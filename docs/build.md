@@ -5,7 +5,7 @@ Copyright © 2026 - Simone Caporale
 Come si passa dai **sorgenti** (`src/`, `data/`, `tools/`) al **disco** e ai documenti generati (stato del 13/11, v1.227).
 **Panoramica di build e test, container e comandi: [Getting started](getting-started.md)** (da leggere prima). Le regole (quando si
 fa la build di release, versioni, commit) sono in `CLAUDE.md`; i test in [Test](test.md); la struttura del codice in
-[Architettura](architettura.md). Tutti i passi girano nel container `barbarian-builder` (i test in `barbarian-emu-vice`).
+[Architettura](architettura.md). Tutti i passi girano nel container `c64-builder` (i test in `c64-emu-vice`).
 
 ## 1. Il percorso completo (`./build.sh` -> `tools/build/build_game.sh`)
 
@@ -18,7 +18,7 @@ flowchart TD
     M["5. mappe e atlante<br/>out/memory-map/, out/atlas/<br/>(atlante solo se cambiano i suoi ingressi)"] --> C
     C["6. copia con la versione nel nome<br/>out/blood_path_vX.Y_1541.d64"] --> T{"--no-test?"}
     T -->|si'| E1["fine"]
-    T -->|no| R["7. test in barbarian-emu-vice: tests/run_tests.sh<br/>debug: smoke + sanity; --release: anche regression ed EMU-*"]
+    T -->|no| R["7. test in c64-emu-vice: tests/run_tests.sh<br/>debug: smoke + sanity; --release: anche regression ed EMU-*"]
 ```
 
 | Comando | Cosa fa |
@@ -27,7 +27,7 @@ flowchart TD
 | `./build.sh --no-test` | build veloce senza test |
 | `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`barbarian-manual`) e `tools/build/release.sh` (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
 | `./build.sh --manual` | solo il manuale (`out/manual/`) |
-| `docker/run.sh builder tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
+| `toolchain/run.sh builder tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
 
 ## 2. Assemblaggio (`tools/build/asm.sh`)
 
@@ -103,7 +103,7 @@ flowchart TD
   `margine codice: N B (di cui M prima del plugin di Krill)` e `menu: zona 1 ... libera N B`.
 - **Passi lenti in cache** (`tools/build/cache_run.py`): girano solo se cambiano i loro ingressi (storia `gen_lore`, manuale
   `gen_help`, atlante `gen_atlas`); impronta SHA-1 di ingressi e uscite.
-- **Compressione** (`tools/build/pack.py`, `third-party-tools/zx0/`): modo rapido nelle build normali, ottimo con `ZX0_BEST=1`
+- **Compressione** (`tools/build/pack.py`, `toolchain/zx0/`): modo rapido nelle build normali, ottimo con `ZX0_BEST=1`
   (`tools/build/release.sh`); cache in `out/zx0cache/`; decompressore di riferimento `tools/build/zx0dec.py`.
 
 ## 3. Il disco (`tools/build/mkdisk.sh`)
@@ -138,24 +138,25 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 | `tools/simulators/*.py` | simulatori di combattimento, progressione, economia ([Bilanciamento](balancing-guide.md)) |
 | `tests/run.py` | i test: `smoke`, `sanity`, `regression` ([Test](test.md)) |
 
-## 4b. Programmi esterni compilati una volta (`third-party-tools/build.sh`, 13/11)
-VICE, zx0 e cc1541 non cambiano: si compilano **una volta** nel container usa e getta `barbarian-tools-builder`
-(`docker/tools-builder`: compilatori e librerie di sviluppo), che alla fine si cancella (container e immagine). `./build.sh` lo
+## 4b. Programmi esterni compilati una volta (`toolchain/build.sh`, 13/11)
+VICE, zx0 e cc1541 non cambiano: si compilano **una volta** nel container usa e getta `c64-tools-builder`
+(target `tools-builder` di `toolchain/docker/Dockerfile`: compilatori e librerie di sviluppo), che alla fine si cancella (container
+e immagine). `./build.sh` lo
 lancia da solo se manca un binario.
 
 | Programma | Sorgente | Risultato (non in git) | Licenza |
 |---|---|---|---|
-| VICE 3.10 (gtk3) | tarball ufficiale, scaricato **sull'host** (`curl`) in `third-party-tools/vice/src/` e scompattato lì | `third-party-tools/vice/bin/` (eseguibili e dati accanto) | GPL-2.0 (`third-party-tools/vice/LICENSE`) |
-| zx0 v2.2 | `third-party-tools/zx0/*.c` (in git) | `third-party-tools/zx0/bin/zx0` | BSD-3 |
-| cc1541 | dallo zip di Krill (`src/third-party/krill`) | `third-party-tools/cc1541/bin/cc1541` (+ `src/`) | MIT |
+| VICE 3.10 (gtk3) | tarball ufficiale, scaricato **sull'host** (`curl`) in `toolchain/vice/src/` e scompattato lì | `toolchain/vice/bin/` (eseguibili e dati accanto) | GPL-2.0 (`toolchain/vice/LICENSE`) |
+| zx0 v2.2 | `toolchain/zx0/*.c` (in git) | `toolchain/zx0/bin/zx0` | BSD-3 |
+| cc1541 | dallo zip di Krill (`C64_KRILL_ZIP` in `toolchain.env`: `src/third-party/krill/loader-v194.zip`) | `toolchain/cc1541/bin/cc1541` (+ `src/`) | MIT |
 
-- Versione di VICE: `VICE_VERSION` (predefinita 3.10) o `VICE_URL`; `third-party-tools/build.sh vice` rifà solo VICE.
+- Versione di VICE: `VICE_VERSION` (predefinita 3.10) o `VICE_URL`; `toolchain/build.sh vice` rifà solo VICE.
 - **Spostabile, senza percorsi assoluti** [MISURATO 13/11]: VICE ha nell'eseguibile il percorso di installazione (`/opt/vice`) ma
   cerca keymap, risorse e ROM **anche accanto all'eseguibile** (`bin/C64`, `bin/common`, ...): `build_tools.sh` copia i dati in `bin/`
   insieme ai programmi, quindi la cartella funziona ovunque (prima, con i dati in `share/vice`, la copia non partiva: "Default keymap
   not found"). Non conosco un'opzione per indicare la cartella dati.
-- **Stessa base** (ubuntu:24.04) per `barbarian-tools-builder`, `barbarian-builder` e `barbarian-emu-vice`: i binari compilati su una
-  base più recente non partono su una più vecchia (una VICE compilata su 26.04 vuole glibc 2.42, la 24.04 ha la 2.39) [MISURATO].
+- **Stessa base** (stage `base` di `toolchain/docker/Dockerfile`, ubuntu:24.04) per `c64-tools-builder`, `c64-builder` e
+  `c64-emu-vice`: i binari compilati su una base più recente non partono su una più vecchia (una VICE compilata su 26.04 vuole glibc 2.42, la 24.04 ha la 2.39) [MISURATO].
 - **VICE headless provato e scartato** [MISURATO 13/11]: la 3.10 con `--enable-headlessui` va in segfault all'avvio (`log_archdep` con
   un puntatore nullo mentre scrive "ROM image not found" per i drive 2000/3000/4000), anche con `-logfile`/`-console`: niente
   screenshot. Resta gtk3 con Xvfb. Non provato: fornire anche le ROM di quei drive.
@@ -166,7 +167,7 @@ lancia da solo se manca un binario.
 
 ```mermaid
 flowchart LR
-    RT["tests/run_tests.sh<br/>(container barbarian-emu-vice)"] --> RU["tests/run.py smoke sanity<br/>(--release / --all: + regression)"]
+    RT["tests/run_tests.sh<br/>(container c64-emu-vice)"] --> RU["tests/run.py smoke sanity<br/>(--release / --all: + regression)"]
     RU --> LIB["tests/lib/c64.py: VICE (x64sc) con il monitor remoto"]
     LIB --> FAST["Game.to_menu(): GAME, LOBBY, villaggio scritti in RAM;<br/>menu_return(): modulo MENU scritto in RAM (out/menu_zK.prg)"]
     RU --> REP["out/test_report.txt / .json"]
@@ -174,22 +175,24 @@ flowchart LR
 ```
 
 ## 6. Container, programmi esterni, Windows e WSL (13/11)
-Nel progetto stanno **tutti i file** (sorgenti, dati, ROM in `roms/`, VICE, zx0 e cc1541 in `third-party-tools/*/bin`). I
-**programmi** stanno nei container (`docker/`, tabella in [Getting started](getting-started.md) sezione 3); sull'host servono solo
+Nel progetto stanno **tutti i file** (sorgenti, dati, ROM in `toolchain/roms/`, VICE, zx0 e cc1541 in `toolchain/*/bin`). I
+**programmi** stanno nei container (`toolchain/docker/Dockerfile`, `tools/manual/Dockerfile`, tabella in
+[Getting started](getting-started.md) sezione 3); sull'host servono solo
 sh, Docker con BuildKit, git e curl (`./validate_env.sh` li controlla).
 
 | Programma | Container | A cosa serve |
 |---|---|---|
-| `64tass` 1.59, `cc65` 2.19, `make`, `perl`, `unzip`, `zip`, `git` | `barbarian-builder` | assemblaggio, Krill's Loader, release, versione dei branch |
-| `python3` 3.12 + Pillow, PyYAML, NumPy, Matplotlib | `barbarian-builder` | generatori, atlante, mappe, simulatori |
-| librerie di VICE (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `barbarian-emu-vice` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
-| node 22, Playwright 1.63 + Chromium, ffmpeg | `barbarian-emu-vc64web` | demone di vc64web (test `EMU-*`, video) |
-| WeasyPrint 70, PyYAML, Pillow | `barbarian-manual` | PDF del manuale |
-| Xvfb, x11vnc, noVNC | `barbarian-emu-viewer` | vista dal vivo nel browser |
-| gcc e librerie di sviluppo | `barbarian-tools-builder` (usa e getta) | VICE, zx0, cc1541 |
+| `64tass` 1.59, `cc65` 2.19, `make`, `perl`, `unzip`, `zip`, `git` | `c64-builder` | assemblaggio, Krill's Loader, release, versione dei branch |
+| `python3` 3.12 + Pillow, PyYAML, NumPy, Matplotlib | `c64-builder` | generatori, atlante, mappe, simulatori |
+| librerie di VICE (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `c64-emu-vice` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
+| node 22, Playwright 1.63 + Chromium, ffmpeg | `c64-emu-vc64web` | demone di vc64web (test `EMU-*`, video) |
+| WeasyPrint 70 (+ PyYAML, Pillow del builder) | `barbarian-manual` (= builder + WeasyPrint) | PDF del manuale |
+| Xvfb, x11vnc, noVNC | `c64-emu-viewer` | vista dal vivo nel browser |
+| gcc e librerie di sviluppo | `c64-tools-builder` (usa e getta) | VICE, zx0, cc1541 |
 
-Dimensioni misurate il 13/11: builder 866 MB, emu-vice 1,51 GB (comprende il builder), emu-vc64web 2,12 GB, emu-viewer 802 MB,
-manual 302 MB. **Costo di Docker** [MISURATO 13/11, Linux su Linux]: smoke in container 15,1 s di media contro 15,6 s sull'host (3
+Dimensioni misurate il 13/11 (`docker image inspect`, layer comuni contati in ogni immagine): c64-builder 868 MB, c64-emu-vice
+1514 MB (comprende il builder), c64-emu-vc64web 2116 MB, c64-emu-viewer 803 MB; barbarian-manual: vedi `docker images` (parte dal
+builder). Lo stage `base` (ubuntu + CA + `/work`) e' in comune fra builder, emu-vice ed emu-viewer [MISURATO: stessi id dei layer]. **Costo di Docker** [MISURATO 13/11, Linux su Linux]: smoke in container 15,1 s di media contro 15,6 s sull'host (3
 prove): nessuna perdita misurabile. **Non misurato** su Docker Desktop / WSL2.
 
 **Windows**: si lavora **dentro WSL2** con il progetto nel filesystem di WSL (`~/...`), non in `/mnt/c` (accessi lenti, permessi e fine

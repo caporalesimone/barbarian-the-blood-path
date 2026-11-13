@@ -16,7 +16,7 @@ Tutto gira in container Docker: sull'host servono solo sh, Docker, git e curl. *
 ./build.sh            # build di tutti i giorni + smoke e sanity: out/blood_path_vX.Y_1541.d64 (POKE 1020,1 prima del RUN = subito il gioco)
 ./build.sh --release  # anche regression, test su vc64web, manuale PDF, zip dei sorgenti (solo su richiesta)
 ./build.sh --view     # i test in VICE visibili dal vivo nel browser: http://localhost:6080
-docker/run.sh builder tools/build/mkdisk.sh       # un comando qualunque in un container
+toolchain/run.sh builder tools/build/mkdisk.sh       # un comando qualunque in un container
 ```
 Versione del gioco e del formato dei salvataggi: `version.yaml`.
 
@@ -28,9 +28,8 @@ Versione del gioco e del formato dei salvataggi: `version.yaml`.
 | `tools/` | `build/` generatori e build, `atlas/` atlante grafico, `memory-map/` mappe RAM e disco, `manual/` manuale, `simulators/` simulatori, `vice/` strumenti in VICE (screenshot, misure, arena), `font/` font della UI |
 | `tests/` | test automatici: `smoke/`, `sanity/`, `regression/`, libreria in `lib/` ([docs/test.md](docs/test.md)) |
 | `docs/` | wiki del gioco ([indice](docs/README.md)), sorgente del manuale (`docs/manual/`), schermate dei menu (`docs/screens/`) |
-| `roms/` | ROM del C64 (`vice-roms/`, `open-roms/`, elenco con SHA-256 e licenze in [roms/roms.md](roms/roms.md)) |
-| `docker/` | i container del progetto e gli script `run.sh`, `images.sh`, `viewer.sh` |
-| `third-party-tools/` | programmi esterni: VICE, zx0, cc1541 (compilati una volta: `third-party-tools/build.sh`), `vc64web-custom/` (secondo emulatore) |
+| `toolchain/` | toolchain C64 generica ([toolchain/README.md](toolchain/README.md)): immagini Docker `c64-*` (`docker/Dockerfile`) e script `run.sh`, `images.sh`, `viewer.sh`, `validate_env.sh`; programmi esterni VICE, zx0, cc1541 (compilati una volta: `toolchain/build.sh`); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in [toolchain/roms/roms.md](toolchain/roms/roms.md)) |
+| `toolchain.env` | configurazione della toolchain per il gioco |
 | `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
 | `out/` | tutto ciò che si genera (non in git), con **solo l'ultima build**: disco, atlante, mappe, manuale, report dei test |
 
@@ -39,10 +38,10 @@ Build a parte con lo stesso codice di combattimento del gioco: niente loader, me
 zaino e drop; una stanza, il PG con l'equipaggiamento indossato e da 1 a 8 mostri, comandati da un bot.
 La build produce `out/arena_game.prg` (gioco con `ARENA=1`) e `out/arena.prg` (modulo `src/test/arena.asm`
 a `$C900`: bot, avvio, fine combattimento, parametri `$CF00`, risultati `$CF40`, registro `$CF80`).
-`tools/vice/arena.py` (nel container `barbarian-emu-vice`: `docker/run.sh emu-vice python3 tools/vice/arena.py ...`) avvia VICE, carica i due file e il tema grafico, scrive i parametri ed esegue la serie:
+`tools/vice/arena.py` (nel container `c64-emu-vice`: `toolchain/run.sh emu-vice python3 tools/vice/arena.py ...`) avvia VICE, carica i due file e il tema grafico, scrive i parametri ed esegue la serie:
 ```
-docker/run.sh emu-vice python3 tools/vice/arena.py --lvl 5 --plvl 5 --weapon sword+1 --armor leather_armor --monster zombie --fights 20 --potions red:3
-docker/run.sh emu-vice python3 tools/vice/arena.py --help         # tutti i parametri (piano, livello, equipaggiamento, mostri, boss, abilita', pozioni...)
+toolchain/run.sh emu-vice python3 tools/vice/arena.py --lvl 5 --plvl 5 --weapon sword+1 --armor leather_armor --monster zombie --fights 20 --potions red:3
+toolchain/run.sh emu-vice python3 tools/vice/arena.py --help         # tutti i parametri (piano, livello, equipaggiamento, mostri, boss, abilita', pozioni...)
 ```
 Da Python, piu' scenari nella stessa sessione: `from arena import Arena` (vedi `tools/vice/arena.py`).
 Fase 1: PG e mostri adiacenti, il bot non si sposta (`--bot stand`): si gira verso il mostro piu' vicino e
@@ -50,7 +49,7 @@ attacca (Rage e Frenzy appena pronte, poi l'abilita' migliore pronta, pozione so
 stessi risultati. Modalita' veloce (default): circa 25 volte il tempo reale in VICE warp.
 
 ## Simulatore delle regole nuove
-`docker/run.sh builder python3 tools/simulators/sim_rules.py` simula il nuovo sistema di combattimento (docs/SISTEMA_COMBATTIMENTO.md) con i
+`toolchain/run.sh builder python3 tools/simulators/sim_rules.py` simula il nuovo sistema di combattimento (docs/SISTEMA_COMBATTIMENTO.md) con i
 parametri di `data/rules.yaml` e scrive `out/simulators/simulazione_regole.html`. Un solo gruppo:
 `python3 tools/simulators/sim_rules.py --fight 5 9 demon skeleton` (piano 5, PG di livello 9).
 `python3 tools/simulators/fit_rules.py` ritara i mostri (curve dei piani 1-10, boss finale, tabella dell'Abisso) sul PG di
@@ -65,12 +64,12 @@ implementazione: la wiki in docs/ (indice docs/README.md).
   (incluso nell'archivio) per scrivere il disco. Archivio, licenza e note in
   [src/third-party/krill/](src/third-party/krill/README.md); come lo usiamo in [docs/FastLoader.md](docs/FastLoader.md).
   Nel gioco il credito è nel menu dei barbari: "loader by krill - v194".
-- **vc64web / c64-tools** (13/11, `third-party-tools/vc64web-custom/`): VirtualC64 di Dirk W. Hoffmann in WebAssembly (porting vc64web) con il
+- **vc64web / c64-tools** (13/11, `toolchain/vc64web-custom/`): VirtualC64 di Dirk W. Hoffmann in WebAssembly (porting vc64web) con il
   controllo da riga di comando, usato come **secondo emulatore** per i test `EMU-*` e per i video (VICE resta il riferimento).
-  Licenza **non verificata** (probabile GPL-3.0, vedi `third-party-tools/vc64web-custom/third-party/vc64web/README.md`); la build prende le ROM
-  Commodore da `roms/` (in git su richiesta, [roms/roms.md](roms/roms.md); da togliere prima di pubblicare). Provenienza e uso: [third-party-tools/vc64web-custom/docs/INCLUSIONE.md](third-party-tools/vc64web-custom/docs/INCLUSIONE.md),
+  Licenza **non verificata** (probabile GPL-3.0, vedi `toolchain/vc64web-custom/third-party/vc64web/README.md`); la build prende le ROM
+  Commodore da `toolchain/roms/` (in git su richiesta, [toolchain/roms/roms.md](toolchain/roms/roms.md); da togliere prima di pubblicare). Provenienza e uso: [toolchain/vc64web-custom/docs/INCLUSIONE.md](toolchain/vc64web-custom/docs/INCLUSIONE.md),
   [docs/emulatore.md](docs/emulatore.md). TODO `I7`.
-- **ZX0** v2 di Einar Saukas (BSD-3, `third-party-tools/zx0/LICENSE`): compressione di `GAME`, `LDAT` e del modulo `MENU`.
-- **VICE** 3.10 (GPL-2.0, `third-party-tools/vice/LICENSE`): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.
-- **cc1541** (MIT, `third-party-tools/cc1541/LICENSE`, dal pacchetto di Krill): scrive il disco.
-- **Open ROMs** (LGPL-3.0+, `roms/open-roms/LICENSE`): ROM libere, ripiego di vc64web.
+- **ZX0** v2 di Einar Saukas (BSD-3, `toolchain/zx0/LICENSE`): compressione di `GAME`, `LDAT` e del modulo `MENU`.
+- **VICE** 3.10 (GPL-2.0, `toolchain/vice/LICENSE`): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.
+- **cc1541** (MIT, `toolchain/cc1541/LICENSE`, dal pacchetto di Krill): scrive il disco.
+- **Open ROMs** (LGPL-3.0+, `toolchain/roms/open-roms/LICENSE`): ROM libere, ripiego di vc64web.

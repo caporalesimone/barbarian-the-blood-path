@@ -1,0 +1,3 @@
+# cc1541 (13/11): sorgente estratto dal pacchetto di Krill e binario, da toolchain/build.sh
+src/
+bin/

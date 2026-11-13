@@ -12,9 +12,9 @@ import glob, os, re, shutil, socket, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "out")
-ROMS = os.path.join(ROOT, "roms", "vice-roms", "DRIVES")   # drive ROMs (roms/roms.md)
+ROMS = os.path.join(ROOT, "toolchain", "roms", "vice-roms", "DRIVES")   # drive ROMs (toolchain/roms/roms.md)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
-from vice_rom import ROM_ARGS, XRUN  # noqa: E402  (x64sc: -default + tutte le ROM da roms/, tools/vice/vice_rom.py)
+from vice_rom import ROM_ARGS, XRUN  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/, tools/vice/vice_rom.py)
 PROMPT = re.compile(r"\(C:\$[0-9a-f]{4}\) $")
 STOP = re.compile(r"Stop on[^\n]*\n[^\n]*?(\d+)\s*\n", re.S)
 FRAME = 19656                                     # cycles of a PAL frame

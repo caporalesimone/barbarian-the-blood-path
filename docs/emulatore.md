@@ -1,4 +1,4 @@
-# Il secondo emulatore: vc64web (`third-party-tools/vc64web-custom`)
+# Il secondo emulatore: vc64web (`toolchain/vc64web-custom`)
 
 Copyright © 2026 - Simone Caporale
 
@@ -15,8 +15,8 @@ I numeri ottenuti qui (cicli, durate) **non sono misure del gioco**: si conferma
 La precisione di questo core rispetto a VICE non è stata confrontata ciclo per ciclo [NON VERIFICATO]: l'unica prova è che il
 gioco parte e si gioca (test `EMU-10..16`).
 
-Provenienza, cosa è versionato e cosa no (le ROM Commodore no: la build le prende da `roms/`), come aggiornare il pacchetto:
-[third-party-tools/vc64web-custom/INCLUSIONE.md](../third-party-tools/vc64web-custom/INCLUSIONE.md).
+Provenienza, cosa è versionato e cosa no (le ROM Commodore no: la build le prende da `toolchain/roms/`), come aggiornare il pacchetto:
+[toolchain/vc64web-custom/INCLUSIONE.md](../toolchain/vc64web-custom/INCLUSIONE.md).
 
 ## Architettura
 
@@ -36,7 +36,7 @@ copia finché il demone resta acceso).
 
 ## Cosa sa fare (con i riferimenti ai file del pacchetto)
 
-Tutto il pacchetto è in `third-party-tools/vc64web-custom/`. Documenti: `README.md` (build, registrazioni), `CHANGELOG.md`, `docs/c64-cli.md`
+Tutto il pacchetto è in `toolchain/vc64web-custom/`. Documenti: `README.md` (build, registrazioni), `CHANGELOG.md`, `docs/c64-cli.md`
 (**ogni comando**, con output reali e «cosa non è verificato»), `docs/C64-API.md` (API JavaScript `window.c64`, «Limiti
 riscontrati»), `docs/scripting.md` (script di testo), `docs/getting-started.md` (prime prove), `docs/C64-TODO.md` (limiti del core),
 `examples/` (script, cicli, shell). Nel seguito «cli §N» = `docs/c64-cli.md` sezione N.
@@ -87,22 +87,22 @@ segnalare al team: sezione «Trappole»).
 
 ## Come si usa
 
-Dal 13/11 il demone gira nel container **`barbarian-emu-vc64web`** (immagine costruita dal `Dockerfile` del pacchetto, con le pagine
-già pronte dentro: `docker/images.sh emu-vc64web` le genera nel builder con `build.py --no-docker --out out/vc64web` e poi fa la
+Dal 13/11 il demone gira nel container **`c64-emu-vc64web`** (immagine costruita dal `Dockerfile` del pacchetto, con le pagine
+già pronte dentro: `toolchain/images.sh emu-vc64web` le genera nel builder con `build.py --no-docker --out out/vc64web` e poi fa la
 `docker build` con il contesto `pages=out/vc64web`). Il pacchetto è autonomo e parametrizzato: `--vice-roms`, `--open-roms`, `--out`,
-`--tag` (README e `docs/INCLUSIONE.md` del pacchetto); le ROM le prende dalla sua `roms/`, identica a `roms/` del progetto.
+`--tag` (README e `docs/INCLUSIONE.md` del pacchetto); le ROM le prende dalla sua `roms/` (`toolchain/vc64web-custom/roms/`), identica a `toolchain/roms/` del progetto.
 
 ```sh
 ./build.sh --emu                                          # build + smoke/sanity con il demone acceso (EMU-* sono in regression)
-docker/run.sh emu-vice python3 tests/run.py -k EMU        # solo i test EMU-*, con il demone acceso a mano:
-docker network create barbarian 2>/dev/null; docker run -d --rm --init --shm-size 1g --name barbarian-emu-vc64web --network barbarian barbarian-emu-vc64web
-EMU_URL=http://barbarian-emu-vc64web:7064 BARBARIAN_DOCKER_ARGS="--network barbarian" docker/run.sh emu-vice python3 tests/run.py -k EMU
+toolchain/run.sh emu-vice python3 tests/run.py -k EMU        # solo i test EMU-*, con il demone acceso a mano:
+docker network create c64 2>/dev/null; docker run -d --rm --init --shm-size 1g --name c64-emu-vc64web --network c64 c64-emu-vc64web
+EMU_URL=http://c64-emu-vc64web:7064 C64_DOCKER_ARGS="--network c64" toolchain/run.sh emu-vice python3 tests/run.py -k EMU
 
 # a mano, dentro il container del demone (client node del pacchetto)
-docker exec -it barbarian-emu-vc64web node headless/c64 start
-docker cp out/disk.d64 barbarian-emu-vc64web:/games/disk.d64
-docker exec barbarian-emu-vc64web node headless/c64 game disk.d64
-docker rm -f barbarian-emu-vc64web                        # spegnere
+docker exec -it c64-emu-vc64web node headless/c64 start
+docker cp out/disk.d64 c64-emu-vc64web:/games/disk.d64
+docker exec c64-emu-vc64web node headless/c64 game disk.d64
+docker rm -f c64-emu-vc64web                        # spegnere
 ```
 
 **Nei test** si usa `tests/lib/emu.py` (classe `Emu`): parla con il demone all'indirizzo `EMU_URL` (HTTP), manda il disco in base64
@@ -171,7 +171,7 @@ flowchart LR
 - **Il ripristino dello snapshot perde gli input** nelle build 30 e precedenti; corretto dalla 31 (verificato il 13/11 sul bot del
   boss: stesso hash con 0, 1 reale, forzate a ogni passo). Se si aggiorna il pacchetto, rifare quella verifica con `_forceRetry`
   (getting-started §7).
-- **Un demone per run di test**: `./build.sh` accende il container `barbarian-emu-vc64web` e lo spegne alla fine; i test lo usano
+- **Un demone per run di test**: `./build.sh` accende il container `c64-emu-vc64web` e lo spegne alla fine; i test lo usano
   uno alla volta (il lock dei test, `out/.test.lock`, vale anche per questi). Dopo un'interruzione controllare con `docker ps` che
   non sia rimasto acceso.
 

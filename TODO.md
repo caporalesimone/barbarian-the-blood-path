@@ -298,11 +298,11 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
 - **I4** B2 minimappa corrotta nel dungeon (05/11, mai riprodotto): servono screenshot e passi.
 - **I5** RUN/STOP fantasma nelle build NOKEYS in VICE (solo strumenti di test).
 - **I6** Glitch del brano del villaggio (hard restart): da riascoltare.
-- **I7** (13/11) Licenze del secondo emulatore (`third-party-tools/vc64web-custom`) **prima di pubblicare il repository**: vc64web / VirtualC64
+- **I7** (13/11) Licenze del secondo emulatore (`toolchain/vc64web-custom`) **prima di pubblicare il repository**: vc64web / VirtualC64
   (probabile GPL-3.0: sorgente corrispondente del wasm), librerie JS, `open-roms` (LGPL-3+, font PXLfont da verificare); le ROM
-  Commodore (14 file in `roms/vice-roms/` e la stessa copia in `third-party-tools/vc64web-custom/roms/`, **in git dal 13/11 su richiesta
-  del committente**, che le toglierà dal repository prima di pubblicare: `roms/roms.md` ha SHA-256, licenze e URL, **URL da verificare**)
-  e le pagine generate di vc64web (`out/vc64web/`, che le incorporano; anche l'immagine `barbarian-emu-vc64web`) non vanno pubblicate.
+  Commodore (14 file in `toolchain/roms/vice-roms/` e la stessa copia in `toolchain/vc64web-custom/roms/`, **in git dal 13/11 su richiesta
+  del committente**, che le toglierà dal repository prima di pubblicare: `toolchain/roms/roms.md` ha SHA-256, licenze e URL, **URL da verificare**)
+  e le pagine generate di vc64web (`out/vc64web/`, che le incorporano; anche l'immagine `c64-emu-vc64web`) non vanno pubblicate.
   Licenze di VICE (GPL-2.0), zx0 (BSD-3), cc1541 (MIT), Krill (BSD-3 con attribuzione): file nelle loro cartelle. Complessità S.
 - **I8** (13/11) Segnalazioni al team dell'emulatore da riprovare a ogni nuova build: `runLoop` non esatto con un caricamento da disco
   dentro il ciclo (`framesActual` 490 su 480 nel passo del portale, `docs/emulatore.md`); il pacchetto dichiara quel caso non verificato.
@@ -314,6 +314,12 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   Rilanciato subito dopo: 33/33 PASS in 19 s. Causa **non trovata**. Ipotesi non verificata: primo avvio di VICE a freddo (cache dei
   file e dei font vuote; la macchina era accesa da 10 minuti). Da fare: riprodurre (riavvio + `./build.sh`); se si ripete, alzare
   il tempo del primo avvio o fare un avvio di riscaldamento in `tests/run_tests.sh`. Complessità S.
+  13/11 sera: la macchina di lavoro si riavvia fra un messaggio e l'altro (uptime ~10 minuti a ogni ripresa); un secondo
+  `./build.sh` dopo un riavvio (con immagini nuove) e' passato 33/33 al primo colpo: non riprodotto, ipotesi del freddo indebolita.
+  13/11 sera, **seconda volta**, in `./build.sh --release` (toolchain nuova): 179 PASS, 6 FAIL, 1 SKIP. PERF-DISK-10..14 con
+  `monitor: no answer to 'load /work/out/start.prg' in 20 s` (il monitor aveva appena risposto al comando prima) e PERF-OPT-11
+  (MonitorError dopo 30 s); rilanciati da soli subito dopo: 6/6 PASS. Stesso sintomo (il monitor remoto di VICE smette di rispondere),
+  in un momento qualsiasi della sessione, non solo al primo avvio. Da fare: registrare il log di VICE e del monitor quando succede.
 
 ## J — Idee per dopo
 
@@ -321,20 +327,25 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   `.gitattributes` con `eol=lf`; `./validate_env.sh` controlla dove sta il progetto). Da fare allora: `./validate_env.sh`, `./build.sh`
   e `./build.sh --view` su WSL2 + Docker Desktop (mai provati: rilevamento WSL provato solo con un `mountinfo` di prova; costo di Docker
   misurato solo Linux su Linux). Complessità S.
-- **I10** (13/11) Immagini Docker più piccole (non urgente): `barbarian-emu-viewer` 802 MB (x11vnc e noVNC di Ubuntu tirano dentro
-  mesa, NumPy e node: provare noVNC dal pacchetto npm in un passo di build a parte), `barbarian-emu-vc64web` 2,12 GB (provare solo
-  `chromium-headless-shell` di Playwright, togliere ffmpeg di sistema se basta quello di Playwright), `barbarian-emu-vice` 1,51 GB
+- **I10** (13/11) Immagini Docker più piccole (non urgente): `c64-emu-viewer` 803 MB (x11vnc e noVNC di Ubuntu tirano dentro
+  mesa, NumPy e node: provare noVNC dal pacchetto npm in un passo di build a parte), `c64-emu-vc64web` 2,12 GB (provare solo
+  `chromium-headless-shell` di Playwright, togliere ffmpeg di sistema se basta quello di Playwright), `c64-emu-vice` 1,51 GB
   (le librerie gtk3 e ffmpeg pesano ~650 MB). Misurare dopo ogni prova. Complessità S-M.
 - **J1** Prefetch nuovo (salvataggio del piano in sottofondo, record N±1, brano successivo): 300–500 B + ~1 KB di buffer.
 - **J2** Anello della velocità (ex 2.7): riuso di `fz_move`; dopo E1.
 - **J3** Sprite del boss finale solo nel tema 8; da verificare con D8.
 - **J4** Pozioni a cura fissa o a formula: confermare col committente che vada bene com'è.
-- **J5** (13/11, segnalato dal committente) **Test in parallelo**: oggi `tests/run.py` esegue i test VICE uno dopo l'altro.
+- **J10** (13/11, segnalato dal committente; numero nuovo: J5-J9 sono gli ID vecchi spostati in M) **Test in parallelo**: oggi `tests/run.py` esegue i test VICE uno dopo l'altro.
   Obiettivo: più worker contemporanei, per tenere bassi i tempi man mano che i test crescono (i tetti di `CAPS` restano).
   Cosa serve: un display Xvfb per worker; porte del monitor remoto di VICE diverse; file temporanei separati in `out/tmp/<worker>`;
   test che assemblano varianti del gioco isolati (oggi riscrivono la build normale); report unico. Nel viewer: più schermi
   (`VIEW_SCREENS=N`, una coppia Xvfb/x11vnc per schermo, websockify con file di token; stima ~30 righe e ~30–60 MB di RAM per
   schermo, non misurati). Complessità M (il grosso è nel runner, non nel viewer).
+- **J11** (13/11, idea del committente, **da decidere piu' avanti**) **Build versionate selezionabili dal viewer**: tenere i dischi
+  delle build precedenti per poter tornare indietro; la pagina indice del viewer propone per prima l'ultima (separata) e sotto le
+  altre. Oggi la pagina mostra gia' l'ultima (`C64_VIEW_DISK`, versione piu' alta) e gli altri dischi di `out/`. **Contro la regola
+  attuale** "`out/` contiene solo la build piu' recente, niente `release/`": serve decidere dove stanno le build vecchie (es.
+  `out/builds/` o una cartella fuori da `out/`), quante se ne tengono e chi le cancella. Complessità S (dopo la decisione).
 
 ---
 

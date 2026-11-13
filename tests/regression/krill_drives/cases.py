@@ -1,12 +1,12 @@
 """Krill's Loader on other drive types emulated by VICE (12/11, TODO M7 KRILL-17): the same disk with -drive8type.
-The ROMs of the drives come from roms/ (dos1541ii, dos1570, dos1571: tests/lib/c64.py passes them to x64sc, nothing is read
+The ROMs of the drives come from toolchain/roms/ (dos1541ii, dos1570, dos1571: tests/lib/c64.py passes them to x64sc, nothing is read
 from VICE's data folder or from /usr/share/vice)."""
 import os
 from lib.runner import test, check, Skip
 from lib.c64 import Game, ROMS
 from lib.play import new_game
 
-DRIVES = ROMS                                   # the drive ROMs live in roms/ (project rule: no system paths)
+DRIVES = ROMS                                   # the drive ROMs live in toolchain/roms/ (project rule: no system paths)
 
 
 def boot(dtype):
@@ -28,11 +28,11 @@ def krill_1541ii(ctx):
     check(ok, "1541-II: the village was not reached (last file %r)" % name)
 
 
-@test("KRILL-18", "1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 from roms/)")
+@test("KRILL-18", "1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 from toolchain/roms/)")
 def krill_157x(ctx):
     roms = [f for f in os.listdir(DRIVES) if f.startswith(("dos1570", "dos1571"))] if os.path.isdir(DRIVES) else []
     if not roms:
-        raise Skip("no 1570/1571 ROM in roms/ (%s)" % DRIVES)
+        raise Skip("no 1570/1571 ROM in toolchain/roms/ (%s)" % DRIVES)
     for d in (1570, 1571):
         ok, name = boot(d)
         check(ok, "%d: the village was not reached (last file %r)" % (d, name))

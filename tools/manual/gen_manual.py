@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Genera out/manual/manuale.html e out/manual/Barbarian_Blood_Path_Manuale.pdf (A5, WeasyPrint).
 
-Gira nel container barbarian-manual (docker/manual, 13/11: WeasyPrint al posto di Chrome; stesse 19 pagine, l'ombra del
+Gira nel container barbarian-manual (tools/manual, 13/11: WeasyPrint al posto di Chrome; stesse 19 pagine, l'ombra del
 titolo in copertina non c'e' perche' WeasyPrint ignora text-shadow). Dall'host: ./build.sh --manual.
 
 Sorgente editabile: docs/manual/manuale_src.html (+ stile.css). Questo script:

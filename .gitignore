@@ -1,4 +1,4 @@
-# Generale (13/11). Ogni componente esterno ha il suo .gitignore nella propria cartella (third-party-tools/*, src/third-party/*).
+# Generale (13/11). Ogni componente esterno ha il suo .gitignore nella propria cartella (toolchain/*, src/third-party/*).
 # Tutto cio' che si genera sta in out/ (non versionato; resta solo out/.gitkeep)
 out/*
 !out/.gitkeep

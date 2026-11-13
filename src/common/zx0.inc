@@ -1,5 +1,5 @@
 ; ===================================================================
-;  zx0.inc - decompressore ZX0 v2 (formato di Einar Saukas, third-party-tools/zx0/LICENSE; specifica in tools/build/zx0dec.py)
+;  zx0.inc - decompressore ZX0 v2 (formato di Einar Saukas, toolchain/zx0/LICENSE; specifica in tools/build/zx0dec.py)
 ;  Ingresso: zx_src = dati compressi, zx_dst = destinazione. jsr zx0_unpack. Sul posto: l'ultimo byte compresso
 ;  deve stare almeno "delta" byte sopra l'ultimo byte decompresso (tools/build/pack.py lo calcola e lo verifica).
 ;  Prima dell'include definire ZX_ZP = primo di 12 byte liberi in pagina zero. Non usa sei (la musica in IRQ

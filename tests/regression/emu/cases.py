@@ -1,13 +1,13 @@
 """Second emulator (13/11, committente): the game must also run on vc64web (VirtualC64 in WebAssembly, another core and
 another 1541 emulation than VICE). VICE stays the only authoritative reference: these tests do not decide what is
 correct, they check that the real disk, played like a player with joystick and keyboard only, works there too.
-Package: third-party-tools/vc64web-custom, helper: tests/lib/emu.py, guide: docs/emulatore.md.
+Package: toolchain/vc64web-custom, helper: tests/lib/emu.py, guide: docs/emulatore.md.
 
 One session, a chain (after a failure the following tests are SKIP): real boot from the disk -> LOBBY -> new barbarian
 (saved with Krill's save plugin on the emulated 1541-II) -> village (HUD text read from the screen RAM) -> alchemist
 (buys a portal scroll) -> crypt -> kill a monster -> portal scroll -> back in the village -> reset and boot again: the
 saved hero is in the list. About 4 minutes. The bots (bots/*.js) run inside the emulator and read the game RAM through
-the labels of out/game.lbl. SKIP (not FAIL) when the daemon (container barbarian-emu-vc64web, EMU_URL) is not running."""
+the labels of out/game.lbl. SKIP (not FAIL) when the daemon (container c64-emu-vc64web, EMU_URL) is not running."""
 import os
 from lib.runner import test, check, Skip
 from lib.c64 import OUT, ROOT

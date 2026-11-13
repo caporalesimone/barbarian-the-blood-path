@@ -14,7 +14,7 @@ come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in
 ./build.sh --no-test       # solo la build
 ./build.sh --release       # build + tutti i test (anche regression ed EMU-*) + manuale PDF + zip dei sorgenti (solo su richiesta)
 ./build.sh --view          # come ./build.sh, ma VICE si vede dal vivo nel browser: http://localhost:6080
-docker/run.sh emu-vice python3 tests/run.py -k SAVE      # un comando qualunque in un container (qui: i test SAVE)
+toolchain/run.sh emu-vice python3 tests/run.py -k SAVE      # un comando qualunque in un container (qui: i test SAVE)
 ```
 
 Sull'host servono **solo** `sh`, Docker (con BuildKit), `git` e `curl`. Python, 64tass, cc65, VICE, node, Chromium, WeasyPrint:
@@ -32,22 +32,28 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, runner `run.py` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
-| `roms/` | ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms/roms.md` | sì |
-| `docker/` | Dockerfile dei container e script `run.sh`, `images.sh`, `viewer.sh` | sì |
-| `third-party-tools/` | programmi esterni: `vice/`, `zx0/`, `cc1541/` (compilati una volta in `bin/`), `vc64web-custom/` (emulatore secondario) | sì, senza `bin/` e `src/` |
+| `toolchain/` | **toolchain C64 generica** (non sa nulla del gioco, [README](../toolchain/README.md)): `docker/Dockerfile` (immagini `c64-*`, multi-stage), script `run.sh`, `images.sh`, `viewer.sh`, `build.sh` (tool), `validate_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati una volta in `bin/`); `vc64web-custom/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`) | sì, senza `bin/` e `src/` |
+| `toolchain.env` | configurazione della toolchain per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer, zip di Krill | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
 | `out/` | **tutto cio' che si genera** (disco, atlante, mappe, manuale, report dei test, file temporanei in `out/tmp/`) | no (solo `.gitkeep`) |
 
 ## 3. I container
 
-| Immagine | Base | Cosa contiene | Quando si usa |
-|---|---|---|---|
-| `barbarian-tools-builder` | ubuntu:24.04 | compilatori C e librerie di sviluppo | **una volta**: compila VICE, zx0, cc1541 in `third-party-tools/*/bin`, poi immagine e container si cancellano |
-| `barbarian-builder` | ubuntu:24.04 | 64tass, cc65, make, perl, Python 3 con Pillow, PyYAML, NumPy, Matplotlib | build del gioco, generatori, simulatori |
-| `barbarian-emu-vice` | barbarian-builder | + librerie di VICE (gtk3), Xvfb, ffmpeg | test, screenshot, arena, misure in VICE, MP3 dei brani |
-| `barbarian-emu-vc64web` | node:22-bookworm-slim | node, Playwright, Chromium, ffmpeg, pagine di vc64web gia' costruite | demone dei test `EMU-*` |
-| `barbarian-emu-viewer` | ubuntu:24.04 | Xvfb, x11vnc, noVNC | facoltativo: vedere VICE dal vivo nel browser |
-| `barbarian-manual` | python:3.14-slim | WeasyPrint, PyYAML, Pillow | PDF del manuale |
+Immagini della **toolchain** (`c64-*`, generiche) e del **gioco** (`barbarian-*`, accanto al loro codice). Le prime vengono da un solo
+Dockerfile multi-stage (`toolchain/docker/Dockerfile`): lo stage `base` (ubuntu + CA + locale) e' il genitore comune, **non ha un
+nome di immagine** (non si avvia mai) e contiene la versione di Ubuntu in un solo punto (`ARG UBUNTU`). I suoi layer sono gli
+stessi in tutte le immagini che ne derivano (13/11, misurato: stessi id dei layer in `c64-builder`, `c64-emu-vice`, `c64-emu-viewer`).
+
+| Immagine | Da | Cosa contiene | Quando si usa | Dimensione (13/11) |
+|---|---|---|---|---|
+| `c64-tools-builder` | base | compilatori C e librerie di sviluppo | **una volta**: compila VICE, zx0, cc1541 in `toolchain/*/bin`, poi immagine e container si cancellano | - |
+| `c64-builder` | base | 64tass, cc65, make, perl, Python 3 con Pillow, PyYAML, NumPy, Matplotlib | build del gioco, generatori, simulatori | 868 MB |
+| `c64-emu-vice` | c64-builder | + librerie di VICE (gtk3), Xvfb, ffmpeg | test, screenshot, arena, misure in VICE, MP3 dei brani | 1514 MB |
+| `c64-emu-viewer` | base | Xvfb, x11vnc, noVNC, pagina indice | facoltativo: VICE dal vivo e ultima build in vc64web nel browser | 803 MB |
+| `c64-emu-vc64web` | node:22-bookworm-slim | node, Playwright, Chromium, ffmpeg, pagine di vc64web gia' costruite (Dockerfile del pacchetto) | demone dei test `EMU-*` | 2116 MB |
+| `barbarian-manual` | c64-builder | + WeasyPrint, pango (`tools/manual/Dockerfile`) | PDF del manuale | vedi `docker images` |
+
+Le dimensioni sono quelle di `docker image inspect` (layer comuni contati in ogni immagine: sul disco i layer condivisi stanno una volta).
 
 ```mermaid
 flowchart LR
@@ -56,39 +62,40 @@ flowchart LR
     V["./validate_env.sh"]
   end
   subgraph once["una volta"]
-    TB["barbarian-tools-builder<br/>(usa e getta)"]
+    TB["c64-tools-builder<br/>(usa e getta)"]
   end
   subgraph proj["progetto (montato in /work)"]
-    TP["third-party-tools/*/bin<br/>VICE, zx0, cc1541"]
-    SRC["src/ data/ tools/ tests/ roms/"]
+    TP["toolchain/*/bin<br/>VICE, zx0, cc1541"]
+    SRC["src/ data/ tools/ tests/ toolchain/roms/"]
     OUT["out/"]
   end
   B -->|"se mancano i tool"| TB --> TP
-  B --> BL["barbarian-builder"]
-  B --> EV["barbarian-emu-vice"]
-  B -->|"--release / --emu"| EW["barbarian-emu-vc64web"]
-  B -->|"--view"| VW["barbarian-emu-viewer"]
-  B -->|"--release / --manual"| MA["barbarian-manual"]
+  B --> BL["c64-builder"]
+  B --> EV["c64-emu-vice"]
+  B -->|"--release / --emu"| EW["c64-emu-vc64web"]
+  B -->|"--view"| VW["c64-emu-viewer"]
+  B -->|"--release / --manual"| MA["barbarian-manual<br/>(tools/manual)"]
   BL -->|"legge"| SRC
   BL -->|"usa"| TP
   BL -->|"scrive"| OUT
   EV -->|"usa VICE"| TP
   EV -->|"report"| OUT
-  EV -->|"HTTP 7064 (rete barbarian)"| EW
-  EV -.->|"DISPLAY :99 (volume barbarian-x11)"| VW
+  EV -->|"HTTP 7064 (rete c64)"| EW
+  EV -.->|"DISPLAY :99 (volume c64-x11)"| VW
 ```
 
-Regole: i container girano con l'utente dell'host (`docker/run.sh`: i file in `out/` restano suoi), il progetto e' montato in
-`/work`, nessun file del progetto sta nelle immagini (tranne le pagine di vc64web nella sua immagine). Le immagini mancanti le
-costruisce `docker/images.sh` (lo chiama `./build.sh`); i tool mancanti `third-party-tools/build.sh`.
+Regole: i container girano con l'utente dell'host (`toolchain/run.sh`: i file in `out/` restano suoi), il progetto e' montato in
+`/work`, nessun file del progetto sta nelle immagini (tranne le pagine di vc64web nella sua immagine). `toolchain/run.sh builder ...`
+usa `c64-builder`; un nome completo (`toolchain/run.sh barbarian-manual ...`) si usa cosi' com'e'. Le immagini mancanti le
+costruisce `toolchain/images.sh` (lo chiama `./build.sh`); i tool mancanti `toolchain/build.sh`.
 
 ## 4. La build
 
 ```mermaid
 flowchart TD
   A["./build.sh"] --> C{"immagini e tool<br/>presenti?"}
-  C -->|no| D["docker/images.sh<br/>third-party-tools/build.sh"] --> E
-  C -->|si| E["barbarian-builder:<br/>tools/build/build_game.sh"]
+  C -->|no| D["toolchain/images.sh<br/>toolchain/build.sh"] --> E
+  C -->|si| E["c64-builder:<br/>tools/build/build_game.sh"]
   E --> E1["versione: bump_version.py<br/>(impronta in version.yaml)"]
   E1 --> E2["generatori: grafica, font,<br/>musica, tabelle (tools/build/gen_*.py)"]
   E2 --> E3["Krill's Loader (cc65)<br/>assemblaggio (64tass), ZX0 (zx0)"]
@@ -96,32 +103,32 @@ flowchart TD
   E4 --> E5["mappe RAM e disco (out/memory-map/)<br/>atlante (out/atlas/)"]
   E5 --> F{"--no-test?"}
   F -->|si| Z["fine"]
-  F -->|no| G["barbarian-emu-vice:<br/>tests/run_tests.sh"]
+  F -->|no| G["c64-emu-vice:<br/>tests/run_tests.sh"]
   G --> H{"--release?"}
   H -->|no| Y["out/blood_path_vX.Y_1541.d64"]
-  H -->|si| I["barbarian-manual: PDF<br/>barbarian-builder: release.sh<br/>(disco ottimo, mappe, zip)"] --> Y
+  H -->|si| I["barbarian-manual: PDF<br/>c64-builder: release.sh<br/>(disco ottimo, mappe, zip)"] --> Y
 ```
 
 - **Versione**: cresce da sola a ogni build con sorgenti cambiati (`version.yaml`: `version` e `source_hash`).
 - **Cache**: i passi lenti indipendenti dal gioco passano da `tools/build/cache_run.py` (girano solo se cambiano gli ingressi).
-- Comandi singoli: `docker/run.sh builder tools/build/asm.sh` (solo assemblaggio), `docker/run.sh builder python3 tools/simulators/sim_rules.py`.
+- Comandi singoli: `toolchain/run.sh builder tools/build/asm.sh` (solo assemblaggio), `toolchain/run.sh builder python3 tools/simulators/sim_rules.py`.
 
 ## 5. I test
 
 ```mermaid
 sequenceDiagram
   participant H as ./build.sh (host)
-  participant V as barbarian-emu-vice
+  participant V as c64-emu-vice
   participant X as VICE x64sc (+ Xvfb)
-  participant W as barbarian-emu-vc64web
+  participant W as c64-emu-vc64web
   H->>V: tests/run_tests.sh (RELEASE, EMU_URL)
   V->>V: tests/run.py smoke sanity [regression]
   loop ogni test VICE
-    V->>X: avvio con -default + ROM di roms/ + monitor remoto
+    V->>X: avvio con -default + ROM di toolchain/roms/ + monitor remoto
     V->>X: memoria, routine, tasti, screenshot
   end
   opt --release / --emu
-    H->>W: avvio del demone (rete barbarian)
+    H->>W: avvio del demone (rete c64)
     loop test EMU-*
       V->>W: HTTP: disco in base64, script, peek, screenshot
     end
@@ -131,16 +138,25 @@ sequenceDiagram
 
 - `smoke/` (veloci, happy path) + `sanity/` (feature corrente): a ogni build e prima di ogni commit. `regression/`: in release.
 - Tetti di durata (`CAPS` in `tests/run.py`): smoke 20 s, smoke + sanity 35 s, un test 10 s. Il viewer non conta.
-- Test singoli: `docker/run.sh emu-vice python3 tests/run.py -k INN`, `docker/run.sh emu-vice python3 tests/run.py all --list`.
+- Test singoli: `toolchain/run.sh emu-vice python3 tests/run.py -k INN`, `toolchain/run.sh emu-vice python3 tests/run.py all --list`.
 - Test su vc64web: `./build.sh --emu` (poi i `EMU-*` sono in regression: `-k EMU`). Senza demone sono SKIP, non FAIL.
 - Regole dei test (ID, lingua, eroe di prova, dove va un test nuovo): [tests/CLAUDE.md](../tests/CLAUDE.md) e [test.md](test.md).
 
 ## 6. Vedere l'emulatore dal vivo
 
-`./build.sh --view` (o `docker/viewer.sh start`) avvia `barbarian-emu-viewer`: uno schermo X condiviso (volume `barbarian-x11`)
-mostrato da noVNC su **http://localhost:6080** (porta aperta solo su localhost). I VICE dei test si aprono su quello schermo
-(`BARBARIAN_VIEW=1`, `DISPLAY=:99`) invece che ognuno sul suo Xvfb. Niente audio. `docker/viewer.sh stop` lo ferma.
-Per giocare si usa VICE con interfaccia installato sull'host (o un C64 vero): e' indipendente dal progetto.
+`./build.sh --view` (o `toolchain/viewer.sh start`) avvia `c64-emu-viewer`; **http://localhost:6080** (porta aperta solo su
+localhost) e' una **pagina indice** con:
+- **VICE dal vivo**: uno schermo X condiviso (volume `c64-x11`) mostrato da noVNC. I VICE dei test si aprono su quello schermo
+  (`C64_VIEW=1`, `DISPLAY=:99`) invece che ognuno sul suo Xvfb. VNC **non trasporta l'audio**.
+- **Ultima build in vc64web**: la pagina portable di vc64web (`out/vc64web/`) aperta con `?disk=/out/<disco>`: l'emulatore gira
+  **nel browser dell'utente**, quindi con l'audio; il disco proposto e' il piu' recente che corrisponde a `C64_VIEW_DISK`
+  (`toolchain.env`, oggi `blood_path_v*_1541.d64`). Il browser lo riscarica solo se e' cambiato (`fetch` con `cache:'no-cache'`,
+  il server risponde 304). Sotto, gli altri dischi di `out/`.
+- il report dei test e la cartella `out/` (sola lettura: il viewer la monta in `/srv/www/out`).
+
+Password VNC facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default nessuna; protegge solo lo schermo, non i file
+di `out/`). `toolchain/viewer.sh stop` lo ferma. In `--view` VICE mostra l'avviso "Sound: initialization failed for device
+`pulse`" (nel viewer non c'e' un server audio): non blocca i test.
 
 ## 7. Dove finisce cosa (`out/`)
 
@@ -160,8 +176,8 @@ Per giocare si usa VICE con interfaccia installato sull'host (o un C64 vero): e'
 | Sintomo | Causa e rimedio |
 |---|---|
 | `./validate_env.sh`: "disco Windows" | il progetto sta in `/mnt/c/...`: clonarlo nel filesystem di WSL (`~/...`) |
-| `pack: manca third-party-tools/zx0/bin/zx0` | tool non compilati: `third-party-tools/build.sh` (`./build.sh` lo fa da solo) |
-| download di VICE fallito | rete o proxy dell'host: scaricare `vice-3.10.tar.gz` a mano in `third-party-tools/vice/src/` |
-| pip/npm: `SELF_SIGNED_CERT_IN_CHAIN` nella build di un'immagine | proxy che intercetta TLS: `BARBARIAN_CA_BUNDLE=/percorso/ca.crt docker/images.sh --force manual emu-vc64web` |
-| Docker Hub `429 Too Many Requests` | limite delle richieste anonime: `docker login`, poi riprovare (le immagini restano in cache) |
+| `pack: manca toolchain/zx0/bin/zx0` | tool non compilati: `toolchain/build.sh` (`./build.sh` lo fa da solo) |
+| download di VICE fallito | rete o proxy dell'host: scaricare `vice-3.10.tar.gz` a mano in `toolchain/vice/src/` |
+| pip/npm: `SELF_SIGNED_CERT_IN_CHAIN` nella build di un'immagine | proxy che intercetta TLS: `C64_CA_BUNDLE=/percorso/ca.crt toolchain/images.sh --force emu-vc64web` e `./build.sh --images` (manuale) |
+| Docker Hub `429 Too Many Requests` | limite delle richieste anonime: `docker login`, poi riprovare (le immagini restano in cache). In alternativa lo specchio di Google: `docker pull mirror.gcr.io/library/node:22-bookworm-slim` e `docker tag` col nome originale (usato il 13/11) |
 | test `EMU-*` SKIP | demone non acceso: `./build.sh --emu` |

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Costruisce Krill's Loader r194 (src/third-party/krill/loader-v194.zip) con la nostra configurazione
 # (src/common/krill/loaderconfig.inc). Tutto in out/krill/ (usa e getta, non si tocca src/third-party/). Serve solo cc65, make e
-# perl: cc1541 (il programma C che scrive il disco) lo compila UNA volta third-party-tools/build.sh in third-party-tools/cc1541/bin.
+# perl: cc1541 (il programma C che scrive il disco) lo compila UNA volta toolchain/build.sh in toolchain/cc1541/bin.
 # Uscite: out/krill/install.prg (INSTALL), loader.prg (resident, RESIDENT), save.prg (plugin, TRANSIENT),
 #         out/krill.inc (simboli per 64tass, tools/build/krill_syms.py).
 # Indirizzi (docs/FastLoader.md): ZP $41 (7 B; il plugin arriva a $57 mentre salva), INSTALL $0840 (dentro START, dopo lo stub BASIC),

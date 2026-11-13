@@ -1,6 +1,6 @@
 #!/bin/bash
-# Build del gioco DENTRO il container barbarian-builder (13/11): niente test, niente VICE. Dall'host si usa ./build.sh, che
-# lancia questo script nel container e poi i test in barbarian-emu-vice.   Uso (nel container): tools/build/build_game.sh
+# Build del gioco DENTRO il container c64-builder (13/11): niente test, niente VICE. Dall'host si usa ./build.sh, che
+# lancia questo script nel container e poi i test in c64-emu-vice.   Uso (nel container): tools/build/build_game.sh
 #  1. versioni: se i sorgenti sono cambiati dall'ultima build la versione cresce (tools/build/bump_version.py, impronta in
 #     version.yaml), poi version.yaml -> out/version.inc
 #  2. generatori dati: grafica, font, musica, tabelle di bilanciamento (balance.yaml)

@@ -98,16 +98,16 @@ File sorgente generati (11/11, G1: non più in `src/` né in git, li scrivono i 
 ## Build
 
 Tutto gira nei container Docker (13/11; panoramica, container e comandi in [Getting started](getting-started.md)): sul PC dello
-sviluppatore servono solo sh, Docker, git e curl. La build gira in `barbarian-builder` (64tass, cc65, Python con
-Pillow/PyYAML/NumPy/Matplotlib), i test in `barbarian-emu-vice` (+ VICE, Xvfb); VICE, zx0 e cc1541 sono compilati una volta in
-`third-party-tools/*/bin`; le ROM stanno in `roms/` e VICE le riceve a mano (`-default` + tutte le ROM). Verificato il 13/11:
+sviluppatore servono solo sh, Docker, git e curl. La build gira in `c64-builder` (64tass, cc65, Python con
+Pillow/PyYAML/NumPy/Matplotlib), i test in `c64-emu-vice` (+ VICE, Xvfb); VICE, zx0 e cc1541 sono compilati una volta in
+`toolchain/*/bin`; le ROM stanno in `toolchain/roms/` e VICE le riceve a mano (`-default` + tutte le ROM). Verificato il 13/11:
 `./build.sh` e `./build.sh --release` completi nei container.
 
 | Comando | Cosa fa |
 |---|---|
 | `./build.sh` | versioni → generatori (`gen_gfx`, `gen_font`, `gen_music`: brani da `tools/build/songs.py`, `gen_db`) → assemblaggio → dischi → mappe RAM/disco e atlante grafico (`gen_atlas.py` → `out/atlas/`) → test |
 | `./build.sh --no-test` | come sopra senza test |
-| `docker/run.sh <container> <comando>` | (13/11) un comando qualunque in un container (`builder`, `emu-vice`, `manual`) |
+| `toolchain/run.sh <container> <comando>` | (13/11) un comando qualunque in un container (`builder`, `emu-vice` = `c64-*`; `barbarian-manual` col nome completo) |
 | `tools/build/asm_audit.py` | (11/11) analisi del codice assemblato dai listati di tutti i programmi: codice non raggiunto, ripetuto, spioncino, routine più grandi → `out/asm_audit/analisi_assembly.md` |
 | `tools/vice/frame_prof.py` | (11/11) cicli di ogni routine del ciclo principale a ogni giro, su un piano e con una corsa di Frenzy scelti ([prestazioni](prestazioni.md)) |
 | `tools/vice/menu_time.py` | (11/11) cronometro del modulo MENU: caricamento dal disco e apertura di negozi e locanda |

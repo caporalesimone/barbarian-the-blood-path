@@ -10,7 +10,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path.insert(0, os.path.join(ROOT, "tools", "font"))   # (11/11) sorgenti del font in tools/font/
 import reliquia as R
 
-rom = open(os.path.join(ROOT, "roms", "vice-roms", "C64", "chargen-901225-01.bin"), "rb").read()
+rom = open(os.path.join(ROOT, "toolchain", "roms", "vice-roms", "C64", "chargen-901225-01.bin"), "rb").read()
 var = dict(R.V)["05 cero"]
 font = R.build(var)
 

@@ -7,8 +7,8 @@ gioco (regola di ZX0 per la decompressione sul posto) e sotto $A000 (corpo di ST
 Scrive anche out/pack.inc (indirizzi per START) e verifica in Python (tools/build/zx0dec.py) che la decompressione
 sul posto in una memoria di 64 KB ricostruisca il gioco byte per byte.
 
-Compressore: il programma C originale (third-party-tools/zx0/, Einar Saukas, BSD-3), compilato UNA volta nel container
-usa e getta barbarian-tools-builder (third-party-tools/build.sh) in third-party-tools/zx0/bin/zx0 (13/11: mai un zx0 del sistema,
+Compressore: il programma C originale (toolchain/zx0/, Einar Saukas, BSD-3), compilato UNA volta nel container
+usa e getta c64-tools-builder (toolchain/build.sh) in toolchain/zx0/bin/zx0 (13/11: mai un zx0 del sistema,
 nessun compilatore C nel container di build).
 Modo rapido (-q, ~1,5 s) di norma; ZX0_BEST=1 (tools/build/release.sh) per il modo ottimo (~20 s, ~1,2 KB in meno).
 Cache in out/zx0cache/: se il gioco non cambia non si ricomprime."""
@@ -17,16 +17,16 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import zx0dec
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-ZBIN = os.path.join(ROOT, "third-party-tools", "zx0", "bin", "zx0")
+ZBIN = os.path.join(ROOT, "toolchain", "zx0", "bin", "zx0")
 CACHE = os.path.join(ROOT, "out", "zx0cache")
 LOADER_AT = 0xA000                      # corpo di START (src/start.asm): il file compresso deve finire sotto
 BEST = os.environ.get("ZX0_BEST") == "1"
 
 
 def compressor():
-    """zx0 compilato da third-party-tools/build.sh in third-party-tools/zx0/bin/zx0"""
+    """zx0 compilato da toolchain/build.sh in toolchain/zx0/bin/zx0"""
     if not os.path.isfile(ZBIN):
-        sys.exit("pack: manca %s: compilare i tool con third-party-tools/build.sh (o ./build.sh, che lo fa da solo)" % ZBIN)
+        sys.exit("pack: manca %s: compilare i tool con toolchain/build.sh (o ./build.sh, che lo fa da solo)" % ZBIN)
     return ZBIN
 
 

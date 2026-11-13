@@ -3,15 +3,15 @@
 Copyright © 2026 - Simone Caporale
 
 Ristrutturati l'11/11 (richiesta del committente). Tre suite, tre cartelle in `tests/`, un solo runner con report.
-Dal 13/11 tutti i test girano nel container **`barbarian-emu-vice`** (i test `EMU-*` parlano con il demone di vc64web nel
-container `barbarian-emu-vc64web`): `./build.sh`, oppure `docker/run.sh emu-vice python3 tests/run.py ...` per i comandi di questa pagina
+Dal 13/11 tutti i test girano nel container **`c64-emu-vice`** (i test `EMU-*` parlano con il demone di vc64web nel
+container `c64-emu-vc64web`): `./build.sh`, oppure `toolchain/run.sh emu-vice python3 tests/run.py ...` per i comandi di questa pagina
 (panoramica: [Getting started](getting-started.md) sezione 5; regole: `tests/CLAUDE.md`).
 I test sono scritti **in inglese** (ID, descrizioni, motivi dei fallimenti, commenti dei file nuovi; gli script storici
 spostati in `regression/` hanno ancora commenti e messaggi in italiano, da tradurre: TODO).
 
 ```mermaid
 flowchart LR
-    B["./build.sh"] --> RT["tests/run_tests.sh<br/>(barbarian-emu-vice)"]
+    B["./build.sh"] --> RT["tests/run_tests.sh<br/>(c64-emu-vice)"]
     RT -->|debug| S1["tests/run.py smoke sanity"]
     RT -->|"--release / --all"| S2["tests/run.py smoke sanity regression"]
     S1 --> REP["out/test_report.txt / .json"]
@@ -87,7 +87,7 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
 un'altra emulazione del 1541-II): avvio dal disco vero, nuovo eroe con salvataggio Krill, HUD letto a schermo, alchimista,
 cripta, mostro ucciso, portale, ritorno e nuovo avvio con l'eroe salvato. **VICE resta l'unico riferimento**: questi test
 non stabiliscono cosa è giusto, dicono che il gioco funziona anche lì. Libreria `tests/lib/emu.py` (classe `Emu`: demone nel
-container `barbarian-emu-vc64web` all'indirizzo `EMU_URL`, `boot`, `run_script`, `run_loop`, `peek`, `findText`); bot in
+container `c64-emu-vc64web` all'indirizzo `EMU_URL`, `boot`, `run_script`, `run_loop`, `peek`, `findText`); bot in
 `tests/regression/emu/bots/`. Senza il demone (`./build.sh --emu` o `--release` lo accendono) i test sono **SKIP** con il motivo. Guida e trappole: [emulatore.md](emulatore.md).
 
 ## Elenco

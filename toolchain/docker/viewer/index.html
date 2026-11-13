@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C64 viewer</title>
+<!-- Pagina indice di c64-emu-viewer (13/11). Copyright (c) 2026 - Simone Caporale
+     Legge gli elenchi delle cartelle servite dal server web (websockify --web): /out/ e /out/vc64web/. -->
+<script src="config.js"></script>
+<style>
+  :root { --bg:#f4f1ea; --fg:#1d1b18; --dim:#6b665d; --card:#fffdf8; --line:#ddd6c8; --acc:#3d4fb8; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#16151a; --fg:#ebe7df; --dim:#9a958b; --card:#201f26; --line:#34323c; --acc:#9aa8ff; } }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+  main { max-width:760px; margin:0 auto; padding:28px 16px 48px; }
+  h1 { font-size:22px; margin:0 0 4px; }
+  .sub { color:var(--dim); margin:0 0 24px; }
+  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:0 0 16px; }
+  h2 { font-size:15px; margin:0 0 10px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+  a { color:var(--acc); }
+  .big { display:inline-block; font-size:17px; font-weight:600; text-decoration:none; padding:6px 0; }
+  .row { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid var(--line); flex-wrap:wrap; }
+  .row:first-child { border-top:0; }
+  .name { font-family:ui-monospace, monospace; word-break:break-all; }
+  .meta { color:var(--dim); font-size:13px; }
+  .latest { border:2px solid var(--acc); }
+  .note { color:var(--dim); font-size:13px; margin:8px 0 0; }
+</style>
+</head>
+<body>
+<main>
+  <h1>C64 viewer</h1>
+  <p class="sub">Schermo condiviso degli emulatori e ultima build. Pagina servita solo su localhost.</p>
+
+  <section>
+    <h2>VICE dal vivo</h2>
+    <a class="big" href="novnc/vnc.html?autoconnect=1&amp;resize=scale&amp;reconnect=1" target="_blank">Apri lo schermo (noVNC)</a>
+    <p class="note">Mostra gli emulatori avviati con lo schermo del viewer (DISPLAY=:99). VNC non trasporta l'audio.</p>
+  </section>
+
+  <section class="latest">
+    <h2>Ultima build in vc64web</h2>
+    <div id="latest">ricerca in out/ ...</div>
+    <p class="note">L'emulatore gira nel tuo browser (audio compreso). Il disco si scarica a ogni apertura se è cambiato.</p>
+  </section>
+
+  <section>
+    <h2>Altri dischi in out/</h2>
+    <div id="others">...</div>
+  </section>
+
+  <section>
+    <h2>File</h2>
+    <div class="row"><a href="out/test_report.txt" target="_blank">Report dei test</a><span class="meta">out/test_report.txt</span></div>
+    <div class="row"><a href="out/" target="_blank">Cartella out/</a><span class="meta">sola lettura</span></div>
+  </section>
+</main>
+<script>
+// nomi dei file elencati in una cartella servita dal server web (pagina di elenco HTML)
+async function list(dir) {
+  try {
+    const r = await fetch(dir, { cache: 'no-cache' });
+    if (!r.ok) return [];
+    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    return [...doc.querySelectorAll('a')].map(a => decodeURIComponent(a.getAttribute('href') || ''))
+      .filter(h => h && !h.includes('/') && !h.startsWith('?'));
+  } catch (e) { return []; }
+}
+async function modified(url) {
+  try { const r = await fetch(url, { method: 'HEAD', cache: 'no-cache' }); return Date.parse(r.headers.get('Last-Modified')) || 0; }
+  catch (e) { return 0; }
+}
+const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true });
+const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function globRe(g) { return new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i'); }
+
+(async () => {
+  const pages = (await list('out/vc64web/')).filter(f => /^VirtualC64-v\d+\.html$/.test(f)).sort(natural);
+  const page = pages.length ? 'out/vc64web/' + pages[pages.length - 1] : null;
+  const disks = (await list('out/')).filter(f => /\.(d64|g64|t64|crt)$/i.test(f));   // immagini di dischi e cartucce (i .prg sono file intermedi)
+  const times = Object.fromEntries(await Promise.all(disks.map(async f => [f, await modified('out/' + encodeURIComponent(f))])));
+  let latest = null;
+  const pat = (window.VIEW_DISK || '').trim();
+  if (pat) { const m = disks.filter(f => globRe(pat).test(f)).sort(natural); latest = m.length ? m[m.length - 1] : null; }
+  if (!latest && disks.length) latest = [...disks].sort((a, b) => times[b] - times[a])[0];
+  const open = f => page ? `${page}?disk=${encodeURIComponent('/out/' + f)}` : null;
+  const when = f => times[f] ? new Date(times[f]).toLocaleString() : '';
+  const row = f => {
+    const u = open(f);
+    return `<div class="row"><span class="name">${u ? `<a href="${esc(u)}" target="_blank">${esc(f)}</a>` : esc(f)}</span>` +
+           `<span class="meta">${esc(when(f))}</span></div>`;
+  };
+  document.getElementById('latest').innerHTML = !latest ? 'nessun disco in out/' :
+    (page ? `<a class="big" href="${esc(open(latest))}" target="_blank">${esc(latest)}</a><div class="meta">${esc(when(latest))}</div>`
+          : `${esc(latest)}<p class="note">Pagina di vc64web non trovata in out/vc64web/ (si genera con l'immagine c64-emu-vc64web).</p>`);
+  const rest = disks.filter(f => f !== latest).sort(natural);
+  document.getElementById('others').innerHTML = rest.length ? rest.map(row).join('') : '<span class="meta">nessuno</span>';
+})();
+</script>
+</body>
+</html>

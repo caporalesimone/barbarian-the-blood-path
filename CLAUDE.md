@@ -15,20 +15,23 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
 - Copyright: "COPYRIGHT 2026 - SIMONE CAPORALE" nel gioco, "Copyright © 2026 - Simone Caporale" nei documenti.
 
 ## Ambiente: tutto nei container (13/11, regola del committente)
-- Build e test girano **solo nei container Docker** (`docker/`): `barbarian-builder` (build), `barbarian-emu-vice` (test e strumenti
-  in VICE), `barbarian-emu-vc64web` (emulatore secondario), `barbarian-manual` (PDF), `barbarian-emu-viewer` (vista dal vivo),
-  `barbarian-tools-builder` (usa e getta). Altri container si chiamano `barbarian-<nome>`. Sull'host servono solo sh, Docker, git,
-  curl. Python gira **solo nei container**. Comandi: `./build.sh [...]`, `docker/run.sh <container> <comando>`, `./validate_env.sh`.
+- Build e test girano **solo nei container Docker**. La **toolchain** (`toolchain/`, 13/11, regola del committente) e' generica
+  per il C64 e non sa nulla del gioco: immagini **`c64-<nome>`** (`c64-builder` build, `c64-emu-vice` test e strumenti in VICE,
+  `c64-emu-vc64web` emulatore secondario, `c64-emu-viewer` vista dal vivo, `c64-tools-builder` usa e getta). Le immagini proprie
+  del gioco si chiamano **`barbarian-<nome>`** e stanno accanto al loro codice (`barbarian-manual`: `tools/manual/Dockerfile`).
+  La configurazione della toolchain per il gioco sta in `toolchain.env`. Sull'host servono solo sh, Docker, git, curl. Python gira
+  **solo nei container**. Comandi: `./build.sh [...]`, `toolchain/run.sh <container> <comando>`, `./validate_env.sh`.
 - I container devono restare **minimi**: ognuno ha solo cio' che serve al suo compito; niente strumenti usati una volta sola
-  (compilatori dei tool: solo in `barbarian-tools-builder`, che si cancella dopo l'uso). Immagini con la **versione** nel tag
-  (es. `ubuntu:24.04`), mai il digest.
-- I programmi esterni che non cambiano (VICE, zx0, cc1541) si compilano **una volta** (`third-party-tools/build.sh`) e stanno nel
-  progetto in `third-party-tools/<nome>/bin` (non in git). Ogni componente esterno ha nella sua cartella il file di licenza e il
-  suo `.gitignore`.
+  (compilatori dei tool: solo in `c64-tools-builder`, che si cancella dopo l'uso). Immagini con la **versione** nel tag
+  (es. `ubuntu:24.04`), mai il digest. Le immagini della toolchain vengono da **un solo Dockerfile multi-stage**
+  (`toolchain/docker/Dockerfile`): lo stage `base` (senza nome di immagine, non si avvia) e' il genitore comune e contiene la
+  **versione di Ubuntu in un solo punto** (`ARG UBUNTU`). vc64web ha il suo Dockerfile (pacchetto autonomo, base node).
+- I programmi esterni che non cambiano (VICE, zx0, cc1541) si compilano **una volta** (`toolchain/build.sh`) e stanno in
+  `toolchain/<nome>/bin` (non in git). Ogni componente esterno ha nella sua cartella il file di licenza e il suo `.gitignore`.
 - **Script**: shell POSIX/bash quando lo script lancia solo comandi; Python quando c'e' logica vera. Mai un Python che fa solo da
   involucro a comandi shell. Librerie Python esterne ammesse solo se sono nel container.
 - **Percorsi**: **nessun percorso assoluto** nel progetto, **solo relativi**, e **tutti i file che servono stanno nel progetto**.
-  Gli script shell ricavano la radice dalla posizione del file, i Python da `__file__`. ROM solo da `roms/` (`roms/roms.md`).
+  Gli script shell ricavano la radice dalla posizione del file, i Python da `__file__`. ROM solo da `toolchain/roms/` (`toolchain/roms/roms.md`).
   L'unico percorso assoluto ammesso e' `/work`, dove i container montano il progetto. Dopo ogni modifica a uno script: provarlo
   lanciandolo da un'altra cartella.
 - **Uscite**: tutto cio' che si genera sta in `out/` (non in git, tranne `out/.gitkeep`), ogni strumento nella sua sottocartella
@@ -39,8 +42,8 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
 ## Cartelle
 `src/` (gioco e librerie per il C64, `src/third-party/`), `data/`, `tools/` (`build/`, `atlas/`, `memory-map/`, `manual/`,
 `simulators/`, `vice/`, `font/`), `tests/` (`smoke/`, `sanity/`, `regression/`), `docs/` (solo documentazione **scritta**: cio'
-che si puo' rigenerare va in `out/`, i suoi generatori in `tools/`), `roms/`, `docker/`, `third-party-tools/` (programmi esterni,
-`vc64web-custom/` = la nostra variante di vc64web, autonoma), `lab/` (studio, non usato dalla build: [lab/README.md](lab/README.md)),
+che si puo' rigenerare va in `out/`, i suoi generatori in `tools/`), `toolchain/` (immagini Docker e script, programmi esterni,
+ROM in `toolchain/roms/`, `vc64web-custom/` = la nostra variante di vc64web, autonoma; [toolchain/README.md](toolchain/README.md)), `lab/` (studio, non usato dalla build: [lab/README.md](lab/README.md)),
 `out/`. Tabella completa: [docs/getting-started.md](docs/getting-started.md) sezione 2. Uno script di verifica che controlla qualcosa
 diventa un test in `tests/`, non resta in `tools/`.
 
@@ -60,14 +63,14 @@ diventa un test in `tests/`, non resta in `tools/`.
 - `docs/FORMATO_DATI.md`: formato esatto dei file su disco e dei salvataggi; aggiornarlo con `SAVE_VER`.
 - **Screenshot dei menu** (08/11, regola del committente): si conservano **in git** in `docs/screens/` (uno per schermata +
   mosaico `tutti_i_menu.png`; 13/11: restano versionati). Si rifanno solo quelli cambiati:
-  `docker/run.sh emu-vice tools/vice/shots_menus.sh inventario locanda ...` (senza nomi: tutti), il mosaico si rigenera da solo.
+  `toolchain/run.sh emu-vice tools/vice/shots_menus.sh inventario locanda ...` (senza nomi: tutti), il mosaico si rigenera da solo.
 - **Manuale**: PDF con WeasyPrint nel container `barbarian-manual` (`./build.sh --manual`, `tools/manual/gen_manual.py`).
   **Copertina** sempre con il **tema rosso** dei dungeon (palette 4): screenshot `dungeon` in `tools/vice/shots_manual.sh` (piano 8
   con il seed di prova). **Screenshot del manuale**: il PG sta sempre in una posizione valida (casella percorribile); per il
   villaggio lo controlla `tools/vice/check_pos.py`, nei dungeon guardare lo screenshot prima di consegnare.
 - **Help** (`HELP`, [docs/help.md](docs/help.md)): testo in `data/help.txt`, ritaglio dell'HUD in `data/help_hud.json`.
   Se cambia un tasto o una schermata, aggiornare `data/help.txt` nello stesso lavoro; se cambia la grafica o la
-  disposizione dell'HUD, `docker/run.sh emu-vice python3 tools/build/gen_help.py --snap` (il test della release lo controlla).
+  disposizione dell'HUD, `toolchain/run.sh emu-vice python3 tools/build/gen_help.py --snap` (il test della release lo controlla).
 - `TODO.md`: **solo lavori aperti**, divisi in **capitoli** con ID `<lettera><numero>` (A1, B2, ...; A = priorità massima): ogni voce
   con obiettivo, motivazione, complessità, cosa serve, cavilli. Le decisioni nuove si scrivono nella voce a cui appartengono, con la
   data; una voce finita si **cancella** e la decisione va nella pagina della wiki interessata. Le decisioni e i lavori
@@ -80,8 +83,8 @@ diventa un test in `tests/`, non resta in `tools/`.
   TODO aggiornati nello stesso lavoro. Messaggio in italiano: titolo breve + corpo con cosa e perché, più le righe di attribuzione
   della sessione (`Co-Authored-By` compreso). Autore dei commit: **Simone Caporale `<caporalesimone@gmail.com>`** (configurazione
   locale del repository; storia ricreata in un solo commit il 13/11 su richiesta del committente).
-- Fuori da git: `out/` (tranne `.gitkeep`), cache, log, i binari e i sorgenti scaricati di `third-party-tools/`. Le ROM Commodore in
-  `roms/` **sono in git** (13/11, richiesta del committente, per esportare il progetto; le toglierà lui prima di pubblicare, TODO I7).
+- Fuori da git: `out/` (tranne `.gitkeep`), cache, log, i binari e i sorgenti scaricati di `toolchain/`. Le ROM Commodore in
+  `toolchain/roms/` **sono in git** (13/11, richiesta del committente, per esportare il progetto; le toglierà lui prima di pubblicare, TODO I7).
 - Prima di consegnare `git status` pulito; non si riscrive la storia senza che il committente lo chieda.
 - **MP3 fuori dal repository** (11/11, regola del committente): `lab/music/` (~13 MB) **non è in git e non c'è mai stato**.
   **Quando il committente chiede di scaricare il repository, includere anche `lab/music/`** (zip a parte o insieme al bundle git).
@@ -100,6 +103,6 @@ diventa un test in `tests/`, non resta in `tools/`.
   (`tools/build/verinfo.py`, `branch_versions` in fondo a `version.yaml`), così non bruciano i numeri di `main`.
 - Il formato dei salvataggi ha una versione (`save_version` in `version.yaml`, `SAVE_VER`): cambiarla a ogni modifica del formato
   del personaggio o del piano salvato.
-- **VICE** (`x64sc` 3.10, compilato una volta in `third-party-tools/vice/bin`) è l'**unico riferimento autorevole** (cicli, tempi,
+- **VICE** (`x64sc` 3.10, compilato una volta in `toolchain/vice/bin`) è l'**unico riferimento autorevole** (cicli, tempi,
   drive, debug). Il gioco deve andare anche sull'emulatore secondario vc64web ([docs/emulatore.md](docs/emulatore.md),
   regole in `tests/CLAUDE.md`).
