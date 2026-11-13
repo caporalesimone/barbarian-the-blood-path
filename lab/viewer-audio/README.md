@@ -30,6 +30,30 @@ supera la soglia all'uscita audio della pagina (AnalyserNode inserito prima dell
 
 VICE 3.10 della toolchain e' compilato con PulseAudio (`Sound: Available sound devices: pulse alsa dummy ...`).
 
+## KasmVNC leggera (`kasmvnc-lite/`, 13/11 sera) [MISURATO]
+Al posto dell'immagine di linuxserver: ubuntu:24.04 + **Xvnc di KasmVNC 1.5.2** (pacchetto ufficiale `.deb`, estratto senza le
+dipendenze perl dello script `vncserver`, che non serve) + PulseAudio (scheda `auto_null`, socket anonimi) + **kclient** (Node, solo la
+parte audio; `pulseaudio2` e' un modulo nativo: compilato in uno stage con lo stesso node di Ubuntu). Niente desktop, niente window
+manager, niente nginx: Xvnc serve il suo client web su 6901, kclient la pagina con l'audio su 6900 (l'iframe punta a 6901).
+Sorgenti: `kasmvnc-lite/fetch.sh` (scarica sull'host; non in git).
+
+| | KasmVNC leggera | linuxserver | viewer di oggi (noVNC, senza audio) |
+|---|---|---|---|
+| Immagine (spazio su disco / compressa) | **790 MB / 199 MB** | 3,02 GB / 819 MB | 803 MB |
+| Ritardo immagine (mediana, 2 x 10 eventi) | **55 / 57 ms** (45-67) | 97 / 99 ms | - |
+| Ritardo audio | **17 / 18 ms** (10-38) | 13 / 20 ms | - |
+| Audio rispetto all'immagine | in anticipo di ~38 ms (15-50) | in anticipo di ~80 ms | - |
+| Memoria a riposo | 67 MB | 90 MB | - |
+| VICE in un altro container | **funziona senza aggiustamenti** (`-ac` sul server X, `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` nel volume dello schermo) | 4 aggiustamenti | - |
+| Test smoke con lo schermo KasmVNC (`C64_VIEW=1`) | 31/31 PASS, 14,6-15,0 s | non provato | 31/31 |
+
+Cosa pesa ancora (pacchetti installati): `libllvm20` 137 MB + `mesa-libgallium` 41 MB (li vuole `libgbm1`/`libgl1`, collegate a Xvnc:
+non si tolgono senza ricompilare KasmVNC), node + ICU ~80 MB (kclient), codec di ffmpeg ~55 MB e GStreamer (dipendenze di
+`pulseaudio` tramite `libasound2-plugins`), systemd ~12 MB. Due accorgimenti scoperti: `-PublicIP 127.0.0.1` (senza, Xvnc 1.5
+interroga server STUN su Internet e non apre la porta web) e il nome della scheda `auto_null` (kclient legge da `auto_null.monitor`).
+Non provati: kclient senza il gestore di file (la pagina ha anche "files": da togliere, espone una cartella), una porta sola,
+microfono, tastiera e joystick dal browser verso VICE.
+
 ## Aggiustamenti necessari per KasmVNC (immagine di linuxserver)
 - `DISABLE_IPV6=true`: senza, nginx non parte in una macchina senza IPv6.
 - Un `xterm` a tutto schermo parte da solo (autostart): va tolto.

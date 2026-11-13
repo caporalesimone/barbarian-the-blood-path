@@ -354,8 +354,10 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   `guacamole-lite` ha un solo manutentore (in alternativa l'applicazione Java ufficiale, molto piu' pesante).
   **KasmVNC** (immagine di linuxserver): immagine ~100 ms, audio ~15-20 ms (in anticipo di ~80 ms), canale audio separato
   (kclient), immagine da 3 GB e 4 aggiustamenti per farla andare con VICE in un altro container.
-  Proposta: **Guacamole** se basta ascoltare (monitorare la musica e gli effetti); se serve giocare con l'audio a tempo, provare una
-  **KasmVNC leggera** (solo Xvnc + client web + ponte audio, non provata). Da fare dopo la scelta: viewer con PulseAudio,
+  **KasmVNC leggera** (13/11 sera, `lab/viewer-audio/kasmvnc-lite/`: Xvnc ufficiale + PulseAudio + kclient, senza desktop):
+  790 MB (come il viewer di oggi, 803 MB, che non ha l'audio), immagine ~55 ms, audio ~18 ms (in anticipo di ~38 ms), VICE e
+  smoke 31/31 sullo schermo KasmVNC senza aggiustamenti. **E' la candidata migliore**: piu' veloce di entrambe le altre e grande
+  quanto il viewer attuale. Da decidere: sostituire il viewer (Xvfb + x11vnc + noVNC) con questa. Da fare dopo la scelta: viewer con PulseAudio,
   `-sounddev pulse` in `--view` (oggi VICE mostra "Sound: initialization failed for device pulse"), vc64web con finestra sullo
   schermo del viewer (non provato), pagina indice con il nuovo client. Complessità M.
 
