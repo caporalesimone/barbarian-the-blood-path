@@ -309,6 +309,12 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
 
 ---
 
+- **I11** (13/11) **Primo avvio dei test dopo il riavvio della macchina**: `./build.sh` con smoke+sanity 9 PASS, 24 FAIL. PG-NEW-01
+  si è fermato dopo 138 s con `monitor: no answer to 'x' in 120 s`, e i test che ne dipendono sono falliti a cascata.
+  Rilanciato subito dopo: 33/33 PASS in 19 s. Causa **non trovata**. Ipotesi non verificata: primo avvio di VICE a freddo (cache dei
+  file e dei font vuote; la macchina era accesa da 10 minuti). Da fare: riprodurre (riavvio + `./build.sh`); se si ripete, alzare
+  il tempo del primo avvio o fare un avvio di riscaldamento in `tests/run_tests.sh`. Complessità S.
+
 ## J — Idee per dopo
 
 - **I9** (13/11) Passaggio a Windows: deciso il 13/11 **WSL2 + container** (tutto gira in Docker, progetto nel filesystem di WSL,
@@ -323,6 +329,12 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
 - **J2** Anello della velocità (ex 2.7): riuso di `fz_move`; dopo E1.
 - **J3** Sprite del boss finale solo nel tema 8; da verificare con D8.
 - **J4** Pozioni a cura fissa o a formula: confermare col committente che vada bene com'è.
+- **J5** (13/11, segnalato dal committente) **Test in parallelo**: oggi `tests/run.py` esegue i test VICE uno dopo l'altro.
+  Obiettivo: più worker contemporanei, per tenere bassi i tempi man mano che i test crescono (i tetti di `CAPS` restano).
+  Cosa serve: un display Xvfb per worker; porte del monitor remoto di VICE diverse; file temporanei separati in `out/tmp/<worker>`;
+  test che assemblano varianti del gioco isolati (oggi riscrivono la build normale); report unico. Nel viewer: più schermi
+  (`VIEW_SCREENS=N`, una coppia Xvfb/x11vnc per schermo, websockify con file di token; stima ~30 righe e ~30–60 MB di RAM per
+  schermo, non misurati). Complessità M (il grosso è nel runner, non nel viewer).
 
 ---
 
