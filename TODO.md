@@ -320,6 +320,7 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   `monitor: no answer to 'load /work/out/start.prg' in 20 s` (il monitor aveva appena risposto al comando prima) e PERF-OPT-11
   (MonitorError dopo 30 s); rilanciati da soli subito dopo: 6/6 PASS. Stesso sintomo (il monitor remoto di VICE smette di rispondere),
   in un momento qualsiasi della sessione, non solo al primo avvio. Da fare: registrare il log di VICE e del monitor quando succede.
+  Release successiva (stessa sera, tool dentro le immagini): 185 PASS, 0 FAIL, 1 SKIP.
 
 ## J — Idee per dopo
 
@@ -346,6 +347,17 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   altre. Oggi la pagina mostra gia' l'ultima (`C64_VIEW_DISK`, versione piu' alta) e gli altri dischi di `out/`. **Contro la regola
   attuale** "`out/` contiene solo la build piu' recente, niente `release/`": serve decidere dove stanno le build vecchie (es.
   `out/builds/` o una cartella fuori da `out/`), quante se ne tengono e chi le cancella. Complessità S (dopo la decisione).
+- **J12** (13/11, richiesta del committente) **Audio degli emulatori nel browser** (il viewer di oggi usa noVNC: niente audio).
+  Prototipo e misure in [lab/viewer-audio/](lab/viewer-audio/README.md) [MISURATO 13/11, browser headless sulla stessa macchina]:
+  **Guacamole** (`guacd` + tunnel `guacamole-lite` + PulseAudio nel viewer): immagine ~130 ms, audio ~250 ms (in ritardo di ~120 ms
+  sull'immagine), audio nello stesso WebSocket, +~400 MB di immagini, VICE suona al primo colpo con l'architettura di oggi;
+  `guacamole-lite` ha un solo manutentore (in alternativa l'applicazione Java ufficiale, molto piu' pesante).
+  **KasmVNC** (immagine di linuxserver): immagine ~100 ms, audio ~15-20 ms (in anticipo di ~80 ms), canale audio separato
+  (kclient), immagine da 3 GB e 4 aggiustamenti per farla andare con VICE in un altro container.
+  Proposta: **Guacamole** se basta ascoltare (monitorare la musica e gli effetti); se serve giocare con l'audio a tempo, provare una
+  **KasmVNC leggera** (solo Xvnc + client web + ponte audio, non provata). Da fare dopo la scelta: viewer con PulseAudio,
+  `-sounddev pulse` in `--view` (oggi VICE mostra "Sound: initialization failed for device pulse"), vc64web con finestra sullo
+  schermo del viewer (non provato), pagina indice con il nuovo client. Complessità M.
 
 ---
 
