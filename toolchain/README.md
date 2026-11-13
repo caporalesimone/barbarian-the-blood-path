@@ -13,21 +13,20 @@ Un solo Dockerfile multi-stage, `docker/Dockerfile`: una immagine per target, tu
 | Immagine | Target | Contenuto |
 |---|---|---|
 | (nessuna) | `base` | ubuntu (`ARG UBUNTU`, oggi 24.04) + CA + locale + `/work`. Genitore comune: **non ha un nome**, non si avvia mai |
-| `c64-tools-builder` | `tools-builder` | compilatori e librerie di sviluppo; usa e getta (`build.sh`), poi si cancella |
-| `c64-builder` | `builder` | 64tass, cc65, make, perl, zip, git, Python 3 con Pillow, PyYAML, NumPy, Matplotlib |
-| `c64-emu-vice` | `emu-vice` | builder + librerie di VICE (gtk3), Xvfb, ffmpeg (VICE e' in `vice/bin`) |
+| (nessuna) | `tools-builder`, `vice-build`, `zx0-build`, `cc1541-build` | compilatori e librerie di sviluppo; compilano i programmi esterni. Restano nella cache di BuildKit, non diventano immagini |
+| `c64-builder` | `builder` | 64tass, cc65, make, perl, zip, git, Python 3 con Pillow, PyYAML, NumPy, Matplotlib; zx0 e cc1541 in `/opt/c64/bin` |
+| `c64-emu-vice` | `emu-vice` | builder + VICE (`x64sc`, `c1541` e i dati in `/opt/vice`), librerie gtk3, Xvfb, ffmpeg |
 | `c64-emu-viewer` | `viewer` | Xvfb + x11vnc + noVNC + pagina indice (`docker/viewer/`) |
 | `c64-emu-vc64web` | (Dockerfile di `vc64web-custom/`) | node, Playwright + Chromium, ffmpeg, demone dell'emulatore nel browser |
 
-Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` e `build.sh` (i tool compilati dipendono dalla glibc).
+Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` (ricompila anche VICE, zx0 e cc1541 sulla base nuova).
 
 ## Script
 
 | Script | Cosa fa |
 |---|---|
-| `images.sh [--force] [nomi]` | costruisce le immagini mancanti (`builder emu-vice emu-viewer emu-vc64web`) |
+| `images.sh [--force] [nomi]` | costruisce le immagini mancanti (`builder emu-vice emu-viewer emu-vc64web`); scarica sull'host il tarball di VICE se manca |
 | `run.sh <immagine> [comando]` | esegue un comando con il progetto in `/work`, con l'utente dell'host; `builder` = `c64-builder`, un nome completo si usa cosi' com'e' |
-| `build.sh [vice] [zx0] [cc1541]` | compila **una volta** i programmi esterni nel container usa e getta, in `*/bin` (non in git) |
 | `viewer.sh start\|stop` | pagina indice su http://localhost:6080: VICE dal vivo (noVNC), ultima build in vc64web nel browser, `out/` del progetto |
 | `validate_env.sh` | controlla l'host: sistema, WSL e posizione del progetto, Docker, fine riga, ROM, immagini, tool |
 
@@ -47,9 +46,9 @@ Altre variabili: `C64_CA_BUNDLE` (CA di un proxy che intercetta TLS, segreto per
 
 | Cartella | Programma | Licenza | Come si ottiene |
 |---|---|---|---|
-| `vice/` | VICE 3.10 (emulatore di riferimento, interfaccia gtk3) | GPL-2.0 (`vice/LICENSE`) | `build.sh vice`: tarball ufficiale scaricato sull'host in `vice/src/`, compilato in `vice/bin/` |
-| `zx0/` | ZX0 v2.2 di Einar Saukas (compressore) | BSD-3 (`zx0/LICENSE`) | sorgenti C in git; `build.sh zx0` -> `zx0/bin/zx0` |
-| `cc1541/` | cc1541 (scrive i dischi .d64) | MIT (`cc1541/LICENSE`) | dallo zip di Krill (`C64_KRILL_ZIP`); `build.sh cc1541` -> `cc1541/bin/cc1541` |
+| `vice/` | VICE 3.10 (emulatore di riferimento, interfaccia gtk3) | GPL-2.0 (`vice/LICENSE`) | tarball ufficiale scaricato sull'host in `vice/download/` (`VICE_VERSION`, `VICE_URL`), compilato nello stage `vice-build` |
+| `zx0/` | ZX0 v2.2 di Einar Saukas (compressore) | BSD-3 (`zx0/LICENSE`) | sorgenti C in git, compilati nello stage `zx0-build` |
+| `cc1541/` | cc1541 (scrive i dischi .d64) | MIT (`cc1541/LICENSE`) | dallo zip di Krill (`C64_KRILL_ZIP`), compilato nello stage `cc1541-build` |
 | `vc64web-custom/` | la nostra variante di vc64web: emulatore nel browser + controllo da riga di comando | vedi `vc64web-custom/docs/INCLUSIONE.md` (non verificata) | pacchetto autonomo; immagine `c64-emu-vc64web` (`images.sh emu-vc64web`) |
 | `roms/` | ROM del C64 (`vice-roms/{C64,DRIVES}`, `open-roms/`) | vedi `roms/roms.md` | in git; identica a `vc64web-custom/roms/` (`validate_env.sh` lo controlla) |
 

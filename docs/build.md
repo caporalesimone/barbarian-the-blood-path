@@ -138,25 +138,26 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 | `tools/simulators/*.py` | simulatori di combattimento, progressione, economia ([Bilanciamento](balancing-guide.md)) |
 | `tests/run.py` | i test: `smoke`, `sanity`, `regression` ([Test](test.md)) |
 
-## 4b. Programmi esterni compilati una volta (`toolchain/build.sh`, 13/11)
-VICE, zx0 e cc1541 non cambiano: si compilano **una volta** nel container usa e getta `c64-tools-builder`
-(target `tools-builder` di `toolchain/docker/Dockerfile`: compilatori e librerie di sviluppo), che alla fine si cancella (container
-e immagine). `./build.sh` lo
-lancia da solo se manca un binario.
+## 4b. Programmi esterni compilati dentro le immagini (13/11)
+VICE, zx0 e cc1541 non cambiano: si compilano **dentro la build delle immagini della toolchain** (`toolchain/docker/Dockerfile`,
+stage `vice-build`, `zx0-build`, `cc1541-build`, tutti da `tools-builder` = base + compilatori e librerie di sviluppo). Nelle
+immagini finali entrano **solo i binari** (`COPY --from`): i compilatori non ci sono. La cache di BuildKit tiene gli stage
+compilati: si ricompila solo se cambia un sorgente o la base (`docker builder prune` svuota la cache: poi VICE si ricompila, ~5 min
+misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagini mancanti da solo (`toolchain/images.sh`).
 
-| Programma | Sorgente | Risultato (non in git) | Licenza |
+| Programma | Sorgente (contesto della build) | Dove finisce | Licenza |
 |---|---|---|---|
-| VICE 3.10 (gtk3) | tarball ufficiale, scaricato **sull'host** (`curl`) in `toolchain/vice/src/` e scompattato lì | `toolchain/vice/bin/` (eseguibili e dati accanto) | GPL-2.0 (`toolchain/vice/LICENSE`) |
-| zx0 v2.2 | `toolchain/zx0/*.c` (in git) | `toolchain/zx0/bin/zx0` | BSD-3 |
-| cc1541 | dallo zip di Krill (`C64_KRILL_ZIP` in `toolchain.env`: `src/third-party/krill/loader-v194.zip`) | `toolchain/cc1541/bin/cc1541` (+ `src/`) | MIT |
+| VICE 3.10 (gtk3) | tarball ufficiale, scaricato **sull'host** (`curl`) da `toolchain/images.sh` in `toolchain/vice/download/` (contesto `vicesrc`) | `c64-emu-vice`: `/opt/vice/bin/x64sc`, `/opt/vice/bin/c1541`, dati in `/opt/vice/share/vice` (gli altri emulatori di VICE non entrano) | GPL-2.0 (`toolchain/vice/LICENSE`) |
+| zx0 v2.2 | `toolchain/zx0/*.c` (in git, contesto `zx0src`) | `c64-builder`: `/opt/c64/bin/zx0` | BSD-3 |
+| cc1541 | dallo zip di Krill (`C64_KRILL_ZIP` in `toolchain.env`: `src/third-party/krill/loader-v194.zip`, contesto `krill`) | `c64-builder`: `/opt/c64/bin/cc1541` | MIT |
 
-- Versione di VICE: `VICE_VERSION` (predefinita 3.10) o `VICE_URL`; `toolchain/build.sh vice` rifà solo VICE.
-- **Spostabile, senza percorsi assoluti** [MISURATO 13/11]: VICE ha nell'eseguibile il percorso di installazione (`/opt/vice`) ma
-  cerca keymap, risorse e ROM **anche accanto all'eseguibile** (`bin/C64`, `bin/common`, ...): `build_tools.sh` copia i dati in `bin/`
-  insieme ai programmi, quindi la cartella funziona ovunque (prima, con i dati in `share/vice`, la copia non partiva: "Default keymap
-  not found"). Non conosco un'opzione per indicare la cartella dati.
-- **Stessa base** (stage `base` di `toolchain/docker/Dockerfile`, ubuntu:24.04) per `c64-tools-builder`, `c64-builder` e
-  `c64-emu-vice`: i binari compilati su una base più recente non partono su una più vecchia (una VICE compilata su 26.04 vuole glibc 2.42, la 24.04 ha la 2.39) [MISURATO].
+- Versione di VICE: `VICE_VERSION` (predefinita 3.10) o `VICE_URL`, poi `toolchain/images.sh --force emu-vice`.
+- VICE e' installato con `--prefix=/opt/vice` e sta in `/opt/vice` anche nell'immagine finale: trova i suoi dati (keymap, risorse)
+  dove li cerca. Prima (fino al passo A del 13/11) era compilato nel progetto in `toolchain/vice/bin` con i dati copiati accanto
+  all'eseguibile per renderlo spostabile.
+- **Stessa base** (stage `base`, ubuntu:24.04) per gli stage di compilazione e per le immagini che eseguono i binari: i binari
+  compilati su una base più recente non partono su una più vecchia (una VICE compilata su 26.04 vuole glibc 2.42, la 24.04 ha la
+  2.39) [MISURATO]. Con un solo Dockerfile la cosa non puo' piu' sfuggire.
 - **VICE headless provato e scartato** [MISURATO 13/11]: la 3.10 con `--enable-headlessui` va in segfault all'avvio (`log_archdep` con
   un puntatore nullo mentre scrive "ROM image not found" per i drive 2000/3000/4000), anche con `-logfile`/`-console`: niente
   screenshot. Resta gtk3 con Xvfb. Non provato: fornire anche le ROM di quei drive.
@@ -175,23 +176,23 @@ flowchart LR
 ```
 
 ## 6. Container, programmi esterni, Windows e WSL (13/11)
-Nel progetto stanno **tutti i file** (sorgenti, dati, ROM in `toolchain/roms/`, VICE, zx0 e cc1541 in `toolchain/*/bin`). I
+Nel progetto stanno **tutti i file** (sorgenti, dati, ROM in `toolchain/roms/`, sorgenti di VICE, zx0 e cc1541). I
 **programmi** stanno nei container (`toolchain/docker/Dockerfile`, `tools/manual/Dockerfile`, tabella in
 [Getting started](getting-started.md) sezione 3); sull'host servono solo
 sh, Docker con BuildKit, git e curl (`./validate_env.sh` li controlla).
 
 | Programma | Container | A cosa serve |
 |---|---|---|
-| `64tass` 1.59, `cc65` 2.19, `make`, `perl`, `unzip`, `zip`, `git` | `c64-builder` | assemblaggio, Krill's Loader, release, versione dei branch |
+| `64tass` 1.59, `cc65` 2.19, `make`, `perl`, `unzip`, `zip`, `git`, `zx0`, `cc1541` | `c64-builder` | assemblaggio, Krill's Loader, release, versione dei branch |
 | `python3` 3.12 + Pillow, PyYAML, NumPy, Matplotlib | `c64-builder` | generatori, atlante, mappe, simulatori |
-| librerie di VICE (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `c64-emu-vice` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
+| VICE (`x64sc`, `c1541`) e le sue librerie (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `c64-emu-vice` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
 | node 22, Playwright 1.63 + Chromium, ffmpeg | `c64-emu-vc64web` | demone di vc64web (test `EMU-*`, video) |
 | WeasyPrint 70 (+ PyYAML, Pillow del builder) | `barbarian-manual` (= builder + WeasyPrint) | PDF del manuale |
 | Xvfb, x11vnc, noVNC | `c64-emu-viewer` | vista dal vivo nel browser |
-| gcc e librerie di sviluppo | `c64-tools-builder` (usa e getta) | VICE, zx0, cc1541 |
+| gcc e librerie di sviluppo | stage `tools-builder` (non e' un'immagine) | compilare VICE, zx0, cc1541 |
 
 Dimensioni misurate il 13/11 (`docker image inspect`, layer comuni contati in ogni immagine): c64-builder 868 MB, c64-emu-vice
-1514 MB (comprende il builder), c64-emu-vc64web 2116 MB, c64-emu-viewer 803 MB; barbarian-manual: vedi `docker images` (parte dal
+1553 MB (comprende il builder e VICE), c64-emu-vc64web 2116 MB, c64-emu-viewer 803 MB; barbarian-manual: vedi `docker images` (parte dal
 builder). Lo stage `base` (ubuntu + CA + `/work`) e' in comune fra builder, emu-vice ed emu-viewer [MISURATO: stessi id dei layer]. **Costo di Docker** [MISURATO 13/11, Linux su Linux]: smoke in container 15,1 s di media contro 15,6 s sull'host (3
 prove): nessuna perdita misurabile. **Non misurato** su Docker Desktop / WSL2.
 

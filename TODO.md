@@ -329,7 +329,7 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   misurato solo Linux su Linux). Complessità S.
 - **I10** (13/11) Immagini Docker più piccole (non urgente): `c64-emu-viewer` 803 MB (x11vnc e noVNC di Ubuntu tirano dentro
   mesa, NumPy e node: provare noVNC dal pacchetto npm in un passo di build a parte), `c64-emu-vc64web` 2,12 GB (provare solo
-  `chromium-headless-shell` di Playwright, togliere ffmpeg di sistema se basta quello di Playwright), `c64-emu-vice` 1,51 GB
+  `chromium-headless-shell` di Playwright, togliere ffmpeg di sistema se basta quello di Playwright), `c64-emu-vice` 1,55 GB (con VICE dentro dal 13/11)
   (le librerie gtk3 e ffmpeg pesano ~650 MB). Misurare dopo ogni prova. Complessità S-M.
 - **J1** Prefetch nuovo (salvataggio del piano in sottofondo, record N±1, brano successivo): 300–500 B + ~1 KB di buffer.
 - **J2** Anello della velocità (ex 2.7): riuso di `fz_move`; dopo E1.

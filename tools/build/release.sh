@@ -11,6 +11,6 @@ RELEASE=1 python3 tools/memory-map/gen_rammap.py out/memory-map/mappa_ram.html >
 python3 tools/memory-map/gen_diskmap.py out/blood_path_v${V}_1541.d64 out/memory-map/mappa_disco.html >/dev/null
 zip -qr out/sources_v$V.zip src data tools tests toolchain lab/README.md build.sh validate_env.sh toolchain.env version.yaml \
     CLAUDE.md TODO.md README.md docs .gitignore .gitattributes \
-    -x "*/__pycache__/*" "toolchain/*/bin/*" "toolchain/vice/src/*" "toolchain/cc1541/src/*" \
+    -x "*/__pycache__/*" "toolchain/vice/download/*" \
        "toolchain/vc64web-custom/out/*"
 echo "release v$V: out/blood_path_v${V}_1541.d64  out/sources_v$V.zip  out/memory-map/  out/manual/"

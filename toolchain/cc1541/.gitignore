@@ -1,3 +1,2 @@
-# cc1541 (13/11): sorgente estratto dal pacchetto di Krill e binario, da toolchain/build.sh
-src/
-bin/
+# cc1541 (13/11): si compila dentro la build di c64-builder (stage cc1541-build) dallo zip di Krill (C64_KRILL_ZIP):
+# qui c'e solo la licenza. Nessun file generato in questa cartella.

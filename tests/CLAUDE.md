@@ -4,7 +4,7 @@ Regole generali nel `CLAUDE.md` della radice; come girano i test (container, flu
 dettagli di suite e runner: `docs/test.md`.
 
 ## Dove girano
-- Nel container **`c64-emu-vice`** (VICE 3.10 di `toolchain/vice/bin`, Xvfb): `./build.sh` (smoke + sanity),
+- Nel container **`c64-emu-vice`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
   `./build.sh --release` (anche regression), `toolchain/run.sh emu-vice python3 tests/run.py -k ID`. Mai sull'host.
 - VICE si avvia sempre con `-default` e con **tutte** le ROM di `toolchain/roms/vice-roms/` passate a mano (`tools/vice/vice_rom.py`,
   `tools/vice/vice_env.sh`): niente configurazione o cartella dati dell'utente.

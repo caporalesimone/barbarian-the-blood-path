@@ -1,2 +1,1 @@
-# zx0 (13/11): binario compilato da toolchain/build.sh
-bin/
+# zx0 (13/11): sorgenti C in git; si compila dentro la build di c64-builder (stage zx0-build). Nessun file generato qui.

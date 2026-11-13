@@ -46,9 +46,9 @@ stessi in tutte le immagini che ne derivano (13/11, misurato: stessi id dei laye
 
 | Immagine | Da | Cosa contiene | Quando si usa | Dimensione (13/11) |
 |---|---|---|---|---|
-| `c64-tools-builder` | base | compilatori C e librerie di sviluppo | **una volta**: compila VICE, zx0, cc1541 in `toolchain/*/bin`, poi immagine e container si cancellano | - |
-| `c64-builder` | base | 64tass, cc65, make, perl, Python 3 con Pillow, PyYAML, NumPy, Matplotlib | build del gioco, generatori, simulatori | 868 MB |
-| `c64-emu-vice` | c64-builder | + librerie di VICE (gtk3), Xvfb, ffmpeg | test, screenshot, arena, misure in VICE, MP3 dei brani | 1514 MB |
+| (stage `tools-builder`, `*-build`) | base | compilatori C e librerie di sviluppo | compilano VICE, zx0, cc1541 **durante la build** delle immagini; non diventano immagini (restano nella cache di BuildKit) | - |
+| `c64-builder` | base | 64tass, cc65, make, perl, Python 3 con Pillow, PyYAML, NumPy, Matplotlib; zx0, cc1541 | build del gioco, generatori, simulatori | 868 MB |
+| `c64-emu-vice` | c64-builder | + VICE 3.10 (`x64sc`, `c1541`), librerie gtk3, Xvfb, ffmpeg | test, screenshot, arena, misure in VICE, MP3 dei brani | 1553 MB |
 | `c64-emu-viewer` | base | Xvfb, x11vnc, noVNC, pagina indice | facoltativo: VICE dal vivo e ultima build in vc64web nel browser | 803 MB |
 | `c64-emu-vc64web` | node:22-bookworm-slim | node, Playwright, Chromium, ffmpeg, pagine di vc64web gia' costruite (Dockerfile del pacchetto) | demone dei test `EMU-*` | 2116 MB |
 | `barbarian-manual` | c64-builder | + WeasyPrint, pango (`tools/manual/Dockerfile`) | PDF del manuale | vedi `docker images` |
@@ -61,24 +61,23 @@ flowchart LR
     B["./build.sh"]
     V["./validate_env.sh"]
   end
-  subgraph once["una volta"]
-    TB["c64-tools-builder<br/>(usa e getta)"]
+  subgraph img["build delle immagini (toolchain/images.sh)"]
+    TB["stage *-build<br/>compilano VICE, zx0, cc1541"]
   end
   subgraph proj["progetto (montato in /work)"]
-    TP["toolchain/*/bin<br/>VICE, zx0, cc1541"]
     SRC["src/ data/ tools/ tests/ toolchain/roms/"]
     OUT["out/"]
   end
-  B -->|"se mancano i tool"| TB --> TP
+  B -->|"se mancano le immagini"| TB
+  TB -->|"zx0, cc1541"| BL
+  TB -->|"VICE"| EV
   B --> BL["c64-builder"]
   B --> EV["c64-emu-vice"]
   B -->|"--release / --emu"| EW["c64-emu-vc64web"]
   B -->|"--view"| VW["c64-emu-viewer"]
   B -->|"--release / --manual"| MA["barbarian-manual<br/>(tools/manual)"]
   BL -->|"legge"| SRC
-  BL -->|"usa"| TP
   BL -->|"scrive"| OUT
-  EV -->|"usa VICE"| TP
   EV -->|"report"| OUT
   EV -->|"HTTP 7064 (rete c64)"| EW
   EV -.->|"DISPLAY :99 (volume c64-x11)"| VW
@@ -87,14 +86,14 @@ flowchart LR
 Regole: i container girano con l'utente dell'host (`toolchain/run.sh`: i file in `out/` restano suoi), il progetto e' montato in
 `/work`, nessun file del progetto sta nelle immagini (tranne le pagine di vc64web nella sua immagine). `toolchain/run.sh builder ...`
 usa `c64-builder`; un nome completo (`toolchain/run.sh barbarian-manual ...`) si usa cosi' com'e'. Le immagini mancanti le
-costruisce `toolchain/images.sh` (lo chiama `./build.sh`); i tool mancanti `toolchain/build.sh`.
+costruisce `toolchain/images.sh` (lo chiama `./build.sh`), compilando dentro anche VICE, zx0 e cc1541.
 
 ## 4. La build
 
 ```mermaid
 flowchart TD
-  A["./build.sh"] --> C{"immagini e tool<br/>presenti?"}
-  C -->|no| D["toolchain/images.sh<br/>toolchain/build.sh"] --> E
+  A["./build.sh"] --> C{"immagini<br/>presenti?"}
+  C -->|no| D["toolchain/images.sh<br/>(compila anche VICE, zx0, cc1541)"] --> E
   C -->|si| E["c64-builder:<br/>tools/build/build_game.sh"]
   E --> E1["versione: bump_version.py<br/>(impronta in version.yaml)"]
   E1 --> E2["generatori: grafica, font,<br/>musica, tabelle (tools/build/gen_*.py)"]
@@ -176,8 +175,8 @@ di `out/`). `toolchain/viewer.sh stop` lo ferma. In `--view` VICE mostra l'avvis
 | Sintomo | Causa e rimedio |
 |---|---|
 | `./validate_env.sh`: "disco Windows" | il progetto sta in `/mnt/c/...`: clonarlo nel filesystem di WSL (`~/...`) |
-| `pack: manca toolchain/zx0/bin/zx0` | tool non compilati: `toolchain/build.sh` (`./build.sh` lo fa da solo) |
-| download di VICE fallito | rete o proxy dell'host: scaricare `vice-3.10.tar.gz` a mano in `toolchain/vice/src/` |
+| `pack: manca zx0` / `mkdisk: manca cc1541` | lo script e' stato lanciato fuori da `c64-builder`: `toolchain/run.sh builder ...` |
+| download di VICE fallito | rete o proxy dell'host: scaricare `vice-3.10.tar.gz` a mano in `toolchain/vice/download/` |
 | pip/npm: `SELF_SIGNED_CERT_IN_CHAIN` nella build di un'immagine | proxy che intercetta TLS: `C64_CA_BUNDLE=/percorso/ca.crt toolchain/images.sh --force emu-vc64web` e `./build.sh --images` (manuale) |
 | Docker Hub `429 Too Many Requests` | limite delle richieste anonime: `docker login`, poi riprovare (le immagini restano in cache). In alternativa lo specchio di Google: `docker pull mirror.gcr.io/library/node:22-bookworm-slim` e `docker tag` col nome originale (usato il 13/11) |
 | test `EMU-*` SKIP | demone non acceso: `./build.sh --emu` |

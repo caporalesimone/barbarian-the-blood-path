@@ -1,3 +1,3 @@
-# VICE (13/11): sorgenti scaricati e scompattati, binari compilati da toolchain/build.sh
-src/
-bin/
+# VICE (13/11): tarball ufficiale scaricato sull'HOST da toolchain/images.sh (non in git). Compilato dentro la build
+# dell'immagine c64-emu-vice (stage vice-build di toolchain/docker/Dockerfile): qui non ci sono binari.
+download/

@@ -20,9 +20,9 @@ sv, hl = g("SV_LEN"), g("HDR_LEN")
 open("out/hl.prg", "wb").write(bytes([0, 0, g("SAVE_VER")]) + bytes(hl - 1))     # elenco vuoto della versione attuale
 open("out/save.prg", "wb").write(bytes([0, 0xe0]) + bytes(sv))
 PY
-# cc1541 di Krill (toolchain/cc1541/bin/cc1541, compilato da toolchain/build.sh): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
-CC=toolchain/cc1541/bin/cc1541
-[ -x $CC ] || { echo "mkdisk: manca $CC: compilare i tool con toolchain/build.sh"; exit 1; }
+# cc1541 di Krill (nel PATH di c64-builder: compilato nella build dell'immagine dallo zip di Krill): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
+CC=cc1541
+command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container c64-builder (toolchain/run.sh builder ...)"; exit 1; }
 ARGS=(-M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/start.prg -f game -w "$PRG" -f lobby -w out/lobby.prg
       -f menu1 -w out/menu1.prg -f menu2 -w out/menu2.prg -f menu3 -w out/menu3.prg -f fmap -w out/fmap.prg)
 for c in 1 2 3 4; do ARGS+=(-f twn$c -w out/gfx0.prg); done     # (12/11) villaggi dei capitoli: oggi copie del villaggio 1 (segnaposto)

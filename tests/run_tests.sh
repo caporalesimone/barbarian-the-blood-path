@@ -5,10 +5,9 @@
 # Single suites / tests: tests/run.py regression, tests/run.py -k SAVE-1, tests/run.py all --list
 # Report: out/test_report.txt and out/test_report.json (ID, suite, result, time, reason).
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
-export PATH="$PWD/toolchain/vice/bin:$PATH"     # VICE of the project (toolchain/build.sh)
 SUITES="smoke sanity"
 if [ "${RELEASE:-0}" = "1" ] || [ "$1" = "--all" ]; then SUITES="smoke sanity regression"; fi
-if ! command -v x64sc >/dev/null 2>&1; then echo "x64sc (VICE) missing: toolchain/build.sh vice"; exit 1; fi
+if ! command -v x64sc >/dev/null 2>&1; then echo "x64sc (VICE) missing: run in the container c64-emu-vice (toolchain/run.sh emu-vice ...)"; exit 1; fi
 python3 tests/run.py $SUITES
 RC=$?
 # the normal build must be the one left in out/ (some tests assemble test variants)

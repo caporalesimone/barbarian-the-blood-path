@@ -88,15 +88,17 @@ fi
 V=$REL/vc64web-custom/roms
 if diff -r "$REL/roms" "$V" >/dev/null 2>&1; then ok "$REL/roms/ e $V identiche"; else err "$REL/roms/ e $V sono diverse (devono essere uguali: diff -r $REL/roms $V)"; fi
 
-echo "== immagini Docker e programmi compilati =="
+echo "== immagini Docker e sorgenti dei programmi esterni =="
 if docker info >/dev/null 2>&1; then
     for i in c64-builder c64-emu-vice c64-emu-vc64web c64-emu-viewer ${C64_EXTRA_IMAGES:-}; do
         docker image inspect "$i" >/dev/null 2>&1 && ok "immagine $i" || warn "immagine $i assente (./build.sh la costruisce quando serve)"
     done
 fi
-for b in vice/bin/x64sc zx0/bin/zx0 cc1541/bin/cc1541; do
-    [ -x "$REL/$b" ] && ok "$REL/$b" || warn "$REL/$b assente (./build.sh lo compila: $REL/build.sh)"
-done
+# (13/11) VICE, zx0 e cc1541 si compilano DENTRO le immagini: qui solo il tarball di VICE (lo scarica toolchain/images.sh)
+ls "$REL"/vice/download/vice-*.tar.gz >/dev/null 2>&1 && ok "tarball di VICE in $REL/vice/download/" \
+    || warn "tarball di VICE assente ($REL/images.sh lo scarica quando costruisce le immagini)"
+K=${C64_KRILL_ZIP:-}
+[ -n "$K" ] && { [ -f "$K" ] && ok "zip di Krill per cc1541: $K" || err "zip di Krill per cc1541 non trovato: $K (C64_KRILL_ZIP)"; }
 
 echo
 if [ $ERR -gt 0 ]; then echo "RISULTATO: $ERR errori, $WARN avvisi"; exit 1; fi

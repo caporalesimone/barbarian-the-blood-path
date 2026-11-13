@@ -3,23 +3,50 @@
 #   toolchain/images.sh                       tutte quelle che mancano
 #   toolchain/images.sh --force [nomi...]     le rifa' (nomi: builder emu-vice emu-viewer emu-vc64web)
 # builder, emu-vice, emu-viewer: target del Dockerfile multi-stage toolchain/docker/Dockerfile (stage base comune, senza nome).
+#   I programmi esterni si compilano DENTRO la build (stage *-build, con i compilatori) e nelle immagini finali entrano solo i
+#   binari: zx0 e cc1541 in c64-builder, VICE in c64-emu-vice. La cache di BuildKit evita di ricompilarli a ogni build.
+#   Sorgenti: VICE dal tarball ufficiale, scaricato qui SULL'HOST (curl: certificati e proxy del computer) in toolchain/vice/download/;
+#   zx0 da toolchain/zx0/; cc1541 dallo zip di Krill's Loader (C64_KRILL_ZIP, toolchain.env del progetto).
+#   VICE_VERSION=3.10 (predefinita), VICE_URL=... (tarball diverso).
 # emu-vc64web: pagine generate nel builder, immagine dal Dockerfile del pacchetto autonomo toolchain/vc64web-custom.
-# c64-tools-builder NON e' qui: e' usa e getta (toolchain/build.sh). Immagini del progetto: le costruisce il progetto (./build.sh).
-# C64_CA_BUNDLE=FILE: CA di un proxy che intercetta TLS, passata come segreto alle build che scaricano con npm.
+# Immagini del progetto: le costruisce il progetto (./build.sh). C64_CA_BUNDLE=FILE: CA di un proxy che intercetta TLS, passata
+# come segreto alle build che scaricano con npm.
 set -eu
 TC=$(cd "$(dirname "$0")" && pwd)
 ROOT=${C64_PROJECT:-$(dirname "$TC")}
 REL=${TC#"$ROOT"/}                     # toolchain/ vista dal container (progetto in /work)
+[ -f "$ROOT/toolchain.env" ] && . "$ROOT/toolchain.env"
 FORCE=0; [ "${1:-}" = "--force" ] && { FORCE=1; shift; }
 NAMES="${*:-builder emu-vice emu-viewer emu-vc64web}"
+VICE_VERSION="${VICE_VERSION:-3.10}"
+VICE_URL="${VICE_URL:-https://sourceforge.net/projects/vice-emu/files/releases/vice-$VICE_VERSION.tar.gz/download}"
 SECRET=""; [ -n "${C64_CA_BUNDLE:-}" ] && SECRET="--secret id=ca,src=$C64_CA_BUNDLE"
 have() { docker image inspect "c64-$1" >/dev/null 2>&1; }
+
+vice_tarball() {                       # scarica il tarball di VICE sull'host, se manca
+    T="$TC/vice/download/vice-$VICE_VERSION.tar.gz"
+    if [ ! -s "$T" ]; then
+        mkdir -p "$TC/vice/download"; echo "scarico $VICE_URL"
+        curl -fsSL --retry 3 -o "$T.part" "$VICE_URL" && mv "$T.part" "$T" || { rm -f "$T.part"; echo "download di VICE fallito"; exit 1; }
+    fi
+    echo "   VICE $VICE_VERSION: sha256 $(sha256sum "$T" | cut -c1-64)"
+}
+target() {                             # docker build di un target del Dockerfile della toolchain, con i contesti dei sorgenti
+    K=${C64_KRILL_ZIP:-}
+    case "$K" in /*) ;; ?*) K="$ROOT/$K" ;; esac
+    [ -f "$K" ] || { echo "manca lo zip di Krill's Loader per cc1541: C64_KRILL_ZIP=${C64_KRILL_ZIP:-} (toolchain.env)"; exit 1; }
+    vice_tarball
+    DOCKER_BUILDKIT=1 docker build -q --target "$1" -t "$2" \
+        --build-arg VICE_VERSION="$VICE_VERSION" --build-arg KRILL_ZIP="$(basename "$K")" \
+        --build-context vicesrc="$TC/vice/download" --build-context zx0src="$TC/zx0" --build-context krill="$(dirname "$K")" \
+        "$TC/docker" >/dev/null
+}
 for n in $NAMES; do
     if [ $FORCE = 0 ] && have "$n"; then continue; fi
     echo "== immagine c64-$n =="
     case $n in
-    builder|emu-vice) DOCKER_BUILDKIT=1 docker build -q --target "$n" -t "c64-$n" "$TC/docker" >/dev/null ;;
-    emu-viewer)       DOCKER_BUILDKIT=1 docker build -q --target viewer -t c64-emu-viewer "$TC/docker" >/dev/null ;;
+    builder|emu-vice) target "$n" "c64-$n" ;;
+    emu-viewer)       target viewer c64-emu-viewer ;;
     emu-vc64web)
         have builder || "$0" builder
         (cd "$ROOT" && "$TC/run.sh" builder python3 "$REL/vc64web-custom/build.py" --no-docker --no-ffmpeg-check --out out/vc64web)

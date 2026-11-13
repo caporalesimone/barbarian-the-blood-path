@@ -28,7 +28,7 @@ Versione del gioco e del formato dei salvataggi: `version.yaml`.
 | `tools/` | `build/` generatori e build, `atlas/` atlante grafico, `memory-map/` mappe RAM e disco, `manual/` manuale, `simulators/` simulatori, `vice/` strumenti in VICE (screenshot, misure, arena), `font/` font della UI |
 | `tests/` | test automatici: `smoke/`, `sanity/`, `regression/`, libreria in `lib/` ([docs/test.md](docs/test.md)) |
 | `docs/` | wiki del gioco ([indice](docs/README.md)), sorgente del manuale (`docs/manual/`), schermate dei menu (`docs/screens/`) |
-| `toolchain/` | toolchain C64 generica ([toolchain/README.md](toolchain/README.md)): immagini Docker `c64-*` (`docker/Dockerfile`) e script `run.sh`, `images.sh`, `viewer.sh`, `validate_env.sh`; programmi esterni VICE, zx0, cc1541 (compilati una volta: `toolchain/build.sh`); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in [toolchain/roms/roms.md](toolchain/roms/roms.md)) |
+| `toolchain/` | toolchain C64 generica ([toolchain/README.md](toolchain/README.md)): immagini Docker `c64-*` (`docker/Dockerfile`) e script `run.sh`, `images.sh`, `viewer.sh`, `validate_env.sh`; sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in [toolchain/roms/roms.md](toolchain/roms/roms.md)) |
 | `toolchain.env` | configurazione della toolchain per il gioco |
 | `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
 | `out/` | tutto ciò che si genera (non in git), con **solo l'ultima build**: disco, atlante, mappe, manuale, report dei test |

@@ -99,8 +99,8 @@ File sorgente generati (11/11, G1: non più in `src/` né in git, li scrivono i 
 
 Tutto gira nei container Docker (13/11; panoramica, container e comandi in [Getting started](getting-started.md)): sul PC dello
 sviluppatore servono solo sh, Docker, git e curl. La build gira in `c64-builder` (64tass, cc65, Python con
-Pillow/PyYAML/NumPy/Matplotlib), i test in `c64-emu-vice` (+ VICE, Xvfb); VICE, zx0 e cc1541 sono compilati una volta in
-`toolchain/*/bin`; le ROM stanno in `toolchain/roms/` e VICE le riceve a mano (`-default` + tutte le ROM). Verificato il 13/11:
+Pillow/PyYAML/NumPy/Matplotlib), i test in `c64-emu-vice` (+ VICE, Xvfb); VICE, zx0 e cc1541 sono compilati dentro le
+immagini; le ROM stanno in `toolchain/roms/` e VICE le riceve a mano (`-default` + tutte le ROM). Verificato il 13/11:
 `./build.sh` e `./build.sh --release` completi nei container.
 
 | Comando | Cosa fa |

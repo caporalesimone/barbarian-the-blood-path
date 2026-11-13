@@ -8,7 +8,7 @@
 #   ./build.sh --manual      solo il manuale PDF (barbarian-manual) in out/manual/
 #   ./build.sh --images      rifa' tutte le immagini Docker (toolchain e manuale; poi la build)
 # Le immagini mancanti si costruiscono da sole (toolchain/images.sh; il manuale: tools/manual/Dockerfile); i programmi esterni
-# (VICE, zx0, cc1541) se mancano si compilano una volta con toolchain/build.sh. Prima volta su un computer nuovo: ./validate_env.sh.
+# (VICE, zx0, cc1541) si compilano dentro le immagini. Prima volta su un computer nuovo: ./validate_env.sh.
 # Configurazione della toolchain per questo progetto: toolchain.env.
 # Copyright (c) 2026 - Simone Caporale
 set -eu
@@ -30,11 +30,6 @@ manual_image() {                          # immagine del progetto per il manuale
 }
 if [ $IMAGES = 1 ]; then toolchain/images.sh --force; manual_image force; fi
 toolchain/images.sh builder emu-vice
-MISS=""
-[ -x toolchain/vice/bin/x64sc ] || MISS="$MISS vice"
-[ -x toolchain/zx0/bin/zx0 ] || MISS="$MISS zx0"
-[ -x toolchain/cc1541/bin/cc1541 ] || MISS="$MISS cc1541"
-[ -z "$MISS" ] || toolchain/build.sh $MISS
 export RELEASE=$REL
 [ $REL = 1 ] && export ZX0_BEST=1          # release: GAME compresso in modo ottimo (tools/build/pack.py)
 
