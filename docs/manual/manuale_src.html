@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Barbarian: The Blood Path - Manuale</title>
+<link rel="stylesheet" href="stile.css">
+</head>
+<!-- SORGENTE EDITABILE DEL MANUALE. Ogni blocco div con class "page" e' una pagina A5 (il contenuto in piu' viene
+     tagliato: tools/manual/gen_manual.py segnala le pagine che traboccano).
+     Segnaposto riempiti da tools/manual/gen_manual.py con i dati di data/rules.yaml e data/balance.yaml:
+       {{MONSTER_ROWS}}, {{STEP_HDR}}, {{MIN_ROW}}, {{MAX_ROW}}
+     Immagini: img/*.png (ritagli generati dagli screenshot in shots/, tools/vice/shots_manual.sh), mon/*.png (sprite mostri).
+     Numeri di pagina: aggiunti automaticamente. Fonte dei contenuti: la wiki in docs/. -->
+<body>
+
+<div class="page cover"><h1>BARBARIAN:<br>THE BLOOD PATH</h1><div class="sub">MANUALE D'ISTRUZIONI</div>
+<div class="sub" style="color:#f2a03a;letter-spacing:6px">♦ ♦ ♦</div>
+<div class="frame"><img class="" src="img/dungeon.png"></div>
+<div class="foot">Gioco di ruolo d'azione per<br><b>COMMODORE 64</b> + unità 1541<br><br>DISCO · 1 LATO · 1 GIOCATORE</div>
+<div class="foot" style="margin-top:7mm;color:#f0e6c8">Copyright © 2026 - Simone Caporale</div></div>
+
+<div class="page "><h1>1. CARICAMENTO</h1>
+<p>Inserisci il disco (<b>blood_path.d64</b>) nella 1541, accendi il C64 e digita:</p>
+<span class="cmd">LOAD"BARBARIAN",8<br>RUN</span>
+<p>Compare un menu con tre voci (joystick su/giù e fire, oppure i tasti <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>): <b>hear the legend</b> racconta la storia del Blood Path (titolo con la musica, poi il racconto che scorre con le immagini; <kbd>RUN/STOP</kbd> torna al menu, <kbd>FIRE</kbd> solo alla fine), <b>read the game manual</b> mostra la pagina con tutti i tasti del gioco, <b>walk the blood path</b> avvia il gioco.</p>
+<p>Scelto il gioco, parte la musica e una schermata d'attesa accompagna il caricamento (circa mezzo minuto: il gioco usa un caricatore veloce, <i>Loader by Krill</i> (Krill's Loader, versione r194), che funziona con la <b>1541</b> e compatibili); poi si passa subito alla selezione del barbaro (il menu è senza musica). <b>quit the game</b> nel menu dei barbari riporta il C64 al BASIC e rimette il drive nel suo stato normale. Nel gioco ogni piano ha la sua musica, scelta a caso; il villaggio e la sala del trono hanno la propria e i combattimenti un tema veloce. Il gioco salva sullo stesso disco: non proteggerlo da scrittura.</p>
+</div>
+
+<div class="page "><h2>CREARE UN EROE</h2>
+<p>Scegli <b>[ create new barbarian ]</b> (fino a 5 eroi). Nella schermata <b>new barbarian</b> ci sono il nome, il seed e il pulsante <b>start</b>:</p>
+<ul><li><b>name</b>: fino a 12 caratteri (a-z, 0-9, spazio). <kbd>DEL</kbd> cancella.</li>
+<li><b>seed</b>: 6 caratteri (a-z, 1-9: lo 0 non è accettato, per non confonderlo con la O). Il gioco ne propone già uno casuale: puoi tenerlo o scriverne un altro. Vedi la nota sul seed.</li></ul>
+<p>Scrivi il nome e premi <kbd>ENTER</kbd>; poi scrivi il seed (o tieni quello proposto) e premi <kbd>ENTER</kbd>: il cursore va su <b>start</b>. Da lì leva o <kbd>W</kbd><kbd>S</kbd> scelgono fra nome, seed e start; fuoco su start crea l'eroe, su nome o seed lo riapre per correggerlo. <kbd>F1</kbd> estrae un nuovo seed, <kbd>RUN/STOP</kbd> esce.</p>
+<div class="cols"><figure><img class="shot" src="img/menu.png"><figcaption>Fig. 1 – Menu dei barbari: gli eroi salvati, <i>create new barbarian</i>, <i>quit the game</i> (leva su/giù o W/S; fuoco, SPAZIO o RETURN)</figcaption></figure><figure><img class="shot" src="img/newhero.png"><figcaption>Fig. 2 – Creazione, <i>new barbarian</i></figcaption></figure></div>
+<p>Scegliendo un eroe salvato compare la sua <b>scheda</b> (capitolo 14): livello, esperienza, oro (addosso più quello nel baule della locanda), piano più profondo, caratteristiche, uccisioni, morti, numero della partita e tempo giocato.</p></div>
+
+<div class="page "><h1>2. COMANDI</h1>
+<p>Si gioca con il joystick (porta 2) oppure con la tastiera: mano sinistra su <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> e <kbd>SPAZIO</kbd>, mano destra sulla riga <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd>.</p>
+<table><tr><th>Azione</th><th>Joystick</th><th>Tastiera</th></tr>
+<tr><td>Muovi</td><td>leva</td><td><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></td></tr>
+<tr><td>Attacca con l'abilità scelta (tenere premuto)</td><td>fuoco</td><td><kbd>SPAZIO</kbd></td></tr>
+<tr><td>Scegli Slash / Whirlwind / Battle Cry / Smash</td><td>—</td><td><kbd>H</kbd> <kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd></td></tr>
+<tr><td>Attiva Rage / Frenzy</td><td>—</td><td><kbd>U</kbd> <kbd>O</kbd></td></tr>
+<tr><td>Pozioni della cintura</td><td>—</td><td><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> <kbd>4</kbd></td></tr>
+<tr><td>Pergamena del portale</td><td>—</td><td><kbd>5</kbd></td></tr>
+<tr><td>Inventario / mappa</td><td>—</td><td><kbd>I</kbd> / <kbd>M</kbd></td></tr>
+<tr><td>Menu di gioco (resume, save, quit)</td><td>—</td><td><kbd>RUN/STOP</kbd></td></tr>
+<tr><td>Usare scale, portale, porte, bauli</td><td>fuoco</td><td><kbd>SPAZIO</kbd></td></tr></table>
+<p><b>Help.</b> La pagina con tutti i tasti (in giallo) è nel menu d'avvio del disco, voce <b>read the game manual</b>. Non è più nel menu dei barbari né nel menu <kbd>RUN/STOP</kbd>.</p>
+</div>
+
+<div class="page "><h2>NEI MENU E NELLE SCHERMATE</h2>
+<table><tr><th>Schermata</th><th>Tasti</th></tr>
+<tr><td>Tutte le schermate</td><td>su/giù (leva o <kbd>W</kbd><kbd>S</kbd>) sposta il cursore; fuoco / <kbd>SPAZIO</kbd> / <kbd>RETURN</kbd> conferma; <kbd>RUN/STOP</kbd> torna indietro. La riga in fondo allo schermo ricorda i tasti della schermata. Sinistra/destra non fanno nulla (unica eccezione: nella locanda destra sposta l'oggetto dallo zaino al baule).</td></tr>
+<tr><td>Domande</td><td>Lasciare un oggetto, comprare/vendere/riparare, cancellare un eroe, uscire: la domanda compare sopra l'ultima riga, che diventa <i>y:yes n:no</i>. Sì = <kbd>Y</kbd> o fuoco / <kbd>SPAZIO</kbd> / <kbd>RETURN</kbd>; no = <kbd>N</kbd> o <kbd>RUN/STOP</kbd>. Poi l'ultima riga torna ai tasti della schermata.</td></tr>
+<tr><td>Inventario</td><td>fuoco usa (equipaggia / beve / toglie), <kbd>DEL</kbd> elimina (con conferma); <kbd>RUN/STOP</kbd> o <kbd>I</kbd> chiudono</td></tr>
+<tr><td>Baule</td><td>fuoco prende l'oggetto; l'oro si prende da solo aprendolo (prima riga della lista); <kbd>RUN/STOP</kbd> chiude</td></tr>
+<tr><td>Negozi</td><td>fuoco sulla merce compra, sullo zaino (o sulla cintura dall'alchimista) vende; dal fabbro fuoco sull'equipaggiamento o <kbd>R</kbd> ripara; poi conferma</td></tr>
+<tr><td>Locanda (baule)</td><td>una sola lista: fuoco sposta l'oggetto (sull'oro dello zaino: tutto nel baule, a decine), sul numero di pagina sfoglia, su un posto dell'equipaggiamento sceglie cosa indossare; <kbd>destra</kbd> dallo zaino al baule</td></tr>
+<tr><td>Mappa</td><td>fuoco, <kbd>M</kbd> o <kbd>RUN/STOP</kbd> la chiudono</td></tr>
+</table>
+<div class="note"><b class="t">PAUSA</b>Il gioco è in pausa in tutte le schermate (inventario, mappa, baule, negozi, locanda, menu): i mostri ripartono solo quando le chiudi.</div></div>
+
+<div class="page "><h1>3. LO SCHERMO</h1>
+<figure><img class="shot" src="img/dungeon.png"><figcaption>Fig. 4 – Il dungeon: eroe e mostri, HUD in basso</figcaption></figure>
+<table><tr><th>Zona</th><th>Significato</th></tr>
+<tr><td>HP</td><td>Vita attuale/massima e barra rossa</td></tr>
+<tr><td>XP</td><td>Esperienza / soglia del livello successivo e barra gialla</td></tr>
+<tr><td>LV</td><td>Livello dell'eroe (massimo 20)</td></tr>
+<tr><td>H J K L</td><td>Le quattro abilità: colore = scelta, pronta, in ricarica o bloccata (grigia: livello troppo basso)</td></tr>
+<tr><td>U O</td><td>Rage e Frenzy: giallo attiva, bianco pronta, blu in ricarica, grigio bloccata</td></tr>
+<tr><td>Chiave + numero</td><td>Chiavi possedute (0–10)</td></tr>
+<tr><td>Cintura</td><td>4 pozioni (tasti <kbd>1</kbd>–<kbd>4</kbd>); diventano <b>blu</b> mentre la ricarica delle pozioni le blocca</td></tr>
+<tr><td>Avvisi</td><td>Vita sotto un quarto: <b>HP lampeggia</b> rosso/giallo (con un suono). Arma, armatura o scudo sotto il 20%: la loro <b>icona lampeggia</b> sopra la cintura</td></tr></table>
+<p>Scegliendo un'abilità il suo nome compare al posto di H J K L; lì compare anche <i>broken</i> quando un oggetto si rompe.</p>
+<p><b>Barra in alto.</b> Quando sei su qualcosa di utilizzabile compare il suo nome (scale, portale, porte, bauli) e <b>Fuoco</b> lo usa; la fontana agisce da sola. La barra vita con il nome segue l'ultimo mostro che colpisci (o, prima, quello che ti attacca); allontanandoti sparisce.</p>
+</div>
+
+<div class="page "><h1>4. IL VILLAGGIO</h1>
+<figure><img class="shot sm" src="img/town.png" style="max-height:36mm"><figcaption>Fig. 5 – La piazza con la fontana di Saint Aldric</figcaption></figure>
+<table><tr><th>Luogo</th><th>Cosa offre</th></tr>
+<tr><td>Cripta (cimitero, a nord-ovest)</td><td>La porta della cripta scende al piano 1 del dungeon</td></tr>
+<tr><td>Blacksmith</td><td>Armi, armature, scudi e <b>riparazioni</b></td></tr>
+<tr><td>Alchemist</td><td>Pozioni, pergamene del portale, anello di rame</td></tr>
+<tr><td>Locanda (a sud-est, lontana dalla cripta)</td><td>Il tuo baule: 24 posti e il tuo oro, salvato su disco</td></tr>
+<tr><td>Fontana</td><td>Ripristina tutta la vita, gratis, passandoci sopra</td></tr>
+<tr><td>Portale (arco di pietra, piazzetta a est)</td><td>Se l'hai aperto con una pergamena, ti riporta nel dungeon dov'eri</td></tr></table>
+<p>Il torrente divide il villaggio in due (due ponti): cimitero, chiesa, piazza e alchimista a ovest; fabbro, portale e locanda a est. Si parte dalla strada a sud. Sulla porta di un negozio, o una-due caselle davanti, compare il suo nome: <b>Fuoco</b> per entrare. La mappa <kbd>M</kbd> mostra tutto il villaggio con un'icona sopra ogni porta.</p>
+<div class="cols"><figure><img class="shot" src="img/townmap.png"><figcaption>Fig. 6 – Mappa del villaggio</figcaption></figure><figure><img class="shot" src="img/town2.png"><figcaption>Fig. 7 – Il ponte a nord sul torrente</figcaption></figure></div></div>
+
+<div class="page "><h1>5. NEGOZI E LOCANDA</h1>
+<div class="cols"><figure><img class="shot" src="img/shop_smith.png"><figcaption>Fig. 8 – Blacksmith</figcaption></figure><figure><img class="shot" src="img/shop_alch.png"><figcaption>Fig. 9 – Alchemist</figcaption></figure></div>
+<p>Ogni negozio mostra la merce (<b>wares</b>, fino a 8 oggetti), il tuo equipaggiamento (<b>equipped</b>), lo zaino (<b>pack</b>), l'oro e la cintura (<b>purse</b>: l'oro è il <b>totale</b>, addosso più il baule della locanda; da 100000 in migliaia, es. <i>657k</i>; si paga prima con l'oro addosso e il resto dal baule) e l'oggetto selezionato con il prezzo (<b>selected item</b>). La riga in basso dice cosa fa il fuoco sulla voce sotto il cursore.</p>
+<ul><li>Fuoco sulla merce compra; compare <i>buy for N g?</i> e confermi con fuoco. Una <b>pozione</b> va nella cintura: compare <b>&gt;</b> sul primo posto libero, su/giù lo spostano, fuoco paga e la mette, <kbd>RUN/STOP</kbd> annulla senza pagare.</li>
+<li>Fuoco su un oggetto dello zaino lo vende a metà prezzo, se quel negozio lo compra: il fabbro armi, armature e scudi, l'alchimista anelli, pozioni (dalla cintura) e pergamene (una alla volta). Gli altri oggetti sono grigi. L'equipaggiamento non si vende mai.</li>
+<li>La merce <b>cambia a ogni visita</b> e <b>cresce con il tuo livello</b>: all'inizio il fabbro ha pugnale, spada, armatura di cuoio e scudo piccolo, l'alchimista pozioni rosse e pergamene; la pozione gialla arriva al livello 5, la viola al 12. Si parte con <b>100 monete</b>.</li>
+<li><b>Riparazione</b> (solo dal fabbro): fuoco sull'arma, l'armatura o lo scudo indossati, oppure <kbd>R</kbd> anche su un oggetto dello zaino. Costa il 25% del prezzo dell'oggetto: la durabilità torna al massimo, ma il massimo cala di 1.</li></ul>
+</div>
+
+<div class="page "><h2>LA LOCANDA</h2>
+<div class="cols"><figure><img class="shot" src="img/stash.png"><figcaption>Fig. 10 – Locanda: zaino a sinistra, baule a destra</figcaption></figure><div>
+<p><b>Locanda (inn).</b> In alto le statistiche del barbaro e l'oggetto selezionato, poi l'equipaggiamento, sotto zaino e baule (<b>24 posti</b>, 3 pagine: il numero di pagina nella cornice del baule è un pulsante). Zaino e baule sono sempre in ordine: armi, armature, scudi, anelli, pozioni, pergamene. In cima a ogni colonna c'è l'<b>oro</b>: Fuoco sull'oro dello zaino lo mette tutto nel baule, <b>a decine</b> (le monete da 0 a 9 che avanzano restano addosso). Il baule tiene fino a <b>655350 monete</b>. Dal baule l'oro non si preleva: non serve, perché i negozi spendono anche l'oro del baule. Fuoco su un oggetto lo sposta tra zaino e baule; <kbd>destra</kbd> porta dallo zaino al baule. Fuoco su un posto dell'equipaggiamento mostra solo gli oggetti adatti di zaino e baule: Fuoco ne indossa uno, <i>- remove</i> toglie quello indossato (l'arma si può solo cambiare), <kbd>RUN/STOP</kbd> annulla. <kbd>RUN/STOP</kbd> o <kbd>I</kbd> escono.</p>
+<p>Il baule si salva <b>sul disco</b> con il barbaro quando scegli <i>save game</i> (capitolo 13): uscendo dalla locanda non si salva. L'arma che impugni non si mette nel baule: prima equipaggiane un'altra.</p></div></div></div>
+
+<div class="page "><h1>6. EROE E INVENTARIO</h1>
+<figure><img class="shot" src="img/inventory.png"><figcaption>Fig. 11 – Inventario (tasto I)</figcaption></figure>
+<p>In alto: vita, ATT, CA, FOR, DES, COS, danno ed esperienza, sempre aggiornati. Sotto: equipaggiamento (arma, armatura, scudo, anello), zaino (8 posti) e cintura (4 pozioni). A destra la scheda dell'oggetto selezionato: danno o CA, magia, valore di vendita e <b>durabilità</b> (es. <i>d 120/200</i>).</p>
+<ul><li>Fuoco su un oggetto dello zaino: lo equipaggia (quello che portavi torna nello zaino); su una pozione: la beve. Fuoco su un oggetto indossato: lo toglie. <kbd>DEL</kbd> elimina l'oggetto, dopo la conferma (fuoco sì, <kbd>RUN/STOP</kbd> no). Le pergamene di portale si tengono nello zaino, in una pila fino a 10.</li>
+<li>L'arma non si toglie e non si vende: si sostituisce. La <b>viking sword</b> è a due mani: niente scudo.</li>
+<li>Le pergamene del portale occupano un solo posto dello zaino (fino a 4 nella pila).</li></ul>
+</div>
+
+<div class="page "><h2>LE REGOLE DEL COMBATTIMENTO</h2>
+<p>Ogni colpo è un tiro di <b>d20</b>: d20 + <b>ATT</b> contro la <b>CA</b> (classe armatura) del bersaglio. 1 manca sempre, 20 è un <b>critico</b> (dadi del danno raddoppiati; dal livello 17 anche il 19). I mostri tirano allo stesso modo contro la tua CA.</p>
+<table><tr><th>Valore</th><th>Da cosa dipende</th></tr>
+<tr><td>ATT</td><td>competenza (cresce con il livello) + FOR (con il pugnale FOR o DES) + magia dell'arma</td></tr>
+<tr><td>Danno</td><td>dadi dell'arma + FOR + magia (dagger 1d4, sword 1d8, viking sword 2d6)</td></tr>
+<tr><td>CA</td><td>10 + DES (limitata dall'armatura) + armatura + scudo + magia</td></tr>
+<tr><td>Anello</td><td>+1/+2/+3 a FOR, DES o COS (rame, argento, oro); COS dà anche vita</td></tr></table></div>
+
+<div class="page "><h1>7. ABILITÀ, POZIONI, LIVELLI</h1>
+<table><tr><th>Tasto</th><th>Abilità</th><th>Livello</th><th>Effetto</th></tr>
+<tr><td><kbd>H</kbd></td><td>Slash</td><td>1</td><td>Colpo davanti a te, al ritmo dell'arma</td></tr>
+<tr><td><kbd>J</kbd></td><td>Whirlwind</td><td>3</td><td>Un colpo a ogni mostro intorno (ricarica 2 s)</td></tr>
+<tr><td><kbd>K</kbd></td><td>Battle Cry</td><td>6</td><td>Nessun danno: chi fallisce il tiro salvezza resta fermo 2 s (ricarica 15 s)</td></tr>
+<tr><td><kbd>U</kbd></td><td>Rage</td><td>9</td><td>Per 6 s i danni subiti sono dimezzati (ricarica 30 s)</td></tr>
+<tr><td><kbd>L</kbd></td><td>Smash</td><td>12</td><td>Colpo ad area con vantaggio, danno doppio e stordimento, anche sui boss (ricarica 6 s)</td></tr>
+<tr><td><kbd>O</kbd></td><td>Frenzy</td><td>15</td><td>Per 5 s due attacchi per pressione e corsa più veloce a ogni colpo a segno, fino al doppio (ricarica 30 s)</td></tr></table>
+<p>H J K L scelgono l'abilità che usi tenendo premuto il fuoco; U e O si attivano subito.</p>
+<h2>POZIONI</h2>
+<table><tr><th>Pozione</th><th>Cura</th><th>Blocco</th><th>Dove si trova</th></tr>
+<tr><td>red (minor healing)</td><td>20</td><td>5 s</td><td>piani 1–10</td></tr>
+<tr><td>yellow (healing potion)</td><td>60</td><td>7 s</td><td>piani 5–17</td></tr>
+<tr><td>violet (greater healing)</td><td>40 + 4 × livello</td><td>10 s</td><td>dal piano 12</td></tr></table>
+<p>Bere una pozione <b>blocca tutte le pozioni</b> per qualche secondo (icone blu). A vita piena non si beve.</p>
+<h2>ESPERIENZA E LIVELLI</h2>
+<p>Ogni mostro ucciso dà esperienza; salendo di livello la vita torna piena e crescono vita, caratteristiche e competenza, fino al livello 20. Se sei 4 o più livelli sopra un mostro, non ti dà né esperienza né bottino.</p>
+<h2>MORTE</h2>
+<p>A vita 0 perdi <b>metà dell'oro che hai addosso</b> (quello nel baule della locanda resta) e ti risvegli nel villaggio accanto al portale. Addosso puoi tenere al massimo <b>10000 monete</b>: l'oro raccolto oltre si perde e i mercanti non comprano se il borsello è pieno; il resto mettilo nel baule della locanda. Il piano che hai lasciato resta com'era: con il portale ci ritorni.</p></div>
+
+<div class="page "><h1>8. DURABILITÀ</h1>
+<p>Armi, armature e scudi hanno una <b>durabilità</b> (10–255, a caso quando l'oggetto ti arriva). Solo ciò che indossi si consuma:</p>
+<table><tr><th>Oggetto</th><th>Si consuma quando</th><th>Probabilità per evento</th></tr>
+<tr><td>Arma</td><td>colpisci un mostro</td><td>1 su 2</td></tr>
+<tr><td>Armatura</td><td>vieni colpito</td><td>sempre</td></tr>
+<tr><td>Scudo</td><td>vieni colpito (non con la viking sword)</td><td>sempre</td></tr></table>
+<p>Un'arma media dura circa <b>3 piani</b> in profondità. Sotto il <b>20%</b> della sua durabilità massima la sua icona lampeggia nell'HUD: passa dal fabbro.</p>
+<p>A 0 l'<b>arma si rompe</b>: resta in mano ma <b>non fa più danni</b> (nome in rosso nell'inventario, icona fissa nell'HUD) finché il fabbro non la ripara o non ne equipaggi un'altra. L'arma non si toglie: si scambia. Lo stesso vale per armatura e scudo: a 0 restano addosso ma non proteggono. Porta un'arma di riserva nello zaino.</p>
+<p><b>Riparazione:</b> 25% del prezzo; la durabilità torna al massimo, che cala di 1.</p>
+</div>
+
+<div class="page "><h1>9. LA MAPPA, SCALE E PORTALE</h1>
+<figure><img class="shot" src="img/dungeonmap.png" style="max-height:48mm"><figcaption>Fig. 12 – Mappa di un piano esplorato a metà (il segno lampeggiante è l'eroe)</figcaption></figure>
+<ul><li><kbd>M</kbd> mostra la mappa (nel dungeon solo le parti visitate), con piano e seed; fuoco, <kbd>M</kbd> o <kbd>RUN/STOP</kbd> la chiudono.</li>
+<li>Sulla scala compare il suo nome (es. <i>stairs down to level 2</i>: il piano del capitolo, da 1 a 5): <b>Fuoco</b> per scendere o salire.</li>
+<li>La <b>pergamena</b> (tasto <kbd>5</kbd>) apre un portale accanto a te verso il villaggio; uno solo alla volta. Dal portale del villaggio torni al punto esatto da cui sei partito.</li></ul></div>
+
+<div class="page "><h1>10. BAULI E TESORI</h1>
+<p>Mettiti sopra un baule (compare il nome) e premi <b>Fuoco</b>: si apre solo se nessun mostro vivo è a meno di 3 caselle. Se serve una chiave viene usata ora (senza chiavi: <i>locked</i>). L'oro si prende da solo, gli oggetti li scegli tu.</p>
+<figure><img class="shot" src="img/chest.png"><figcaption>Fig. 13 – Schermata baule: fuoco prende, A prende tutto, I chiude</figcaption></figure>
+<table><tr><th>Baule</th><th>Dove</th><th>Oggetti</th></tr>
+<tr><td>Normale</td><td>nelle stanze, senza chiave</td><td>1–2</td></tr>
+<tr><td>Con chiave</td><td>dal piano 2, al più 2 per piano</td><td>2–3, migliori</td></tr>
+<tr><td>D'oro</td><td>dal piano 3, accanto a un mostro forte; chiave</td><td>3, i migliori del piano</td></tr></table>
+<p>I bauli del piano sono decisi dal seed. Più in profondità trovi oggetti migliori e più oro.</p>
+<h2>COSA LASCIANO I MOSTRI</h2>
+<p>Per ogni mostro ucciso: 45% oro (direttamente nel borsello), 20% un tesoro con un oggetto, 35% niente; in più 8% una chiave (massimo 10). Il tesoro compare a combattimento finito, nella casella libera più vicina al corpo. <b>I tesori dei mostri più forti e più in profondità contengono oggetti migliori</b>: conta il piano, la famiglia, la variante forte e perfino quanta vita aveva il mostro. Quasi sempre si trova roba comune, ma ogni tanto esce l'oggetto che ti permette di scendere più giù.</p>
+<p>Un piano contiene al massimo 15 bauli: quando sono 15, i mostri lasciano solo oro.</p></div>
+
+<div class="page "><h1>11. I MOSTRI</h1>
+<p>Quattro famiglie: Fallen → Fallen Warchief, Skeleton → Skeleton King, Zombie → Lich, Demon → Balrog. Nelle stanze trovi i mostri base; dal piano 3 alcune stanze hanno la variante forte (altro colore), sempre più frequente in profondità. Valori della scheda base; «dal piano» è il primo piano in cui compare.</p>
+<table class="mt"><tr><th></th><th>Mostro</th><th>Dal piano</th><th>Vita</th><th>Danno</th><th>CA</th><th>XP</th><th>Veloc.</th></tr>{{MONSTER_ROWS}}</table>
+<p><small>Scendendo, i mostri hanno più vita, attacco, CA e danno. Ogni mostro nasce con la vita ±25% rispetto alla media del suo tipo.</small></p>
+<h2>QUANTI MOSTRI PER PIANO</h2>
+<table class="mt"><tr><th>Piani</th>{{STEP_HDR}}</tr>
+<tr><td>Minimo</td>{{MIN_ROW}}</tr><tr><td>Massimo</td>{{MAX_ROW}}</tr></table>
+<p>In più ogni piano da 1 a 19 ha il suo boss; il piano 20 ha solo il boss finale.</p></div>
+
+<div class="page "><h1>12. I BOSS</h1>
+<p><b>Piani 1–19.</b> Accanto alle scale che scendono ti aspetta un boss con nome (es. <i>Duriel the Burning</i>, deciso dal seed): una variante forte che lampeggia in bianco, con due volte e mezza la vita, CA e attacco più alti, immune al blocco da colpo. Ucciso, lascia sempre una chiave e un tesoro con 3 oggetti migliori del piano.</p>
+<p><b>Piano 20: la sala del trono.</b> Il <b>Lord of Ruin</b> si sveglia quando entri nel cerchio del pentacolo. Quando la sua vita scende sotto i tre quarti, la metà e un quarto evoca nuovi mostri sulle punte della stella. Non lascia bottino: ucciso, si aprono le stanze dei tesori con <b>4 bauli epici</b> (armi, armature, scudi, anelli), ciascuno con 3 oggetti dei migliori e una buona somma d'oro.</p>
+<h1 style="margin-top:6mm">13. SALVATAGGIO</h1>
+<div class="cols"><div><table><tr><th>Menu (RUN/STOP)</th><th>Effetto</th></tr>
+<tr><td>Resume</td><td>Torna a giocare</td></tr>
+<tr><td>Save game</td><td>Salva eroe, baule e piani</td></tr>
+<tr><td>Quit game</td><td>Torna al menu dei barbari <b>senza salvare</b></td></tr></table></div>
+<figure><img class="shot" src="img/gamemenu.png"><figcaption>Fig. 14 – Menu di gioco</figcaption></figure></div>
+<p>Il gioco salva <b>solo quando lo scegli</b> con <i>save game</i> (qualche secondo, "saving barbarian") e quando crei l'eroe: <i>quit game</i> chiede conferma ("unsaved progress will be lost") e torna al menu senza salvare. Spegnendo o uscendo senza salvare si riparte dall'ultimo salvataggio, con l'eroe, il baule e i piani di allora.</p>
+<p>I piani sono divisi in gruppi di <b>5</b> (1–5, 6–10, 11–15, 16–20): i piani del gruppo in cui sei restano in memoria, e passando da un gruppo all'altro (per esempio scendendo dal piano 5 al 6) il gioco <b>salva da solo</b> eroe e piani (circa dieci secondi).</p>
+<div class="note"><b class="t">IMPORTANTE</b>Non spegnere il computer durante il salvataggio. I salvataggi di versioni precedenti del gioco non sono compatibili: all'avvio la schermata <i>bad save file version</i> mostra la versione trovata e quella attesa e propone <b>destroy all data</b> (cancella tutti i salvataggi) oppure <b>quit</b> (esci, il cursore parte da qui).</div></div>
+
+<div class="page "><h1>14. PARTITE E RIPOPOLAMENTO</h1>
+<p>Ogni volta che riprendi un eroe salvato dal menu inizia una <b>nuova partita</b> (il numero è nella scheda dell'eroe). I piani che avevi ripulito nelle partite precedenti tornano <b>popolati</b>: mostri di nuovo vivi e bauli del piano di nuovo chiusi, così puoi tornare a fare esperienza e tesori. La parte di mappa già esplorata resta segnata. Nella stessa partita, invece, un piano ripulito resta ripulito.</p>
+<div class="cols"><figure><img class="shot" src="img/hero.png"><figcaption>Fig. 15 – Scheda dell'eroe salvato</figcaption></figure><div>
+<p>La scheda dell'eroe mostra nome, seed, numero di <b>sessioni</b> e <b>tempo giocato</b>, poi livello, esperienza, oro totale (addosso più baule della locanda), <b>morti</b>, <b>uccisioni</b>, piano più profondo, le caratteristiche e le quest. In basso <i>start game</i> per giocare, <i>delete</i> seguito dal nome per cancellarlo (con conferma) e <i>back</i> per tornare all'elenco.</p></div></div>
+<h1 style="margin-top:6mm">15. CONSIGLI</h1>
+<ul><li>Bevi prima di scendere troppo in basso: dopo una pozione le altre restano bloccate per qualche secondo.</li>
+<li>Battle Cry ferma i nemici: usalo e colpisci con calma. Rage contro i boss, Frenzy contro i gruppi.</li>
+<li>Tieni sempre una pergamena del portale e un'arma di riserva.</li>
+<li>Ripara dal fabbro prima che l'arma arrivi a 0: rotta non fa danni.</li>
+<li>Tieni qualche chiave: i bauli d'oro nascondono il bottino migliore.</li>
+<li>Metti nel baule della locanda gli oggetti buoni che non usi: quando muori perdi metà dell'oro.</li></ul></div>
+
+<div class="page "><h1>NOTA: IL SEED</h1>
+<p>Il <b>seed</b> è un codice di <b>6 caratteri</b> (cifre 1-9 e lettere a-z; lo 0 è escluso per non confonderlo con la O). Lo scegli, o lo accetti, quando crei l'eroe.</p>
+<p><b>Cosa decide il seed:</b> la forma, i colori e le stanze di ogni piano del dungeon; i mostri all'ingresso del piano; dove stanno i bauli del piano e cosa contengono; il nome di ogni boss.</p>
+<p><b>Cosa non decide:</b> il bottino dei mostri uccisi, i colpi e i danni: restano casuali.</p>
+<p>Stesso seed = stesso mondo: due eroi con lo stesso seed trovano gli stessi piani, e puoi rigiocare o condividere un dungeon annotando il seed (è nella scheda dell'eroe e sulla mappa). Il seed non si cambia dopo la creazione e riproduce lo stesso mondo solo con la stessa versione del gioco.</p>
+<h1 style="margin-top:6mm">SE IL TEMPO DI GIOCO RESTA FERMO</h1>
+<p>Il <b>tempo giocato</b> della scheda dell'eroe è misurato dall'<b>orologio interno del C64</b> (l'orologio TOD del chip CIA). Questo orologio non usa il processore: conta i 50 impulsi al secondo della rete elettrica che l'alimentatore originale del C64 fornisce al computer (la tensione alternata a 9 V). Per questo conta anche il tempo passato nei negozi, nei menu e durante i caricamenti; non conta il tempo nel menu iniziale.</p>
+<p>Se le ore e i minuti nella scheda <b>restano sempre a zero</b> anche dopo aver giocato, quasi certamente l'alimentatore non fornisce quel segnale: succede con alcuni alimentatori moderni o di terze parti, e su alcuni emulatori o computer compatibili. Il gioco funziona normalmente in tutto il resto; solo il tempo giocato non viene contato. Con l'alimentatore originale e con l'emulatore VICE il tempo viene contato.</p>
+<p style="text-align:center;margin-top:8mm;color:#8a7a60">♦ ♦ ♦<br>BARBARIAN: THE BLOOD PATH<br>Scritto in assembly 6502 per C64<br>Loader by Krill (Krill's Loader r194, © 2022 Gunnar Ruthenberg)<br><br>Copyright © 2026 - Simone Caporale</p></div>
+
+</body>
+</html>

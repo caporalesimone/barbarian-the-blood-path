@@ -1,0 +1,63 @@
+; Mappa del villaggio (48x48). Una lettera per casella (tools/build/gen_maps.py, LEGEND). Legenda:
+; (12/11) ==uscita del capitolo (sentiero, ALIASES): casella da cui si va al capitolo dopo (TODO M1)
+; .=grassa ,=grassb `=grassc :=path d=dirt +=cobble x=bridge W=bwall R=broof r=broofa l=broofl c=chimney o=window
+; S=dsmith L=dalch H=dhome D=hdoor 5=signs 7=signl A=spire ~=fountain 1-4=fount0-3 O=portal T=tree
+; >=tstairs (porta della cripta) /=crypta @=cryptb \=cryptc [=cryptl ]=cryptr t=grave Y=grave2
+; %=water (=waterl )=waterr *=flowers w=well |=fence v=fencev i=lamp B=bush s=stall
+; Aldric's Crossing (10/11, concept v3 approvato dal committente; prima: 06/11 con ritocchi del 09/11). Il torrente scende da
+; nord a sud con un percorso irregolare (esce dalla mappa in alto e in basso) e due ponti alti 3 caselle; a sud un laghetto
+; alimentato da un ramo del torrente. Ovest: cimitero con la cripta (nord-ovest, lapidi in file con la terra davanti), chiesa
+; con il campanile, piazza con la fontana, alchimista (sud-ovest). Est: fabbro, piazzetta tonda del portale, orto, locanda
+; (sud-est: dalla parte opposta della cripta, per il precaricamento). Case con finestre, comignoli e giardini recintati; due
+; pozzi; sentieri tortuosi che collegano tutto; boschetti nelle zone vuote. Generata da uno script (concept del 10/11,
+; semi 5 e 3) e controllata: tutto raggiungibile, porte collegate ai sentieri, niente arredi entro 3 caselle dai negozi.
+; 12/11 (committente, TODO M1): sentiero di uscita largo 2 a nord (colonne 26-27, dalla chiesa al bordo), dalla parte
+; opposta all'ingresso (strada a sud, colonna 16): le due caselle sul bordo sono l'uscita del capitolo (=).
+TTTTTTTTTTTTTTTTTTTTTTTTTT==TT(%)TTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTT::TT(%)TTTTTTTTTTTTTTT
+TT,..,.,..,`.,,,..A`,.,,,`::.,(%)`.T.`,,``.`.,TT
+TT,||||||||||||||.W.T`,`.T::,`(%),.TT.T..T,TT.TT
+TT.v.,,..`./@\.,v.o,T,A,..::TT(%).,`.TT..T,,T,TT
+TT.v.Y,t,Y.[>].Yv.WlllWlll::..,(%)TT`,T`.T,TT.TT
+TT,v,d,d`d`.d..dv,olllolll::,.(%).`..TT..,,.,.TT
+TT.v...,,`..d.,.v.WWWWWWWW::,(%).,.,..,....TT.TT
+TT.v,Y.Y.t..d,,Yv`WWoWDWoW::(%)..TT,rcrrrrr,,.TT
+TT.v.d.d.d..d,.dv..,..:::::(%),.``,.rrrrrrr.,.TT
+TT,v`,.`,..`d,,,v.`.,.:::..(%)`,.,*.WWW5WWWTT.TT
+TT.v.t.Y.Y`,dddddd...,..:::xxx::.,..WoWSWoW,,.TT
+TT`v.d,d.d`,dddddd::::.,:::xxx::::::`.`:`.,,TTTT
+TT,||||||||||||||:.*.::::::xxx::,,i:::::`.,,T.TT
+TT.`,,..,.,,.`,`.:i...,``,`(%),::,....`.....`,TT
+TT..rcrrr.,,...`::..TTT,...(%).,:.,,.,lclll.B,TT
+TT..rrrrr*i,:::::,..T.,..,..(%).:,`TT,lllll,,,TT
+TT..WoWoW`:::`,,:.RRRRRcR...(%),::*TT,WoWoW,T`TT
+TT..WWDWW.:.w`.::,RRRRRRR..(%),.,:,,..WWDWW`T.TT
+TT.`,,:::::.,..:..WWWoWWW,..(%).`::,,vB,:.Bv..TT
+TT.........```.:.,WoWDWoW..,`(%)*`:,.|||:|||,`TT
+TT``lllcl,,T,T.::vB*,:`*Bv,T..(%),:,*.`,:.,,.`TT
+TT.,lllll..T.T.,:||||:||||,T,(%)`.::wi.+++.,*,TT
+TT`,WoWoW.,,.T,,:,..,:,.,,.TT(%).,,:.`+++++.,`TT
+TT.,WWDWW,`...,.:`.`.:i,T`.,T(%)..,:.+++++++,.TT
+TT..,.::...i++++++++++,,TT.,(%).,,:::+++++++..TT
+TT..,*,::::+s+s+++s+s+..,T,.(%)..::`.+++++++,`TT
+TT,.RcRRRR,++++~~+++++.*`.,,(%),.:,.,,+++++...TT
+TT`.RRRRRR.+++~12~++++`,,...(%)..:*..`.+++.i.,TT
+TT..WWWoWW.+++~34~++++:.,TTT,(%)i::.|||||..,.,TT
+TT`,WoWDWW,++++~~+++++..,..T,.(%),:,v*d*vRRRcRTT
+TT`vB*.:.Bv+++++++++++.,,*,`..(%),:,vdddvRRRRRTT
+TT.||||:|||+++++++++i+::`...`,(%),:,v*d*vWoWoWTT
+TT....,::::++++++++++i,::*`:::xxx::,||d||WWDWWTT
+TT,B,.`i,.`,.,.,:.,``..,::::::xxx::::::,.:::..TT
+TT,...T.,TT,,T,,:.T.TTT,.,`:::xxx::`*.::::`..,TT
+TT.TT.TT,...,T,,:,T,T.,TT...,.(%)`:...`i..,...TT
+TT`.,.`.,...`.,.:.T`....T.*...(%).:..T,,,.TT.`TT
+TT.T.lllllcl...::,.,(%%%),..TT(%).:,,,`..,.T`.TT
+TT,T.lllllllTT.:,,(%%%%%%).,,T(%).::,RRRRRcR..TT
+TT`T,WWW7WWW`T.:,(%%%%%%%%%%%%%%)..:.RRRRRRR..TT
+TT,.TWoWLWoW,,i:.(%%%%%%%%)...(%)..:,WWWoWWW`.TT
+TT.TT..,:.,::::::,(%%%%%%)T.`(%)...::WoWHWoWT.TT
+TT,T,.`.::::.,.,:.`,(%%%),T,.(%),T`i:::::...TTTT
+TT.T,,.,,..,`*,.:.,`,,.`,.T.(%).`TT,*...,.`.T,TT
+TT.`,,.`,.......:..,.`..,.,.(%)`..T`,.,....,,.TT
+TTTTTTTTTTTTTTTT:TTTTTTTTTTT(%)TTTTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTT(%)TTTTTTTTTTTTTTTT

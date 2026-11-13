@@ -1,0 +1,35 @@
+@page { size: A5; margin: 0 }
+* { box-sizing: border-box }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact }
+body { margin: 0; font: 8pt/1.34 'DejaVu Sans Mono', monospace; color: #2a2118; background: #f3ead3 }
+.page { width: 148mm; height: 210mm; padding: 9mm 11mm 10mm; page-break-after: always; position: relative; overflow: hidden;
+        background: #f3ead3; border-top: 3mm solid #8a1c14 }
+.page:last-child { page-break-after: auto }
+.page::after { content: attr(data-n); position: absolute; bottom: 3.5mm; left: 0; right: 0; text-align: center; font-size: 7pt; color: #8a7a60 }
+.cover { background: #14121c; color: #f0e6c8; border-top: 3mm solid #c8501e; text-align: center }
+.cover::after { content: '' }
+.cover h1 { font-size: 27pt; line-height: 1.05; color: #f2a03a; margin: 17mm 0 3mm; letter-spacing: 1px; border: 0;
+            text-shadow: 2px 2px #7a2410 }
+.cover .sub { letter-spacing: 3px; font-size: 8.5pt; margin-bottom: 7mm }
+.cover .frame { border: 1.5mm solid #f0e6c8; margin: 6mm 4mm; padding: 0; background: #000 }
+.cover .frame img { width: 100%; display: block; image-rendering: pixelated }
+.cover .foot { font-size: 7.5pt; letter-spacing: 1px; color: #c9bd9c; margin-top: 5mm }
+h1 { font-size: 14pt; color: #8a1c14; margin: 0 0 3.5mm; padding-bottom: 1.5mm; border-bottom: 0.6mm solid #2a2118; letter-spacing: .5px }
+h2 { display: inline-block; font-size: 8.6pt; background: #2a2118; color: #f3ead3; padding: .6mm 2mm; margin: 3mm 0 1.6mm; letter-spacing: .5px }
+p { margin: 0 0 2mm } ul { margin: 0 0 2mm; padding-left: 4.5mm } li { margin: 0 0 .6mm }
+kbd, svg.key { font-size: 7.4pt }   /* i <kbd> diventano SVG in tools/manual/gen_manual.py (testo centrato esatto) */
+svg.key { display: inline-block; margin: 0 .3mm; overflow: visible }
+code, .cmd { font: inherit }
+.cmd { display: block; background: #14121c; color: #7ee0a2; padding: 2mm 3mm; margin: 2mm 0; font-size: 9pt }
+table { border-collapse: collapse; width: 100%; margin: 1.5mm 0 3mm; font-size: 7.4pt }
+th { background: #2a2118; color: #f3ead3; text-align: left; padding: .8mm 1.5mm; font-weight: normal }
+td { border-bottom: .2mm solid #c9b98f; padding: .8mm 1.5mm; vertical-align: top }
+small { font-size: 6.3pt; color: #6a5a40 }
+figure { margin: 2mm 0 3mm; text-align: center } figcaption { font-size: 6.8pt; color: #6a5a40; font-style: italic; margin-top: 1mm }
+img.shot { width: 100%; max-height: 58mm; object-fit: contain; image-rendering: pixelated; border: .35mm solid #2a2118; background: #000; display: block }
+img.sm { max-height: 44mm; width: auto; margin: 0 auto } img.half { width: 100%; image-rendering: pixelated; border: .35mm solid #2a2118; background: #000; display: block }
+.cols { display: flex; gap: 3mm } .cols > * { flex: 1; min-width: 0 }
+.note { border: .4mm solid #8a1c14; background: #fbf3e0; padding: 1.8mm 2.5mm; margin: 2.5mm 0; font-size: 7.8pt }
+.note b.t { color: #8a1c14; display: block; margin-bottom: .6mm; letter-spacing: .5px }
+td.spr { width: 9mm; padding: .4mm } td.spr img { width: 8.5mm; image-rendering: pixelated; display: block; background: #15151c }
+.mt td, .mt th { text-align: center } .mt td:first-child, .mt th:first-child { text-align: left }

@@ -1,0 +1,6 @@
+# Joystick porta 2: su per 10 fotogrammi, poi su+fuoco; si legge il registro $DC00 (bit a 0 = premuto).
+wait "READY." 10s
+0 JOY2-UP 10
+3 assert mem=0xDC00 0x1E &0x1F
+12 JOY2-UP&JOY2-FIRE 10
+15 assert mem=0xDC00 0x0E &0x1F

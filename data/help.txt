@@ -1,0 +1,112 @@
+# HELP: il manuale del menu del loader (tools/build/gen_help.py). Una pagina per "=== titolo"; ogni riga = una riga
+# dello schermo dalla 2, colonne 1..38. [testo] giallo (tasti), {testo} ciano (note), "@hud" = ritaglio dell'HUD (4 righe).
+# Icone della UI (08/11 sera): ¤ moneta (mai la parola gold), † spada, ‡ armatura, ° anello, # scudo.
+# Tutto quello che c'e' qui deve essere vero nel codice: se cambia un tasto, cambia anche questa pagina.
+=== moving and fighting
+[joystick 2] or [w a s d]  move
+[fire] or [space]  attack with the skill
+you have chosen: hold it to keep on
+striking.
+
+skills: choose the one fire uses
+ [h] slash       level 1, one blow
+ [j] whirlwind   level 3, all around
+ [k] battle cry  level 6, stuns them
+ [l] smash       level 12, double dice
+powers: they start at once
+ [u] rage        level 9, for 6 s the
+               damage you take halves
+ [o] frenzy      level 15, for 5 s two
+               blows per fire, faster
+{a skill shows in the hud only when}
+{your level allows it.}
+
+[1]-[4]  drink a potion of the belt
+[5]  read a portal scroll
+[i]  inventory      [m]  floor map
+[c]  character      [run/stop]  menu
+=== fire on places
+stand on a place and press [fire]:
+ stairs down   the next floor
+ stairs up     the floor above
+               (from floor 1: village)
+ crypt         floor 1
+ portal        on a floor: the village
+               in the village: back to
+               the floor you left
+ shop door     smith or alchemist
+ inn door      your inn chest
+ chest         open it, if no monster
+               is near; a key chest
+               needs a key.
+
+walk on the fountain: it heals you.
+
+{every floor remembers what you did}
+{there when you leave it.}
+=== inventory, chests and shops
+every screen works the same way:
+ [w] [s] or [stick] up/down: move
+ [fire] select   [run/stop] back
+inventory [i]   {the pack holds 8 items}
+ [fire] use   [del] drop   ([i] closes)
+ {a broken item (red) stays on you but}
+ {does nothing: repair it or swap it.}
+chest: [fire] takes an item
+shops: smith, alchemist
+ [fire] on wares: buy (your ¤, then
+ the inn's). on the pack: sell. smith:
+ [fire] on worn gear or [r]: repair.
+ a potion: choose its belt slot.
+inn chest (your inn): 24 items
+ [fire] moves an item between pack
+ and chest; on your ¤: into the chest
+ in tens (0..9 stay on you).
+ [right] from the pack to the chest.
+ [fire] on a page number: next page.
+ [fire] on an equipped slot: choose
+ what to wear ([run/stop] cancels).
+map [m]: [fire], [m] or [run/stop]
+=== menus and saving
+game menu [run/stop]
+ resume, save game, quit game
+ {quit game: back to the main menu}
+ autosave: levels 5-6, 10-11, 15-16
+{never switch off while saving!}
+main menu: choose a barbarian to see
+ his sheet: start, delete, back.
+questions: [y] or [fire] = yes,
+ [n] or [run/stop] = no.
+ quit the game: back to basic
+new barbarian
+ name, [return], seed, [return]
+ seed: 6 letters or digits, [f1] random
+ then w/s choose, fire edits or starts
+ [del] delete   [run/stop] back
+ {the same seed makes the same dungeon.}
+
+if you die you lose half of the ¤
+you carry (the ¤ in your inn chest
+is safe) and wake up in the village.
+you can carry up to 10000¤: keep
+the rest in your inn chest.
+=== the hud
+[1]              [2]             [3]
+@hud
+[4]        [5]       [6]   [7]          [8]
+
+[1] hp, xp: life and experience, now
+    and max (10000+ shows as 10k)
+[2] red bar: life   yellow bar: level
+[3] gear wearing out: flashes, red =
+    broken. c3 l4: chapter 3, level 4
+[4] lv: your level. yellow arrow: stat
+    points to spend, press [c]
+[5] h j k l: skills, yellow = on fire
+[6] u o: rage, frenzy. yellow: on,
+    white: ready, cyan: recharging
+[7] keys for the key chests
+[8] belt: potions [1]-[4] (blue while
+    they recharge), portal scroll [5]
+{top line: the place where you stand,}
+{or the monster you fight and its life}

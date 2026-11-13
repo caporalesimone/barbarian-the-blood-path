@@ -1,0 +1,558 @@
+#!/usr/bin/env python3
+"""Genera out/db.asm da data/rules.yaml (combattimento: PG, abilita', oggetti, schede e crescita dei mostri,
+esperienza) e data/balance.yaml (mondo: generazione, bottino, bauli, negozi, nomi, colori).
+uso: python3 tools/build/gen_db.py [--check]
+Formule e significato delle tabelle: docs/combattimento.md, docs/mostri.md, docs/oggetti.md."""
+import os, re, sys, math
+import yaml
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import items_db  # noqa: E402
+import bestiary  # noqa: E402
+
+ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
+DST = os.path.join(ROOT, "out", "db.asm")
+
+CATS = ["weapon", "armor", "shield", "ring", "potion", "scroll"]          # id categoria = indice + 1
+CAT_CONST = ["CAT_WEAPON", "CAT_ARMOR", "CAT_SHIELD", "CAT_RING", "CAT_POTION", "CAT_SCROLL"]
+SECTION = {"weapon": "weapons", "armor": "armors", "shield": "shields", "ring": "rings", "potion": "potions",
+           "scroll": "scrolls"}
+# puntatori sprite: base a $A000 slot 12.. (128+12), forti e finale a $8C00 (48..)
+PTR_BASE, PTR_STRONG = 140, 48
+STATS = ("str", "dex", "con")
+
+
+class Err(Exception):
+    pass
+
+
+def chk(cond, msg):
+    if not cond:
+        raise Err(msg)
+
+
+def byte(v, what):
+    chk(isinstance(v, int) and 0 <= v <= 255, f"{what}: {v} non e' un byte (0..255)")
+    return v
+
+
+def word(v, what):
+    chk(isinstance(v, int) and 0 <= v <= 65535, f"{what}: {v} non e' una word")
+    return v
+
+
+def pct256(p, what):
+    chk(0 <= p <= 100, f"{what}: percentuale {p} fuori da 0..100")
+    return min(255, round(p * 256 / 100))
+
+
+def mm(d, what):
+    lo, hi = d["min"], d["max"]
+    chk(isinstance(lo, int) and isinstance(hi, int) and lo <= hi, f"{what}: min/max non validi")
+    return lo, hi
+
+
+def asm_str(s, what):
+    chk(all(c in "abcdefghijklmnopqrstuvwxyz0123456789 '-." for c in s),
+        f"{what}: '{s}' usa caratteri non ammessi (solo minuscole, cifre, spazio)")
+    return s
+
+
+def dice(s):
+    """'NdS+K' -> (N, S, K)"""
+    s = str(s).replace(" ", "")
+    m = re.fullmatch(r"(?:(\d+)d(\d+))?([+-]\d+)?|(\d+)", s)
+    chk(m is not None, "dadi non validi: " + s)
+    if m.group(4):
+        return 0, 0, int(m.group(4))
+    return int(m.group(1) or 0), int(m.group(2) or 0), int(m.group(3) or 0)
+
+
+def mod(v):
+    return (v - 10) // 2
+
+
+class Out:
+    def __init__(self):
+        self.lines = []
+
+    def __call__(self, s=""):
+        self.lines.append(s)
+
+    def bytes(self, label, vals, per=16):
+        vals = list(vals)
+        for i in range(0, max(1, len(vals)), per):
+            head = f"{label:<12}" if i == 0 else " " * 12
+            self(f"{head}.byte " + ", ".join(str(v) for v in vals[i:i + per]))
+
+    def words(self, label, vals, per=10):
+        vals = list(vals)
+        for i in range(0, len(vals), per):
+            head = f"{label:<12}" if i == 0 else " " * 12
+            self(f"{head}.word " + ", ".join(str(v) for v in vals[i:i + per]))
+
+    def strings(self, prefix, names):
+        self.bytes(prefix + "_lo", [f"<{prefix}_{i}" for i in range(len(names))])
+        self.bytes(prefix + "_hi", [f">{prefix}_{i}" for i in range(len(names))])
+        for i, n in enumerate(names):
+            self(f'{prefix}_{i:<8} .text "{n}"')
+            self("            .byte 0")
+
+
+def pl_points(P, L):
+    """punti statistica guadagnati fino al livello L (11/11: stat_points)"""
+    sp = P["stat_points"]
+    return sum(sp["per_level"] for l in range(2, L + 1) if sp["first"] <= l <= sp["last"] and (l - sp["first"]) % sp["every"] == 0)
+
+
+def pl_scores(P, L):
+    """caratteristiche del PG di riferimento al livello L: base + punti spesi come reference_alloc"""
+    sc = dict(P["scores"])
+    for k in P["reference_alloc"][:pl_points(P, L)]:
+        sc[k] += 1
+    return sc
+
+
+def main():
+    B = bestiary.load_balance(ROOT)           # balance.yaml + mostri (data/monsters/bestiary.tsv, 11/11)
+    R = items_db.load_rules(ROOT)             # rules.yaml + data/items/items.tsv (11/11)
+    o = Out()
+    o("; ===================================================================")
+    o(";  db.asm - GENERATO da tools/build/gen_db.py (data/rules.yaml, data/balance.yaml, data/items/items.tsv,")
+    o(";  data/monsters/bestiary.tsv). Tabelle per piano: indice = piano 0..MAXLEVEL (0 = villaggio); per oggetto:")
+    o(";  indice = id dell'oggetto (elenco sotto); per mostro: indice = tipo (elenco sotto).")
+    o(";  NON MODIFICARE A MANO: modifica gli YAML e rigenera.")
+    o("; ===================================================================")
+
+    c = B["constants"]
+    maxl = c["max_dungeon_level"]
+    chk(maxl == R["dungeon"]["floors"], "balance.yaml max_dungeon_level != rules.yaml dungeon.floors")
+    chk(2 <= maxl <= 24, "max_dungeon_level deve essere 2..24 (c_vis: 3 byte)")
+    nst = c.get("difficulty_steps", maxl)
+
+    def step(L):
+        """piano L (1..maxl) -> gradino 1..nst delle tabelle spawn (l'ultimo piano = ultimo gradino)"""
+        return nst if L == maxl else max(1, min(nst - 1, round(L * (nst - 1) / (maxl - 1))))
+
+    P = R["player"]
+    plmax = P["max_level_before_boss"]
+    chk(plmax == maxl, "player.max_level_before_boss deve essere = dungeon.floors (un livello per piano)")
+    o(f"MAXLEVEL    = {maxl}            ; numero di piani (l'ultimo: sala del trono)")
+    o(f"PL_MAXLVL   = {plmax}            ; tetto del PG prima dell'Abisso")
+    o("dungeon_level = cur_level")
+    o()
+
+    # ------------------------------------------------------------ PG
+    T = R["timing"]
+    o("; ---- tempi (fotogrammi)")
+    o(f"GCD_T       = {byte(T['gcd'], 'gcd')}")
+    o(f"MON_ATK_T   = {byte(T['monster_attack'], 'monster_attack')}")
+    o(f"STUN_HIT    = {byte(T['stun_on_hit'], 'stun_on_hit')}")
+    o()
+    o("; ---- PG: caratteristiche per livello (senza anello), competenza, vita massima (senza anello)")
+    chk(P["hp_level1"] == "10+CON", "hp_level1: supportato solo '10+CON' (vedi recalc_stats)")
+    L1 = int(P["hp_level1"].split("+")[0])
+    o(f"PL_HP1      = {L1}")
+    o(f"PL_HPL      = {byte(P['hp_per_level'], 'hp_per_level')}")
+    o(f"PL_START_GOLD = {word(B['player']['start_gold'], 'start_gold')}")
+    o(f"GOLD_MAX = {word(B['player']['gold_max'], 'gold_max')}       ; oro massimo addosso")
+    # (11/11) punti statistica: caratteristiche di base + punti spesi (c_sadd), vita = 10 + COS + (L-1) x (6 + mod COS)
+    chk(len(P["reference_alloc"]) >= pl_points(P, plmax) and all(k in STATS for k in P["reference_alloc"]),
+        "player.reference_alloc: una caratteristica (str/dex/con) per ogni punto fino al livello massimo")
+    for k in STATS:
+        chk(P["scores"][k] >= 10, f"player.scores.{k} >= 10 (modv)")
+        o(f"PL_{k.upper()}0     = {byte(P['scores'][k], k)}            ; valore di base (livello 1)")
+    prof, pts = [], []
+    for L in range(0, plmax + 1):
+        Lx = max(1, L)
+        prof.append(2 + (Lx - 1) // P["prof_every"])
+        pts.append(byte(pl_points(P, Lx), "stat_points"))
+    o.bytes("pl_prof", prof)
+    o("; punti statistica guadagnati fino al livello (indice = livello)")
+    o.bytes("pl_pts", pts)
+    o(".if TESTCL > 1                 ; eroe di prova (TESTCL): punti spesi come il PG di riferimento")
+    for k in STATS:
+        o.bytes("pl_r" + k, [byte(pl_scores(P, max(1, L))[k] - P["scores"][k], k) for L in range(0, plmax + 1)])
+    o(".endif")
+    RS = P["respec"]
+    chk(RS["final_boss"] >= 1, "respec.final_boss >= 1 (kill_monster: ciclo su X)")
+    o(f"RESP_MAX    = {byte(RS['max'], 'respec.max')}           ; gettoni respec al massimo")
+    o(f"RESP_FINAL  = {byte(RS['final_boss'], 'respec.final_boss')}             ; gettoni per il boss finale")
+    o(f"RESP_DROP   = {byte(round(RS['abyss_chest_percent'] * 256 / 100), 'abyss_chest_percent')}             ; bauli dell'Abisso: gettone se rand < RESP_DROP (x/256)")
+    o(f"CRIT_LVL    = {byte(R['skills']['brutal_critical_level'], 'brutal_critical_level')}")
+    dc = R["dex_cap"]
+    o()
+
+    # ------------------------------------------------------------ abilita'
+    SK = R["skills"]
+    order = ["slash", "whirlwind", "battle_cry", "smash", "rage", "frenzy"]
+    o("; ---- abilita': 0 slash, 1 whirlwind, 2 battle cry, 3 smash (con Fire, tasti F1 F3 F5 F7), 4 rage (R), 5 frenzy (F)")
+    o("SK_N        = 6")
+    o.bytes("sk_req", [byte(SK[k]["level"], k) for k in order])
+    cds = [0 if k == "slash" else word(SK[k]["cooldown"], k) for k in order]
+    o.bytes("sk_cd_lo", [v & 255 for v in cds])
+    o.bytes("sk_cd_hi", [v >> 8 for v in cds])
+    o(f"BC_STUN     = {byte(SK['battle_cry']['stun'], 'battle_cry.stun')}")
+    o(f"SM_STUN     = {byte(SK['smash']['stun'], 'smash.stun')}")
+    o(f"RAGE_DUR    = {word(SK['rage']['duration'], 'rage.duration')}")
+    chk(SK["rage"].get("damage", 0) == 0, "rage.damage: supportato solo 0 (Rage dimezza i danni subiti)")
+    o(f"FZ_DUR      = {word(SK['frenzy']['duration'], 'frenzy.duration')}")
+    chk(SK["frenzy"]["extra_hits"] == 1, "frenzy.extra_hits: supportato solo 1")
+    o(f"FZ_RUN1     = {byte(SK['frenzy']['run_first'], 'run_first')}    ; % di corsa in piu' al primo colpo a segno")
+    o(f"FZ_RUN2     = {byte(SK['frenzy']['run_step'], 'run_step')}    ; % in piu' a ogni colpo a segno dopo")
+    o(f"FZ_RUNMAX   = {byte(SK['frenzy']['run_max'], 'run_max')}")
+    o()
+
+    # ------------------------------------------------------------ esperienza
+    mons_r = list(R["monsters"].items())
+    mons_b = list(B["monsters"].items())
+    chk([k for k, _ in mons_r] == [k for k, _ in mons_b], "rules.yaml e balance.yaml: stessi mostri nello stesso ordine")
+    base = [(k, m) for k, m in mons_b if m["tier"] == "base"]
+    strong = [(k, m) for k, m in mons_b if m["tier"] == "strong"]
+    final = [(k, m) for k, m in mons_b if m["tier"] == "final"]
+    chk(mons_b == base + strong + final, "ordine mostri: prima i base, poi i forti, poi il finale")
+    chk(len(final) == 1, "serve esattamente un mostro 'final'")
+    chk([m["strong_of"] for _, m in strong] == [k for k, _ in base], "varianti forti nell'ordine dei base")
+    nb = len(base)
+    MR = R["monsters"]
+    xpq = R["xp_per_floor"]
+
+    def mxp(k, L):
+        Pf = 0 if MR[k].get("final") else max(0, L - MR[k]["floor"])
+        return MR[k]["xp"] * (1 + xpq * Pf)
+
+    sp = B["spawn"]
+
+    def floor_xp(L):
+        """esperienza attesa esplorando tutto il piano L (mostri comuni + boss con nome)"""
+        if L == maxl:
+            return mxp(final[0][0], L)
+        n = (sp["max_monsters_per_level"][step(L) - 1] + sp["min_monsters_per_level"][step(L) - 1]) / 2
+        bt = [k for k, _ in base if MR[k]["floor"] <= L] or [base[0][0]]
+        avg = sum(mxp(k, L) for k in bt) / len(bt)
+        st = [k for k, _ in strong if MR[k]["floor"] <= L] or [strong[0][0]]
+        bxp = sum(mxp(k, L) for k in st) / len(st) * B["boss"]["xp_multiplier"]
+        return n * avg + bxp
+
+    lpf = 1.3                                                    # livelli per piano esplorato tutto
+    E = [0.0]
+    for L in range(1, maxl + 1):
+        E.append(E[-1] + floor_xp(L))
+    need = []
+    for lv in range(2, plmax + 1):
+        f = (lv - 1) / lpf                                       # piani esplorati per arrivare al livello lv
+        i = int(f)
+        xv = E[i] + (E[min(i + 1, maxl)] - E[i]) * (f - i)
+        need.append(int(round(xv)))
+    for i in range(1, len(need)):
+        need[i] = max(need[i], need[i - 1] + 1)
+    chk(need[-1] < 1 << 24, "xp oltre 24 bit")
+    o("; ---- esperienza (24 bit) per passare al livello 2..PL_MAXLVL: ~1,3 livelli per piano esplorato tutto")
+    o.bytes("xp_n0", [v & 255 for v in need])
+    o.bytes("xp_n1", [(v >> 8) & 255 for v in need])
+    o.bytes("xp_n2", [v >> 16 for v in need])
+    o(f"XP_PFQ      = {byte(round(xpq * 4), 'xp_per_floor')}            ; xp = base x (4 + P x XP_PFQ) / 4")
+    o()
+
+    # ------------------------------------------------------------ oggetti
+    items = [("none", "none", {"name": "-", "price": 0, "ilvl": 0})]
+    for cat in CATS:
+        for k, it in R[SECTION[cat]].items():
+            if not isinstance(it, dict) or "name" not in it:
+                continue
+            items.append((k, cat, it))
+    chk(len(items) <= 64, "troppi oggetti (max 63)")
+    # lunghezza del nome mostrato (08/11): le colonne dei menu (casa, inventario, negozi, riquadro dell'oggetto) hanno
+    # 17 caratteri (ui_item riempie fino a 17): al massimo NAME_SHOW = 16, cosi' resta sempre uno spazio prima della
+    # cornice o della colonna accanto. Arma/armatura/scudo: "+N " davanti; anello: " str"/" dex"/" con" dietro;
+    # pergamena: "N " davanti (3 caratteri: la pila potrebbe arrivare a 10); pozione: il nome e basta. Documentato in docs/oggetti.md (Nomi).
+    NAME_SHOW = 16
+    for k, cat, it in items[1:]:
+        extra = {"weapon": 3, "armor": 3, "shield": 3, "ring": 4, "scroll": 3}.get(cat, 0)
+        chk(len(it["name"]) + extra <= NAME_SHOW,
+            f"nome '{it['name']}' ({cat}): {len(it['name'])} caratteri + {extra} mostrati = {len(it['name']) + extra} > {NAME_SHOW} (docs/oggetti.md)")
+    ids = {k: i for i, (k, _, _) in enumerate(items)}
+    o("; ---- oggetti (id = ordine in data/items/items.tsv: armi, armature, scudi, anelli, pozioni, pergamene; 0 = vuoto)")
+    o(";      id: " + ", ".join("%d %s" % (i, k) for i, (k, _, _) in enumerate(items)))
+    for i, (k, _, _) in enumerate(items):
+        if i:
+            o(f"I_{k.upper():<14} = {i}")
+    for i, cc in enumerate(CAT_CONST):
+        o(f"{cc:<11}= {i + 1}")
+    o(f"N_ITEMS     = {len(items)}")
+    o(f"I_POTR      = {ids['red']}")
+    o(f"I_POTY      = {ids['yellow']}")
+    o(f"I_POTV      = {ids['violet']}")
+    o(f"I_SCROLL    = {ids['portal_scroll']}")
+    o(f"I_START     = {ids[R['start_weapon']]}")
+    du = R["durability"]
+    o("; ---- durabilita' (armi, armature, scudi indossati): generazione, usura 1/N, riparazione")
+    o(f"DUR_MIN     = {byte(du['min'], 'durability.min')}")
+    o(f"DUR_MAX     = {byte(du['max'], 'durability.max')}")
+    o(f"DUR_WP      = {byte(du['ilvl_weight_percent'], 'ilvl_weight_percent')}      ; % dei casi in cui il livello oggetto pesa")
+    o(f"DUR_PI      = {byte(du['floor_per_ilvl'], 'floor_per_ilvl')}       ; minimo = DUR_MIN + DUR_PI x ilvl (caso pesato)")
+    o(f"WEAR_W      = {byte(du['wear']['weapon_per_hit'], 'wear')}")
+    o(f"WEAR_A      = {byte(du['wear']['armor_per_hit'], 'wear')}")
+    o(f"WEAR_S      = {byte(du['wear']['shield_per_hit'], 'wear')}")
+    pc = byte(du['warn_percent'], 'durability.warn_percent')
+    assert 0 < pc and 100 % pc == 0, "durability.warn_percent deve dividere 100"
+    o(f"WARN_PC     = {pc}      ; avviso nell'HUD: durabilita' <= WARN_PC % del massimo")
+    o(f"WARN_MUL    = {100 // pc}       ; (hud.asm: durabilita' x WARN_MUL <= massimo)")
+    o(f"REPAIR_PC   = {byte(du['repair_cost_percent'], 'repair_cost_percent')}")
+    chk(du["min"] + du["floor_per_ilvl"] * max(it.get("ilvl", 0) for _, ct, it in items if it.get("loot") is not False) < du["max"], "durability: minimo pesato oltre il massimo")
+    cat, price, ilvl, dn, ds, val, rate, pen, fl = ([] for _ in range(9))
+    for k, ct, it in items:
+        cat.append(0 if ct == "none" else CATS.index(ct) + 1)
+        price.append(word(it.get("price", 0), f"{k}.price"))
+        ilvl.append(255 if it.get("loot") is False else byte(it.get("ilvl", 0), f"{k}.ilvl"))   # 255 = mai nel bottino
+        a = b_ = v = r = p = f = 0
+        if ct == "weapon":
+            n, s, kk = dice(it["dice"])
+            chk(kk == 0 and n >= 1, f"{k}: dadi senza costante (NdS)")
+            a, b_, r, p = n, s, it["rate"], it["pen"]
+            f = (1 if it.get("two_handed") else 0) | (4 if it.get("nomod") else 0)
+        elif ct == "armor":
+            v = it["ac"]
+            f = min(255, dc[it["type"]])
+        elif ct == "shield":
+            v = it["ac"]
+        elif ct == "ring":
+            v = it["bonus"]
+        elif ct == "potion":
+            m = re.fullmatch(r"(?:(\d+)\*L\+)?(\d+)", str(it["heal"]).replace(" ", ""))
+            chk(m is not None, f"{k}.heal: formati ammessi 'B' o 'A*L+B'")
+            a, v = int(m.group(1) or 0), int(m.group(2))
+            chk(it["cooldown"] % 2 == 0, f"{k}.cooldown: deve essere pari (si salva /2)")
+            r = it["cooldown"] // 2
+            f = it["color"]
+        for nm, x in (("dn", a), ("ds", b_), ("val", v), ("rate", r), ("pen", p), ("fl", f)):
+            byte(x, f"{k}.{nm}")
+        dn.append(a); ds.append(b_); val.append(v); rate.append(r); pen.append(p); fl.append(f)
+    o.bytes("itcat", cat)
+    o.words("itprice", price)
+    o.bytes("itilvl", ilvl)
+    o.bytes("itdn", dn)                  # arma: numero di dadi; pozione: cura per livello (A in A*L+B)
+    o.bytes("itds", ds)                  # arma: facce del dado
+    o.bytes("itval", val)                # armatura/scudo: CA; anello: +N al modificatore; pozione: cura fissa (B)
+    o.bytes("itrate", rate)              # arma: cadenza (fotogrammi); pozione: ricarica / 2
+    o.bytes("itpen", pen)
+    o.bytes("itfl", fl)                  # arma: bit0 due mani, bit2 senza modificatori; armatura: limite DES; pozione: colore
+    o()
+
+    # ------------------------------------------------------------ bottino
+    lo = B["loot"]
+    maxll = byte(lo["max_loot_level"], "max_loot_level")
+    w = lo["category_weights"]
+    chk(sum(w[k] for k in CATS) == 100, "category_weights deve sommare a 100")
+    cum, s = [], 0
+    for k in CATS:
+        s += w[k]
+        cum.append(s)
+    bon = lo["bonus"]
+    o("; ---- bottino: categorie (soglie su 100), magia +N per livello bottino")
+    o(f"MAXLL       = {maxll}")
+    o.bytes("loot_cum", cum)
+    o.bytes("cat_bonus", [0] + [1 if k in bon["categories"] else 0 for k in CATS])
+    o.bytes("bon_tab", [min(bon["max"], max(bon["min"], math.floor(ll * bon["per_loot_level"]))) for ll in range(maxll + 1)])
+    # lt_scan prende il migliore oggetto con ilvl <= L: ogni categoria con peso deve avere un oggetto di ilvl 0
+    for ct in ("weapon", "armor", "shield", "ring"):
+        if w.get(ct) and not any(c == ct and it["ilvl"] == 0 for _, c, it in items):
+            print(f"AVVISO: nessun oggetto di ilvl 0 nella categoria {ct}: a livello oggetto 0 la categoria resta vuota")
+    # pozioni: colore secondo le zone (rules.yaml potions.zones / ramp)
+    PZ = R["potions"]
+    z = PZ["zones"]
+    zb = [1, round(z[0] * maxl) + 1, round(z[1] * maxl) + 1]
+    t1, t2 = [], []
+    for f in range(0, maxl + 1):
+        wt = []
+        for kz in range(3):
+            lo_, hi_ = zb[kz], (zb[kz + 1] - 1 if kz < 2 else 10 ** 6)
+            d = max(0, lo_ - f, f - hi_)
+            wt.append(1.0 if d == 0 else (PZ["ramp"][d - 1] if d <= len(PZ["ramp"]) else 0.0))
+        tot = sum(wt) or 1
+        t1.append(min(255, round(256 * wt[0] / tot)))
+        t2.append(min(255, round(256 * (wt[0] + wt[1]) / tot)))
+    o("; pozioni per piano: rnd < pot_t1 -> rossa, < pot_t2 -> gialla, altrimenti viola (oltre il dungeon: viola)")
+    o.bytes("pot_t1", t1)
+    o.bytes("pot_t2", t2)
+    o()
+
+    # ------------------------------------------------------------ mostri
+    G = R["growth"]
+    o("; ---- mostri: scheda (rules.yaml), crescita per piano P = piano - piano minimo, curve per piano (x/32)")
+    o(f"N_BASE      = {nb}")
+    o(";      tipo: " + ", ".join("%d %s" % (i + 1, k) for i, (k, _) in enumerate(mons_r)) + " (0 = nessuno; tabelle mon_* da 0)")
+    o(f"N_MTYPES    = {len(mons_r)}")
+    o(f"T_FINAL     = {len(mons_r)}")
+    for i, (k, _) in enumerate(mons_r):
+        o(f"M_{k.upper():<16} = {i + 1}")
+    t = {f: [0] for f in ("fmin", "hp_lo", "hp_hi", "hpd2", "ac", "att", "dn", "ds", "dk", "sv", "xp_lo", "xp_hi",
+                          "imm", "spd", "col", "llb", "ptr")}
+    for i, ((k, m), (_, b)) in enumerate(zip(mons_r, mons_b)):
+        hn, hs, hk = dice(m["hp"])
+        havg = hn * (hs + 1) / 2 + hk
+        if m.get("final"):
+            havg *= R.get("final_boss_hp_mult", 1)
+        dn_, ds_, dk_ = dice(m["dmg"])
+        t["fmin"].append(byte(m["floor"], k))
+        t["hp_lo"].append(int(round(havg)) & 255)
+        t["hp_hi"].append(word(int(round(havg)), k) >> 8)
+        t["hpd2"].append(byte(hs + 1, k))
+        for f, v in (("ac", m["ac"]), ("att", m["att"]), ("dn", dn_), ("ds", ds_), ("dk", dk_), ("sv", m["save"])):
+            t[f].append(byte(v, f"{k}.{f}"))
+        t["xp_lo"].append(word(m["xp"], k) & 255)
+        t["xp_hi"].append(m["xp"] >> 8)
+        t["imm"].append(1 if m.get("stun_immune") else 0)
+        t["spd"].append(byte(max(1, round(b["speed"] * B.get("monster_speed_percent", 100) / 100)), k))
+        t["col"].append(byte(b["color"], k))
+        t["llb"].append(byte(b.get("loot_level_bonus", 0), k))
+        t["ptr"].append(PTR_BASE + 2 * i if i < nb else PTR_STRONG + 2 * (i - nb))
+    for f, v in t.items():
+        o.bytes(("mon_" if f in ("spd", "col", "llb", "ptr") else "mt_") + f, v)
+    o.bytes("gr_ac", [int(p * G["ac_per_floor"]) for p in range(maxl)])
+    o.bytes("gr_att", [int(p * G["att_per_floor"]) for p in range(maxl)])
+    o.bytes("gr_dmg", [int(p * G["dmg_per_floor"]) for p in range(maxl)])
+    o.bytes("gr_hpd", [int(p * G["hp_dice_per_floor"]) for p in range(maxl)])
+    sc = R.get("monster_scale", {"hp": 1, "damage": 1})
+    chk(len(G["curve_hp"]) == maxl + 1 and len(G["curve_dmg"]) == maxl + 1, "growth.curve_*: servono floors+1 valori")
+    o.bytes("cv_hp", [byte(round(v * sc["hp"] * 32), "curve_hp") for v in G["curve_hp"]])
+    o.bytes("cv_dmg", [byte(round(v * sc["damage"] * 32), "curve_dmg") for v in G["curve_dmg"]])
+    bo = R["boss"]
+    chk(round(bo["hp_mult"] * 2) == bo["hp_mult"] * 2, "boss.hp_mult: multiplo di 0,5")
+    o(f"BOSS_HPH    = {byte(int(bo['hp_mult'] * 2), 'boss.hp_mult')}            ; vita del boss con nome x BOSS_HPH / 2")
+    o(f"BOSS_AC     = {byte(bo['ac_add'], 'boss.ac_add')}")
+    o(f"BOSS_ATT    = {byte(bo['att_add'], 'boss.att_add')}")
+    o(f"BOSS_LVL    = 3             ; livello del boss = piano + 3 (variante forte: + 2) per l'esperienza")
+    bw = B["boss"]
+    o(f"BOSS_XP_MUL = {byte(bw['xp_multiplier'], 'xp_multiplier')}")
+    o(f"BOSS_LL_ADD = {byte(bw['loot_level_add'], 'loot_level_add')}      ; chestLevel del boss: + N")
+    cl = B["chest_level"]
+    o("; ---- chestLevel (1..255): per_floor x piano + bonus; livello oggetto T = CL / CL_PF, L = T x u^2")
+    o(f"CL_PF       = {byte(cl['per_floor'], 'chest_level.per_floor')}")
+    o(f"CL_LLB      = {byte(cl['llb_mult'], 'llb_mult')}")
+    o(f"CL_STRONG   = {byte(cl['strong_bonus'], 'strong_bonus')}")
+    o(f"CL_HP       = {byte(cl['hp_bonus'], 'hp_bonus')}")
+    chk(cl["per_floor"] in (2, 4, 8, 16), "chest_level.per_floor: potenza di 2 (shift nel codice)")
+    chk(cl["per_floor"] * maxl + 3 * cl["llb_mult"] + cl["strong_bonus"] + cl["hp_bonus"] + bw["loot_level_add"] <= 255,
+        "chestLevel oltre 255 al piano massimo")
+    chk(1 <= bw["loot_items"] <= 4, "boss.loot_items 1..4")
+    o(f"BOSS_ITEMS  = {bw['loot_items']}")
+    o(f"BOSS_KEY    = {1 if bw['key'] else 0}")
+    chk(len(bw["first_names"]) == 8 and len(bw["epithets"]) == 8, "servono 8 nomi e 8 epiteti")
+    fs = R["final_summons"]
+    o(f"SUM_WAVE    = {byte(fs['per_wave'], 'per_wave')}")
+    o(f"SUM_MAXALIVE = {byte(fs['max_alive'], 'max_alive')}")
+    o(f"SUM_FLOOR   = {byte(fs['floor'], 'final_summons.floor')}")
+    mt = [0] + [sum(1 for k, _ in base if MR[k]["floor"] <= L) for L in range(1, maxl + 1)]
+    chk(all(v >= 1 for v in mt[1:]), "al piano 1 serve almeno un mostro base")
+    o.bytes("maxtype_tab", mt)
+    sr = sp["strong_room_chance"]
+    smf = byte(sp.get("strong_min_floor", 1), "strong_min_floor")
+    o.bytes("strong_tab", [0] + [0 if L < smf else pct256(min(100, sr["percent"] + sr["per_dungeon_level"] * (step(L) - 1)), "strong")
+                                 for L in range(1, maxl + 1)])
+    o(f"STRONG_EARLY = {byte(sp.get('strong_early', 0), 'strong_early')}   ; variante forte solo se il suo piano minimo <= piano + N")
+    a, b_ = mm(sp["monsters_per_room"], "monsters_per_room")
+    o(f"SPAWN_MIN   = {a}")
+    o(f"SPAWN_MAX   = {b_}")
+    mx = sp["max_monsters_per_level"]
+    mn = sp["min_monsters_per_level"]
+    chk(len(mx) == nst and len(mn) == nst, f"spawn.*_monsters_per_level: servono {nst} valori")
+    chk(mx[-1] == 0, "spawn.max_monsters_per_level: l'ultimo gradino deve avere 0 (solo il boss finale)")
+    chk(all(0 <= a <= b <= 28 for a, b in zip(mn, mx)), "spawn: min <= max <= 28")
+    o.bytes("maxmon_tab", [0] + [mx[step(L) - 1] for L in range(1, maxl + 1)])
+    o.bytes("minmon_tab", [0] + [mn[step(L) - 1] for L in range(1, maxl + 1)])
+    o()
+
+    # ------------------------------------------------------------ drop
+    d = B["drops"]
+    o("; ---- bottino dei mostri (soglie su 256)")
+    o(f"DROP_KEY    = {pct256(d['key']['chance'], 'key')}")
+    oc = d["outcome"]
+    chk(sum(oc.values()) == 100 and oc["gold_only"] > oc["chest"], "drops.outcome: somma 100, gold_only > chest")
+    o(f"DROP_T_GOLD  = {pct256(oc['gold_only'], 'gold_only')}")
+    o(f"DROP_T_CHEST = {pct256(oc['gold_only'] + oc['chest'], 'gold_only+chest')}")
+    a, b_ = mm(d["gold"], "drops.gold")
+    o(f"DROP_GOLD_MIN = {a}")
+    o(f"DROP_GOLD_MAX = {b_}")
+    o(f"DROP_GOLD_LVL = {byte(d['gold']['per_dungeon_level'], 'drops.gold.per_dungeon_level')}   ; oro in piu' per piano")
+    a, b_ = mm(d["chest"]["items"], "drops.chest.items")
+    chk(1 <= a and b_ <= 4, "drops.chest.items 1..4")
+    o(f"DROP_IMIN   = {a}")
+    o(f"DROP_IMAX   = {b_}")
+    o()
+
+    # ------------------------------------------------------------ bauli
+    ch = B["chests"]
+    o("; ---- bauli (indice: 0 normale, 1 chiave, 2 oro); ch_llmin/max: si sommano al piano")
+    llmin, llmax, bias, imin, imax, keyr = [], [], [], [], [], []
+    for n in ("normal", "key", "gold"):
+        kd = ch[n]
+        a, b_ = mm(kd["loot_level"], f"chests.{n}.loot_level")
+        llmin.append(byte(a, n)); llmax.append(byte(b_, n))
+        bias.append(1 if kd.get("bias_low") else 0)
+        a, b_ = mm(kd["items"], f"chests.{n}.items")
+        chk(1 <= a and b_ <= 4, f"chests.{n}.items 1..4")
+        imin.append(a); imax.append(b_)
+        keyr.append(1 if kd["key_required"] else 0)
+    o.bytes("ch_llmin", llmin)
+    o.bytes("ch_llmax", llmax)
+    o.bytes("ch_bias", bias)
+    o.bytes("ch_imin", imin)
+    o.bytes("ch_imax", imax)
+    o.bytes("ch_keyr", keyr)
+    o(f"CH_N_ROOM   = {pct256(ch['normal']['room_chance'], 'normal')}")
+    o(f"CH_N_MINLVL = {ch['normal']['min_dungeon_level']}")
+    o(f"CH_K_ROOM   = {pct256(ch['key']['room_chance'], 'key')}")
+    o(f"CH_K_MINLVL = {ch['key']['min_dungeon_level']}")
+    o(f"CH_K_MAX    = {ch['key']['max_per_level']}")
+    o(f"CH_G_CHANCE = {pct256(ch['gold']['chance'], 'gold')}")
+    o(f"CH_G_MINLVL = {ch['gold']['min_dungeon_level']}")
+    ga = ch["gold_amount"]
+    chk(ga["max_per_loot_level"] * maxll <= 255, "chests.gold_amount: max_per_loot_level x max_loot_level <= 255")
+    o(f"CH_GOLD_LLMIN = {ga['min_per_loot_level']}")
+    o(f"CH_GOLD_LLMAX = {ga['max_per_loot_level']}")
+    o(f"FIN_GOLD    = {word(ch['final_gold'], 'chests.final_gold')}       ; oro di ogni baule epico della sala del trono")
+    o()
+
+    # ------------------------------------------------------------ negozi
+    sh = B["shops"]
+    chk(list(sh) == ["blacksmith", "alchemist"], "shops: blacksmith, alchemist (09/11: niente armaiolo)")
+    first, count, flat, stock, minl = [], [], [], [], []
+    ahead = B["shop_rules"]["level_ahead"]
+    itd = {k: (ct, it) for k, ct, it in items}
+    for n, dd in sh.items():
+        lst = dd["items"]
+        chk(1 <= len(lst) <= 16 and 1 <= dd["stock"] <= min(8, len(lst)), f"shop {n}: pool 1..16, stock 1..min(8, pool) (riquadro merce da 8)")
+        first.append(len(flat)); count.append(len(lst)); stock.append(dd["stock"])
+        for k in lst:
+            chk(k in ids, f"shop {n}: oggetto '{k}' sconosciuto")
+            flat.append(ids[k])
+            ct, it = itd[k]
+            # livello minimo del PG per vederlo in vendita: pozioni e pergamene shop_level (rules.yaml),
+            # equipaggiamento livello oggetto - level_ahead
+            minl.append(byte(it["shop_level"], f"{k}.shop_level") if "shop_level" in it else max(0, it.get("ilvl", 0) - ahead))
+    o("; ---- negozi (0 fabbro, 1 alchimista)")
+    o.bytes("shop_first", first)
+    o.bytes("shop_cnt", count)
+    o.bytes("shop_stock", stock)
+    o.bytes("shop_items", flat)
+    o.bytes("shop_minl", minl)            # livello minimo del PG (parallelo a shop_items)
+    o()
+
+    # ------------------------------------------------------------ nomi (codici schermo)
+    o('        .enc "screen"')
+    o.strings("itnm", [asm_str(it["name"], f"nome {k}") for k, _, it in items])
+    o.strings("tn", ["-"] + [asm_str(k.replace("_", " "), "nome mostro") for k, _ in mons_r])
+    o.strings("fn", [asm_str(n, "boss") for n in bw["first_names"]])
+    o.strings("ep", [asm_str(n, "boss") for n in bw["epithets"]])
+    o('        .enc "none"')
+    if "--check" not in sys.argv:
+        open(DST, "w").write("\n".join(o.lines) + "\n")
+    print(f"ok: {DST} ({len(items)-1} oggetti, {len(mons_r)} mostri, {maxl} piani, xp al livello {plmax}: {need[-1]})")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Err as e:
+        print("ERRORE dati:", e)
+        sys.exit(1)

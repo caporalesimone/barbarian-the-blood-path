@@ -1,0 +1,76 @@
+; Lore del gioco (programma LORE, tools/build/gen_lore.py -> out/ldat.prg). Testo in inglese, minuscolo.
+; Righe che iniziano con ';' = commenti. Un paragrafo = righe consecutive; una riga vuota lo chiude.
+; Il testo va a capo da solo (colonne 2-37). [parole] = giallo.
+; Comandi:
+;   @img nome           immagine (tools/build/gen_lore.py, IMAGES), centrata; le righe vuote prima e dopo le mette il tool
+;   @title testo        titolo di capitolo, centrato, giallo
+;   @center testo       riga centrata (bianca, [..] in giallo)
+;   @spr nomi...        fila di sprite raddoppiati (mostri del gioco), con animazione a 2 fotogrammi
+;   @gap n              n righe vuote
+;   @hold               all'inizio: lo schermo resta fermo finche' non passa il tempo o si preme fire
+;   @stop n             fine: lo scorrimento si ferma quando questa riga arriva alla riga n dello schermo
+
+@gap 9
+@img logo
+@hold
+@gap 14
+
+@title the blood path
+@gap 1
+@img crypt
+
+under the graves of aldric's crossing there is a door. under the door, a stair. nobody built it. it was always there.
+
+twenty floors down the stair ends in a hall, and in the hall there is a throne, and on the throne sits the [lord of ruin].
+
+@img lord
+
+he is not a king. he is hungry.
+
+every winter his raiders climb the stair: the [fallen], the walking [skeletons], the [zombies] that were people, and the [demons] that drive them.
+
+@spr fallen skeleton zombie demon
+
+they take who they find and they drag them down, one floor a night, bleeding on every step.
+
+the villages have a name for that stair. they call it [the blood path].
+
+@gap 4
+@title saint aldric
+@gap 1
+@img fountain
+
+four hundred years ago a monk named aldric walked down the stair with a hammer and two iron gates. he built one on the seventh floor and one on the fourteenth, and he sealed them with his own blood, because the lord of ruin feeds on blood that swore an oath, and aldric had sworn never to come back up.
+
+he never did. the raiders stopped for a while. the village built a fountain over the well where he drew his last water. it still heals. nobody knows why.
+
+the gates are four hundred years old. they are rusting.
+
+@gap 4
+@img torches the red hand
+
+in the mountains east of the mill there was a clan that painted their right hand red before a fight. the red hand swore the oldest oath there is: [blood for blood], to the last of us.
+
+thirty winters ago the raiders came up through the mine instead of the crypt. they took the red hand in one night, warriors and children, and dragged them down the path. a boy hid in a well. he was the only one.
+
+the oath does not die with the clan. it waits for the last one to grow up.
+
+@gap 4
+@title the last of them
+@gap 1
+@img hero
+
+he grew up. he has a sword, a dagger really, and a thousand gold pieces from selling everything his clan left behind. he has walked to aldric's crossing because the priest wrote that the crypt door was open again.
+
+he does not know the war-dances of his people. nobody taught him. but the blood remembers, they say, if you walk the path far enough.
+
+@img stairs
+
+the lord of ruin knows he is coming. he has eaten every red hand but one. he is waiting for the last meal.
+
+@gap 3
+@title walk the path
+@gap 2
+@center press fire
+@stop 14
+@gap 14

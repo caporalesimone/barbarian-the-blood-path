@@ -1,0 +1,5 @@
+# Video che resta aperto oltre lo script (keep): si chiude a mano con  c64 --out lungo.mp4 videoStop
+wait "READY." 10s
+video start lungo every=4 scale=1 keep
+0 text "print 1\n"
+wait 40

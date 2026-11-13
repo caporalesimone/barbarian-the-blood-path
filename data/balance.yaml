@@ -1,0 +1,135 @@
+# =====================================================================
+#  BARBARIAN: THE BLOOD PATH - dati del mondo
+#  Generazione dei mostri, bottino, bauli, negozi, nomi, colori e velocita'.
+#  I numeri del COMBATTIMENTO (PG, abilita', armi, armature, scudi, anelli, pozioni, schede e crescita dei
+#  mostri, esperienza) sono in data/rules.yaml. Entrambi i file -> tools/build/gen_db.py -> src/db.asm.
+#  Dopo ogni modifica: python3 tools/build/gen_db.py   (o ./build.sh)
+#
+#  CONVENZIONI
+#  - piano          : cur_level nel codice (1..max_dungeon_level; l'ultimo e' la sala del trono).
+#  - gradino        : alcune tabelle per piano sono scritte per `difficulty_steps` gradini: il piano L usa il
+#                     gradino round(L * (steps-1) / (piani-1)), l'ultimo piano l'ultimo gradino.
+#  - min / max      : valore tirato a caso (estremi inclusi).
+#  - chance         : probabilita' in percento (0..100).
+# =====================================================================
+
+constants:
+  max_dungeon_level: 20         # numero di piani: 19 casuali + sala del trono (boss finale) (06/11)
+  difficulty_steps: 10          # gradini delle tabelle spawn.* (scritte per 10 gradini)
+
+player:
+  start_gold: 100
+  # oro massimo addosso (07/11 sera): oltre si perde (raccolta) o non si vende; il resto va nel baule di casa (65535)
+  gold_max: 10000
+
+# ---------------------------------------------------------------- mostri: aspetto e bottino
+# L'ordine e i nomi devono coincidere con data/rules.yaml (monsters). tier: base | strong | final.
+# strong_of: la variante forte appartiene alla famiglia del base indicato (stessa grafica, altro colore).
+# speed: passi per frame in 1/8 di pixel (8 = 1 px/frame), scalati da monster_speed_percent.
+# loot_level_bonus: si somma al piano per il livello del bottino.
+monster_speed_percent: 80       # mostri un po' piu' lenti (richiesta 03/11)
+# (11/11) mostri (tier, strong_of, colore, velocita', bonus del bottino): data/monsters/bestiary.tsv (tools/build/bestiary.py)
+
+spawn:
+  monsters_per_room: {min: 0, max: 3}
+  # massimo di mostri comuni per gradino (il boss del piano e' escluso); l'ultimo gradino ha solo il boss finale
+  max_monsters_per_level: [10, 11, 13, 15, 17, 19, 20, 21, 22, 0]
+  # minimo garantito per gradino (se la generazione ne piazza meno, ne vengono aggiunti); <= massimo
+  min_monsters_per_level: [5, 5, 6, 7, 8, 9, 10, 10, 11, 0]
+  # probabilita' che una stanza contenga UNA variante forte (per gradino); mai prima di strong_min_floor
+  # (06/11: inizio graduale) e mai una variante il cui piano minimo (rules.yaml) supera il piano + strong_early
+  strong_room_chance: {percent: 12, per_dungeon_level: 6}
+  strong_min_floor: 3
+  strong_early: 1
+
+# boss con nome di ogni piano (versione potenziata di una variante forte disponibile al piano).
+# Vita, CA e ATT del boss: data/rules.yaml (boss).
+boss:
+  xp_multiplier: 4              # xp del boss = xp della variante * N
+  loot_level_add: 12            # chestLevel del tesoro del boss: + N (vedi chest_level)
+  loot_items: 3
+  key: true                     # lascia sempre una chiave
+  first_names: [baal, mephisto, azmodan, belial, duriel, andariel, izual, zagrath]
+  epithets: [the damned, the butcher, the flayer, the unholy, the burning,
+             the hollow, the cruel, the pale]
+
+# ---------------------------------------------------------------- bottino dei mostri
+drops:
+  key:   {chance: 8}            # % indipendente: chiave per i bauli chiusi
+  # UN solo tiro per mostro ucciso, pesi % (somma 100). gold_only deve essere > chest.
+  outcome:
+    nothing: 35
+    gold_only: 45               # solo oro: finisce direttamente nel PG
+    chest: 20                   # tesoro del mostro: SEMPRE oro (chests.gold_amount) + oggetti; sparisce cambiando piano
+  gold:  {min: 12, max: 40, per_dungeon_level: 6}
+  chest: {items: {min: 1, max: 1}}
+  # livello bottino = piano + loot_level_bonus del mostro
+
+# ---------------------------------------------------------------- bauli del piano (al massimo 4 + quello del boss)
+# loot_level: si SOMMA al piano (06/11: prima era assoluto 1..15)
+chests:
+  normal:
+    loot_level: {min: 0, max: 1}
+    bias_low: true              # tira due volte e tiene il minore
+    items: {min: 1, max: 2}
+    key_required: false
+    room_chance: 27             # per stanza
+    min_dungeon_level: 1
+  key:
+    loot_level: {min: 1, max: 3}
+    bias_low: false
+    items: {min: 2, max: 3}
+    key_required: true
+    room_chance: 16
+    min_dungeon_level: 2
+    max_per_level: 2
+  gold:
+    loot_level: {min: 3, max: 5}
+    bias_low: false
+    items: {min: 3, max: 3}
+    key_required: true
+    chance: 55                  # per piano, accanto al mostro piu' forte
+    min_dungeon_level: 3
+    max_per_level: 1
+  # apertura: Fire fermi sul baule, nessun mostro vivo entro 2 caselle (chest_fire)
+  # oro automatico all'apertura: tra min e max volte il livello bottino
+  gold_amount: {min_per_loot_level: 3, max_per_loot_level: 7}
+  # bauli epici della sala del trono (piano 20): uno per categoria (armi, armature, scudi, anelli), livello
+  # bottino massimo, EPIC_ITEMS oggetti e final_gold monete ciascuno. final_gold = 10% dell'oro che il PG puo'
+  # raccogliere uccidendo tutti i mostri di tutti i piani (tools/simulators/sim_gold.py), diviso sui 4 bauli (06/11).
+  final_gold: 430
+
+# ---------------------------------------------------------------- chestLevel e oggetti nel bottino (06/11)
+# Ogni tesoro ha un chestLevel CL (1..255, byte): tesoro di un mostro = per_floor x piano + loot_level_bonus
+# del tipo x llb_mult + strong_bonus (variante forte) + hp_bonus (+ se il mostro era nato con molta vita,
+# - con poca: soglie a +-1/8 della vita media del tipo) + boss.loot_level_add (boss con nome).
+# Bauli del piano: per_floor x (piano + offset del tipo di baule); bauli epici: 255.
+# Dal CL al livello oggetto: T = CL / per_floor (~ piano); per ogni oggetto L = round(T x u^2) (u uniforme 0..1):
+# in media oggetti scarsi (meta' dei casi L <= T/4) ma nel 10% dei casi L >= 0,8 T. Esce l'oggetto della
+# categoria con il livello oggetto piu' alto <= L (nessuno: altra categoria); magia +N da bon_tab[L].
+# Bauli epici: L = T sempre (qualita' massima). Simulazione: tools/simulators/sim_chest.py.
+chest_level:
+  per_floor: 8
+  llb_mult: 4
+  strong_bonus: 4
+  hp_bonus: 4
+loot:
+  max_loot_level: 20
+  category_weights: {weapon: 34, armor: 20, shield: 16, ring: 10, potion: 15, scroll: 5}
+  # magia +N su arma, armatura, scudo: tirata tra 0 e min(max, floor(livello_bottino * per_loot_level))
+  bonus: {min: 0, max: 3, per_loot_level: 0.2, categories: [weapon, armor, shield]}
+
+# ---------------------------------------------------------------- negozi
+# Assortimento legato al livello del PG: un oggetto e' in vendita se livello oggetto <= livello del PG + level_ahead;
+# pozioni e pergamene usano shop_level di rules.yaml (livello minimo del PG). Se il pool filtrato ha meno di
+# stock oggetti si mostrano quelli che ci sono.
+shop_rules:
+  level_ahead: 3
+shops:
+  # items = pool; stock = quanti oggetti vengono estratti a caso (senza ripetizioni) a OGNI ingresso nel negozio
+  blacksmith:                     # 08/11: anche armature e scudi; 09/11: l'armaiolo non c'e' piu', vende tutto il fabbro
+    stock: 6                      # al massimo 8 (riquadro merce da 8); quanto e cosa vende: da decidere (TODO)
+    items: [dagger, sword, viking_sword, leather_armor, chain_mail, plate_mail, small_shield, medium_shield, tower_shield]
+  alchemist:
+    stock: 4
+    items: [red, yellow, violet, portal_scroll, copper]

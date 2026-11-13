@@ -1,0 +1,15 @@
+# Fine riga (13/11): sempre LF nel repository e nella copia di lavoro, anche su Windows (gli script girano in Linux/Docker)
+* text=auto eol=lf
+*.sh text eol=lf
+*.py text eol=lf
+# binari
+*.bin binary
+*.rom binary
+*.prg binary
+*.d64 binary
+*.zip binary
+*.png binary
+*.mp3 binary
+*.wasm binary
+*.ttf binary
+*.tar.gz binary

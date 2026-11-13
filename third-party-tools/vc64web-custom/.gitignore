@@ -1,0 +1,11 @@
+# pacchetto vc64web-custom: file generati e cartelle di lavoro (le ROM Commodore in roms/ sono versionate: vedi roms/roms.md)
+out/
+output/
+node_modules/
+*.zip
+__pycache__/
+*.pyc
+work/games/*
+!work/games/README.md
+work/roms/*
+!work/roms/README.md

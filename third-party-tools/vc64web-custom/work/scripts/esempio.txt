@@ -1,0 +1,6 @@
+# esempio: stampa un testo e fa uno screenshot (c64 --outdir output script scripts/esempio.txt)
+wait "READY." 10s
+0 text "print \"ciao\"\n"
+wait 30
+assert screen "CIAO"
+screenshot esempio

@@ -1,0 +1,196 @@
+[
+ {
+  "set": "VILLG",
+  "name": "fountain",
+  "label": "Fontana di Saint Aldric (al centro solida, il bordo ~ cura)",
+  "rows": [
+   "+~~+",
+   "~12~",
+   "~34~",
+   "+~~+"
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "crypt",
+  "label": "Cripta (porta del dungeon >)",
+  "rows": [
+   "/@\\",
+   "[>]"
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "bridge",
+  "label": "Ponte sul torrente (10/11: alto 3 caselle, accessi larghi quanto il ponte)",
+  "rows": [
+   "(%)",
+   "xxx",
+   "xxx",
+   "xxx",
+   "(%)"
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "river",
+  "label": "Fiume (sponde ( ) e acqua %)",
+  "rows": [
+   "(%)",
+   "(%)"
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "lake",
+  "label": "Laghetto a sud, alimentato da un ramo del torrente (10/11)",
+  "rect": [
+   17,
+   38,
+   32,
+   43
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "smith",
+  "label": "Fabbro (blacksmith): tetto con comignolo c, finestre o, insegna 5, porta S",
+  "rect": [
+   36,
+   8,
+   42,
+   11
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "alchemist",
+  "label": "Alchimista (alchemist): tetto con comignolo, finestre, insegna 7, porta L",
+  "rect": [
+   5,
+   38,
+   11,
+   41
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "inn",
+  "label": "Locanda (inn, porta H): tetto con comignolo, finestre (10/11: a sud-est, opposta alla cripta)",
+  "rect": [
+   37,
+   39,
+   43,
+   42
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "church",
+  "label": "Chiesa (10/11): campanile alto a ovest e torretta, guglie A con la croce, finestre o, porta chiusa D",
+  "rect": [
+   18,
+   2,
+   25,
+   8
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "house",
+  "label": "Casa chiusa: tetto con comignolo c, finestre o, porta D",
+  "rect": [
+   4,
+   15,
+   8,
+   18
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "garden_house",
+  "label": "Casa chiusa con giardino recintato: steccato | e v, cespugli B, fiori * (10/11)",
+  "rect": [
+   17,
+   17,
+   25,
+   22
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "portal_square",
+  "label": "Piazzetta tonda del portale (10/11): il portale si apre a (42,24), lampioni",
+  "rect": [
+   37,
+   22,
+   43,
+   28
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "garden",
+  "label": "Orto recintato (10/11, al posto del recinto del fieno): terra d e fiori *",
+  "rect": [
+   36,
+   29,
+   40,
+   33
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "well",
+  "label": "Pozzo accanto al sentiero (10/11: due nel villaggio)",
+  "rect": [
+   11,
+   17,
+   13,
+   19
+  ]
+ },
+ {
+  "set": "VILLG",
+  "name": "cemetery",
+  "label": "Cimitero: steccato (verticale a linea sola v), lapidi t Y in file con la terra d davanti, cripta",
+  "rect": [
+   3,
+   3,
+   16,
+   13
+  ]
+ },
+ {
+  "set": "DUNGA",
+  "name": "wall",
+  "label": "Muro: WALL (#) sopra la faccia WALLFACE (=), che post_walls mette sopra il pavimento",
+  "rows": [
+   "#",
+   "=",
+   "."
+  ]
+ },
+ {
+  "set": "TRONO",
+  "name": "pentacle",
+  "label": "Pentacolo: stella (a) e cerchio (b) attorno al boss finale",
+  "rect": [
+   15,
+   16,
+   33,
+   34
+  ]
+ },
+ {
+  "set": "TRONO",
+  "name": "treasure",
+  "label": "Stanza dei tesori: 4 bauli epici e la leva (H), aperta alla morte del boss",
+  "rect": [
+   13,
+   0,
+   35,
+   7
+  ]
+ }
+]

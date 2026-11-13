@@ -1,0 +1,13 @@
+# allowlist: nell'immagine entra solo cio' che serve a eseguire il demone headless (le pagine arrivano dal contesto "pages")
+*
+!headless/c64
+!headless/c64d.js
+!headless/c64-batch
+!headless/c64-api.js
+!headless/APIVER
+!headless/package.json
+!docs/C64-API.md
+!docs/scripting.md
+!roms/vice-roms/C64/*.bin
+!roms/vice-roms/DRIVES/*.bin
+!roms/open-roms/*.rom

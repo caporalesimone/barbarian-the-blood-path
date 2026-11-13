@@ -1,0 +1,60 @@
+# Chapters of the game (11/11, docs/capitoli.md, docs/quests.md 3.8). Read by tools/build/chapters_db.py, which computes the
+# two counters: the LOCAL level (1..levels, restarts in every chapter: what the player sees) and the GLOBAL depth
+# (1..global_max: levels of the previous chapters + local level; it drives the difficulty). The last chapter with
+# `levels: rest` (the Abyss) takes the levels left up to global_max. Users: tools/simulators/chapters.py (balancing per chapter),
+# tools/atlas/gen_atlas.py (one section per chapter), the bestiaries (data/monsters/bestiary.tsv: `floor` = global depth).
+# The game code does NOT know chapters yet (TODO M9): see `today`. Rule of the owner (11/11 evening): 5 levels per chapter
+# (the last one = final map), the Abyss apart; the game keeps the 5 level states of the current chapter in RAM.
+#
+# Fields: id, name, implemented (in the game code), village (name, gfx file, map, pf_n, atlas_set), levels (how many,
+# the last one is the final map), themes (dungeon palettes GFXn), atlas_sets, final (final map: name, file, generator,
+# atlas_set, boss = id in the bestiary).
+
+global_max: 255
+today: {levels: 20, note: "one village (Aldric's Crossing), levels 1-19 generated + the throne room on level 20 = depth 1-20"}
+
+chapters:
+  - id: 1
+    name: "Aldric's Crossing"
+    implemented: false
+    village: {name: "Aldric's Crossing", gfx: GFX0, map: data/town_map.txt, pf_n: 8, atlas_set: VILLG}
+    levels: 5
+    themes: [1, 2]
+    atlas_sets: [DUNGA, DUNGB]
+    final: {name: "The Crypt of the Abbot", file: null, generator: null, atlas_set: null, boss: hollow_abbot}
+
+  - id: 2
+    name: "Blackwater Mill"
+    implemented: false
+    village: {name: "Blackwater Mill", gfx: null, map: null, pf_n: null, atlas_set: null}
+    levels: 5
+    themes: [3, 4]
+    atlas_sets: [DUNGC, DUNGD]
+    final: {name: "The Flooded Mill", file: null, generator: null, atlas_set: null, boss: miller_of_blackwater}
+
+  - id: 3
+    name: "The Last Camp"
+    implemented: false
+    village: {name: "The Last Camp", gfx: null, map: null, pf_n: null, atlas_set: null}
+    levels: 5
+    themes: [5, 6]
+    atlas_sets: [DUNGE, DUNGF]
+    final: {name: "The Broken Bastion", file: null, generator: null, atlas_set: null, boss: varok_oathbreaker}
+
+  - id: 4
+    name: "The Throne of Ruin"
+    implemented: false
+    village: {name: "Ruin's Gate", gfx: null, map: null, pf_n: null, atlas_set: null}
+    levels: 5
+    themes: [7, 8]
+    atlas_sets: [DUNGG, DUNGH]
+    final: {name: "The Throne of Ruin", file: FMAP, generator: tools/build/gen_final.py, atlas_set: TRONO, boss: lord_of_ruin}
+
+  - id: 5
+    name: "The Abyss"
+    implemented: false
+    village: {name: "the city of the Abyss", gfx: null, map: null, pf_n: null, atlas_set: null}
+    levels: rest
+    themes: [1, 2, 3, 4, 5, 6, 7]
+    atlas_sets: []
+    final: null

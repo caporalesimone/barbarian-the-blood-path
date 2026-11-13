@@ -1,0 +1,23 @@
+id	category	type	name	hands	dice	rate	pen	ac	armor_type	bonus	heal	cooldown	zone	rarity	color	ilvl	price	shop_level	tier	notes
+dagger	equipment	weapon	dagger	1	1d4	12	0									0	40		base	start weapon
+sword	equipment	weapon	sword	1	1d8	14	0									3	200		base	one-handed sword
+viking_sword	equipment	weapon	viking sword	2	2d6	20	1									12	2400		base	two-handed: no shield, slower, more dice (Smash x2)
+leather_armor	equipment	armor	leather armor					2	light							0	80		base	
+chain_mail	equipment	armor	chain mail					5	medium							7	900		base	
+plate_mail	equipment	armor	plate mail					8	heavy							14	3600		base	
+small_shield	equipment	shield	small shield					1								0	60		base	
+medium_shield	equipment	shield	mid shield					2								5	400		base	name shortened 08/11 (was medium shield)
+tower_shield	equipment	shield	tower shield					3								10	1800		base	
+copper	equipment	ring	copper ring							1						7	700		base	+N to the modifier of STR, DEX or CON (chosen when the ring is created)
+silver	equipment	ring	silver ring							2						12	2500		base	
+gold	equipment	ring	gold ring							3						17	8000		base	
+red	consumable	potion	minor healing								20	250	0	common	2		25	0	base	5 s cooldown
+yellow	consumable	potion	healing potion								60	350	1	common	7		90	5	base	7 s cooldown
+violet	consumable	potion	greater healing								4*L+40	500	2	common	4		250	12	base	10 s cooldown; the only potion in the Abyss
+portal_scroll	consumable	scroll	portal scroll													1	60	1	base	opens a portal to the village
+viking_sword_2	equipment	weapon		2	3d8	20	2									30			void	Abyss (levels 21+): simulator only
+viking_sword_3	equipment	weapon		2	4d8	20	2									60			void	
+viking_sword_4	equipment	weapon		2	5d8	20	3									100			void	
+viking_sword_5	equipment	weapon		2	6d8	20	3									140			void	
+viking_sword_6	equipment	weapon		2	7d8	20	4									180			void	
+viking_sword_7	equipment	weapon		2	8d8	20	4									220			void	

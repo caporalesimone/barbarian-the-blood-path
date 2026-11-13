@@ -1,0 +1,19 @@
+services:
+  c64:
+    build:
+      context: .
+      additional_contexts:
+        pages: ./out          # pagine generate da build.py (--out)
+    image: c64d
+    init: true
+    shm_size: 1gb
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7064:7064"   # solo localhost: il demone non ha autenticazione (c64.eval esegue JS nella pagina)
+    volumes:
+      - ./work/games:/games          # file di gioco: .d64 .g64 .prg .t64 .crt ...   (c64 games / c64 game NOME)
+      - ./work/roms:/roms            # ROM aggiuntive oltre a quelle del repo        (c64 roms / c64 rom kernal NOME)
+      - ./work/scripts:/scripts:ro   # script di input
+      - ./output:/output        # file prodotti dagli script (--outdir /output)
+# uso:  docker compose exec c64 node headless/c64 start
+#       docker compose exec c64 node headless/c64 --outdir /output script /scripts/esempio.txt

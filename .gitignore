@@ -1,0 +1,9 @@
+# Generale (13/11). Ogni componente esterno ha il suo .gitignore nella propria cartella (third-party-tools/*, src/third-party/*).
+# Tutto cio' che si genera sta in out/ (non versionato; resta solo out/.gitkeep)
+out/*
+!out/.gitkeep
+__pycache__/
+*.pyc
+monitor.log
+# MP3 di riferimento: fuori dal repository (11/11), vanno inclusi a mano quando si scarica il progetto (CLAUDE.md)
+lab/music/

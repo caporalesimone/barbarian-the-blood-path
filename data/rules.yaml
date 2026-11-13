@@ -1,0 +1,164 @@
+# Regole del sistema di combattimento (05-06/11, docs/BILANCIAMENTO.md, docs/combattimento.md).
+# Fonte unica dei numeri del combattimento: la usano il gioco (tools/build/gen_db.py -> src/db.asm) e il simulatore
+# (tools/simulators/sim_rules.py, tools/simulators/rules.py). Il resto del mondo (generazione dei mostri, bauli, bottino, negozi, nomi,
+# colori) e' in data/balance.yaml. Taratura: tools/simulators/fit_rules.py, risultati in docs/BILANCIAMENTO.md.
+#
+# Notazione dei dadi: "NdS+K" (es. "1d8+2", "2d6", "3"). Tempi in fotogrammi PAL (50 al secondo).
+
+# Dungeon: piani 1..floors (il piano `floors` e' la stanza del boss finale); un livello del PG per piano (livello = piano);
+# oltre: Abisso, piani floors+1 .. 255, sempre livello = piano. Il tetto del PG prima dell'Abisso e' `floors`.
+dungeon: {floors: 20}
+
+timing:
+  gcd: 10                 # ricarica globale dopo ogni azione del PG
+  monster_attack: 45      # un mostro attacca ogni 45 fotogrammi; il primo colpo al contatto
+  stun_on_hit: 5          # ogni colpo del PG ferma il mostro per 5 fotogrammi (come il gioco)
+  max_frames: 6000        # oltre: tempo scaduto (120 s)
+
+# ---------------------------------------------------------------- PG
+# Tre caratteristiche, tutte usate:
+#   FOR  -> tiro per colpire e danno delle armi, CD del Battle Cry
+#   DES  -> CA (limitata dal tipo di armatura)
+#   COS  -> vita per livello
+# mod = (valore - 10) / 2 per difetto.
+player:
+  scores: {str: 16, dex: 13, con: 15}                         # iniziali: mod +3, +1, +2
+  # (11/11, branch feature/stat-points) Punti statistica: il passaggio di livello non alza piu' le caratteristiche da
+  # solo; il PG riceve punti da spendere nella schermata C (FOR, DES, COS +1 per punto). Numero fisso preso dalla
+  # crescita automatica di prima (FOR +1 ai livelli 4/8/12/16/20, COS 6/14, DES 10/18 = 9 punti): 1 punto ogni 2
+  # livelli, dal 2 al 18 = 9 punti al livello 20.
+  stat_points: {per_level: 1, every: 2, first: 2, last: 18}
+  reference_alloc: [str, con, str, dex, str, con, str, dex, str]   # come li spende il PG di riferimento (tools/simulators/, arena, eroe di prova)
+  # Respec: azzera i punti spesi (tornano tutti da spendere). Gettoni: c_resp (max 255); +1 uccidendo il boss finale,
+  # +1 regalo di una quest (progetto), nell'Abisso un gettone nei bauli con probabilita' bassa (preso come l'oro).
+  respec: {max: 255, final_boss: 1, abyss_chest_percent: 2}
+  epic_every: 4            # oltre il 20: +1 a FOR, COS, DES a rotazione ogni 4 livelli
+  prof_every: 4            # competenza: 2 + (livello-1)/4 -> 2..6 al 20, poi +1 ogni 4 livelli
+  hp_level1: "10+CON"      # vita al livello 1: 10 + valore di COS (25)
+  hp_per_level: 6          # (11/11) vita = 10 + COS + (livello - 1) x (6 + mod COS): COS di adesso, retroattiva
+  max_level_before_boss: 20   # = dungeon.floors (un livello per piano)
+
+# Abilita' attive: livello, ricarica (cooldown) e durata in fotogrammi. Tutte le durate e ricariche sono in secondi
+# nel commento. "Slash" e' l'attacco base (ricarica = cadenza dell'arma, vedi weapons.rate).
+skills:
+  slash:      {level: 1}                                        # attacco base: ricarica = cadenza dell'arma
+  whirlwind:  {level: 3,  cooldown: 100}                        # 2 s: colpisce tutti i mostri adiacenti, dadi x1
+  battle_cry: {level: 6,  cooldown: 750, stun: 100}             # 15 s; stordisce 2 s chi fallisce: d20 + salvezza >= 8 + comp + mod FOR
+  rage:       {level: 9,  cooldown: 1500, duration: 300, damage: 0, taken_half: true}   # 30 s / dura 6 s: danni subiti dimezzati
+  smash:      {level: 12, cooldown: 300, stun: 25}              # 6 s: vantaggio (2d20) e dadi dell'arma x2, stordisce 0,5 s
+  frenzy:     {level: 15, cooldown: 1500, duration: 250, extra_hits: 1,   # 30 s / dura 5 s: +1 colpo per attacco
+               run_first: 25, run_step: 15, run_max: 100}       # corsa: +25% al primo colpo a segno, +15% a ogni colpo a segno dopo, max +100%, fino a fine Frenzy
+  brutal_critical_level: 17                                     # critico su 19-20 dal livello 17
+
+# Pozioni: cura FISSA (rossa, gialla) o a formula (viola: L = livello, HP = vita massima); ricarica = nessuna pozione
+# per quel tempo dopo averla bevuta. Dove escono: i piani 1..floors sono divisi in 3 zone (zone: frazioni del numero di
+# piani); dentro la zona il peso e' 1, fuori cala per ogni piano di distanza secondo `ramp` (0 oltre). Nell'Abisso
+# solo la viola. Cosi' il piano massimo si cambia senza rifare i conti.
+potions:                   # the potions themselves: data/items/items.tsv (type potion); here only where they drop
+  zones: [0.35, 0.7]       # fine della zona 0 e della zona 1 come frazione dei piani (20 piani: 1-7, 8-14, 15-20)
+  ramp: [0.4, 0.15, 0.05]  # peso a 1, 2, 3 piani dalla propria zona (oltre: 0); es. gialla al piano 7: 0.4, al 6: 0.15, al 5: 0.05
+  drink_below: 0.35        # il bot beve sotto il 35% della vita
+
+# ---------------------------------------------------------------- oggetti
+# (11/11) Gli oggetti (armi, armature, scudi, anelli, pozioni, pergamene, armi dell'Abisso) stanno nel database
+# data/items/items.tsv (colonne: data/items/README.md; caricato da tools/build/items_db.py, che li rimette nelle sezioni
+# weapons/armors/shields/rings/potions/scrolls/void_weapons per gen_db, gen_manual e tools/simulators/). Qui restano le regole.
+dex_cap: {light: 99, medium: 2, heavy: 0}
+
+# Durabilita' (06/11): solo armi, armature e scudi INDOSSATI si usurano; a 0 l'oggetto si distrugge.
+# Generata quando l'oggetto entra nello zaino (bottino o acquisto): con probabilita' ilvl_weight_percent il
+# livello oggetto pesa (tiro uniforme fra min + floor_per_ilvl x ilvl e max), altrimenti tiro uniforme fra min e
+# max: in media dura molto, ogni tanto un bell'oggetto dura poco. Simulazione: tools/simulators/sim_durability.py.
+durability:
+  min: 10
+  max: 255
+  ilvl_weight_percent: 75
+  floor_per_ilvl: 8
+  wear:                      # 1 punto di usura con probabilita' 1/N
+    weapon_per_hit: 2        # per colpo a segno del PG (ogni tiro d'attacco riuscito)
+    armor_per_hit: 1         # per colpo subito
+    shield_per_hit: 1        # per colpo subito (se lo scudo conta: non con un'arma a due mani)
+  # 06/11: usura 2/1/1 per una riparazione ogni ~3 piani (tools/simulators/sim_durability.py); un boss costa all'arma 6-14 punti
+  warn_percent: 20           # avviso nell'HUD: durabilita' <= 20% del massimo (deve dividere 100)
+  repair_cost_percent: 25    # dal fabbro: costo = prezzo x N / 100, riporta la durata al massimo; il massimo cala di 1
+start_weapon: dagger       # arma iniziale (il PG ha sempre un'arma: non si puo' togliere senza metterne un'altra)
+magic_max: 3               # +N massimo su arma, armatura e scudo nei piani 1-20 (ATT/CA/danno)
+
+
+# ---------------------------------------------------------------- mostri
+# Scheda base al piano minimo del tipo. P = piano - piano minimo: vita +hp_dice_per_floor dadi, CA +ac_per_floor,
+# ATT +att_per_floor, danno +dmg_per_floor (per piano, parte decimale troncata); salvezza + ATT/2.
+# curve_hp / curve_dmg (indice = piano, 0..floors): moltiplicatori cercati da tools/simulators/fit_rules.py sul PG di riferimento.
+monster_scale: {hp: 1.0, damage: 1.0}       # moltiplicatori globali (taratura veloce)
+growth: {hp_dice_per_floor: 0.5, ac_per_floor: 1, att_per_floor: 0.7, dmg_per_floor: 1.0,
+         curve_hp:  [1, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
+         curve_dmg: [1, 0.5, 0.5, 0.5, 0.5, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 1, 1, 1, 1, 1, 1]}
+# xp: esperienza al piano minimo del tipo; per ogni piano in piu' x (1 + xp_per_floor * P) (provvisorio: Fable).
+xp_per_floor: 0.25
+# esperienza per passare al livello 2..20 (24 bit): ~1,3 livelli esplorando tutto un piano (provvisoria: Fable)
+xp_needed: auto
+# (11/11) i mostri (schede: floor, level, hp, ac, att, dmg, save, xp, strong/final/stun_immune) stanno nel bestiario
+# data/monsters/bestiary.tsv (tools/build/bestiary.py li rimette qui per gen_db e tools/simulators/: righe implemented = yes).
+boss: {hp_mult: 2.5, ac_add: 2, att_add: 2}   # boss con nome dei piani 1..floors-1 (variante forte)
+final_boss_hp_mult: 1         # moltiplicatore della vita del boss finale (la scheda e' gia' tarata)
+final_summons: {waves: 3, per_wave: 2, max_alive: 2, delay: 0, floor: 20, types: [fallen, skeleton, zombie, demon]}   # ondata (2 mostri, subito) al 75/50/25% della vita se i vivi (boss compreso) sono <= max_alive; statistiche del piano 20 (06/11)
+
+# ---------------------------------------------------------------- Abisso (piani floors+1 .. 255, livello = piano)
+# Curva separata: i mostri partono dalla scheda del piano `floors` e crescono per piano V = piano - floors
+# SEGUENDO il PG di riferimento dell'Abisso (livello = piano): CA += crescita dell'ATT del PG + indurimento,
+# ATT += crescita della CA del PG, danno x crescita della vita del PG, vita x crescita del danno del PG.
+# Calcolato ogni 16 piani e interpolato (sul C64: tabella di 16 righe).
+void:
+  hardening: 6            # punti di CA in piu' al piano 245 oltre a quelli che seguono il PG: i colpi a segno del PG calano
+  boss_hp_mult: 3         # boss con nome nell'Abisso: vita x3 (nel dungeon: boss.hp_mult = x2,5)
+  reference: {armor: plate_mail, shield: "", magic_base: 3, magic_every: 40, magic_max: 8, ring: gold}   # magia +3 al piano floors, +1 ogni 40 piani
+  table:   # [V = piano - 10, CA +, ATT +, vita x, danno x] da tools/simulators/fit_rules.py; interpolata tra le righe
+    - [0, 0, 0, 1, 1]
+    - [16, 5, 0, 2.12, 1.35]
+    - [32, 11, 0, 1.1, 4.61]
+    - [48, 16, 1, 1.33, 7.55]
+    - [64, 22, 1, 2.06, 3.39]
+    - [80, 28, 2, 1.65, 11.73]
+    - [96, 32, 2, 2.19, 7.43]
+    - [112, 38, 2, 2.81, 4.83]
+    - [128, 44, 3, 1.96, 13.36]
+    - [144, 49, 3, 1.96, 12.7]
+    - [160, 55, 4, 2.23, 20.04]
+    - [176, 60, 4, 3.03, 12.79]
+    - [192, 65, 4, 2.27, 19.54]
+    - [208, 71, 5, 2.54, 25.47]
+    - [224, 77, 5, 2.15, 30.06]
+    - [235, 79, 5, 3.88, 11.42]
+  limits: {byte: 255, word: 65535}   # ATT e CA a 8 bit; vita e danno di un colpo a 16 bit
+
+# ---------------------------------------------------------------- bottino (stile Diablo)
+loot:
+  area_level_per_floor: 2
+  rarity: {common: 100, uncommon: 40, rare: 10, very_rare: 3, unique: 1}
+  g_common: [1, 2, 4, 6, 8, 8, 7, 6, 5, 4, 3, 3, 2, 2, 1, 1, 1, 1, 1, 1, 0]
+  g_chase:  [1, 2, 3, 3, 3, 3, 2, 2, 2, 2, 1]
+  magic_max_per_area: 4
+
+# PG di riferimento per piano: livello = piano, oggetti di un giocatore "normale" che arriva al piano.
+# ring: caratteristica e anello (es. "str:copper").
+reference:   # equipaggiamento atteso per piano (06/11: magia 0 fino al 4, +1 dal 5, +2 dal 14 secondo tools/simulators/sim_chest.py)
+  1:  {weapon: dagger,       armor: leather_armor, shield: small_shield,  magic: 0, ring: ""}
+  2:  {weapon: dagger,       armor: leather_armor, shield: small_shield,  magic: 0, ring: ""}
+  3:  {weapon: sword,        armor: leather_armor, shield: small_shield,  magic: 0, ring: ""}
+  4:  {weapon: sword,        armor: leather_armor, shield: small_shield,  magic: 0, ring: ""}
+  5:  {weapon: sword,        armor: leather_armor, shield: medium_shield, magic: 1, ring: ""}
+  6:  {weapon: sword,        armor: leather_armor, shield: medium_shield, magic: 1, ring: ""}
+  7:  {weapon: sword,        armor: chain_mail,    shield: medium_shield, magic: 1, ring: "str:copper"}
+  8:  {weapon: sword,        armor: chain_mail,    shield: medium_shield, magic: 1, ring: "str:copper"}
+  9:  {weapon: sword,        armor: chain_mail,    shield: medium_shield, magic: 1, ring: "str:copper"}
+  10: {weapon: sword,        armor: chain_mail,    shield: tower_shield,  magic: 1, ring: "str:copper"}
+  11: {weapon: sword,        armor: chain_mail,    shield: tower_shield,  magic: 1, ring: "str:copper"}
+  12: {weapon: viking_sword, armor: chain_mail,    shield: "",            magic: 1, ring: "str:copper"}
+  13: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 1, ring: "str:silver"}
+  14: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 2, ring: "str:silver"}
+  15: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 2, ring: "str:silver"}
+  16: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 2, ring: "str:gold"}
+  17: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 2, ring: "str:gold"}
+  18: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 2, ring: "str:gold"}
+  19: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 2, ring: "str:gold"}
+  20: {weapon: viking_sword, armor: plate_mail,    shield: "",            magic: 2, ring: "str:gold"}

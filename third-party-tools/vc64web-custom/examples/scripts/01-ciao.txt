@@ -1,0 +1,7 @@
+# Stampa un testo, verifica che compaia e fa uno screenshot.
+# Lancio:  c64 --outdir ../output script scripts/01-ciao.txt      (emulatore avviato)
+wait "READY." 10s
+0 text "print \"ciao\"\n"
+wait 40
+assert screen "CIAO"
+screenshot ciao
