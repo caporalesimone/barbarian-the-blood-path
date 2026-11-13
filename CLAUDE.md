@@ -17,7 +17,7 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
 ## Ambiente: tutto nei container (13/11, regola del committente)
 - Build e test girano **solo nei container Docker**. La **toolchain** (`toolchain/`, 13/11, regola del committente) e' generica
   per il C64 e non sa nulla del gioco: immagini **`c64-<nome>`** (`c64-builder` build, `c64-emu-vice` test e strumenti in VICE,
-  `c64-emu-vc64web` emulatore secondario, `c64-emu-viewer` vista dal vivo). Le immagini proprie
+  `c64-emu-vc64web` emulatore secondario, `c64-emu-viewer` vista dal vivo con l'audio, KasmVNC). Le immagini proprie
   del gioco si chiamano **`barbarian-<nome>`** e stanno accanto al loro codice (`barbarian-manual`: `tools/manual/Dockerfile`).
   La configurazione della toolchain per il gioco sta in `toolchain.env`. Sull'host servono solo sh, Docker, git, curl. Python gira
   **solo nei container**. Comandi: `./build.sh [...]`, `toolchain/run.sh <container> <comando>`, `./validate_env.sh`.

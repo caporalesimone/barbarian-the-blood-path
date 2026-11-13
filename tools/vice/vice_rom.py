@@ -16,5 +16,5 @@ ROM_ARGS = ["-default",
             "-dos1570", ROMS_DRIVES + "/dos1570-315090-01.bin", "-dos1571", ROMS_DRIVES + "/dos1571-310654-05.bin"]
 
 # Display (13/11): di norma ogni VICE ha il suo display virtuale (xvfb-run); con C64_VIEW=1 (./build.sh --view, container
-# c64-emu-viewer) VICE si apre sullo schermo condiviso DISPLAY, che il viewer mostra nel browser (noVNC).
+# c64-emu-viewer) VICE si apre sullo schermo condiviso DISPLAY, che il viewer mostra nel browser (KasmVNC).
 XRUN = [] if os.environ.get("C64_VIEW") == "1" and os.environ.get("DISPLAY") else ["xvfb-run", "-a"]

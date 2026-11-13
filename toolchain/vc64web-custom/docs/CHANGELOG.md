@@ -7,7 +7,7 @@ Le voci più recenti sono in alto. Per le build fino alla 10 il legame build↔A
 ## Dopo la build 32 (non ancora numerata, 13/11)
 - Add: pagina portable con **`?disk=URL[&program=NOME]`**: scarica il disco e lo avvia (con "Autoload + RUN" se attivo). `fetch` con
   `cache:'no-cache'` (riscaricato solo se cambiato sul server). Senza parametro la pagina non fa richieste di rete, come prima. Solo da
-  un server web (da `file://` il browser blocca `fetch`). Provato con il viewer del gioco (server di websockify).
+  un server web (da `file://` il browser blocca `fetch`). Provato con il viewer del gioco (server Node del viewer, 14/11; prima websockify).
 
 ## Build 32 (API 25) — dal report Barbarian su v31
 - Verifica sul gioco (report v31): R12–R16 risolti; bot completo del boss con hash identico con 0, 1 reale, forzato a ogni passo, 2 ogni 3, `exact:false`; `c64-batch -j 3` 9/9 identici.

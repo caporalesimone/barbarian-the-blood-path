@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C64 dal vivo</title>
+<!-- Schermo del viewer dal vivo (client web di KasmVNC) con l'audio (13/11). Copyright (c) 2026 - Simone Caporale
+     L'audio arriva da /audio (WebSocket, PCM s16le stereo 44100 Hz) e si riproduce con WebAudio con un piccolo margine (~30 ms).
+     Il browser accende l'audio solo dopo un clic: pulsante "Audio". -->
+<style>
+  :root { --bar:#16151a; --fg:#ebe7df; --acc:#9aa8ff; --dim:#9a958b; }
+  html, body { margin:0; height:100%; background:#000; color:var(--fg); font:14px/1.4 system-ui, sans-serif; }
+  body { display:flex; flex-direction:column; }
+  header { display:flex; gap:12px; align-items:center; padding:6px 12px; background:var(--bar); flex-wrap:wrap; }
+  header a { color:var(--acc); text-decoration:none; }
+  button { font:inherit; padding:4px 12px; border-radius:6px; border:1px solid #444; background:#2a2833; color:var(--fg); cursor:pointer; }
+  button.on { background:#3d4fb8; border-color:#3d4fb8; }
+  #st { color:var(--dim); }
+  iframe { flex:1; border:0; width:100%; }
+</style>
+</head>
+<body>
+<header>
+  <a href="./">&larr; indice</a>
+  <button id="audioBtn" title="Accende o spegne l'audio dello schermo">Audio: spento</button>
+  <span id="st"></span>
+</header>
+<iframe src="vnc/index.html?autoconnect=1&amp;resize=remote&amp;show_control_bar=true&amp;clipboard_up=true&amp;clipboard_down=true" allow="clipboard-read; clipboard-write"></iframe>
+<script>
+let ctx = null, ws = null, next = 0, rest = null;
+const btn = document.getElementById('audioBtn'), st = document.getElementById('st');
+function play(data) {
+  let b = new Uint8Array(data);
+  if (rest) { const m = new Uint8Array(rest.length + b.length); m.set(rest); m.set(b, rest.length); b = m; rest = null; }
+  const keep = b.length % 4;                               // 4 byte = un campione stereo s16le
+  if (keep) { rest = b.slice(b.length - keep); b = b.subarray(0, b.length - keep); }
+  const n = b.length / 4; if (!n) return;
+  const i16 = new Int16Array(b.buffer, b.byteOffset, n * 2);
+  const ab = ctx.createBuffer(2, n, 44100), L = ab.getChannelData(0), R = ab.getChannelData(1);
+  for (let i = 0; i < n; i++) { L[i] = i16[2 * i] / 32768; R[i] = i16[2 * i + 1] / 32768; }
+  const s = ctx.createBufferSource(); s.buffer = ab; s.connect(ctx.destination);
+  const now = ctx.currentTime;
+  if (next < now + 0.005 || next > now + 0.25) next = now + 0.03;     // ripartenza o ritardo accumulato: si torna a ~30 ms
+  s.start(next); next += ab.duration;
+}
+function on() {
+  ctx = ctx || new AudioContext({ sampleRate: 44100 }); ctx.resume();
+  ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/audio');
+  ws.binaryType = 'arraybuffer';
+  ws.onmessage = e => play(e.data);
+  ws.onopen = () => { st.textContent = 'audio collegato'; };
+  ws.onclose = () => { st.textContent = ws ? 'audio scollegato' : ''; if (ws) off(); };
+  btn.textContent = 'Audio: acceso'; btn.classList.add('on');
+}
+function off() {
+  const w = ws; ws = null; if (w) w.close();
+  btn.textContent = 'Audio: spento'; btn.classList.remove('on');
+}
+btn.onclick = () => (ws ? off() : on());
+window.audio = on;                                         // per le prove automatiche
+</script>
+</body>
+</html>

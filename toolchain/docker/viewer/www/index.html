@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>C64 viewer</title>
 <!-- Pagina indice di c64-emu-viewer (13/11). Copyright (c) 2026 - Simone Caporale
-     Legge gli elenchi delle cartelle servite dal server web (websockify --web): /out/ e /out/vc64web/. -->
+     Legge gli elenchi delle cartelle servite dal server del viewer (server.js): /out/ e /out/vc64web/. -->
 <script src="config.js"></script>
 <style>
   :root { --bg:#f4f1ea; --fg:#1d1b18; --dim:#6b665d; --card:#fffdf8; --line:#ddd6c8; --acc:#3d4fb8; }
@@ -33,9 +33,10 @@
   <p class="sub">Schermo condiviso degli emulatori e ultima build. Pagina servita solo su localhost.</p>
 
   <section>
-    <h2>VICE dal vivo</h2>
-    <a class="big" href="novnc/vnc.html?autoconnect=1&amp;resize=scale&amp;reconnect=1" target="_blank">Apri lo schermo (noVNC)</a>
-    <p class="note">Mostra gli emulatori avviati con lo schermo del viewer (DISPLAY=:99). VNC non trasporta l'audio.</p>
+    <h2>Schermo dal vivo</h2>
+    <a class="big" href="live.html" target="_blank">Apri lo schermo (con audio)</a>
+    <p class="note">Gli emulatori avviati sullo schermo del viewer (DISPLAY=:99), con il loro suono (pulsante "Audio" nella pagina).
+      VICE con il suono: <code>toolchain/viewer.sh exec tools/vice/play.sh</code>. I test girano senza suono.</p>
   </section>
 
   <section class="latest">

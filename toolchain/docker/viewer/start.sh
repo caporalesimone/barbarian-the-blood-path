@@ -1,27 +1,23 @@
 #!/bin/sh
 # Avvio di c64-emu-viewer (13/11). Copyright (c) 2026 - Simone Caporale
-#   schermo :99 (client locali senza autorizzazione X: -ac; solo socket, niente TCP), VNC su 5900 interno,
-#   server web su 6080: pagina indice (/), noVNC (/novnc/), cartella out/ del progetto in sola lettura (/out/).
-# Variabili: VIEW_SIZE (1280x1000x24), VIEW_PASSWORD (password VNC; vuota = nessuna), VIEW_DISK (disco proposto nell'indice:
-#   nome o modello con *, es. game_v*.d64; vuoto = il .d64 piu' recente in /out/).
+#   schermo :99 = Xvnc di KasmVNC (client locali senza autorizzazione X: -ac; solo socket, niente TCP; WebSocket su 127.0.0.1:6901)
+#   audio = PulseAudio, scheda virtuale "c64"; i client (VICE negli altri container) usano il socket anonimo /tmp/.X11-unix/pulse
+#   server web su 6080 (server.js): indice, schermo dal vivo con audio, out/ del progetto
+# Variabili: VIEW_SIZE (1280x1000), VIEW_PASSWORD (facoltativa), VIEW_DISK (disco proposto nell'indice).
 set -e
-W=${VIEW_SIZE:-1280x1000x24}
-rm -f /tmp/.X99-lock /tmp/.X11-unix/X99
-Xvfb :99 -screen 0 "$W" -ac -nolisten tcp -extension MIT-SHM &   # niente memoria condivisa X: i client stanno in altri container
+G=$(printf '%s' "${VIEW_SIZE:-1280x1000}" | cut -dx -f1,2)          # accetta anche il vecchio formato 1280x1000x24
+rm -f /tmp/.X99-lock /tmp/.X11-unix/X99 /tmp/.X11-unix/pulse
+mkdir -p /tmp/.X11-unix /run/pulse; chmod 1777 /tmp/.X11-unix
+pulseaudio --system --disallow-exit --disallow-module-loading --exit-idle-time=-1 -n \
+  -L "module-null-sink sink_name=c64 rate=44100" \
+  -L "module-native-protocol-unix auth-anonymous=1 socket=/run/pulse/native" \
+  -L "module-native-protocol-unix auth-anonymous=1 socket=/tmp/.X11-unix/pulse" \
+  -L "module-always-sink" --daemonize=yes --log-target=stderr 2>/tmp/pulse.log
+mkdir -p /root/.vnc; touch /root/.kasmpasswd
+# -PublicIP: senza, Xvnc 1.5 interroga server STUN su Internet prima di aprire la porta web
+Xvnc :99 -geometry "$G" -depth 24 -ac -nolisten tcp -extension MIT-SHM -PublicIP 127.0.0.1 \
+  -websocketPort 6901 -interface 127.0.0.1 -disableBasicAuth -SecurityTypes None -sslOnly 0 -AlwaysShared \
+  -httpd /usr/share/kasmvnc/www -RectThreads 0 -Log '*:stderr:30' > /tmp/xvnc.log 2>&1 &
 for i in $(seq 50); do [ -S /tmp/.X11-unix/X99 ] && break; sleep 0.1; done
-chmod 777 /tmp/.X11-unix
-if [ -n "${VIEW_PASSWORD:-}" ]; then
-    x11vnc -storepasswd "$VIEW_PASSWORD" /tmp/vncpass >/dev/null 2>&1; AUTH="-rfbauth /tmp/vncpass"
-else
-    AUTH="-nopw"
-fi
-# shellcheck disable=SC2086
-x11vnc -display :99 -noshm -forever -shared $AUTH -rfbport 5900 -quiet -bg -o /tmp/x11vnc.log
-# radice del server web: indice + noVNC + out/ (montata dal progetto in /srv/www/out, se c'e')
-mkdir -p /srv/www
-cp /opt/viewer/index.html /srv/www/index.html
-ln -sfn /usr/share/novnc /srv/www/novnc
-D=$(printf '%s' "${VIEW_DISK:-}" | sed 's/["\\]//g')
-printf 'window.VIEW_DISK = "%s";\n' "$D" > /srv/www/config.js
-echo "viewer pronto: http://localhost:6080"
-exec websockify --web /srv/www 6080 localhost:5900
+chmod 777 /tmp/.X11-unix/pulse 2>/dev/null || true
+cd /opt/viewer && PULSE_SERVER=unix:/run/pulse/native exec node server.js

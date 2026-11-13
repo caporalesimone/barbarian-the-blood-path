@@ -328,8 +328,8 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   `.gitattributes` con `eol=lf`; `./validate_env.sh` controlla dove sta il progetto). Da fare allora: `./validate_env.sh`, `./build.sh`
   e `./build.sh --view` su WSL2 + Docker Desktop (mai provati: rilevamento WSL provato solo con un `mountinfo` di prova; costo di Docker
   misurato solo Linux su Linux). Complessità S.
-- **I10** (13/11) Immagini Docker più piccole (non urgente): `c64-emu-viewer` 803 MB (x11vnc e noVNC di Ubuntu tirano dentro
-  mesa, NumPy e node: provare noVNC dal pacchetto npm in un passo di build a parte), `c64-emu-vc64web` 2,12 GB (provare solo
+- **I10** (13/11) Immagini Docker più piccole (non urgente): `c64-emu-viewer` 780 MB (14/11, KasmVNC: mesa e LLVM ~180 MB li vuole
+  Xvnc; codec e GStreamer ~55 MB arrivano con `pulseaudio`), `c64-emu-vc64web` 2,12 GB (provare solo
   `chromium-headless-shell` di Playwright, togliere ffmpeg di sistema se basta quello di Playwright), `c64-emu-vice` 1,55 GB (con VICE dentro dal 13/11)
   (le librerie gtk3 e ffmpeg pesano ~650 MB). Misurare dopo ogni prova. Complessità S-M.
 - **J1** Prefetch nuovo (salvataggio del piano in sottofondo, record N±1, brano successivo): 300–500 B + ~1 KB di buffer.
@@ -340,26 +340,13 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   Obiettivo: più worker contemporanei, per tenere bassi i tempi man mano che i test crescono (i tetti di `CAPS` restano).
   Cosa serve: un display Xvfb per worker; porte del monitor remoto di VICE diverse; file temporanei separati in `out/tmp/<worker>`;
   test che assemblano varianti del gioco isolati (oggi riscrivono la build normale); report unico. Nel viewer: più schermi
-  (`VIEW_SCREENS=N`, una coppia Xvfb/x11vnc per schermo, websockify con file di token; stima ~30 righe e ~30–60 MB di RAM per
+  (`VIEW_SCREENS=N`, un Xvnc di KasmVNC per schermo e il server del viewer che li smista; stima ~30 righe e ~30–60 MB di RAM per
   schermo, non misurati). Complessità M (il grosso è nel runner, non nel viewer).
 - **J11** (13/11, idea del committente, **da decidere piu' avanti**) **Build versionate selezionabili dal viewer**: tenere i dischi
   delle build precedenti per poter tornare indietro; la pagina indice del viewer propone per prima l'ultima (separata) e sotto le
   altre. Oggi la pagina mostra gia' l'ultima (`C64_VIEW_DISK`, versione piu' alta) e gli altri dischi di `out/`. **Contro la regola
   attuale** "`out/` contiene solo la build piu' recente, niente `release/`": serve decidere dove stanno le build vecchie (es.
   `out/builds/` o una cartella fuori da `out/`), quante se ne tengono e chi le cancella. Complessità S (dopo la decisione).
-- **J12** (13/11, richiesta del committente) **Audio degli emulatori nel browser** (il viewer di oggi usa noVNC: niente audio).
-  Prototipo e misure in [lab/viewer-audio/](lab/viewer-audio/README.md) [MISURATO 13/11, browser headless sulla stessa macchina]:
-  **Guacamole** (`guacd` + tunnel `guacamole-lite` + PulseAudio nel viewer): immagine ~130 ms, audio ~250 ms (in ritardo di ~120 ms
-  sull'immagine), audio nello stesso WebSocket, +~400 MB di immagini, VICE suona al primo colpo con l'architettura di oggi;
-  `guacamole-lite` ha un solo manutentore (in alternativa l'applicazione Java ufficiale, molto piu' pesante).
-  **KasmVNC** (immagine di linuxserver): immagine ~100 ms, audio ~15-20 ms (in anticipo di ~80 ms), canale audio separato
-  (kclient), immagine da 3 GB e 4 aggiustamenti per farla andare con VICE in un altro container.
-  **KasmVNC leggera** (13/11 sera, `lab/viewer-audio/kasmvnc-lite/`: Xvnc ufficiale + PulseAudio + kclient, senza desktop):
-  790 MB (come il viewer di oggi, 803 MB, che non ha l'audio), immagine ~55 ms, audio ~18 ms (in anticipo di ~38 ms), VICE e
-  smoke 31/31 sullo schermo KasmVNC senza aggiustamenti. **E' la candidata migliore**: piu' veloce di entrambe le altre e grande
-  quanto il viewer attuale. Da decidere: sostituire il viewer (Xvfb + x11vnc + noVNC) con questa. Da fare dopo la scelta: viewer con PulseAudio,
-  `-sounddev pulse` in `--view` (oggi VICE mostra "Sound: initialization failed for device pulse"), vc64web con finestra sullo
-  schermo del viewer (non provato), pagina indice con il nuovo client. Complessità M.
 
 ---
 

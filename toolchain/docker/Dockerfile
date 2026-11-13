@@ -8,7 +8,7 @@
 #   cc1541-build    cc1541 dallo zip di Krill's Loader (contesto "krill" + ARG KRILL_ZIP, dal toolchain.env del progetto)
 #   builder         base + assemblatore, cc65, generatori Python + zx0, cc1541 in /opt/c64/bin    -> c64-builder
 #   emu-vice        builder + VICE (x64sc, c1541 e i suoi dati in /opt/vice) + librerie, Xvfb, ffmpeg -> c64-emu-vice
-#   viewer          base + Xvfb, x11vnc, noVNC, pagina indice                                    -> c64-emu-viewer
+#   viewer          base + Xvnc di KasmVNC, PulseAudio, server Node (indice, schermo con audio)    -> c64-emu-viewer
 # I compilatori stanno SOLO negli stage *-build: le immagini finali ricevono i programmi gia' compilati (COPY --from). La cache di
 # BuildKit tiene gli stage compilati: si ricompila solo se cambia un sorgente o la base (docker builder prune svuota la cache).
 # L'emulatore secondario (c64-emu-vc64web) ha il suo Dockerfile nel pacchetto autonomo vc64web-custom/ (base node ufficiale).
@@ -81,11 +81,28 @@ COPY --from=vice-build /out/share/ /opt/vice/share/
 COPY --from=vice-build /out/VERSION.txt /opt/vice/VERSION.txt
 ENV PATH=/opt/vice/bin:$PATH
 
-# --- schermo condiviso da guardare nel browser: Xvfb :99 + x11vnc + noVNC, pagina indice su http://localhost:6080
-# Gli altri container disegnano sullo stesso schermo montando il volume c64-x11 (DISPLAY=:99). VNC non trasporta audio.
-FROM base AS viewer
-RUN apt-get update && apt-get install -y --no-install-recommends xvfb x11vnc novnc websockify procps \
+# --- schermo condiviso da guardare nel browser, con l'audio (13/11): Xvnc di KasmVNC (pacchetto ufficiale, contesto "kasmvnc":
+# toolchain/kasmvnc/download/) + PulseAudio + server Node (toolchain/docker/viewer/server.js) su http://localhost:6080.
+# Gli altri container disegnano sullo stesso schermo e suonano montando il volume c64-x11 (DISPLAY=:99,
+# PULSE_SERVER=unix:/tmp/.X11-unix/pulse). Il server usa pulseaudio2 (modulo nativo): si compila con lo stesso node che lo esegue.
+FROM base AS viewer-node
+RUN apt-get update && apt-get install -y --no-install-recommends nodejs npm build-essential python3 libpulse-dev \
     && rm -rf /var/lib/apt/lists/*
+COPY viewer/package.json /opt/viewer/
+RUN --mount=type=secret,id=ca if [ -s /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; npm config set cafile /run/secrets/ca; fi; \
+    cd /opt/viewer && npm install --omit=dev --no-audit --no-fund && rm -f package-lock.json
+
+FROM base AS viewer
+ARG KASMVNC_DEB=kasmvncserver_ubuntu_noble_1.5.2_amd64.deb
+COPY --from=kasmvnc ${KASMVNC_DEB} /tmp/kasmvnc.deb
+# solo le librerie di Xvnc (le dipendenze del pacchetto SENZA perl, che serve allo script vncserver, non usato) + i file del pacchetto
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        libfreetype6 libgbm1 libgl1 libpixman-1-0 libpng16-16t64 libssl3t64 libunwind8 libx11-6 libxau6 libxcursor1 libxdmcp6 \
+        libxext6 libxfixes3 libxfont2 libxrandr2 libxshmfence1 libxtst6 xauth x11-xkb-utils xkb-data \
+        pulseaudio nodejs procps \
+    && dpkg-deb -x /tmp/kasmvnc.deb / && ln -sf /usr/bin/Xkasmvnc /usr/bin/Xvnc \
+    && rm -rf /var/lib/apt/lists/* /tmp/kasmvnc.deb /usr/share/doc /usr/share/man
+COPY --from=viewer-node /opt/viewer/node_modules /opt/viewer/node_modules
 COPY viewer/ /opt/viewer/
 EXPOSE 6080
 CMD ["sh", "/opt/viewer/start.sh"]

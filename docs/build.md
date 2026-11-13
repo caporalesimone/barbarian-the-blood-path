@@ -188,7 +188,7 @@ sh, Docker con BuildKit, git e curl (`./validate_env.sh` li controlla).
 | VICE (`x64sc`, `c1541`) e le sue librerie (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `c64-emu-vice` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
 | node 22, Playwright 1.63 + Chromium, ffmpeg | `c64-emu-vc64web` | demone di vc64web (test `EMU-*`, video) |
 | WeasyPrint 70 (+ PyYAML, Pillow del builder) | `barbarian-manual` (= builder + WeasyPrint) | PDF del manuale |
-| Xvfb, x11vnc, noVNC | `c64-emu-viewer` | vista dal vivo nel browser |
+| Xvnc di KasmVNC 1.5.2, PulseAudio, node (server del viewer) | `c64-emu-viewer` | vista dal vivo nel browser, con l'audio |
 | gcc e librerie di sviluppo | stage `tools-builder` (non e' un'immagine) | compilare VICE, zx0, cc1541 |
 
 Dimensioni misurate il 13/11 (`docker image inspect`, layer comuni contati in ogni immagine): c64-builder 868 MB, c64-emu-vice

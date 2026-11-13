@@ -2,8 +2,12 @@
 
 Copyright © 2026 - Simone Caporale
 
+**Esito (14/11)**: scelta la **KasmVNC leggera**, integrata nella toolchain come `c64-emu-viewer` (`toolchain/docker/Dockerfile`, target
+`viewer`; al posto di kclient un server Node nostro con una porta sola, audio su WebSocket e password facoltativa). Pagina:
+`docs/getting-started.md` sezione 6.
+
 Materiale di **studio**, non usato dalla build. Confronto fra due modi di portare nel browser **immagine e audio** dello schermo
-degli emulatori (oggi il viewer usa noVNC, che non trasporta l'audio). Decisione aperta nel TODO (J12).
+degli emulatori (oggi il viewer usa noVNC, che non trasporta l'audio). 
 
 ## Cosa e' stato provato
 | | Guacamole | KasmVNC |

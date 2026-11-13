@@ -1,0 +1,9 @@
+{
+  "name": "c64-emu-viewer",
+  "private": true,
+  "description": "Server del viewer della toolchain C64: pagina indice, client di KasmVNC, audio da PulseAudio (13/11)",
+  "dependencies": {
+    "pulseaudio2": "0.5.5",
+    "ws": "8.18.3"
+  }
+}

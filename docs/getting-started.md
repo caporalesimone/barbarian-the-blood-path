@@ -49,7 +49,7 @@ stessi in tutte le immagini che ne derivano (13/11, misurato: stessi id dei laye
 | (stage `tools-builder`, `*-build`) | base | compilatori C e librerie di sviluppo | compilano VICE, zx0, cc1541 **durante la build** delle immagini; non diventano immagini (restano nella cache di BuildKit) | - |
 | `c64-builder` | base | 64tass, cc65, make, perl, Python 3 con Pillow, PyYAML, NumPy, Matplotlib; zx0, cc1541 | build del gioco, generatori, simulatori | 868 MB |
 | `c64-emu-vice` | c64-builder | + VICE 3.10 (`x64sc`, `c1541`), librerie gtk3, Xvfb, ffmpeg | test, screenshot, arena, misure in VICE, MP3 dei brani | 1553 MB |
-| `c64-emu-viewer` | base | Xvfb, x11vnc, noVNC, pagina indice | facoltativo: VICE dal vivo e ultima build in vc64web nel browser | 803 MB |
+| `c64-emu-viewer` | base | Xvnc di KasmVNC, PulseAudio, server Node (pagina indice, schermo con audio) | facoltativo: emulatori dal vivo **con l'audio** e ultima build in vc64web nel browser | 780 MB |
 | `c64-emu-vc64web` | node:22-bookworm-slim | node, Playwright, Chromium, ffmpeg, pagine di vc64web gia' costruite (Dockerfile del pacchetto) | demone dei test `EMU-*` | 2116 MB |
 | `barbarian-manual` | c64-builder | + WeasyPrint, pango (`tools/manual/Dockerfile`) | PDF del manuale | vedi `docker images` |
 
@@ -143,19 +143,27 @@ sequenceDiagram
 
 ## 6. Vedere l'emulatore dal vivo
 
-`./build.sh --view` (o `toolchain/viewer.sh start`) avvia `c64-emu-viewer`; **http://localhost:6080** (porta aperta solo su
-localhost) e' una **pagina indice** con:
-- **VICE dal vivo**: uno schermo X condiviso (volume `c64-x11`) mostrato da noVNC. I VICE dei test si aprono su quello schermo
-  (`C64_VIEW=1`, `DISPLAY=:99`) invece che ognuno sul suo Xvfb. VNC **non trasporta l'audio**.
+`./build.sh --view` (o `toolchain/viewer.sh start`) avvia `c64-emu-viewer`; **http://localhost:6080** (una sola porta, aperta solo
+su localhost) e' una **pagina indice** con:
+- **Schermo dal vivo con l'audio** (`/live.html`, 14/11): lo schermo X condiviso e' il server X di **KasmVNC** (volume `c64-x11`),
+  mostrato dal suo client web; l'audio viene da **PulseAudio** del viewer (scheda virtuale `c64`) ed e' mandato dal server del viewer
+  su un WebSocket (`/audio`), acceso dal pulsante "Audio" della pagina. Gli emulatori di un altro container usano schermo e audio
+  con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
+  aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
+  **VICE con il suono**, a velocita' reale, sull'ultima build: `toolchain/viewer.sh exec tools/vice/play.sh [disco]`
+  (`viewer.sh exec` = un comando in `c64-emu-vice` collegato a schermo e audio del viewer). La tastiera del browser arriva a VICE.
+  Misure [14/11, browser headless sulla stessa macchina, 2 x 10 eventi]: immagine ~55 ms, audio ~41 ms (il riproduttore tiene
+  ~30 ms di margine), audio e immagine entro ~15 ms; la prima nota dopo un silenzio puo' arrivare con 100-200 ms. Confronto con le
+  alternative (Guacamole, KasmVNC di linuxserver): [lab/viewer-audio](../lab/viewer-audio/README.md).
 - **Ultima build in vc64web**: la pagina portable di vc64web (`out/vc64web/`) aperta con `?disk=/out/<disco>`: l'emulatore gira
   **nel browser dell'utente**, quindi con l'audio; il disco proposto e' il piu' recente che corrisponde a `C64_VIEW_DISK`
   (`toolchain.env`, oggi `blood_path_v*_1541.d64`). Il browser lo riscarica solo se e' cambiato (`fetch` con `cache:'no-cache'`,
   il server risponde 304). Sotto, gli altri dischi di `out/`.
-- il report dei test e la cartella `out/` (sola lettura: il viewer la monta in `/srv/www/out`).
+- il report dei test e la cartella `out/` (sola lettura: il viewer la monta in `/srv/out`).
 
-Password VNC facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default nessuna; protegge solo lo schermo, non i file
-di `out/`). `toolchain/viewer.sh stop` lo ferma. In `--view` VICE mostra l'avviso "Sound: initialization failed for device
-`pulse`" (nel viewer non c'e' un server audio): non blocca i test.
+Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default nessuna): autenticazione HTTP del browser su
+**tutto** il viewer (pagine, `out/`, schermo, audio; utente qualsiasi). Il server X di KasmVNC ascolta solo dentro il container
+(127.0.0.1:6901): fuori c'e' solo la porta 6080. `toolchain/viewer.sh stop` lo ferma.
 
 ## 7. Dove finisce cosa (`out/`)
 

@@ -54,7 +54,7 @@ if [ $EMU = 1 ]; then
 fi
 if [ $VIEW = 1 ]; then
     toolchain/viewer.sh start
-    DARGS="$DARGS -v c64-x11:/tmp/.X11-unix"; export C64_VIEW=1 DISPLAY=:99
+    DARGS="$DARGS -v c64-x11:/tmp/.X11-unix"; export C64_VIEW=1 DISPLAY=:99 PULSE_SERVER=unix:/tmp/.X11-unix/pulse
 fi
 C64_DOCKER_ARGS="$DARGS" toolchain/run.sh emu-vice tests/run_tests.sh
 
