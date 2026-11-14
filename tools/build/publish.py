@@ -18,7 +18,7 @@ Le cartelle si fondono: ripubblicare la stessa versione sostituisce solo i grupp
 lascia gli altri (es. il manuale di una build precedente della stessa versione). manifest.json dice, per ogni file, quando e'
 stato prodotto, la sua impronta SHA-256 (per una cartella: dell'elenco ordinato dei suoi file) e se i test sono girati. Si cancellano solo cartelle che contengono un manifest.json.
 Aggiorna anche il collegamento relativo out/releases/latest -> v<V>."""
-import argparse, datetime, hashlib, json, os, shutil, sys
+import argparse, datetime, hashlib, json, os, re, shutil, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +40,57 @@ def sha256(path):
         for b in iter(lambda: f.read(1 << 20), b""):
             h.update(b)
     return h.hexdigest()
+
+
+def git_info():
+    """commit, ramo e oggetto del lavoro da cui nasce la build; dirty = ci sono modifiche non committate (la build le contiene)"""
+    def g(*a):
+        return subprocess.run(["git", "-C", ROOT] + list(a), capture_output=True, text=True, timeout=20).stdout.strip()
+    try:
+        return {"commit": g("rev-parse", "--short", "HEAD"), "subject": g("log", "-1", "--format=%s"),
+                "dirty": bool(g("status", "--porcelain", "--", "src", "data", "tools", "tests", "toolchain", "docs", "version.yaml"))}
+    except Exception:
+        return {}
+
+
+def memory_stats():
+    """margini di memoria dalle etichette di out/work/game.lbl (stesse formule di tools/build/asm.sh)"""
+    p = os.path.join(OUT, "work", "game.lbl")
+    if not os.path.isfile(p):
+        return {}
+    lb = {m.group(1): int(m.group(2), 16) for m in (re.match(r"(\w+)\s*=\s*\$([0-9a-f]+)", x) for x in open(p)) if m}
+    try:
+        st = {"code_free_below_8720": lb["SCR_H"] + 800 - lb["gfx_data"], "code_free_9c00_block": lb["FREE_RAM_END"] + 1 - lb["code2_end"]}
+    except KeyError:
+        st = {}
+    for k, f in (("game_prg_bytes", "game.prg"), ("game_zx0_bytes", "game.zx0")):
+        q = os.path.join(OUT, "work", f)
+        if os.path.isfile(q):
+            st[k] = os.path.getsize(q) - 2
+    return st
+
+
+def d64_info(path):
+    """blocchi liberi e directory di un .d64 da 35 tracce (BAM e directory alla traccia 18)"""
+    d = open(path, "rb").read()
+    spt = lambda tr: 21 if tr <= 17 else 19 if tr <= 24 else 18 if tr <= 30 else 17
+    off = lambda tr, s: (sum(spt(x) for x in range(1, tr)) + s) * 256
+    bam = off(18, 0)
+    free = sum(d[bam + 4 * tr] for tr in range(1, 36) if tr != 18)
+    total = sum(spt(tr) for tr in range(1, 36) if tr != 18)
+    # PETSCII -> testo: $41-$5A (maiuscole sul C64) in minuscolo come le scrive il gioco, $C1-$DA in maiuscolo
+    pet = lambda b: chr(b + 32) if 0x41 <= b <= 0x5A else chr(b - 128) if 0xC1 <= b <= 0xDA else chr(b) if 0x20 <= b < 0x7F else "?"
+    files, tr, s, seen = [], 18, 1, set()
+    while tr and (tr, s) not in seen and 1 <= tr <= 35:
+        seen.add((tr, s))
+        o = off(tr, s)
+        for i in range(8):
+            e = d[o + 32 * i: o + 32 * i + 32]
+            if e[2] & 7 and e[2]:
+                files.append({"name": "".join(pet(b) for b in e[5:21] if b != 0xA0), "type": ["DEL", "SEQ", "PRG", "USR", "REL"][e[2] & 7] if (e[2] & 7) < 5 else "?",
+                              "blocks": e[30] + 256 * e[31]})
+        tr, s = d[o], d[o + 1]
+    return {"blocks_total": total, "blocks_free": free, "blocks_used": total - free, "files": files}
 
 
 def tree_sha256(path):
@@ -76,6 +127,7 @@ def main():
     ap.add_argument("--manual", action="store_true")
     ap.add_argument("--release", action="store_true")
     ap.add_argument("--only-manual", action="store_true")
+    ap.add_argument("--build-seconds", type=int, default=None, help="durata del passo di build (la misura build.sh)")
     a = ap.parse_args()
     if a.keep < 1:
         sys.exit("publish: --keep deve essere >= 1")
@@ -136,7 +188,16 @@ def main():
         res = [x["result"] for x in r["results"]]
         tests = {"ran": True, "suites": r.get("suites"), "total": len(res), "pass": res.count("PASS"),
                  "fail": res.count("FAIL"), "skip": res.count("SKIP"), "seconds": r.get("total_s"), "at": stamp}
-    man.update({"version": v, "branch": branch, "save_version": ver.get("save_version"), "source_hash": ver.get("source_hash"),
+    stats = man.get("stats") or {}
+    if not a.only_manual:
+        stats.update(memory_stats())
+        stats["disk"] = d64_info(os.path.join(vdir, "blood_path_v%s_1541.d64" % v))
+        stats["git"] = git_info()
+        if a.build_seconds is not None:
+            stats["build_seconds"] = a.build_seconds
+    if a.tests:
+        stats["test_seconds"] = tests.get("seconds")
+    man.update({"stats": stats, "version": v, "branch": branch, "save_version": ver.get("save_version"), "source_hash": ver.get("source_hash"),
                 "updated_at": stamp, "tests": tests, "release": bool(man.get("release") or a.release),
                 "missing": sorted({"disk", "atlas", "memory-map", "tests", "manual"} - {m["group"] for m in man["files"].values()})})
     with open(mpath, "w") as f:

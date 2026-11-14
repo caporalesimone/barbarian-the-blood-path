@@ -7,7 +7,12 @@
 //   /input       WebSocket dei tasti degli overlay (tastiera C64, joystick) di live.html: testo "d <keysym>", "u <keysym>", "f"
 //                (= puntatore al centro dello schermo: senza window manager i tasti vanno alla finestra sotto il puntatore)
 //   /out/        cartella out/ del progetto, sola lettura (montata in /srv/out), con elenco delle cartelle
+//   /control     (14/11) POST JSON {"cmd":"status"|"play"|"stop","disk":"releases/v<V>/<file>.d64"}: VICE sullo schermo dal vivo,
+//                inoltrato al lettore (toolchain/viewer_player.py, container c64-emu-player) dal socket Unix nel volume c64-x11
 // VIEW_PASSWORD (facoltativa, di default assente): autenticazione HTTP Basic su TUTTO (pagine, out/, schermo, audio).
+// Protezioni (14/11): Host deve essere localhost/127.0.0.1/[::1] (o in VIEW_HOSTS, separati da virgole) contro il DNS rebinding;
+// WebSocket e /control accettano solo richieste dalla stessa origine (un altro sito aperto nel browser non puo' comandare il viewer);
+// /control vuole Content-Type application/json (un form di un altro sito non puo' mandarlo senza preflight, che qui non si concede).
 'use strict';
 const http = require('http'), fs = require('fs'), path = require('path'), net = require('net');
 const { WebSocketServer, WebSocket } = require('ws');
@@ -15,6 +20,38 @@ const PulseAudio = require('pulseaudio2');
 
 const PORT = 6080, VNC_PORT = 6901, PASS = process.env.VIEW_PASSWORD || '';
 const DISK = (process.env.VIEW_DISK || '').replace(/["\\]/g, '');
+const PLAYER_SOCK = '/tmp/.X11-unix/c64-player.sock';
+const HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', ...(process.env.VIEW_HOSTS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean)]);
+function hostOk(req) {                                          // nome dell'Host senza porta
+  const h = String(req.headers.host || '').toLowerCase().replace(/:\d+$/, '');
+  return HOSTS.has(h);
+}
+function sameOrigin(req) {                                      // Origin assente (curl, script locali) o uguale all'Host
+  const o = req.headers.origin;
+  if (!o) return true;
+  try { return new URL(o).host === req.headers.host; } catch (e) { return false; }
+}
+function control(req, res) {
+  const fail = (code, msg) => { res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify({ ok: false, error: msg })); };
+  if (req.method !== 'POST') return fail(405, 'solo POST');
+  if (!sameOrigin(req)) return fail(403, 'origine diversa');
+  if (!String(req.headers['content-type'] || '').startsWith('application/json')) return fail(415, 'serve application/json');
+  let body = '';
+  req.on('data', d => { body += d; if (body.length > 2048) req.destroy(); });
+  req.on('end', () => {
+    let q;
+    try { q = JSON.parse(body); } catch (e) { return fail(400, 'JSON non valido'); }
+    const line = JSON.stringify({ cmd: String(q.cmd || ''), disk: q.disk === undefined ? undefined : String(q.disk) }) + '\n';
+    const c = net.connect(PLAYER_SOCK);
+    let out = '', done = false;
+    const finish = (code, txt) => { if (done) return; done = true; res.statusCode = code; res.setHeader('Content-Type', 'application/json'); res.setHeader('Cache-Control', 'no-store'); res.end(txt); };
+    c.setTimeout(8000, () => { c.destroy(); finish(504, JSON.stringify({ ok: false, error: 'il lettore non risponde' })); });
+    c.on('connect', () => c.write(line));
+    c.on('data', d => { out += d; });
+    c.on('end', () => finish(200, out.trim() || JSON.stringify({ ok: false, error: 'risposta vuota' })));
+    c.on('error', () => finish(503, JSON.stringify({ ok: false, error: 'lettore non attivo (C64_VIEW_PLAYER in toolchain.env, poi toolchain/viewer.sh stop e start)' })));
+  });
+}
 const ROOTS = [['/out/', '/srv/out', true], ['/vnc/', '/usr/share/kasmvnc/www', false], ['/', path.join(__dirname, 'www'), false]];
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css',
   '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon', '.txt': 'text/plain; charset=utf-8',
@@ -50,6 +87,7 @@ function listing(res, dir, urlPath) {                           // elenco HTML (
 }
 
 const server = http.createServer((req, res) => {
+  if (!hostOk(req)) { res.statusCode = 421; return res.end('Host non ammesso (VIEW_HOSTS)'); }
   if (!authorized(req)) { res.statusCode = 401; res.setHeader('WWW-Authenticate', 'Basic realm="c64 viewer"'); return res.end(); }
   let urlPath;
   try { urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname); } catch (e) { res.statusCode = 400; return res.end(); }
@@ -57,6 +95,7 @@ const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/javascript'); res.setHeader('Cache-Control', 'no-cache');
     return res.end(`window.VIEW_DISK = "${DISK}";\n`);
   }
+  if (urlPath === '/control') return control(req, res);
   if (urlPath === '/out') { res.statusCode = 301; res.setHeader('Location', '/out/'); return res.end(); }
   const [prefix, root, list] = ROOTS.find(([p]) => urlPath.startsWith(p));
   const file = path.normalize(path.join(root, urlPath.slice(prefix.length)));
@@ -128,6 +167,7 @@ inWss.on('connection', ws => {
 
 // --- WebSocket: /audio e /input qui, tutto il resto (client di KasmVNC) passa a Xvnc cosi' com'e'
 server.on('upgrade', (req, sock, head) => {
+  if (!hostOk(req) || !sameOrigin(req)) { sock.end('HTTP/1.1 403 Forbidden\r\n\r\n'); return; }
   if (!authorized(req)) { sock.end('HTTP/1.1 401 Unauthorized\r\n\r\n'); return; }
   if (req.url.startsWith('/input')) { inWss.handleUpgrade(req, sock, head, ws => inWss.emit('connection', ws, req)); return; }
   if (req.url.startsWith('/audio')) { wss.handleUpgrade(req, sock, head, ws => wss.emit('connection', ws, req)); return; }

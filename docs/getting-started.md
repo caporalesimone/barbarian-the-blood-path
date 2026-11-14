@@ -140,7 +140,8 @@ sequenceDiagram
 ```
 
 - `smoke/` (veloci, happy path) + `sanity/` (feature corrente): a ogni build e prima di ogni commit. `regression/`: in release.
-- Tetti di durata (`CAPS` in `tests/run.py`): smoke 20 s, smoke + sanity 35 s, un test 10 s. Il viewer non conta.
+- Tetti di durata (`CAPS` in `tests/run.py`): smoke 20 s, smoke + sanity 35 s, un test 10 s. Valgono anche con il viewer acceso
+  (i test sul suo schermo sono piu' lenti: 28,3 s contro 17,9 s, una misura del 14/11; `./build.sh --no-view` li tiene sui display virtuali).
 - Test singoli: `toolchain/run.sh emu-vice python3 tests/run.py -k INN`, `toolchain/run.sh emu-vice python3 tests/run.py all --list`.
 - Test su vc64web: `./build.sh --emu` (poi i `EMU-*` sono in regression: `-k EMU`). Senza demone sono SKIP, non FAIL.
 - Regole dei test (ID, lingua, eroe di prova, dove va un test nuovo): [tests/CLAUDE.md](../tests/CLAUDE.md) e [test.md](test.md).
@@ -148,7 +149,36 @@ sequenceDiagram
 ## 6. Vedere l'emulatore dal vivo
 
 `./build.sh --view` (o `toolchain/viewer.sh start`) avvia `c64-emu-viewer`; **http://localhost:6080** (una sola porta, aperta solo
-su localhost) e' una **pagina indice** con:
+su localhost) e' il **centro di controllo** (14/11, richiesta del committente; tema Commodore 64: palette del VIC-II e font ricavato dal
+chargen nell'immagine, stage `viewer-font`):
+- **Stato dal vivo** (aggiornato ogni 2 s): **BUILD** (fase e esito di `./build.sh`, da `out/tmp/build.json`), **TEST** (barra di
+  avanzamento, test in corso, ultimi esiti e FAIL, da `out/tmp/tests.json` che `tests/run.py` riscrive dopo ogni test), **VICE LIVE**
+  (il VICE avviato dalla pagina, con "Gioca / prova" e "Chiudi").
+- **Miniatura dello schermo dal vivo** fissa in basso a destra (client KasmVNC in sola vista, `view_only=1&resize=scale`): un clic la
+  apre **grande e interattiva** (`/live.html`: tastiera fisica, overlay Tastiera / Joy 1 / Joy 2, Audio). Se il viewer e' acceso,
+  `./build.sh` fa girare i test sul suo schermo da solo (`--no-view` per evitarlo) e la miniatura si apre quando partono i test.
+  [misurato 14/11, una volta sola] smoke + sanity con la vista accesa e VICE del lettore in esecuzione: 28,3 s contro 17,9 s senza
+  (tetto 35 s).
+- **Una scheda per versione** di `out/releases/` (da `manifest.json`): esito dei test, commit, release/branch, modifiche non
+  committate; pulsanti **vc64web (browser)**, **VICE sullo schermo dal vivo**, **Scarica .d64**; margini di RAM, blocchi liberi del
+  disco, dimensione di GAME compresso, durate; tabella degli artefatti (dimensione, data, SHA-256) con quelli **non generati**; directory
+  del disco; elenco dei test (o solo i FAIL, con il motivo).
+- **Andamento** fra le versioni tenute (margini di RAM, blocchi liberi, GAME compresso, durata di build e di smoke + sanity) e
+  **confronto** fra due versioni (misure, file del disco cambiati, test con esito o tempo diverso).
+- **Prove a mano**: "VICE vuoto (READY.)" (`play.sh --bare`), "vc64web vuoto", e i **file propri**: un `.d64 .g64 .prg .t64 .crt`
+  copiato in `out/tmp/` compare nella pagina con i pulsanti VICE e vc64web. Nella finestra di VICE il menu (File -> Smart attach)
+  monta qualunque file del progetto (`/work`).
+
+**Come la pagina comanda VICE** (14/11, scelta piu' sicura confermata dal committente): il viewer **non** ha il socket di Docker (chi
+lo ha e' root sull'host). `viewer.sh start` avvia anche **`c64-emu-player`** (immagine `c64-emu-vice`, `toolchain/viewer_player.py`) se
+`toolchain.env` definisce `C64_VIEW_PLAYER` (qui `tools/vice/play.sh`): la pagina manda `POST /control` al server del viewer, che lo
+passa al lettore da un socket Unix nel volume `c64-x11` (`c64-player.sock`). Comandi: `status`, `play` (percorso sotto `out/`, solo
+`.d64 .g64 .prg .t64 .crt`, niente `..`, il file deve esistere), `basic`, `stop`. Protezioni del server: Host solo `localhost`,
+`127.0.0.1`, `[::1]` (o `VIEW_HOSTS`) contro il DNS rebinding; `/control` e i WebSocket solo dalla stessa origine; `/control` solo con
+`Content-Type: application/json`. [provato 14/11 con curl: 421 con Host estraneo, 403 con Origin estraneo, 415 senza JSON, `disco non
+valido` per `../version.yaml`; in un browser headless: VICE avviato dalla pagina, 100% e 50 fps nello schermo grande]
+
+Dettagli dello schermo dal vivo:
 - **Schermo dal vivo con l'audio** (`/live.html`, 14/11): lo schermo X condiviso e' il server X di **KasmVNC** (volume `c64-x11`),
   mostrato dal suo client web; l'audio viene da **PulseAudio** del viewer (scheda virtuale `c64`) ed e' mandato dal server del viewer
   su un WebSocket (`/audio`), acceso dal pulsante "Audio" della pagina. Gli emulatori di un altro container usano schermo e audio
@@ -169,11 +199,10 @@ su localhost) e' una **pagina indice** con:
   Misure [14/11, browser headless sulla stessa macchina, 2 x 10 eventi]: immagine ~55 ms, audio ~41 ms (il riproduttore tiene
   ~30 ms di margine), audio e immagine entro ~15 ms; la prima nota dopo un silenzio puo' arrivare con 100-200 ms. Confronto con le
   alternative (Guacamole, KasmVNC di linuxserver): [lab/viewer-audio](../lab/viewer-audio/README.md).
-- **Ultima build in vc64web**: la pagina portable di vc64web (`out/cache/vc64web/`) aperta con `?disk=/out/releases/v<V>/<disco>`: l'emulatore gira
-  **nel browser dell'utente**, quindi con l'audio; il disco proposto e' il piu' recente che corrisponde a `C64_VIEW_DISK`
-  (`toolchain.env`, oggi `blood_path_v*_1541.d64`). Il browser lo riscarica solo se e' cambiato (`fetch` con `cache:'no-cache'`,
-  il server risponde 304). Sotto, **tutte le altre versioni** di `out/releases/` (14/11): un clic su una riga avvia quel disco. Le righe vengono dall'elenco delle cartelle (`disk.d64`, il disco di lavoro, non e' elencato).
-- il report dei test e la cartella `out/` (sola lettura: il viewer la monta in `/srv/out`).
+- **vc64web**: la pagina portable di vc64web (`out/cache/vc64web/`) aperta con `?disk=/out/releases/v<V>/<disco>`: l'emulatore gira
+  **nel browser dell'utente**, quindi con l'audio. Il browser riscarica il disco solo se e' cambiato (`fetch` con `cache:'no-cache'`,
+  il server risponde 304).
+- la cartella `out/` (sola lettura: il viewer la monta in `/srv/out`).
 
 Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default nessuna): autenticazione HTTP del browser su
 **tutto** il viewer (pagine, `out/`, schermo, audio; utente qualsiasi). Il server X di KasmVNC ascolta solo dentro il container
@@ -186,7 +215,7 @@ Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default 
 
 | Percorso | Cosa |
 |---|---|
-| `out/releases/v<V>/` | **gli artefatti di ogni versione**: `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generati per quella versione), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
+| `out/releases/v<V>/` | **gli artefatti di ogni versione**: `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generati per quella versione), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca; dal 14/11 `stats`: commit e modifiche non committate, margini di RAM da `game.lbl`, blocchi liberi e directory del disco, dimensioni di GAME, durata di build e test). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
 | `out/work/disk.d64` | disco di lavoro della build in corso (da qui si pubblica) |
 | `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
 | `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
@@ -198,7 +227,7 @@ Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default 
 | `out/cache/zx0/` | compressioni ZX0 gia' fatte (`tools/build/pack.py`) |
 | `out/cache/steps/` | impronte dei passi lenti saltati se gli ingressi non cambiano (`tools/build/cache_run.py`) |
 | `out/cache/vc64web/` | pagine di vc64web (portable e headless): la pagina portable la usa l'indice del viewer |
-| `out/tmp/` | file usa e getta (si puo' cancellare sempre), HOME dei container |
+| `out/tmp/` | file usa e getta (si puo' cancellare sempre), HOME dei container, stato dal vivo per il viewer (`build.json`, `tests.json`), file propri da provare nel viewer (`.d64 .g64 .prg .t64 .crt`) |
 
 ## 8. Problemi tipici
 

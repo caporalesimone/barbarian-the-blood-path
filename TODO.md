@@ -303,6 +303,8 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   Commodore (14 file in `toolchain/roms/vice-roms/` e la stessa copia in `toolchain/vc64web-custom/roms/`, **in git dal 13/11 su richiesta
   del committente**, che le toglierà dal repository prima di pubblicare: `toolchain/roms/roms.md` ha SHA-256, licenze e URL, **URL da verificare**)
   e le pagine generate di vc64web (`out/cache/vc64web/`, che le incorporano; anche l'immagine `c64-emu-vc64web`) non vanno pubblicate.
+  (14/11) Anche il font della pagina del viewer (`c64.ttf`, stage `viewer-font`) e' ricavato dal chargen Commodore: senza le ROM nel
+  repository lo stage non si costruisce; prima di pubblicare va sostituito (es. con il chargen di `open-roms`, licenza da verificare).
   Licenze di VICE (GPL-2.0), zx0 (BSD-3), cc1541 (MIT), Krill (BSD-3 con attribuzione): file nelle loro cartelle. Complessità S.
 - **I8** (13/11) Segnalazioni al team dell'emulatore da riprovare a ogni nuova build: `runLoop` non esatto con un caricamento da disco
   dentro il ciclo (`framesActual` 490 su 480 nel passo del portale, `docs/emulatore.md`); il pacchetto dichiara quel caso non verificato.

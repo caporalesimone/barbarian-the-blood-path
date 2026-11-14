@@ -3,116 +3,500 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>C64 viewer</title>
-<!-- Pagina indice di c64-emu-viewer (13/11). Copyright (c) 2026 - Simone Caporale
-     Legge gli elenchi delle cartelle servite dal server del viewer (server.js): /out/ e /out/cache/vc64web/. -->
+<title>C64 control center</title>
+<!-- Pagina indice di c64-emu-viewer (13/11; 14/11 centro di controllo). Copyright (c) 2026 - Simone Caporale
+     Legge solo file serviti dal server del viewer (server.js), tutti in sola lettura:
+       /out/releases/v<V>/manifest.json   una scheda per versione (artefatti, test, statistiche; formato: tools/build/publish.py)
+       /out/tmp/build.json, tests.json    stato dal vivo di build e test (build.sh, tests/run.py)
+       /out/cache/vc64web/                pagina di vc64web (emulatore nel browser)
+     e comanda VICE sullo schermo dal vivo con POST /control (lettore toolchain/viewer_player.py, se C64_VIEW_PLAYER e' definito).
+     Senza manifest.json (altri progetti) elenca solo i dischi .d64 trovati in out/releases/v*/ e in out/. -->
 <script src="config.js"></script>
 <style>
-  :root { --bg:#f4f1ea; --fg:#1d1b18; --dim:#6b665d; --card:#fffdf8; --line:#ddd6c8; --acc:#3d4fb8; }
-  @media (prefers-color-scheme: dark) { :root { --bg:#16151a; --fg:#ebe7df; --dim:#9a958b; --card:#201f26; --line:#34323c; --acc:#9aa8ff; } }
+  /* tema C64 (14/11, richiesta del committente): palette "Pepto" del VIC-II, font dal chargen (c64.ttf, generato nell'immagine).
+     Il testo corrente e' un azzurro piu' chiaro del colore 14 per la leggibilita'; il resto usa i 16 colori del C64. */
+  @font-face { font-family:"C64"; src:url("c64.ttf") format("truetype"); font-display:swap; }
+  :root { --border:#6C5EB5; --screen:#352879; --fg:#B7AFF5; --hi:#FFFFFF; --dim:#8A80D6; --line:#5848A8; --acc:#70A4B2;
+          --ok:#9AD284; --bad:#E08B7A; --warn:#B8C76F; --orange:#C99A5B; --c64:"C64", ui-monospace, monospace; --fine:ui-monospace, SFMono-Regular, Menlo, monospace; }
   * { box-sizing:border-box; }
-  body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
-  main { max-width:760px; margin:0 auto; padding:28px 16px 48px; }
-  h1 { font-size:22px; margin:0 0 4px; }
-  .sub { color:var(--dim); margin:0 0 24px; }
-  section { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px 18px; margin:0 0 16px; }
-  h2 { font-size:15px; margin:0 0 10px; text-transform:uppercase; letter-spacing:.06em; color:var(--dim); }
+  html { background:var(--border); }
+  body { margin:0; padding:28px 28px 40px; color:var(--fg); font:16px/1.45 var(--c64); -webkit-font-smoothing:none; font-smooth:never; }
+  @media (max-width:700px) { body { padding:16px 16px 28px; } }
+  main { max-width:1180px; margin:0 auto; background:var(--screen); padding:22px 24px 40px; min-height:80vh; }
+  @media (max-width:700px) { main { padding:16px 12px 28px; } }
+  .boot { text-align:center; margin:0 0 6px; color:var(--hi); }
+  .boot2 { text-align:center; margin:0 0 18px; }
+  .ready { margin:0 0 20px; }
+  .cursor { display:inline-block; width:.62em; height:1em; background:var(--fg); vertical-align:-0.12em; animation:blink 1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity:0; } }
+  h2 { font:16px var(--c64); margin:0 0 12px; display:inline-block; background:var(--fg); color:var(--screen); padding:1px 8px; }
+  h3 { font:24px/1.2 var(--c64); margin:0; color:var(--hi); }
   a { color:var(--acc); }
-  .big { display:inline-block; font-size:17px; font-weight:600; text-decoration:none; padding:6px 0; }
-  .row { display:flex; justify-content:space-between; gap:12px; padding:7px 0; border-top:1px solid var(--line); flex-wrap:wrap; }
-  .row:first-child { border-top:0; }
-  .name { font-family:ui-monospace, monospace; word-break:break-all; }
-  .meta { color:var(--dim); font-size:13px; }
-  .latest { border:2px solid var(--acc); }
-  .note { color:var(--dim); font-size:13px; margin:8px 0 0; }
+  code, .fine { font-family:var(--fine); font-size:13px; }
+  .dim { color:var(--dim); }
+  .small { font-size:16px; }
+  section, .card { border:2px solid var(--line); padding:14px 16px; margin:0 0 16px; }
+  .grid3 { display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:16px; margin-bottom:16px; }
+  .grid3 > section { margin:0; }
+  @media (max-width:900px) { .grid3 { grid-template-columns:1fr; } }
+  .state { color:var(--hi); display:flex; align-items:center; gap:10px; }
+  .dot { width:12px; height:12px; background:var(--dim); flex:none; }
+  .dot.ok { background:var(--ok); } .dot.fail { background:var(--bad); } .dot.running { background:var(--warn); animation:blink 1s steps(1) infinite; }
+  .bar { height:12px; border:2px solid var(--line); margin:8px 0 4px; }
+  .bar > i { display:block; height:100%; background:var(--ok); }
+  .bar.fail > i { background:var(--bad); }
+  .chip { display:inline-block; padding:0 6px; border:2px solid currentColor; color:var(--acc); white-space:nowrap; }
+  .chip.ok { color:var(--ok); } .chip.bad { color:var(--bad); } .chip.warn { color:var(--warn); } .chip.plain { color:var(--dim); }
+  .chip.inv { background:var(--hi); color:var(--screen); border-color:var(--hi); }
+  button, .btn { font:16px var(--c64); border:0; background:var(--fg); color:var(--screen); padding:3px 10px; cursor:pointer; text-decoration:none;
+                 display:inline-flex; align-items:center; gap:6px; }
+  button:hover, .btn:hover { background:var(--hi); }
+  button:focus-visible, .btn:focus-visible { outline:2px dashed var(--hi); outline-offset:2px; }
+  button.primary, .btn.primary { background:var(--ok); }
+  button.danger { background:var(--bad); }
+  button:disabled { opacity:.4; cursor:default; }
+  .actions { display:flex; gap:10px; flex-wrap:wrap; margin:12px 0 4px; align-items:center; }
+  .card.latest { border-color:var(--fg); }
+  .card-head { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; align-items:center; }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .kv { display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:10px 18px; margin:12px 0; }
+  .kv div { border-left:4px solid var(--line); padding-left:8px; }
+  .kv b { display:block; color:var(--hi); font-weight:400; }
+  .kv span { color:var(--dim); }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:4px 10px 4px 0; border-top:2px solid var(--line); vertical-align:top; font-weight:400; }
+  th { color:var(--dim); border-top:0; }
+  td.num, th.num { text-align:right; white-space:nowrap; }
+  tr.missing td { color:var(--dim); }
+  details { margin-top:10px; } summary { cursor:pointer; color:var(--acc); }
+  .spark { display:grid; grid-template-columns:repeat(auto-fill, minmax(230px, 1fr)); gap:16px; }
+  .spark div { color:var(--dim); }
+  .spark b { color:var(--hi); font-weight:400; }
+  .spark svg { display:block; width:100%; height:36px; margin-top:4px; overflow:visible; }
+  select { font:16px var(--c64); padding:2px 4px; border:2px solid var(--fg); background:var(--screen); color:var(--hi); }
+  .up { color:var(--ok); } .down { color:var(--bad); }
+  .msg { margin-top:6px; min-height:1em; color:var(--bad); }
+  .results { max-height:230px; overflow:auto; margin-top:6px; }
+  .results div { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  label { cursor:pointer; }
+  input[type=checkbox] { accent-color:var(--ok); width:16px; height:16px; vertical-align:-2px; }
+  /* schermo dal vivo: miniatura fissa in basso a destra (solo vista), clic = finestra grande interattiva */
+  #mini { position:fixed; right:18px; bottom:18px; width:min(380px, calc(100vw - 36px)); background:var(--screen); border:4px solid var(--fg);
+          box-shadow:0 0 0 4px var(--screen); z-index:20; }
+  #mini header { display:flex; justify-content:space-between; align-items:center; background:var(--fg); color:var(--screen); padding:1px 6px; }
+  #mini header button { padding:0 6px; background:var(--screen); color:var(--fg); }
+  #mini .frame { position:relative; aspect-ratio:1280/1000; background:#000; }
+  #mini iframe { position:absolute; inset:0; width:100%; height:100%; border:0; pointer-events:none; }
+  #mini .hit { position:absolute; inset:0; cursor:zoom-in; background:transparent; }
+  #mini .hit:hover { outline:3px dashed var(--hi); outline-offset:-3px; }
+  #mini.closed .frame { display:none; }
+  #big { position:fixed; inset:0; background:rgba(20,14,60,.82); z-index:30; display:none; padding:16px; }
+  #big.open { display:flex; flex-direction:column; }
+  #big header { display:flex; justify-content:space-between; align-items:center; background:var(--fg); color:var(--screen); padding:2px 8px; }
+  #big header button { background:var(--screen); color:var(--fg); }
+  #big iframe { flex:1; width:100%; border:4px solid var(--fg); border-top:0; background:#000; }
 </style>
 </head>
 <body>
 <main>
-  <h1>C64 viewer</h1>
-  <p class="sub">Schermo condiviso degli emulatori e ultima build. Pagina servita solo su localhost.</p>
+  <p class="boot">**** C64 CONTROL CENTER ****</p>
+  <p class="boot2" id="bootline">64K RAM SYSTEM &nbsp;...</p>
+  <p class="ready">READY.<br><span class="cursor"></span></p>
+
+  <!-- stato dal vivo: build, test, VICE sullo schermo -->
+  <div class="grid3">
+    <section><h2>BUILD</h2><div id="build">...</div></section>
+    <section><h2>TEST</h2><div id="tests">...</div></section>
+    <section><h2>VICE LIVE</h2><div id="player">...</div></section>
+  </div>
 
   <section>
-    <h2>Schermo dal vivo</h2>
-    <a class="big" href="live.html" target="_blank">Apri lo schermo (con audio)</a>
-    <p class="note">Gli emulatori avviati sullo schermo del viewer (DISPLAY=:99), con il loro suono (pulsante "Audio" nella pagina).
-      VICE con il suono: <code>toolchain/viewer.sh exec tools/vice/play.sh</code>. I test girano senza suono.</p>
+    <h2>PROVE A MANO</h2>
+    <div class="actions" style="margin-top:0">
+      <button data-basic="1">VICE vuoto (READY.)</button>
+      <a class="btn" id="vcbare" target="_blank">vc64web vuoto</a>
+      <button id="openbig">Schermo grande</button>
+      <a class="btn" href="live.html" target="_blank">Schermo in una scheda</a>
+    </div>
+    <div id="mine"></div>
+    <p class="fine dim" style="margin:10px 0 0">VICE parte sullo schermo dal vivo (velocità reale, audio): nello <b>schermo grande</b> si usa la tastiera del PC,
+      e i pulsanti in alto <b>Tastiera</b> (tastiera C64 a video), <b>Joy 1</b>, <b>Joy 2</b> (porta 2 = quella del gioco), <b>Audio</b>.
+      Dal menu di VICE (barra in alto nella sua finestra: File &rarr; Smart attach / Attach disk image) si monta qualunque file del progetto
+      (in <code>/work</code>). File tuoi: copiali in <code>out/tmp/</code> (.d64 .g64 .prg .t64 .crt) e compaiono qui sopra; <code>out/tmp/</code> si può
+      cancellare a ogni pulizia. Dalla shell: <code>toolchain/viewer.sh exec tools/vice/play.sh &lt;file|versione|--bare&gt;</code> oppure
+      <code>toolchain/viewer.sh exec x64sc ...</code> con le opzioni che vuoi.</p>
   </section>
 
-  <section class="latest">
-    <h2>Ultima build in vc64web</h2>
-    <div id="latest">ricerca in out/ ...</div>
-    <p class="note">L'emulatore gira nel tuo browser (audio compreso). Il disco si scarica a ogni apertura se è cambiato.</p>
+  <section id="trendbox" hidden>
+    <h2>ANDAMENTO</h2>
+    <div class="spark" id="trends"></div>
+    <p class="fine dim" style="margin:10px 0 0">Dalla più vecchia alla più nuova delle versioni tenute in out/releases/ (retention). Passa sopra un grafico per i valori.</p>
   </section>
 
-  <section>
-    <h2>Altre versioni (out/releases/)</h2>
-    <div id="others">...</div>
+  <section id="cmpbox" hidden>
+    <div class="card-head">
+      <h2 style="margin:0">CONFRONTO</h2>
+      <div class="actions" style="margin:0"><select id="cmpA"></select> <span>&rarr;</span> <select id="cmpB"></select></div>
+    </div>
+    <div id="cmp"></div>
   </section>
 
-  <section>
-    <h2>File</h2>
-    <div class="row"><a href="out/releases/latest/test_report.txt" target="_blank">Report dei test (ultima versione)</a><span class="meta">out/releases/latest/</span></div>
-    <div class="row"><a href="out/" target="_blank">Cartella out/work/</a><span class="meta">sola lettura</span></div>
-  </section>
+  <h2 style="margin:8px 0 14px">VERSIONI</h2>
+  <div id="cards">SEARCHING FOR out/releases/ ...</div>
+  <p class="fine dim">viewer su localhost &middot; aggiornamento ogni 2 s &middot; <a href="out/" target="_blank">cartella out/</a> (sola lettura)</p>
 </main>
-<script>
-// nomi dei file elencati in una cartella servita dal server web (pagina di elenco HTML)
-async function list(dir) {
-  try {
-    const r = await fetch(dir, { cache: 'no-cache' });
-    if (!r.ok) return [];
-    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
-    return [...doc.querySelectorAll('a')].map(a => decodeURIComponent(a.getAttribute('href') || ''))
-      .filter(h => h && !h.includes('/') && !h.startsWith('?'));
-  } catch (e) { return []; }
-}
-// sottocartelle (nomi senza la barra finale)
-async function subdirs(dir) {
-  try {
-    const r = await fetch(dir, { cache: 'no-cache' });
-    if (!r.ok) return [];
-    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
-    return [...doc.querySelectorAll('a')].map(a => decodeURIComponent(a.getAttribute('href') || ''))
-      .filter(h => /^[^/?]+\/$/.test(h)).map(h => h.slice(0, -1));
-  } catch (e) { return []; }
-}
-async function modified(url) {
-  try { const r = await fetch(url, { method: 'HEAD', cache: 'no-cache' }); return Date.parse(r.headers.get('Last-Modified')) || 0; }
-  catch (e) { return 0; }
-}
-const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true });
-const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-function globRe(g) { return new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i'); }
 
-(async () => {
-  const pages = (await list('out/cache/vc64web/')).filter(f => /^VirtualC64-v\d+\.html$/.test(f)).sort(natural);
-  const page = pages.length ? 'out/cache/vc64web/' + pages[pages.length - 1] : null;
-  // (14/11) i dischi stanno in out/releases/v<versione>/ (tools/build/publish.py); si elencano anche quelli sciolti in out/
-  const isDisk = f => /\.(d64|g64|t64|crt)$/i.test(f);   // immagini di dischi e cartucce (i .prg sono file intermedi)
-  const vers = (await subdirs('out/releases/')).filter(d => /^v/.test(d)).sort(natural);
-  const disks = [];                                       // percorsi sotto out/, es. releases/v1.239/blood_path_v1.239_1541.d64
-  for (const d of vers) for (const f of (await list('out/releases/' + encodeURIComponent(d) + '/')).filter(isDisk)) disks.push('releases/' + d + '/' + f);
-  for (const f of (await list('out/')).filter(isDisk)) if (f !== 'disk.d64') disks.push(f);   // disk.d64 = disco di lavoro della build, non una versione
-  const base = f => f.split('/').pop();
-  const times = Object.fromEntries(await Promise.all(disks.map(async f => [f, await modified('out/' + f.split('/').map(encodeURIComponent).join('/'))])));
-  let latest = null;
-  const pat = (window.VIEW_DISK || '').trim();
-  if (pat) { const m = disks.filter(f => globRe(pat).test(base(f))).sort((a, b) => natural(base(a), base(b))); latest = m.length ? m[m.length - 1] : null; }
-  if (!latest && disks.length) latest = [...disks].sort((a, b) => times[b] - times[a])[0];
-  const open = f => page ? `${page}?disk=${encodeURIComponent('/out/' + f)}` : null;
-  const when = f => times[f] ? new Date(times[f]).toLocaleString() : '';
-  const row = f => {
-    const u = open(f);
-    return `<div class="row"><span class="name">${u ? `<a href="${esc(u)}" target="_blank">${esc(base(f))}</a>` : esc(base(f))}</span>` +
-           `<span class="meta">${esc(f.includes('/') ? f.split('/')[1] : '')} ${esc(when(f))}</span></div>`;
+<div id="mini">
+  <header><span>LIVE :99</span><span><button id="minibig" title="ingrandisci">&#9633;</button> <button id="minitog" title="riduci">-</button></span></header>
+  <div class="frame"><div class="hit" id="minihit" title="clic: schermo grande, interattivo"></div></div>
+</div>
+<div id="big">
+  <header><span>SCHERMO DAL VIVO &middot; tastiera, joystick e audio dai pulsanti in alto</span><button id="bigclose">CHIUDI X</button></header>
+</div>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true });
+const encPath = p => p.split('/').map(encodeURIComponent).join('/');
+const fmtB = n => n == null ? '–' : n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
+const fmtT = s => s == null ? '–' : s < 60 ? Math.round(s) + ' s' : Math.floor(s / 60) + ' min ' + String(Math.round(s % 60)).padStart(2, '0') + ' s';
+const fmtD = iso => iso ? new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '';
+const ago = t => { const s = Math.max(0, Date.now() / 1000 - t); return s < 90 ? Math.round(s) + ' s fa' : s < 5400 ? Math.round(s / 60) + ' min fa' : Math.round(s / 3600) + ' h fa'; };
+const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* niente */ } } };
+
+async function getJSON(url) {
+  try { const r = await fetch(url, { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; }
+}
+async function listing(dir) {                       // [nome, cartella?] dalla pagina di elenco di server.js
+  try {
+    const r = await fetch(dir, { cache: 'no-cache' });
+    if (!r.ok) return [];
+    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    return [...doc.querySelectorAll('a')].map(a => decodeURIComponent(a.getAttribute('href') || '')).filter(h => h && !h.startsWith('?'))
+      .map(h => h.endsWith('/') ? [h.slice(0, -1), true] : [h, false]).filter(([n]) => !n.includes('/'));
+  } catch (e) { return []; }
+}
+async function control(cmd, disk) {
+  try {
+    const r = await fetch('control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd, disk }) });
+    return await r.json();
+  } catch (e) { return { ok: false, error: 'viewer non raggiungibile' }; }
+}
+
+// ---------------------------------------------------------------- versioni (manifest.json)
+let VERS = [], PAGE = null, PLAYER = null;
+const DESC = {
+  disk: 'Disco 1541', atlas: 'Atlante grafico', 'memory-map': 'Mappe RAM e disco', tests: 'Report dei test', manual: 'Manuale PDF',
+};
+const ORDER = ['disk', 'tests', 'manual', 'atlas', 'memory-map'];
+
+async function loadVersions() {
+  const pages = (await listing('out/cache/vc64web/')).map(([n]) => n).filter(n => /^VirtualC64-v\d+\.html$/.test(n)).sort(natural);
+  PAGE = pages.length ? 'out/cache/vc64web/' + pages[pages.length - 1] : null;
+  const dirs = (await listing('out/releases/')).filter(([n, d]) => d && /^v/.test(n)).map(([n]) => n);
+  const latestDisk = (await listing('out/releases/latest/')).map(([n]) => n);
+  const vs = await Promise.all(dirs.map(async d => {
+    const m = await getJSON('out/releases/' + encodeURIComponent(d) + '/manifest.json');
+    const disks = m ? Object.keys(m.files || {}).filter(f => /\.d64$/i.test(f)) : (await listing('out/releases/' + encodeURIComponent(d) + '/')).map(([n]) => n).filter(n => /\.d64$/i.test(n));
+    return { dir: d, m, disks };
+  }));
+  // la versione "latest" e' quella a cui punta il collegamento: stessa lista di file e disco con lo stesso nome
+  for (const v of vs) v.latest = v.disks.length > 0 && v.disks.every(f => latestDisk.includes(f));
+  if (vs.filter(v => v.latest).length > 1) for (const v of vs) v.latest = false;
+  vs.sort((a, b) => natural(b.dir, a.dir));
+  // dischi sciolti in out/ (altri progetti; disk.d64 e' il disco di lavoro della build)
+  const loose = (await listing('out/')).filter(([n, d]) => !d && /\.d64$/i.test(n) && n !== 'disk.d64').map(([n]) => n);
+  VERS = vs;
+  render(loose);
+}
+
+function vcLink(path) { return PAGE ? PAGE + '?disk=' + encodeURIComponent('/out/' + path) : null; }
+function bootline() {
+  const l = VERS.find(v => v.latest) || VERS[0], m = l && l.m, t = m && m.tests;
+  $('bootline').textContent = !l ? '64K RAM SYSTEM  NESSUNA VERSIONE' :
+    `${l.dir.toUpperCase()}  ${t && t.ran ? (t.fail ? t.fail + ' TEST FAIL' : t.pass + ' TEST OK') : 'TEST NON ESEGUITI'}` +
+    (m && m.stats && m.stats.code_free_below_8720 != null ? `  ${m.stats.code_free_below_8720} BYTES FREE` : '');
+  const bare = $('vcbare'); if (PAGE) bare.href = PAGE; else { bare.removeAttribute('href'); bare.title = 'pagina di vc64web non trovata'; }
+}
+
+function card(v) {
+  const m = v.m || {}, st = m.stats || {}, t = m.tests || {}, g = st.git || {}, base = 'out/releases/' + encodeURIComponent(v.dir) + '/';
+  const disk = v.disks[0], diskPath = disk ? 'releases/' + v.dir + '/' + disk : null;
+  const chips = [];
+  if (v.latest) chips.push('<span class="chip">latest</span>');
+  if (m.release) chips.push('<span class="chip ok">release</span>');
+  if (m.branch && m.branch !== 'main') chips.push(`<span class="chip warn">branch ${esc(m.branch)}</span>`);
+  if (t.ran) chips.push(t.fail ? `<span class="chip bad">test ${t.fail} FAIL / ${t.total}</span>` : `<span class="chip ok">test ${t.pass}/${t.total} PASS${t.skip ? ', ' + t.skip + ' SKIP' : ''}</span>`);
+  else if (v.m) chips.push('<span class="chip plain">test non eseguiti</span>');
+  if (t.ran && t.suites) chips.push(`<span class="chip plain">${esc(t.suites.join(' + '))}</span>`);
+  if (g.dirty) chips.push('<span class="chip warn" title="la build conteneva modifiche non ancora committate">modifiche non committate</span>');
+  const playing = PLAYER && PLAYER.running && PLAYER.disk === diskPath;
+  const acts = [];
+  if (diskPath) {
+    const u = vcLink(diskPath);
+    acts.push(u ? `<a class="btn primary" href="${esc(u)}" target="_blank">vc64web (browser)</a>` : '<button disabled title="pagina di vc64web non trovata in out/cache/vc64web/">vc64web</button>');
+    acts.push(`<button data-play="${esc(diskPath)}" ${PLAYER === false ? 'disabled title="lettore non attivo"' : ''}>${playing ? 'VICE: in esecuzione &#9632;' : 'VICE sullo schermo dal vivo'}</button>`);
+    acts.push(`<a class="btn" href="${esc(base + encodeURIComponent(disk))}" download>Scarica .d64</a>`);
+  }
+  if (v.m) acts.push(`<a class="btn" href="${esc(base + 'manifest.json')}" target="_blank">manifest.json</a>`);
+  // statistiche
+  const kv = [];
+  const add = (label, val, title) => kv.push(`<div title="${esc(title || '')}"><b>${val}</b><span>${esc(label)}</span></div>`);
+  if (st.code_free_below_8720 != null) add('RAM libera sotto $8720', st.code_free_below_8720 + ' B', 'codice del gioco: margine fino allo schermo dell\'HUD');
+  if (st.code_free_9c00_block != null) add('RAM libera blocco $9C00', st.code_free_9c00_block + ' B');
+  if (st.disk) add('blocchi liberi sul disco', st.disk.blocks_free + ' / ' + st.disk.blocks_total);
+  if (st.game_zx0_bytes != null) add('GAME compresso (zx0)', fmtB(st.game_zx0_bytes), 'non compresso: ' + fmtB(st.game_prg_bytes));
+  if (st.build_seconds != null) add('durata build', fmtT(st.build_seconds));
+  if (t.ran) add('durata test', fmtT(t.seconds));
+  // artefatti: presenti e mancanti
+  const files = Object.entries(m.files || {}).sort((a, b) => ORDER.indexOf(a[1].group) - ORDER.indexOf(b[1].group) || natural(a[0], b[0]));
+  let rows = files.map(([f, x]) => {
+    const href = base + encPath(f) + (x.type === 'dir' ? '/' : '');
+    return `<tr><td>${esc(DESC[x.group] || x.group)}</td><td><a class="fine" href="${esc(href)}" target="_blank">${esc(f)}${x.type === 'dir' ? '/' : ''}</a>${x.type === 'dir' ? ` <span class="dim small">(${x.files} file)</span>` : ''}</td>` +
+      `<td class="num">${fmtB(x.bytes)}</td><td class="dim small">${esc(fmtD(x.produced))}</td><td class="fine dim" title="SHA-256 ${esc(x.sha256)}">${esc((x.sha256 || '').slice(0, 10))}</td></tr>`;
+  }).join('');
+  rows += (m.missing || []).map(gp => `<tr class="missing"><td>${esc(DESC[gp] || gp)}</td><td colspan="4">non generato in questa versione</td></tr>`).join('');
+  if (!v.m) rows = v.disks.map(f => `<tr><td>Disco</td><td><a class="fine" href="${esc(base + encodeURIComponent(f))}">${esc(f)}</a></td><td colspan="3" class="dim">senza manifest.json</td></tr>`).join('');
+  const dirList = st.disk && st.disk.files ? `<details><summary>Directory del disco (${st.disk.files.length} file, ${st.disk.blocks_used} blocchi usati)</summary>
+      <table><tr><th>Nome</th><th>Tipo</th><th class="num">Blocchi</th></tr>${st.disk.files.map(f => `<tr><td class="fine">${esc(f.name)}</td><td>${esc(f.type)}</td><td class="num">${f.blocks}</td></tr>`).join('')}</table></details>` : '';
+  const testDet = t.ran ? `<details data-tests="${esc(base + 'test_report.json')}"><summary>Test: ${t.fail ? 'dettaglio dei FAIL' : 'elenco'} (${t.total})</summary><div class="small dim">caricamento...</div></details>` : '';
+  return `<div class="card${v.latest ? ' latest' : ''}">
+    <div class="card-head"><h3>${esc(v.dir)}</h3><div class="chips">${chips.join('')}</div></div>
+    <div class="small dim">${m.built_at ? 'build ' + esc(fmtD(m.built_at)) : ''}${m.updated_at && m.updated_at !== m.built_at ? ' &middot; aggiornata ' + esc(fmtD(m.updated_at)) : ''}${
+      g.commit ? ` &middot; commit <span class="fine">${esc(g.commit)}</span> ${esc(g.subject || '')}` : ''}${m.save_version != null ? ' &middot; salvataggi v' + esc(m.save_version) : ''}</div>
+    <div class="actions">${acts.join('')}</div>
+    ${kv.length ? `<div class="kv">${kv.join('')}</div>` : ''}
+    <table><tr><th>Artefatto</th><th>File</th><th class="num">Dim.</th><th>Prodotto</th><th>SHA-256</th></tr>${rows}</table>
+    ${dirList}${testDet}
+  </div>`;
+}
+
+function render(loose) {
+  let html = VERS.map(card).join('');
+  if (loose.length) html += `<section><h2>Dischi sciolti in out/</h2>${loose.map(f => {
+    const u = vcLink(f);
+    return `<div class="actions"><span class="fine">${esc(f)}</span>${u ? `<a class="btn" href="${esc(u)}" target="_blank">vc64web</a>` : ''}<button data-play="${esc(f)}">VICE</button></div>`;
+  }).join('')}</section>`;
+  $('cards').innerHTML = html || '<section class="dim">Nessuna versione in out/releases/ (./build.sh)</section>';
+  renderTrends(); renderCompareSelects(); bootline(); loadMine();
+}
+
+// dettaglio dei test di una versione, caricato quando si apre
+document.addEventListener('toggle', async e => {
+  const d = e.target;
+  if (!(d instanceof HTMLDetailsElement) || !d.open || !d.dataset.tests || d.dataset.loaded) return;
+  d.dataset.loaded = 1;
+  const r = await getJSON(d.dataset.tests), box = d.querySelector('div');
+  if (!r) { box.textContent = 'report non trovato'; return; }
+  const res = r.results || [], bad = res.filter(x => x.result !== 'PASS');
+  const show = bad.length ? bad : res;
+  box.outerHTML = `<table><tr><th>ID</th><th>Suite</th><th>Esito</th><th class="num">Tempo</th><th>Test / motivo</th></tr>${show.map(x =>
+    `<tr><td class="fine">${esc(x.id)}</td><td>${esc(x.suite)}</td><td><span class="chip ${x.result === 'PASS' ? 'ok' : x.result === 'FAIL' ? 'bad' : 'plain'}">${esc(x.result)}</span></td>` +
+    `<td class="num">${x.time.toFixed(2)} s</td><td>${esc(x.desc)}${x.reason ? `<div class="small" style="color:var(--bad)">${esc(x.reason)}</div>` : ''}</td></tr>`).join('')}</table>` +
+    (bad.length ? `<p class="small dim">${res.length - bad.length} PASS non mostrati.</p>` : '');
+}, true);
+
+// pulsanti VICE
+document.addEventListener('click', async e => {
+  const bb = e.target.closest('button[data-basic]');
+  if (bb) {
+    bb.disabled = true;
+    const r = await control('basic');
+    bb.disabled = false;
+    if (!r.ok) alertBox(r.error); else showBig(true);
+    return pollPlayer();
+  }
+  const b = e.target.closest('button[data-play]');
+  if (!b) return;
+  const disk = b.dataset.play, stop = PLAYER && PLAYER.running && PLAYER.disk === disk;
+  b.disabled = true;
+  const r = await control(stop ? 'stop' : 'play', stop ? undefined : disk);
+  if (!r.ok) alertBox(r.error); else if (!stop) showLive(true);
+  await pollPlayer(); render(lastLoose());
+});
+function lastLoose() { return [...document.querySelectorAll('#cards section .fine')].map(x => x.textContent); }
+function alertBox(msg) { $('player').insertAdjacentHTML('beforeend', `<div class="msg" style="color:var(--bad)">${esc(msg)}</div>`); }
+
+// ---------------------------------------------------------------- andamento
+function sparkline(vals) {
+  const w = 160, h = 30, n = vals.length, lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo || 1;
+  const pts = vals.map((v, i) => [n === 1 ? w / 2 : i * w / (n - 1), h - 2 - (v - lo) / sp * (h - 4)]);
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="var(--acc)" stroke-width="1.6" vector-effect="non-scaling-stroke"/>` +
+    pts.map((p, i) => `<circle cx="${p[0]}" cy="${p[1]}" r="${i === n - 1 ? 2.6 : 1.6}" fill="var(--acc)"/>`).join('') + '</svg>';
+}
+const METRICS = [
+  ['RAM libera sotto $8720', v => v.m?.stats?.code_free_below_8720, x => x + ' B', 1],
+  ['RAM libera blocco $9C00', v => v.m?.stats?.code_free_9c00_block, x => x + ' B', 1],
+  ['blocchi liberi sul disco', v => v.m?.stats?.disk?.blocks_free, x => x, 1],
+  ['GAME compresso', v => v.m?.stats?.game_zx0_bytes, fmtB, -1],
+  ['durata build', v => v.m?.stats?.build_seconds, fmtT, -1],
+  ['durata smoke + sanity', v => (v.m?.tests?.ran && (v.m.tests.suites || []).join() === 'smoke,sanity') ? v.m.tests.seconds : undefined, fmtT, -1],
+];
+function renderTrends() {
+  const old = [...VERS].reverse();
+  const out = METRICS.map(([label, get, fmt]) => {
+    const pts = old.map(v => [v.dir, get(v)]).filter(([, x]) => x != null);
+    if (!pts.length) return '';
+    const vals = pts.map(p => p[1]);
+    return `<div title="${esc(pts.map(([d, x]) => d + ': ' + fmt(x)).join('\n'))}">${esc(label)}<br><b>${esc(fmt(vals[vals.length - 1]))}</b>` +
+      ` <span>(${pts.length > 1 ? esc(pts[0][0]) + ' - ' : ''}${esc(pts[pts.length - 1][0])})</span>${sparkline(vals)}</div>`;
+  }).join('');
+  $('trendbox').hidden = !out; $('trends').innerHTML = out;
+}
+
+// ---------------------------------------------------------------- confronto
+function renderCompareSelects() {
+  const ms = VERS.filter(v => v.m);
+  $('cmpbox').hidden = ms.length < 2;
+  if (ms.length < 2) return;
+  const a = $('cmpA').value, b = $('cmpB').value;
+  const opts = ms.map(v => `<option>${esc(v.dir)}</option>`).join('');
+  $('cmpA').innerHTML = opts; $('cmpB').innerHTML = opts;
+  $('cmpA').value = ms.some(v => v.dir === a) ? a : ms[1].dir;
+  $('cmpB').value = ms.some(v => v.dir === b) ? b : ms[0].dir;
+  compare();
+}
+async function compare() {
+  const A = VERS.find(v => v.dir === $('cmpA').value), B = VERS.find(v => v.dir === $('cmpB').value);
+  if (!A || !B) return;
+  const row = (label, get, fmt, better) => {
+    const x = get(A), y = get(B);
+    if (x == null && y == null) return '';
+    let d = '';
+    if (x != null && y != null && x !== y) {
+      const good = better ? (y - x) * better > 0 : null;
+      d = `<span class="${good === null ? '' : good ? 'up' : 'down'}">${y > x ? '+' : ''}${typeof x === 'number' ? (Number.isInteger(y - x) ? y - x : (y - x).toFixed(1)) : ''}</span>`;
+    }
+    return `<tr><td>${esc(label)}</td><td class="num">${x == null ? '–' : esc(fmt(x))}</td><td class="num">${y == null ? '–' : esc(fmt(y))}</td><td class="num">${d}</td></tr>`;
   };
-  document.getElementById('latest').innerHTML = !latest ? 'nessun disco in out/' :
-    (page ? `<a class="big" href="${esc(open(latest))}" target="_blank">${esc(base(latest))}</a><div class="meta">${esc(when(latest))}</div>`
-          : `${esc(base(latest))}<p class="note">Pagina di vc64web non trovata in out/cache/vc64web/ (si genera con l'immagine c64-emu-vc64web).</p>`);
-  const rest = disks.filter(f => f !== latest).sort((a, b) => natural(b, a));   // le versioni piu' recenti in alto
-  document.getElementById('others').innerHTML = rest.length ? rest.map(row).join('') : '<span class="meta">nessuno</span>';
-})();
+  let h = `<table><tr><th>Misura</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th><th class="num">Differenza</th></tr>`;
+  h += METRICS.map(([l, g, f, b]) => row(l, g, f, b)).join('');
+  h += row('commit', v => v.m?.stats?.git?.commit, x => x);
+  h += row('versione dei salvataggi', v => v.m?.save_version, x => x);
+  h += '</table>';
+  // file del disco: blocchi per file
+  const fa = Object.fromEntries((A.m.stats?.disk?.files || []).map(f => [f.name, f.blocks])), fb = Object.fromEntries((B.m.stats?.disk?.files || []).map(f => [f.name, f.blocks]));
+  const names = [...new Set([...Object.keys(fa), ...Object.keys(fb)])].filter(n => fa[n] !== fb[n]);
+  if (names.length && A.m.stats?.disk && B.m.stats?.disk) h += `<details><summary>File del disco cambiati di dimensione (${names.length})</summary><table><tr><th>File</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th></tr>` +
+    names.map(n => `<tr><td class="fine">${esc(n)}</td><td class="num">${fa[n] ?? '–'}</td><td class="num">${fb[n] ?? '–'}</td></tr>`).join('') + '</table></details>';
+  // test: esiti cambiati e tempi
+  const [ra, rb] = await Promise.all([A, B].map(v => v.m.tests?.ran ? getJSON('out/releases/' + encodeURIComponent(v.dir) + '/test_report.json') : null));
+  if (ra && rb) {
+    const ia = Object.fromEntries(ra.results.map(x => [x.id, x])), ib = Object.fromEntries(rb.results.map(x => [x.id, x]));
+    const ids = [...new Set([...Object.keys(ia), ...Object.keys(ib)])];
+    const changed = ids.filter(i => (ia[i]?.result) !== (ib[i]?.result));
+    const slower = ids.filter(i => ia[i] && ib[i]).map(i => [i, ib[i].time - ia[i].time]).filter(([, d]) => Math.abs(d) >= 0.5).sort((p, q) => q[1] - p[1]).slice(0, 8);
+    h += `<details ${changed.length ? 'open' : ''}><summary>Test con esito diverso (${changed.length})</summary>` + (changed.length ? `<table><tr><th>ID</th><th>${esc(A.dir)}</th><th>${esc(B.dir)}</th></tr>` +
+      changed.map(i => `<tr><td class="fine">${esc(i)}</td><td>${esc(ia[i]?.result || 'assente')}</td><td>${esc(ib[i]?.result || 'assente')}</td></tr>`).join('') + '</table>' : '<p class="small dim">nessuno</p>') + '</details>';
+    if (slower.length) h += `<details><summary>Test con il tempo cambiato di almeno 0,5 s (${slower.length})</summary><table><tr><th>ID</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th><th class="num">Differenza</th></tr>` +
+      slower.map(([i, d]) => `<tr><td class="fine">${esc(i)}</td><td class="num">${ia[i].time.toFixed(2)} s</td><td class="num">${ib[i].time.toFixed(2)} s</td><td class="num ${d > 0 ? 'down' : 'up'}">${d > 0 ? '+' : ''}${d.toFixed(2)} s</td></tr>`).join('') + '</table></details>';
+    if ((ra.suites || []).join() !== (rb.suites || []).join()) h += `<p class="small dim">Suite diverse (${esc((ra.suites || []).join('+'))} / ${esc((rb.suites || []).join('+'))}): i test presenti solo in una risultano "assente".</p>`;
+  } else h += '<p class="small dim">Confronto dei test: serve il report in entrambe le versioni.</p>';
+  $('cmp').innerHTML = h;
+}
+$('cmpA').onchange = compare; $('cmpB').onchange = compare;
+
+// ---------------------------------------------------------------- stato dal vivo
+let lastBuild = null, lastTestsState = null;
+async function pollStatus() {
+  const b = await getJSON('out/tmp/build.json'), t = await getJSON('out/tmp/tests.json');
+  // build
+  if (!b) $('build').innerHTML = '<div class="dim">nessuna build registrata</div>';
+  else {
+    const lbl = { running: 'in corso', ok: 'riuscita', fail: 'fallita' }[b.state] || b.state;
+    const dur = (b.state === 'running' ? Date.now() / 1000 : b.updated) - b.started;
+    $('build').innerHTML = `<div class="state"><span class="dot ${esc(b.state)}"></span>${esc(lbl)}</div>` +
+      `<div class="small">${b.state === 'running' ? 'fase: <b>' + esc(b.phase) + '</b>' : b.state === 'fail' ? 'fallita nella fase <b>' + esc(b.phase) + '</b>' : 'completata'} &middot; ${fmtT(dur)}</div>` +
+      `<div class="small dim">./build.sh ${esc(b.flags || '')} &middot; ${b.state === 'running' ? 'avviata ' + ago(b.started) : 'finita ' + ago(b.updated)}</div>`;
+    if (lastBuild && lastBuild.state === 'running' && b.state !== 'running') loadVersions();     // nuova versione pubblicata
+    lastBuild = b;
+  }
+  // test
+  if (!t) $('tests').innerHTML = '<div class="dim">nessuna esecuzione registrata</div>';
+  else {
+    const res = t.results || [], n = k => res.filter(x => x.result === k).length, fail = n('FAIL');
+    const st = t.state === 'running' && b && b.state !== 'running' && b.updated > t.updated ? 'fail' : t.state;   // test interrotti a meta'
+    const lbl = { running: 'in corso', ok: 'superati', fail: st !== t.state ? 'interrotti' : 'con errori' }[st] || st;
+    const pct = t.total ? Math.round(res.length / t.total * 100) : 0;
+    const cur = t.current ? `<div class="small mono" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${esc(t.current.desc)}">&#9654; ${esc(t.current.id)} ${esc(t.current.desc)}</div>` : '';
+    const recent = res.slice().reverse().filter(x => x.result !== 'PASS').concat(res.slice(-6).reverse().filter(x => x.result === 'PASS')).slice(0, 12);
+    $('tests').innerHTML = `<div class="state"><span class="dot ${esc(st)}"></span>${esc(lbl)} <span class="small dim" style="font-weight:400">${esc((t.suites || []).join(' + '))}${t.filter && t.filter.length ? ' -k ' + esc(t.filter.join(' ')) : ''}</span></div>` +
+      `<div class="bar${fail ? ' fail' : ''}"><i style="width:${pct}%"></i></div>` +
+      `<div class="small">${res.length}/${t.total} &middot; <span class="up">${n('PASS')} PASS</span> &middot; <span class="${fail ? 'down' : 'dim'}">${fail} FAIL</span> &middot; ${n('SKIP')} SKIP &middot; ${fmtT(t.seconds ?? (Date.now() / 1000 - t.started))}</div>` +
+      cur + (t.caps && t.caps.length ? `<div class="small down">${esc(t.caps.join('; '))}</div>` : '') +
+      `<div class="results">${recent.map(x => `<div title="${esc(x.desc + (x.reason ? ' -> ' + x.reason : ''))}"><span class="${x.result === 'FAIL' ? 'down' : x.result === 'PASS' ? 'up' : 'dim'}">${esc(x.result.padEnd(4))}</span> ${esc(x.id)} ${esc(x.reason || x.desc)}</div>`).join('')}</div>`;
+    if (t.state === 'running' && lastTestsState !== 'running' && lastTestsState !== null) miniOpen(true);   // test partiti: la miniatura si apre
+    lastTestsState = t.state;
+  }
+}
+async function pollPlayer() {
+  const r = await control('status');
+  const was = JSON.stringify(PLAYER);
+  if (!r.ok) {
+    PLAYER = false;
+    $('player').innerHTML = `<div class="state"><span class="dot"></span>NON DISPONIBILE</div><div class="fine dim">${esc(r.error)}</div>`;
+  } else {
+    PLAYER = r;
+    $('player').innerHTML = r.running
+      ? `<div class="state"><span class="dot running"></span>RUNNING</div><div class="fine">${r.disk ? esc(r.disk) : 'senza disco (READY.)'}</div><div class="dim">da ${ago(r.since)}</div>` +
+        `<div class="actions"><button id="plive" class="primary">Gioca / prova</button><button id="pstop" class="danger">Chiudi</button></div>`
+      : `<div class="state"><span class="dot"></span>FERMO</div><div class="fine dim">Pulsante "VICE" di una versione, o "VICE vuoto" qui sotto: velocità reale, audio, tastiera e joystick dal browser.</div>`;
+    if ($('pstop')) $('pstop').onclick = async () => { await control('stop'); await pollPlayer(); };
+    if ($('plive')) $('plive').onclick = () => showLive(true);
+  }
+  if (was !== JSON.stringify(PLAYER) && VERS.length) render(lastLoose());
+}
+
+// ---------------------------------------------------------------- schermo dal vivo
+// miniatura: client KasmVNC in sola vista, scalato (resize=scale: non cambia la risoluzione dello schermo); il clic apre la finestra
+// grande = live.html (interattiva: tastiera, overlay tastiera C64 e joystick, audio). Aperta la grande, la miniatura si stacca
+// (una connessione VNC alla volta da questa pagina).
+const MINI_URL = 'vnc/index.html?autoconnect=1&resize=scale&view_only=1&show_control_bar=false&reconnect=1&reconnect_delay=2000';
+function miniOn(on) {
+  const fr = document.querySelector('#mini .frame'), ifr = fr.querySelector('iframe');
+  if (on && !ifr) fr.insertAdjacentHTML('afterbegin', `<iframe src="${MINI_URL}" title="schermo dal vivo (miniatura)" tabindex="-1"></iframe>`);
+  if (!on && ifr) ifr.remove();
+}
+function miniOpen(open) {
+  $('mini').classList.toggle('closed', !open);
+  $('minitog').textContent = open ? '-' : '+';
+  store.set('mini', open ? '1' : '0');
+  miniOn(open && !$('big').classList.contains('open'));
+}
+function showBig(on) {
+  const big = $('big');
+  if (on && !big.classList.contains('open')) {
+    big.insertAdjacentHTML('beforeend', '<iframe src="live.html" allow="autoplay; clipboard-read; clipboard-write" title="schermo dal vivo"></iframe>');
+    big.classList.add('open'); miniOn(false);
+    setTimeout(() => { const f = big.querySelector('iframe'); if (f) f.focus(); }, 300);
+  } else if (!on && big.classList.contains('open')) {
+    big.querySelector('iframe').remove(); big.classList.remove('open');
+    miniOn(!$('mini').classList.contains('closed'));
+  }
+}
+const showLive = on => showBig(on);
+$('minihit').onclick = () => showBig(true);
+$('minibig').onclick = () => showBig(true);
+$('openbig').onclick = () => showBig(true);
+$('bigclose').onclick = () => showBig(false);
+$('minitog').onclick = () => miniOpen($('mini').classList.contains('closed'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('big').classList.contains('open')) showBig(false); });
+miniOpen(store.get('mini') !== '0');
+
+// ---------------------------------------------------------------- prove a mano: file in out/tmp/
+async function loadMine() {
+  const f = (await listing('out/tmp/')).filter(([n, d]) => !d && /\.(d64|g64|prg|t64|crt)$/i.test(n)).map(([n]) => 'tmp/' + n);
+  $('mine').innerHTML = f.length ? '<div class="dim" style="margin-top:6px">File in out/tmp/:</div>' + f.map(p => {
+    const u = vcLink(p);
+    return `<div class="actions" style="margin:6px 0"><span class="fine">${esc(p)}</span><button data-play="${esc(p)}">VICE</button>${u && /\.(d64|prg|t64|crt|g64)$/i.test(p) ? `<a class="btn" href="${esc(u)}" target="_blank">vc64web</a>` : ''}</div>`;
+  }).join('') : '';
+}
+
+loadVersions();
+pollStatus(); pollPlayer();
+setInterval(() => { if (!document.hidden) { pollStatus(); pollPlayer(); } }, 2000);
 </script>
 </body>
 </html>

@@ -46,6 +46,8 @@ si scrivono quelli della feature nuova.
   dopo un fallimento i test seguenti sono SKIP con il motivo).
 - `tests/run.py [smoke|sanity|regression|all] [-k ID|prefisso] [--list]`; report a schermo e in
   `out/work/test_report.txt` / `out/work/test_report.json`: ID, suite, esito (PASS/FAIL/SKIP), tempo, motivo.
+  Stato dal vivo (14/11): `out/tmp/tests.json`, riscritto dopo ogni test (stato, test in corso, esiti fin qui): lo legge il centro di
+  controllo del viewer ([getting-started](getting-started.md) sezione 6).
 
 ## Tetti di durata (12/11, committente)
 

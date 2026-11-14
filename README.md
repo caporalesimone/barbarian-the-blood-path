@@ -35,7 +35,8 @@ Si combinano liberamente (es. `./build.sh --no-atlas --no-manual`). Senza parame
 | `--no-test` | salta smoke e sanity |
 | `--release` | build completa + **tutti** i test (anche regression ed `EMU-*` su vc64web) + manuale + `tools/build/release.sh` (GAME compresso in modo ottimo) |
 | `--emu` | i test con il demone vc64web acceso (`EMU-*`) |
-| `--view` | i test aprono VICE sullo schermo del viewer (http://localhost:6080) |
+| `--view` | i test aprono VICE sullo schermo del viewer (http://localhost:6080); se il viewer e' gia' acceso lo fanno da soli |
+| `--no-view` | i test sui display virtuali anche con il viewer acceso |
 | `--manual` | **solo** il manuale PDF, senza rifare il disco |
 | `--images` | rifa' tutte le immagini Docker, poi la build |
 | `--keep N` | quante versioni tenere in `out/releases/` (default 5; anche `KEEP_VERSIONS=N`) |

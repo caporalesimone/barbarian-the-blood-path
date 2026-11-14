@@ -92,6 +92,13 @@ COPY viewer/package.json /opt/viewer/
 RUN --mount=type=secret,id=ca if [ -s /run/secrets/ca ]; then export NODE_EXTRA_CA_CERTS=/run/secrets/ca; npm config set cafile /run/secrets/ca; fi; \
     cd /opt/viewer && npm install --omit=dev --no-audit --no-fund && rm -f package-lock.json
 
+# font della pagina indice dal chargen del C64 (14/11): fonttools solo qui, nell'immagine entra il .ttf (contesto "roms": toolchain/roms/)
+FROM base AS viewer-font
+RUN apt-get update && apt-get install -y --no-install-recommends python3-fonttools && rm -rf /var/lib/apt/lists/*
+COPY --from=roms vice-roms/C64/chargen-901225-01.bin /tmp/chargen.bin
+COPY viewer/c64font.py /tmp/c64font.py
+RUN python3 /tmp/c64font.py /tmp/chargen.bin /tmp/c64.ttf
+
 FROM base AS viewer
 ARG KASMVNC_DEB=kasmvncserver_ubuntu_noble_1.5.2_amd64.deb
 COPY --from=kasmvnc ${KASMVNC_DEB} /tmp/kasmvnc.deb
@@ -104,5 +111,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* /tmp/kasmvnc.deb /usr/share/doc /usr/share/man
 COPY --from=viewer-node /opt/viewer/node_modules /opt/viewer/node_modules
 COPY viewer/ /opt/viewer/
+COPY --from=viewer-font /tmp/c64.ttf /opt/viewer/www/c64.ttf
 EXPOSE 6080
 CMD ["sh", "/opt/viewer/start.sh"]

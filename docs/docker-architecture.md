@@ -37,8 +37,10 @@ flowchart TD
     VB -. "copia /opt/vice (x64sc, c1541, share)" .-> EVICE
 
     BASE --> VN["stage viewer-node<br/>npm + modulo nativo pulseaudio2"]
+    BASE --> VF["stage viewer-font<br/>fonttools: c64.ttf dal chargen"]
     BASE --> VW["c64-emu-viewer<br/>Xvnc (KasmVNC) + PulseAudio + server Node"]
     VN -. "copia node_modules" .-> VW
+    VF -. "copia c64.ttf" .-> VW
 
     BLD --> MAN["barbarian-manual<br/>+ WeasyPrint (tools/manual/Dockerfile)"]
 
@@ -49,7 +51,7 @@ flowchart TD
     classDef stage fill:#f2f2f2,stroke:#999,stroke-dasharray:4 3;
     class BLD,EVICE,VW,VC gen;
     class MAN game;
-    class BASE,TB,VB,ZB,CB,VN stage;
+    class BASE,TB,VB,ZB,CB,VN,VF stage;
 ```
 
 Linea tratteggiata = si copia solo il risultato: **i compilatori non finiscono mai nelle immagini finali** (restano nella cache di BuildKit).
@@ -101,11 +103,12 @@ flowchart LR
     MANC["barbarian-manual<br/>(--manual, --release)"]
 
     subgraph VOL["volume «c64-x11» → /tmp/.X11-unix"]
-        XSOCK(["socket X: X99<br/>socket audio: pulse"])
+        XSOCK(["socket X: X99<br/>socket audio: pulse<br/>socket del lettore: c64-player.sock"])
     end
 
     VIEW["c64-emu-viewer<br/>:6080 su 127.0.0.1<br/>(--view, viewer.sh start)"]
     PLAY["c64-emu-vice<br/>play.sh: VICE dal vivo<br/>(viewer.sh exec)"]
+    PLR["c64-emu-player<br/>viewer_player.py → play.sh<br/>(viewer.sh start)"]
     BR(["browser"])
 
     BSH -->|"1. docker run"| BLDC
@@ -115,11 +118,13 @@ flowchart LR
     BSH -->|"--view"| VSH
     VSH -->|"start"| VIEW
     VSH -->|"exec"| PLAY
+    VSH -->|"start (C64_VIEW_PLAYER)"| PLR
 
     PROJ -. "montato" .-> BLDC
     PROJ -. "montato" .-> TEST
     PROJ -. "montato" .-> MANC
     PROJ -. "montato" .-> PLAY
+    PROJ -. "montato" .-> PLR
     OUT -. "sola lettura → /srv/out" .-> VIEW
 
     TEST -->|"HTTP EMU_URL=http://c64-emu-vc64web:7064"| VC64
@@ -127,6 +132,8 @@ flowchart LR
     VIEW --- XSOCK
     TEST -. "solo con --view" .- XSOCK
     PLAY --- XSOCK
+    PLR --- XSOCK
+    VIEW -->|"POST /control → c64-player.sock"| PLR
     BR -->|"http://localhost:6080"| VIEW
 ```
 
@@ -137,10 +144,10 @@ Chi crea cosa:
 | `./build.sh` | `c64-builder` (build) → container di test su `c64-emu-vice` (smoke + sanity) |
 | `./build.sh --no-test` | solo `c64-builder` |
 | `./build.sh --emu` | come sopra, più `c64-emu-vc64web` (demone, spento a fine comando) |
-| `./build.sh --view` | come sopra, più `c64-emu-viewer` (resta acceso dopo la fine) e il test sul suo schermo |
+| `./build.sh --view` | come sopra, più `c64-emu-viewer` e `c64-emu-player` (restano accesi dopo la fine) e i test sul suo schermo; se il viewer è già acceso i test lo usano anche senza `--view` (`--no-view` per evitarlo) |
 | `./build.sh --manual` | solo `barbarian-manual` |
 | `./build.sh --release` | tutto: `--emu`, tutti i test, `barbarian-manual`, poi `c64-builder` per il pacchetto |
-| `toolchain/viewer.sh start` | `c64-emu-viewer` |
+| `toolchain/viewer.sh start` | `c64-emu-viewer`, poi `c64-emu-player` (immagine `c64-emu-vice`, `toolchain/viewer_player.py`) se `toolchain.env` definisce `C64_VIEW_PLAYER` |
 | `toolchain/viewer.sh exec tools/vice/play.sh` | `c64-emu-viewer` se non c'è, poi `c64-emu-vice` con VICE dal vivo e audio |
 | `toolchain/run.sh builder …` | un container `c64-builder` per quel comando |
 
@@ -151,14 +158,22 @@ Il container di test e quello di `play.sh` sono lo stesso tipo di immagine (`c64
 | Risorsa | Chi la usa | A cosa serve |
 |---|---|---|
 | Rete `c64` | il container di test, `c64-emu-vc64web` | i test raggiungono il demone `vc64web` per nome (`http://c64-emu-vc64web:7064`). Il demone **non** pubblica la porta sull'host |
-| Volume `c64-x11` | `c64-emu-viewer`, container VICE collegati allo schermo | contiene il socket X (`X99`) e il socket audio (`pulse`) |
+| Volume `c64-x11` | `c64-emu-viewer`, `c64-emu-player`, container VICE collegati allo schermo | contiene il socket X (`X99`), il socket audio (`pulse`) e il socket del lettore (`c64-player.sock`, 14/11) |
 | `/work` | quasi tutti | il progetto dell'host, con l'utente (uid/gid) dell'host |
 | `/srv/out` | solo `c64-emu-viewer`, **in sola lettura** | la cartella `out/` mostrata dal viewer |
 | Porta `127.0.0.1:6080` | `c64-emu-viewer` | unica porta pubblicata: **solo localhost** (HTTP e WebSocket) |
 
 Il viewer **non** sta sulla rete `c64`: parla con gli altri container solo attraverso il volume `c64-x11`. [dal codice: `viewer.sh` non passa `--network`]
 
-Variabili d'ambiente del viewer: `VIEW_PORT` (6080), `VIEW_PASSWORD` (facoltativa, protegge tutto), `VIEW_SIZE` (1280x1000), `C64_VIEW_DISK` (disco proposto per primo nell'indice).
+**Niente socket di Docker nel viewer** (14/11, scelta del committente: la piu' sicura). Chi monta `/var/run/docker.sock` puo' avviare un
+container con il disco dell'host montato, cioe' e' root sull'host; e la porta su 127.0.0.1 non basta, perche' una pagina qualsiasi aperta
+nel browser puo' mandare richieste a localhost. Per avviare VICE dalla pagina il viewer parla quindi con un processo che gira gia'
+(`c64-emu-player`, lanciato da `viewer.sh start` sull'host) attraverso il socket Unix `c64-player.sock` del volume `c64-x11`, con soli
+quattro comandi (`status`, `play` di un file sotto `out/`, `basic`, `stop`). Il server del viewer accetta poi solo Host locali (`VIEW_HOSTS`
+per gli altri), richieste della stessa origine su `/control` e sui WebSocket, e `/control` solo in JSON. [provato 14/11 con curl]
+
+Variabili d'ambiente del viewer: `VIEW_PORT` (6080), `VIEW_PASSWORD` (facoltativa, protegge tutto), `VIEW_SIZE` (1280x1000), `VIEW_HOSTS`
+(Host ammessi oltre a localhost), `C64_VIEW_DISK` (disco proposto per primo nell'indice), `C64_VIEW_PLAYER` (comando del lettore).
 Per i container emulatori: `EMU_URL`, `C64_VIEW`, `DISPLAY`, `PULSE_SERVER`.
 
 ## 5. Dentro il viewer: video, audio, tasti

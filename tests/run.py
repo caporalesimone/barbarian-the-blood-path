@@ -7,7 +7,8 @@ In every suite one folder per feature; its cases.py registers the tests (ID, des
 folder are scripts and data of that feature.
 Usage: tests/run.py [smoke|sanity|regression|all ...] [-k ID|prefix ...] [--list] [--md]
 Duration caps (CAPS): smoke 20 s, smoke + sanity 35 s, one smoke / sanity test 10 s (exit 1 with "TIME CAP" lines).
-Report: on screen and in out/work/test_report.txt / out/work/test_report.json (ID, suite, result, time, reason)."""
+Report: on screen and in out/work/test_report.txt / out/work/test_report.json (ID, suite, result, time, reason).
+Live status (14/11, for the viewer page): out/tmp/tests.json, rewritten after every test (state, current test, results so far)."""
 import glob, importlib.util, json, os, sys, time, traceback
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -46,6 +47,21 @@ def lock():
     except OSError:
         print("another test run is active: waiting for it"); fcntl.flock(f, fcntl.LOCK_EX)
     return f
+
+
+LIVE = os.path.join(os.path.dirname(HERE), "out", "tmp", "tests.json")
+ST = {}
+
+
+def live(**kw):
+    """live status for the viewer page: atomic rewrite of out/tmp/tests.json (never fails the run)"""
+    ST.update(kw, updated=round(time.time(), 1))
+    try:
+        with open(LIVE + ".tmp", "w") as f:
+            json.dump(ST, f)
+        os.replace(LIVE + ".tmp", LIVE)
+    except OSError:
+        pass
 
 
 def check_caps(res, suites, filtered):
@@ -90,6 +106,7 @@ def main():
             print()
         return
     res, t_all = [], time.time()
+    live(state="running", suites=suites, filter=keys, total=len(tests), started=round(t_all, 1), current=None, results=res)
     by_mod = {}
     for t in tests: by_mod.setdefault(t["module"], []).append(t)
     for mname, tl in by_mod.items():
@@ -106,6 +123,7 @@ def main():
         t_setup = time.time() - t0
         for i, t in enumerate(tl):
             r = dict(id=t["id"], suite=t["suite"], desc=t["desc"], module=mname)
+            live(current=dict(id=t["id"], suite=t["suite"], desc=t["desc"], since=round(time.time(), 1)))
             t0 = time.time()
             if setup_err:
                 r.update(result="FAIL", reason=setup_err)
@@ -124,6 +142,7 @@ def main():
                 if r["result"] == "FAIL" and chain: broken = t["id"]
             r["time"] = round(time.time() - t0 + (t_setup if i == 0 else 0), 2)
             res.append(r)
+            live(results=res)
             print("  %-4s %-14s %6.2f s  %s%s" % (r["result"], r["id"], r["time"], r["desc"],
                                                  ("  -> " + r["reason"]) if r["reason"] else ""), flush=True)
         try:
@@ -136,6 +155,7 @@ def main():
     summary = "%s: %d test, %d PASS, %d FAIL, %d SKIP, %.1f s" % ("+".join(suites), len(res), n["PASS"], n["FAIL"], n["SKIP"], tot)
     print(summary)
     for e in cap_err: print("TIME CAP: " + e)
+    live(state="fail" if n["FAIL"] or cap_err else "ok", current=None, seconds=round(tot, 1), caps=cap_err)
     out = os.path.join(os.path.dirname(HERE), "out", "work")
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "test_report.txt"), "w") as f:
