@@ -14,10 +14,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 OUT = os.path.join(ROOT, "out", "work")
 ROMS = os.path.join(ROOT, "toolchain", "roms", "vice-roms", "DRIVES")   # drive ROMs (toolchain/roms/roms.md)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path.insert(0, os.path.join(ROOT, "toolchain", "memmap"))
+import probe as memprobe  # noqa: E402  (run-time memory probe: C64_MEMPROBE=1, toolchain/memmap/probe.py)
 from vice_rom import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/, tools/vice/vice_rom.py)
 PROMPT = re.compile(r"\(C:\$[0-9a-f]{4}\) $")
 STOP = re.compile(r"Stop on[^\n]*\n[^\n]*?(\d+)\s*\n", re.S)
 FRAME = 19656                                     # cycles of a PAL frame
+PROBE_DIR = os.path.join(OUT, "memprobe")         # C64_MEMPROBE=1: RAM dumps of every VICE session (./build.sh --probe)
 
 
 def labels(name="game"):
@@ -96,6 +99,7 @@ def settle(s, boot=1.0, gap=0.1):
 
 class Vice:
     """x64sc in warp with the remote monitor. disk: d64 mounted in drive 8 (a copy, so the original is untouched)."""
+    _probe_n = 0
 
     def __init__(self, disk=None, extra=(), inplace=False, warp=True, show=False, boot_tmax=30, boot_wait=None):
         """inplace=True: the disk is mounted as is (writes persist: needed by save tests across sessions).
@@ -103,7 +107,7 @@ class Vice:
         (14/11, TODO I11) it waits for the C64 itself to be ready (IRQ vectors and READY. on the screen, vice_rom.wait_boot),
         not for a fixed time: the monitor port opens ~7 s before the boot ends on a cold machine.
         boot_wait=<seconds>: the old fixed wait, only for VICE started with -autostart (no READY. on the screen then)."""
-        self.disk = None
+        self.disk, self.probing = None, False
         args = ([] if show else XRUN) + [
                 "x64sc", "-silent", "-sounddev", "dummy"] + ROM_ARGS + (["-warp"] if warp else [])
         if disk and inplace:
@@ -133,6 +137,12 @@ class Vice:
                 time.sleep(boot_wait)
             self.s.settimeout(0.02)
             self.quiet()
+            # (14/11, TODO T1) run-time memory probe: RAM filled with a known pattern right after the boot, saved by close().
+            # Not with -autostart (boot_wait): the program is already loading, the fill would overwrite it.
+            if os.environ.get("C64_MEMPROBE") == "1" and boot_wait is None:
+                for c in memprobe.fill_commands(PROBE_DIR):
+                    self.cmd(c)
+                self.probing, self.probe_disk = True, memprobe.file_sha1(disk)
         except Exception:
             self.close()                                # no VICE left running (it would hold port 6510 for the next Vice())
             raise
@@ -216,6 +226,20 @@ class Vice:
         self.cmd('screenshot "%s" 2' % path)
 
     def close(self):
+        if self.probing:
+            try:                                        # memory probe: the whole RAM of this session (toolchain/memmap/probe.py)
+                Vice._probe_n += 1
+                tag = os.environ.get("C64_MEMPROBE_TAG", "vice")
+                p = os.path.join(PROBE_DIR, "%s_%d_%d.bin" % (re.sub(r"\W+", "_", tag), os.getpid(), Vice._probe_n))
+                for c in memprobe.dump_commands(p):
+                    self.cmd(c)
+                t0 = time.time()                        # the save must be complete before "quit"
+                while time.time() - t0 < 5 and (not os.path.isfile(p) or os.path.getsize(p) < 0x10000):
+                    time.sleep(0.02)
+                memprobe.write_meta(p, tag, self.probe_disk)
+            except Exception:
+                pass
+            self.probing = False
         try:
             self.s.sendall(b"quit\n")
         except Exception:

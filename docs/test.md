@@ -82,6 +82,10 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
   ripristinati); `regs()` legge pc/a/x/y/sp.
 - Prestazioni (`regression/perf`): durata di ogni fotogramma = cicli fra due letture dell'input; perso = più di 1,5
   fotogrammi PAL. Le soglie sono le misure dell'11/11 più un margine ([prestazioni](prestazioni.md)).
+- **Sonda della memoria** (14/11, `C64_MEMPROBE=1`, `./build.sh --probe`): ogni `Vice()` avviato senza `-autostart` riempie la RAM
+  con lo schema di `toolchain/memmap/probe.py` subito dopo il boot e `close()` la salva in `out/work/memprobe/<suite.area>_<pid>_<n>.bin`
+  (lo scenario è il modulo dei test, `C64_MEMPROBE_TAG` messo da `tests/run.py`). Serve alla mappa automatica ([build.md](build.md)).
+  Un test che fallisce solo con la sonda sta leggendo memoria mai inizializzata (il C64 vero all'accensione non ha la RAM a zero).
 
 ## Il secondo emulatore (13/11)
 
@@ -90,7 +94,7 @@ un'altra emulazione del 1541-II): avvio dal disco vero, nuovo eroe con salvatagg
 cripta, mostro ucciso, portale, ritorno e nuovo avvio con l'eroe salvato. **VICE resta l'unico riferimento**: questi test
 non stabiliscono cosa è giusto, dicono che il gioco funziona anche lì. Libreria `tests/lib/emu.py` (classe `Emu`: demone nel
 container `c64-emu-vc64web` all'indirizzo `EMU_URL`, `boot`, `run_script`, `run_loop`, `peek`, `findText`); bot in
-`tests/regression/emu/bots/`. Senza il demone (`./build.sh --emu` o `--release` lo accendono) i test sono **SKIP** con il motivo. Guida e trappole: [emulatore.md](emulatore.md).
+`tests/regression/emu/bots/`. Senza il demone (`./build.sh --emu` o `--release` lo accendono) i test sono **SKIP** con il motivo. (14/11: prima erano FAIL, perche' il runner contava come fallimento ogni eccezione del `setup` del modulo; ora un `Skip` nel `setup` da' SKIP a tutti i test del modulo.) Guida e trappole: [emulatore.md](emulatore.md).
 
 ## Elenco
 

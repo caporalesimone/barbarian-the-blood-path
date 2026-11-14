@@ -9,15 +9,20 @@ It reads only what the build already produces:
   - the .d64 disk: directory, block chains, load address of every PRG.
 A listing is a "module" of the program if its output file (-o) is on the disk (same content) or a disk file has its name
 (game -> GAME, menu -> MENU1..3: compressed or split files). The other listings (test variants) are listed apart.
-Output: DIR/index.html (RAM and disk) and DIR/memmap.json (the same data for other tools).
+Output: DIR/index.html (RAM and disk) and DIR/memmap.json (the same data for other tools, with "metrics" in the format of the
+viewer manifest).
+--probe DIR (default out/work/memprobe if it exists): RAM dumps of the run-time probe in VICE (toolchain/memmap/probe.py); only
+the dumps made with the same disk are used. They add the memory really written while the scenarios ran.
 
 Limits (static analysis): data copied or unpacked by the program somewhere else, buffers used only through pointers and tables
 read with an index past their first byte are not seen; the area of data that becomes free after start-up stays used.
-The planned additions (annotations in the sources, check in VICE) are in the project TODO."""
+The run-time probe covers part of it (what the scenarios run); the planned additions (annotations in the sources) are in the TODO."""
 import argparse, glob, hashlib, html, json, os, re, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
+sys.path.insert(0, HERE)
+import probe  # noqa: E402  (run-time memory probe in VICE: toolchain/memmap/probe.py)
 
 # ------------------------------------------------------------------ the C64
 SYSTEM = [  # (start, end included, name, note)
@@ -431,6 +436,99 @@ def overlaps(used):
     return out
 
 
+# ------------------------------------------------------------------ run-time probe (VICE)
+def probe_data(folder, disk_path):
+    """dumps of the probe made with this disk -> dict or None"""
+    dumps, ignored = probe.load(folder, probe.file_sha1(disk_path) if disk_path else None)
+    if not dumps:
+        return {"dumps": 0, "ignored": ignored} if ignored else None
+    run = set().union(*(d["written"] for d in dumps))
+    never = [a for a in range(0x0400, 0x10000) if probe.probed(a) and a not in run]
+    return {"dumps": len(dumps), "ignored": ignored, "run": run, "never": never,
+            "scenarios": sorted(((d["tag"], len(d["written"])) for d in dumps), key=lambda x: x[0])}
+
+
+def bank_of(a):
+    for s, e, bank in BANKS:
+        if s <= a <= e:
+            return bank
+    return None
+
+
+def probe_ranges(addrs):
+    """addresses -> [(a, b, bank)] split at the bank borders (bank None below $0400)"""
+    cuts = sorted({x for s, e, _ in BANKS for x in (s, e + 1)})
+    out = []
+    for a, b in ranges_of(addrs):
+        pts = [a] + [c for c in cuts if a < c < b] + [b]
+        out += [(x, y, bank_of(x)) for x, y in zip(pts, pts[1:])]
+    return out
+
+
+def probe_html(pr, occ):
+    P = []
+    w = P.append
+    w("<section><h2>Measured in VICE (run-time probe)</h2>")
+    if not pr.get("run"):
+        w("<p class='note' style='margin-top:0'>%d RAM dumps found, none made with this disk (test variants or an older build): "
+          "run the probe again (<code>./build.sh --probe</code>).</p></section>" % pr["dumps"])
+        return "".join(P)
+    nv = probe_ranges(pr["never"])
+    w("<div class='kv'><div><b>%d B</b><span>RAM never written while running ($033C-$03FB, $0400-$07FF, $0803-$FFFF)</span></div>" % len(pr["never"]))
+    for s, e, bank in BANKS:
+        w("<div><b>%d B</b><span>never written: %s</span></div>" % (sum(b - a for a, b, k in nv if k == bank), E(bank)))
+    w("<div><b>%d</b><span>VICE sessions (dumps)%s</span></div></div>" % (pr["dumps"], (", %d of other disks ignored" % pr["ignored"]) if pr["ignored"] else ""))
+    w("<p class='note'>Right after the boot the RAM is filled with a known pattern, the scenarios run, then the RAM is saved: a byte "
+      "still equal to the pattern was <b>never written</b>. This is the real use while running (data copied or unpacked, buffers, "
+      "screen) that the static analysis cannot see, but only for what the scenarios run (the tests of the project).</p>")
+    # page grid: share of every page written at run time
+    w("<div class='pages' style='margin-top:10px'><div></div>" + "".join("<div class='h'>%X</div>" % c for c in range(16)))
+    run = pr["run"]
+    for r in range(16):
+        w("<div class='rh'>$%X000</div>" % r)
+        for c in range(16):
+            pg = r * 16 + c
+            pa = [a for a in range(pg * 256, pg * 256 + 256) if probe.probed(a)]
+            if not pa:
+                w("<div class='pg sys' title='$%02X00-$%02XFF  not probed' style='background:transparent'></div>" % (pg, pg)); continue
+            n = sum(1 for a in pa if a in run)
+            st = sum(1 for a in pa if a not in run and is_free(occ.get(a), False))
+            tip = "$%02X00-$%02XFF  %s\nwritten at run time: %d of %d B\nnever written: %d B (%d of them free also for the static analysis)" % (
+                pg, pg, sys_name(pg * 256), n, len(pa), len(pa) - n, st)
+            w("<div class='pg' title='%s'><i style='flex:%d;background:#8a1c14'></i><i style='flex:%d;background:#4f9d4566'></i></div>" % (
+                E(tip, True), n, len(pa) - n))
+    w("</div><div class='legend' style='margin-top:6px'><span><i style='background:#8a1c14'></i>written at run time</span>"
+      "<span><i style='background:#4f9d4566'></i>never written</span></div>")
+    # never written stretches, compared with the static view
+    w("<h3>Never written while running</h3><div class='wrap'><table><tr><th>From</th><th>To</th><th class='n'>Bytes</th><th>Bank</th>"
+      "<th>Static analysis</th></tr>")
+    small = 0
+    for a, b, bank in nv:
+        if b - a < 16:
+            small += b - a; continue
+        used = sorted(cover(occ, a, b))
+        nfree = sum(1 for x in range(a, b) if is_free(occ.get(x), False))
+        st = "free" if nfree == b - a else ("used by: " + ", ".join(used)) if not nfree else "%d B free; used by: %s" % (nfree, ", ".join(used))
+        w("<tr><td class='mono'>%s</td><td class='mono'>%s</td><td class='n'>%d</td><td>%s</td><td>%s</td></tr>" % (h4(a), h4(b - 1), b - a, E(bank or ""), E(st)))
+    w("</table></div><p class='note'>Stretches of at least 16 bytes; %d more bytes in shorter stretches. \"Used by\" on a never written "
+      "stretch = the program declares or loads something there that the scenarios never wrote (code not loaded in the tests, variables "
+      "never set, reservations larger than needed): candidates to check, not free memory for sure.</p>" % small)
+    # written but statically free
+    hid = [a for a in pr["run"] if 0x0400 <= a and is_free(occ.get(a), True)]
+    hr = [(a, b) for a, b in ranges_of(hid) if b - a >= 16]
+    w("<details><summary>Written at run time where the static analysis sees nothing (%d B)</summary><p class='note'>Buffers behind "
+      "pointers, unpacked or copied data, screen and sprite areas, memory cleared at start-up, the test shortcuts.</p>"
+      "<div class='wrap'><table><tr><th>From</th><th>To</th><th class='n'>Bytes</th><th>Bank</th></tr>" % len(hid))
+    for a, b in hr:
+        w("<tr><td class='mono'>%s</td><td class='mono'>%s</td><td class='n'>%d</td><td>%s</td></tr>" % (h4(a), h4(b - 1), b - a, E(bank_of(a) or "")))
+    w("</table></div></details>")
+    w("<details><summary>Scenarios (%d)</summary><div class='wrap'><table><tr><th>Scenario</th><th class='n'>Bytes written</th></tr>" % len(pr["scenarios"]))
+    for t, n in pr["scenarios"]:
+        w("<tr><td class='mono'>%s</td><td class='n'>%d</td></tr>" % (E(t), n))
+    w("</table></div></details></section>")
+    return "".join(P)
+
+
 # ------------------------------------------------------------------ HTML page
 E = html.escape
 PALETTE = ["#c8301e", "#8e5bb0", "#e8762b", "#1f8a8a", "#c2477e", "#b8860b", "#7a4a2a", "#5d8a2f", "#d4622a", "#6a4c93", "#2f9e8f",
@@ -469,7 +567,7 @@ svg.tracks{width:100%;height:auto;display:block;font:11px var(--mono)}
 """
 
 
-def page_html(used, other, disk, occ, title):
+def page_html(used, other, disk, occ, title, pr=None):
     P = []
     w = P.append
     col = {m.name: PALETTE[i % len(PALETTE)] for i, m in enumerate(used)}
@@ -553,6 +651,10 @@ def page_html(used, other, disk, occ, title):
     small = sum(b - a for a, b, _ in fr if b - a < 16)
     w("</table></div>" "<p class='note'>Stretches of at least 16 bytes; %d more free bytes in shorter stretches.</p></section>" % small)
 
+    # --- run-time probe
+    if pr:
+        w(probe_html(pr, occ))
+
     # --- overlaps
     ov = overlaps(used)
     if ov:
@@ -588,6 +690,8 @@ def page_html(used, other, disk, occ, title):
       "<li>Buffers used only through pointers, and tables read with an index past their first byte, are not seen; the screen, unless "
       "it is declared with a reservation, is seen only through the addresses used directly.</li>"
       "<li>An address between $D000 and $DFFF used by the code counts as an I/O register, unless it is inside code or variables of the program.</li>"
+      "<li>Run-time probe (if present): it sees only what the scenarios run; the test shortcuts (memory written by the monitor) count "
+      "as written; a byte written with the same value as the pattern looks untouched (about 1 in 250 for data that is not $00, $FF, $20).</li>"
       "</ul></section></main></body></html>")
     return "\n".join(P)
 
@@ -803,6 +907,7 @@ def main():
     ap.add_argument("--disk", default="out/work/disk.d64", help=".d64 disk (default out/work/disk.d64)")
     ap.add_argument("--out", default="out/work/memory-map", help="output folder (default out/work/memory-map)")
     ap.add_argument("--title", default=None, help="project name (default: C64_VIEW_TITLE of toolchain.env)")
+    ap.add_argument("--probe", default=None, help="RAM dumps of the run-time probe in VICE (default out/work/memprobe if it exists)")
     a = ap.parse_args()
     used, other, disk = analyse(a.work, a.disk)
     if not used:
@@ -811,7 +916,9 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     OUTDIR[0] = a.out
     title = a.title if a.title is not None else project_title()
-    open(os.path.join(a.out, "index.html"), "w").write(page_html(used, other, disk, occ, title))
+    pdir = a.probe if a.probe is not None else os.path.join(a.work, "memprobe")
+    pr = probe_data(pdir, a.disk if disk else None)
+    open(os.path.join(a.out, "index.html"), "w").write(page_html(used, other, disk, occ, title, pr))
     fr = free_ranges(occ)
     data = {"schema": 1, "free_bytes": sum(b - a for a, b, _ in fr),
             "free_by_bank": {bank: sum(y - x for x, y, k in fr if k == bank) for _, _, bank in BANKS},
@@ -821,13 +928,26 @@ def main():
                          "bytes": len(m.bytes), "reserved": sum(s for _, s, _, _ in m.virtual), "segments": [[x, y - 1] for x, y in ranges_of(m.bytes)]}
                         for m in used],
             "other_listings": [m.name for m in other]}
+    data["metrics"] = [{"id": "ram_free_static", "label": "RAM free from the program (static)", "value": data["free_bytes"], "unit": "B",
+                        "better": "up", "hint": "toolchain/memmap: $0400-$FFFF with no code, data, variables or data files"}]
+    if pr and pr.get("run"):
+        nv = probe_ranges(pr["never"])
+        data["probe"] = {"dumps": pr["dumps"], "ignored": pr["ignored"], "never_written_bytes": len(pr["never"]),
+                         "never_written_by_bank": {bank: sum(y - x for x, y, k in nv if k == bank) for _, _, bank in BANKS},
+                         "never_written_ranges": [{"from": x, "to": y - 1, "bank": k} for x, y, k in nv],
+                         "scenarios": [{"tag": t, "written": n} for t, n in pr["scenarios"]]}
+        data["metrics"].append({"id": "ram_never_written", "label": "RAM never written in the tests (VICE)", "value": len(pr["never"]),
+                                "unit": "B", "better": "up", "hint": "run-time probe, %d VICE sessions" % pr["dumps"]})
+    elif pr:
+        data["probe"] = {"dumps": 0, "ignored": pr["ignored"]}
     if disk:
         data["disk"] = {"name": disk["name"], "id": disk["id"], "blocks_free": disk["free"], "blocks_total": disk["total"],
                         "files": [{"name": f["name"], "type": f["type"], "blocks": f["blocks"], "load": f.get("load"), "end": (f["end"] - 1) if "end" in f else None,
                                    "modules": f.get("modules", []), "built": f.get("built")} for f in disk["files"]]}
     json.dump(data, open(os.path.join(a.out, "memmap.json"), "w"), indent=1)
-    print("c64map: %s (%d modules, %d B free from the program%s)" % (os.path.join(a.out, "index.html"), len(used), data["free_bytes"],
-          ", disk %d/%d blocks free" % (disk["free"], disk["total"]) if disk else ""))
+    print("c64map: %s (%d modules, %d B free from the program%s%s)" % (os.path.join(a.out, "index.html"), len(used), data["free_bytes"],
+          ", disk %d/%d blocks free" % (disk["free"], disk["total"]) if disk else "",
+          ", probe: %d B never written in %d VICE sessions" % (len(pr["never"]), pr["dumps"]) if pr and pr.get("run") else ""))
 
 
 if __name__ == "__main__":

@@ -203,6 +203,9 @@ def main():
     stats = man.get("stats") or {}
     if not a.only_manual:
         stats["metrics"] = game_metrics()
+        mm = os.path.join(OUT, "work", "memory-map", "memmap.json")
+        if a.maps and os.path.isfile(mm):          # (14/11) misure generiche della mappa automatica (toolchain/memmap/c64map.py)
+            stats["metrics"] += json.load(open(mm)).get("metrics", [])
         stats["info"] = [{"label": "salvataggi", "value": "v%s" % ver.get("save_version")}]
         stats["disk"] = d64_info(os.path.join(vdir, "blood_path_v%s_1541.d64" % v))
         stats["git"] = git_info()

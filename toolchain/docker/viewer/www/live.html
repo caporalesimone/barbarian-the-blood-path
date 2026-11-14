@@ -20,6 +20,9 @@
   button:active { transform:translateY(3px); box-shadow:none; }
   button.on { background:#f2c230; }
   #st { color:var(--dim); }
+  .vol { display:flex; align-items:center; gap:6px; color:var(--fg); font:600 13px "DejaVu Sans Mono", ui-monospace, monospace; }
+  .vol input { width:110px; accent-color:#f2c230; }
+  .vol output { min-width:4.5ch; color:var(--acc); }
   iframe { flex:1; border:0; width:100%; }
 
   /* overlay (14/11): C64 keyboard and joysticks over the screen, semi-transparent */
@@ -52,6 +55,8 @@
 <header>
   <a href="./">&larr; index</a>
   <button id="audioBtn" title="Turns the screen audio on or off">Audio: off</button>
+  <label class="vol" title="Volume of the screen audio (gain: 0-400%; above 100% it amplifies, loud passages can clip)">Vol
+    <input id="vol" type="range" min="0" max="400" step="5" value="100"><output id="volV">100%</output></label>
   <button id="kbBtn" title="Commodore 64 keyboard over the screen">Keyboard</button>
   <button id="j1Btn" title="Joystick 1 over the screen (port 1)">Joy 1</button>
   <button id="j2Btn" title="Joystick 2 over the screen (port 2: the one most games use)">Joy 2</button>
@@ -60,8 +65,17 @@
 <iframe src="vnc/index.html?autoconnect=1&amp;view_only=0&amp;resize=remote&amp;show_control_bar=true&amp;clipboard_up=true&amp;clipboard_down=true" allow="clipboard-read; clipboard-write"></iframe>
 <div id="ov"><div id="kb"></div><div class="joy" id="j1"></div><div class="joy" id="j2"></div></div>
 <script>
-let ctx = null, ws = null, next = 0, rest = null;
+let ctx = null, ws = null, next = 0, rest = null, gain = null;
 const btn = document.getElementById('audioBtn'), st = document.getElementById('st');
+// (14/11) volume: one GainNode between the audio blocks and the speakers; the value is remembered in this browser
+const vol = document.getElementById('vol'), volV = document.getElementById('volV');
+try { const v = localStorage.getItem('c64.live.volume'); if (v !== null && !isNaN(+v)) vol.value = v; } catch (e) {}
+function setVol() {
+  volV.textContent = vol.value + '%';
+  if (gain) gain.gain.setTargetAtTime(vol.value / 100, ctx.currentTime, 0.02);   // short ramp: no click
+  try { localStorage.setItem('c64.live.volume', vol.value); } catch (e) {}
+}
+vol.oninput = setVol; setVol();
 function play(data) {
   let b = new Uint8Array(data);
   if (rest) { const m = new Uint8Array(rest.length + b.length); m.set(rest); m.set(b, rest.length); b = m; rest = null; }
@@ -71,13 +85,14 @@ function play(data) {
   const i16 = new Int16Array(b.buffer, b.byteOffset, n * 2);
   const ab = ctx.createBuffer(2, n, 44100), L = ab.getChannelData(0), R = ab.getChannelData(1);
   for (let i = 0; i < n; i++) { L[i] = i16[2 * i] / 32768; R[i] = i16[2 * i + 1] / 32768; }
-  const s = ctx.createBufferSource(); s.buffer = ab; s.connect(ctx.destination);
+  const s = ctx.createBufferSource(); s.buffer = ab; s.connect(gain);
   const now = ctx.currentTime;
   if (next < now + 0.005 || next > now + 0.25) next = now + 0.03;     // restart or accumulated delay: back to ~30 ms
   s.start(next); next += ab.duration;
 }
 function on() {
   ctx = ctx || new AudioContext({ sampleRate: 44100 }); ctx.resume();
+  if (!gain) { gain = ctx.createGain(); gain.gain.value = vol.value / 100; gain.connect(ctx.destination); }
   ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/audio');
   ws.binaryType = 'arraybuffer';
   ws.onmessage = e => play(e.data);

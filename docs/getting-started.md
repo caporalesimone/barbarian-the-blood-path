@@ -184,7 +184,9 @@ passa al lettore da un socket Unix nel volume `c64-x11` (`c64-player.sock`). Com
 Dettagli dello schermo dal vivo:
 - **Schermo dal vivo con l'audio** (`/live.html`, 14/11): lo schermo X condiviso e' il server X di **KasmVNC** (volume `c64-x11`),
   mostrato dal suo client web; l'audio viene da **PulseAudio** del viewer (scheda virtuale `c64`) ed e' mandato dal server del viewer
-  su un WebSocket (`/audio`), acceso dal pulsante "Audio" della pagina. Gli emulatori di un altro container usano schermo e audio
+  su un WebSocket (`/audio`), acceso dal pulsante "Audio" della pagina; accanto, il cursore **Vol** (14/11 sera, richiesta del committente)
+  regola il guadagno nel browser da 0 a 400% (un `GainNode` WebAudio; oltre il 100% amplifica e i passaggi forti possono saturare; il
+  valore resta nel browser, `localStorage`). Agisce solo sull'ascolto, non su VICE ne' sulle registrazioni. Gli emulatori di un altro container usano schermo e audio
   con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
   aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
   **VICE con il suono**, a velocita' reale, sull'ultima build: `toolchain/viewer.sh exec tools/vice/play.sh [disco.d64|versione]` (senza argomento `out/releases/latest`, con `1.239` quella versione)
@@ -218,12 +220,13 @@ Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default 
 
 | Percorso | Cosa |
 |---|---|
-| `out/releases/v<V>/` | **gli artefatti di ogni versione**: `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generati per quella versione), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca; dal 14/11 `stats`: commit e modifiche non committate, margini di RAM da `game.lbl`, blocchi liberi e directory del disco, dimensioni di GAME, durata di build e test). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
+| `out/releases/v<V>/` | **gli artefatti di ogni versione**: `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generati per quella versione), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca; dal 14/11 `stats`: commit e modifiche non committate, margini di RAM da `game.lbl` e, quando si pubblicano le mappe, le misure di `memmap.json` (`ram_free_static`, `ram_never_written`), blocchi liberi e directory del disco, dimensioni di GAME, durata di build e test). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
 | `out/work/disk.d64` | disco di lavoro della build in corso (da qui si pubblica) |
 | `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
 | `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
 | `out/work/atlas/` | atlante grafico (`index.html`) |
 | `out/work/memory-map/` | mappa automatica della memoria e del disco (`index.html`, `memmap.json`, `toolchain/memmap/c64map.py`) e mappe curate a mano (`mappa_ram.html`, `mappa_disco.html`) |
+| `out/work/memprobe/` | (14/11) dump della RAM della sonda in VICE (`./build.sh --probe`, uno per sessione VICE dei test, con scenario e impronta del disco nel `.json` accanto) |
 | `out/work/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
 | `out/work/simulators/` | report dei simulatori |
 | `out/work/test_report.txt`, `.json` | esito dei test |

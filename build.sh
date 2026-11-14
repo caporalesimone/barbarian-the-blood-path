@@ -9,6 +9,8 @@
 #   ./build.sh --view        i test aprono VICE sullo schermo del viewer: http://localhost:6080 (c64-emu-viewer); se il viewer e'
 #                            gia' acceso lo fanno da soli (14/11), salvo --no-view
 #   ./build.sh --no-view     i test su display virtuali anche con il viewer acceso
+#   ./build.sh --probe       (14/11) sonda della memoria in VICE: RAM riempita con uno schema dopo il boot, salvata alla fine di ogni
+#                            sessione dei test; la mappa automatica (toolchain/memmap) aggiunge la memoria scritta davvero
 #   ./build.sh --manual      SOLO il manuale PDF (barbarian-manual), senza rifare il disco
 #   ./build.sh --images      rifa' tutte le immagini Docker (toolchain e manuale; poi la build)
 #   ./build.sh --keep N      quante versioni tenere in out/releases/ (default 5, KEEP_VERSIONS nell'ambiente)
@@ -21,14 +23,15 @@
 # Copyright (c) 2026 - Simone Caporale
 set -eu
 cd "$(dirname "$0")"
-FLAGS="$*"; REL=0; NOTEST=0; EMU=0; VIEW=0; NOVIEW=0; MANUAL=0; IMAGES=0; KEEP=${KEEP_VERSIONS:-5}; ATLAS=1; MAPS=1; MANUALDEF=1
+FLAGS="$*"; PROBE=0; REL=0; NOTEST=0; EMU=0; VIEW=0; NOVIEW=0; MANUAL=0; IMAGES=0; KEEP=${KEEP_VERSIONS:-5}; ATLAS=1; MAPS=1; MANUALDEF=1
 while [ $# -gt 0 ]; do
-    case "$1" in --release) REL=1; EMU=1 ;; --no-test) NOTEST=1 ;; --emu) EMU=1 ;; --view) VIEW=1 ;; --no-view) NOVIEW=1 ;; --manual) MANUAL=1 ;;
+    case "$1" in --release) REL=1; EMU=1 ;; --no-test) NOTEST=1 ;; --emu) EMU=1 ;; --view) VIEW=1 ;; --no-view) NOVIEW=1 ;; --manual) MANUAL=1 ;; --probe) PROBE=1 ;;
                  --images) IMAGES=1 ;; --fast) ATLAS=0; MAPS=0; MANUALDEF=0 ;; --no-atlas) ATLAS=0 ;; --no-maps) MAPS=0 ;;
                  --no-manual) MANUALDEF=0 ;; --keep) shift; KEEP=${1:-}; case "$KEEP" in ''|*[!0-9]*|0) echo "--keep N: intero >= 1"; exit 1 ;; esac ;;
-                 *) sed -n 2,22p "$0"; exit 1 ;; esac
+                 *) sed -n 2,24p "$0"; exit 1 ;; esac
     shift
 done
+[ $PROBE = 1 ] && MAPS=1 && NOTEST=0                 # la sonda serve alla mappa e gira nei test
 # stato dal vivo per la pagina del viewer: out/tmp/build.json (scrittura atomica: file temporaneo + mv)
 T0=$(date +%s); PHASE=avvio
 status() {
@@ -93,7 +96,12 @@ if [ $VIEW = 1 ] && [ $NOVIEW = 0 ]; then
     toolchain/viewer.sh start
     DARGS="$DARGS -v c64-x11:/tmp/.X11-unix"; export C64_VIEW=1 DISPLAY=:99 PULSE_SERVER=unix:/tmp/.X11-unix/pulse
 fi
+if [ $PROBE = 1 ]; then rm -rf out/work/memprobe; export C64_MEMPROBE=1; fi
 C64_DOCKER_ARGS="$DARGS" toolchain/run.sh emu-vice tests/run_tests.sh
+if [ $PROBE = 1 ]; then                    # mappa automatica di nuovo, con i dump della sonda (out/work/memprobe/)
+    phase mappa
+    toolchain/run.sh builder python3 toolchain/memmap/c64map.py --work out/work --disk out/work/disk.d64 --out out/work/memory-map
+fi
 
 PUB="$PUB --tests"
 if [ $REL = 1 ] || [ $MANUALDEF = 1 ]; then

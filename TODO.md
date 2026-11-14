@@ -536,11 +536,14 @@ VS Code: niente per ora. Prima la mappa della memoria (T1), poi il resto (T2).
 - Fatto il 14/11: `toolchain/memmap/c64map.py` (generico, nessuna configurazione) -> `out/work/memory-map/index.html` + `memmap.json`:
   moduli dai listati di 64tass collegati al disco, panoramica per pagine, strati, spazio libero per banco, moduli nella stessa memoria,
   pagina zero / I/O / KERNAL per modulo, disco completo. Pagina in [docs/build.md](docs/build.md) sezione 4.
-- **Verifica in VICE** (la piu' utile): RAM riempita con uno schema noto dopo il boot, poi gli scenari dei test (smoke, sanity,
-  regression), poi lettura della memoria: i byte ancora uguali allo schema non sono mai stati scritti. Darebbe l'uso **vero**
-  (dati copiati all'avvio, buffer dietro puntatori, schermo, sprite, decompressioni) che l'analisi statica non vede. Cavilli: un byte
-  scritto con lo stesso valore dello schema sembra intatto (schema senza $00/$FF/$20, o due passate con schemi diversi); i test che
-  partono con `-autostart` vanno riempiti prima del caricamento; tempo dei test in piu' (da misurare). **Complessita'**: M.
+- Fatto il 14/11: **sonda in VICE** (`./build.sh --probe`, `toolchain/memmap/probe.py`, sezione "Measured in VICE" della pagina;
+  [docs/build.md](docs/build.md)) e misure generiche nel manifest (`metrics` di `memmap.json`: `ram_free_static`, `ram_never_written`).
+  Prima misura (smoke + sanity + regression, 39 sessioni con lo stesso disco): **1791 B mai scritti** contro 6398 B liberi per l'analisi
+  statica. Da guardare [non verificato, sono indizi]: zone libere per l'analisi statica ma scritte durante i test (`$8E39-$8FFF` 455 B,
+  `$B701-$BDFF` con un byte libero a ogni inizio pagina = probabile tabella o buffer dietro puntatori, `$D000-$D47F` sotto l'I/O);
+  `$B300-$B3FE` (modulo `lore`) mai scritto = il modulo non e' caricato da nessun test. Resta: far girare la sonda in `--release`
+  (oggi solo a mano: `C64_MEMPROBE=1 ... tests/run.py regression`, poi `c64map.py`) e una seconda passata con uno schema diverso per
+  togliere i byte scritti con lo stesso valore (probabilita' ~1/250 per byte di dati qualsiasi).
 - **Annotazioni facoltative nei sorgenti** (es. `;@map "grafica fissa, morta dopo copy_gfx" free-after=start`) per descrizioni e
   dati che diventano liberi dopo l'avvio: senza, oggi il margine di 2333 B sotto `$8720` (asm.sh) non si ritrova nella mappa
   automatica, perche' `gfx_data` resta occupato. **Complessita'**: S-M.
@@ -548,10 +551,9 @@ VS Code: niente per ora. Prima la mappa della memoria (T1), poi il resto (T2).
   libero con il solo modulo; gli scenari veri verrebbero dalla verifica in VICE o da un elenco facoltativo.
 - **Coppie di etichette** inizio/fine (`x`/`x_end`) per nominare zone senza annotazioni: dipende da come ogni progetto chiama le etichette.
 - **Mappe vecchie** (`tools/memory-map/gen_rammap.py`, `gen_diskmap.py`: `mappa_ram.html`, `mappa_disco.html`, curate a mano, con
-  scenari e verifiche in VICE): restano finche' la mappa automatica non ha annotazioni e verifica in VICE; poi si tolgono e le
-  descrizioni passano nelle annotazioni. La pagina automatica le collega ("Altre pagine").
-- Una misura generica nel manifest per il viewer (`memmap.json`: RAM libera, blocchi liberi) cosi' ogni progetto ha l'andamento
-  della memoria senza scrivere codice.
+  scenari e verifiche in VICE): restano finche' la mappa automatica non ha le annotazioni (la verifica in VICE c'e' dal 14/11); poi si
+  tolgono e le descrizioni passano nelle annotazioni. La pagina automatica le collega ("Altre pagine"). (14/11: non tolte, perche'
+  senza annotazioni si perderebbero le descrizioni scritte a mano.)
 
 ### T2 Estrazione della toolchain in un repository a parte
 - Piano da preparare dopo T1 (14/11): rendere `toolchain/` autosufficiente (dentro: `tools/vice/` generici, `tests/lib/` motore dei

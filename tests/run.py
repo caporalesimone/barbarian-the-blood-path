@@ -9,7 +9,7 @@ Usage: tests/run.py [smoke|sanity|regression|all ...] [-k ID|prefix ...] [--list
 Duration caps (CAPS): smoke 20 s, smoke + sanity 35 s, one smoke / sanity test 10 s (exit 1 with "TIME CAP" lines).
 Report: on screen and in out/work/test_report.txt / out/work/test_report.json (ID, suite, result, time, reason).
 Live status (14/11, for the viewer page): out/tmp/tests.json, rewritten after every test (state, current test, results so far)."""
-import glob, importlib.util, json, os, sys, time, traceback
+import glob, importlib.util, json, os, re, sys, time, traceback
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -111,13 +111,17 @@ def main():
     for t in tests: by_mod.setdefault(t["module"], []).append(t)
     for mname, tl in by_mod.items():
         m, ctx = mods[mname], {}
+        os.environ["C64_MEMPROBE_TAG"] = re.sub(r"\.cases$", "", mname)   # memory probe (C64_MEMPROBE=1): scenario name of the RAM dumps
         chain = getattr(m, "CHAIN", False)
         broken = None
         t0 = time.time()
         try:
             if hasattr(m, "setup"): m.setup(ctx)
-            setup_err = None
+            setup_err = setup_skip = None
+        except R.Skip as e:                         # (14/11) a setup that cannot run (e.g. no vc64web daemon): SKIP, not FAIL
+            setup_err, setup_skip = None, str(e)
         except Exception as e:
+            setup_skip = None
             setup_err = "setup: %s" % (e,)
             if os.environ.get("TESTDEBUG"): traceback.print_exc()
         t_setup = time.time() - t0
@@ -125,7 +129,9 @@ def main():
             r = dict(id=t["id"], suite=t["suite"], desc=t["desc"], module=mname)
             live(current=dict(id=t["id"], suite=t["suite"], desc=t["desc"], since=round(time.time(), 1)))
             t0 = time.time()
-            if setup_err:
+            if setup_skip:
+                r.update(result="SKIP", reason="setup: " + setup_skip)
+            elif setup_err:
                 r.update(result="FAIL", reason=setup_err)
             elif broken:
                 r.update(result="SKIP", reason="after the failure of %s" % broken)

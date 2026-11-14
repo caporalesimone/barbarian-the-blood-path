@@ -5,7 +5,7 @@
 #   toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py      (project image: full name)
 # Name: builder, emu-vice, ... = image c64-<name>; the full name of an existing image is used as is.
 # Runs as the host user (the files in out/ stay theirs); HOME in out/tmp/home.
-# Variables passed: EMU_URL, C64_VIEW, DISPLAY, PULSE_SERVER and those of C64_PASS_ENV (project toolchain.env).
+# Variables passed: EMU_URL, C64_VIEW, DISPLAY, PULSE_SERVER, C64_MEMPROBE and those of C64_PASS_ENV (project toolchain.env).
 # Extra docker options: C64_DOCKER_ARGS="--network c64 ...". Project: the folder above toolchain/ (or C64_PROJECT).
 set -eu
 TC=$(cd "$(dirname "$0")" && pwd)
@@ -18,7 +18,7 @@ docker image inspect "$IMG" >/dev/null 2>&1 || IMG=c64-$IMG
 TTY=""; if [ -t 0 ] && [ -t 1 ]; then TTY="-it"; fi
 mkdir -p "$ROOT/out/tmp/home"
 ENVS=""
-for v in EMU_URL C64_VIEW DISPLAY PULSE_SERVER ${C64_PASS_ENV:-}; do
+for v in EMU_URL C64_VIEW DISPLAY PULSE_SERVER C64_MEMPROBE ${C64_PASS_ENV:-}; do
     eval "[ -n \"\${$v+x}\" ]" && ENVS="$ENVS -e $v"
 done
 # shellcheck disable=SC2086

@@ -37,6 +37,7 @@ Si combinano liberamente (es. `./build.sh --no-atlas --no-manual`). Senza parame
 | `--emu` | i test con il demone vc64web acceso (`EMU-*`) |
 | `--view` | i test aprono VICE sullo schermo del viewer (http://localhost:6080); se il viewer e' gia' acceso lo fanno da soli |
 | `--no-view` | i test sui display virtuali anche con il viewer acceso |
+| `--probe` | (14/11) sonda della memoria in VICE durante i test: la mappa automatica (`out/work/memory-map/index.html`) aggiunge la RAM scritta davvero ([docs/build.md](docs/build.md)) |
 | `--manual` | **solo** il manuale PDF, senza rifare il disco |
 | `--images` | rifa' tutte le immagini Docker, poi la build |
 | `--keep N` | quante versioni tenere in `out/releases/` (default 5; anche `KEEP_VERSIONS=N`) |
