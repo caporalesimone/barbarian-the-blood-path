@@ -29,6 +29,7 @@ Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` (r
 | `run.sh <immagine> [comando]` | esegue un comando con il progetto in `/work`, con l'utente dell'host; `builder` = `c64-builder`, un nome completo si usa cosi' com'e' |
 | `viewer.sh start\|stop\|exec` | http://localhost:6080: centro di controllo (stato di build e test, una scheda per versione di `out/releases/`, andamento e confronto), schermo dal vivo con audio (KasmVNC + PulseAudio), vc64web nel browser, `out/` del progetto; `exec <comando>` = comando in `c64-emu-vice` collegato a schermo e audio. Con `C64_VIEW_PLAYER` avvia anche `c64-emu-player` |
 | `viewer_player.py` | lettore del viewer (container `c64-emu-player`): avvia `C64_VIEW_PLAYER <file>` sullo schermo dal vivo quando lo chiede la pagina (`POST /control`), da un socket Unix nel volume `c64-x11`; il viewer non ha il socket di Docker |
+| `memmap/c64map.py` | mappa della memoria e del disco **automatica**, senza configurazione (nel container `c64-builder`): legge i listati di 64tass (`-L`), le etichette (`-l`), i PRG e il `.d64`; scrive `index.html` e `memmap.json`. `--work`, `--disk`, `--out`, `--title` (default `C64_VIEW_TITLE`). Analisi statica: limiti nella pagina |
 | `validate_env.sh` | controlla l'host: sistema, WSL e posizione del progetto, Docker, fine riga, ROM, immagini, tool |
 
 ## Configurazione del progetto (`toolchain.env`)

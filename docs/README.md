@@ -48,7 +48,8 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | Documento | Contenuto |
 |---|---|
 | [FORMATO_DATI.md](FORMATO_DATI.md) | Formato byte per byte dei file su disco e dei salvataggi |
-| [mappa_ram.html](../out/work/memory-map/mappa_ram.html) / [mappa_disco.html](../out/work/memory-map/mappa_disco.html) | Mappe generate a ogni build |
+| [memory-map/index.html](../out/work/memory-map/index.html) | Mappa automatica della memoria e del disco (toolchain, a ogni build) |
+| [mappa_ram.html](../out/work/memory-map/mappa_ram.html) / [mappa_disco.html](../out/work/memory-map/mappa_disco.html) | Mappe curate a mano, generate a ogni build |
 | [grafica/index.html](../out/work/atlas/index.html) | Atlante grafico (generato a ogni build): tutti i tile di villaggio, dungeon (8 palette) e sala del trono con id e lettere, mappe a griglia con zoom al passaggio del mouse, composizioni, titolo, charset, sprite, font; `out/work/atlas/tiles.json` |
 | [SISTEMA_COMBATTIMENTO.md](SISTEMA_COMBATTIMENTO.md) | Progetto del sistema d20 (05/11) |
 | [BILANCIAMENTO.md](BILANCIAMENTO.md) | Proposta di bilanciamento a 20 piani (05/11) e ritarature |

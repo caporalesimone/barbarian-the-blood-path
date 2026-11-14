@@ -26,6 +26,7 @@ Il branch `feature/stat-points` (v1.196, A1) ha `SAVE_VER $C6` e margine 1049 B.
 | [J](#j--idee-per-dopo) | idee per dopo (bassa priorità) |
 | [K](#k--frenzy-prove-in-gioco-del-committente) | Frenzy: prove in gioco del committente (11/11) |
 | [M](#m--capitoli--loader-macro-capitolo-1211-committente) | **Capitoli + loader** (macro capitolo): sequenza dei capitoli, brano per capitolo, prestazioni dei caricamenti, fast loader, capitoli nel codice e bestiari |
+| [T](#t--toolchain-condivisa-1411-committente) | **toolchain condivisa** fra piu' giochi: mappa della memoria automatica, estrazione in un repository a parte |
 
 ---
 
@@ -520,3 +521,41 @@ sentiero di uscita a nord con la casella generica `=` e `travel to next chapter`
   capitoli 2–4, Lord of Ruin nel capitolo 4. **Serve**: taratura (prima simulazione: Abbot 13%, Miller 97%, Varok 100%:
   da rifare con `fit_rules.py`), sprite (3 comuni + 1 boss per capitolo), IA nuove (distanza, carica, teletrasporto,
   evocazione: da scegliere), H2. **Complessità**: L.
+
+---
+
+## T — Toolchain condivisa (14/11, committente)
+
+Decisioni del 14/11: la toolchain diventera' un repository a parte, **senza submodule**: versione nelle immagini (`c64-builder:1.3`),
+comando dell'host **`c64t`** (`c64t init` crea un progetto chiedendo nome e informazioni, scrive il `.env`); nel gioco restano sorgenti,
+grafica, dati, testo del manuale, test e i generatori propri. Il codice 6502 di librerie esterne (Krill, decompressore zx0) resta
+**nel gioco** con la sua versione; nella toolchain solo i programmi dell'host (cc1541 dal suo sorgente, non dallo zip di Krill).
+VS Code: niente per ora. Prima la mappa della memoria (T1), poi il resto (T2).
+
+### T1 Mappa della memoria automatica: aggiunte
+- Fatto il 14/11: `toolchain/memmap/c64map.py` (generico, nessuna configurazione) -> `out/work/memory-map/index.html` + `memmap.json`:
+  moduli dai listati di 64tass collegati al disco, panoramica per pagine, strati, spazio libero per banco, moduli nella stessa memoria,
+  pagina zero / I/O / KERNAL per modulo, disco completo. Pagina in [docs/build.md](docs/build.md) sezione 4.
+- **Verifica in VICE** (la piu' utile): RAM riempita con uno schema noto dopo il boot, poi gli scenari dei test (smoke, sanity,
+  regression), poi lettura della memoria: i byte ancora uguali allo schema non sono mai stati scritti. Darebbe l'uso **vero**
+  (dati copiati all'avvio, buffer dietro puntatori, schermo, sprite, decompressioni) che l'analisi statica non vede. Cavilli: un byte
+  scritto con lo stesso valore dello schema sembra intatto (schema senza $00/$FF/$20, o due passate con schemi diversi); i test che
+  partono con `-autostart` vanno riempiti prima del caricamento; tempo dei test in piu' (da misurare). **Complessita'**: M.
+- **Annotazioni facoltative nei sorgenti** (es. `;@map "grafica fissa, morta dopo copy_gfx" free-after=start`) per descrizioni e
+  dati che diventano liberi dopo l'avvio: senza, oggi il margine di 2333 B sotto `$8720` (asm.sh) non si ritrova nella mappa
+  automatica, perche' `gfx_data` resta occupato. **Complessita'**: S-M.
+- **Scenari** (quali moduli stanno in memoria insieme): oggi i moduli caricati a turno sono sommati e ogni scheda dice lo spazio
+  libero con il solo modulo; gli scenari veri verrebbero dalla verifica in VICE o da un elenco facoltativo.
+- **Coppie di etichette** inizio/fine (`x`/`x_end`) per nominare zone senza annotazioni: dipende da come ogni progetto chiama le etichette.
+- **Mappe vecchie** (`tools/memory-map/gen_rammap.py`, `gen_diskmap.py`: `mappa_ram.html`, `mappa_disco.html`, curate a mano, con
+  scenari e verifiche in VICE): restano finche' la mappa automatica non ha annotazioni e verifica in VICE; poi si tolgono e le
+  descrizioni passano nelle annotazioni. La pagina automatica le collega ("Altre pagine").
+- Una misura generica nel manifest per il viewer (`memmap.json`: RAM libera, blocchi liberi) cosi' ogni progetto ha l'andamento
+  della memoria senza scrivere codice.
+
+### T2 Estrazione della toolchain in un repository a parte
+- Piano da preparare dopo T1 (14/11): rendere `toolchain/` autosufficiente (dentro: `tools/vice/` generici, `tests/lib/` motore dei
+  test, `publish.py`, cache dei passi, versioni), immagini con la versione nel tag, comando `c64t` (`init`, `build`, `test`, `view`,
+  `play`, `images`, `doctor`, `upgrade`), container generico del manuale (WeasyPrint + tema "manuale C64" + tasti `<kbd>`), progetto
+  di esempio che prova che la toolchain e' davvero generica, prova da ambiente pulito.
+

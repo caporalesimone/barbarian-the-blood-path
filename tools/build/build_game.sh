@@ -27,6 +27,7 @@ DISK=out/work/disk.d64
 if [ "${BUILD_MAPS:-1}" = 1 ]; then
     echo "== mappe RAM e disco ($DISK, out/work/memory-map/) =="
     python3 tools/memory-map/gen_rammap.py && python3 tools/memory-map/gen_diskmap.py $DISK || exit 1
+    python3 toolchain/memmap/c64map.py --work out/work --disk $DISK --out out/work/memory-map || exit 1   # (14/11) mappa automatica della toolchain: index.html
 fi
 if [ "${BUILD_ATLAS:-1}" = 1 ]; then
     echo "== atlante grafico (out/work/atlas/) =="

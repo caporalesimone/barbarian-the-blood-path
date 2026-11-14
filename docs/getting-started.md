@@ -224,7 +224,7 @@ Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default 
 | `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
 | `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
 | `out/work/atlas/` | atlante grafico (`index.html`) |
-| `out/work/memory-map/` | mappa della RAM e del disco (HTML) |
+| `out/work/memory-map/` | mappa automatica della memoria e del disco (`index.html`, `memmap.json`, `toolchain/memmap/c64map.py`) e mappe curate a mano (`mappa_ram.html`, `mappa_disco.html`) |
 | `out/work/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
 | `out/work/simulators/` | report dei simulatori |
 | `out/work/test_report.txt`, `.json` | esito dei test |

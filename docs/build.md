@@ -131,7 +131,8 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 
 | Strumento | Uso |
 |---|---|
-| `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build (se cambia la memoria o il disco vanno aggiornati) |
+| `toolchain/memmap/c64map.py` (14/11, generico) | `out/work/memory-map/index.html` + `memmap.json` a ogni build: mappa **automatica**, senza configurazione, dai listati di 64tass (`-L`), dalle etichette (`-l`) e dal disco. Moduli = listati il cui file e' sul disco (stesso contenuto o stesso nome: `game` compresso, `menu` diviso in `menu1..3`); per ogni byte: indirizzo nel file, indirizzo di esecuzione (`.logical`) e file sorgente; variabili di `.virtual`; indirizzi usati dalle istruzioni (pagina zero, I/O, KERNAL). Mostra: panoramica per pagine, strati per modulo, spazio libero per banco, moduli nella stessa memoria (overlay), disco completo. **Analisi statica**: non vede dati copiati o decompressi all'avvio, buffer dietro puntatori, dati che diventano liberi (es. `gfx_data` dopo `copy_gfx`). Verifica: il libero `$9E7B-$9FFF` = 389 B coincide con il margine del blocco `$9C00` di `asm.sh`. Aggiunte: TODO T1 |
+| `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build: mappe **curate a mano** con scenari e verifiche in VICE (se cambia la memoria o il disco vanno aggiornate); restano finche' la mappa automatica non le sostituisce (TODO T1) |
 | `tools/atlas/gen_atlas.py` (+ `atlas_names.py`, `atlas_template.html`) | atlante grafico `out/work/atlas/` ([regole in CLAUDE.md](../CLAUDE.md)) |
 | `tools/build/asm_audit.py` | analisi del codice assemblato (`out/work/asm_audit/analisi_assembly.md`, test `ASM-10`) |
 | `tools/manual/gen_manual.py` | manuale per la release |
