@@ -39,7 +39,7 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   lanciandolo da un'altra cartella.
 - **Uscite**: tutto cio' che si genera sta in `out/` (non in git, tranne `out/.gitkeep`), ogni strumento nella sua sottocartella
   (`out/atlas/`, `out/memory-map/`, `out/manual/`, `out/simulators/`, `out/vc64web/`, ...). File temporanei e usa e getta in
-  `out/tmp/` (si puo' cancellare sempre), **mai** in `/tmp`. **`out/` contiene solo la build piu' recente**; niente cartella `release/`.
+  `out/tmp/` (si puo' cancellare sempre), **mai** in `/tmp`. **Artefatti per versione** (14/11, regola del committente): ogni build pubblica in `out/releases/v<versione>/` (disco, atlante, mappe, report dei test, manuale se generato, zip dei sorgenti in release) con `manifest.json` (`tools/build/publish.py`); `out/releases/latest` punta all'ultima; si tengono le ultime **5** versioni (`./build.sh --keep N`, `KEEP_VERSIONS`). Il resto di `out/` sono intermedi riscrivibili della build in corso (spostamento in `out/work/`: TODO J14). La pubblicazione fuori dal computer (GitHub) verra' dopo.
 - Fine riga sempre LF (`.gitattributes`); il progetto su Windows sta nel filesystem di WSL2, non su `/mnt/c` (`./validate_env.sh`).
 
 ## Cartelle
@@ -95,7 +95,7 @@ diventa un test in `tests/`, non resta in `tools/`.
 ## Build, versioni, release
 - `./build.sh` (build + smoke e sanity), `./build.sh --no-test`, `./build.sh --release` (anche regression, `EMU-*`, manuale, zip:
   **solo quando la chiede il committente**). Dettagli: [docs/getting-started.md](docs/getting-started.md), [docs/build.md](docs/build.md).
-- **Un solo disco** (11/11 sera, regola del committente): `out/disk.d64` -> `out/blood_path_vX.Y_1541.d64`. Per lo sviluppo:
+- **Un solo disco** (11/11 sera, regola del committente): `out/disk.d64` (disco di lavoro) -> `out/releases/vX.Y/blood_path_vX.Y_1541.d64`. Per lo sviluppo:
   `LOAD"*",8`, `POKE 1020,1` (subito `START`; `POKE 1021,1` = god mode), `RUN` ([docs/cheats.md](docs/cheats.md)).
 - **Versione**: cresce da sola (numero minore di `version.yaml`) a **ogni build con cambiamenti** ai sorgenti
   (`tools/build/bump_version.py`; impronta in `version.yaml`, `source_hash`). **Ogni file consegnato porta la versione nel nome**

@@ -2,6 +2,7 @@
 # Costruisce le immagini della toolchain (13/11). Copyright (c) 2026 - Simone Caporale
 #   toolchain/images.sh                       tutte quelle che mancano
 #   toolchain/images.sh --force [nomi...]     le rifa' (nomi: builder emu-vice emu-viewer emu-vc64web)
+#   A immagini fatte si cancellano i sorgenti scaricati (tarball di VICE, .deb di KasmVNC): --force li riscarica.
 # builder, emu-vice, emu-viewer: target del Dockerfile multi-stage toolchain/docker/Dockerfile (stage base comune, senza nome).
 #   I programmi esterni si compilano DENTRO la build (stage *-build, con i compilatori) e nelle immagini finali entrano solo i
 #   binari: zx0 e cc1541 in c64-builder, VICE in c64-emu-vice. La cache di BuildKit evita di ricompilarli a ogni build.
@@ -26,6 +27,10 @@ KASMVNC_DEB="${KASMVNC_DEB:-kasmvncserver_ubuntu_noble_${KASMVNC_VERSION}_amd64.
 KASMVNC_URL="${KASMVNC_URL:-https://github.com/kasmtech/KasmVNC/releases/download/v$KASMVNC_VERSION/$KASMVNC_DEB}"
 SECRET=""; [ -n "${C64_CA_BUNDLE:-}" ] && SECRET="--secret id=ca,src=$C64_CA_BUNDLE"
 have() { docker image inspect "c64-$1" >/dev/null 2>&1; }
+vc64web_pages() {                      # pagine di vc64web in out/vc64web/: la page VirtualC64 la usa l'indice del viewer, la headless l'immagine
+    have builder || "$0" builder
+    (cd "$ROOT" && "$TC/run.sh" builder python3 "$REL/vc64web-custom/build.py" --no-docker --no-ffmpeg-check --out out/vc64web)
+}
 
 vice_tarball() {                       # scarica il tarball di VICE sull'host, se manca
     T="$TC/vice/download/vice-$VICE_VERSION.tar.gz"
@@ -62,8 +67,7 @@ for n in $NAMES; do
     builder|emu-vice) target "$n" "c64-$n" ;;
     emu-viewer)       target viewer c64-emu-viewer ;;
     emu-vc64web)
-        have builder || "$0" builder
-        (cd "$ROOT" && "$TC/run.sh" builder python3 "$REL/vc64web-custom/build.py" --no-docker --no-ffmpeg-check --out out/vc64web)
+        vc64web_pages
         # shellcheck disable=SC2086
         DOCKER_BUILDKIT=1 docker build -q $SECRET -t c64-emu-vc64web --build-context pages="$ROOT/out/vc64web" \
             "$TC/vc64web-custom" >/dev/null ;;
@@ -71,3 +75,12 @@ for n in $NAMES; do
     esac
     echo "   $(docker image inspect -f '{{.Size}}' "c64-$n" | awk '{printf "%.0f MB", $1/1e6}')"
 done
+# (14/11, regola del committente) cio' che serve SOLO a costruire un'immagine si toglie a immagine fatta: VICE e KasmVNC sono
+# gia' dentro le immagini; per rifarle (--force) i sorgenti si riscaricano da soli (il contenuto e' lo stesso: la cache di
+# BuildKit resta valida). La pagina headless di vc64web serve solo alla build dell'immagine (c64d.js la ha nel container).
+# la pagina VirtualC64 serve all'indice del viewer anche se l'immagine di vc64web c'e' gia' (out/ puo' essere stato svuotato)
+case " $NAMES " in *" emu-viewer "*) ls "$ROOT"/out/vc64web/VirtualC64-v*.html >/dev/null 2>&1 || vc64web_pages >/dev/null ;; esac
+have emu-vice && rm -f "$TC/vice/download/"*.tar.gz
+have emu-viewer && rm -f "$TC/kasmvnc/download/"*.deb
+have emu-vc64web && rm -f "$ROOT/out/vc64web/c64-headless.html"
+true

@@ -16,7 +16,7 @@ flowchart TD
     A["3. assemblaggio: tools/build/asm.sh<br/>(sotto, sezione 2)"] --> D
     D["4. disco: tools/build/mkdisk.sh<br/>out/disk.d64"] --> M
     M["5. mappe e atlante<br/>out/memory-map/, out/atlas/<br/>(atlante solo se cambiano i suoi ingressi)"] --> C
-    C["6. copia con la versione nel nome<br/>out/blood_path_vX.Y_1541.d64"] --> T{"--no-test?"}
+    C["6. disco di lavoro out/disk.d64"] --> T{"--no-test?"}
     T -->|si'| E1["fine"]
     T -->|no| R["7. test in c64-emu-vice: tests/run_tests.sh<br/>debug: smoke + sanity; --release: anche regression ed EMU-*"]
 ```
@@ -26,7 +26,8 @@ flowchart TD
 | `./build.sh` | build di tutti i giorni: tutto + smoke e sanity (deve passare prima di ogni commit) |
 | `./build.sh --no-test` | build veloce senza test |
 | `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`barbarian-manual`) e `tools/build/release.sh` (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
-| `./build.sh --manual` | solo il manuale (`out/manual/`) |
+| `./build.sh --manual` | solo il manuale (`out/manual/`, poi copiato in `out/releases/v<V>/`) |
+| `./build.sh --keep N` | quante versioni tenere in `out/releases/` (default 5, anche `KEEP_VERSIONS=N`) |
 | `toolchain/run.sh builder tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
 
 ## 2. Assemblaggio (`tools/build/asm.sh`)

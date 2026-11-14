@@ -13,7 +13,7 @@ Tutto gira in container Docker: sull'host servono solo sh, Docker, git e curl. *
 (cartelle, container, build, test, dove finiscono i file).
 ```
 ./validate_env.sh     # controllo dell'ambiente (la prima volta; su Windows: progetto dentro WSL2)
-./build.sh            # build di tutti i giorni + smoke e sanity: out/blood_path_vX.Y_1541.d64 (POKE 1020,1 prima del RUN = subito il gioco)
+./build.sh            # build di tutti i giorni + smoke e sanity: out/releases/latest/blood_path_vX.Y_1541.d64 (POKE 1020,1 prima del RUN = subito il gioco)
 ./build.sh --release  # anche regression, test su vc64web, manuale PDF, zip dei sorgenti (solo su richiesta)
 ./build.sh --view     # i test in VICE visibili dal vivo nel browser: http://localhost:6080
 toolchain/run.sh builder tools/build/mkdisk.sh       # un comando qualunque in un container
@@ -31,7 +31,7 @@ Versione del gioco e del formato dei salvataggi: `version.yaml`.
 | `toolchain/` | toolchain C64 generica ([toolchain/README.md](toolchain/README.md)): immagini Docker `c64-*` (`docker/Dockerfile`) e script `run.sh`, `images.sh`, `viewer.sh`, `validate_env.sh`; sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in [toolchain/roms/roms.md](toolchain/roms/roms.md)) |
 | `toolchain.env` | configurazione della toolchain per il gioco |
 | `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
-| `out/` | tutto ciò che si genera (non in git), con **solo l'ultima build**: disco, atlante, mappe, manuale, report dei test |
+| `out/` | tutto ciò che si genera (non in git): `out/releases/v<versione>/` (ultime 5: disco, atlante, mappe, manuale, report dei test) e gli intermedi della build in corso |
 
 ## Arena di combattimento (test e bilanciamento)
 Build a parte con lo stesso codice di combattimento del gioco: niente loader, menu, villaggio, disco,

@@ -7,16 +7,21 @@
 #   ./build.sh --view        i test aprono VICE sullo schermo del viewer: http://localhost:6080 (c64-emu-viewer)
 #   ./build.sh --manual      solo il manuale PDF (barbarian-manual) in out/manual/
 #   ./build.sh --images      rifa' tutte le immagini Docker (toolchain e manuale; poi la build)
+#   ./build.sh --keep N      quante versioni tenere in out/releases/ (default 5, KEEP_VERSIONS nell'ambiente)
+# Gli artefatti di ogni build (disco, atlante, mappe, report dei test, manuale, zip dei sorgenti) finiscono in
+# out/releases/v<versione>/ con manifest.json (tools/build/publish.py); out/releases/latest punta all'ultima.
 # Le immagini mancanti si costruiscono da sole (toolchain/images.sh; il manuale: tools/manual/Dockerfile); i programmi esterni
 # (VICE, zx0, cc1541) si compilano dentro le immagini. Prima volta su un computer nuovo: ./validate_env.sh.
 # Configurazione della toolchain per questo progetto: toolchain.env.
 # Copyright (c) 2026 - Simone Caporale
 set -eu
 cd "$(dirname "$0")"
-REL=0; NOTEST=0; EMU=0; VIEW=0; MANUAL=0; IMAGES=0
-for a in "$@"; do
-    case "$a" in --release) REL=1; EMU=1 ;; --no-test) NOTEST=1 ;; --emu) EMU=1 ;; --view) VIEW=1 ;; --manual) MANUAL=1 ;;
-                 --images) IMAGES=1 ;; *) sed -n 2,14p "$0"; exit 1 ;; esac
+REL=0; NOTEST=0; EMU=0; VIEW=0; MANUAL=0; IMAGES=0; KEEP=${KEEP_VERSIONS:-5}
+while [ $# -gt 0 ]; do
+    case "$1" in --release) REL=1; EMU=1 ;; --no-test) NOTEST=1 ;; --emu) EMU=1 ;; --view) VIEW=1 ;; --manual) MANUAL=1 ;;
+                 --images) IMAGES=1 ;; --keep) shift; KEEP=${1:-}; case "$KEEP" in ''|*[!0-9]*|0) echo "--keep N: intero >= 1"; exit 1 ;; esac ;;
+                 *) sed -n 2,18p "$0"; exit 1 ;; esac
+    shift
 done
 command -v docker >/dev/null || { echo "Docker non trovato: ./validate_env.sh"; exit 1; }
 docker info >/dev/null 2>&1 || { echo "il demone Docker non risponde: ./validate_env.sh"; exit 1; }
@@ -35,11 +40,12 @@ export RELEASE=$REL
 
 if [ $MANUAL = 1 ]; then
     manual_image
-    toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py; exit 0
+    toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py
+    toolchain/run.sh builder python3 tools/build/publish.py --keep "$KEEP" --only-manual; exit 0
 fi
 
 toolchain/run.sh builder tools/build/build_game.sh
-[ $NOTEST = 1 ] && exit 0
+if [ $NOTEST = 1 ]; then toolchain/run.sh builder python3 tools/build/publish.py --keep "$KEEP"; exit 0; fi
 
 # --- servizi per i test: rete comune, demone vc64web, viewer
 NET=c64; docker network inspect $NET >/dev/null 2>&1 || docker network create $NET >/dev/null
@@ -58,11 +64,14 @@ if [ $VIEW = 1 ]; then
 fi
 C64_DOCKER_ARGS="$DARGS" toolchain/run.sh emu-vice tests/run_tests.sh
 
+PUB="--keep $KEEP --tests"
 if [ $REL = 1 ]; then
     manual_image
     toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py
     toolchain/run.sh builder tools/build/release.sh
+    PUB="$PUB --manual --release"
 fi
-V=$(sed -n 's/^version: "\(.*\)"/\1/p' version.yaml)
-echo "== build OK v$V: out/blood_path_v${V}_1541.d64 =="
+# shellcheck disable=SC2086
+toolchain/run.sh builder python3 tools/build/publish.py $PUB
+echo "== build OK =="
 [ $REL = 1 ] || echo "   (test: smoke + sanity; tutti i test con ./build.sh --release)"

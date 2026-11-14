@@ -106,7 +106,7 @@ flowchart TD
   F -->|si| Z["fine"]
   F -->|no| G["c64-emu-vice:<br/>tests/run_tests.sh"]
   G --> H{"--release?"}
-  H -->|no| Y["out/blood_path_vX.Y_1541.d64"]
+  H -->|no| Y["out/releases/vX.Y/ (publish.py)"]
   H -->|si| I["barbarian-manual: PDF<br/>c64-builder: release.sh<br/>(disco ottimo, mappe, zip)"] --> Y
 ```
 
@@ -152,7 +152,7 @@ su localhost) e' una **pagina indice** con:
   su un WebSocket (`/audio`), acceso dal pulsante "Audio" della pagina. Gli emulatori di un altro container usano schermo e audio
   con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
   aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
-  **VICE con il suono**, a velocita' reale, sull'ultima build: `toolchain/viewer.sh exec tools/vice/play.sh [disco]`
+  **VICE con il suono**, a velocita' reale, sull'ultima build: `toolchain/viewer.sh exec tools/vice/play.sh [disco.d64|versione]` (senza argomento `out/releases/latest`, con `1.239` quella versione)
   (`viewer.sh exec` = un comando in `c64-emu-vice` collegato a schermo e audio del viewer). La tastiera fisica del browser arriva a VICE.
   **Overlay** in `/live.html` (14/11): tre pulsanti nell'intestazione accendono, sopra lo schermo e semitrasparenti, la **tastiera del C64**
   (66 tasti con la disposizione originale e i tasti funzione a destra; SHIFT, CTRL e C= restano premuti fino al tasto successivo, SHIFT LOCK
@@ -167,10 +167,10 @@ su localhost) e' una **pagina indice** con:
   Misure [14/11, browser headless sulla stessa macchina, 2 x 10 eventi]: immagine ~55 ms, audio ~41 ms (il riproduttore tiene
   ~30 ms di margine), audio e immagine entro ~15 ms; la prima nota dopo un silenzio puo' arrivare con 100-200 ms. Confronto con le
   alternative (Guacamole, KasmVNC di linuxserver): [lab/viewer-audio](../lab/viewer-audio/README.md).
-- **Ultima build in vc64web**: la pagina portable di vc64web (`out/vc64web/`) aperta con `?disk=/out/<disco>`: l'emulatore gira
+- **Ultima build in vc64web**: la pagina portable di vc64web (`out/vc64web/`) aperta con `?disk=/out/releases/v<V>/<disco>`: l'emulatore gira
   **nel browser dell'utente**, quindi con l'audio; il disco proposto e' il piu' recente che corrisponde a `C64_VIEW_DISK`
   (`toolchain.env`, oggi `blood_path_v*_1541.d64`). Il browser lo riscarica solo se e' cambiato (`fetch` con `cache:'no-cache'`,
-  il server risponde 304). Sotto, gli altri dischi di `out/`.
+  il server risponde 304). Sotto, **tutte le altre versioni** di `out/releases/` (14/11): un clic su una riga avvia quel disco. Le righe vengono dall'elenco delle cartelle (`disk.d64`, il disco di lavoro, non e' elencato).
 - il report dei test e la cartella `out/` (sola lettura: il viewer la monta in `/srv/out`).
 
 Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default nessuna): autenticazione HTTP del browser su
@@ -181,7 +181,8 @@ Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default 
 
 | Percorso | Cosa |
 |---|---|
-| `out/blood_path_vX.Y_1541.d64` | il disco della build (e `out/disk.d64`) |
+| `out/releases/v<V>/` | **gli artefatti di ogni versione** (14/11): `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generato per quella versione), `sources_v<V>.zip` (release), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
+| `out/disk.d64` | disco di lavoro della build in corso (da qui si pubblica) |
 | `out/atlas/` | atlante grafico (`index.html`) |
 | `out/memory-map/` | mappa della RAM e del disco (HTML) |
 | `out/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |

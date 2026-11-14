@@ -27,7 +27,7 @@ Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` (r
 |---|---|
 | `images.sh [--force] [nomi]` | costruisce le immagini mancanti (`builder emu-vice emu-viewer emu-vc64web`); scarica sull'host il tarball di VICE se manca |
 | `run.sh <immagine> [comando]` | esegue un comando con il progetto in `/work`, con l'utente dell'host; `builder` = `c64-builder`, un nome completo si usa cosi' com'e' |
-| `viewer.sh start\|stop\|exec` | http://localhost:6080: schermo dal vivo con audio (KasmVNC + PulseAudio), ultima build in vc64web nel browser, `out/` del progetto; `exec <comando>` = comando in `c64-emu-vice` collegato a schermo e audio |
+| `viewer.sh start\|stop\|exec` | http://localhost:6080: schermo dal vivo con audio (KasmVNC + PulseAudio), tutte le versioni di `out/releases/` in vc64web nel browser, `out/` del progetto; `exec <comando>` = comando in `c64-emu-vice` collegato a schermo e audio |
 | `validate_env.sh` | controlla l'host: sistema, WSL e posizione del progetto, Docker, fine riga, ROM, immagini, tool |
 
 ## Configurazione del progetto (`toolchain.env`)

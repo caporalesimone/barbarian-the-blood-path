@@ -321,6 +321,17 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   (MonitorError dopo 30 s); rilanciati da soli subito dopo: 6/6 PASS. Stesso sintomo (il monitor remoto di VICE smette di rispondere),
   in un momento qualsiasi della sessione, non solo al primo avvio. Da fare: registrare il log di VICE e del monitor quando succede.
   Release successiva (stessa sera, tool dentro le immagini): 185 PASS, 0 FAIL, 1 SKIP.
+  **14/11, causa trovata per il caso del primo avvio a freddo** (analisi con un sottoagente Opus, riprodotto 1 volta su 1 dopo un vero
+  riavvio della macchina, 0 su 3 senza riavvio): corsa all'avvio nel harness. VICE apre la porta del monitor ~7 s prima di aver finito
+  il boot (disco lento a freddo: x64sc ~3 s in stato D); `tests/lib/c64.py` (`Vice.__init__`, righe ~115-125) si connette, aspetta `sleep(1.0)` e manda
+  load/break/pc/x; se il KERNAL non ha ancora inizializzato i vettori IRQ (`$0314` = `00 00`) il C64 gira a vuoto in warp, il breakpoint non
+  arriva e `x` scade a 120 s (VICE e il monitor funzionano: provato anche a caldo con SIGSTOP di 0,9 s subito dopo la connessione). I 24 FAIL
+  sono un solo errore di setup copiato su tutti i test del modulo (`tests/run.py:109-110`; per questo "0,00 s"). **Correzione proposta, non
+  applicata**: al posto di `sleep(boot_wait)` attendere `READY.` (riga 6 dello schermo) o `$0314/$0315` = `31 EA`, tetto 30 s; stessa
+  attesa in `tools/build/gen_help.py:42-48` e `settle()`; un nuovo tentativo del setup (una sola riga di errore); `start_new_session=True` +
+  `os.killpg` in `Vice.close` (rischio latente: x64sc non risponde al `quit` e resta vivo con la 6510 aperta). **Non spiegati**: il blocco
+  a meta' sessione del 13/11 (PERF-DISK `load` senza risposta) e' un sintomo diverso; l'origine della lentezza sotto il guest (hypervisor o
+  disco) e' un'ipotesi. dockerd dopo il riavvio e' fallito una volta al primo avvio (`failed to start containerd: timeout`), poi ok.
 
 ## J — Idee per dopo
 
@@ -342,12 +353,6 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   test che assemblano varianti del gioco isolati (oggi riscrivono la build normale); report unico. Nel viewer: più schermi
   (`VIEW_SCREENS=N`, un Xvnc di KasmVNC per schermo e il server del viewer che li smista; stima ~30 righe e ~30–60 MB di RAM per
   schermo, non misurati). Complessità M (il grosso è nel runner, non nel viewer).
-- **J11** (13/11, idea del committente, **da decidere piu' avanti**) **Build versionate selezionabili dal viewer**: tenere i dischi
-  delle build precedenti per poter tornare indietro; la pagina indice del viewer propone per prima l'ultima (separata) e sotto le
-  altre. Oggi la pagina mostra gia' l'ultima (`C64_VIEW_DISK`, versione piu' alta) e gli altri dischi di `out/`. **Contro la regola
-  attuale** "`out/` contiene solo la build piu' recente, niente `release/`": serve decidere dove stanno le build vecchie (es.
-  `out/builds/` o una cartella fuori da `out/`), quante se ne tengono e chi le cancella. Complessità S (dopo la decisione).
-
 - **J13** (14/11) **Overlay del viewer (tastiera C64, Joy 1, Joy 2): prove che mancano e idee**. Provato solo in un browser headless sulla
   stessa macchina (vedi getting-started §6). Da fare: (a) schermo a sfioramento reale (telefono/tablet: multitocco stick + fire, rotazione,
   dimensioni dei tasti), (b) browser e tastiera reali, (c) **gamepad fisico**: la Gamepad API del browser vede il pad; basterebbe leggerlo in
@@ -355,6 +360,14 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   il puntatore (nessun window manager), quindi l'overlay riporta il puntatore al centro dello schermo (la finestra di VICE e' centrata: ipotesi,
   non verificata con altre dimensioni di schermo); con SHIFT a scatto i tasti senza equivalente PC (grafici C64) escono senza shift.
 ---
+
+- **J14** (14/11, decisione del committente: layout B) **Intermedi della build in `out/work/` e cache in `out/cache/`**. Fatto il 14/11: artefatti
+  per versione in `out/releases/v<V>/` + `latest` + retention (`./build.sh --keep N`, 5). Resta: gli intermedi (`.prg`, `.lst`, `.lbl`, `.inc`,
+  log, `gfx/`, `snd/`, `krill/`) stanno ancora nella radice di `out/` insieme a `disk.d64`; da portare in `out/work/`, e `zx0cache`/`.cache`
+  in `out/cache/`. Complessità M, **meccanica ma larga**: ~330 righe di codice con `out/` (script, test, generatori), 34 negli include
+  dell'assembly, ~200 nella documentazione; si fa con una sostituzione controllata e una `./build.sh --release` completa. Cavilli: `out/tmp/`
+  resta com'e'; i test leggono `out/*.lbl` e `out/game.prg`; il viewer monta `out/` in sola lettura. Pubblicazione delle build quando si
+  passera' a GitHub (release/asset del tag): per ora solo locale.
 
 ## K — Frenzy: prove in gioco del committente (11/11)
 

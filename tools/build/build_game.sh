@@ -6,7 +6,7 @@
 #  2. generatori dati: grafica, font, musica, tabelle di bilanciamento (balance.yaml)
 #  3. assemblaggio (64tass) -> out/game.prg, controllo del margine di memoria, disco out/disk.d64
 #  4. mappe della RAM e del disco (out/memory-map/), atlante grafico (out/atlas/)
-#  5. copia del disco con la versione nel nome: out/blood_path_vX.Y_1541.d64
+#  (14/11) la pubblicazione degli artefatti in out/releases/v<versione>/ la fa ./build.sh con tools/build/publish.py
 set -e
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 mkdir -p out                    # (11/11) anche i sorgenti generati stanno in out/
@@ -28,6 +28,4 @@ python3 tools/memory-map/gen_rammap.py && python3 tools/memory-map/gen_diskmap.p
 python3 tools/build/cache_run.py gen_atlas --in tools data out/gfx out/gfx_consts.inc out/gfx0.prg out/fmap.prg out/title.prg docs/screens \
     --out out/atlas/index.html -- python3 tools/atlas/gen_atlas.py || exit 1        # (11/11) solo se cambiano i suoi ingressi
 V=$(python3 tools/build/gen_version.py --print version)
-rm -f out/blood_path_v*.d64
-cp out/disk.d64 out/blood_path_v${V}_1541.d64      # (11/11) un solo disco
-echo "== disco: out/blood_path_v${V}_1541.d64 =="
+echo "== disco v$V: $DISK (poi out/releases/v$V/blood_path_v${V}_1541.d64, tools/build/publish.py) =="
