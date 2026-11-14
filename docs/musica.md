@@ -120,8 +120,10 @@ play `$1003` una volta per fotogramma (50 Hz, PAL), SID 6581. Titolo dal nome in
 rilascio con la versione.
 
 **Ascolto**: nella pagina di controllo di Lab64 (`./lab64 view`, http://localhost:6080) la riga delle musiche di ogni versione ha
-**♪ play**: apre `sid.html`, un player con l'elenco dei brani (jsSID 0.9.1 di Hermit, nel browser; scelta 6581/8580, volume,
-download). I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID. VICE resta il riferimento: jsSID ha un filtro diverso.
+**♪ play**: apre `sid.html`, un player con l'elenco dei brani (jsSID 0.9.1 di Hermit, servito in locale, non da CDN; scelta
+6581/8580, volume, download), un **oscilloscopio per ogni voce del SID** (forma d'onda per inviluppo, prima del filtro) e del
+missaggio, i registri decodificati di ogni voce (forma d'onda, impulso, frequenza, gate, ADSR, sync, ring, instradamento nel filtro)
+e del filtro, **mute** per voce e **filtro del SID acceso/spento**. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID. VICE resta il riferimento: jsSID ha un filtro diverso.
 Test: `MUSIC-11` (regression) controlla l'intestazione di ogni `.sid` e che init + 50 fotogrammi di play scrivano il SID.
 
 ## Effetti sonori (`src/common/sfx.inc`)
