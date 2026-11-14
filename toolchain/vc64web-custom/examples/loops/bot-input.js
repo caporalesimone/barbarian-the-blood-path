@@ -1,7 +1,7 @@
-// Bot per la prova di determinismo (API 24): usa TUTTI i tipi di input (joystick tenuto, joystick con durata,
-// tasto tenuto, tasto con durata) e occupa la CPU dell'host per 0-13 ms a passo, per provocare i ritardi del browser.
-// Il bersaglio (shell/11-determinismo.sh) e' un programma a $C000 che legge $DC00 senza sosta e ne fa un istogramma a $C100,
-// piu' il buffer di tastiera del KERNAL: un input perso o spostato di un fotogramma cambia la RAM e quindi l'hash.
+// Bot for the determinism test (API 24): it uses ALL the input kinds (held joystick, joystick with duration,
+// held key, key with duration) and keeps the host CPU busy 0-13 ms per step, to provoke browser delays.
+// The target (shell/11-determinism.sh) is a program at $C000 that reads $DC00 without pause and builds a histogram at $C100,
+// plus the KERNAL keyboard buffer: an input lost or moved by one frame changes the RAM and so the hash.
 const t = performance.now(), d = (i * 7919) % 14;
 while (performance.now() - t < d) {}
 const D = ['up', 'down', 'left', 'right', 'fire'], st = {};

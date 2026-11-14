@@ -15,19 +15,19 @@ def sc(ch):
     if ch=='[': return 27
     if ch==']': return 29
     if 32<=o<=63: return o
-    raise Exception('carattere non supportato: %r'%ch)
+    raise Exception('character not supported: %r'%ch)
 scr=[32]*1000; col=[11]*1000
 def put(x,y,t,c=None):
     for i,ch in enumerate(t):
         scr[y*40+x+i]=sc(ch)
         if c is not None: col[y*40+x+i]=c
 for code,x,y,label in KEYS: put(x,y,label)
-put(9,0,"TEST TASTI E JOYSTICK",1)
-put(1,1,"GRIGIO=DA PROVARE  VERDE=PROVATO")
+put(9,0,"KEY AND JOYSTICK TEST",1)
+put(1,1,"GREY=TO BE TESTED  GREEN=TESTED")
 put(0,13,"SHIFT+F1/F3/F5/F7 = F2/F4/F6/F8")
-put(0,14,"JOYSTICK PORTA 2"); put(0,17,"JOYSTICK PORTA 1")
-put(0,21,"ULTIMO:"); put(0,22,"EVENTI:")
-put(0,23,"STOP DISATTIVATO - PER USCIRE: RESET")
+put(0,14,"JOYSTICK PORT 2"); put(0,17,"JOYSTICK PORT 1")
+put(0,21,"LAST:  "); put(0,22,"EVENTS:")
+put(0,23,"STOP DISABLED - TO EXIT: RESET")
 tab=[0]*240
 for code,x,y,label in KEYS:
     ad=1024+y*40+x; tab[code]=ad&255; tab[80+code]=ad>>8; tab[160+code]=len(label)
@@ -94,4 +94,4 @@ for name,bs,dst in payload:
     jobs+=[addr&255,addr>>8,dst&255,dst>>8,len(bs)&255,len(bs)>>8]; data+=list(bs); addr+=len(bs)
 blob=code+jobs+data
 json.dump({'base':BASE,'bytes':blob},open(sys.argv[1] if len(sys.argv)>1 else os.path.join(HERE,'blob.json'),'w'))
-print('blob',len(blob),'byte; init $%04X'%BASE, file=sys.stderr)
+print('blob',len(blob),'bytes; init $%04X'%BASE, file=sys.stderr)

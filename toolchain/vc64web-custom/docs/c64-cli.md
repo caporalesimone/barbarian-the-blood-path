@@ -1,242 +1,242 @@
-# c64 — riferimento completo dei comandi
+# c64 — complete command reference
 
-Copyright © 2026 Simone Caporale. Vale per la build 32 / API 25.
+Copyright © 2026 Simone Caporale. Valid for build 32 / API 25.
 
-Questo documento spiega **ogni comando** del client `c64` e del demone `c64d`. Gli output mostrati sono stati ottenuti eseguendo i comandi su un demone vero (build 25), salvo dove è scritto altrimenti. Per il modello del tempo, le proprietà dell'API JavaScript e le novità versione per versione vedi anche `C64-API.md`; per i file di script vedi `scripting.md`; esempi pronti in `../examples/`.
+This document explains **every command** of the `c64` client and of the `c64d` daemon. The outputs shown were obtained by running the commands on a real daemon (build 25), unless stated otherwise (14/11: messages translated into English, outputs adapted). For the time model, the properties of the JavaScript API and the changes version by version see also `C64-API.md`; for script files see `scripting.md`; ready-made examples in `../examples/`.
 
-Indice: [1 Architettura](#1-architettura) · [2 Avvio del demone](#2-avvio-del-demone-c64dj) · [3 Opzioni del client](#3-opzioni-globali-del-client) · [4 Argomenti e output](#4-come-si-passano-gli-argomenti-e-cosa-si-ottiene) · [5 Comandi del client](#5-comandi-propri-del-client-e-del-demone) · [6 Ciclo di vita](#6-ciclo-di-vita-e-tempo) · [7 Input](#7-input-tastiera-e-joystick) · [8 Memoria](#8-memoria-e-etichette) · [9 Schermo](#9-schermo) · [10 Dischi e file](#10-dischi-file-rom) · [11 Debug](#11-debug-cpu-chip-drive) · [12 Stati e regressione](#12-stati-e-regressione) · [13 Registrazioni](#13-registrazioni) · [14 Script e cicli](#14-script-e-cicli-di-controllo) · [15 Varie](#15-varie-store-wasm-eval) · [16 Errori](#16-errori-e-codici-di-uscita) · [17 Cosa non è verificato](#17-cosa-non-è-verificato)
+Index: [1 Architecture](#1-architecture) · [2 Starting the daemon](#2-starting-the-daemon-c64djs) · [3 Client options](#3-global-client-options) · [4 Arguments and output](#4-how-arguments-are-passed-and-what-you-get) · [5 Client commands](#5-commands-of-the-client-and-of-the-daemon) · [6 Life cycle](#6-life-cycle-and-time) · [7 Input](#7-input-keyboard-and-joystick) · [8 Memory](#8-memory-and-labels) · [9 Screen](#9-screen) · [10 Disks and files](#10-disks-files-roms) · [11 Debug](#11-debug-cpu-chips-drive) · [12 States and regression](#12-states-and-regression) · [13 Recordings](#13-recordings) · [14 Scripts and loops](#14-scripts-and-control-loops) · [15 Misc](#15-misc-store-wasm-eval) · [16 Errors](#16-errors-and-exit-codes) · [17 What is not verified](#17-what-is-not-verified)
 
 ---
 
-## 1. Architettura
+## 1. Architecture
 
 ```mermaid
 flowchart LR
-  U["Utente / script shell / Claude<br/><b>c64 &lt;comando&gt; [argomenti]</b>"]
-  subgraph D["Demone c64d.js (Node)"]
-    Q["Coda: UNA chiamata alla volta<br/>(/call)"]
-    X["Fuori coda:<br/>/ping /status /abort /quit"]
-    F["ffmpeg (pipe PNG)<br/>solo per i video"]
+  U["User / shell script / Claude<br/><b>c64 &lt;command&gt; [arguments]</b>"]
+  subgraph D["Daemon c64d.js (Node)"]
+    Q["Queue: ONE call at a time<br/>(/call)"]
+    X["Out of queue:<br/>/ping /status /abort /quit"]
+    F["ffmpeg (PNG pipe)<br/>videos only"]
   end
-  subgraph B["Chromium (Playwright)<br/>headless oppure --headed"]
+  subgraph B["Chromium (Playwright)<br/>headless or --headed"]
     P["c64-headless.html<br/>+ c64-api.js (window.c64)"]
     E["VirtualC64 (wasm)"]
   end
   U -- "HTTP 127.0.0.1:7064" --> Q
   U -. "HTTP" .-> X
   Q -- "page.evaluate" --> P
-  X -. "abort / stato" .-> P
+  X -. "abort / status" .-> P
   P --> E
-  P -- "frame PNG" --> F
+  P -- "PNG frames" --> F
 ```
-- Il **demone** (`headless/c64d.js`) apre `out/c64-headless.html` in Chromium (headless, oppure con finestra visibile con `--headed`, §2) e ci inietta `c64-api.js`.
-- Il **client** (`headless/c64`) manda al demone una richiesta HTTP per comando. Quasi tutti i comandi sono semplicemente il nome di un metodo di `window.c64` con i suoi argomenti: `c64 peek 0x0400 8` = `window.c64.peek("0x0400", 8)`.
-- Le chiamate sono **serializzate**: una alla volta, in ordine di arrivo, perché l'emulatore è deterministico solo se nessuno lo tocca in parallelo. Fanno eccezione `ping`, `status` e `abort`, che non passano dalla coda e si possono usare mentre un job è in corso.
-- Il core si ferma fra una chiamata e l'altra dopo i comandi deterministici (`runFrames`, `runUntil`, …): vedi «Modello del tempo» in `C64-API.md`. Un fotogramma PAL = 19656 cicli.
+- The **daemon** (`headless/c64d.js`) opens `out/c64-headless.html` in Chromium (headless, or with a visible window with `--headed`, §2) and injects `c64-api.js` into it.
+- The **client** (`headless/c64`) sends one HTTP request per command to the daemon. Almost all commands are simply the name of a `window.c64` method with its arguments: `c64 peek 0x0400 8` = `window.c64.peek("0x0400", 8)`.
+- Calls are **serialized**: one at a time, in order of arrival, because the emulator is deterministic only if nobody touches it in parallel. The exceptions are `ping`, `status` and `abort`, which bypass the queue and can be used while a job is running.
+- The core stops between one call and the next after the deterministic commands (`runFrames`, `runUntil`, …): see "Time model" in `C64-API.md`. One PAL frame = 19656 cycles.
 
-## 2. Avvio del demone (`c64d.js`)
+## 2. Starting the daemon (`c64d.js`)
 
 ```sh
 cd headless
-npm install && npx playwright install chromium     # una volta (vedi README)
+npm install && npx playwright install chromium     # once (see README)
 node c64d.js [--page FILE] [--api FILE] [--port N] [--host H] [--headed]
 ```
-| Opzione | Default | Significato |
+| Option | Default | Meaning |
 |---|---|---|
-| `--page FILE` | `headless/c64-headless.html` se esiste, altrimenti `out/c64-headless.html` | pagina da aprire (si genera con `python3 build.py`) |
-| `--api FILE` | `headless/c64-api.js` | API da iniettare nella pagina. La versione (`APIVER`) viene sostituita al posto di `/*__API__*/` |
-| `--port N` | `7064` | porta HTTP |
-| `--headed` | assente (headless) | Chromium **con finestra visibile**: vedi l'emulatore mentre lo comandi dalla CLI. Equivale a `C64_HEADED=1`. Vedi «Modalità con finestra» sotto |
-| `--host H` | `$C64_HOST` oppure `127.0.0.1` | indirizzo di ascolto. **Il demone non ha autenticazione e `eval` esegue JavaScript**: non esporlo oltre localhost (in Docker è `0.0.0.0` ma la porta è pubblicata solo su `127.0.0.1`) |
+| `--page FILE` | `headless/c64-headless.html` if it exists, otherwise `out/c64-headless.html` | page to open (generated with `python3 build.py`) |
+| `--api FILE` | `headless/c64-api.js` | API to inject into the page. The version (`APIVER`) replaces `/*__API__*/` |
+| `--port N` | `7064` | HTTP port |
+| `--headed` | absent (headless) | Chromium **with a visible window**: you see the emulator while you drive it from the CLI. Same as `C64_HEADED=1`. See "Windowed mode" below |
+| `--host H` | `$C64_HOST` or `127.0.0.1` | listening address. **The daemon has no authentication and `eval` runs JavaScript**: do not expose it beyond localhost (in Docker it is `0.0.0.0` but the port is published only on `127.0.0.1`) |
 
-Variabili d'ambiente del demone: `C64_HEADED=1` (come `--headed`), `C64_HOST` (host di ascolto), `C64_NO_SANDBOX=1` (Chromium senza sandbox: serve in Docker/root), `NODE_PATH` (se `playwright` è installato globalmente: `export NODE_PATH=$(npm root -g)`). Stampa `c64d pronto su 127.0.0.1:7064 (c64-headless.html)` quando è pronto. Si ferma con `c64 quit`.
+Daemon environment variables: `C64_HEADED=1` (like `--headed`), `C64_HOST` (listening host), `C64_NO_SANDBOX=1` (Chromium without sandbox: needed in Docker/root), `NODE_PATH` (if `playwright` is installed globally: `export NODE_PATH=$(npm root -g)`). It prints `c64d ready on 127.0.0.1:7064 (c64-headless.html)` when ready. Stop it with `c64 quit`.
 
-### Modalità con finestra (`--headed`)
+### Windowed mode (`--headed`)
 ```sh
-node c64d.js --headed          # in un'altra shell: node c64 start; node c64 type 'PRINT 1' …
+node c64d.js --headed          # in another shell: node c64 start; node c64 type 'PRINT 1' …
 ```
-Il demone, la CLI e tutti i comandi sono identici: cambia solo che Chromium mostra la finestra. Cose da sapere:
-- **Serve un display.** Su Linux senza `DISPLAY`/`WAYLAND_DISPLAY` il demone esce con un messaggio. Non funziona nel container Docker così com'è (nessun server grafico). Su server remoto: `xvfb-run -a node c64d.js --headed` (display virtuale, ma allora non lo vedi tu).
-- La pagina è quella minima: mostra **solo il canvas dell'emulatore**, senza menu né tastiera a schermo. Con il core fermo (dopo `runFrames`, `runUntil`, …) vedi l'ultimo fotogramma congelato; si anima solo mentre il core gira (`resume`, `warp`, job in corso, video).
-- **Chiudere la finestra termina il demone** (come `c64 quit`).
-- Non toccare la finestra durante script, video o regressioni: tastiera/mouse reali nella pagina possono arrivare all'emulatore e rompere la ripetibilità. Gli screenshot e i video sono catturati dentro la pagina e non dipendono dalle dimensioni della finestra.
-- Le prestazioni in tempo reale dipendono dalla macchina; la modalità deterministica non cambia.
+The daemon, the CLI and all commands are identical: the only difference is that Chromium shows the window. Things to know:
+- **A display is needed.** On Linux without `DISPLAY`/`WAYLAND_DISPLAY` the daemon exits with a message. It does not work in the Docker container as it is (no graphical server). On a remote server: `xvfb-run -a node c64d.js --headed` (virtual display, but then you do not see it).
+- The page is the minimal one: it shows **only the emulator canvas**, without menus or on-screen keyboard. With the core stopped (after `runFrames`, `runUntil`, …) you see the last frozen frame; it animates only while the core runs (`resume`, `warp`, running job, video).
+- **Closing the window ends the daemon** (like `c64 quit`).
+- Do not touch the window during scripts, videos or regressions: real keyboard/mouse in the page can reach the emulator and break repeatability. Screenshots and videos are captured inside the page and do not depend on the window size.
+- Real-time performance depends on the machine; deterministic mode does not change.
 
-Endpoint HTTP (se vuoi chiamarlo senza il client):
-| Richiesta | Effetto |
+HTTP endpoints (to call it without the client):
+| Request | Effect |
 |---|---|
-| `POST /call` `{"method":"peek","args":["0x0400",16]}` | chiama un metodo → `{"ok":true,"value":…}` oppure `{"ok":false,"error":"…","code":"…"}` |
+| `POST /call` `{"method":"peek","args":["0x0400",16]}` | calls a method → `{"ok":true,"value":…}` or `{"ok":false,"error":"…","code":"…"}` |
 | `GET /ping` | `{"ok":true,"value":{"api":"c64d","port":7064,"page":"c64-headless.html"}}` |
-| `GET /status` | job in corso e avanzamento (come `c64 status`) |
-| `POST /abort` | interrompe il job in corso (come `c64 abort`) |
-| `POST /quit` | chiude Chromium e termina il demone |
+| `GET /status` | running job and progress (like `c64 status`) |
+| `POST /abort` | interrupts the running job (like `c64 abort`) |
+| `POST /quit` | closes Chromium and ends the daemon |
 
-### Più istanze in parallelo
-Ogni demone ha il proprio Chromium e il proprio emulatore: bastano porte diverse.
+### Several instances in parallel
+Each daemon has its own Chromium and its own emulator: different ports are enough.
 ```sh
 node c64d.js --port 7064 &  node c64d.js --port 7065 &
-node c64 --port 7064 start ; node c64 --port 7065 start     # due emulatori indipendenti
+node c64 --port 7064 start ; node c64 --port 7065 start     # two independent emulators
 ```
-Provato con due istanze (cicli indipendenti). Ogni istanza costa un Chromium (RAM); non provato con molte. I file temporanei dei video usano il PID del demone, quindi non si pestano.
+Tested with two instances (independent cycles). Each instance costs one Chromium (RAM); not tested with many. The temporary video files use the daemon PID, so they do not clash.
 
-## 3. Opzioni globali del client
+## 3. Global client options
 
-`c64 [opzioni] comando [argomenti…]` — le opzioni possono stare ovunque nella riga.
+`c64 [options] command [arguments…]` — options can be anywhere on the line.
 
-| Opzione | Significato |
+| Option | Meaning |
 |---|---|
-| `--port N` | porta del demone (default 7064) |
-| `--host H` | indirizzo del demone (default `127.0.0.1`, oppure `$C64_HOST_CLIENT`) |
-| `--out FILE` | se il risultato è binario (screenshot PNG, GIF, video, disco, stato esportato…) lo scrive in `FILE` invece di stamparlo; per `regress check` salva l'immagine delle differenze; per `regress save` salva la baseline JSON |
-| `--outdir DIR` | cartella dove scrivere i file prodotti da uno script (screenshot, video, registrazioni). Default: cartella corrente. Viene creata se manca; di ogni file si usa solo il nome base |
-| `--compact` | JSON su una riga (senza, gli oggetti lunghi più di 100 caratteri sono stampati su più righe) |
-| `--quiet` | non stampa il risultato (resta il codice di uscita) |
+| `--port N` | daemon port (default 7064) |
+| `--host H` | daemon address (default `127.0.0.1`, or `$C64_HOST_CLIENT`) |
+| `--out FILE` | if the result is binary (PNG screenshot, GIF, video, disk, exported state…) writes it to `FILE` instead of printing it; for `regress check` saves the difference image; for `regress save` saves the JSON baseline |
+| `--outdir DIR` | folder where the files produced by a script are written (screenshots, videos, recordings). Default: current folder. Created if missing; only the base name of each file is used |
+| `--compact` | JSON on one line (without it, objects longer than 100 characters are printed on several lines) |
+| `--quiet` | does not print the result (the exit code remains) |
 
-Altre variabili del client: `C64_GAMES` (cartella dei giochi, vedi `games`), `C64_ROMS` (cartelle ROM extra, vedi `roms`).
+Other client variables: `C64_GAMES` (games folder, see `games`), `C64_ROMS` (extra ROM folders, see `roms`).
 
-## 4. Come si passano gli argomenti e cosa si ottiene
+## 4. How arguments are passed and what you get
 
-Ogni argomento è convertito così, nell'ordine:
-1. `@@percorso` e il file esiste → il **contenuto di testo** del file (script, etichette `.lbl`, JSON, codice JS);
-2. `@percorso` e il file esiste → il file **in base64** (dischi, ROM, stati, programmi);
-3. altrimenti si prova `JSON.parse`: numeri (`10`), `true`/`false`, `null`, oggetti (`'{"frames":4}'`), array (`'[1,2,3]'`);
-4. se non è JSON valido resta **una stringa**: per questo `0x0400`, `$C000`, `READY.` o un'etichetta (`start`) arrivano come testo e l'API li interpreta (indirizzi: `0x..`, `$..`, decimale, etichetta).
+Each argument is converted like this, in order:
+1. `@@path` and the file exists → the **text content** of the file (script, `.lbl` labels, JSON, JS code);
+2. `@path` and the file exists → the file **in base64** (disks, ROMs, states, programs);
+3. otherwise `JSON.parse` is tried: numbers (`10`), `true`/`false`, `null`, objects (`'{"frames":4}'`), arrays (`'[1,2,3]'`);
+4. if it is not valid JSON it stays **a string**: that is why `0x0400`, `$C000`, `READY.` or a label (`start`) arrive as text and the API interprets them (addresses: `0x..`, `$..`, decimal, label).
 
-Conseguenze da conoscere:
-- **Gli oggetti e gli array devono essere JSON valido**, quindi **niente `0x..` dentro** `{…}` o `[…]` come numeri: `'{"until":[0xFFFF]}'` NON è JSON, arriva come stringa e il metodo riceve un testo invece di un oggetto (provato: `trace` ha usato i default e ha girato per minuti). Scrivi `65535` oppure `"0xFFFF"` fra virgolette. Usa sempre apici singoli per racchiudere il JSON in shell.
-- Un elenco di byte va dato come array JSON: `c64 poke 0x0400 '[1,2,3]'` (`poke 0x0400 1,2,3` è la stringa `1,2,3` e dà un errore di base64).
-- `sendText`: la sequenza `\n` scritta in shell (due caratteri) viene trasformata in RETURN dal client.
-- **Risultati**: una stringa viene stampata così com'è, il resto come JSON. Se un file binario è atteso usa `--out`.
+Consequences to know:
+- **Objects and arrays must be valid JSON**, so **no `0x..` inside** `{…}` or `[…]` as numbers: `'{"until":[0xFFFF]}'` is NOT JSON, it arrives as a string and the method receives a text instead of an object (tested: `trace` used the defaults and ran for minutes). Write `65535` or `"0xFFFF"` in quotes. Always use single quotes around JSON in the shell.
+- A list of bytes must be given as a JSON array: `c64 poke 0x0400 '[1,2,3]'` (`poke 0x0400 1,2,3` is the string `1,2,3` and gives a base64 error).
+- `sendText`: the `\n` sequence written in the shell (two characters) is turned into RETURN by the client.
+- **Results**: a string is printed as it is, the rest as JSON. If a binary file is expected use `--out`.
 
-Codici di uscita: `0` ok · `1` errore del comando (messaggio `ERRORE CODICE: testo` su stderr) · `2` uso sbagliato · `3` demone non raggiungibile.
+Exit codes: `0` ok · `1` command error (message `ERROR CODE: text` on stderr) · `2` wrong usage · `3` daemon not reachable.
 
 ---
 
-## 5. Comandi propri del client e del demone
+## 5. Commands of the client and of the daemon
 
-Non sono metodi dell'API: li gestisce il client o il demone.
+They are not API methods: the client or the daemon handles them.
 
 ### `ping`
-Controlla che il demone risponda. `c64 ping` → `{"api":"c64d","port":7064,"page":"c64-headless.html"}`.
+Checks that the daemon answers. `c64 ping` → `{"api":"c64d","port":7064,"page":"c64-headless.html"}`.
 
 ### `quit`
-Chiude Chromium e termina il demone. Non attende job in corso.
+Closes Chromium and ends the daemon. Does not wait for running jobs.
 
 ### `status`
-Stato del job in corso. **Non passa dalla coda**: funziona anche mentre un altro client attende.
+State of the running job. **Bypasses the queue**: it works also while another client is waiting.
 ```
 $ c64 status
 {"busy":true,"method":"runLoop","elapsedMs":3007,"queued":0,"progress":{"frozen":false,"cycles":5916456,"run":{"frames":1,"of":2},"loop":{"iterations":70,"frames":140,"of":3000}}}
 ```
-`busy`: un job sta girando · `method`: l'ultimo metodo ricevuto · `queued`: job in attesa · `progress.run`: fotogrammi eseguiti dalla `run` corrente e totale · `progress.loop`: iterazioni, fotogrammi e massimo di un `runLoop`. A riposo: `{"busy":false,…,"progress":{"frozen":true,"cycles":…,"run":null,"loop":null}}`.
+`busy`: a job is running · `method`: the last method received · `queued`: waiting jobs · `progress.run`: frames run by the current `run` and total · `progress.loop`: iterations, frames and maximum of a `runLoop`. Idle: `{"busy":false,…,"progress":{"frozen":true,"cycles":…,"run":null,"loop":null}}`.
 
 ### `abort`
-Flusso di un job con `status` e `abort`:
+Flow of a job with `status` and `abort`:
 
 ```mermaid
 sequenceDiagram
-  participant C as Client c64
-  participant D as Demone
+  participant C as c64 client
+  participant D as Daemon
   participant A as window.c64
   C->>D: POST /call (job 1: runLoop)
-  D->>A: esegue (coda: running)
-  C->>D: POST /call (job 2) — accodato
-  C-->>D: GET /status (non in coda)
+  D->>A: runs (queue: running)
+  C->>D: POST /call (job 2) — queued
+  C-->>D: GET /status (not queued)
   D-->>C: busy, method, progress, queued=1
-  C-->>D: POST /abort (oppure client chiuso/ucciso)
-  D->>A: abort() — incrementa abortGen
-  A-->>D: job 1 termina con ABORTED
-  D-->>C: ERRORE ABORTED (file parziali scritti)
-  D->>A: parte job 2
-  A-->>D: risultato
+  C-->>D: POST /abort (or client closed/killed)
+  D->>A: abort() — increments abortGen
+  A-->>D: job 1 ends with ABORTED
+  D-->>C: ERROR ABORTED (partial files written)
+  D->>A: job 2 starts
+  A-->>D: result
   D-->>C: {"ok":true,"value":…}
 ```
 
-Interrompe il job in corso (`runFrames`, `runUntil`, `runLoop`, script, video…): quel job termina con `ERRORE ABORTED` (exit 1; i file già prodotti, video parziale compreso, vengono scritti); l'emulatore resta fermo; i job già in coda partono. Risposta: `{"aborted":true,"cycles":…}`. Se un client viene chiuso o ucciso mentre attende, il demone interrompe da solo il suo job.
+Interrupts the running job (`runFrames`, `runUntil`, `runLoop`, script, video…): that job ends with `ERROR ABORTED` (exit 1; the files already produced, partial video included, are written); the emulator stays stopped; the queued jobs start. Answer: `{"aborted":true,"cycles":…}`. If a client is closed or killed while waiting, the daemon interrupts its job by itself.
 
 ### `help` (= `methods`)
-Elenco di tutti i metodi dell'API con la firma (array di stringhe). Anche `c64 methods`.
+List of all API methods with their signature (array of strings). Also `c64 methods`.
 
-### `docs [PAROLA]`
-Stampa `C64-API.md`; con `PAROLA` solo le sezioni (`## …`) il cui titolo la contiene: `c64 docs regress`, `c64 docs 17`. Cerca il file accanto al client, in `docs/` e in `../docs/`.
+### `docs [WORD]`
+Prints `C64-API.md`; with `WORD` only the sections (`## …`) whose title contains it: `c64 docs regress`, `c64 docs 17`. Looks for the file next to the client, in `docs/` and in `../docs/`.
 
-### `roms [FILTRO]`
-Elenca i file ROM (`.bin`, `.rom`) trovati in: `$C64_ROMS` (cartelle separate da `:`), `third-party/vice-roms/`, `third-party/open-roms/`. Con `FILTRO` solo i nomi che lo contengono. Non parla con il demone.
+### `roms [FILTER]`
+Lists the ROM files (`.bin`, `.rom`) found in: `$C64_ROMS` (folders separated by `:`), `roms/vice-roms/`, `roms/open-roms/`. With `FILTER` only the names containing it. Does not talk to the daemon.
 ```
 $ c64 roms 251104
-kernal-251104-04.bin  (8192 byte)  ../../home/claude/repo/third-party/vice-roms/C64/kernal-251104-04.bin
+kernal-251104-04.bin  (8192 bytes)  ../roms/vice-roms/C64/kernal-251104-04.bin
 ```
 
-### `rom KIND NOME`
-Carica una ROM alternativa al posto di quella incorporata: `KIND` = `kernal` | `basic` | `chargen` | `floppy` (anche `drive`); `NOME` = nome del file o una sua parte (deve identificare un solo file, altrimenti «nome ambiguo»). Vale **dal prossimo `start`**: `c64 stop; c64 rom kernal 251104-04; c64 start`.
+### `rom KIND NAME`
+Loads an alternative ROM in place of the embedded one: `KIND` = `kernal` | `basic` | `chargen` | `floppy` (also `drive`); `NAME` = file name or a part of it (must identify a single file, otherwise "ambiguous name"). Effective **from the next `start`**: `c64 stop; c64 rom kernal 251104-04; c64 start`.
 ```
 $ c64 rom kernal 251104-04
 {"kind":"kernal","bytes":8192,"name":"kernal-251104-04.bin","needsRestart":true}
 ```
-`c64 rom` senza argomenti mostra le ROM utente attive: `{"user":{"kernal":{"name":"kernal-251104-04.bin","bytes":8192}},"driveRom":"1541-II","builtinDriveRoms":["1541","1541-II"]}`. Per tornare alle predefinite: `c64 clearRoms`. Il core emula solo la famiglia 1541 (le ROM drive devono essere da 16 KB); vedi l'elenco delle ROM provate in `C64-API.md` (API 17).
+`c64 rom` without arguments shows the active user ROMs: `{"user":{"kernal":{"name":"kernal-251104-04.bin","bytes":8192}},"driveRom":"1541-II","builtinDriveRoms":["1541","1541-II"]}`. To go back to the defaults: `c64 clearRoms`. The core emulates only the 1541 family (drive ROMs must be 16 KB); see the list of tested ROMs in `C64-API.md` (API 17).
 
-### `games [FILTRO]`
-Elenca i file di gioco (`.d64 .g64 .d71 .d81 .nib .prg .p00 .t64 .tap .crt .vsf .zip`) trovati, anche in sottocartelle, in `$C64_GAMES` (default `./games`, oppure `/games` se esiste, come in Docker).
+### `games [FILTER]`
+Lists the game files (`.d64 .g64 .d71 .d81 .nib .prg .p00 .t64 .tap .crt .vsf .zip`) found, also in subfolders, in `$C64_GAMES` (otherwise the first existing among `./games`, `<package>/work/games`, `/games` as in Docker).
 ```
 $ C64_GAMES=./games c64 games
-t.d64  (174848 byte)
+t.d64  (174848 bytes)
 ```
 
-### `game NOME`
-Monta o carica un file di gioco, cercandolo per nome (parte del percorso relativo; deve essere unico). Le immagini disco (`.d64 .g64 .d71 .d81 .nib`) vanno nel drive 8 (`attach`); gli altri formati con `loadFile`. Risponde con lo stato (`state()`). Provato solo con `.d64`; `.prg`, `.t64`, `.crt` non sono stati provati.
+### `game NAME`
+Attaches or loads a game file, looking it up by name (part of the relative path; must be unique). Disk images (`.d64 .g64 .d71 .d81 .nib`) go into drive 8 (`attach`); the other formats with `loadFile`. Answers with the state (`state()`). Tested only with `.d64`; `.prg`, `.t64`, `.crt` not tested.
 ```
 $ c64 game t.d64
 {"started":true,…,"disk":"t.d64","disk8":true,…}
 ```
 
-### `regress save NOME [opzioni]` · `regress check NOME|@@file.json [opzioni]` · `regress list`
-Baseline e confronto di regressione: vedi [12](#12-stati-e-regressione).
+### `regress save NAME [options]` · `regress check NAME|@@file.json [options]` · `regress list`
+Regression baseline and comparison: see [12](#12-states-and-regression).
 
-### `video FILE.txt|FILE.js|N [opzioni]`
-Video **deterministico** (frame per frame, muto) con ffmpeg: vedi [13](#13-registrazioni).
+### `video FILE.txt|FILE.js|N [options]`
+**Deterministic** video (frame by frame, silent) with ffmpeg: see [13](#13-recordings).
 
-### `script FILE [opzioni]` · `scriptCheck FILE`
-Esegue / valida uno script di input da file di testo: vedi [14](#14-script-e-cicli-di-controllo).
+### `script FILE [options]` · `scriptCheck FILE`
+Runs / validates an input script from a text file: see [14](#14-scripts-and-control-loops).
 
 ---
 
-## 6. Ciclo di vita e tempo
+## 6. Life cycle and time
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `start [opts]` | Avvia l'emulatore e attende il boot (core oltre 3 milioni di cicli e in marcia). `opts` JSON: `disk:{name,data}` (immagine base64), `driveRom` (`"1541"`\|`"1541-II"`), `roms:{kernal:…,basic:…,chargen:…,floppy:…}` (base64), `port` (1\|2, porta joystick), `autoload` (true/false), `program` (nome del programma da caricare), `timeout` (ms, default 30000). Ritorna lo stato. `c64 start` ≈ 5 s. Dopo `start` l'emulatore è **in marcia**. |
-| `ready [timeoutMs]` | Attende che il core sia in marcia e oltre il boot; ritorna lo stato. Con il core **fermo** non può riuscire: dà `TIMEOUT` dopo 30 s. |
-| `stop` | Ferma e spegne l'emulatore (`start` lo riavvia, anche con ROM nuove). |
-| `reset [{"hard":true}]` | Reset (come il tasto RESET). Con `hard`: spegni/riaccendi (il contatore dei cicli riparte da 0). Dopo un reset il KERNAL ignora la tastiera per circa 140 fotogrammi (vedi `C64-API.md`). |
-| `pause` | Ferma il core (`frozen=true`). Da qui `peek`/`poke`/`regs`/screenshot sono a stato congelato. |
-| `resume` | Riporta il core in marcia a tempo reale (≈ 985 000 cicli/s). Se riprende meno di 260 ms dopo uno stop, attende il resto. |
-| `warp true\|false` | Warp del core: gira più veloce del tempo reale (non esatto). Ritorna `true`. |
-| `state` | Stato: `{started,injected,port,kbd,disk,running,frozen,warp,cycles,disk8,driveRom,roms}`. Prima di `start`: `{"started":false,…,"error":"emulatore non avviato: chiama c64.start()"}`. |
+| `start [opts]` | Starts the emulator and waits for the boot (core beyond 3 million cycles and running). `opts` JSON: `disk:{name,data}` (base64 image), `driveRom` (`"1541"`\|`"1541-II"`), `roms:{kernal:…,basic:…,chargen:…,floppy:…}` (base64), `port` (1\|2, joystick port), `autoload` (true/false), `program` (name of the program to load), `timeout` (ms, default 30000). Returns the state. `c64 start` ≈ 5 s. After `start` the emulator is **running**. |
+| `ready [timeoutMs]` | Waits for the core to be running and past the boot; returns the state. With the core **stopped** it cannot succeed: `TIMEOUT` after 30 s. |
+| `stop` | Stops and powers off the emulator (`start` restarts it, also with new ROMs). |
+| `reset [{"hard":true}]` | Reset (like the RESET button). With `hard`: power off/on (the cycle counter restarts from 0). After a reset the KERNAL ignores the keyboard for about 140 frames (see `C64-API.md`). |
+| `pause` | Stops the core (`frozen=true`). From here `peek`/`poke`/`regs`/screenshots work on a frozen state. |
+| `resume` | Puts the core back to real-time running (≈ 985 000 cycles/s). If it resumes less than 260 ms after a stop, it waits for the rest. |
+| `warp true\|false` | Core warp: runs faster than real time (not exact). Returns `true`. |
+| `state` | State: `{started,injected,port,kbd,disk,running,frozen,warp,cycles,disk8,driveRom,roms}`. Before `start`: `{"started":false,…,"error":"emulator not started: call c64.start()"}`. |
 | `info` | `{"build":"v27","api":25,"core":"VirtualC64 5.x (vc64web)","driveRom":"1541-II"}`. |
-| `cycles` | Cicli CPU dall'accensione. |
-| `frames` | Fotogrammi interi (cicli ÷ 19656). |
-| `framesExact` | Fotogrammi con la parte frazionaria. |
-| `runFrames N` | Esegue **N fotogrammi esatti** e **ferma** il core. Ritorna `{reason:"frames",cycles,frames}`. Con `'{"fast":true}'` come secondo argomento usa il warp per il grosso e gli ultimi fotogrammi a velocità normale (esatto salvo `exact:false` nel risultato). Dopo `call`/`runUntil` il numero di fotogrammi può essere frazionario (es. `2.98`). **API 23: esatto anche se il browser è in ritardo**: prima di ogni avanzamento si prende uno snapshot (≈5 ms), se il core ha sforato di un fotogramma si ripristina e si ripete (campo `retries` nel risultato). `'{"exact":false}'` = comportamento precedente (nessuno snapshot; raramente +1 fotogramma). |
-| `runCycles N` | Come sopra, arrotondando per eccesso a fotogrammi interi (il core non ha granularità inferiore). |
-| `runUntil COND [opzioni]` | Esegue finché la condizione è vera, poi ferma. Vedi sotto. |
-| `waitFor TESTO [ms]` | Attende **a tempo reale** (controlla ogni 150 ms, default 15000 ms) che `TESTO` compaia a schermo (testo KERNAL, maiuscole indifferenti): `true` se compare, `false` se scade (non è un errore). Non fa avanzare il core: con il core fermo non compare mai. Per il core fermo usa `runUntil` o `wait` negli script. |
-| `sleep MS` | Pausa del demone in millisecondi (tempo reale, non emulato). Ritorna `null`. |
+| `cycles` | CPU cycles since power on. |
+| `frames` | Whole frames (cycles ÷ 19656). |
+| `framesExact` | Frames with the fractional part. |
+| `runFrames N` | Runs **exactly N frames** and **stops** the core. Returns `{reason:"frames",cycles,frames}`. With `'{"fast":true}'` as second argument it uses warp for the bulk and the last frames at normal speed (exact unless `exact:false` in the result). After `call`/`runUntil` the number of frames can be fractional (e.g. `2.98`). **API 23: exact even if the browser is late**: before each advance a snapshot is taken (≈5 ms), if the core overshot by one frame it is restored and repeated (field `retries` in the result). `'{"exact":false}'` = previous behavior (no snapshot; rarely +1 frame). |
+| `runCycles N` | As above, rounding up to whole frames (the core has no finer granularity). |
+| `runUntil COND [options]` | Runs until the condition is true, then stops. See below. |
+| `waitFor TEXT [ms]` | Waits **in real time** (checks every 150 ms, default 15000 ms) for `TEXT` to appear on screen (KERNAL text, case insensitive): `true` if it appears, `false` on expiry (not an error). It does not advance the core: with the core stopped it never appears. With the core stopped use `runUntil` or `wait` in scripts. |
+| `sleep MS` | Daemon pause in milliseconds (real time, not emulated). Returns `null`. |
 
-**`runUntil COND [opzioni]`**: `COND` è un oggetto JSON. Le condizioni su memoria e schermo (`addr`, `mem`, `screenText`, `screenRegex`, `text`, `screenMatch`, `cycles`, `when`) si combinano in OR: vale la prima che si verifica; con `{"all":true}` fra le opzioni devono valere tutte. `pc`, `pcIn` e `watch` fermano comunque l'esecuzione quando si verificano.
-| Condizione | Significato |
+**`runUntil COND [options]`**: `COND` is a JSON object. The memory and screen conditions (`addr`, `mem`, `screenText`, `screenRegex`, `text`, `screenMatch`, `cycles`, `when`) combine in OR: the first one that happens wins; with `{"all":true}` among the options all must hold. `pc`, `pcIn` and `watch` stop the run anyway when they happen.
+| Condition | Meaning |
 |---|---|
-| `{"pc":"$0840"}` o `{"pc":[a,b]}` | PC all'indirizzo (ferma sull'istruzione esatta); numero, stringa `$..`, etichetta o array |
-| `{"pcIn":[a,b]}` | PC in un intervallo (max 64 indirizzi) |
-| `{"addr":A,"value":V,"mask":M,"not":false}` | `mem[A] & M == V & M` (o `!=` con `not`) |
-| `{"mem":[A,V]}` | `mem[A] == V` (terzo elemento: maschera) |
-| `{"watch":A}` o `[a,b…]` | accesso all'indirizzo (watchpoint, max 16); ferma DOPO l'istruzione |
-| `{"screenText":"READY."}` / `{"screenRegex":"^READY"}` | testo (KERNAL, maiuscole indifferenti) / espressione regolare sullo schermo |
-| `{"text":"TESTO"}` o `{"text":[18,5,1,4,25]}` | testo in **screen code** (API 18): vale anche con charset propri. Opzioni di `findText` in `{"textOpts":{"addr":…,"map":…}}` (API 20/21) |
-| `{"screenMatch":"NOME","maxDiff":0,"tolerance":0,"rect":{…}}` | lo schermo corrisponde a quello salvato con `screenSave NOME` (al massimo `maxDiff` pixel diversi) |
-| `{"cycles":N}` | cicli totali raggiunti |
-| `{"pc":A,"whenRegs":{"x":3}}` | (API 21) con `pc`: ferma solo se i registri `a`,`x`,`y`,`p` valgono quanto indicato; se no riprende. Ogni stop legge i registri con `regs` (≈40 cicli in più). Per ora solo con `pc`. **Lento**: ≈0,2 s di orologio per stop (misurato: 100 stop in 18 s), perché ogni stop richiede 3 halt/run del core con l'attesa che evita il recupero di fotogrammi; inutilizzabile con timeout grandi se il PC passa spesso |
-| `{"when":{"addr":A,"value":V}}` | condizione sulla memoria durante l'esecuzione |
-Opzioni: `{"timeoutFrames":3000}` (default 3000, **non è un limite**: si può alzare), `{"all":true}`. Ritorna `{reason:"cond"|"pc"|"watch"…,cycles,frames}`; allo scadere errore `TIMEOUT: timeout: mem[$0002]==$FF non raggiunto in 5 fotogrammi`. Le esecuzioni vanno a tempo reale (4000 fotogrammi ≈ 80 s).
+| `{"pc":"$0840"}` or `{"pc":[a,b]}` | PC at the address (stops on the exact instruction); number, `$..` string, label or array |
+| `{"pcIn":[a,b]}` | PC in a range (max 64 addresses) |
+| `{"addr":A,"value":V,"mask":M,"not":false}` | `mem[A] & M == V & M` (or `!=` with `not`) |
+| `{"mem":[A,V]}` | `mem[A] == V` (third element: mask) |
+| `{"watch":A}` or `[a,b…]` | access to the address (watchpoint, max 16); stops AFTER the instruction |
+| `{"screenText":"READY."}` / `{"screenRegex":"^READY"}` | text (KERNAL, case insensitive) / regular expression on the screen |
+| `{"text":"TEXT"}` or `{"text":[18,5,1,4,25]}` | text in **screen code** (API 18): works also with custom charsets. `findText` options in `{"textOpts":{"addr":…,"map":…}}` (API 20/21) |
+| `{"screenMatch":"NAME","maxDiff":0,"tolerance":0,"rect":{…}}` | the screen matches the one saved with `screenSave NAME` (at most `maxDiff` different pixels) |
+| `{"cycles":N}` | total cycles reached |
+| `{"pc":A,"whenRegs":{"x":3}}` | (API 21) with `pc`: stops only if registers `a`,`x`,`y`,`p` have the given values; otherwise resumes. Each stop reads the registers with `regs` (≈40 extra cycles). For now only with `pc`. **Slow**: ≈0.2 s of clock per stop (measured: 100 stops in 18 s), because each stop needs 3 halt/run of the core with the wait that avoids frame catch-up; unusable with large timeouts if the PC passes often |
+| `{"when":{"addr":A,"value":V}}` | memory condition during the run |
+Options: `{"timeoutFrames":3000}` (default 3000, **not a limit**: it can be raised), `{"all":true}`. Returns `{reason:"cond"|"pc"|"watch"…,cycles,frames}`; on expiry error `TIMEOUT: timeout: mem[$0002]==$FF not reached in 5 frames`. Runs go in real time (4000 frames ≈ 80 s).
 ```
 c64 runUntil '{"text":"READY."}'
 c64 runUntil '{"mem":[2,255]}' '{"timeoutFrames":5}'
@@ -244,241 +244,241 @@ c64 runUntil '{"mem":[2,255]}' '{"timeoutFrames":5}'
 
 ---
 
-## 7. Input: tastiera e joystick
+## 7. Input: keyboard and joystick
 
-L'input entra nella **matrice della tastiera** e nelle porte joystick del core. I tempi sono in fotogrammi emulati. Un tasto va tenuto almeno 1 fotogramma e rilasciato almeno 2 prima di ripremerlo (altrimenti la pressione può andare persa).
+Input goes into the core **keyboard matrix** and joystick ports. Times are in emulated frames. A key must be held at least 1 frame and released at least 2 before pressing it again (otherwise the press can be lost).
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `type TASTO [opzioni]` | Preme **un tasto** (carattere o nome: `w`, `RETURN`, `F1`, `RUN/STOP`, `SHIFT+A`) o **più tasti simultanei** con un array JSON `'["w","d"]'`, aspetta il rilascio. Opzioni: `frames` (default 3, min 1), `releaseFrames` (default 3, min 2), `shift`/`ctrl`/`cbm` (true), `noWait`. Ritorna `{keys:[…],frames}`. Dopo un reset attende il boot (`{"noWait":true}` per non farlo). |
-| `keyDown TASTO` | Tiene premuto (effetto al prossimo fotogramma emulato). |
-| `keyUp TASTO` | Rilascia. |
-| `sendText TESTO [opzioni]` | Digita una stringa nella matrice tastiera (non scrive in `$0277`); `\n` = RETURN. Token fra graffe: `{RUN/STOP}` `{F1}`…`{F8}` `{HOME}` `{CLR}` `{DEL}` `{INST}` `{UP}`… `{SHIFT+A}` `{CTRL+3}` `{C=+Q}` `{WAIT:30}` (attende 30 fotogrammi) `{{}` (la graffa). Opzioni: `framesPerKey`, `releaseFrames`, `keepCase`, `noWait`. Ritorna `{keys,frames}`. Es.: `c64 sendText 'print 6*7\n'` → `{"keys":10,"frames":61}`. |
-| `keyNames` | Elenco dei tasti: `{keys:[nomi della matrice],named:[RUN/STOP, F1…],shifted:[…]}`. |
-| `joy …` | Joystick, due forme: **singola direzione** `joy up 1 [porta]` (1 = premuta, 0 = rilasciata; direzioni `up down left right fire`); **stato completo** `joy PORTA '{"up":true,"fire":true}' [fotogrammi]` — con i fotogrammi tiene lo stato per quel tempo e rilascia (avanza il tempo emulato). Ritorna `true`. La porta di default è quella scelta con `start({port})` (default 2). |
-| `joyPulse DIR [ms] [porta]` | Preme e rilascia dopo `ms` (default 150) **di orologio**. Con il core fermo non succede nulla di visibile (deduzione dal codice, non provato). |
-| `fire [ms] [porta]` | `joyPulse fire` (default 120 ms). |
-| `sendJoy "R10 UF8 W5 L3" [{"port":2}]` | Sequenza di joystick: lettere `U D L R` (direzioni) e `F` (fuoco) tenute N fotogrammi (`R10`, `UF8` = su+fuoco per 8); `Wn` = attesa di n fotogrammi. Ritorna `{frames:26}`. |
+| `type KEY [options]` | Presses **one key** (character or name: `w`, `RETURN`, `F1`, `RUN/STOP`, `SHIFT+A`) or **several simultaneous keys** with a JSON array `'["w","d"]'`, waits for the release. Options: `frames` (default 3, min 1), `releaseFrames` (default 3, min 2), `shift`/`ctrl`/`cbm` (true), `noWait`. Returns `{keys:[…],frames}`. After a reset it waits for the boot (`{"noWait":true}` to avoid it). |
+| `keyDown KEY` | Holds the key (effective from the next emulated frame). |
+| `keyUp KEY` | Releases. |
+| `sendText TEXT [options]` | Types a string into the keyboard matrix (does not write `$0277`); `\n` = RETURN. Tokens in braces: `{RUN/STOP}` `{F1}`…`{F8}` `{HOME}` `{CLR}` `{DEL}` `{INST}` `{UP}`… `{SHIFT+A}` `{CTRL+3}` `{C=+Q}` `{WAIT:30}` (waits 30 frames) `{{}` (the brace). Options: `framesPerKey`, `releaseFrames`, `keepCase`, `noWait`. Returns `{keys,frames}`. E.g.: `c64 sendText 'print 6*7\n'` → `{"keys":10,"frames":61}`. |
+| `keyNames` | List of keys: `{keys:[matrix names],named:[RUN/STOP, F1…],shifted:[…]}`. |
+| `joy …` | Joystick, two forms: **single direction** `joy up 1 [port]` (1 = pressed, 0 = released; directions `up down left right fire`); **full state** `joy PORT '{"up":true,"fire":true}' [frames]` — with frames it holds the state for that time and releases (advances emulated time). Returns `true`. The default port is the one chosen with `start({port})` (default 2). |
+| `joyPulse DIR [ms] [port]` | Presses and releases after `ms` (default 150) **of clock**. With the core stopped nothing visible happens (deduced from the code, not tested). |
+| `fire [ms] [port]` | `joyPulse fire` (default 120 ms). |
+| `sendJoy "R10 UF8 W5 L3" [{"port":2}]` | Joystick sequence: letters `U D L R` (directions) and `F` (fire) held N frames (`R10`, `UF8` = up+fire for 8); `Wn` = wait n frames. Returns `{frames:26}`. |
 
-Dentro `runLoop`, `joy(porta,stato,frames)` non fa avanzare il tempo (vedi `C64-API.md`, API 18).
+Inside `runLoop`, `joy(port,state,frames)` does not advance time (see `C64-API.md`, API 18).
 
 ---
 
-## 8. Memoria e etichette
+## 8. Memory and labels
 
-Gli indirizzi si possono scrivere `0x0400`, `$0400`, decimale o come **etichetta** (`start`, `lobby:nome` per un insieme).
+Addresses can be written `0x0400`, `$0400`, decimal or as a **label** (`start`, `lobby:name` for a set).
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `peek A` | Un byte (la memoria come la vede la CPU: ROM e I/O visibili secondo `$01`). `c64 peek 0x0400` → `32`. |
-| `peek A N [{"ram":true}]` | Array di N byte. `ram:true` = RAM pura (ignora `$01`, imposta temporaneamente la mappa). |
-| `peekRange A N` | Come `peek A N`. |
-| `peekWord A` | Parola a 16 bit little-endian: `c64 peekWord 0xFFFC` → `64738`. |
-| `poke A V [{"ram":true}]` | Scrive un byte o un array JSON (`'[1,2,3]'`). Ritorna il numero di byte scritti. Scritture sul chip (VIC, SID…) valgono come per la CPU. |
-| `pokeRange A '[…]'` | Come `poke` con array. |
-| `dump A N` | Esadecimale a 16 byte per riga: `FFFC: E2 FC 48 FF …`. |
-| `find BYTE\|TESTO [{"from","to","ram","screen","max"}]` | Cerca una sequenza (array di byte o stringa ASCII; con `screen:true` come codici schermo). Ritorna gli indirizzi (max 256). `c64 find READY` → `[41848]`; con `screen:true` → `[1224,1384]`. |
-| `ramSnap NOME [{"from","to"}]` | Fotografa un intervallo (default `$0000–$FFFF`, vista RAM). |
-| `ramDiff A B [{"max"}]` | Differenze fra due foto (`B=null` = stato attuale): `{count,changes:[{addr,a,b}]}` (max 1000). Serve a trovare l'indirizzo di vite/punteggio. |
-| `loadLabels @@FILE.lbl [{"set":"nome","activate":false}]` | Carica etichette VICE (`al C:0840 .nome`) o `nome = $0840`. Ritorna quante. `set` = insieme a parte (si legge con `lobby:nome`). |
-| `label NOME` | Indirizzo (numero) di un'etichetta. |
-| `useLabels INSIEME` | Rende attivo un insieme: `{"set":"default","count":2}`. |
-| `labelSets` | Insiemi caricati e quante etichette: `{"default":2}`. |
-| `stateHash [{"only","exclude"}]` | Hash per componente (Memory, CPU, CIA1/2, VIC, SID, Drive…) + hash complessivo: per confrontare due stati. L'hash CPU è instabile. |
+| `peek A` | One byte (memory as the CPU sees it: ROM and I/O visible according to `$01`). `c64 peek 0x0400` → `32`. |
+| `peek A N [{"ram":true}]` | Array of N bytes. `ram:true` = pure RAM (ignores `$01`, temporarily sets the map). |
+| `peekRange A N` | Like `peek A N`. |
+| `peekWord A` | Little-endian 16-bit word: `c64 peekWord 0xFFFC` → `64738`. |
+| `poke A V [{"ram":true}]` | Writes a byte or a JSON array (`'[1,2,3]'`). Returns the number of bytes written. Writes to chips (VIC, SID…) behave as for the CPU. |
+| `pokeRange A '[…]'` | Like `poke` with an array. |
+| `dump A N` | Hex, 16 bytes per line: `FFFC: E2 FC 48 FF …`. |
+| `find BYTES\|TEXT [{"from","to","ram","screen","max"}]` | Looks for a sequence (byte array or ASCII string; with `screen:true` as screen codes). Returns the addresses (max 256). `c64 find READY` → `[41848]`; with `screen:true` → `[1224,1384]`. |
+| `ramSnap NAME [{"from","to"}]` | Snapshots a range (default `$0000–$FFFF`, RAM view). |
+| `ramDiff A B [{"max"}]` | Differences between two snapshots (`B=null` = current state): `{count,changes:[{addr,a,b}]}` (max 1000). Useful to find the address of lives/score. |
+| `loadLabels @@FILE.lbl [{"set":"name","activate":false}]` | Loads VICE labels (`al C:0840 .name`) or `name = $0840`. Returns how many. `set` = separate set (read with `lobby:name`). |
+| `label NAME` | Address (number) of a label. |
+| `useLabels SET` | Activates a set: `{"set":"default","count":2}`. |
+| `labelSets` | Loaded sets and how many labels: `{"default":2}`. |
+| `stateHash [{"only","exclude"}]` | Hash per component (Memory, CPU, CIA1/2, VIC, SID, Drive…) + overall hash: to compare two states. The CPU hash is unstable. |
 
 ---
 
-## 9. Schermo
+## 9. Screen
 
-La pagina rende lo schermo a 384×270 (area visibile PAL). Dopo un `poke` su un registro del VIC avanza almeno un fotogramma prima di fare uno screenshot (altrimenti l'immagine è quella precedente).
+The page renders the screen at 384×270 (PAL visible area). After a `poke` on a VIC register advance at least one frame before taking a screenshot (otherwise the image is the previous one).
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `screenInfo` | Dove legge il VIC: `{bank,screen,charset,charsetRom,lowercase,bitmap,ecm,multicolor,textMode}`. |
-| `screenText` | Le 25 righe di testo dalla RAM schermo (conversione screen code → testo con il set caratteri standard). |
-| `screenCodes` | I 1000 codici schermo grezzi (array), indipendenti dal charset. |
-| `findText TESTO\|CODICI [{"raw","all","exact","addr","len","map","enc"}]` | Cerca testo **in screen code**: `{row,col,addr}` o `null`; `all:true` → elenco. Lettere indifferenti dal maiuscolo, bit 7 (inverso) ignorato salvo `exact`. `c64 findText READY.` → `{"row":5,"col":0,"addr":1224}`. `addr`: indirizzo RAM schermo alternativo (API 20). Non vede glifi grafici né testo sulla bitmap. `map` (API 21): codifica propria del gioco, es. `{"0-9":45,"/":55}` (carattere o intervallo `a-b` → codice iniziale); il testo si traduce con la mappa (carattere assente = `BAD_ARG`) e il confronto è esatto. `c64 findText '198/198' '{"addr":33792,"map":{"0-9":45,"/":55}}'`. **Attenzione**: con `addr` su un'area che non è uno schermo (es. dati del font) un testo può dare falsi positivi: usa `map` o un array di codici. **API 23**: `enc` = codifica caricata con `loadEncoding` (si possono aggiungere caratteri con `map`); `len` = ricerca lineare in `[addr, addr+len)` senza impaginare a 40 colonne, ritorna `{offset,addr}` (per buffer come il nome del mostro: `c64 findText 'LORD OF RUIN' '{"addr":"nbuf","len":24}'`); `addr` accetta etichette (`"nbuf"`, `"$8400"`). Con `map`/`enc` maiuscole e minuscole si equivalgono se la mappa ha solo una delle due. La mappa può essere carattere per carattere (lettere non contigue). |
-| `loadEncoding NOME MAPPA\|@@file.cdef [{"block"}]` | (API 23/24) Registra una codifica con nome: oggetto JSON (`{"0-9":45,"/":55,"A":57,…}`) o testo con righe `.cdef` di 64tass (`.cdef "09", 45` intervallo, `.cdef "A","F",57` intervallo, `.cdef "/", 55` singolo; `;` commento). **API 24**: il codice può essere un simbolo (`.cdef "A","A",G_A`) risolto da righe `NOME = valore` dello stesso testo (anche `$hex`, `%bin`) o dalle etichette caricate con `loadLabels`; con blocchi `.enc "nome"` si leggono solo le `.cdef` del blocco col nome della codifica (o `{"block":"nome"}`). Così si carica direttamente `gfx_consts.inc` del gioco: `c64 loadEncoding hud @@out/gfx_consts.inc`. Provato su un file con la stessa struttura descritta nel report, non sul file vero. |
-| `encodings` | (API 23) Codifiche caricate: `{nome: numero di caratteri}`. |
-| `border` · `background` | Colore del bordo / dello sfondo (0–15). |
-| `cursor` | `{col,row}` del cursore KERNAL. |
-| `screenshot` | PNG come data-URL; con `--out f.png` lo scrive su file. Opzioni: `'{"rect":{"x":0,"y":0,"w":8,"h":8}}'` ritaglio; `'{"raw":true}'` → `{width,height,data:base64 RGBA}`. |
-| `screenSave NOME` | Salva lo schermo attuale in memoria. |
-| `screenDiff A B [opzioni]` | Confronta due schermi salvati (`null` = attuale): `{same,diffPixels,ratio,width,height,bbox}`. Opzioni `tolerance` (0–255 per canale), `rect`, `image:true` (PNG delle differenze con `--out`). |
-| `sprites` | Gli 8 sprite dai registri VIC: `{sprites:[{n,enabled,x,y,color,multicolor,expandX,expandY,behindBackground,pointer,dataAddr},…]}`. |
-| `recordGif [{"frames","every","rect"}]` | Avanza di `frames` fotogrammi (emulatore fermo) catturando uno ogni `every` e ritorna una GIF animata: `c64 --out a.gif recordGif '{"frames":10,"every":5}'`. |
+| `screenInfo` | Where the VIC reads: `{bank,screen,charset,charsetRom,lowercase,bitmap,ecm,multicolor,textMode}`. |
+| `screenText` | The 25 text lines from screen RAM (screen code → text conversion with the standard character set). |
+| `screenCodes` | The 1000 raw screen codes (array), independent of the charset. |
+| `findText TEXT\|CODES [{"raw","all","exact","addr","len","map","enc"}]` | Looks for text **in screen code**: `{row,col,addr}` or `null`; `all:true` → list. Letters case insensitive, bit 7 (reverse) ignored unless `exact`. `c64 findText READY.` → `{"row":5,"col":0,"addr":1224}`. `addr`: alternative screen RAM address (API 20). Does not see graphic glyphs nor text on the bitmap. `map` (API 21): game's own encoding, e.g. `{"0-9":45,"/":55}` (character or range `a-b` → starting code); the text is translated with the map (missing character = `BAD_ARG`) and the comparison is exact. `c64 findText '198/198' '{"addr":33792,"map":{"0-9":45,"/":55}}'`. **Warning**: with `addr` on an area that is not a screen (e.g. font data) a text can give false positives: use `map` or an array of codes. **API 23**: `enc` = encoding loaded with `loadEncoding` (characters can be added with `map`); `len` = linear search in `[addr, addr+len)` without 40-column paging, returns `{offset,addr}` (for buffers like the monster name: `c64 findText 'LORD OF RUIN' '{"addr":"nbuf","len":24}'`); `addr` accepts labels (`"nbuf"`, `"$8400"`). With `map`/`enc` upper and lower case are equivalent if the map has only one of the two. The map can be character by character (non-contiguous letters). |
+| `loadEncoding NAME MAP\|@@file.cdef [{"block"}]` | (API 23/24) Registers a named encoding: JSON object (`{"0-9":45,"/":55,"A":57,…}`) or text with 64tass `.cdef` lines (`.cdef "09", 45` range, `.cdef "A","F",57` range, `.cdef "/", 55` single; `;` comment). **API 24**: the code can be a symbol (`.cdef "A","A",G_A`) resolved from `NAME = value` lines of the same text (also `$hex`, `%bin`) or from the labels loaded with `loadLabels`; with `.enc "name"` blocks only the `.cdef` lines of the block with the encoding name are read (or `{"block":"name"}`). This way a game's `gfx_consts.inc` can be loaded directly: `c64 loadEncoding hud @@out/gfx_consts.inc`. Tested on a file with the same structure described in the report, not on the real file. |
+| `encodings` | (API 23) Loaded encodings: `{name: number of characters}`. |
+| `border` · `background` | Border / background color (0–15). |
+| `cursor` | `{col,row}` of the KERNAL cursor. |
+| `screenshot` | PNG as data URL; with `--out f.png` writes it to a file. Options: `'{"rect":{"x":0,"y":0,"w":8,"h":8}}'` crop; `'{"raw":true}'` → `{width,height,data:base64 RGBA}`. |
+| `screenSave NAME` | Saves the current screen in memory. |
+| `screenDiff A B [options]` | Compares two saved screens (`null` = current): `{same,diffPixels,ratio,width,height,bbox}`. Options `tolerance` (0–255 per channel), `rect`, `image:true` (PNG of the differences with `--out`). |
+| `sprites` | The 8 sprites from the VIC registers: `{sprites:[{n,enabled,x,y,color,multicolor,expandX,expandY,behindBackground,pointer,dataAddr},…]}`. |
+| `recordGif [{"frames","every","rect"}]` | Advances `frames` frames (emulator stopped) capturing one every `every` and returns an animated GIF: `c64 --out a.gif recordGif '{"frames":10,"every":5}'`. |
 
 ---
 
-## 10. Dischi, file, ROM
+## 10. Disks, files, ROMs
 
-**I dischi si montano con il core in marcia.** Con il core fermo l'immagine risulta «caricata» in `state().disk` ma il drive non la vede (`disk8:false`, `diskImage` → «nessun disco nel drive 8»): fai `resume` prima di `attach`/`loadFile`.
+**Disks are attached with the core running.** With the core stopped the image appears "loaded" in `state().disk` but the drive does not see it (`disk8:false`, `diskImage` → "no disk in drive 8"): do `resume` before `attach`/`loadFile`.
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `loadFile NOME @FILE [opzioni]` | Carica `.d64 .g64 .prg .t64 .crt …`. Opzioni: `autoload` (true: LOAD + RUN automatici per i dischi), `program` (nome del programma), `wait` (false = non attendere la fine dell'autoload), `timeout` (ms). Con l'autoload fa un **reset**: i `poke` fatti prima si perdono; falli dopo che il comando è tornato. Ritorna lo stato. |
-| `attach 8 @FILE NOME` | Monta un disco nel drive 8 senza autoload (solo il drive 8). |
-| `detach` / `eject` | Espelle il disco. |
-| `diskImage [8] [{"bytes":true}]` | L'immagine del disco corrente (anche dopo un `SAVE`), base64: `c64 --out out.d64 diskImage` → `scritto out.d64 (174848 byte)`. |
-| `driveState [8]` | `{type,hasDisk,motor,powerSave,syncMark,readMode,halftrack,track,headOffset}` (il LED non è esposto). |
-| `driveTrace FRAMI [{"every","drive"}]` | Posizione della testina nel tempo (un campione ogni `every` fotogrammi, il core avanza). |
-| `loadRom KIND @FILE [{"name"}]` | ROM utente al posto di quelle incorporate (valgono dal prossimo `start`): `kernal` (8192 byte), `basic` (8192), `chargen` (4096), `floppy` (16384, solo famiglia 1541). Per nome: comando `rom`. |
-| `clearRoms [KIND]` | Torna alle ROM incorporate (tutte o una). |
-| `roms` | **Nota**: da riga di comando `c64 roms` è il comando del client che elenca i file (§5); l'API `roms()` si ottiene con `c64 rom` senza argomenti. |
+| `loadFile NAME @FILE [options]` | Loads `.d64 .g64 .prg .t64 .crt …`. Options: `autoload` (true: automatic LOAD + RUN for disks), `program` (program name), `wait` (false = do not wait for the end of the autoload), `timeout` (ms). With autoload it does a **reset**: `poke`s done before are lost; do them after the command returned. Returns the state. |
+| `attach 8 @FILE NAME` | Attaches a disk to drive 8 without autoload (drive 8 only). |
+| `detach` / `eject` | Ejects the disk. |
+| `diskImage [8] [{"bytes":true}]` | The image of the current disk (also after a `SAVE`), base64: `c64 --out out.d64 diskImage` → `written out.d64 (174848 bytes)`. |
+| `driveState [8]` | `{type,hasDisk,motor,powerSave,syncMark,readMode,halftrack,track,headOffset}` (the LED is not exposed). |
+| `driveTrace FRAMES [{"every","drive"}]` | Head position over time (one sample every `every` frames, the core advances). |
+| `loadRom KIND @FILE [{"name"}]` | User ROM in place of the embedded ones (effective from the next `start`): `kernal` (8192 bytes), `basic` (8192), `chargen` (4096), `floppy` (16384, 1541 family only). By name: the `rom` command. |
+| `clearRoms [KIND]` | Back to the embedded ROMs (all or one). |
+| `roms` | **Note**: on the command line `c64 roms` is the client command that lists the files (§5); the API `roms()` is reached with `c64 rom` without arguments. |
 
 ---
 
-## 11. Debug: CPU, chip, drive
+## 11. Debug: CPU, chips, drive
 
-Per quasi tutti il core deve essere **fermo** (`pause`) o lo diventa dopo la chiamata.
+For almost all of them the core must be **stopped** (`pause`) or becomes so after the call.
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `regs` | `{pc,line,cycle,cycles,a,x,y,p,sp}`. A/X/Y/P/SP si leggono con un piccolo stub 6502 (33 byte di RAM in `$0334–$0367`, ripristinati, ~40 cicli). |
-| `setRegs '{"a":5,"x":6,"pc":…}'` | Imposta i registri (SP non modificabile). Core fermo. |
-| `breakpoint A` | Aggiunge un breakpoint; ritorna l'id. |
-| `breakpoints` | Elenco `[{id,addr}]`. |
-| `clearBreakpoints` | Li toglie tutti; ritorna quanti. |
-| `watch A` / `watch '[a,b]'` | Watchpoint (si ferma dopo l'istruzione che accede all'indirizzo); ritorna gli id. |
-| `watchpoints` / `clearWatchpoints` | Elenco / rimuove tutti. |
-| `disasm A N` | Disassembla N istruzioni: `[{pc,bytes:"E2 FC",asm:"NOP #FC"},…]` (il disassembler del core, istruzioni illegali comprese). |
-| `step N` | Esegue N istruzioni (≈ 20 ms ciascuna): `[{pc,bytes,asm,cycles}]` (`cycles` = valore prima dell'istruzione). Core fermo. |
-| `trace '{"until":[A],"max":N,"last":K}'` | Esegue istruzioni **finché il PC è in `until`** (o max, default 20000 ≈ 400 s!) e ritorna le ultime K (default 32): `{instructions,reached,pc,last:[…]}`. Post-mortem: `loadState` + `trace`. Dà **sempre** un `max` ragionevole. |
-| `measure DA A [{"timeoutFrames","n"}]` | (API 21; `n` da API 22) Cicli **esatti** fra due PC: esegue fino a `DA`, azzera il conteggio, esegue fino ad `A`. Con `{"n":50}` ripete 50 volte e aggiunge `{n,min,max,mean,samples}` (≈0,15 s di orologio a ripetizione: 10 ripetizioni in 1,5 s). `c64 measure 0xC002 0xC005` → `{from,to,cycles:49,fromCycles,toCycles,frames}`. Etichette ammesse. Provato su un ciclo `DEX/BNE` (49 cicli come da calcolo a mano); non confrontato con VICE. |
-| `call A [{"a","x","y"}] [{"timeoutFrames","scratch","noWait","frames"}]` | `JSR A` e ritorno; registri e PC ripristinati; ritorna `{a,x,y,p}` in uscita. Routine che non ritorna → `CALL_TIMEOUT` (ripristina solo PC e area di lavoro `$0334`). `noWait:true`: salta alla routine con `JMP`, la lascia girare `frames` fotogrammi (default 2) e ritorna `{started,pc,frames}`. Negli script: `call ADDR nowait`. |
-| `inspect NOME` | Stato interno di un componente del core: `cpu mem vic cia1 cia2 sid c64 drive8 …` → `{config,state,raw}`. |
-| `sid` | I 29 registri del SID + decodifica delle 3 voci (frequenza, Hz, gate, forma d'onda, ADSR…). |
-| `sidTrace FRAMI [{"every"}]` | Registri SID ogni `every` fotogrammi mentre il core avanza (per verificare le musiche). |
-| `wasm NOME [arg…]` | Chiama una funzione esportata del core (`wasm wasm_get_cpu_cycles`). Ritorna il valore (i BigInt diventano numeri o stringhe). |
+| `regs` | `{pc,line,cycle,cycles,a,x,y,p,sp}`. A/X/Y/P/SP are read with a small 6502 stub (33 bytes of RAM at `$0334–$0367`, restored, ~40 cycles). |
+| `setRegs '{"a":5,"x":6,"pc":…}'` | Sets the registers (SP cannot be changed). Core stopped. |
+| `breakpoint A` | Adds a breakpoint; returns the id. |
+| `breakpoints` | List `[{id,addr}]`. |
+| `clearBreakpoints` | Removes them all; returns how many. |
+| `watch A` / `watch '[a,b]'` | Watchpoint (stops after the instruction that accesses the address); returns the ids. |
+| `watchpoints` / `clearWatchpoints` | List / removes all. |
+| `disasm A N` | Disassembles N instructions: `[{pc,bytes:"E2 FC",asm:"NOP #FC"},…]` (the core disassembler, illegal instructions included). |
+| `step N` | Runs N instructions (≈ 20 ms each): `[{pc,bytes,asm,cycles}]` (`cycles` = value before the instruction). Core stopped. |
+| `trace '{"until":[A],"max":N,"last":K}'` | Runs instructions **until the PC is in `until`** (or max, default 20000 ≈ 400 s!) and returns the last K (default 32): `{instructions,reached,pc,last:[…]}`. Post-mortem: `loadState` + `trace`. **Always** give a reasonable `max`. |
+| `measure FROM TO [{"timeoutFrames","n"}]` | (API 21; `n` since API 22) **Exact** cycles between two PCs: runs to `FROM`, resets the count, runs to `TO`. With `{"n":50}` repeats 50 times and adds `{n,min,max,mean,samples}` (≈0.15 s of clock per repetition: 10 repetitions in 1.5 s). `c64 measure 0xC002 0xC005` → `{from,to,cycles:49,fromCycles,toCycles,frames}`. Labels allowed. Tested on a `DEX/BNE` loop (49 cycles as computed by hand); not compared with VICE. |
+| `call A [{"a","x","y"}] [{"timeoutFrames","scratch","noWait","frames"}]` | `JSR A` and return; registers and PC restored; returns `{a,x,y,p}` on exit. Routine that does not return → `CALL_TIMEOUT` (restores only PC and the `$0334` work area). `noWait:true`: jumps to the routine with `JMP`, lets it run `frames` frames (default 2) and returns `{started,pc,frames}`. In scripts: `call ADDR nowait`. |
+| `inspect NAME` | Internal state of a core component: `cpu mem vic cia1 cia2 sid c64 drive8 …` → `{config,state,raw}`. |
+| `sid` | The 29 SID registers + decoding of the 3 voices (frequency, Hz, gate, waveform, ADSR…). |
+| `sidTrace FRAMES [{"every"}]` | SID registers every `every` frames while the core advances (to check music). |
+| `wasm NAME [arg…]` | Calls an exported core function (`wasm wasm_get_cpu_cycles`). Returns the value (BigInts become numbers or strings). |
 
 ---
 
-## 12. Stati e regressione
+## 12. States and regression
 
-**Stati** (snapshot completi del core in memoria JS, validi finché il demone è acceso):
-| Comando | Cosa fa |
+**States** (full snapshots of the core in JS memory, valid while the daemon is on):
+| Command | What it does |
 |---|---|
-| `saveState NOME [{"export":true}]` | CPU, RAM, VIC, SID, CIA, drive, disco. `c64 saveState s1` → `{"name":"s1","size":790840,"cycles":10358712}`. Con `export:true` e `--out f.bin` salva anche il file (790 840 byte nel caso provato). |
-| `loadState NOME\|@FILE` | Ripristina (cicli e RAM esattamente allo stato salvato; breakpoint e watchpoint vanno ricontrollati). Da file: `c64 loadState @f.bin`. |
-| `states` | Elenco `{nome:{size,cycles}}`. |
-| `dropState NOME` | Elimina. |
+| `saveState NAME [{"export":true}]` | CPU, RAM, VIC, SID, CIA, drive, disk. `c64 saveState s1` → `{"name":"s1","size":790840,"cycles":10358712}`. With `export:true` and `--out f.bin` also saves the file (790 840 bytes in the tested case). |
+| `loadState NAME\|@FILE` | Restores (cycles and RAM exactly as saved; breakpoints and watchpoints must be checked again). From a file: `c64 loadState @f.bin`. |
+| `states` | List `{name:{size,cycles}}`. |
+| `dropState NAME` | Deletes. |
 
-**Regressione**: la baseline contiene hash dei componenti, RAM (default `$0000–$FFFF`), schermo (PNG) e cicli. Vive nella pagina finché il demone è acceso.
-| Comando | Cosa fa |
+**Regression**: the baseline contains component hashes, RAM (default `$0000–$FFFF`), screen (PNG) and cycles. It lives in the page while the daemon is on.
+| Command | What it does |
 |---|---|
-| `regress save NOME [opzioni]` | Crea/sovrascrive la baseline. Opzioni JSON: `ram:[[a,b],…]` intervalli, `screen:false`, `only`/`exclude` (componenti). Stampa `{name,cycles,hash,ram,screen}`. Con `--out f.json` scrive il bundle completo su file. |
-| `regress check NOME\|@@f.json [opzioni]` | Confronta lo stato attuale con la baseline (nome o file). Opzioni: `ignore:["0x0400-0x07E7",…]` (intervalli RAM esclusi), `tolerance` (pixel), `only`, `exclude`, `ram`, `screen`, `strict`, `includeCpu`, `image` (con `--out f.png` salva l'immagine delle differenze), `maxGroups`. **Codice di uscita 0 = PASS, 1 = FAIL** (con le ragioni su stderr). Il confronto ha senso solo se parti dallo stesso stato (`loadState` + stessi input). |
-| `regress list` | Baseline presenti: `{nome:{cycles,ram,screen}}`. |
-| `regressSave` / `regressCheck` / `regressList` | Gli stessi metodi dell'API (restituiscono il JSON completo). |
+| `regress save NAME [options]` | Creates/overwrites the baseline. JSON options: `ram:[[a,b],…]` ranges, `screen:false`, `only`/`exclude` (components). Prints `{name,cycles,hash,ram,screen}`. With `--out f.json` writes the full bundle to a file. |
+| `regress check NAME\|@@f.json [options]` | Compares the current state with the baseline (name or file). Options: `ignore:["0x0400-0x07E7",…]` (excluded RAM ranges), `tolerance` (pixels), `only`, `exclude`, `ram`, `screen`, `strict`, `includeCpu`, `image` (with `--out f.png` saves the difference image), `maxGroups`. **Exit code 0 = PASS, 1 = FAIL** (with the reasons on stderr). The comparison makes sense only if you start from the same state (`loadState` + same inputs). |
+| `regress list` | Existing baselines: `{name:{cycles,ram,screen}}`. |
+| `regressSave` / `regressCheck` / `regressList` | The same API methods (they return the full JSON). |
 
 ---
 
-## 13. Registrazioni
+## 13. Recordings
 
-Panoramica e scelta del metodo: README, sezione «Registrazioni». Comandi:
+Overview and choice of the method: README, "Recordings" section. Commands:
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `video FILE.txt\|FILE.js\|N [opzioni]` | **Video deterministico**, muto. Un frame ogni `every` fotogrammi emulati mentre gira uno script di input (`.txt`), un ciclo JS (`.js`, corpo di funzione come `runLoop`) o N fotogrammi; codificato da **ffmpeg** (libx264) nel demone. Richiede il core **fermo** (`pause`). Va a tempo reale (200 fotogrammi ≈ 4–5 s). Opzioni JSON: `every` (default 2 → `fps = 50/every`), `scale` (1–4, default 3 = 1152×810), `crf` (0–51, default 20), `fps`, `preset`. Uso: `c64 pause; c64 --out clip.mp4 video prova.txt '{"every":2,"scale":3}'`. Negli script: `video start`/`video stop` (vedi `scripting.md` §5). |
-| `videoStop` | Chiude un video lasciato aperto con `video start … keep`: `c64 --out lungo.mp4 videoStop`. |
-| `grabBrowserVideoAndAudio '{"action":"start",…}'` | **Video + audio dal browser** in tempo reale, non sincronizzato con l'emulatore (core in marcia). Azioni `start` / `stop` / `status`; con `seconds` registra e si ferma da sola. Opzioni: `keyboard`, `joy1`, `joy2` = `none`\|`below`\|`overlay`, `scale` (1–4, default 2), `fps` (50), `bitrate`, `audio` (true), `audioGain` (default 1), `mime`. `stop` ritorna `{data,mime,bytes,seconds,width,height,audio,audioPeak,controls,warnings}`; `--out clip.webm` salva il file (webm VP9+Opus). |
-| `recordVideo [{"frames"\|"seconds","fps","mime","bitrate","scale"}]` | Video del canvas con `MediaRecorder` (tempo reale, senza audio). Con il core fermo avanza di `frames` fotogrammi. `c64 --out v.webm recordVideo '{"frames":20,"scale":1}'`. |
-| `recordGif` | GIF animata (§9). |
-| `recordStart` · `recordStop ['{"format":"text"}']` | Registra le chiamate di input (`keyDown keyUp joy sendText type sendJoy fire joyPulse poke pokeRange`) con il fotogramma relativo. `recordStop` → `{startCycles,frames,events:[{f,m,a}]}`; con `{"format":"text"}` lo esporta come script di testo (righe come `0 L 3`, `10 O 3`; gli eventi non esprimibili diventano commenti `# non esportato`). |
-| `replay REC` | Rifà le chiamate registrate agli stessi fotogrammi relativi: partendo dallo stesso stato (`loadState`/`reset`) con il core fermo è esatto. |
-| `capStart` · `capArm` · `capRun` · `capTake` · `capStop` · `capClipStop` | **Interni**: li usano `video` e gli script per catturare i fotogrammi; non servono da riga di comando. |
+| `video FILE.txt\|FILE.js\|N [options]` | **Deterministic video**, silent. One frame every `every` emulated frames while an input script (`.txt`), a JS loop (`.js`, function body like `runLoop`) or N frames run; encoded by **ffmpeg** (libx264) in the daemon. Requires the core **stopped** (`pause`). Runs in real time (200 frames ≈ 4–5 s). JSON options: `every` (default 2 → `fps = 50/every`), `scale` (1–4, default 3 = 1152×810), `crf` (0–51, default 20), `fps`, `preset`. Usage: `c64 pause; c64 --out clip.mp4 video test.txt '{"every":2,"scale":3}'`. In scripts: `video start`/`video stop` (see `scripting.md` §5). |
+| `videoStop` | Closes a video left open with `video start … keep`: `c64 --out long.mp4 videoStop`. |
+| `grabBrowserVideoAndAudio '{"action":"start",…}'` | **Video + audio from the browser** in real time, not synchronized with the emulator (core running). Actions `start` / `stop` / `status`; with `seconds` it records and stops by itself. Options: `keyboard`, `joy1`, `joy2` = `none`\|`below`\|`overlay`, `scale` (1–4, default 2), `fps` (50), `bitrate`, `audio` (true), `audioGain` (default 1), `mime`. `stop` returns `{data,mime,bytes,seconds,width,height,audio,audioPeak,controls,warnings}`; `--out clip.webm` saves the file (webm VP9+Opus). |
+| `recordVideo [{"frames"\|"seconds","fps","mime","bitrate","scale"}]` | Canvas video with `MediaRecorder` (real time, no audio). With the core stopped it advances `frames` frames. `c64 --out v.webm recordVideo '{"frames":20,"scale":1}'`. |
+| `recordGif` | Animated GIF (§9). |
+| `recordStart` · `recordStop ['{"format":"text"}']` | Records the input calls (`keyDown keyUp joy sendText type sendJoy fire joyPulse poke pokeRange`) with the relative frame. `recordStop` → `{startCycles,frames,events:[{f,m,a}]}`; with `{"format":"text"}` exports it as a text script (lines like `0 L 3`, `10 O 3`; events that cannot be expressed become `# not exported` comments). |
+| `replay REC` | Repeats the recorded calls at the same relative frames: starting from the same state (`loadState`/`reset`) with the core stopped it is exact. |
+| `capStart` · `capArm` · `capRun` · `capTake` · `capStop` · `capClipStop` | **Internal**: used by `video` and scripts to capture frames; not needed from the command line. |
 
 ---
 
-## 14. Script e cicli di controllo
+## 14. Scripts and control loops
 
 ### `script FILE [{"noWait":true}]`
-Esegue uno script di input (`.txt`; sintassi in `scripting.md`) dentro l'emulatore con tempo emulato esatto. `--outdir DIR` dice dove scrivere gli screenshot, i video e le registrazioni prodotti. Ritorna `{events,frames,warnings,outputs?,log?}`; in caso di errore: `ERRORE CODICE: script riga N: …` (exit 1) e i file già prodotti vengono comunque scritti.
+Runs an input script (`.txt`; syntax in `scripting.md`) inside the emulator with exact emulated time. `--outdir DIR` says where to write the screenshots, videos and recordings produced. Returns `{events,frames,warnings,outputs?,log?}`; on error: `ERROR CODE: script line N: …` (exit 1) and the files already produced are written anyway.
 ```
 $ c64 --outdir out script k.txt
-scritto out/k.png (screenshot)
+written out/k.png (screenshot)
 {"events":3,"frames":25,"warnings":[],"outputs":[{"type":"screenshot","name":"k.png","mime":"image/png","line":3}]}
 ```
-`noWait:true` non attende il boot dopo un reset.
+`noWait:true` does not wait for the boot after a reset.
 
 ### `scriptCheck FILE`
-Solo validazione: `{"events":3,"warnings":[]}` oppure l'errore con il numero di riga.
+Validation only: `{"events":3,"warnings":[]}` or the error with the line number.
 
-### `runLoop 'CODICE' [{"frames":N,"every":2,"exact":true}]`
-Esegue **dentro la pagina** un ciclo di controllo: nessuna chiamata HTTP per passo. `CODICE` è il corpo di una funzione JS con parametri `(c64, i, state)`; `return false` termina; `state` è un oggetto che persiste tra i passi e viene restituito; `every` = fotogrammi per passo (default 2); `frames` = massimo. Il codice può essere in un file: `c64 runLoop "$(cat bot.js)" '{"frames":4000}'`. Ritorna `{iterations,frames,state}`. Dentro il ciclo `c64.joy(porta,stato,frames)` preme e rilascia senza avanzare il tempo (API 18). Va a tempo reale (≈ 25 passi/s con `every=2`).
+### `runLoop 'CODE' [{"frames":N,"every":2,"exact":true}]`
+Runs a control loop **inside the page**: no HTTP call per step. `CODE` is the body of a JS function with parameters `(c64, i, state)`; `return false` ends it; `state` is an object that persists between steps and is returned; `every` = frames per step (default 2); `frames` = maximum. The code can be in a file: `c64 runLoop "$(cat bot.js)" '{"frames":4000}'`. Returns `{iterations,frames,state}`. Inside the loop `c64.joy(port,state,frames)` presses and releases without advancing time (API 18). Runs in real time (≈ 25 steps/s with `every=2`).
 ```
 c64 runLoop 'const hp=c64.peek("c_hp"); if(hp===0) return false; c64.joy(2,{right:true},2);' '{"frames":3000}'
 ```
-**API 23/24 — passi esatti e diagnostica.** (API 24: corretto il difetto della 23 che perdeva joystick e tasti tenuti a ogni ripetizione, vedi sotto.) Ogni passo avanza esattamente `every` fotogrammi (stesso meccanismo di `runFrames`: snapshot, verifica, ripristino). Il risultato contiene `framesActual` (dai cicli), `exact` (`framesActual == frames`), `retries:[[passo,ripetizioni],…]` (passi in cui il core aveva sforato ed è stato riportato indietro; **al massimo 200 voci**), `retriesTotal` (API 25: totale vero delle ripetizioni, contate per avanzamento: un passo con un rilascio di `joy`/`type` a metà fa due avanzamenti, quindi con `_forceRetry:1` il totale può superare il numero di passi) e `retriesTruncated` (true se la lista è stata tagliata). Prima un passo ogni ~800–1000 avanzava di un fotogramma in più quando il browser era in ritardo e il contatore restituito non lo mostrava: un bot ad anello chiuso dallo stesso stato dava esiti diversi. Misure: bot con carico CPU variabile, 1000 passi, 3 esecuzioni → hash identici; 3 istanze in parallelo → più ripetizioni (5–8 su 150 passi) ma esito identico. Velocità invariata (tempo reale). `{"exact":false}` = vecchio comportamento. Prova di regressione: `examples/shell/11-determinismo.sh [N] [PASSI]`.
+**API 23/24 — exact steps and diagnostics.** (API 24: fixed the API 23 defect that lost held joystick and keys at every repetition, see below.) Each step advances exactly `every` frames (same mechanism as `runFrames`: snapshot, check, restore). The result contains `framesActual` (from the cycles), `exact` (`framesActual == frames`), `retries:[[step,repetitions],…]` (steps where the core had overshot and was brought back; **at most 200 entries**), `retriesTotal` (API 25: the true total of repetitions, counted per advance: a step with a `joy`/`type` release in the middle makes two advances, so with `_forceRetry:1` the total can exceed the number of steps) and `retriesTruncated` (true if the list was cut). Before, one step every ~800–1000 advanced one extra frame when the browser was late and the returned counter did not show it: a closed-loop bot from the same state gave different outcomes. Measures: bot with variable CPU load, 1000 steps, 3 runs → identical hashes; 3 instances in parallel → more repetitions (5–8 over 150 steps) but identical outcome. Speed unchanged (real time). `{"exact":false}` = old behavior. Regression test: `examples/shell/11-determinism.sh [N] [STEPS]`.
 
-**Verificare che un bot sia ripetibile (opzioni di prova, API 25 documentate).** `{"_forceRetry":N}` fa considerare sbagliati i primi N tentativi di ogni passo (quindi ripristino e ripetizione forzati); `{"_forceEvery":K}` lo applica solo ai passi con indice multiplo di K. Un bot è ripetibile se lo stesso stato dà lo stesso `stateHash` con e senza queste opzioni:
+**Checking that a bot is repeatable (test options, API 25 documented).** `{"_forceRetry":N}` makes the first N attempts of each step count as wrong (so forced restore and repetition); `{"_forceEvery":K}` applies it only to the steps whose index is a multiple of K. A bot is repeatable if the same state gives the same `stateHash` with and without these options:
 ```sh
 c64 loadState s0; c64 runLoop "$(cat bot.js)" '{"frames":600}';                                   c64 stateHash
 c64 loadState s0; c64 runLoop "$(cat bot.js)" '{"frames":600,"_forceRetry":1}';                   c64 stateHash
 c64 loadState s0; c64 runLoop "$(cat bot.js)" '{"frames":600,"_forceRetry":2,"_forceEvery":3}';  c64 stateHash
 ```
-Costo: con `_forceRetry:1` ogni passo è eseguito due volte (misurato dalla chat Barbarian: 600 fotogrammi in 119 s invece di 24 s). Valgono anche per `runFrames` (`_forceRetry`). Il trattino basso indica opzioni di prova: possono cambiare senza preavviso.
+Cost: with `_forceRetry:1` each step is run twice (measured by the Barbarian chat: 600 frames in 119 s instead of 24 s). They also work for `runFrames` (`_forceRetry`). The leading underscore marks test options: they can change without notice.
 
-**Velocità del passo esatto (misurato).** Per passo da 2 fotogrammi: solo esecuzione 44 ms, snapshot + esecuzione 40 ms, snapshot + **ripristino** + esecuzione 82 ms. Il costo extra non è il ripristino in sé (~6 ms) ma il core, che dopo `wasm_loadfile` riparte più tardi (ipotesi: riallinea il proprio orologio e aspetta il fotogramma successivo; non verificato nel sorgente del core). Sul gioco: 600 fotogrammi in 24 s invece di 12 s. Con più istanze (`c64-batch`) la resa torna circa al tempo reale.
+**Speed of the exact step (measured).** Per 2-frame step: run only 44 ms, snapshot + run 40 ms, snapshot + **restore** + run 82 ms. The extra cost is not the restore itself (~6 ms) but the core, which after `wasm_loadfile` restarts later (hypothesis: it realigns its own clock and waits for the next frame; not verified in the core source). On the game: 600 frames in 24 s instead of 12 s. With several instances (`c64-batch`) the throughput goes back to about real time.
 
-**Input e ripristino (API 24, misurato).** Il core **non** salva nello snapshot le porte joystick né la matrice della tastiera, e un input già consegnato si perde con il ripristino; la coda degli eventi di tastiera programmati (`type`/`sendText` con rilascio ritardato) invece **non** si svuota con il ripristino. L'API tiene quindi un modello degli input (joystick, tasti tenuti, eventi programmati) e a ogni ripristino: rilascia tutto, ripreme ciò che era tenuto e riprogramma gli eventi consumati dal tentativo scartato. Inoltre ogni passo parte **sempre** da uno stato appena ripristinato (anche il primo tentativo): il ripristino non è trasparente (senza input, un passo ripetuto cambiava lo stato dei CIA), così primo tentativo e ripetizioni sono identici. Dentro `runLoop`, `type()` non fa avanzare il core e il rilascio lo gestisce il ciclo (come `joy` con durata): nessun evento resta nella coda del core alla fine del ciclo. Verifiche: bersaglio che legge `$DC00` e il buffer del KERNAL con joystick tenuto e a durata, tasti tenuti e a durata: stesso hash con 0 ripetizioni, con una ripetizione forzata a ogni passo, con 2 ripetizioni ogni 3 passi; 6 esecuzioni su 3 istanze in parallelo (2–10 ripetizioni reali ciascuna) tutte uguali, anche la prima di un demone appena avviato.
+**Input and restore (API 24, measured).** The core does **not** save the joystick ports nor the keyboard matrix in the snapshot, and an input already delivered is lost with the restore; the queue of scheduled keyboard events (`type`/`sendText` with delayed release) instead is **not** emptied by the restore. So the API keeps a model of the inputs (joystick, held keys, scheduled events) and at each restore: releases everything, presses again what was held and reschedules the events consumed by the discarded attempt. Moreover each step **always** starts from a freshly restored state (also the first attempt): the restore is not transparent (without input, a repeated step changed the CIA state), so first attempt and repetitions are identical. Inside `runLoop`, `type()` does not advance the core and the loop handles the release (like `joy` with a duration): no event stays in the core queue at the end of the loop. Checks: target reading `$DC00` and the KERNAL buffer with held and timed joystick, held and timed keys: same hash with 0 repetitions, with one forced repetition per step, with 2 repetitions every 3 steps; 6 runs on 3 instances in parallel (2–10 real repetitions each) all equal, including the first one of a freshly started daemon.
 
-### `c64-batch` (API 23) — molte esecuzioni in parallelo
-Programma a parte (`headless/c64-batch`), non un comando di `c64`:
+### `c64-batch` (API 23) — many runs in parallel
+A separate program (`headless/c64-batch`), not a `c64` command:
 ```sh
 node c64-batch --state boss.bin --loop bot.js --runs 40 -j 4 --frames 3000 \
   --labels game.lbl --collect 'peek c_hp 2' --collect 'peek 0x9680 1'
 ```
-Avvia `J` demoni sulle porte `--base-port` (default 7100)…+J-1 (o usa quelli già accesi), e per ogni esecuzione `k`: `loadState`, `runLoop` con `const RUN=k;` in testa al codice, le chiamate `--collect` (sintassi come la CLI) e `stateHash`. Stampa su stdout `[{run,port,ms,frames,framesActual,exact,retriesCount,retries,hash,collect:{…},error?},…]`; avanzamento su stderr; `--keep` lascia accesi i demoni. Poiché i passi sono esatti, lo stesso `RUN` dà sempre lo stesso esito: per esplorare, il bot varia i parametri con `RUN`. Provato: 6 esecuzioni da 300 fotogrammi su 3 istanze in 29 s (avvio compreso), esiti coerenti con `RUN`. Ogni istanza è un Chromium (RAM): numero massimo utile non misurato.
+Starts `J` daemons on ports `--base-port` (default 7100)…+J-1 (or uses those already running), and for each run `k`: `loadState`, `runLoop` with `const RUN=k;` at the top of the code, the `--collect` calls (syntax as the CLI) and `stateHash`. Prints on stdout `[{run,port,ms,frames,framesActual,exact,retriesCount,retries,hash,collect:{…},error?},…]`; progress on stderr; `--keep` leaves the daemons running. Since the steps are exact, the same `RUN` always gives the same outcome: to explore, the bot varies its parameters with `RUN`. Tested: 6 runs of 300 frames on 3 instances in 29 s (startup included), outcomes consistent with `RUN`. Each instance is a Chromium (RAM): maximum useful number not measured.
 
-**Più veloce del tempo reale? (misurato, API 23)** Il core di vc64web non espone una chiamata per calcolare fotogrammi in modo sincrono (funzioni wasm esportate: nessun `execute`/`computeFrame`), e la cadenza la dà il ciclo della pagina: `SPEED_BOOST` al 500% non cambia nulla (500 fotogrammi in 10,03 s sia al 100% sia al 500%). Il warp avanza a salti di ~26 fotogrammi. Quindi un singolo emulatore resta a tempo reale; la velocità si ottiene con più istanze (`c64-batch`).
+**Faster than real time? (measured, API 23)** The vc64web core does not expose a call to compute frames synchronously (exported wasm functions: no `execute`/`computeFrame`), and the pace is given by the page loop: `SPEED_BOOST` at 500% changes nothing (500 frames in 10.03 s both at 100% and at 500%). Warp advances in jumps of ~26 frames. So a single emulator stays at real time; speed comes from several instances (`c64-batch`).
 
 ---
 
-## 15. Varie: store, wasm, eval
+## 15. Misc: store, wasm, eval
 
-| Comando | Cosa fa |
+| Command | What it does |
 |---|---|
-| `storeSet K V` · `storeGet K [DEFAULT]` · `storeDel K` · `storeKeys` · `storeExport` · `storeImport OBJ` | Archivio chiave/valore JSON nel browser (`localStorage`). Sopravvive alle pagine ricaricate; fra build diverse solo se il browser condivide `localStorage` per i `file://` (Chromium sì; Firefox/Safari non verificato). |
-| `wasm NOME [arg…]` | Chiama una funzione del core esportata (§11). |
-| `eval 'CODICE'` | Esegue **JavaScript arbitrario** nel contesto dell'emulatore (la pagina interna): `eval '1+1'` → `2`. L'API sta in `parent.c64` (`eval 'parent.c64.cycles()'`); `window.c64` lì non esiste. **Pericoloso**: il demone non ha autenticazione. |
-| `waitFor`, `sleep` | Vedi §6. |
+| `storeSet K V` · `storeGet K [DEFAULT]` · `storeDel K` · `storeKeys` · `storeExport` · `storeImport OBJ` | JSON key/value store in the browser (`localStorage`). Survives page reloads; across different builds only if the browser shares `localStorage` for `file://` (Chromium yes; Firefox/Safari not verified). |
+| `wasm NAME [arg…]` | Calls an exported core function (§11). |
+| `eval 'CODE'` | Runs **arbitrary JavaScript** in the emulator context (the inner page): `eval '1+1'` → `2`. The API is in `parent.c64` (`eval 'parent.c64.cycles()'`); `window.c64` does not exist there. **Dangerous**: the daemon has no authentication. |
+| `waitFor`, `sleep` | See §6. |
 
 ---
 
-## 16. Errori e codici di uscita
+## 16. Errors and exit codes
 
-Gli errori hanno un codice: `ERRORE CODICE: messaggio`, exit 1.
+Errors have a code: `ERROR CODE: message`, exit 1.
 
-| Codice | Significato |
+| Code | Meaning |
 |---|---|
-| `NOT_STARTED` / `NOT_READY` | emulatore non avviato / non pronto |
-| `TIMEOUT` | condizione non raggiunta nel tempo dato (`runUntil`, `waitFor`, `wait` negli script, `ready`, `loadFile` con autoload) |
-| `BAD_ARG` | argomento non valido (anche errori di sintassi di uno script: il messaggio ha il numero di riga) |
-| `UNKNOWN_LABEL` | etichetta sconosciuta |
-| `NO_STATE` / `NO_SHOT` | stato / schermata non salvati con quel nome |
-| `ASSERT` / `REGRESS` | `assert` o `regress check` falliti in uno script |
-| `ABORTED` | job interrotto da `abort` o dal client chiuso |
-| `STALL` | il core non avanza da 5 s durante una esecuzione |
-| `CALL_TIMEOUT` | `call`: la routine non è tornata nel tempo dato (usa `noWait`) |
-| `CLIENT_GONE` | (solo demone) il client si è disconnesso prima dell'esecuzione |
-| `UNSUPPORTED` | funzione non disponibile nel browser (es. `MediaRecorder`) |
-| `NO_FFMPEG` / `FFMPEG` | `ffmpeg` mancante nel PATH / terminato con errore |
-| `DAEMON` | errore del demone (es. risposta non serializzabile) |
-| `CORE` | errore del core emulatore |
-| `ERROR` | errore generico dell'API (messaggio nel testo) |
+| `NOT_STARTED` / `NOT_READY` | emulator not started / not ready |
+| `TIMEOUT` | condition not reached in the given time (`runUntil`, `waitFor`, `wait` in scripts, `ready`, `loadFile` with autoload) |
+| `BAD_ARG` | invalid argument (also syntax errors of a script: the message has the line number) |
+| `UNKNOWN_LABEL` | unknown label |
+| `NO_STATE` / `NO_SHOT` | state / screen not saved with that name |
+| `ASSERT` / `REGRESS` | `assert` or `regress check` failed in a script |
+| `ABORTED` | job interrupted by `abort` or by the client being closed |
+| `STALL` | the core has not advanced for 5 s during a run |
+| `CALL_TIMEOUT` | `call`: the routine did not return in the given time (use `noWait`) |
+| `CLIENT_GONE` | (daemon only) the client disconnected before the run |
+| `UNSUPPORTED` | function not available in the browser (e.g. `MediaRecorder`) |
+| `NO_FFMPEG` / `FFMPEG` | `ffmpeg` missing in the PATH / ended with an error |
+| `DAEMON` | daemon error (e.g. non-serializable answer) |
+| `CORE` | emulator core error |
+| `ERROR` | generic API error (message in the text) |
 
-Il codice di uscita del client: `0` ok · `1` errore · `2` uso sbagliato · `3` demone non raggiungibile (`demone non raggiungibile su 127.0.0.1:7064 (avvia c64d.js)`).
+Client exit code: `0` ok · `1` error · `2` wrong usage · `3` daemon not reachable (`daemon not reachable on 127.0.0.1:7064 (start c64d.js)`).
 
 ---
 
-## 17. Cosa non è verificato
+## 17. What is not verified
 
-- Docker: mai costruito né eseguito; le indicazioni su `/games`, `/roms`, `/scripts`, `/output` sono coerenti con il `docker-compose.yml` ma non provate.
-- `game` con `.prg`, `.t64`, `.crt`, `.tap`, `.vsf`, `.zip`: non provato (solo `.d64`).
-- `joyPulse`/`fire` con il core fermo: comportamento dedotto dal codice.
-- `capStart`, `capArm`, `capRun`, `capTake`, `capStop`, `capClipStop`: interni, non descritti oltre il ruolo.
-- `inspect` con tutti i componenti, `sidTrace`, `driveTrace`, `storeImport`, `replay`: provati solo `inspect cpu`, `sidTrace`, `driveTrace`; `replay` e `storeImport` non sono stati rieseguiti per questo documento.
-- Opzioni minori di `regress check` (`only`, `exclude`, `strict`, `includeCpu`, `maxGroups`): descritte dal codice, non provate una per una.
-- `video` / `grab` su durate lunghe: non misurato.
-- Windows e macOS: non provati.
+- Docker Compose: never run; the indications about `/games`, `/roms`, `/scripts`, `/output` are consistent with `docker-compose.yml` but not tested. (The image itself is built and used in the game project, `docs/INCLUSION.md`.)
+- `game` with `.prg`, `.t64`, `.crt`, `.tap`, `.vsf`, `.zip`: not tested (only `.d64`).
+- `joyPulse`/`fire` with the core stopped: behavior deduced from the code.
+- `capStart`, `capArm`, `capRun`, `capTake`, `capStop`, `capClipStop`: internal, not described beyond their role.
+- `inspect` with all components, `sidTrace`, `driveTrace`, `storeImport`, `replay`: only `inspect cpu`, `sidTrace`, `driveTrace` tested; `replay` and `storeImport` were not run again for this document.
+- Minor options of `regress check` (`only`, `exclude`, `strict`, `includeCpu`, `maxGroups`): described from the code, not tested one by one.
+- `video` / `grab` on long durations: not measured.
+- Windows and macOS: not tested.

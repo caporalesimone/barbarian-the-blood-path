@@ -1,6 +1,6 @@
-# Registra gli input dello script come nuovo script di testo (sessione.txt in --outdir).
+# Records the script inputs as a new text script (session.txt in --outdir).
 wait "READY." 10s
-rec start sessione
+rec start session
 0 L
 10 O
 20 A

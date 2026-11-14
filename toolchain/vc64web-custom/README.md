@@ -1,257 +1,257 @@
-# c64-tools — VirtualC64 controllabile da riga di comando
+# c64-tools — VirtualC64 controllable from the command line
 
-Copyright © 2026 Simone Caporale. La versione (build e API) è in `BUILD` e `headless/APIVER`; il nome dei file in `out/` la contiene.
+Copyright © 2026 Simone Caporale. The version (build and API) is in `BUILD` and `headless/APIVER`; the file names in `out/` contain it.
 
-## Struttura del repo
+## Repository layout
 ```
-build.py                genera tutto in out/ (o in --out DIR) e, se c'è Docker, l'immagine; ROM da --vice-roms / --open-roms
-BUILD                   numero di build, incrementato da build.py solo con --bump-version
+build.py                generates everything in out/ (or in --out DIR) and, if Docker is present, the image; ROMs from --vice-roms / --open-roms
+BUILD                   build number, incremented by build.py only with --bump-version
 README.md  (CHANGELOG.md in docs/)
 Dockerfile  docker-compose.yml  .dockerignore  .gitignore
-docs/                   c64-cli.md (OGNI comando spiegato), C64-API.md (API), scripting.md (script), C64-TODO.md (limiti e cose da verificare), CHANGELOG.md, INCLUSIONE.md (come sta nel gioco)
-examples/               esempi eseguibili: scripts/ (input), loops/ (cicli JS), shell/ (comandi), tools/ (D64 di prova)
-headless/               SORGENTI del controllo remoto: c64d.js (demone), c64 (client), c64-batch (esecuzioni in parallelo), c64-api.js, headless.template.html, APIVER, package.json
-portable/               SORGENTI della pagina standalone (shell.html, asm/): NON funziona senza build
-third-party/            emulatore e documentazione dei componenti esterni, una cartella per componente con README (cos'è, origine, licenza)
-roms/                   ROM: vice-roms/{C64,DRIVES}/, open-roms/; roms.md = quali file servono, SHA-256, licenze, dove trovarli
-work/                   cartelle di lavoro montate in Docker: games/, roms/ (ROM aggiuntive), scripts/; il contenuto di games/ e roms/ non va nel repo
-out/                    (ignorata da git) risultato della build
+docs/                   c64-cli.md (EVERY command explained), C64-API.md (API), scripting.md (scripts), C64-TODO.md (limits and things to verify), CHANGELOG.md, INCLUSION.md (how it sits in the game)
+examples/               runnable examples: scripts/ (input), loops/ (JS loops), shell/ (commands), tools/ (test D64)
+headless/               SOURCES of the remote control: c64d.js (daemon), c64 (client), c64-batch (parallel runs), c64-api.js, headless.template.html, APIVER, package.json
+portable/               SOURCES of the standalone page (shell.html, asm/): does NOT work without a build
+third-party/            emulator and documentation of the external components, one folder per component with a README (what it is, origin, license)
+roms/                   ROMs: vice-roms/{C64,DRIVES}/, open-roms/; roms.md = which files are needed, SHA-256, licenses, where to find them
+work/                   work folders mounted in Docker: games/, roms/ (extra ROMs), scripts/; the contents of games/ and roms/ do not go in the repository
+out/                    (ignored by git) build result
 ```
 
 ## Build
 
-### Comando
+### Command
 ```sh
-python3 build.py                 # build con la versione attuale (file BUILD invariato)
-python3 build.py --no-docker     # come sopra, senza il passo Docker
-python3 build.py --bump-version  # prima incrementa BUILD di 1 (solo per una release)
-python3 build.py --save          # con Docker: salva anche out/c64d-vNN.tar.gz
+python3 build.py                 # build with the current version (BUILD file unchanged)
+python3 build.py --no-docker     # as above, without the Docker step
+python3 build.py --bump-version  # first increments BUILD by 1 (for a release only)
+python3 build.py --save          # with Docker: also saves out/c64d-vNN.tar.gz
 ```
-**Non usare `--bump-version` per le build normali**: è riservato alla procedura di rilascio, perché modifica il file `BUILD` (il numero di versione). Per build di sviluppo o di prova usa il comando senza flag.
+**Do not use `--bump-version` for normal builds**: it is reserved for the release procedure, because it changes the `BUILD` file (the version number). For development or test builds use the command without flags.
 
-I flag si combinano (es. `--bump-version --save`, solo in release). Un argomento `--xxx` sconosciuto viene **ignorato senza errore**. Si lancia dalla radice del repo o da qualunque cartella: i percorsi sono relativi alla posizione di `build.py`.
+Flags combine (e.g. `--bump-version --save`, release only). An unknown `--xxx` argument is **ignored without an error**. It can be run from the repository root or from any folder: paths are relative to the location of `build.py`.
 
-| Flag | Effetto |
+| Flag | Effect |
 |---|---|
-| *(nessuno)* | usa il numero in `BUILD` così com'è; `BUILD` non viene modificato |
-| `--bump-version` | `BUILD` += 1 e il file `BUILD` viene riscritto (poi va committato) |
-| `--no-docker` | salta il passo Docker |
-| `--vice-roms DIR` | ROM Commodore (sottocartelle `C64/`, `DRIVES/`); default `roms/vice-roms` (env `C64_VICE_ROMS`) |
-| `--open-roms DIR` | ROM libere; default `roms/open-roms` (env `C64_OPEN_ROMS`) |
-| `--out DIR` | cartella delle pagine generate; default `out` (env `C64_OUT`); l'immagine Docker le riceve con `--build-context pages=DIR` |
-| `--tag NOME` | nome dell'immagine Docker; default `c64d` (env `C64_IMAGE`) |
-| `--no-ffmpeg-check` | non controlla ffmpeg (quando le pagine si generano dove il demone non girerà) |
-| `--save` | dopo `docker build`, esegue `docker save c64d:latest | gzip` → `out/c64d-vNN.tar.gz`; ha effetto solo se Docker è presente e non c'è `--no-docker` |
+| *(none)* | uses the number in `BUILD` as it is; `BUILD` is not changed |
+| `--bump-version` | `BUILD` += 1 and the `BUILD` file is rewritten (then it must be committed) |
+| `--no-docker` | skips the Docker step |
+| `--vice-roms DIR` | Commodore ROMs (subfolders `C64/`, `DRIVES/`); default `roms/vice-roms` (env `C64_VICE_ROMS`) |
+| `--open-roms DIR` | free ROMs; default `roms/open-roms` (env `C64_OPEN_ROMS`) |
+| `--out DIR` | folder of the generated pages; default `out` (env `C64_OUT`); the Docker image receives them with `--build-context pages=DIR` |
+| `--tag NAME` | Docker image name; default `c64d` (env `C64_IMAGE`) |
+| `--no-ffmpeg-check` | does not check ffmpeg (when the pages are generated where the daemon will not run) |
+| `--save` | after `docker build`, runs `docker save c64d:latest | gzip` → `out/c64d-vNN.tar.gz`; effective only if Docker is present and there is no `--no-docker` |
 
-### Cosa fa, in ordine
-1. Legge `BUILD` (e lo incrementa solo con `--bump-version`) e `headless/APIVER`; la versione è `vNN` (NN a due cifre).
-2. **Cancella `out/` per intero e la ricrea**, a ogni esecuzione e con qualunque flag. Non tenere file tuoi in `out/`. La cancellazione avviene prima di qualunque controllo: se la build fallisce, `out/` resta vuota o incompleta.
-3. Assembla il blob 6502 (circa 2,8 KB) che viene incorporato nelle pagine (`portable/asm/mkblob.py`, scrive un file temporaneo in `out/` che poi elimina).
-4. Legge emulatore (`third-party/vc64web`) e ROM (`--vice-roms`, default `roms/vice-roms`; `--open-roms`, default `roms/open-roms`; elenco in `roms/roms.md`) e li incorpora in base64.
-5. Scrive `out/VirtualC64-vNN.html` (portable: tutte le varianti ROM compatibili, selezionabili da menu; default Kernal 901227-03, chargen 901225-01, drive 1541-II).
-6. Scrive `out/c64-headless.html` (solo emulatore, ROM standard e i due drive ROM 1541/1541-II; altre ROM a richiesta con `c64 rom`).
-7. Se `docker` è nel PATH e non c'è `--no-docker`: `docker build` con tag `c64d:vNN` e `c64d:latest` (contesto = repo, filtrato dall'allowlist di `.dockerignore`). Se Docker manca stampa un messaggio e prosegue.
-8. Controlla `ffmpeg` (nel PATH e con encoder `libx264`): se manca stampa un **WARNING**, la build **non** fallisce (vedi "ffmpeg" più sotto).
+### What it does, in order
+1. Reads `BUILD` (and increments it only with `--bump-version`) and `headless/APIVER`; the version is `vNN` (NN with two digits).
+2. **Deletes `out/` entirely and recreates it**, at every run and with any flag. Do not keep your own files in `out/`. The deletion happens before any check: if the build fails, `out/` stays empty or incomplete.
+3. Assembles the 6502 blob (about 2.8 KB) embedded in the pages (`portable/asm/mkblob.py`, writes a temporary file in `out/` and then deletes it).
+4. Reads the emulator (`third-party/vc64web`) and the ROMs (`--vice-roms`, default `roms/vice-roms`; `--open-roms`, default `roms/open-roms`; list in `roms/roms.md`) and embeds them in base64.
+5. Writes `out/VirtualC64-vNN.html` (portable: all the compatible ROM variants, selectable from a menu; default Kernal 901227-03, chargen 901225-01, drive 1541-II).
+6. Writes `out/c64-headless.html` (emulator only, standard ROMs and the two drive ROMs 1541/1541-II; other ROMs on request with `c64 rom`).
+7. If `docker` is in the PATH and there is no `--no-docker`: `docker build` with tags `c64d:vNN` and `c64d:latest` (context = repository, filtered by the `.dockerignore` allowlist). If Docker is missing it prints a message and continues.
+8. Checks `ffmpeg` (in the PATH and with the `libx264` encoder): if missing it prints a **WARNING**, the build does **not** fail (see "ffmpeg" below).
 
-Una build riuscita termina con `build vNN api NN -> out/` e codice di uscita 0. Il warning ffmpeg non cambia il codice di uscita; un errore negli altri passi (file mancante, `docker build` fallito) interrompe la build con codice diverso da 0.
+A successful build ends with `build vNN api NN -> out/` and exit code 0. The ffmpeg warning does not change the exit code; an error in the other steps (missing file, failed `docker build`) stops the build with a non-zero code.
 
-Schema:
+Diagram:
 
 ```mermaid
 flowchart TD
-  A["python3 build.py [flag]"] --> B["Legge BUILD (+1 solo con --bump-version) e headless/APIVER"]
-  B --> C["Cancella e ricrea out/"]
-  C --> D["Blob 6502 (portable/asm/mkblob.py)"]
-  D --> E["Incorpora emulatore e ROM (base64)"]
+  A["python3 build.py [flags]"] --> B["Reads BUILD (+1 only with --bump-version) and headless/APIVER"]
+  B --> C["Deletes and recreates out/"]
+  C --> D["6502 blob (portable/asm/mkblob.py)"]
+  D --> E["Embeds emulator and ROMs (base64)"]
   E --> F1["out/VirtualC64-vNN.html (portable)"]
-  E --> F2["out/c64-headless.html (demone)"]
-  F1 --> G{"docker nel PATH<br/>e non --no-docker?"}
+  E --> F2["out/c64-headless.html (daemon)"]
+  F1 --> G{"docker in the PATH<br/>and no --no-docker?"}
   F2 --> G
-  G -->|sì| H["docker build c64d:vNN, c64d:latest<br/>(--save → out/c64d-vNN.tar.gz)"]
+  G -->|yes| H["docker build c64d:vNN, c64d:latest<br/>(--save → out/c64d-vNN.tar.gz)"]
   G -->|no| I
   H --> I{"ffmpeg + libx264?"}
-  I -->|no| W["WARNING (non blocca)"]
-  I -->|sì| OK["ffmpeg: ok"]
+  I -->|no| W["WARNING (not blocking)"]
+  I -->|yes| OK["ffmpeg: ok"]
   W --> Z["build vNN api NN -> out/"]
   OK --> Z
 ```
 
-### Risultato (`out/`, ignorata da git)
-- `VirtualC64-vNN.html` — pagina **portable**: un solo file con emulatore e ROM incorporati (nessun controllo remoto). Funziona anche da telefono, senza rete.
-- `c64-headless.html` — pagina minima aperta dal demone `c64d.js`.
-- (con `--save` e Docker) `c64d-vNN.tar.gz` — immagine Docker esportata.
-- Immagine Docker `c64d:vNN` / `c64d:latest`, nel Docker locale (non in `out/`).
+### Result (`out/`, ignored by git)
+- `VirtualC64-vNN.html` — **portable** page: a single file with emulator and ROMs embedded (no remote control). It also works from a phone, offline.
+- `c64-headless.html` — minimal page opened by the `c64d.js` daemon.
+- (with `--save` and Docker) `c64d-vNN.tar.gz` — exported Docker image.
+- Docker image `c64d:vNN` / `c64d:latest`, in the local Docker (not in `out/`).
 
-`portable/` e `headless/headless.template.html` sono **sorgenti**: senza `build.py` non c'è nulla da aprire. Il codice Node dell'headless (`c64d.js`, `c64`, `c64-api.js`) non ha passo di build; serve solo `out/c64-headless.html`.
+`portable/` and `headless/headless.template.html` are **sources**: without `build.py` there is nothing to open. The headless Node code (`c64d.js`, `c64`, `c64-api.js`) has no build step; only `out/c64-headless.html` is needed.
 
-### Requisiti per buildare
-Python 3 (solo libreria standard). Per il passo Docker anche Docker. ffmpeg non serve a buildare: manca → solo un warning. Dettagli e link nella tabella qui sotto.
+### Build requirements
+Python 3 (standard library only). For the Docker step also Docker. ffmpeg is not needed to build: missing → only a warning. Details and links in the table below.
 
-### Versioni
-- **Build** (`BUILD`): numero che compare nel nome dei file e dello zip. Cambia solo con `--bump-version`.
-- **API** (`headless/APIVER`): intero della versione di `c64-api.js` (`c64.apiVersion`). **Si aggiorna a mano** quando l'API cambia; il demone lo inietta nella pagina al posto di `/*__API__*/`. `build.py` lo legge e lo stampa, non lo modifica.
-- Ogni build ha una voce in `docs/CHANGELOG.md` (le più recenti in alto).
+### Versions
+- **Build** (`BUILD`): number in the names of the files and of the zip. Changes only with `--bump-version`.
+- **API** (`headless/APIVER`): integer version of `c64-api.js` (`c64.apiVersion`). **Updated by hand** when the API changes; the daemon injects it into the page in place of `/*__API__*/`. `build.py` reads and prints it, it does not change it.
+- Every build has an entry in `docs/CHANGELOG.md` (most recent at the top).
 
-### Procedura di release
+### Release procedure
 ```mermaid
 flowchart LR
   R1["1. APIVER + CHANGELOG<br/>(BUILD+1)"] --> R2["2. python3 build.py --bump-version"]
-  R2 --> R3["3. Controlla output / WARNING"]
-  R3 --> R4["4. Prova headless:<br/>c64d, start, info, quit"]
-  R4 --> R5["5. Commit (con BUILD) + git archive → zip senza out/"]
-  R5 --> R6["6. Consegna zip + VirtualC64-vNN.html"]
+  R2 --> R3["3. Check output / WARNING"]
+  R3 --> R4["4. Try headless:<br/>c64d, start, info, quit"]
+  R4 --> R5["5. Commit (with BUILD) + git archive → zip without out/"]
+  R5 --> R6["6. Deliver zip + VirtualC64-vNN.html"]
 ```
 
-1. Aggiorna `headless/APIVER` se l'API è cambiata e scrivi la voce in `docs/CHANGELOG.md` (numero build nuovo = `BUILD`+1).
-2. `python3 build.py --bump-version` (aggiungi `--save` per esportare l'immagine).
-3. Controlla l'output: nessun WARNING inatteso, `build vNN api NN -> out/`.
-4. Prova almeno l'headless: `cd headless && node c64d.js &`, `node c64 start`, `node c64 info`, `node c64 quit`.
-5. Commit (compreso `BUILD`), poi zip del repo **senza `out/`**: `git archive --format=zip --prefix=c64-tools/ -o c64-tools-vNN-apiNN.zip HEAD`.
-6. Consegna lo zip e `out/VirtualC64-vNN.html`.
+1. Update `headless/APIVER` if the API changed and write the entry in `docs/CHANGELOG.md` (new build number = `BUILD`+1).
+2. `python3 build.py --bump-version` (add `--save` to export the image).
+3. Check the output: no unexpected WARNING, `build vNN api NN -> out/`.
+4. Try at least the headless: `cd headless && node c64d.js &`, `node c64 start`, `node c64 info`, `node c64 quit`.
+5. Commit (including `BUILD`), then zip the repository **without `out/`**: `git archive --format=zip --prefix=c64-tools/ -o c64-tools-vNN-apiNN.zip HEAD`.
+6. Deliver the zip and `out/VirtualC64-vNN.html`.
 
-### Cosa non è verificato
-- Il passo Docker (`docker build`, `--save`, `docker compose`) **non è mai stato eseguito**: nell'ambiente di sviluppo non c'era un daemon Docker. Le regole dell'allowlist in `.dockerignore` sono state simulate a mano, non provate con Docker.
-- Versione minima di Node non verificata (provato con la 22).
-- Build non provata su Windows/macOS (percorsi gestiti con `pathlib`, ma non testato).
+### What is not verified
+- The `docker compose` step and `--save` were never run by the package author. (In the game project the image is built with `docker build` and used by the `EMU-*` tests: see `docs/INCLUSION.md`.)
+- Minimum Node version not verified (tested with 22).
+- Build not tested on Windows/macOS (paths handled with `pathlib`, but not tested).
 
-## Cosa serve installare (strumenti esterni, non inclusi)
-| Strumento | A cosa serve | Dove deve trovarsi |
+## What to install (external tools, not included)
+| Tool | What it is for | Where it must be |
 |---|---|---|
-| Python 3 — https://www.python.org | `build.py` (solo libreria standard) | `python3` nel PATH |
-| Node.js — https://nodejs.org (provato con la 22; versione minima non verificata) | demone `c64d.js` e client `c64` (il client usa solo moduli standard di Node) | `node` nel PATH |
-| Playwright — https://playwright.dev (npm) | pilota Chromium per il demone: **unico modulo Node esterno** | `cd headless && npm install` (crea `headless/node_modules/`), oppure globale: `npm i -g playwright` con `NODE_PATH=$(npm root -g)` |
-| Chromium (scaricato da Playwright) | esegue la pagina | `npx playwright install chromium` (cache di Playwright, di solito `~/.cache/ms-playwright`) |
-| ffmpeg — https://ffmpeg.org/download.html | video deterministici (`c64 video`, `video start` negli script) | eseguibile `ffmpeg` nel PATH |
-| Docker — https://docs.docker.com/get-docker/ | solo per costruire/usare l'immagine | `docker` nel PATH |
-| git — https://git-scm.com | repo | — |
-Nel container (Dockerfile) sono già installati ffmpeg, Playwright e Chromium.
+| Python 3 — https://www.python.org | `build.py` (standard library only) | `python3` in the PATH |
+| Node.js — https://nodejs.org (tested with 22; minimum version not verified) | `c64d.js` daemon and `c64` client (the client uses only standard Node modules) | `node` in the PATH |
+| Playwright — https://playwright.dev (npm) | drives Chromium for the daemon: **the only external Node module** | `cd headless && npm install` (creates `headless/node_modules/`), or global: `npm i -g playwright` with `NODE_PATH=$(npm root -g)` |
+| Chromium (downloaded by Playwright) | runs the page | `npx playwright install chromium` (Playwright cache, usually `~/.cache/ms-playwright`) |
+| ffmpeg — https://ffmpeg.org/download.html | deterministic videos (`c64 video`, `video start` in scripts) | `ffmpeg` executable in the PATH |
+| Docker — https://docs.docker.com/get-docker/ | only to build/use the image | `docker` in the PATH |
+| git — https://git-scm.com | repository | — |
+In the container (Dockerfile) ffmpeg, Playwright and Chromium are already installed.
 
 ### ffmpeg
-`build.py` a fine build controlla che `ffmpeg` sia nel PATH e abbia l'encoder `libx264`; se manca stampa un **WARNING** e la build **non** fallisce. Senza ffmpeg tutto funziona tranne i video deterministici (`c64 video`, `video start` negli script); il video+audio dal browser (`grabBrowserVideoAndAudio`) non lo usa.
+At the end of the build `build.py` checks that `ffmpeg` is in the PATH and has the `libx264` encoder; if missing it prints a **WARNING** and the build does **not** fail. Without ffmpeg everything works except the deterministic videos (`c64 video`, `video start` in scripts); the browser video+audio (`grabBrowserVideoAndAudio`) does not use it.
 - Linux (Debian/Ubuntu): `sudo apt install ffmpeg`
 - macOS: `brew install ffmpeg`
-- Windows: scarica una build da https://www.gyan.dev/ffmpeg/builds/ (o https://github.com/BtbN/FFmpeg-Builds/releases), estrai e aggiungi la cartella `bin` al PATH; in alternativa `winget install ffmpeg` (id pacchetto non verificato).
-- Sito ufficiale / altre piattaforme: https://ffmpeg.org/download.html
-- Verifica: `ffmpeg -hide_banner -encoders | grep libx264` (Windows: `| findstr libx264`) deve stampare una riga.
+- Windows: download a build from https://www.gyan.dev/ffmpeg/builds/ (or https://github.com/BtbN/FFmpeg-Builds/releases), extract it and add the `bin` folder to the PATH; alternatively `winget install ffmpeg` (package id not verified).
+- Official site / other platforms: https://ffmpeg.org/download.html
+- Check: `ffmpeg -hide_banner -encoders | grep libx264` (Windows: `| findstr libx264`) must print one line.
 
-## Registrazioni
-Ci sono cinque modi per registrare, con garanzie diverse. Scegline in base a cosa devi ottenere.
+## Recordings
+There are five ways to record, with different guarantees. Choose based on what you need.
 
-| Cosa | Come | Emulatore | Tempo | Audio | Output | Ripetibile |
+| What | How | Emulator | Time | Audio | Output | Repeatable |
 |---|---|---|---|---|---|---|
-| Video deterministico da script | `c64 video`, `video start` negli script | fermo (`pause`) | emulato, esatto | no | `.mp4` (ffmpeg) | sì |
-| Video + audio dal browser | `grabBrowserVideoAndAudio` | in marcia (`resume`) | orologio del computer | sì | `.webm` (VP9 + Opus) | no |
-| Animazione GIF deterministica | `recordGif` | fermo | emulato | no | `.gif` | sì |
-| Video del canvas, senza audio | `recordVideo` | fermo o in marcia | orologio | no | `.webm` | no |
-| Input registrati come script | `rec start` / `rec stop`, `recordStart`/`recordStop` | qualsiasi | relativo all'inizio | — | script di testo | sì (rieseguibile) |
+| Deterministic video from a script | `c64 video`, `video start` in scripts | stopped (`pause`) | emulated, exact | no | `.mp4` (ffmpeg) | yes |
+| Video + audio from the browser | `grabBrowserVideoAndAudio` | running (`resume`) | computer clock | yes | `.webm` (VP9 + Opus) | no |
+| Deterministic GIF animation | `recordGif` | stopped | emulated | no | `.gif` | yes |
+| Canvas video, no audio | `recordVideo` | stopped or running | clock | no | `.webm` | no |
+| Inputs recorded as a script | `rec start` / `rec stop`, `recordStart`/`recordStop` | any | relative to the start | — | text script | yes (replayable) |
 
-Scelta del metodo:
+Choosing the method:
 
 ```mermaid
 flowchart TD
-  S{"Cosa ti serve?"}
-  S -->|"Risultato identico a ogni run<br/>(regressione, documentazione)"| DET{"Serve l'audio?"}
-  S -->|"Vedere/ascoltare com'è davvero<br/>in tempo reale"| GR["grabBrowserVideoAndAudio<br/>core in marcia, .webm VP9+Opus"]
-  S -->|"Salvare gli input per rifarli"| RC["rec start / rec stop<br/>(recordStart/recordStop) → script"]
-  DET -->|no| FMT{"Formato"}
-  DET -->|sì| GR
-  FMT -->|".mp4"| VI["c64 video / video start<br/>(core fermo, ffmpeg)"]
+  S{"What do you need?"}
+  S -->|"Identical result at every run<br/>(regression, documentation)"| DET{"Is audio needed?"}
+  S -->|"See/hear how it really is<br/>in real time"| GR["grabBrowserVideoAndAudio<br/>core running, .webm VP9+Opus"]
+  S -->|"Save the inputs to replay them"| RC["rec start / rec stop<br/>(recordStart/recordStop) → script"]
+  DET -->|no| FMT{"Format"}
+  DET -->|yes| GR
+  FMT -->|".mp4"| VI["c64 video / video start<br/>(core stopped, ffmpeg)"]
   FMT -->|".gif"| GI["recordGif"]
-  S -->|"Canvas senza audio, rapido"| RV["recordVideo (.webm, orologio)"]
+  S -->|"Canvas without audio, quick"| RV["recordVideo (.webm, clock)"]
 ```
 
-### Video deterministico (`c64 video`, `video start`)
-Lo screenshot viene preso **dentro la pagina** ogni `every` fotogrammi emulati, e ogni frame è inviato a un `ffmpeg` del demone via pipe. Il video è a `fps = 50 / every` (default `every=2`, quindi 25 fps). Richiede emulatore fermo e `ffmpeg` nel PATH. È muto.
+### Deterministic video (`c64 video`, `video start`)
+The screenshot is taken **inside the page** every `every` emulated frames, and each frame is sent through a pipe to an `ffmpeg` on the daemon side. The video runs at `fps = 50 / every` (default `every=2`, so 25 fps). It requires the emulator stopped and `ffmpeg` in the PATH. It is silent.
 ```sh
 node c64 pause
-node c64 --out intro.mp4 video ../work/scripts/esempio.txt '{"every":2,"scale":3}'   # da file di script
-node c64 --out idle.mp4 video 250 '{"every":4}'                                 # N fotogrammi
+node c64 --out intro.mp4 video ../work/scripts/example.txt '{"every":2,"scale":3}'   # from a script file
+node c64 --out idle.mp4 video 250 '{"every":4}'                                   # N frames
 ```
-Dentro uno script (`docs/scripting.md`, §5):
+Inside a script (`docs/scripting.md`, §5):
 ```
 video start intro every=2 scale=3
 ...
 video stop
 ```
-Chiusura: di default il video si chiude a fine script anche in caso di errore (`video start clip` = `autostop`). Con `keep` resta aperto oltre lo script e si chiude con `c64 --out clip.mp4 videoStop`.
+Closing: by default the video is closed at the end of the script, also on error (`video start clip` = `autostop`). With `keep` it stays open after the script and is closed with `c64 --out clip.mp4 videoStop`.
 
-### Video + audio dal browser (`grabBrowserVideoAndAudio`)
-Un `MediaRecorder` del browser registra il canvas e l'audio della pagina. Non sincronizzato con l'emulatore: non lo ferma e non ne fa avanzare il tempo. Va usato con l'emulatore in marcia.
+### Video + audio from the browser (`grabBrowserVideoAndAudio`)
+A browser `MediaRecorder` records the canvas and the page audio. Not synchronized with the emulator: it does not stop it and does not advance its time. Use it with the emulator running.
 ```sh
 node c64 resume
 node c64 grabBrowserVideoAndAudio '{"action":"start","keyboard":"below","joy2":"below"}'
-node c64 --outdir ../output script ../work/scripts/esempio.txt
+node c64 --outdir ../output script ../work/scripts/example.txt
 node c64 --out clip.webm grabBrowserVideoAndAudio '{"action":"stop"}'
-ffmpeg -i clip.webm clip.mp4                       # conversione opzionale
+ffmpeg -i clip.webm clip.mp4                       # optional conversion
 ```
-Opzioni: `keyboard`, `joy1`, `joy2` = `none` (default) | `below` | `overlay`; `scale` 1-4 (default 2); `fps` (50); `bitrate` (4000000); `audio` (true). Con `{"seconds":N}` registra N secondi e si ferma da sola (blocca il demone per N secondi).
-`stop` restituisce `audioPeak` (0-1, ~0 = silenzio) e `warnings`: controllali.
-Il pannello comandi mostra tasti premuti e joystick dal vivo. **Non è disponibile dentro gli script**: lo script non ha un comando `grab`; la combinazione va fatta a tre passi dalla CLI (vedi sopra).
+Options: `keyboard`, `joy1`, `joy2` = `none` (default) | `below` | `overlay`; `scale` 1-4 (default 2); `fps` (50); `bitrate` (4000000); `audio` (true). With `{"seconds":N}` it records N seconds and stops by itself (blocks the daemon for N seconds).
+`stop` returns `audioPeak` (0-1, ~0 = silence) and `warnings`: check them.
+The command panel shows pressed keys and joysticks live. **Not available inside scripts**: scripts have no `grab` command; the combination is done in three steps from the CLI (see above).
 
-### Animazione deterministica (`recordGif`)
-Un fotogramma ogni `every` fotogrammi emulati, deterministico, con emulatore fermo.
+### Deterministic animation (`recordGif`)
+One frame every `every` emulated frames, deterministic, with the emulator stopped.
 ```sh
 node c64 pause
 node c64 --out clip.gif recordGif '{"frames":60,"every":2}'
 ```
 
-### Canvas senza audio (`recordVideo`)
-Video del canvas in tempo reale con `MediaRecorder`, senza audio. Se l'emulatore è fermo avanza di `frames` fotogrammi; altrimenti registra per `seconds`. Opzioni: `frames` o `seconds`, `fps`, `scale` (1-4), `bitrate`, `mime`. Per il video con audio usa `grabBrowserVideoAndAudio`.
+### Canvas without audio (`recordVideo`)
+Real-time canvas video with `MediaRecorder`, without audio. If the emulator is stopped it advances `frames` frames; otherwise it records for `seconds`. Options: `frames` or `seconds`, `fps`, `scale` (1-4), `bitrate`, `mime`. For video with audio use `grabBrowserVideoAndAudio`.
 
-### Input registrati come script (`rec`, `recordStart`)
-Registra gli eventi di input (tasti, joystick, `text`) e li esporta come script di testo rieseguibile. Non registra video.
+### Inputs recorded as a script (`rec`, `recordStart`)
+Records input events (keys, joystick, `text`) and exports them as a replayable text script. It does not record video.
 ```
-rec start sessione           # sessione.txt
+rec start session            # session.txt
 ...
 rec stop
 ```
-Dalla CLI: `node c64 recordStart`, poi `node c64 recordStop '{"format":"text"}'`. Gli eventi non esprimibili come riga di script (per esempio `poke`) finiscono come commento `# non esportato`. Il tempo esportato è relativo all'inizio della registrazione.
+From the CLI: `node c64 recordStart`, then `node c64 recordStop '{"format":"text"}'`. Events that cannot be expressed as a script line (for example `poke`) end up as a `# not exported` comment. The exported time is relative to the start of the recording.
 
-### Limiti e cose non verificate
-- Il video deterministico gira a tempo reale (1 s di video ≈ 1 s di orologio, anche con un bot dentro `runLoop`) e richiede `ffmpeg` nel PATH (vedi "ffmpeg" più sopra). Gli altri modi no.
-- Nessun modo registra audio **e** video in modo deterministico: l'audio del core non è deterministico (`docs/C64-API.md`).
-- Nel grab il `start` ritorna quando il `MediaRecorder` è stato avviato, non quando è arrivato il primo frame. Un ritardo tra avvio del recorder e `resume` non è escluso con certezza: per ora non c'è un'attesa sull'evento `onstart`.
-- Sincronizzazione audio/video del grab alla fine della registrazione: non verificata (due orologi diversi).
-- Durate lunghe (memoria dei blocchi del `MediaRecorder`) e video `keep` di molti minuti: non provate.
-- Docker: non provato.
+### Limits and things not verified
+- The deterministic video runs in real time (1 s of video ≈ 1 s of clock, also with a bot inside `runLoop`) and requires `ffmpeg` in the PATH (see "ffmpeg" above). The other ways do not.
+- No way records audio **and** video deterministically: the core audio is not deterministic (`docs/C64-API.md`).
+- In the grab, `start` returns when the `MediaRecorder` has been started, not when the first frame arrived. A delay between recorder start and `resume` is not excluded with certainty: for now there is no wait on the `onstart` event.
+- Audio/video synchronization of the grab at the end of the recording: not verified (two different clocks).
+- Long durations (memory of the `MediaRecorder` blocks) and `keep` videos of many minutes: not tested.
+- Docker Compose: not tested.
 
-## Headless (demone + client)
-**Non c'è un passo di build per il codice** (`c64d.js`, `c64`, `c64-api.js` sono sorgenti eseguibili così come sono); serve solo `out/c64-headless.html`, generato da `build.py`. L'unico modulo Node esterno è `playwright`.
+## Headless (daemon + client)
+**There is no build step for the code** (`c64d.js`, `c64`, `c64-api.js` are executable sources as they are); only `out/c64-headless.html`, generated by `build.py`, is needed. The only external Node module is `playwright`.
 ```sh
 python3 build.py --no-docker
 cd headless && npm install && npx playwright install chromium
-node c64d.js &                                  # porta 7064 (--port, --page, --api)
-node c64d.js --headed &                         # come sopra ma con la finestra dell'emulatore visibile (serve un display; vedi docs/c64-cli.md §2)
-node c64 start ; node c64 sendText 'print"ciao"\n' ; node c64 screenText ; node c64 quit
-node c64 docs regress                           # documentazione (docs/C64-API.md)
+node c64d.js &                                  # port 7064 (--port, --page, --api)
+node c64d.js --headed &                         # as above but with the emulator window visible (a display is needed; see docs/c64-cli.md §2)
+node c64 start ; node c64 sendText 'print"hello"\n' ; node c64 screenText ; node c64 quit
+node c64 docs regress                           # documentation (docs/C64-API.md)
 ```
-- Script di input: `node c64 --outdir ../output script ../work/scripts/esempio.txt` — vedi `docs/scripting.md`.
-- Video deterministico (muto): `node c64 pause ; node c64 --out clip.mp4 video prova.txt`.
-- Video + audio del browser in tempo reale: `node c64 resume ; node c64 grabBrowserVideoAndAudio '{"action":"start","keyboard":"below","joy2":"below"}'` … `node c64 --out clip.webm grabBrowserVideoAndAudio '{"action":"stop"}'`.
-- Regressione: `node c64 regress save NOME`, `regress check NOME` (exit 0/1).
-- **Per cominciare**: `docs/getting-started.md`. **Riferimento di ogni comando**: `docs/c64-cli.md`. **Esempi eseguibili**: `examples/` (indice in `examples/README.md`).
-- Job lunghi: `node c64 status` (job in corso, avanzamento; non attende la coda) e `node c64 abort` (interrompe il job in corso, l'emulatore resta fermo). Se un client viene chiuso o ucciso il demone interrompe da solo il suo job: non serve `pkill -9`.
-- Testo a schermo in screen code (anche con charset propri): `node c64 findText "TESTO"`, `runUntil '{"text":"TESTO"}'`, nello script `wait text "TESTO" 5s`.
-- Giochi: `node c64 games`, `node c64 game NOME` (cartella `games/`, o `$C64_GAMES`).
+- Input scripts: `node c64 --outdir ../output script ../work/scripts/example.txt` — see `docs/scripting.md`.
+- Deterministic (silent) video: `node c64 pause ; node c64 --out clip.mp4 video test.txt`.
+- Real-time browser video + audio: `node c64 resume ; node c64 grabBrowserVideoAndAudio '{"action":"start","keyboard":"below","joy2":"below"}'` … `node c64 --out clip.webm grabBrowserVideoAndAudio '{"action":"stop"}'`.
+- Regression: `node c64 regress save NAME`, `regress check NAME` (exit 0/1).
+- **To start**: `docs/getting-started.md`. **Reference of every command**: `docs/c64-cli.md`. **Runnable examples**: `examples/` (index in `examples/README.md`).
+- Long jobs: `node c64 status` (running job, progress; does not wait in the queue) and `node c64 abort` (interrupts the running job, the emulator stays stopped). If a client is closed or killed the daemon interrupts its job by itself: no `pkill -9` needed.
+- Screen text in screen code (also with custom charsets): `node c64 findText "TEXT"`, `runUntil '{"text":"TEXT"}'`, in scripts `wait text "TEXT" 5s`.
+- Games: `node c64 games`, `node c64 game NAME` (folder `work/games/`, or `$C64_GAMES`).
 
-## ROM
-In `roms/vice-roms/` ci sono solo ROM compatibili con il core (le altre sono state tolte, vedi README della cartella). **Predefinite**: Kernal 901227-03, Basic 901226-01, Chargen 901225-01, drive 1541-II. La pagina portable le incorpora tutte (7 Kernal, 2 chargen, 1541 e 1541-II) e le fa scegliere dal menu; il headless incorpora solo le predefinite (più la 1541) e le altre si caricano a richiesta:
+## ROMs
+`roms/vice-roms/` holds only ROMs compatible with the core (the others were removed, see the folder README). **Defaults**: Kernal 901227-03, Basic 901226-01, Chargen 901225-01, drive 1541-II. The portable page embeds them all (7 Kernals, 2 chargens, 1541 and 1541-II) and lets you choose from the menu; the headless page embeds only the defaults (plus the 1541) and the others are loaded on request:
 ```sh
-node c64 roms 251104                         # elenco (third-party/, $C64_ROMS = cartelle separate da ':')
+node c64 roms 251104                         # list (roms/, $C64_ROMS = folders separated by ':')
 node c64 stop ; node c64 rom kernal 251104-04 ; node c64 start
-node c64 clearRoms                           # torna alle predefinite
+node c64 clearRoms                           # back to the defaults
 ```
-ROM di terzi che possiedi (es. JiffyDOS, proprietario, non incluso): `c64.loadRom(kind, data)` — non verificato che il core le accetti.
+Third-party ROMs you own (e.g. JiffyDOS, proprietary, not included): `c64.loadRom(kind, data)` — not verified that the core accepts them.
 
 ## Docker
-`python3 build.py` genera `out/` e costruisce l'immagine, che contiene la pagina headless **già buildata** (`out/c64-headless.html`), `headless/` (demone, client, API), `docs/C64-API.md` e `docs/scripting.md`, le ROM (`third-party/vice-roms`, `third-party/open-roms`) più ffmpeg, Playwright e Chromium. Non contiene `portable/`, `build.py`, changelog, `.git`, il portable buildato né altro non necessario all'esecuzione (allowlist in `.dockerignore`).
+`python3 build.py` generates `out/` and builds the image, which contains the **already built** headless page (`out/c64-headless.html`), `headless/` (daemon, client, API), `docs/C64-API.md` and `docs/scripting.md`, the ROMs (`roms/vice-roms`, `roms/open-roms`) plus ffmpeg, Playwright and Chromium. It does not contain `portable/`, `build.py`, the changelog, `.git`, the built portable page nor anything else not needed at run time (allowlist in `.dockerignore`).
 ```sh
-docker compose up -d --build                  # (build.py deve aver già generato out/)
+docker compose up -d --build                  # (build.py must already have generated out/)
 docker compose exec c64 node headless/c64 start
-docker compose exec c64 node headless/c64 game gioco.d64
-docker compose exec c64 node headless/c64 --outdir /output script /scripts/esempio.txt
+docker compose exec c64 node headless/c64 game game.d64
+docker compose exec c64 node headless/c64 --outdir /output script /scripts/example.txt
 ```
-Volumi: `./work/games` → `/games` (file di gioco: .d64 .g64 .prg .t64 .crt ...), `./work/roms` → `/roms` (ROM aggiuntive, oltre a quelle del repo), `./scripts` → `/scripts` (sola lettura), `./output` → `/output` (file prodotti). Porta 7064 pubblicata solo su 127.0.0.1: il demone non ha autenticazione e `c64.eval` esegue JavaScript. **Il Dockerfile non è mai stato costruito né provato** (nessun demone Docker nell'ambiente di sviluppo).
+Volumes: `./work/games` → `/games` (game files: .d64 .g64 .prg .t64 .crt ...), `./work/roms` → `/roms` (extra ROMs, besides those of the repository), `./work/scripts` → `/scripts` (read only), `./output` → `/output` (produced files). Port 7064 published only on 127.0.0.1: the daemon has no authentication and `c64.eval` runs JavaScript. **`docker compose` was never tested** (the image itself is built and used in the game project).
 
-## Prima di pubblicare
-Gli HTML incorporano vc64web e ROM Commodore; le ROM sono anche nel repo. Vedi `third-party/README.md`: diritti di ridistribuzione delle ROM e licenza di vc64web **non verificati**.
+## Before publishing
+The HTML pages embed vc64web and the Commodore ROMs; the ROMs are also in the repository. See `third-party/README.md`: redistribution rights of the ROMs and license of vc64web **not verified**.

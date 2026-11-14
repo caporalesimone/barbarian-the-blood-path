@@ -1,164 +1,168 @@
 # Changelog
 
-Formato: **Add** (nuovo) · **Fix** (corretto) · **Change** (comportamento cambiato).
-"Build" = numero in `VirtualC64-vNN.html` e nel nome dello zip. "API" = versione di `c64-api.js` (`c64.apiVersion`).
-Le voci più recenti sono in alto. Per le build fino alla 10 il legame build↔API non è registrato: sono elencate per API.
+Format: **Add** (new) · **Fix** (corrected) · **Change** (behavior changed).
+"Build" = number in `VirtualC64-vNN.html` and in the zip name. "API" = version of `c64-api.js` (`c64.apiVersion`).
+Newest entries at the top. For builds up to 10 the build↔API link is not recorded: they are listed by API.
 
-## Dopo la build 32 (non ancora numerata, 13/11)
-- Add: pagina portable con **`?disk=URL[&program=NOME]`**: scarica il disco e lo avvia (con "Autoload + RUN" se attivo). `fetch` con
-  `cache:'no-cache'` (riscaricato solo se cambiato sul server). Senza parametro la pagina non fa richieste di rete, come prima. Solo da
-  un server web (da `file://` il browser blocca `fetch`). Provato con il viewer del gioco (server Node del viewer, 14/11; prima websockify).
+## After build 32 (not numbered yet, 13/11 - 14/11)
+- Add: portable page with **`?disk=URL[&program=NAME]`**: downloads the disk and starts it (with "Autoload + RUN" if on). `fetch` with
+  `cache:'no-cache'` (downloaded again only if changed on the server). Without the parameter the page makes no network requests, as
+  before. Only from a web server (from `file://` the browser blocks `fetch`). Tested with the game viewer (viewer Node server, 14/11; websockify before).
+- Change (14/11): the whole package in English (comments, messages, page texts, documentation, examples; example files renamed:
+  `01-hello.txt`, `02-memory.txt`, `07-regression.txt`, `08-text-and-call.txt`, `count-memory.js`, `01-start-and-text.sh` ...
+  `11-determinism.sh`). The client error prefix is now `ERROR CODE: message` (was `ERRORE`). The key test program shows
+  `KEY AND JOYSTICK TEST` and `runKeyTest()` waits for that text. The API is otherwise unchanged (API 25).
 
-## Build 32 (API 25) — dal report Barbarian su v31
-- Verifica sul gioco (report v31): R12–R16 risolti; bot completo del boss con hash identico con 0, 1 reale, forzato a ogni passo, 2 ogni 3, `exact:false`; `c64-batch -j 3` 9/9 identici.
-- Fix R17: `retries` troncato a 200 voci senza avviso → `retriesTotal`, `retriesTruncated`; `c64-batch` usa il totale; `11-determinismo.sh` stampa il totale.
-- Doc: `_forceRetry`/`_forceEvery` come opzioni di prova per verificare un bot; misura del costo del passo esatto (44 ms → 82 ms per passo da 2 fotogrammi, dovuto al core dopo il ripristino; causa interna non verificata).
+## Build 32 (API 25) — from the Barbarian report on v31
+- Check on the game (report v31): R12–R16 solved; full boss bot with identical hash with 0, 1 real, forced at every step, 2 every 3, `exact:false`; `c64-batch -j 3` 9/9 identical.
+- Fix R17: `retries` truncated at 200 entries without warning → `retriesTotal`, `retriesTruncated`; `c64-batch` uses the total; `11-determinism.sh` prints the total.
+- Doc: `_forceRetry`/`_forceEvery` as test options to verify a bot; measure of the exact-step cost (44 ms → 82 ms per 2-frame step, due to the core after the restore; internal cause not verified).
 
-## Build 31 (API 24) — dal report Barbarian su v30
-- **Fix R12 (bloccante)**: il ripristino dei passi esatti perdeva joystick e tasti tenuti. Cause misurate: (1) porte joystick e matrice tastiera non sono nello snapshot del core; (2) il ripristino non è trasparente nemmeno senza input (un passo ripetuto cambiava lo stato dei CIA); (3) gli eventi di tastiera programmati restano nella coda del core attraverso il ripristino e `loadState` (e passavano da un'esecuzione alla successiva: la prima esecuzione di un demone nuovo differiva dalle altre). Correzioni: modello degli input riapplicato a ogni ripristino (rilascia tutto, ripreme, riprogramma i consumati); ogni passo parte da uno stato appena ripristinato; `type()` in `runLoop` con rilascio gestito dal ciclo; `saveState`/`loadState` con gli input.
-- **R13**: `11-determinismo.sh` con bersaglio che legge `$DC00` + buffer KERNAL, `loops/bot-input.js` (sostituisce `bot-chiuso.js`), ripetizioni forzate. Esito: stesso hash con 0, 1 per passo, 2 ogni 3 ripetizioni; 6/6 uguali su 3 istanze.
-- **R14** `.cdef` con simboli e `.enc`; **R15** `assert text`; **R16** `retriesCount` in `c64-batch`.
-- Costo: un ripristino in più per passo (~6 ms) oltre allo snapshot (~5 ms); a una istanza la velocità resta tempo reale (non rimisurata in dettaglio sul gioco).
-- Non verificato: `gfx_consts.inc` vero del gioco (provato un file con la stessa struttura); `sendText` lungo a cavallo di un ripristino (usa finestre di eventi programmati: dovrebbe essere coperto dalla riprogrammazione, non provato); joystick/tastiera con `--headed` e mani dell'utente sulla finestra.
+## Build 31 (API 24) — from the Barbarian report on v30
+- **Fix R12 (blocking)**: the restore of the exact steps lost held joysticks and keys. Measured causes: (1) joystick ports and keyboard matrix are not in the core snapshot; (2) the restore is not transparent even without input (a repeated step changed the CIA state); (3) scheduled keyboard events stay in the core queue across the restore and `loadState` (and passed from one run to the next: the first run of a new daemon differed from the others). Fixes: input model reapplied at every restore (releases everything, presses again, reschedules the consumed ones); every step starts from a freshly restored state; `type()` in `runLoop` with release handled by the loop; `saveState`/`loadState` with the inputs.
+- **R13**: `11-determinism.sh` with a target that reads `$DC00` + KERNAL buffer, `loops/bot-input.js` (replaces `bot-chiuso.js`), forced repeats. Result: same hash with 0, 1 per step, 2 every 3 repeats; 6/6 equal on 3 instances.
+- **R14** `.cdef` with symbols and `.enc`; **R15** `assert text`; **R16** `retriesCount` in `c64-batch`.
+- Cost: one more restore per step (~6 ms) besides the snapshot (~5 ms); with one instance the speed stays real time (not measured again in detail on the game).
+- Not verified: the game's real `gfx_consts.inc` (a file with the same structure was tested); long `sendText` across a restore (it uses windows of scheduled events: it should be covered by the rescheduling, not tested); joystick/keyboard with `--headed` and the user's hands on the window.
 
-## Build 30 (API 23) — dal report Barbarian su v29
-- **Fix determinismo** (R4/R5/R6): `runFrames`/`runLoop` esatti con snapshot+verifica+ripristino; `runLoop` ritorna `framesActual`, `exact`, `retries`. Riprodotto senza gioco (1 passo su 1000 a +1 fotogramma con carico CPU variabile) e corretto: 3/3 hash identici su 1000 passi; prova `examples/shell/11-determinismo.sh` + `examples/loops/bot-chiuso.js`.
-- Add (R1): `loadEncoding` (oggetto o righe `.cdef` 64tass), `encodings`, opzione `enc` in `findText`/`runUntil`/`wait text`.
-- Add (R2): `findText {len}` ricerca lineare in un buffer, ritorna `{offset,addr}`.
-- R3: le etichette in `addr` funzionavano già; documentato.
-- Add (R9): `headless/c64-batch` (più esecuzioni su più demoni, `RUN` nel codice del ciclo, raccolta risultati JSON).
-- Fix: messaggio d'errore per `JOY2-UP&FIRE` negli script; `findText` con `map`: maiuscole/minuscole equivalenti.
-- Non fatti, con misura del motivo: R7 (nessuna chiamata wasm sincrona; `SPEED_BOOST` 500% senza effetto), R8 (inutile: la cadenza è il tempo reale, non il costo di disegno), R10 profilatore (nessun aggancio per istruzione nel core), `whenRegs` veloce (la RetroShell non legge i registri CPU).
-- Non verificato: `loadEncoding` con il `.cdef` vero del gioco; sintassi `.cdef` di 64tass ricostruita (intervallo `"AZ"` e `"A","Z"`), non dalla sua documentazione; restauro dello snapshot con caricamenti da disco in corso (solo testo digitato provato).
+## Build 30 (API 23) — from the Barbarian report on v29
+- **Determinism fix** (R4/R5/R6): exact `runFrames`/`runLoop` with snapshot+check+restore; `runLoop` returns `framesActual`, `exact`, `retries`. Reproduced without the game (1 step in 1000 at +1 frame with variable CPU load) and fixed: 3/3 identical hashes over 1000 steps; test `examples/shell/11-determinism.sh` + `examples/loops/bot-chiuso.js`.
+- Add (R1): `loadEncoding` (object or 64tass `.cdef` lines), `encodings`, `enc` option in `findText`/`runUntil`/`wait text`.
+- Add (R2): `findText {len}` linear search in a buffer, returns `{offset,addr}`.
+- R3: labels in `addr` already worked; documented.
+- Add (R9): `headless/c64-batch` (several runs on several daemons, `RUN` in the loop code, JSON result collection).
+- Fix: error message for `JOY2-UP&FIRE` in scripts; `findText` with `map`: upper/lower case equivalent.
+- Not done, with the measured reason: R7 (no synchronous wasm call; `SPEED_BOOST` 500% with no effect), R8 (useless: the pace is real time, not the drawing cost), R10 profiler (no per-instruction hook in the core), fast `whenRegs` (the RetroShell does not read the CPU registers).
+- Not verified: `loadEncoding` with the game's real `.cdef`; 64tass `.cdef` syntax rebuilt (range `"AZ"` and `"A","Z"`), not from its documentation; snapshot restore with disk loads running (only typed text tested).
 
 ## Build 29 (API 22)
-- Add: `measure(from,to,{n})` con min/max/media.
-- Change: gli esempi shell scrivono in `$TMPDIR/c64-examples-output` (non più `output/` nel pacchetto).
-- Doc: `whenRegs` documentato come lento (≈0,2 s per stop, misurato dall'altra chat); `getting-started.md` §7 su come cercare la causa di esiti diversi dallo stesso stato.
-- Non fatto: `whenRegs` più veloce (il costo è nei 3 halt/run per stop e nell'attesa che evita il recupero di fotogrammi; toglierla farebbe avanzare l'emulazione in modo non esatto: non verificato se e come eliminarla); mappa delle lettere dell'HUD (serve il codice del gioco, che non ho). Determinismo del bot nel gioco: non riproducibile qui; senza il gioco il ciclo è esatto (3/3 uguali).
+- Add: `measure(from,to,{n})` with min/max/mean.
+- Change: the shell examples write into `$TMPDIR/c64-examples-output` (no longer `output/` in the package).
+- Doc: `whenRegs` documented as slow (≈0.2 s per stop, measured by the other chat); `getting-started.md` §7 on how to find the cause of different results from the same state.
+- Not done: faster `whenRegs` (the cost is in the 3 halt/run per stop and in the wait that avoids the frame catch-up; removing it would advance the emulation non-exactly: not verified whether and how to remove it); HUD letter map (it needs the game code, which I do not have). Bot determinism in the game: not reproducible here; without the game the loop is exact (3/3 equal).
 
 ## Build 28 (API 21)
-- Add: `findText(...,{map})` (codifica propria), `measure(from,to)` (cicli tra due PC), `runUntil({pc,whenRegs})`.
-- Fix: `c64 games` non trovava `games/` se lanciato da `headless/` (ora cerca anche `<repo>/games`).
-- Doc: `docs/getting-started.md` (prime cose da provare), più istanze in parallelo (provate: due), misura del warp (salti di ~26 fotogrammi).
-- Non fatto: `runLoop` in warp (inesatto per la granularità misurata), profilatore per routine, stato RAM/CPU del drive 1541, video deterministico più veloce del tempo reale. `change_level` (12 s): non riprodotto senza il gioco; ipotesi, non verificata: la routine ritorna davvero dopo ~600 fotogrammi (generazione livello), cioè vicino al timeout di `call` (600).
+- Add: `findText(...,{map})` (own encoding), `measure(from,to)` (cycles between two PCs), `runUntil({pc,whenRegs})`.
+- Fix: `c64 games` did not find `games/` when run from `headless/` (now it also looks in `<repo>/games`).
+- Doc: `docs/getting-started.md` (first things to try), several instances in parallel (tested: two), warp measure (jumps of ~26 frames).
+- Not done: `runLoop` in warp (not exact because of the measured granularity), per-routine profiler, 1541 drive RAM/CPU state, deterministic video faster than real time. `change_level` (12 s): not reproduced without the game; hypothesis, not verified: the routine really returns after ~600 frames (level generation), i.e. close to the `call` timeout (600).
 
 ## Build 27 (API 20)
-- Add: opzione `--headed` / `C64_HEADED=1` del demone: Chromium con finestra visibile, comandato dalla CLI come in headless. Serve un display; chiudere la finestra termina il demone. Provato solo sotto Xvfb (avvio + comandi); l'aspetto della finestra su un desktop reale non è stato visto.
-- Add: `screenCodes({addr})` e `findText(testo,{addr})` leggono la RAM schermo da un indirizzo scelto invece di quello del VIC (giochi con schermo di testo altrove o doppio buffer). Non verificato sul gioco Barbarian (segnalato `findText` nullo sulla stanza del boss: causa non accertata).
-- Doc: diagrammi Mermaid (architettura, flusso job/status/abort, scelta registrazione, pipeline di build, procedura di release).
+- Add: daemon option `--headed` / `C64_HEADED=1`: Chromium with a visible window, driven by the CLI as in headless. A display is needed; closing the window ends the daemon. Tested only under Xvfb (start + commands); the window look on a real desktop was not seen.
+- Add: `screenCodes({addr})` and `findText(text,{addr})` read the screen RAM from a chosen address instead of the VIC one (games with the text screen elsewhere or double buffer). Not verified on the Barbarian game (a null `findText` reported in the boss room: cause not established).
+- Doc: Mermaid diagrams (architecture, job/status/abort flow, recording choice, build pipeline, release procedure).
 
 ## Build 26 (API 19)
-- Fix: `reset({hard:true})` non funzionava (`wasm_hard_reset is not a function`).
-- Fix: il demone andava in crash con risultati contenenti BigInt (es. `c64 wasm wasm_get_cpu_cycles`).
-- Fix: `roms()` sovrastimava di 1 byte; Change: `c64 rom` senza argomenti = ROM utente attive; `c64 rom KIND NOME` passa il nome del file.
-- Doc: nuovo `docs/c64-cli.md` (ogni comando del client e dell'API con output reali e cosa non è verificato) e cartella `examples/` (8 script, 2 cicli, 10 script shell, generatore di D64 di prova), tutti provati.
+- Fix: `reset({hard:true})` did not work (`wasm_hard_reset is not a function`).
+- Fix: the daemon crashed with results containing BigInt (e.g. `c64 wasm wasm_get_cpu_cycles`).
+- Fix: `roms()` overestimated by 1 byte; Change: `c64 rom` with no arguments = active user ROMs; `c64 rom KIND NAME` passes the file name.
+- Doc: new `docs/c64-cli.md` (every client and API command with real output and what is not verified) and `examples/` folder (8 scripts, 2 loops, 10 shell scripts, test D64 generator), all tested.
 
 ## Build 25 (API 18)
-Correzioni dalle prove sul campo (gioco «Barbarian»); dettaglio in `docs/C64-API.md` (API 18).
-- Fix: `runLoop` con `joy(porta,stato,frames)` non tornava più (due `runFrames` concorrenti si fermavano a vicenda). Ora le esecuzioni sono serializzate e dentro `runLoop` `joy(...,frames)` preme/rilascia senza far avanzare il tempo. Era anche la causa dei «9 minuti» di `c64 video` con un bot.
-- Add: watchdog `STALL` (core fermo da 5 s durante una esecuzione).
-- Add: `abort()` / `c64 abort` (interrompe il job in corso); un client chiuso o ucciso interrompe il suo job; `c64 status` / `progress()` (job in corso e avanzamento).
-- Fix: `call` che non ritorna → errore `CALL_TIMEOUT` chiaro (ripristina PC e area di lavoro); Add: `call(...,{noWait})` e `call ADDR nowait` negli script.
-- Add: `findText`, `screenCodes`, `runUntil({text})`, `wait text "..."` (ricerca in screen code, anche con charset propri).
-- Add: `grabBrowserVideoAndAudio({audioGain})` per alzare il livello dell'audio registrato (molto basso).
-- Doc: `timeoutFrames` 3000 è il default, non un limite; il video deterministico gira a tempo reale; `POKE` prima di `loadFile` con autoload viene perso (reset).
+Fixes from field tests (game «Barbarian»); details in `docs/C64-API.md` (API 18).
+- Fix: `runLoop` with `joy(port,state,frames)` never returned (two concurrent `runFrames` stopped each other). Now runs are serialized and inside `runLoop` `joy(...,frames)` presses/releases without advancing time. It was also the cause of the «9 minutes» of `c64 video` with a bot.
+- Add: `STALL` watchdog (core stopped for 5 s during a run).
+- Add: `abort()` / `c64 abort` (interrupts the running job); a closed or killed client interrupts its job; `c64 status` / `progress()` (running job and progress).
+- Fix: `call` that never returns → clear `CALL_TIMEOUT` error (restores PC and work area); Add: `call(...,{noWait})` and `call ADDR nowait` in scripts.
+- Add: `findText`, `screenCodes`, `runUntil({text})`, `wait text "..."` (search as screen code, also with custom charsets).
+- Add: `grabBrowserVideoAndAudio({audioGain})` to raise the level of the recorded audio (very low).
+- Doc: `timeoutFrames` 3000 is the default, not a limit; the deterministic video runs at real time; a `POKE` before `loadFile` with autoload is lost (reset).
 
 ## Build 24 (API 17)
-- Change: `build.py` non incrementa più `BUILD` di default; l'incremento richiede `--bump-version` (sostituisce `--no-bump`).
-- Add: `build.py` controlla ffmpeg (PATH + encoder libx264) a fine build; se manca stampa un WARNING senza bloccare. Il README spiega come installarlo.
-- Change: l'immagine Docker contiene solo il necessario all'esecuzione dell'headless (pagina già buildata, `headless/`, docs API e scripting, ROM): allowlist in `.dockerignore`.
-- Change: repo con `build.py` che genera tutto in `out/` (HTML portable con ROM e emulatore incorporati, pagina headless, immagine Docker se c'è Docker). `portable/` e `headless/` contengono solo sorgenti; `out/` non è nel repo. Le ROM sono nel repo (`third-party/`).
-- Add: pagina portable con menu per scegliere Kernal (7 varianti), chargen (2) e drive (1541-II/1541); predefinite le standard. Headless: solo le standard incorporate (altre con `c64 rom`).
-- Change: tolte le ROM drive non compatibili (1540, 1551, 2031, 1570/71/81, 1001, 2040…9000).
-- Add: client `c64 games` / `c64 game NOME` (cartella `games/`, `$C64_GAMES`); `$C64_ROMS` accetta più cartelle separate da `:`.
-- Change: Docker incorpora tutto il repo (incl. `out/`), volumi `/games`, `/roms`, `/scripts`, `/output`.
-- Change: la versione API è nel file `headless/APIVER` (letto dal demone); `headless/package.json` dichiara l'unica dipendenza, `playwright`.
+- Change: `build.py` no longer increments `BUILD` by default; incrementing needs `--bump-version` (replaces `--no-bump`).
+- Add: `build.py` checks ffmpeg (PATH + libx264 encoder) at the end of the build; if missing it prints a WARNING without blocking. The README explains how to install it.
+- Change: the Docker image contains only what the headless run needs (page already built, `headless/`, API and scripting docs, ROMs): allowlist in `.dockerignore`.
+- Change: repo with `build.py` that generates everything in `out/` (portable HTML with ROMs and emulator embedded, headless page, Docker image if Docker is there). `portable/` and `headless/` contain only sources; `out/` is not in the repo. The ROMs are in the repo (`third-party/`).
+- Add: portable page with a menu to choose the Kernal (7 variants), chargen (2) and drive (1541-II/1541); the standard ones by default. Headless: only the standard ones embedded (others with `c64 rom`).
+- Change: removed the non-compatible drive ROMs (1540, 1551, 2031, 1570/71/81, 1001, 2040…9000).
+- Add: client `c64 games` / `c64 game NAME` (`games/` folder, `$C64_GAMES`); `$C64_ROMS` accepts several folders separated by `:`.
+- Change: Docker embeds the whole repo (incl. `out/`), volumes `/games`, `/roms`, `/scripts`, `/output`.
+- Change: the API version is in the `headless/APIVER` file (read by the daemon); `headless/package.json` declares the only dependency, `playwright`.
 
 ## Build 23 (API 17)
-- Change: nuova struttura dello zip: `README.md` e `CHANGELOG.md` in root, `Dockerfile` in root, `docs/`, `headless/` (ex `src`), `portable/` (HTML standalone), `third-party/` (emulatore e ROM, un README per componente con origine e licenza).
-- Add: `loadRom`, `clearRoms`, `roms`, `start({roms})` e client `c64 roms` / `c64 rom KIND NOME`: ROM alternative (Kernal, Basic, chargen, drive 1541) dalla cartella `third-party`. Tutti i Kernal VICE si avviano; dei drive solo famiglia 1541.
-- Change: `c64 docs` cerca `C64-API.md` anche in `docs/` e `../docs/`; Docker: copia `headless/`, `docs/` e le ROM VICE (`C64_ROMS=/app/roms`).
+- Change: new zip layout: `README.md` and `CHANGELOG.md` in the root, `Dockerfile` in the root, `docs/`, `headless/` (formerly `src`), `portable/` (standalone HTML), `third-party/` (emulator and ROMs, one README per component with origin and license).
+- Add: `loadRom`, `clearRoms`, `roms`, `start({roms})` and client `c64 roms` / `c64 rom KIND NAME`: alternative ROMs (Kernal, Basic, chargen, 1541 drive) from the `third-party` folder. All the VICE Kernals boot; of the drives only the 1541 family.
+- Change: `c64 docs` also looks for `C64-API.md` in `docs/` and `../docs/`; Docker: copies `headless/`, `docs/` and the VICE ROMs (`C64_ROMS=/app/roms`).
 
 ## Build 22 (API 16)
-- Add: `grabBrowserVideoAndAudio` — registra video e audio del browser (webm VP9+Opus) in tempo reale, in un registratore a parte, senza alcuna sincronizzazione con l'emulatore. Pannello comandi con scelta indipendente `keyboard`/`joy1`/`joy2` = `none|below|overlay` (FIRE a sinistra, stick a destra; in overlay stick a due cerchi), `scale`.
-- Nota: `c64 video` e `video start` negli script restano deterministici e muti.
+- Add: `grabBrowserVideoAndAudio` — records browser video and audio (webm VP9+Opus) in real time, in a separate recorder, with no synchronization with the emulator. Control panel with independent choice `keyboard`/`joy1`/`joy2` = `none|below|overlay` (FIRE on the left, stick on the right; in overlay a two-circle stick), `scale`.
+- Note: `c64 video` and `video start` in scripts stay deterministic and silent.
 
 ## Build 19 (API 15)
-- Add: comandi nello script: `poke`, `assert mem=`/`assert screen`, `wait mem=` (anche `!=`, maschera), `saveState`/`loadState`, `screenshot`, `regress save|check`, `call`. Errori con numero di riga e codici `ASSERT`/`REGRESS`/`TIMEOUT` (exit 1 da shell).
-- Add: `video start|stop` e `rec start|stop` nello script; senza `keep` la chiusura è garantita a fine script (anche in errore), con `keep` continuano oltre lo script e si chiudono a mano (`c64 videoStop`, `recordStop`).
-- Add: `scripting.md` (guida completa con esempi) nel pacchetto; client `--outdir`; Docker: cartelle `scripts/` e `out/` montate.
-- Change: gli errori di `runScript` portano `outputs` e `log` (il client salva comunque i file prodotti).
-- Nota: audio nel video non fatto (campioni del core non deterministici, vedi C64-API.md).
+- Add: script commands: `poke`, `assert mem=`/`assert screen`, `wait mem=` (also `!=`, mask), `saveState`/`loadState`, `screenshot`, `regress save|check`, `call`. Errors with line number and codes `ASSERT`/`REGRESS`/`TIMEOUT` (exit 1 from the shell).
+- Add: `video start|stop` and `rec start|stop` in scripts; without `keep` closing is guaranteed at the end of the script (also on error), with `keep` they go on after the script and are closed by hand (`c64 videoStop`, `recordStop`).
+- Add: `scripting.md` (full guide with examples) in the package; client `--outdir`; Docker: folders `scripts/` and `out/` mounted.
+- Change: `runScript` errors carry `outputs` and `log` (the client saves the produced files anyway).
+- Note: audio in the video not done (core samples not deterministic, see C64-API.md).
 
 ## Build 17 (API 14)
-- Add: `runLoop` (ciclo di controllo dentro la pagina, ~8x più veloce dei passi via HTTP).
-- Add: `c64 video` (mp4 deterministico con input, ffmpeg lato demone; `capStart/capRun/capTake/capStop`).
-- Add: `runFrames(n,{fast:true})` esatto anche con il warp (500 fotogrammi: 0,64 s invece di 10 s).
-- Add: insiemi di etichette (`loadLabels({set})`, `useLabels`, `set:nome`), `runUntil({screenMatch})`, `driveTrace`, `recordStop({format:'text'})`.
-- Add: client `--quiet` e `--compact`; Dockerfile con ffmpeg.
-- Fix: `stateHash` instabile alla prima chiamata (il componente CPU dipende dal debugger): escluso dall'hash complessivo (`includeCpu`).
-- Fix: `loadFile`/`start` con `program` in maiuscolo non trovava il file (ora minuscolo).
-- Change: documentato che il primo `runFrames` dopo `warp(false)` avanza di ~26 fotogrammi di troppo.
+- Add: `runLoop` (control loop inside the page, ~8x faster than steps over HTTP).
+- Add: `c64 video` (deterministic mp4 with inputs, ffmpeg on the daemon side; `capStart/capRun/capTake/capStop`).
+- Add: `runFrames(n,{fast:true})` exact also with warp (500 frames: 0.64 s instead of 10 s).
+- Add: label sets (`loadLabels({set})`, `useLabels`, `set:name`), `runUntil({screenMatch})`, `driveTrace`, `recordStop({format:'text'})`.
+- Add: client `--quiet` and `--compact`; Dockerfile with ffmpeg.
+- Fix: `stateHash` unstable at the first call (the CPU component depends on the debugger): excluded from the overall hash (`includeCpu`).
+- Fix: `loadFile`/`start` with an uppercase `program` did not find the file (now lowercase).
+- Change: documented that the first `runFrames` after `warp(false)` advances ~26 frames too many.
 
 ## Build 16 (API 13)
-- Change: `recordVideo({scale})` massimo 4 (1536×1080, circa full HD); prima 8.
+- Change: `recordVideo({scale})` maximum 4 (1536×1080, about full HD); 8 before.
 
 ## Build 15 (API 12)
-- Add: `recordVideo({scale})`, ingrandimento intero con pixel nitidi (es. 3 → 1152×810).
+- Add: `recordVideo({scale})`, integer scaling with sharp pixels (e.g. 3 → 1152×810).
 
 ## Build 14 (API 11)
-- Fix: `c64 sendText 'testo\n'` da shell scriveva `\n` letterale; ora preme RETURN.
+- Fix: `c64 sendText 'text\n'` from the shell typed a literal `\n`; now it presses RETURN.
 
 ## Build 13 (API 11)
-- Add: `Dockerfile` e `docker-compose.yml` (non provati). Demone: variabili `C64_HOST`, `C64_NO_SANDBOX`; client: `--host`.
+- Add: `Dockerfile` and `docker-compose.yml` (not tested). Daemon: variables `C64_HOST`, `C64_NO_SANDBOX`; client: `--host`.
 
 ## Build 12 (API 11)
-- Add: `runScript` / `scriptCheck` e `c64 script file.txt` (righe `<fotogramma> <input> [durata]` e `wait`).
-- Change: lo zip ha il numero di versione nel nome.
+- Add: `runScript` / `scriptCheck` and `c64 script file.txt` (lines `<frame> <input> [duration]` and `wait`).
+- Change: the zip has the version number in its name.
 
 ## Build 11 (API 10)
-- Change: l'HTML standalone non contiene più controllo remoto né documentazione. L'API è nel file `c64-api.js`, iniettato dal demone.
-- Change: il demone apre `c64-headless.html` (solo emulatore, senza interfaccia). Nome HTML senza `-apiN`.
-- Change: la documentazione è `C64-API.md` (anche `c64 docs [parola]`); il metodo `docs()` non esiste più.
-- Add: `C64-TODO.md` e questo changelog nello zip.
+- Change: the standalone HTML no longer contains remote control nor documentation. The API is in the `c64-api.js` file, injected by the daemon.
+- Change: the daemon opens `c64-headless.html` (emulator only, no interface). HTML name without `-apiN`.
+- Change: the documentation is `C64-API.md` (also `c64 docs [word]`); the `docs()` method no longer exists.
+- Add: `C64-TODO.md` and this changelog in the zip.
 
 ## API 10
-- Add: `regressSave` / `regressCheck` / `regressList` e `c64 regress` (confronto stato registrato vs nuovo: hash, RAM, schermo).
-- Add: `recordVideo` (WebM, tempo reale, non deterministico).
-- Fix: l'hash della CPU è escluso dal confronto (instabile), salvo `includeCpu`.
+- Add: `regressSave` / `regressCheck` / `regressList` and `c64 regress` (comparison of a recorded state vs a new one: hash, RAM, screen).
+- Add: `recordVideo` (WebM, real time, not deterministic).
+- Fix: the CPU hash is excluded from the comparison (unstable), unless `includeCpu`.
 
 ## API 9
-- Change: `type` = un tasto o più tasti simultanei; `sendText` = stringhe. `key()` e il vecchio `type(stringa)` rimossi (nessuna retrocompatibilità).
-- Change: tempi minimi pressione 1 / rilascio 2 fotogrammi (default 3 / 3).
-- Add: `framesPerKey` e `releaseFrames` in `sendText`.
+- Change: `type` = one key or several simultaneous keys; `sendText` = strings. `key()` and the old `type(string)` removed (no backward compatibility).
+- Change: minimum times press 1 / release 2 frames (default 3 / 3).
+- Add: `framesPerKey` and `releaseFrames` in `sendText`.
 
 ## API 8
-- Fix: `type` e `sendText` perdevano caratteri dopo un reset (il KERNAL legge la tastiera dopo ~140 fotogrammi): ora attendono il boot (`noWait` per disattivare).
+- Fix: `type` and `sendText` lost characters after a reset (the KERNAL reads the keyboard after ~140 frames): now they wait for the boot (`noWait` to disable it).
 
 ## API 7
 - Add: `sprites`, `stateHash`, `disasm`, `find`, `ramSnap` / `ramDiff`, `recordStart` / `recordStop` / `replay`, `sendJoy`, `store*`.
-- Add: demone Node `c64d` e client da riga di comando `c64`.
+- Add: Node daemon `c64d` and command-line client `c64`.
 
 ## API 6
-- Add: `sendText`, watchpoint, `saveState` / `loadState`, `step` / `trace`, `inspect` / `sid` / `sidTrace`, `screenDiff` / `recordGif`, `runUntil` con `pcIn` / `mem` / `watch` / `when` / `all`, errori con codice.
-- Change: `frames()` ritorna un intero (il frazionario è `framesExact()`).
-- Fix: `loadFile` con autoload tornava prima della fine della sequenza (ora attende; `wait:false` per il vecchio comportamento).
-- Fix: `setRegs` con un'etichetta in `pc` impostava 0.
+- Add: `sendText`, watchpoints, `saveState` / `loadState`, `step` / `trace`, `inspect` / `sid` / `sidTrace`, `screenDiff` / `recordGif`, `runUntil` with `pcIn` / `mem` / `watch` / `when` / `all`, errors with a code.
+- Change: `frames()` returns an integer (the fractional one is `framesExact()`).
+- Fix: `loadFile` with autoload returned before the end of the sequence (now it waits; `wait:false` for the old behavior).
+- Fix: `setRegs` with a label in `pc` set 0.
 
 ## API 5
-- Change: «Autoload + RUN» attivo di default (anche per `start({disk})` e `loadFile` di un d64; `autoload:false` per disattivarlo).
-- Change: il test tasti compare in ~4 s invece di ~20 s.
+- Change: «Autoload + RUN» on by default (also for `start({disk})` and `loadFile` of a d64; `autoload:false` to disable it).
+- Change: the key test shows up in ~4 s instead of ~20 s.
 
 ## API 4
-- Change: test tasti riscritto in linguaggio macchina (latenza 1 fotogramma; F2/F4/F6/F8, RESTORE).
+- Change: key test rewritten in machine language (1-frame latency; F2/F4/F6/F8, RESTORE).
 
 ## API 3
-- Add: controllo deterministico (`runFrames`, `runUntil`, `regs`, `call`, breakpoint, `diskImage`, `driveState`, etichette, `joy(porta,stato,frames)`, `peek(a,n,opt)`, `start({driveRom})`).
-- Change: `screenText` legge dal VIC.
+- Add: deterministic control (`runFrames`, `runUntil`, `regs`, `call`, breakpoints, `diskImage`, `driveState`, labels, `joy(port,state,frames)`, `peek(a,n,opt)`, `start({driveRom})`).
+- Change: `screenText` reads from the VIC.
 
 ## API 2
 - Add: `runKeyTest`.
 
 ## API 1
-- Add: controllo base (start, tasti, joystick, peek/poke, `screenText`).
+- Add: basic control (start, keys, joystick, peek/poke, `screenText`).

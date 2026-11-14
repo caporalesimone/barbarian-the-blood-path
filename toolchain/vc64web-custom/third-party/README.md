@@ -1,14 +1,14 @@
 # third-party
 
-Una cartella per ogni componente di terze parti, ciascuna con un `README.md` che dice cos'è, da dove viene (link) e con che licenza. **Le licenze sono quelle che ho potuto leggere nei file o ricordare: dove scrivo «non verificata» controllare prima di pubblicare.**
+One folder per third-party component, each with a `README.md` that says what it is, where it comes from (link) and its license. **The licenses are the ones I could read in the files or remember: where it says «not verified», check before publishing.**
 
-| Cartella | Contenuto | Incluso | Nota |
+| Folder | Contents | Included | Note |
 |---|---|---|---|
-| `vc64web/` | emulatore (wasm + JS) | sì | licenza non verificata (GPL?) |
-| `vice-roms/` | ROM Commodore compatibili (7 Kernal, 2 chargen, Basic, drive 1541 e 1541-II) | sì, anche nel repo | **diritti di ridistribuzione da verificare** |
-| `open-roms/` | ROM libere | sì | LGPL-3+; font PXLfont da verificare |
-| `playwright/` | Chromium headless | no | solo documentazione |
-| `ffmpeg/` | encoder video | no | solo documentazione |
-| `nodejs/` | runtime | no | solo documentazione |
+| `vc64web/` | emulator (wasm + JS) | yes | license not verified (GPL?) |
+| `../roms/vice-roms/` | compatible Commodore ROMs (7 Kernals, 2 chargens, Basic, 1541 and 1541-II drives) | yes, also in the repo | **redistribution rights to be verified** |
+| `../roms/open-roms/` | free ROMs | yes | LGPL-3+; PXLfont font to be verified |
+| `playwright/` | headless Chromium | no | documentation only |
+| `ffmpeg/` | video encoder | no | documentation only |
+| `nodejs/` | runtime | no | documentation only |
 
-Gli HTML generati in `out/` (portable e headless) **incorporano** vc64web e le ROM VICE di default: vanno trattati come il più restrittivo dei componenti inclusi.
+The HTML files generated in `out/` (portable and headless) **embed** vc64web and the default VICE ROMs: treat them as the most restrictive of the included components.

@@ -2,16 +2,16 @@
 <html><head><meta charset="utf-8"><title>VirtualC64 headless /*__VER__*/</title></head>
 <body style="margin:0;background:#000"><div id="screen" style="position:fixed;inset:0"></div>
 <script>
-/* Pagina minima per il controllo remoto: solo l'emulatore (vc64web in iframe) e il minimo per avviarlo. Niente interfaccia.
-   L'API (c64-api.js) viene iniettata dal demone. Copyright © 2026 Simone Caporale */
+/* Minimal page for remote control: only the emulator (vc64web in an iframe) and the minimum to start it. No interface.
+   The API (c64-api.js) is injected by the daemon. Copyright © 2026 Simone Caporale */
 const INNER  = /*__INNER__*/null;
 const ASSETS = /*__ASSETS__*/{};
 const APP_BUILD='/*__VER__*/';
 const st={port:2,running:false,paused:false,warp:false,disk:null,roms:{},injected:false,drvRom:'1541-II'};
-const _el={}, $=id=>_el[id]||(_el[id]={checked:id==='autoStart',value:'',dataset:{},textContent:'',style:{},classList:{toggle(){},add(){},remove(){}}});   // controlli dell'interfaccia assenti: valori in memoria
+const _el={}, $=id=>_el[id]||(_el[id]={checked:id==='autoStart',value:'',dataset:{},textContent:'',style:{},classList:{toggle(){},add(){},remove(){}}});   // interface controls absent: values in memory
 const setPort=p=>{ st.port=p; }, savePrefs=()=>{}, msg=()=>{};
 function b64ToU8(b64){ const s=atob(b64), u=new Uint8Array(s.length); for(let i=0;i<s.length;i++) u[i]=s.charCodeAt(i); return u; }
-const DEFSEL={kernal:'901227-03',chargen:'901225-01'};   // headless: solo le ROM standard incorporate; le altre con loadRom()
+const DEFSEL={kernal:'901227-03',chargen:'901225-01'};   // headless: only the embedded standard ROMs; the others with loadRom()
 const rkey=k=>k==='floppy'?DRVROMS[st.drvRom||'1541-II']:k==='basic'?'rom_basic':'rom_'+k+'_'+DEFSEL[k];
 const DRVROMS={'1541-II':'rom_floppy','1541':'rom_floppy_1541'};
 function romB64(k){ const u=st.roms[k]; if(u&&u.b64) return u.b64; const a=ASSETS[rkey(k)]; return a?a.b:null; }

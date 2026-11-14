@@ -1,4 +1,4 @@
-# pacchetto vc64web-custom: file generati e cartelle di lavoro (le ROM Commodore in roms/ sono versionate: vedi roms/roms.md)
+# vc64web-custom package: generated files and work folders (the Commodore ROMs in roms/ are versioned: see roms/roms.md)
 out/
 output/
 node_modules/

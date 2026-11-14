@@ -16,7 +16,7 @@ La precisione di questo core rispetto a VICE non è stata confrontata ciclo per 
 gioco parte e si gioca (test `EMU-10..16`).
 
 Provenienza, cosa è versionato e cosa no (le ROM Commodore no: la build le prende da `toolchain/roms/`), come aggiornare il pacchetto:
-[toolchain/vc64web-custom/INCLUSIONE.md](../toolchain/vc64web-custom/INCLUSIONE.md).
+[toolchain/vc64web-custom/docs/INCLUSION.md](../toolchain/vc64web-custom/docs/INCLUSION.md).
 
 ## Architettura
 
@@ -36,10 +36,12 @@ copia finché il demone resta acceso).
 
 ## Cosa sa fare (con i riferimenti ai file del pacchetto)
 
-Tutto il pacchetto è in `toolchain/vc64web-custom/`. Documenti: `README.md` (build, registrazioni), `CHANGELOG.md`, `docs/c64-cli.md`
-(**ogni comando**, con output reali e «cosa non è verificato»), `docs/C64-API.md` (API JavaScript `window.c64`, «Limiti
-riscontrati»), `docs/scripting.md` (script di testo), `docs/getting-started.md` (prime prove), `docs/C64-TODO.md` (limiti del core),
-`examples/` (script, cicli, shell). Nel seguito «cli §N» = `docs/c64-cli.md` sezione N.
+Tutto il pacchetto è in `toolchain/vc64web-custom/`. Documenti: `README.md` (build, registrazioni), `docs/CHANGELOG.md`, `docs/c64-cli.md`
+(**ogni comando**, con output reali e «What is not verified»), `docs/C64-API.md` (API JavaScript `window.c64`, «Limits
+found»), `docs/scripting.md` (script di testo), `docs/getting-started.md` (prime prove), `docs/C64-TODO.md` (limiti del core),
+`examples/` (script, cicli, shell). Nel seguito «cli §N» = `docs/c64-cli.md` sezione N. Dal 14/11 il pacchetto (documenti,
+messaggi, esempi) è **in inglese** come tutta la toolchain: gli errori del client sono `ERROR CODE: messaggio`, la schermata del test
+tasti dice `KEY AND JOYSTICK TEST`; i titoli citati qui (es. «Limits found») sono quelli inglesi.
 
 | Capacità | Comando / API | Dove è documentata | Usata nel progetto |
 |---|---|---|---|
@@ -90,7 +92,7 @@ segnalare al team: sezione «Trappole»).
 Dal 13/11 il demone gira nel container **`c64-emu-vc64web`** (immagine costruita dal `Dockerfile` del pacchetto, con le pagine
 già pronte dentro: `toolchain/images.sh emu-vc64web` le genera nel builder con `build.py --no-docker --out out/cache/vc64web` e poi fa la
 `docker build` con il contesto `pages=out/cache/vc64web`). Il pacchetto è autonomo e parametrizzato: `--vice-roms`, `--open-roms`, `--out`,
-`--tag` (README e `docs/INCLUSIONE.md` del pacchetto); le ROM le prende dalla sua `roms/` (`toolchain/vc64web-custom/roms/`), identica a `toolchain/roms/` del progetto.
+`--tag` (README e `docs/INCLUSION.md` del pacchetto); le ROM le prende dalla sua `roms/` (`toolchain/vc64web-custom/roms/`), identica a `toolchain/roms/` del progetto.
 
 ```sh
 ./build.sh --emu                                          # build + smoke/sanity con il demone acceso (EMU-* sono in regression)

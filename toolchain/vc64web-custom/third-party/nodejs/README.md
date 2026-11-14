@@ -1,6 +1,6 @@
-# Node.js — NON incluso
+# Node.js — NOT included
 
-**Cos'è**: runtime di `c64d.js` e del client `c64`. Il Dockerfile parte dall'immagine `node:22-bookworm-slim`.
+**What it is**: runtime of `c64d.js` and of the `c64` client. The Dockerfile starts from the `node:22-bookworm-slim` image.
 
-**Origine**: https://nodejs.org · immagine https://hub.docker.com/_/node
-**Licenza**: MIT per Node.js (da conoscenza generale, non verificata); l'immagine Docker contiene anche pacchetti Debian con licenze varie.
+**Origin**: https://nodejs.org · image https://hub.docker.com/_/node
+**License**: MIT for Node.js (general knowledge, not verified); the Docker image also contains Debian packages with various licenses.

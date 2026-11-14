@@ -15,6 +15,9 @@ per questo documento; *[non verificato]* = ipotesi.
   cartella `toolchain/`, che non sa nulla del gioco) e una del gioco (`barbarian-manual`).
 - **Container** (nascono e muoiono a ogni comando): quasi tutti con `--rm`. **Nessuno è sempre acceso**: dipendono da cosa chiedi a
   `build.sh` o a `viewer.sh`. Il progetto sta sull'host e si monta in `/work`.
+- **Lingua** (14/11, regola del committente): tutto `toolchain/` è in inglese (codice, commenti, messaggi, pagine, README, il pacchetto
+  `vc64web-custom/` compresi documenti ed esempi); la wiki, il TODO e i commit restano in italiano. Conseguenze visibili: il client
+  vc64web stampa `ERROR CODE: messaggio`, la schermata del test tasti dice `KEY AND JOYSTICK TEST` ([emulatore.md](emulatore.md)).
 
 ## 2. Immagini e parentela
 

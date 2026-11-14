@@ -1,4 +1,4 @@
-# poke, assert e wait sulla memoria (indirizzi liberi in $C000).
+# poke, assert and wait on memory (free addresses at $C000).
 wait "READY." 10s
 poke 0xC000 1,2,3
 assert mem=0xC001 2

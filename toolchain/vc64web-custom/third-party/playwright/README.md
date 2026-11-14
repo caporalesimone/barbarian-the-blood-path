@@ -1,6 +1,6 @@
-# Playwright (con Chromium) — NON incluso
+# Playwright (with Chromium) — NOT included
 
-**Cos'è**: libreria Node che pilota Chromium. Il demone `headless/c64d.js` la usa solo internamente per aprire la pagina dell'emulatore. Non è incluso nel pacchetto: si installa con `npm i -g playwright && npx playwright install chromium` (nel Docker: `playwright@1.63.0`).
+**What it is**: Node library that drives Chromium. The `headless/c64d.js` daemon uses it only internally to open the emulator page. It is not included in the package: install it with `npm i -g playwright && npx playwright install chromium` (in Docker: `playwright@1.63.0`).
 
-**Origine**: https://github.com/microsoft/playwright · https://playwright.dev
-**Licenza**: Apache-2.0 (da conoscenza generale, non verificata qui). Chromium, scaricato da Playwright, ha le sue licenze (BSD e componenti di terze parti): https://chromium.googlesource.com/chromium/src/+/main/LICENSE
+**Origin**: https://github.com/microsoft/playwright · https://playwright.dev
+**License**: Apache-2.0 (general knowledge, not verified here). Chromium, downloaded by Playwright, has its own licenses (BSD and third-party components): https://chromium.googlesource.com/chromium/src/+/main/LICENSE

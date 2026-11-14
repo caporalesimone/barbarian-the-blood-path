@@ -60,14 +60,14 @@ def assemble(src,org,sym0):
             if ln.startswith('.org'): continue
             p=ln.split(None,1); mn=p[0].upper(); op=p[1].strip() if len(p)>1 else None
             mode,v=parse(op,mn,sym,final)
-            if mode not in OPS[mn]: raise Exception('modo %s non valido per %s (%s)'%(mode,mn,ln))
+            if mode not in OPS[mn]: raise Exception('mode %s not valid for %s (%s)'%(mode,mn,ln))
             oc=OPS[mn][mode]
             if mode=='imp' or mode=='a': out.append(oc); pc+=1
             elif mode in('imm','zp','indy'): out+= [oc,v&255]; pc+=2
             elif mode=='rel':
                 if final:
                     t=val(v,sym); d=t-(pc+2)
-                    if not -128<=d<=127: raise Exception('salto fuori range: '+ln+' %d'%d)
+                    if not -128<=d<=127: raise Exception('branch out of range: '+ln+' %d'%d)
                 else: d=0
                 out+=[oc,d&255]; pc+=2
             else: out+=[oc,v&255,(v>>8)&255]; pc+=3

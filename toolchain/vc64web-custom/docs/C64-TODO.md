@@ -1,91 +1,91 @@
-# VirtualC64 (v10, API 10): cosa manca
+# VirtualC64 (v10, API 10): what is missing
 
 Copyright © 2026 Simone Caporale
 
-Legenda: [V] da verificare (esiste ma non provato), [F] fattibile (so che il core lo offre), [?] non so se fattibile, [L] limite del core (non risolvibile da qui).
+Legend: [V] to be verified (it exists but is not tested), [F] feasible (I know the core offers it), [?] I do not know if it is feasible, [L] core limit (cannot be solved from here).
 
-## 1. Da verificare su quanto già fatto
-- [V] Breakpoint e watchpoint dopo `loadState`: sopravvivono? Oggi vanno ricontrollati a mano.
-- [V] `type`/`sendText` in tempo reale: provati (GET, F1, SHIFT+A, W+D, stringhe di ~130 caratteri), stesso esito dell'emulatore fermo. Non provati: browser in background (timer rallentati), warp, NTSC.
-- [V] `{LEFT}` a 9 fotogrammi da `{UP}` perso in un programma BASIC con GET (API 6, con default 3/2): non riprodotto con i nuovi default 3/3; causa non nota. Con rilascio di 1 fotogramma gli errori sono misurati (pressione 3–4: 1 prova su 8 corretta), il meccanismo non è chiarito.
-- [V] `replay` con emulatore in corsa (tempo reale): non esatto per costruzione, non misurato.
-- [V] Demone `c64d`: sessioni lunghe (ore), più client insieme, memoria di Chromium.
-- [V] `storeSet/storeGet` tra build con nomi file diversi: provato solo in Chromium; Firefox e Safari no.
-- [V] NTSC: i fotogrammi sono tarati su PAL (19656 cicli), niente prova con NTSC.
-- [V] Telefono: il file HTML non è stato provato su un telefono reale con questa API (solo Chromium headless).
-- [V] `type`/`sendText` perdono i tasti quando il C64 non legge la tastiera (interruzioni disattivate, LOAD in corso): non rilevabile dall'esterno, si attende il prompt. (Boot dopo reset: risolto in API 8.)
-- [V] Fantasmi della matrice (3 tasti ai vertici di un rettangolo) e interferenza joystick/tastiera: non so se il core li emula; non verificato. Con più tasti simultanei il KERNAL (`GET`) riporta un solo tasto.
-- [V] Tempi minimi dei tasti (pressione 1, rilascio 2) misurati nel BASIC con 8 sfasamenti; non su altri programmi o con tastiere lette meno di una volta per fotogramma.
+## 1. To verify on what is already done
+- [V] Breakpoints and watchpoints after `loadState`: do they survive? Today they must be checked again by hand.
+- [V] `type`/`sendText` in real time: tested (GET, F1, SHIFT+A, W+D, strings of ~130 characters), same result as with the emulator stopped. Not tested: browser in the background (slowed timers), warp, NTSC.
+- [V] `{LEFT}` 9 frames after `{UP}` lost in a BASIC program with GET (API 6, with defaults 3/2): not reproduced with the new 3/3 defaults; cause unknown. With a 1-frame release the errors are measured (press 3–4: 1 try in 8 correct), the mechanism is not clear.
+- [V] `replay` with the emulator running (real time): not exact by design, not measured.
+- [V] `c64d` daemon: long sessions (hours), several clients together, Chromium memory.
+- [V] `storeSet/storeGet` across builds with different file names: tested only in Chromium; not in Firefox and Safari.
+- [V] NTSC: frames are calibrated on PAL (19656 cycles), no NTSC test.
+- [V] Phone: the HTML file was not tested on a real phone with this API (only headless Chromium).
+- [V] `type`/`sendText` lose keys when the C64 does not read the keyboard (interrupts disabled, LOAD running): not detectable from outside, the prompt is awaited. (Boot after reset: solved in API 8.)
+- [V] Matrix ghosting (3 keys at the corners of a rectangle) and joystick/keyboard interference: I do not know if the core emulates them; not verified. With several simultaneous keys the KERNAL (`GET`) reports only one key.
+- [V] Minimum key times (press 1, release 2) measured in BASIC with 8 phase shifts; not on other programs or with keyboards read less than once per frame.
 
-## 2. Funzioni non fatte
-- [F] Breakpoint condizionali con registri (oggi `when` controlla solo la memoria). Richiede la lettura dei registri a ogni stop.
-- [F] `step`/`trace` con registri A/X/Y/P/SP per istruzione (oggi solo pc/byte/asm/cicli): il registro stampato dal shell ha i nibble invertiti, serve un'altra via (stub 6502 che altera i cicli).
-- [F] Cambio PAL/NTSC dall'API (probabilmente `wasm_configure`, non provato).
-- [F] Esporta/Importa impostazioni dell'interfaccia (JSON) nel menu; oggi c'è solo `store*` via API.
-- [F] Test automatici dell'API nel repository (oggi gli script di prova stanno nello scratchpad).
-- [?] Audio: `wasm_get_sound_buffer_address` / `wasm_copy_into_sound_buffer` esistono; non so se si può registrare un WAV in modo ripetibile (il core produce campioni solo mentre gira).
-- [?] CPU e memoria del drive 1541: `? drive8` dà lo stato; non ho verificato se il debugger legge la RAM del drive (servirebbe per capire Krill).
-- [?] Cartucce, REU, nastro (`wasm_press_play`...): il core li gestisce, non toccati.
-- [?] Mappa degli accessi alla memoria (heatmap) come copertura del codice: l'opzione `HEATMAP` non si attiva con `wasm_configure`; altre vie non cercate.
-- [?] Registrazione in tempo reale come alternativa al replay a fotogrammi.
+## 2. Functions not done
+- [F] Conditional breakpoints on registers (today `when` checks only memory). It needs reading the registers at every stop.
+- [F] `step`/`trace` with A/X/Y/P/SP registers per instruction (today only pc/bytes/asm/cycles): the register printed by the shell has swapped nibbles, another way is needed (a 6502 stub that alters the cycles).
+- [F] PAL/NTSC switch from the API (probably `wasm_configure`, not tested).
+- [F] Export/import of the interface settings (JSON) in the menu; today there is only `store*` through the API.
+- [F] Automated API tests in the repository (today the test scripts are in the scratchpad).
+- [?] Audio: `wasm_get_sound_buffer_address` / `wasm_copy_into_sound_buffer` exist; I do not know if a WAV can be recorded repeatably (the core produces samples only while running).
+- [?] 1541 drive CPU and memory: `? drive8` gives the state; I have not verified whether the debugger reads the drive RAM (it would help to understand Krill).
+- [?] Cartridges, REU, tape (`wasm_press_play`...): the core handles them, not touched.
+- [?] Memory access map (heatmap) as code coverage: the `HEATMAP` option does not turn on with `wasm_configure`; other ways not searched.
+- [?] Real-time recording as an alternative to frame replay.
 
-## 3. Limiti del core (non risolvibili da qui)
-- [L] Granularità minima: 1 fotogramma (19656 cicli); `runCycles` arrotonda per eccesso.
-- [L] Il warp rompe l'esattezza dei fotogrammi.
-- [L] Solo la famiglia 1541 (1540/1571/1581 rifiutate come "Unknown ROM").
-- [L] `wasm_rewind` riavvolge il nastro, non lo stato; il core non ha un buffer delle istruzioni passate oltre alle ultime 8 che il shell mostra.
-- [L] `wasm_sprite_info` dà solo x,y; il resto si legge dai registri.
-- [L] I comandi `f` e `m` del shell non accettano gli argomenti provati; `find` è fatto in JS.
-- [L] Dopo una pausa di 15–260 ms il core recupera fino a 3 fotogrammi: `runFrames` attende 260 ms (≈0,3 s per chiamata).
-- [L] Non è VICE: i risultati sui cicli vanno confermati in VICE nativo.
+## 3. Core limits (cannot be solved from here)
+- [L] Minimum granularity: 1 frame (19656 cycles); `runCycles` rounds up.
+- [L] Warp breaks frame exactness.
+- [L] Only the 1541 family (1540/1571/1581 refused as "Unknown ROM").
+- [L] `wasm_rewind` rewinds the tape, not the state; the core has no buffer of past instructions beyond the last 8 shown by the shell.
+- [L] `wasm_sprite_info` gives only x,y; the rest is read from the registers.
+- [L] The shell `f` and `m` commands do not accept the arguments tried; `find` is done in JS.
+- [L] After a 15–260 ms pause the core catches up to 3 frames: `runFrames` waits 260 ms (≈0.3 s per call).
+- [L] It is not VICE: cycle results must be confirmed in native VICE.
 
-## 4. Idee (non richieste)
-- Variante di `c64d` con CDP diretto, senza Playwright (proposta e declinata il 12/11).
-- (fatto in API 10: `regressSave/regressCheck`.) Da verificare: baseline su più sessioni/daemon riavviato; confronto con tolleranza per schermi con sprite animati.
-- Video deterministico (PNG fotogramma per fotogramma + ffmpeg lato Node) e audio: non fatti; `recordVideo` è in tempo reale, solo Chromium verificato.
+## 4. Ideas (not requested)
+- A `c64d` variant with direct CDP, without Playwright (proposed and declined on 12/11).
+- (done in API 10: `regressSave/regressCheck`.) To verify: baselines across several sessions/restarted daemon; comparison with tolerance for screens with animated sprites.
+- Deterministic video (PNG frame by frame + ffmpeg on the Node side) and audio: not done; `recordVideo` is real time, only Chromium verified.
 
-## Struttura (da API 10, build 11)
-- `VirtualC64-v11.html` = solo emulatore + interfaccia, nessun controllo remoto.
-- `c64-headless.html` = pagina minima per il demone (solo emulatore, nessuna interfaccia); `c64-api.js` viene iniettato dal demone.
-- Da verificare: uso manuale di `c64-api.js` incollato nella console della pagina standalone (la pagina non ha più `window.c64`, ma l'iniezione dovrebbe funzionare perché usa le stesse variabili globali; non provato).
-- Il guadagno di `c64-headless.html` è soprattutto a runtime (niente UI/CSS/layout): la dimensione è quasi uguale (~4,0 MB, dominata da wasm e ROM).
+## Layout (since API 10, build 11)
+- `VirtualC64-v11.html` = emulator + interface only, no remote control.
+- `c64-headless.html` = minimal page for the daemon (emulator only, no interface); `c64-api.js` is injected by the daemon.
+- To verify: manual use of `c64-api.js` pasted into the console of the standalone page (the page no longer has `window.c64`, but injection should work because it uses the same globals; not tested).
+- The gain of `c64-headless.html` is mostly at run time (no UI/CSS/layout): the size is almost the same (~4.0 MB, dominated by wasm and ROMs).
 
-## Script di input (API 11)
-- Non fatti per scelta: if/goto/cicli/variabili/include (per la logica: JavaScript con l'API).
-- Da fare se serve: esportare le registrazioni (`recordStop`) in formato testo; verificare script molto lunghi e `wait pc=`.
+## Input scripts (API 11)
+- Not done by choice: if/goto/loops/variables/include (for logic: JavaScript with the API).
+- To do if needed: export recordings (`recordStop`) as text; verify very long scripts and `wait pc=`.
 
 ## Docker
-- Dockerfile e docker-compose.yml NON provati: nell'ambiente di sviluppo non c'era il demone Docker. Provati solo il demone con C64_HOST=0.0.0.0 e C64_NO_SANDBOX=1 e il client con --host.
-- Da verificare: build (playwright@1.63.0 + `playwright install --with-deps chromium` su node:22-bookworm-slim), healthcheck, uso con --shm-size=1g.
+- Dockerfile and docker-compose.yml NOT tested: the development environment had no Docker daemon. Only the daemon with C64_HOST=0.0.0.0 and C64_NO_SANDBOX=1 and the client with --host were tested. (13/11: in the game project the image `c64-emu-vc64web` is built and used by the `EMU-*` tests.)
+- To verify: build (playwright@1.63.0 + `playwright install --with-deps chromium` on node:22-bookworm-slim), healthcheck, use with --shm-size=1g.
 
-## Dopo la valutazione del 12/11 (todo-emulatore-web.md della chat Barbarian), build 17 / API 14
-Fatto: ciclo in pagina (`runLoop`), `runFrames({fast})` esatto con il warp, video deterministico con input (`c64 video`), insiemi di etichette, `runUntil({screenMatch})`, `driveTrace`, `recordStop({format:'text'})` (parziale), `--quiet`/`--compact`, nome programma minuscolo, `stateHash` senza CPU. Stati su file: già possibile (documentato).
-Non fatto: audio (video e WAV), più istanze in parallelo, profilatore per routine (cicli per etichetta), breakpoint condizionali su registri / `step` con A/X/Y/P.
-Da verificare:
-- `video` su durate lunghe (decine di minuti) e con `every:1`; ffmpeg lato demone (nel Docker è installato nel Dockerfile, non provato).
-- `runFrames({fast})` su un disco reale con Krill (provato solo su BASIC/schermata di avvio).
-- `recordStop({format:'text'})`: i `joy` a stato e `sendJoy` non sono esportati; il tempo parte dall'inizio della registrazione.
-- Warp: il primo `runFrames` dopo `warp(false)` avanza di ~26 fotogrammi di troppo (misurato in un caso); la causa nel core non è nota.
-- `runLoop`: ~25 passi/s a 2 fotogrammi (tempo reale); più veloce solo con warp (non esatto).
+## After the 12/11 review (todo-emulatore-web.md of the Barbarian chat), build 17 / API 14
+Done: in-page loop (`runLoop`), exact `runFrames({fast})` with warp, deterministic video with inputs (`c64 video`), label sets, `runUntil({screenMatch})`, `driveTrace`, `recordStop({format:'text'})` (partial), `--quiet`/`--compact`, lowercase program name, `stateHash` without CPU. States to files: already possible (documented).
+Not done: audio (video and WAV), several instances in parallel, per-routine profiler (cycles per label), conditional breakpoints on registers / `step` with A/X/Y/P.
+To verify:
+- `video` on long durations (tens of minutes) and with `every:1`; ffmpeg on the daemon side (installed in the Dockerfile, not tested).
+- `runFrames({fast})` on a real disk with Krill (tested only on BASIC/start screen).
+- `recordStop({format:'text'})`: state `joy` and `sendJoy` are not exported; time starts from the start of the recording.
+- Warp: the first `runFrames` after `warp(false)` advances ~26 frames too many (measured in one case); the cause in the core is unknown.
+- `runLoop`: ~25 steps/s at 2 frames (real time); faster only with warp (not exact).
 
-## Script e video (build 19, API 15)
-- [V] Non provati: script molto lunghi; `assert` e `wait mem=` in tempo reale con tempi lunghi; `wait mem=` in warp; video `keep` di molti minuti (memoria della coda, ffmpeg); script con errore mentre un video `keep` è aperto (resta aperto: chiudere con `videoStop`).
-- [V] Docker: Dockerfile/compose aggiornati (volumi `scripts/` e `out/`, scripting.md) ma MAI costruiti né provati (nessun demone Docker disponibile qui).
-- [L] **Audio nel video**: non fatto. Il core (`wasm_copy_into_sound_buffer[_stereo]`) restituisce blocchi da 1024 campioni; in 100 fotogrammi ~79k campioni invece di 88,2k (44,1 kHz), ampiezza ~0,002 con un tono SID acceso, comportamento diverso dopo `wasm_open_main_thread_audio`. Causa non indagata. Alternativa non provata: sintetizzare il SID offline dai registri (`sidTrace`) con un modello SID in JS (lavoro grande, risultato diverso da reSID).
-- [F] `call` con parametri sullo stack o con scratch diverso; `assert pc=`; `wait` composti (testo OR mem): non fatti.
+## Scripts and video (build 19, API 15)
+- [V] Not tested: very long scripts; `assert` and `wait mem=` in real time with long times; `wait mem=` in warp; `keep` videos of many minutes (queue memory, ffmpeg); a script with an error while a `keep` video is open (it stays open: close it with `videoStop`).
+- [V] Docker: Dockerfile/compose updated (volumes `scripts/` and `out/`, scripting.md) but NEVER built nor tested (no Docker daemon available here).
+- [L] **Audio in the video**: not done. The core (`wasm_copy_into_sound_buffer[_stereo]`) returns blocks of 1024 samples; in 100 frames ~79k samples instead of 88.2k (44.1 kHz), amplitude ~0.002 with a SID tone on, different behavior after `wasm_open_main_thread_audio`. Cause not investigated. Alternative not tested: synthesize the SID offline from the registers (`sidTrace`) with a JS SID model (big work, result different from reSID).
+- [F] `call` with parameters on the stack or with a different scratch area; `assert pc=`; compound `wait` (text OR mem): not done.
 
 ## grabBrowserVideoAndAudio (build 22, API 16)
-- [V] Non provati: registrazioni lunghe (memoria dei blocchi nel browser), deriva audio/video, pannello con tastiera/joystick virtuali della pagina, audio disattivato dalla pagina, tutte le combinazioni di `keyboard`/`joy1`/`joy2` (provate: tutte below, tutte overlay, solo joy2 overlay, kb below+joy1 overlay, joy1+joy2 overlay, kb+joy2 overlay, joy1 below+joy2 overlay).
-- [F] Non fatto: pannello con CRSR su/sinistra (mostra SHIFT + CRSR giù/destra), FIRE/joystick del tasto per-porta con più direzioni, conversione automatica in mp4 lato demone.
+- [V] Not tested: long recordings (block memory in the browser), audio/video drift, panel with the page virtual keyboard/joysticks, audio disabled by the page, all the `keyboard`/`joy1`/`joy2` combinations (tested: all below, all overlay, only joy2 overlay, kb below+joy1 overlay, joy1+joy2 overlay, kb+joy2 overlay, joy1 below+joy2 overlay).
+- [F] Not done: panel with CRSR up/left (it shows SHIFT + CRSR down/right), per-port FIRE/joystick key with several directions, automatic conversion to mp4 on the daemon side.
 
-## ROM e struttura (build 23, API 17)
-- [V] `third-party/*/README.md`: licenze di vc64web, PXLfont e diritti di ridistribuzione delle ROM Commodore NON verificati (scritto nei README).
-- [V] ROM drive: provate solo 1541 e 1541-II; 1540/1551/2031 bloccate in LOADING (prova interrotta); 1570/1571/1581 rifiutate dal core.
-- [?] JiffyDOS / SpeedDOS / Dolphin DOS e cartridge (Final Cartridge, Action Replay, Epyx FastLoad): non forniti (proprietari); non verificato se il core le accetta. Dolphin/SpeedDOS richiedono il cavo parallelo (porta utente), che il core non emula (da conoscenza generale, non verificato).
-- [V] Docker con la nuova struttura (`COPY headless/ docs/ third-party/vice-roms`): mai costruito.
+## ROMs and layout (build 23, API 17)
+- [V] `third-party/*/README.md`: licenses of vc64web, PXLfont and redistribution rights of the Commodore ROMs NOT verified (written in the READMEs).
+- [V] Drive ROMs: only 1541 and 1541-II tested; 1540/1551/2031 stuck in LOADING (test interrupted); 1570/1571/1581 refused by the core.
+- [?] JiffyDOS / SpeedDOS / Dolphin DOS and cartridges (Final Cartridge, Action Replay, Epyx FastLoad): not provided (proprietary); not verified whether the core accepts them. Dolphin/SpeedDOS need the parallel cable (user port), which the core does not emulate (general knowledge, not verified).
+- [V] Docker with the new layout (`COPY headless/ docs/ roms/`): never built. (13/11: built in the game project.)
 
-## Repo e build (build 24)
-- [V] `build.py` con Docker: mai eseguito qui (nessun demone Docker); provate solo la generazione di `out/` e il demone.
-- [V] `game NOME` per `.crt`/`.t64`/`.prg` usa `loadFile` (documentato come supportato dall'API): non provato con cartucce reali; i `.d64` sì (attach).
-- [V] Versione minima di Node non verificata (provato con la 22).
-- [?] Il headless potrebbe leggere l'emulatore direttamente da `third-party/vc64web` senza pagina generata: non fatto (la pagina in `out/` incorpora wasm e ROM).
+## Repo and build (build 24)
+- [V] `build.py` with Docker: never run here (no Docker daemon); only the generation of `out/` and the daemon were tested.
+- [V] `game NAME` for `.crt`/`.t64`/`.prg` uses `loadFile` (documented as supported by the API): not tested with real cartridges; `.d64` yes (attach).
+- [V] Minimum Node version not verified (tested with 22).
+- [?] The headless page could read the emulator directly from `third-party/vc64web` without a generated page: not done (the page in `out/` embeds wasm and ROMs).

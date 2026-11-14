@@ -1,6 +1,6 @@
-# ffmpeg — NON incluso
+# ffmpeg — NOT included
 
-**Cos'è**: codificatore usato dal demone per i video deterministici (`c64 video`, `video start` negli script): H.264 (libx264). Non è nel pacchetto: va nel PATH (il Dockerfile lo installa con `apt`, pacchetto Debian `ffmpeg`).
+**What it is**: the encoder used by the daemon for the deterministic videos (`c64 video`, `video start` in scripts): H.264 (libx264). It is not in the package: it must be in the PATH (the Dockerfile installs it with `apt`, Debian package `ffmpeg`).
 
-**Origine**: https://ffmpeg.org
-**Licenza**: LGPL-2.1+ o GPL-2+ a seconda di come è compilato; le build che includono libx264 (come quella Debian, da quanto ricordo, non verificato) sono GPL. Se si pubblica un'immagine Docker che lo contiene, valgono quei termini.
+**Origin**: https://ffmpeg.org
+**License**: LGPL-2.1+ or GPL-2+ depending on how it is compiled; builds that include libx264 (like the Debian one, as far as I remember, not verified) are GPL. If a Docker image containing it is published, those terms apply.

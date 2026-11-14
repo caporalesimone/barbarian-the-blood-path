@@ -92,7 +92,7 @@ implementazione: la wiki in docs/ (indice docs/README.md).
 - **vc64web / c64-tools** (13/11, `toolchain/vc64web-custom/`): VirtualC64 di Dirk W. Hoffmann in WebAssembly (porting vc64web) con il
   controllo da riga di comando, usato come **secondo emulatore** per i test `EMU-*` e per i video (VICE resta il riferimento).
   Licenza **non verificata** (probabile GPL-3.0, vedi `toolchain/vc64web-custom/third-party/vc64web/README.md`); la build prende le ROM
-  Commodore da `toolchain/roms/` (in git su richiesta, [toolchain/roms/roms.md](toolchain/roms/roms.md); da togliere prima di pubblicare). Provenienza e uso: [toolchain/vc64web-custom/docs/INCLUSIONE.md](toolchain/vc64web-custom/docs/INCLUSIONE.md),
+  Commodore da `toolchain/roms/` (in git su richiesta, [toolchain/roms/roms.md](toolchain/roms/roms.md); da togliere prima di pubblicare). Provenienza e uso: [toolchain/vc64web-custom/docs/INCLUSION.md](toolchain/vc64web-custom/docs/INCLUSION.md),
   [docs/emulatore.md](docs/emulatore.md). TODO `I7`.
 - **ZX0** v2 di Einar Saukas (BSD-3, `toolchain/zx0/LICENSE`): compressione di `GAME`, `LDAT` e del modulo `MENU`.
 - **VICE** 3.10 (GPL-2.0, `toolchain/vice/LICENSE`): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.

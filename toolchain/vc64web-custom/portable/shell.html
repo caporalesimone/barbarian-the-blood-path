@@ -1,11 +1,11 @@
 <!doctype html>
 <!-- Copyright © 2026 Simone Caporale
-     Front-end touch (tastiera, joystick, Fire, comandi) per vc64web.
-     Include, in un unico file, l'emulatore vc64web / VirtualC64 (GPL-3.0):
+     Touch front-end (keyboard, joystick, Fire, commands) for vc64web.
+     It includes, in one file, the vc64web / VirtualC64 emulator (GPL-3.0):
        https://github.com/vc64web/virtualc64web  ·  https://github.com/dirkwhoffmann/virtualc64
-     le Open-ROMs (https://github.com/MEGA65/open-roms) e le ROM Commodore di VICE (C64 + 1541-II, solo uso personale/test, non ridistribuire).
-     Poiché contiene codice GPL-3.0, la redistribuzione di questo file è soggetta alla GPL-3.0. -->
-<html lang="it">
+     the Open-ROMs (https://github.com/MEGA65/open-roms) and the Commodore ROMs of VICE (C64 + 1541-II, personal/test use only, do not redistribute).
+     Since it contains GPL-3.0 code, redistribution of this file is subject to the GPL-3.0. -->
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
@@ -20,7 +20,7 @@ html,body{margin:0;padding:0;height:100%;background:#111;color:var(--ink);font-f
 body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation}
 button{font-family:inherit}
 
-/* ============ struttura: PORTRAIT (default) ============ */
+/* ============ layout: PORTRAIT (default) ============ */
 #app{position:fixed;inset:0;display:flex;flex-direction:column;overflow-y:auto;overflow-x:hidden;background:#111;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 #bar{flex:none;height:var(--bar);display:flex;align-items:center;gap:4px;padding:0 6px;background:#1b1b1b;color:#ddd}
@@ -52,7 +52,7 @@ button{font-family:inherit}
 #dpad.on .knob{transition:none;background:radial-gradient(circle at 38% 32%,#ffffff 0,#dedede 55%,#b4b4b4 100%)}
 #dpad .L.on::after{border-right-color:#fff}#dpad .R.on::after{border-left-color:#fff}
 
-/* tastiera C64 */
+/* C64 keyboard */
 #kbd{flex:none;display:none;background:#d9d3c4;border-top:1px solid #9d9784;padding:5px 4px calc(6px + env(safe-area-inset-bottom));flex-direction:column;gap:4px;touch-action:none}
 #app[data-kbd="1"] #kbd{display:flex}
 #app[data-kbd="1"] #stage{max-height:38dvh}
@@ -69,7 +69,7 @@ button{font-family:inherit}
 .key.dark{background:#5b574a;color:#fff}.key.dark small{color:#d8d2bd}
 .key.w15{flex:1.5}.key.w2{flex:2}.key.w6{flex:6}
 
-/* ============ LANDSCAPE: schermo a tutta altezza, controlli in overlay ============ */
+/* ============ LANDSCAPE: full-height screen, controls in overlay ============ */
 @media (orientation:landscape){
   #app{overflow:hidden;display:block}
   #bar{position:absolute;top:0;left:0;right:0;z-index:20;padding-left:max(6px,env(safe-area-inset-left));padding-right:max(6px,env(safe-area-inset-right));padding-top:env(safe-area-inset-top);height:calc(var(--bar) + env(safe-area-inset-top))}
@@ -90,7 +90,7 @@ button{font-family:inherit}
   #kbd .krow{gap:2px}
 }
 
-/* ============ menu (pannello) ============ */
+/* ============ menu (panel) ============ */
 #sheet{position:fixed;z-index:100;inset:0;background:#fff;display:none;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:env(safe-area-inset-top) env(safe-area-inset-right) calc(20px + env(safe-area-inset-bottom)) env(safe-area-inset-left);user-select:none}
 #app[data-menu="1"] #sheet{display:block}
@@ -124,18 +124,18 @@ code{background:#eee;border-radius:4px;padding:0 3px}
 <div id="app" data-kbd="0" data-menu="0">
 
   <div id="bar">
-    <button class="ib" id="bKbd" type="button" title="Mostra/nascondi tastiera" aria-label="Tastiera">⌨</button>
-    <button class="ib" id="bPause" type="button" title="Pausa / riprendi" aria-label="Pausa">⏸</button>
+    <button class="ib" id="bKbd" type="button" title="Show/hide keyboard" aria-label="Keyboard">⌨</button>
+    <button class="ib" id="bPause" type="button" title="Pause / resume" aria-label="Pause">⏸</button>
     <button class="ib" id="bReset" type="button" title="Reset" aria-label="Reset">↺</button>
     <button class="ib red" id="bWarp" type="button" title="Warp" aria-label="Warp">⚡</button>
     <button class="ib" id="bAudio" type="button" title="Audio" aria-label="Audio">🔇</button>
-    <span id="status">fermo</span>
-    <button class="ib txt" id="bPort" type="button" title="Porta joystick">J2</button>
-    <button class="ib" id="bFs" type="button" title="Schermo intero" aria-label="Schermo intero">⛶</button>
+    <span id="status">stopped</span>
+    <button class="ib txt" id="bPort" type="button" title="Joystick port">J2</button>
+    <button class="ib" id="bFs" type="button" title="Full screen" aria-label="Full screen">⛶</button>
     <button class="ib" id="bMenu" type="button" title="Menu" aria-label="Menu">☰</button>
   </div>
 
-  <div id="stage"><div id="screen"></div><button id="startBtn" type="button">▶ Avvia emulatore</button></div>
+  <div id="stage"><div id="screen"></div><button id="startBtn" type="button">▶ Start emulator</button></div>
 
   <div id="controls">
     <button id="fireBtn" type="button" aria-label="Fire">FIRE</button>
@@ -144,95 +144,95 @@ code{background:#eee;border-radius:4px;padding:0 3px}
       <button class="qk" type="button" data-code="Enter">RETURN</button>
       <button class="qk" type="button" data-code="Space">SPACE</button>
     </div>
-    <div id="dpad" role="group" aria-label="Stick direzionale"><div class="knob"></div></div>
+    <div id="dpad" role="group" aria-label="Directional stick"><div class="knob"></div></div>
   </div>
 
   <div id="kbd"></div>
 
   <div id="sheet">
     <div class="in">
-      <header><b>Menu</b><button class="ib" id="sClose" type="button" style="background:#eee;color:#111;border-color:#bbb" aria-label="Chiudi">✕</button></header>
+      <header><b>Menu</b><button class="ib" id="sClose" type="button" style="background:#eee;color:#111;border-color:#bbb" aria-label="Close">✕</button></header>
 
       <details class="sec" open>
-        <summary>1 · Disco e programmi</summary>
+        <summary>1 · Disk and programs</summary>
         <div class="grid g2">
-          <label class="cb" for="diskFile">📁 Carica disco / programma</label>
-          <button type="button" class="cb" id="ejectBtn">⏏ Espelli dal drive</button>
+          <label class="cb" for="diskFile">📁 Load disk / program</label>
+          <button type="button" class="cb" id="ejectBtn">⏏ Eject from drive</button>
         </div>
         <input id="diskFile" type="file" accept=".d64,.g64,.prg,.t64,.crt,.tap,.zip">
-        <div class="fn" id="diskName">Nessun file selezionato</div>
-        <div class="sub">Comandi rapidi</div>
+        <div class="fn" id="diskName">No file selected</div>
+        <div class="sub">Quick commands</div>
         <div class="grid g4">
           <button type="button" class="cb" data-cmd='load"$",8'>LOAD "$"</button>
           <button type="button" class="cb" data-cmd='list'>LIST</button>
           <button type="button" class="cb" data-cmd='load"*",8,1'>LOAD "*",8,1</button>
           <button type="button" class="cb" data-cmd='run'>RUN</button>
         </div>
-        <div class="sub">Avvio automatico</div>
+        <div class="sub">Autostart</div>
         <div class="grid g2">
           <label class="cb" id="autoLbl"><input type="checkbox" id="autoStart" checked style="margin-right:6px"> Autoload + RUN</label>
-          <input type="text" id="prgName" placeholder="nome programma (vuoto = primo)" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
+          <input type="text" id="prgName" placeholder="program name (empty = first)" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
         </div>
-        <div class="note">Dopo l'inserimento digita <code>LOAD"nome*",8,1</code>, attende la fine del caricamento e fa <code>RUN</code>.</div>
+        <div class="note">After inserting, it types <code>LOAD"name*",8,1</code>, waits for the load to finish and does <code>RUN</code>.</div>
       </details>
 
       <details class="sec">
-        <summary>2 · Controllo emulatore</summary>
+        <summary>2 · Emulator control</summary>
         <div class="grid g3">
           <button type="button" class="cb" id="rsrBtn">RUN/STOP +RESTORE</button>
-          <button type="button" class="cb" id="relaunchBtn">↻ Riavvia tutto</button>
-          <button type="button" class="cb" id="stopBtn">■ Spegni</button>
+          <button type="button" class="cb" id="relaunchBtn">↻ Restart everything</button>
+          <button type="button" class="cb" id="stopBtn">■ Power off</button>
         </div>
         <div class="grid g2" style="margin-top:8px">
           <button type="button" class="cb" id="snapBtn">📸 Snapshot</button>
-          <button type="button" class="cb" id="advBtn">⚙ Impostazioni vc64web</button>
+          <button type="button" class="cb" id="advBtn">⚙ vc64web settings</button>
         </div>
-        <div class="sub">Digita testo / script</div>
+        <div class="sub">Type text / script</div>
         <div class="row">
-          <input type="text" id="typeTxt" placeholder='testo da digitare, es. load"*",8,1' autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
-          <button type="button" class="cb" id="typeBtn" style="flex:0 0 90px">Invia</button>
+          <input type="text" id="typeTxt" placeholder='text to type, e.g. load"*",8,1' autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button type="button" class="cb" id="typeBtn" style="flex:0 0 90px">Send</button>
         </div>
-        <label class="cb" style="margin-top:6px"><input type="checkbox" id="typeEnter" checked style="margin-right:6px"> + Invio</label>
+        <label class="cb" style="margin-top:6px"><input type="checkbox" id="typeEnter" checked style="margin-right:6px"> + Return</label>
         <div class="row" style="margin-top:8px">
-          <input type="text" id="scriptTxt" placeholder="action script, es. j2fire1=>100ms=>j2fire0" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
-          <button type="button" class="cb" id="scriptBtn" style="flex:0 0 90px">Esegui</button>
+          <input type="text" id="scriptTxt" placeholder="action script, e.g. j2fire1=>100ms=>j2fire0" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false">
+          <button type="button" class="cb" id="scriptBtn" style="flex:0 0 90px">Run</button>
         </div>
-        <div class="note">Sintassi dello script: wiki di vc64web, pagina <i>action_sequence_script</i>.</div>
+        <div class="note">Script syntax: vc64web wiki, page <i>action_sequence_script</i>.</div>
       </details>
 
       <details class="sec">
-        <summary>3 · Joystick e tastiera</summary>
+        <summary>3 · Joystick and keyboard</summary>
         <div class="grid g2">
-          <button type="button" class="cb on" id="port2Btn">Joystick porta 2</button>
-          <button type="button" class="cb" id="port1Btn">Joystick porta 1</button>
+          <button type="button" class="cb on" id="port2Btn">Joystick port 2</button>
+          <button type="button" class="cb" id="port1Btn">Joystick port 1</button>
         </div>
-        <label class="cb" style="margin-top:8px"><input type="checkbox" id="kbJoy" style="margin-right:6px"> Tastiera fisica → joystick (frecce + spazio)</label>
-        <div class="note">Solo per chi usa una tastiera vera: con l'opzione attiva lo SPAZIO diventa Fire e non si digita. Vale dal prossimo avvio.</div>
-        <div class="sub">Prova</div>
-        <button type="button" class="cb" id="testBtn" style="width:100%;background:#fff3f2;border-color:#c2231d">🧪 Test tasti e joystick (programma BASIC)</button>
-        <div class="note">Riavvia il C64 e disegna la tastiera: il tasto premuto si inverte, quelli già provati diventano verdi. Include SHIFT destro/sinistro, F1–F8 (F2/F4/F6/F8 = SHIFT+F1/F3/F5/F7), RESTORE e Stick/Fire delle porte 1 e 2. Reagisce entro 1 fotogramma (20 ms). Per uscire usa Reset.</div>
+        <label class="cb" style="margin-top:8px"><input type="checkbox" id="kbJoy" style="margin-right:6px"> Physical keyboard → joystick (arrows + space)</label>
+        <div class="note">Only for a real keyboard: with the option on, SPACE becomes Fire and cannot be typed. Effective from the next start.</div>
+        <div class="sub">Test</div>
+        <button type="button" class="cb" id="testBtn" style="width:100%;background:#fff3f2;border-color:#c2231d">🧪 Key and joystick test (BASIC program)</button>
+        <div class="note">Restarts the C64 and draws the keyboard: the pressed key turns reversed, the keys already tested turn green. It includes left/right SHIFT, F1–F8 (F2/F4/F6/F8 = SHIFT+F1/F3/F5/F7), RESTORE and Stick/Fire of ports 1 and 2. It reacts within 1 frame (20 ms). To exit use Reset.</div>
       </details>
 
       <details class="sec">
-        <summary>4 · Memoria (POKE / PEEK)</summary>
+        <summary>4 · Memory (POKE / PEEK)</summary>
       <div id="pokeBox">
-        <div class="note" style="margin-top:0">Utilizzabile in qualsiasi momento, anche con il programma in esecuzione.</div>
+        <div class="note" style="margin-top:0">Usable at any time, also while the program runs.</div>
         <div class="row" style="margin-top:6px">
-          <input type="text" id="pkAddr" placeholder="indirizzo ($D020, 53280)" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false">
-          <input type="text" id="pkVal" placeholder="valore (7, $07, 0x07)" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <input type="text" id="pkAddr" placeholder="address ($D020, 53280)" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <input type="text" id="pkVal" placeholder="value (7, $07, 0x07)" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="row" style="margin-top:6px">
           <button type="button" class="cb" id="pkPoke">POKE</button>
           <button type="button" class="cb" id="pkPeek">PEEK</button>
-          <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="pkRam" style="width:auto;min-height:0"> RAM pura</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px"><input type="checkbox" id="pkRam" style="width:auto;min-height:0"> Plain RAM</label>
         </div>
         <div id="pkOut" style="margin-top:6px;font:13px ui-monospace,Menlo,monospace;min-height:1.2em"></div>
       </div>
       </details>
 
       <details class="sec">
-        <summary>5 · ROM e drive</summary>
-        <div class="note">Nel file sono incorporate le ROM di VICE (C64 + 1541-II) per uso di test locale. Qui puoi sostituirle con le tue: vengono salvate nel browser e hanno la precedenza.</div>
+        <summary>5 · ROMs and drive</summary>
+        <div class="note">The file embeds the VICE ROMs (C64 + 1541-II) for local testing. Here you can replace them with your own: they are saved in the browser and take precedence.</div>
         <div class="grid g2">
           <label class="cb" for="romFloppy">1541 (floppy)</label>
           <label class="cb" for="romKernal">Kernal</label>
@@ -241,16 +241,16 @@ code{background:#eee;border-radius:4px;padding:0 3px}
         </div>
         <input id="romFloppy" type="file" data-rom="floppy"><input id="romKernal" type="file" data-rom="kernal">
         <input id="romBasic" type="file" data-rom="basic"><input id="romChar" type="file" data-rom="chargen">
-        <div class="note" style="margin-top:8px">ROM del drive incorporata (vale dal prossimo avvio). Il core emula solo la famiglia 1541: sono disponibili 1541-II e 1541.</div>
-        <div class="note" style="margin-top:8px">Varianti ROM incorporate (valgono dal prossimo avvio; le ROM caricate da file hanno la precedenza). Provato: tutti i Kernal si avviano; i drive 1540/1551/2031/1570/1571/1581 sono stati tolti perché non compatibili.</div>
+        <div class="note" style="margin-top:8px">Embedded drive ROM (effective from the next start). The core emulates only the 1541 family: 1541-II and 1541 are available.</div>
+        <div class="note" style="margin-top:8px">Embedded ROM variants (effective from the next start; ROMs loaded from file take precedence). Tested: all the Kernals boot; the 1540/1551/2031/1570/1571/1581 drives were removed because not compatible.</div>
         <select id="selKernal" class="cb" style="width:100%;margin-top:6px"></select>
         <select id="selChargen" class="cb" style="width:100%;margin-top:6px"></select>
-        <select id="drvRom" class="cb" style="width:100%;margin-top:6px"><option value="1541-II">1541-II (251968-03) — predefinita</option><option value="1541">1541 originale (325302-01 + 901229-05)</option></select>
+        <select id="drvRom" class="cb" style="width:100%;margin-top:6px"><option value="1541-II">1541-II (251968-03) — default</option><option value="1541">original 1541 (325302-01 + 901229-05)</option></select>
         <div class="fn" id="romInfo"></div>
-        <button type="button" class="cb" id="romClear" style="margin-top:8px;width:100%">Rimuovi ROM utente</button>
+        <button type="button" class="cb" id="romClear" style="margin-top:8px;width:100%">Remove user ROMs</button>
       </details>
 
-      <div class="note" id="about" style="margin-top:16px"><b>VirtualC64 <span class="verTag"></span></b><br>Emulatore: vc64web / VirtualC64 (GPL-3.0). Copyright © 2026 Simone Caporale (interfaccia). Contiene ROM Commodore (da VICE): solo uso personale/test, non ridistribuire.</div>
+      <div class="note" id="about" style="margin-top:16px"><b>VirtualC64 <span class="verTag"></span></b><br>Emulator: vc64web / VirtualC64 (GPL-3.0). Copyright © 2026 Simone Caporale (interface). Contains Commodore ROMs (from VICE): personal/test use only, do not redistribute.</div>
     </div>
   </div>
 </div>
@@ -259,13 +259,13 @@ code{background:#eee;border-radius:4px;padding:0 3px}
 
 <script>
 /* ===================================================================
-   Dati incorporati (generati da build.py)
+   Embedded data (generated by build.py)
    =================================================================== */
-const INNER  = /*__INNER__*/null;     // documento HTML di vc64web (stringa)
-const ASSETS = /*__ASSETS__*/{};      // nome -> {t: mime, b: base64}
+const INNER  = /*__INNER__*/null;     // vc64web HTML document (string)
+const ASSETS = /*__ASSETS__*/{};      // name -> {t: mime, b: base64}
 
 /* ===================================================================
-   Utilità
+   Utilities
    =================================================================== */
 const $ = id => document.getElementById(id);
 const st = { port:2, running:false, paused:false, warp:false, audio:false, disk:null, roms:{}, mods:{shift:false,ctrl:false,cbm:false}, injected:false };
@@ -278,14 +278,14 @@ function b64ToU8(b64){ const s=atob(b64), u=new Uint8Array(s.length); for(let i=
 function fileToB64(f){ return new Promise((ok,ko)=>{ const r=new FileReader(); r.onload=()=>ok(r.result.split(',')[1]); r.onerror=ko; r.readAsDataURL(f); }); }
 
 /* ===================================================================
-   Emulatore: iframe (blob) + canale postMessage
+   Emulator: iframe (blob) + postMessage channel
    =================================================================== */
 let frame=null, pollT=null;
 
 function send(obj){ try{ frame.contentWindow.postMessage(obj,'*'); return true; }catch(e){ return false; } }
-/* esegue codice nel contesto globale dell'emulatore (stessa semantica di vc64web_player.exec) */
+/* runs code in the emulator global context (same semantics as vc64web_player.exec) */
 function emu(code){
-  if(!st.running||!frame){ msg("Avvia prima l'emulatore"); return false; }
+  if(!st.running||!frame){ msg("Start the emulator first"); return false; }
   return send({cmd:'script', script:code});
 }
 const act = s => emu('await action('+JSON.stringify(s)+');');
@@ -304,15 +304,15 @@ window.addEventListener('message', ev=>{
   }
 });
 
-// ROM effettive: quelle caricate dall'utente hanno la precedenza su quelle incorporate (VICE)
-const APP_BUILD='/*__VER__*/';          // build = numero progressivo (vNN)
-const KERNALS={'901227-03':'901227-03 (standard, rev. 3) — predefinito','901227-02':'901227-02 (rev. 2)','901227-01':'901227-01 (rev. 1)','251104-04':'251104-04 (SX-64)','390852-01':'390852-01 (C64 Games System)','901246-01':'901246-01 (4064 / Educator)','906145-02':'906145-02 (variante, non identificata)'};
-const CHARGENS={'901225-01':'901225-01 (standard) — predefinito','906143-02':'906143-02 (set alternativo)'};
+// effective ROMs: those loaded by the user take precedence over the embedded ones (VICE)
+const APP_BUILD='/*__VER__*/';          // build = progressive number (vNN)
+const KERNALS={'901227-03':'901227-03 (standard, rev. 3) — predefinito','901227-02':'901227-02 (rev. 2)','901227-01':'901227-01 (rev. 1)','251104-04':'251104-04 (SX-64)','390852-01':'390852-01 (C64 Games System)','901246-01':'901246-01 (4064 / Educator)','906145-02':'906145-02 (variant, not identified)'};
+const CHARGENS={'901225-01':'901225-01 (standard) — predefinito','906143-02':'906143-02 (alternative set)'};
 const DEFSEL={kernal:'901227-03',chargen:'901225-01'};
-for(const k of Object.keys(KERNALS)) if(!ASSETS['rom_kernal_'+k]) delete KERNALS[k];     // solo le varianti incorporate (la build elenca quelle trovate in roms/)
+for(const k of Object.keys(KERNALS)) if(!ASSETS['rom_kernal_'+k]) delete KERNALS[k];     // only the embedded variants (the build lists those found in roms/)
 for(const k of Object.keys(CHARGENS)) if(!ASSETS['rom_chargen_'+k]) delete CHARGENS[k];
 const rkey=k=>k==='floppy'?DRVROMS[st.drvRom||'1541-II']:k==='basic'?'rom_basic':'rom_'+k+'_'+((st.sel&&st.sel[k])||DEFSEL[k]);
-const DRVROMS={'1541-II':'rom_floppy','1541':'rom_floppy_1541'};   // ROM drive incorporate: il core emula solo la famiglia 1541
+const DRVROMS={'1541-II':'rom_floppy','1541':'rom_floppy_1541'};   // embedded drive ROMs: the core emulates only the 1541 family
 function romB64(k){ const u=st.roms[k]; if(u&&u.b64) return u.b64; const a=ASSETS[rkey(k)]; return a?a.b:null; }
 function romsComplete(){ return ['kernal','basic','chargen'].every(k=>!!romB64(k)); }
 function haveFloppy(){ return !!romB64('floppy'); }
@@ -322,8 +322,8 @@ function launch(){
   stopFrame();
   const cfg={ navbar:false, wide:false, border:0.3, touch:false, dialog_on_disk:false, dialog_on_missing_roms:false };
   cfg.openROMS = !romsComplete();          // Open-ROMs incorporate, se mancano Kernal/Basic/Chargen
-  if($('kbJoy').checked) cfg['port'+st.port]=true;   // tastiera fisica → joystick su quella porta (opzionale)
-  // l'iframe (srcdoc, stessa origine) legge risorse e configurazione da window.parent.__EMU
+  if($('kbJoy').checked) cfg['port'+st.port]=true;   // physical keyboard → joystick on that port (optional)
+  // the iframe (srcdoc, same origin) reads resources and configuration from window.parent.__EMU
   window.__EMU={ assets:ASSETS, href:'about:srcdoc#'+encodeURIComponent(JSON.stringify(cfg)) };
   frame=document.createElement('iframe');
   frame.setAttribute('allow','autoplay; fullscreen; gamepad');
@@ -331,22 +331,22 @@ function launch(){
   $('screen').appendChild(frame);
   $('startBtn').style.display='none';
   st.running=true; st.injected=false; st.paused=false; st.warp=false;
-  $('status').textContent='avvio…';
+  $('status').textContent='starting…';
   clearInterval(pollT);
   pollT=setInterval(()=>send('poll_state'), st.injected?900:350);
   setTimeout(()=>{ if(st.running) $('status').textContent=statusText(); },2500);
 }
-function statusText(){ return (romsComplete()?(Object.keys(st.roms).length?'ROM originali (utente+VICE)':'ROM VICE'):'Open-ROMs')+(haveFloppy()?' · 1541':' · senza 1541')+(st.disk?' · '+st.disk.name:''); }
+function statusText(){ return (romsComplete()?(Object.keys(st.roms).length?'ROM originali (utente+VICE)':'ROM VICE'):'Open-ROMs')+(haveFloppy()?' · 1541':' · no 1541')+(st.disk?' · '+st.disk.name:''); }
 function stopFrame(){
   clearInterval(pollT); pollT=null;
   if(frame){ frame.remove(); frame=null; }
 }
 function stop(){
   releaseAllInput(); stopFrame(); st.running=false;
-  $('startBtn').style.display=''; $('status').textContent='fermo';
+  $('startBtn').style.display=''; $('status').textContent='stopped';
 }
 
-/* Dopo il primo "render_run_state": ROM utente + eventuale disco (stesso meccanismo del web player) */
+/* After the first "render_run_state": user ROMs + optional disk (same mechanism as the web player) */
 function inject(){
   clearInterval(pollT); pollT=setInterval(()=>send('poll_state'),900);
   const d={cmd:'load'};
@@ -356,7 +356,7 @@ function inject(){
   if(st.disk){ d.file_name=st.disk.name; d.file=st.disk.bin; any=true; }
   if(any) send(d);
   if(st.disk) afterInsert();
-  if(st.once){ st.disk=null; st.once=false; $('diskName').textContent='Nessun file selezionato'; }
+  if(st.once){ st.disk=null; st.once=false; $('diskName').textContent='No file selected'; }
   $('status').textContent=statusText();
 }
 function afterInsert(){
@@ -364,14 +364,14 @@ function afterInsert(){
   const sl="const sl=ms=>new Promise(r=>setTimeout(r,ms));";
   let script=null;
   if(/\.(prg|t64)$/i.test(n)){
-    // il programma viene caricato dopo un reset: attendo il prompt e digito RUN
+    // the program is loaded after a reset: wait for the prompt and type RUN
     script=sl+"await sl(400);await wasm_ready_after_reset();await sl(900);wasm_auto_type('run:\\n');";
   }else if(/\.(d64|g64)$/i.test(n) && $('autoStart').checked){
     const prg=$('prgName').value.trim().replace(/["\\]/g,'');
     script=sl+
       "for(let i=0;i<200&&!wasm_has_disk('drive8');i++) await sl(100);"+
       "await wasm_ready_after_reset();"+
-      "wasm_poke(0xD4,0);wasm_poke(0xD8,0);"+          // esce da eventuale modo virgolette/inserimento
+      "wasm_poke(0xD4,0);wasm_poke(0xD8,0);"+          // leaves any quote/insert mode
       "wasm_auto_type("+JSON.stringify('load"'+prg+'*",8,1:\n')+");"+
       "await disk_loading_finished();"+
       "wasm_auto_type('\\nrun:\\n');";
@@ -381,11 +381,11 @@ function afterInsert(){
 
 /*KT<<*/
 /* ===================================================================
-   Programma di test tasti/joystick (BASIC, tokenizzato qui in JS)
-   Disegna la tastiera C64: tasto premuto = invertito, già provato = verde.
-   Legge: $C5 (197) tasto corrente, $028D (653) SHIFT/C=/CTRL, $DC00/$DC01 joystick.
+   Key/joystick test program (BASIC, tokenized here in JS)
+   Draws the C64 keyboard: pressed key = reversed, already tested = green.
+   Reads: $C5 (197) current key, $028D (653) SHIFT/C=/CTRL, $DC00/$DC01 joystick.
    =================================================================== */
-const KT_KEYS=[ // [codice $C5, x, y, etichetta]   (codice = riga*8+colonna della matrice 6526)
+const KT_KEYS=[ // [$C5 code, x, y, label]   (code = row*8+column of the 6526 matrix)
  [57,1,3,'←'],[56,3,3,'1'],[59,5,3,'2'],[8,7,3,'3'],[11,9,3,'4'],[16,11,3,'5'],[19,13,3,'6'],[24,15,3,'7'],[27,17,3,'8'],[32,19,3,'9'],[35,21,3,'0'],[40,23,3,'+'],[43,25,3,'-'],[48,27,3,'£'],[51,29,3,'HOME'],[0,34,3,'DEL'],
  [58,0,5,'CTRL'],[62,5,5,'Q'],[9,7,5,'W'],[14,9,5,'E'],[17,11,5,'R'],[22,13,5,'T'],[25,15,5,'Y'],[30,17,5,'U'],[33,19,5,'I'],[38,21,5,'O'],[41,23,5,'P'],[46,25,5,'@'],[49,27,5,'*'],[54,29,5,'↑'],[74,33,5,'RST'],
  [63,0,7,'STOP'],[10,5,7,'A'],[13,7,7,'S'],[18,9,7,'D'],[21,11,7,'F'],[26,13,7,'G'],[29,15,7,'H'],[34,17,7,'J'],[37,19,7,'K'],[42,21,7,'L'],[45,23,7,':'],[50,25,7,';'],[53,27,7,'='],[1,30,7,'RETURN'],
@@ -399,7 +399,7 @@ const BAS_KW=['END','FOR','NEXT','DATA','INPUT#','INPUT','DIM','READ','LET','GOT
 const BAS_SORTED=BAS_KW.map((k,i)=>[k,128+i]).sort((a,b)=>b[0].length-a[0].length);
 const PET={'£':92,'←':95,'↑':94};
 function petByte(ch){ return PET[ch]!==undefined?PET[ch]:ch.charCodeAt(0); }
-function basTokenize(src){            // testo di una riga -> byte (keyword in token, stringhe/REM/DATA grezzi)
+function basTokenize(src){            // text of a line -> bytes (keywords as tokens, strings/REM/DATA raw)
   const out=[]; let i=0, q=false;
   while(i<src.length){
     const ch=src[i];
@@ -416,7 +416,7 @@ function basTokenize(src){            // testo di una riga -> byte (keyword in t
   }
   return out;
 }
-function basProgram(lines,start=0x0801){   // [[numero,testo],...] -> PRG
+function basProgram(lines,start=0x0801){   // [[number,text],...] -> PRG
   const body=[]; let addr=start;
   for(const [n,t] of lines){
     const tok=basTokenize(t), len=2+2+tok.length+1, next=addr+len;
@@ -425,9 +425,9 @@ function basProgram(lines,start=0x0801){   // [[numero,testo],...] -> PRG
   body.push(0,0);
   return Uint8Array.from([start&255,start>>8,...body]);
 }
-// Test tasti: il PRG contiene un piccolo programma BASIC (stato "ULTIMO/EVENTI") e, da $0A00, un blob in linguaggio macchina
-// che copia in un attimo l'immagine dello schermo, le tabelle e la routine IRQ/NMI ($C000) e la installa.
-// La routine scandisce matrice tastiera e joystick a ogni IRQ: latenza = 1 fotogramma. Il blob è generato da asm/mkblob.py.
+// Key test: the PRG contains a small BASIC program (status "LAST/EVENTS") and, from $0A00, a machine-language blob
+// that copies at once the screen image, the tables and the IRQ/NMI routine ($C000) and installs it.
+// The routine scans keyboard matrix and joysticks at every IRQ: latency = 1 frame. The blob is generated by asm/mkblob.py.
 const KT_BLOB=/*__KTBLOB__*/null;
 function buildKeyTestPrg(){
   const L=[];
@@ -443,13 +443,13 @@ function buildKeyTestPrg(){
   L.push([83,'IF I>=64 AND I<69 THEN PRINT "J2 ";']);
   L.push([85,'POKE 781,22:POKE 782,8:POKE 783,0:SYS 65520:PRINT NC;"    ";:GOTO 30']);
   const bas=basProgram(L), off=KT_BLOB.base-0x0801+2;
-  if(bas.length>off) throw new Error('programma BASIC del test troppo lungo');
+  if(bas.length>off) throw new Error('test BASIC program too long');
   const out=new Uint8Array(off+KT_BLOB.bytes.length); out.set(bas,0); out.set(KT_BLOB.bytes,off); return out;
 }
 /*>>KT*/
 function runTestPrg(){
   const bin=buildKeyTestPrg();
-  if(st.running&&st.injected){ mountDisk('keytest.prg',bin); st.disk=null; $('diskName').textContent='Nessun file selezionato'; }
+  if(st.running&&st.injected){ mountDisk('keytest.prg',bin); st.disk=null; $('diskName').textContent='No file selected'; }
   else { st.once=true; mountDisk('keytest.prg',bin); }
 }
 $('testBtn').onclick=()=>{ runTestPrg(); closeMenu(); };
@@ -459,32 +459,32 @@ $('relaunchBtn').onclick=()=>{ launch(); closeMenu(); };
 $('stopBtn').onclick=()=>{ stop(); closeMenu(); };
 
 /* ===================================================================
-   ROM / disco
+   ROM / disk
    =================================================================== */
 function loadPrefs(){
   try{ const o=JSON.parse(lsGet(LSK)||'{}'); st.roms=o.roms||{}; if(o.drvRom&&DRVROMS[o.drvRom]) st.drvRom=o.drvRom; st.sel={}; if(o.sel){ if(KERNALS[o.sel.kernal]) st.sel.kernal=o.sel.kernal; if(CHARGENS[o.sel.chargen]) st.sel.chargen=o.sel.chargen; } if(o.port) st.port=o.port; $('autoStart').checked=(o.auto===undefined)?true:!!o.auto; if(o.kbJoy) $('kbJoy').checked=true; if(o.prg) $('prgName').value=o.prg; if(o.kbd!==undefined&&o.kbd!==null) setKbd(!!o.kbd); }catch(e){}
 }
 function savePrefs(){
   const ok=lsSet(LSK, JSON.stringify({roms:st.roms, drvRom:st.drvRom||'1541-II', sel:st.sel||{}, port:st.port, auto:$('autoStart').checked, kbJoy:$('kbJoy').checked, prg:$('prgName').value, kbd:$('app').dataset.kbd==='1'}));
-  if(!ok) msg('Impossibile salvare nel browser (ROM comprese)');
+  if(!ok) msg('Cannot save in the browser (ROMs included)');
 }
 function romInfo(){
   const n=Object.keys(st.roms).filter(k=>st.roms[k]&&st.roms[k].b64).map(k=>k+' ('+st.roms[k].name+')');
-  $('romInfo').textContent = 'Attive (incorporate, VICE): Kernal '+((st.sel&&st.sel.kernal)||DEFSEL.kernal)+', Basic 901226-01, Chargen '+((st.sel&&st.sel.chargen)||DEFSEL.chargen)+', drive '+(st.drvRom||'1541-II')+'. '+(n.length?'Sostituite da: '+n.join(', '):'Nessuna ROM utente caricata.');
+  $('romInfo').textContent = 'Attive (incorporate, VICE): Kernal '+((st.sel&&st.sel.kernal)||DEFSEL.kernal)+', Basic 901226-01, Chargen '+((st.sel&&st.sel.chargen)||DEFSEL.chargen)+', drive '+(st.drvRom||'1541-II')+'. '+(n.length?'Replaced by: '+n.join(', '):'No user ROM loaded.');
 }
 document.querySelectorAll('input[data-rom]').forEach(inp=>{
   inp.addEventListener('change', async ()=>{
     const f=inp.files[0]; if(!f) return;
     st.roms[inp.dataset.rom]={name:f.name,b64:await fileToB64(f)};
     savePrefs(); romInfo();
-    if(st.running){ msg('ROM salvata — riavvio'); launch(); } else msg('ROM salvata');
+    if(st.running){ msg('ROM saved — restarting'); launch(); } else msg('ROM saved');
     inp.value='';
   });
 });
-$('romClear').onclick=()=>{ st.roms={}; savePrefs(); romInfo(); msg('ROM utente cancellate (tornano quelle VICE al prossimo avvio)'); };
+$('romClear').onclick=()=>{ st.roms={}; savePrefs(); romInfo(); msg('User ROMs removed (the VICE ones come back at the next start)'); };
 for(const [id,key,tab] of [['selKernal','kernal',KERNALS],['selChargen','chargen',CHARGENS]]){ const el=$(id); el.innerHTML=Object.keys(tab).map(k=>'<option value="'+k+'">'+(key==='kernal'?'Kernal ':'Chargen ')+tab[k]+'</option>').join('');
-  el.addEventListener('change',()=>{ st.sel=st.sel||{}; st.sel[key]=el.value; savePrefs(); romInfo(); msg(key+' '+el.value+': attivo al prossimo avvio'); }); }
-$('drvRom').addEventListener('change',()=>{ st.drvRom=$('drvRom').value; savePrefs(); romInfo(); msg('ROM drive '+st.drvRom+': attiva al prossimo avvio'); });
+  el.addEventListener('change',()=>{ st.sel=st.sel||{}; st.sel[key]=el.value; savePrefs(); romInfo(); msg(key+' '+el.value+': active from the next start'); }); }
+$('drvRom').addEventListener('change',()=>{ st.drvRom=$('drvRom').value; savePrefs(); romInfo(); msg('ROM drive '+st.drvRom+': active from the next start'); });
 $('autoStart').addEventListener('change',savePrefs); $('kbJoy').addEventListener('change',savePrefs); $('prgName').addEventListener('change',savePrefs);
 
 function mountDisk(name,bin){
@@ -498,24 +498,24 @@ $('diskFile').addEventListener('change', async e=>{
   mountDisk(f.name, new Uint8Array(await f.arrayBuffer())); closeMenu();
   e.target.value='';
 });
-$('ejectBtn').onclick=()=>{ emu("try{wasm_eject_disk('drive8')}catch(e){}"); st.disk=null; $('diskName').textContent='Nessun file selezionato'; msg('Disco espulso'); };
+$('ejectBtn').onclick=()=>{ emu("try{wasm_eject_disk('drive8')}catch(e){}"); st.disk=null; $('diskName').textContent='No file selected'; msg('Disk ejected'); };
 
 /* ===================================================================
-   Pulsanti emulatore
+   Emulator buttons
    =================================================================== */
 $('bPause').onclick=()=>{ act('toggle_run'); };
 $('bReset').onclick=()=>{ emu("wasm_reset();reset_keyboard();"); msg('Reset'); };
 $('bWarp').onclick=()=>{ act('toggle_warp'); };
-$('bAudio').onclick=()=>{ if(!st.running) return msg("Avvia prima l'emulatore"); send('toggle_audio()'); };
+$('bAudio').onclick=()=>{ if(!st.running) return msg("Start the emulator first"); send('toggle_audio()'); };
 $('advBtn').onclick=()=>{ act('menubar'); closeMenu(); };
-$('snapBtn').onclick=()=>{ act('take_snapshot'); msg('Snapshot richiesto'); closeMenu(); };
+$('snapBtn').onclick=()=>{ act('take_snapshot'); msg('Snapshot requested'); closeMenu(); };
 $('rsrBtn').onclick=()=>{ emu("wasm_runstop_restore();"); closeMenu(); };
 $('bFs').onclick=()=>{
   const el=$('app');
   if(document.fullscreenElement||document.webkitFullscreenElement){ (document.exitFullscreen||document.webkitExitFullscreen).call(document); return; }
   const f=el.requestFullscreen||el.webkitRequestFullscreen;
-  if(f){ try{ const r=f.call(el); if(r&&r.catch) r.catch(()=>msg('Schermo intero non disponibile')); }catch(e){ msg('Schermo intero non disponibile'); } }
-  else msg('Schermo intero non supportato da questo browser (iPhone: usa "Aggiungi a Home")');
+  if(f){ try{ const r=f.call(el); if(r&&r.catch) r.catch(()=>msg('Full screen not available')); }catch(e){ msg('Full screen not available'); } }
+  else msg('Full screen not supported by this browser (iPhone: use "Add to Home Screen")');
 };
 function openMenu(){ $('app').dataset.menu='1'; }
 function closeMenu(){ $('app').dataset.menu='0'; }
@@ -576,15 +576,15 @@ function setPort(p){
   releaseAllInput(); st.port=p;
   $('port1Btn').classList.toggle('on',p===1); $('port2Btn').classList.toggle('on',p===2);
   $('bPort').textContent='J'+p; savePrefs();
-  if(st.running) msg('Joystick su porta '+p);
+  if(st.running) msg('Joystick on port '+p);
 }
 $('port1Btn').onclick=()=>setPort(1); $('port2Btn').onclick=()=>setPort(2);
 $('bPort').onclick=()=>setPort(st.port===2?1:2);
 
 /* ===================================================================
-   Tastiera C64 (matrice via press_key / release_key di vc64web: tenuta supportata)
+   C64 keyboard (matrix via vc64web press_key / release_key: holding supported)
    =================================================================== */
-// [etichetta, codice fisico vc64web, etichetta shift, classi, tipo]  tipo: k=tasto, m=modificatore a scatto
+// [label, vc64web physical code, shift label, classes, kind]  kind: k=key, m=latching modifier
 const K=(l,c,s,cl)=>[l,c,s||'',cl||'','k'];
 const M=(l,c,cl,id)=>[l,c,'','mod '+(cl||''),'m',id];
 const L=ch=>K(ch,'Key'+ch);
@@ -612,7 +612,7 @@ function clearMods(){ st.mods.shift=st.mods.ctrl=st.mods.cbm=false; kbd.querySel
 function activeModCodes(){
   const a=[]; for(const m of ['ctrl','cbm','shift']) if(st.mods[m]) a.push(MODCODE[m]); return a;
 }
-// pressione/rilascio con tenuta minima (≥70 ms) per essere sicuri che il C64 la veda
+// press/release with a minimum hold (≥70 ms) to be sure the C64 sees it
 const held=new Map();   // pointerId -> {code,mods,t}
 function keyDown(code,mods){
   emu(mods.map(m=>'press_key("'+m+'");').join('')+'press_key("'+code+'");');
@@ -624,7 +624,7 @@ function keyUp(code,mods,t){
 function bindKeyEl(el,getCode,opts){
   el.addEventListener('pointerdown',e=>{
     e.preventDefault();
-    if(!st.running){ msg("Avvia prima l'emulatore"); return; }
+    if(!st.running){ msg("Start the emulator first"); return; }
     try{ el.setPointerCapture(e.pointerId); }catch(_){}
     el.classList.add('hit');
     const code=getCode(), mods=opts&&opts.sticky?activeModCodes():[];
@@ -654,7 +654,7 @@ window.addEventListener('blur',releaseAllKeys);
 function setKbd(on){ $('app').dataset.kbd=on?'1':'0'; $('bKbd').classList.toggle('on',on); }
 $('bKbd').onclick=()=>{ setKbd($('app').dataset.kbd!=='1'); savePrefs(); };
 
-/* il focus torna all'emulatore dopo un tocco sui controlli (tastiera fisica su desktop) */
+/* the focus goes back to the emulator after a touch on the controls (physical keyboard on desktop) */
 document.addEventListener('pointerup',e=>{
   if(frame && !e.target.closest('input,textarea,#sheet')){ try{ frame.focus(); }catch(_){} }
 });
@@ -663,8 +663,8 @@ window.addEventListener('beforeunload',()=>{ savePrefs(); });
 
 /* POKE / PEEK manuale dal menu */
 (function(){
-  const core=()=>{ const w=frame&&st.running?frame.contentWindow:null; if(!w||typeof w.wasm_peek!=='function') throw new Error("Avvia prima l'emulatore"); return w; };
-  const ramView=f=>{ const w=core(); if(!$('pkRam').checked) return f(w); const old=w.wasm_peek(1); w.wasm_poke(1,old&0xF8); try{ return f(w); } finally{ w.wasm_poke(1,old); } };   // RAM pura: $01 = RAM ovunque, poi ripristino
+  const core=()=>{ const w=frame&&st.running?frame.contentWindow:null; if(!w||typeof w.wasm_peek!=='function') throw new Error("Start the emulator first"); return w; };
+  const ramView=f=>{ const w=core(); if(!$('pkRam').checked) return f(w); const old=w.wasm_peek(1); w.wasm_poke(1,old&0xF8); try{ return f(w); } finally{ w.wasm_poke(1,old); } };   // plain RAM: $01 = RAM everywhere, then restore
   const memPeek=a=>ramView(w=>w.wasm_peek(a)), memPoke=(a,v)=>ramView(w=>w.wasm_poke(a,v));
   const num=t=>{ t=String(t).trim(); if(/^\$[0-9a-f]+$/i.test(t)) return parseInt(t.slice(1),16); if(/^0x[0-9a-f]+$/i.test(t)) return parseInt(t,16); if(/^%[01]+$/.test(t)) return parseInt(t.slice(1),2); if(/^\d+$/.test(t)) return +t; return NaN; };
   const out=(m,ok)=>{ const o=$('pkOut'); o.textContent=m; o.style.color=ok===false?'#c2231d':'inherit'; };
@@ -672,13 +672,13 @@ window.addEventListener('beforeunload',()=>{ savePrefs(); });
   function addrVal(){ let a=num($('pkAddr').value); if(isNaN(a)&&$('pkAddr').value.trim()) {  } return a; }
   $('pkPoke').onclick=()=>{
     const a=addrVal(), v=num($('pkVal').value);
-    if(isNaN(a)||a<0||a>65535) return out('Indirizzo non valido (0–65535, $0000–$FFFF)',false);
-    if(isNaN(v)||v<0||v>255) return out('Valore non valido (0–255, $00–$FF)',false);
-    try{ memPoke(a,v); const r=memPeek(a); out('POKE '+a+','+v+'  →  $'+hx(a,4)+' = $'+hx(r,2)+' ('+r+')'+(r!==v?'  (letto un valore diverso: bit non usati, registro I/O o ROM)':''));
+    if(isNaN(a)||a<0||a>65535) return out('Invalid address (0–65535, $0000–$FFFF)',false);
+    if(isNaN(v)||v<0||v>255) return out('Invalid value (0–255, $00–$FF)',false);
+    try{ memPoke(a,v); const r=memPeek(a); out('POKE '+a+','+v+'  →  $'+hx(a,4)+' = $'+hx(r,2)+' ('+r+')'+(r!==v?'  (a different value was read: unused bits, I/O register or ROM)':''));
     }catch(e){ out(e.message,false); }
   };
   $('pkPeek').onclick=()=>{
-    const a=addrVal(); if(isNaN(a)||a<0||a>65535) return out('Indirizzo non valido (0–65535, $0000–$FFFF)',false);
+    const a=addrVal(); if(isNaN(a)||a<0||a>65535) return out('Invalid address (0–65535, $0000–$FFFF)',false);
     try{ const r=memPeek(a); out('PEEK('+a+')  →  $'+hx(r,2)+' = '+r+' = %'+r.toString(2).padStart(8,'0')); }catch(e){ out(e.message,false); }
   };
   [$('pkAddr'),$('pkVal')].forEach(el=>el.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('pkPoke').click(); } e.stopPropagation(); }));
@@ -688,11 +688,11 @@ window.addEventListener('beforeunload',()=>{ savePrefs(); });
 const firstRun = lsGet(LSK)===null;
 loadPrefs(); $('drvRom').value=st.drvRom||'1541-II'; $('selKernal').value=(st.sel&&st.sel.kernal)||DEFSEL.kernal; $('selChargen').value=(st.sel&&st.sel.chargen)||DEFSEL.chargen; setPort(st.port); romInfo();
 document.querySelectorAll('.verTag').forEach(e=>e.textContent=APP_BUILD);
-if(firstRun && matchMedia('(orientation:portrait)').matches) setKbd(true);   // primo avvio in verticale: tastiera visibile
+if(firstRun && matchMedia('(orientation:portrait)').matches) setKbd(true);   // first start in portrait: keyboard visible
 
-/* ?disk=URL[&program=NOME] (13/11): scarica il disco e lo avvia (con "Autoload + RUN" se attivo). fetch con cache 'no-cache':
-   il browser chiede al server se il file e' cambiato e lo riscarica solo in quel caso. Senza parametro: nessuna richiesta di rete.
-   Funziona solo da un server web (da file:// il browser blocca fetch). */
+/* ?disk=URL[&program=NAME] (13/11): downloads the disk and starts it (with "Autoload + RUN" if on). fetch with cache 'no-cache':
+   the browser asks the server whether the file changed and downloads it again only then. No parameter: no network request.
+   It works only from a web server (from file:// the browser blocks fetch). */
 (async function(){
   const q=new URLSearchParams(location.search), u=q.get('disk'); if(!u) return;
   if(q.has('program')) $('prgName').value=q.get('program').replace(/["\\]/g,'');
@@ -700,7 +700,7 @@ if(firstRun && matchMedia('(orientation:portrait)').matches) setKbd(true);   // 
     const r=await fetch(u,{cache:'no-cache'}); if(!r.ok) throw new Error('HTTP '+r.status);
     const name=decodeURIComponent(new URL(u,location.href).pathname.split('/').pop())||'disk.d64';
     mountDisk(name,new Uint8Array(await r.arrayBuffer()));
-  }catch(e){ msg('Disco non caricato ('+u+'): '+e.message); }
+  }catch(e){ msg('Disk not loaded ('+u+'): '+e.message); }
 })();
 </script>
 </body>
