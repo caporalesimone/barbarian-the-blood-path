@@ -553,6 +553,11 @@ VS Code: niente per ora. Prima la mappa della memoria (T1), poi il resto (T2).
 - Una misura generica nel manifest per il viewer (`memmap.json`: RAM libera, blocchi liberi) cosi' ogni progetto ha l'andamento
   della memoria senza scrivere codice.
 
+### T3 Toolchain in inglese (14/11, regola del committente)
+- Tutto `toolchain/` in inglese: `README.md`, script (`run.sh`, `images.sh`, `viewer.sh`, `validate_env.sh`), `viewer_player.py`,
+  Dockerfile, server e pagine del viewer (`index.html`, `live.html`, `server.js`), `vc64web-custom/`. Fatto: `memmap/c64map.py`.
+  Cavilli: i messaggi degli script che i test o la wiki citano alla lettera vanno aggiornati insieme. **Complessita'**: M.
+
 ### T2 Estrazione della toolchain in un repository a parte
 - Piano da preparare dopo T1 (14/11): rendere `toolchain/` autosufficiente (dentro: `tools/vice/` generici, `tests/lib/` motore dei
   test, `publish.py`, cache dei passi, versioni), immagini con la versione nel tag, comando `c64t` (`init`, `build`, `test`, `view`,

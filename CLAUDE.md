@@ -12,6 +12,8 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   Segnalare SEMPRE quando un'informazione non è certa al 100%.
 - I file per Simone si consegnano come file (SendUserFile), non come artifact pubblicati.
 - Tutto il testo **nel gioco** è in inglese; i nomi di oggetti, mostri e abilità non si traducono mai.
+- (14/11, regola del committente) **La toolchain (`toolchain/`) è tutta in inglese**: codice, commenti, script, pagine generate,
+  README e messaggi. Il resto del progetto (wiki, TODO, commit) resta in italiano.
 - Copyright: "COPYRIGHT 2026 - SIMONE CAPORALE" nel gioco, "Copyright © 2026 - Simone Caporale" nei documenti.
 
 ## Ambiente: tutto nei container (13/11, regola del committente)
