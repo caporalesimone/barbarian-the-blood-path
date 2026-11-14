@@ -133,7 +133,9 @@ registri `$D400-$D418` con le modifiche evidenziate. **Disposizione** (14/11): i
 sposta trascinando la maniglia ⠿, si allarga solo alle misure previste per lui (bottone `L×A` nell'intestazione: clic = misura
 successiva, Shift+clic = precedente; oppure l'angolo ◢, che scatta), si chiude alla sola intestazione; il VU ha misura fissa; gli
 altri scendono e riempiono i buchi. La disposizione resta nel browser, **⟲ VIEW** torna a quella di partenza. Elenco e barra in alto
-restano fissi. Il piano roll mostra 10 s a 6 colonne e 20 s a 12. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID.
+restano fissi. Due temi (menu "theme" in alto): **studio** (banco scuro) e **commodore** (come la pagina di controllo: carta
+crema, rosso, strisce arcobaleno, chiaro o scuro secondo la scelta fatta li'). Dalla pagina di controllo si apre anche con **♪ SID Studio**
+in "Try it yourself" (sulle musiche della versione piu' recente). Il piano roll mostra 10 s a 6 colonne e 20 s a 12. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID.
 Test: `MUSIC-11` (regression) controlla l'intestazione di ogni `.sid` e che init + 50 fotogrammi di play scrivano il SID.
 
 ## Effetti sonori (`src/common/sfx.inc`)
