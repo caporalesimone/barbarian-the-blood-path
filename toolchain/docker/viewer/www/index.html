@@ -1,19 +1,19 @@
 <!doctype html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>C64 control center</title>
-<!-- Pagina indice di c64-emu-viewer: centro di controllo di un progetto C64 (13/11; 14/11 centro di controllo). Copyright (c) 2026 - Simone Caporale
-     Generica: non sa nulla del progetto. Legge solo file serviti dal server del viewer (server.js), in sola lettura:
-       /out/releases/v<V>/manifest.json   una scheda per versione (formato: toolchain/README.md, "Manifest per il viewer")
-       /out/tmp/build.json, tests.json    stato dal vivo di build e test (formato: idem)
-       /out/cache/vc64web/                pagina di vc64web (emulatore nel browser)
-       /config.js                         VIEW_TITLE = nome del progetto (C64_VIEW_TITLE in toolchain.env)
-     e comanda VICE sullo schermo dal vivo con POST /control (lettore toolchain/viewer_player.py, se C64_VIEW_PLAYER e' definito).
-     Senza manifest.json elenca solo i dischi .d64 trovati in out/releases/v*/ e in out/.
-     Tema (14/11, richiesta del committente): moderno ma che ricordi il C64 e i suoi manuali: carta beige, inchiostro marrone, rosso
-     scuro, barra arcobaleno, etichette a forma di tasto. -->
+<!-- c64-emu-viewer index page: control center of a C64 project (13/11; 14/11 control center). Copyright (c) 2026 - Simone Caporale
+     Generic: it knows nothing about the project. It reads only files served by the viewer server (server.js), read-only:
+       /out/releases/v<V>/manifest.json   one card per version (format: toolchain/README.md, "Manifest for the viewer")
+       /out/tmp/build.json, tests.json    live build and test status (format: same place)
+       /out/cache/vc64web/                vc64web page (in-browser emulator)
+       /config.js                         VIEW_TITLE = project name (C64_VIEW_TITLE in toolchain.env)
+     and drives VICE on the live screen with POST /control (player toolchain/viewer_player.py, when C64_VIEW_PLAYER is defined).
+     Without manifest.json it lists only the .d64 disks found in out/releases/v*/ and in out/.
+     Theme (14/11, owner's request): modern but reminiscent of the C64 and its manuals: beige paper, brown ink, dark red, rainbow
+     stripes, key-shaped labels. -->
 <script src="config.js"></script>
 <style>
   :root {
@@ -42,7 +42,7 @@
   .dim { color:var(--ink2); }
   .small { font-size:13px; }
 
-  /* testata: la "scatola" scura con la barra arcobaleno, come le confezioni e i manuali Commodore */
+  /* header: the dark "box" with the rainbow stripes, like the Commodore boxes and manuals */
   .top { background:var(--night); color:var(--nightfg); position:relative; overflow:hidden; }
   .top .in { max-width:1180px; margin:0 auto; padding:22px 330px 20px 16px; position:relative; z-index:1; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:flex-end; }
   .top h1 { margin:0; font:700 24px/1.15 var(--mono); letter-spacing:.04em; }
@@ -67,14 +67,14 @@
   .grid3 > section { margin:0; }
   @media (max-width:900px) { .grid3 { grid-template-columns:minmax(0,1fr); } }
 
-  /* tasti: pulsanti, link d'azione e etichette disegnati come i tasti del C64 nel manuale */
+  /* keys: buttons, action links and labels drawn like the C64 keys in the manual */
   .key, button { font:600 13px var(--mono); color:var(--keyink); background:var(--key); border:1.5px solid var(--keyink); border-radius:6px;
        padding:4px 11px 3px; box-shadow:0 3px 0 var(--keyink); cursor:pointer; text-decoration:none; display:inline-flex; gap:6px; align-items:center;
        margin-bottom:3px; transition:transform .05s, box-shadow .05s; white-space:nowrap; }
   .key:hover, button:hover { background:var(--paper); }
   .key:active, button:active { transform:translateY(3px); box-shadow:0 0 0 var(--keyink); }
   .key:focus-visible, button:focus-visible { outline:2px solid var(--r5); outline-offset:3px; }
-  .key.dark, button.dark { background:var(--keyink); color:var(--key); }                  /* come RUN/STOP e i tasti funzione */
+  .key.dark, button.dark { background:var(--keyink); color:var(--key); }                  /* like RUN/STOP and the function keys */
   .key.dark:hover, button.dark:hover { background:var(--red); border-color:var(--red); box-shadow:0 3px 0 var(--ink); }
   button.warnk { background:var(--badbg); }
   button:disabled { opacity:.45; cursor:default; transform:none; box-shadow:0 3px 0 var(--keyink); }
@@ -119,7 +119,7 @@
   .themeb { position:absolute; right:16px; top:12px; z-index:2; }
   .themeb button { font-size:11px; padding:2px 7px 1px; box-shadow:0 2px 0 var(--keyink); }
 
-  /* schermo dal vivo: miniatura (sola vista) incorniciata come la copertina del manuale; clic = finestra grande interattiva */
+  /* live screen: thumbnail (view only) framed like the manual cover; click = big interactive window */
   #mini { position:fixed; right:18px; bottom:18px; width:min(360px, calc(100vw - 36px)); z-index:20; background:var(--night);
           border:5px solid var(--nightfg); box-shadow:0 0 0 1.5px var(--ink), 0 10px 30px rgba(0,0,0,.35); }
   #mini header, #big header { display:flex; justify-content:space-between; align-items:center; gap:8px; background:var(--night); color:var(--nightfg);
@@ -142,10 +142,10 @@
 <body>
 <div class="top">
   <div class="rainbow" aria-hidden="true"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i><i class="r5"></i></div>
-  <div class="themeb"><button id="themebtn" title="tema chiaro / scuro">TEMA</button></div>
+  <div class="themeb"><button id="themebtn" title="light / dark theme">THEME</button></div>
   <div class="in">
     <div>
-      <div class="proj" id="proj">progetto C64</div>
+      <div class="proj" id="proj">C64 project</div>
       <h1>C64 CONTROL CENTER</h1>
     </div>
     <div class="sub" id="sub">...</div>
@@ -161,49 +161,49 @@
   </div>
 
   <section>
-    <h2>Prove a mano</h2>
+    <h2>Try it yourself</h2>
     <div class="actions" style="margin-top:0">
-      <button data-basic="1" class="dark">VICE vuoto · READY.</button>
-      <a class="key" id="vcbare" target="_blank">vc64web vuoto</a>
-      <button id="openbig">Schermo grande</button>
-      <a class="key" href="live.html" target="_blank">Schermo in una scheda</a>
+      <button data-basic="1" class="dark">Empty VICE · READY.</button>
+      <a class="key" id="vcbare" target="_blank">Empty vc64web</a>
+      <button id="openbig">Big screen</button>
+      <a class="key" href="live.html" target="_blank">Screen in a tab</a>
     </div>
     <div id="mine"></div>
-    <p class="note">VICE parte sullo schermo dal vivo, a velocità reale e con l'audio. Nello <b>schermo grande</b> la tastiera del PC arriva al C64;
-      i pulsanti in alto accendono <b>Tastiera</b> (tastiera C64 a video), <b>Joy 1</b>, <b>Joy 2</b> e <b>Audio</b>. Dal menu di VICE
-      (File → Smart attach) si monta qualunque file del progetto, in <code>/work</code>. I file tuoi (<code>.d64 .g64 .prg .t64 .crt</code>)
-      copiati in <code>out/tmp/</code> compaiono qui sopra. Dalla shell:</p>
-    <code class="cmd" id="cmdline">toolchain/viewer.sh exec x64sc &lt;opzioni&gt;</code>
+    <p class="note">VICE starts on the live screen, at real speed and with audio. In the <b>big screen</b> the PC keyboard reaches the C64;
+      the buttons at the top turn on <b>Keyboard</b> (on-screen C64 keyboard), <b>Joy 1</b>, <b>Joy 2</b> and <b>Audio</b>. From the VICE menu
+      (File → Smart attach) any file of the project can be attached, in <code>/work</code>. Your own files (<code>.d64 .g64 .prg .t64 .crt</code>)
+      copied into <code>out/tmp/</code> show up above. From the shell:</p>
+    <code class="cmd" id="cmdline">toolchain/viewer.sh exec x64sc &lt;options&gt;</code>
   </section>
 
   <section id="trendbox" hidden>
-    <h2>Andamento</h2>
+    <h2>Trends</h2>
     <div class="spark" id="trends"></div>
-    <p class="note">Dalla più vecchia alla più nuova delle versioni tenute in <code>out/releases/</code>. Passa sopra un grafico per i valori.</p>
+    <p class="note">From the oldest to the newest of the versions kept in <code>out/releases/</code>. Hover a chart for the values.</p>
   </section>
 
   <section id="cmpbox" hidden>
     <div class="head">
-      <h2 style="margin:0">Confronto</h2>
+      <h2 style="margin:0">Compare</h2>
       <div class="actions" style="margin:0"><select id="cmpA"></select> <span class="dim">→</span> <select id="cmpB"></select></div>
     </div>
     <div id="cmp" style="margin-top:12px"></div>
   </section>
 
-  <h2 style="margin:10px 0 14px">Versioni</h2>
-  <div id="cards" class="meta">ricerca in out/releases/ ...</div>
-  <p class="note">Viewer su localhost · aggiornamento ogni 2 s · <a href="out/" target="_blank">cartella out/</a> (sola lettura)</p>
+  <h2 style="margin:10px 0 14px">Versions</h2>
+  <div id="cards" class="meta">looking in out/releases/ ...</div>
+  <p class="note">Viewer on localhost · refresh every 2 s · <a href="out/" target="_blank">out/ folder</a> (read-only)</p>
 </main>
 
 <div id="mini">
   <header><span style="display:flex;gap:8px;align-items:center"><span class="stripes" aria-hidden="true"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i><i class="r5"></i></span>LIVE</span>
-    <span><button id="minibig" title="schermo grande, interattivo">⤢</button> <button id="minitog" title="riduci">–</button></span></header>
-  <div class="frame"><div class="hit" id="minihit" title="clic: schermo grande, interattivo"></div></div>
+    <span><button id="minibig" title="big screen, interactive">⤢</button> <button id="minitog" title="minimize">–</button></span></header>
+  <div class="frame"><div class="hit" id="minihit" title="click: big screen, interactive"></div></div>
 </div>
 <div id="big">
   <div class="win">
-    <header><span style="display:flex;gap:8px;align-items:center"><span class="stripes" aria-hidden="true"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i><i class="r5"></i></span>SCHERMO DAL VIVO · tastiera, joystick e audio dai pulsanti in alto</span>
-      <button id="bigclose">ESC · chiudi</button></header>
+    <header><span style="display:flex;gap:8px;align-items:center"><span class="stripes" aria-hidden="true"><i class="r1"></i><i class="r2"></i><i class="r3"></i><i class="r4"></i><i class="r5"></i></span>LIVE SCREEN · keyboard, joysticks and audio from the buttons at the top</span>
+      <button id="bigclose">ESC · close</button></header>
   </div>
 </div>
 
@@ -215,15 +215,15 @@ const natural = (a, b) => a.localeCompare(b, undefined, { numeric: true });
 const encPath = p => p.split('/').map(encodeURIComponent).join('/');
 const fmtB = n => n == null ? '–' : n < 1024 ? n + ' B' : n < 1048576 ? (n / 1024).toFixed(1) + ' KB' : (n / 1048576).toFixed(2) + ' MB';
 const fmtT = s => s == null ? '–' : s < 60 ? Math.round(s) + ' s' : Math.floor(s / 60) + ' min ' + String(Math.round(s % 60)).padStart(2, '0') + ' s';
-const fmtD = iso => iso ? new Date(iso).toLocaleString('it-IT', { dateStyle: 'short', timeStyle: 'short' }) : '';
-const ago = t => { const s = Math.max(0, Date.now() / 1000 - t); return s < 90 ? Math.round(s) + ' s fa' : s < 5400 ? Math.round(s / 60) + ' min fa' : Math.round(s / 3600) + ' h fa'; };
+const fmtD = iso => iso ? new Date(iso).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' }) : '';
+const ago = t => { const s = Math.max(0, Date.now() / 1000 - t); return s < 90 ? Math.round(s) + ' s ago' : s < 5400 ? Math.round(s / 60) + ' min ago' : Math.round(s / 3600) + ' h ago'; };
 const store = { get: k => { try { return localStorage.getItem(k); } catch (e) { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* niente */ } } };
 const fmtUnit = (v, u) => v == null ? '–' : u === 'B' ? fmtB(v) : u === 's' ? fmtT(v) : v + (u ? ' ' + u : '');
 
 async function getJSON(url) {
   try { const r = await fetch(url, { cache: 'no-store' }); return r.ok ? await r.json() : null; } catch (e) { return null; }
 }
-async function listing(dir) {                       // [nome, cartella?] dalla pagina di elenco di server.js
+async function listing(dir) {                       // [name, folder?] from the server.js listing page
   try {
     const r = await fetch(dir, { cache: 'no-cache' });
     if (!r.ok) return [];
@@ -236,20 +236,20 @@ async function control(cmd, disk) {
   try {
     const r = await fetch('control', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cmd, disk }) });
     return await r.json();
-  } catch (e) { return { ok: false, error: 'viewer non raggiungibile' }; }
+  } catch (e) { return { ok: false, error: 'viewer not reachable' }; }
 }
 
-// ---------------------------------------------------------------- tema chiaro / scuro (preferenza del sistema, o scelta salvata)
+// ---------------------------------------------------------------- light / dark theme (system preference, or saved choice)
 function applyTheme(t) { if (t) document.documentElement.dataset.theme = t; else delete document.documentElement.dataset.theme; }
 applyTheme(store.get('theme'));
 $('themebtn').onclick = () => {
   const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
   const t = dark ? 'light' : 'dark'; applyTheme(t); store.set('theme', t);
 };
-if (window.VIEW_PLAYER) $('cmdline').textContent = `toolchain/viewer.sh exec ${window.VIEW_PLAYER} <file | --bare>\ntoolchain/viewer.sh exec x64sc <opzioni>`;
+if (window.VIEW_PLAYER) $('cmdline').textContent = `toolchain/viewer.sh exec ${window.VIEW_PLAYER} <file | --bare>\ntoolchain/viewer.sh exec x64sc <options>`;
 if (window.VIEW_TITLE) { $('proj').textContent = window.VIEW_TITLE; document.title = window.VIEW_TITLE + ' · C64 control center'; }
 
-// ---------------------------------------------------------------- versioni (manifest.json)
+// ---------------------------------------------------------------- versions (manifest.json)
 let VERS = [], PAGE = null, PLAYER = null;
 const groupLabel = (m, g) => (m.groups && m.groups[g]) || g;
 
@@ -263,7 +263,7 @@ async function loadVersions() {
     const disks = m ? Object.keys(m.files || {}).filter(f => /\.d64$/i.test(f)) : (await listing('out/releases/' + encodeURIComponent(d) + '/')).map(([n]) => n).filter(n => /\.d64$/i.test(n));
     return { dir: d, m, disks };
   }));
-  for (const v of vs) v.latest = v.disks.length > 0 && v.disks.every(f => latestFiles.includes(f));    // "latest" = stessi dischi del collegamento
+  for (const v of vs) v.latest = v.disks.length > 0 && v.disks.every(f => latestFiles.includes(f));    // "latest" = same disks as the link
   if (vs.filter(v => v.latest).length > 1) for (const v of vs) v.latest = false;
   vs.sort((a, b) => natural(b.dir, a.dir));
   const loose = (await listing('out/')).filter(([n, d]) => !d && /\.d64$/i.test(n) && n !== 'disk.d64').map(([n]) => n);
@@ -275,10 +275,10 @@ function vcLink(path) { return PAGE ? PAGE + '?disk=' + encodeURIComponent('/out
 
 function headerLine() {
   const l = VERS.find(v => v.latest) || VERS[0], m = l && l.m, t = m && m.tests;
-  $('sub').innerHTML = !l ? 'nessuna versione in out/releases/' :
-    `ultima <b>${esc(l.dir)}</b> · ${t && t.ran ? (t.fail ? `<span style="color:#ff9a85">${t.fail} test FAIL</span>` : `${t.pass}/${t.total} test PASS`) : 'test non eseguiti'}` +
+  $('sub').innerHTML = !l ? 'no version in out/releases/' :
+    `latest <b>${esc(l.dir)}</b> · ${t && t.ran ? (t.fail ? `<span style="color:#ff9a85">${t.fail} test FAIL</span>` : `${t.pass}/${t.total} test PASS`) : 'tests not run'}` +
     (m && m.built_at ? ' · ' + esc(fmtD(m.updated_at || m.built_at)) : '');
-  const bare = $('vcbare'); if (PAGE) bare.href = PAGE; else { bare.removeAttribute('href'); bare.title = 'pagina di vc64web non trovata in out/cache/vc64web/'; }
+  const bare = $('vcbare'); if (PAGE) bare.href = PAGE; else { bare.removeAttribute('href'); bare.title = 'vc64web page not found in out/cache/vc64web/'; }
 }
 
 function card(v) {
@@ -289,73 +289,73 @@ function card(v) {
   if (m.release) chips.push('<span class="tag ok">release</span>');
   if (m.branch && m.branch !== 'main' && m.branch !== 'master') chips.push(`<span class="tag warn">branch ${esc(m.branch)}</span>`);
   if (t.ran) chips.push(t.fail ? `<span class="tag bad">${t.fail} FAIL / ${t.total}</span>` : `<span class="tag ok">${t.pass}/${t.total} PASS${t.skip ? ' · ' + t.skip + ' SKIP' : ''}</span>`);
-  else if (v.m) chips.push('<span class="tag">test non eseguiti</span>');
+  else if (v.m) chips.push('<span class="tag">tests not run</span>');
   if (t.ran && t.suites) chips.push(`<span class="tag">${esc(t.suites.join(' + '))}</span>`);
-  if (g.dirty) chips.push('<span class="tag warn" title="la build conteneva modifiche non ancora committate">non committata</span>');
+  if (g.dirty) chips.push('<span class="tag warn" title="the build contained changes not yet committed">uncommitted</span>');
   const playing = PLAYER && PLAYER.running && PLAYER.disk === diskPath;
   const acts = [];
   if (diskPath) {
     const u = vcLink(diskPath);
-    acts.push(u ? `<a class="key dark" href="${esc(u)}" target="_blank">▶ vc64web</a>` : '<button disabled title="pagina di vc64web non trovata in out/cache/vc64web/">vc64web</button>');
-    acts.push(`<button data-play="${esc(diskPath)}" ${PLAYER === false ? 'disabled title="lettore non attivo"' : ''}>${playing ? '■ VICE in esecuzione' : '▶ VICE live'}</button>`);
+    acts.push(u ? `<a class="key dark" href="${esc(u)}" target="_blank">▶ vc64web</a>` : '<button disabled title="vc64web page not found in out/cache/vc64web/">vc64web</button>');
+    acts.push(`<button data-play="${esc(diskPath)}" ${PLAYER === false ? 'disabled title="player not running"' : ''}>${playing ? '■ VICE running' : '▶ VICE live'}</button>`);
     acts.push(`<a class="key" href="${esc(base + encodeURIComponent(disk))}" download>↓ .d64</a>`);
   }
   if (v.m) acts.push(`<a class="key" href="${esc(base + 'manifest.json')}" target="_blank">manifest</a>`);
   const kv = [];
   const add = (label, val, title) => kv.push(`<div title="${esc(title || '')}"><b>${esc(val)}</b><span>${esc(label)}</span></div>`);
   for (const x of st.metrics || []) add(x.label, fmtUnit(x.value, x.unit), x.hint);
-  if (st.disk) add('blocchi liberi sul disco', st.disk.blocks_free + ' / ' + st.disk.blocks_total);
-  if (st.build_seconds != null) add('durata build', fmtT(st.build_seconds));
-  if (t.ran) add('durata test', fmtT(t.seconds));
+  if (st.disk) add('free disk blocks', st.disk.blocks_free + ' / ' + st.disk.blocks_total);
+  if (st.build_seconds != null) add('build time', fmtT(st.build_seconds));
+  if (t.ran) add('test time', fmtT(t.seconds));
   const files = Object.entries(m.files || {}).sort((a, b) => natural(a[1].group, b[1].group) || natural(a[0], b[0]));
   let rows = files.map(([f, x]) => {
     const href = base + encPath(f) + (x.type === 'dir' ? '/' : '');
     return `<tr><td>${esc(groupLabel(m, x.group))}</td><td><a class="mono" href="${esc(href)}" target="_blank">${esc(f)}${x.type === 'dir' ? '/' : ''}</a>${x.type === 'dir' ? ` <span class="dim small">(${x.files} file)</span>` : ''}</td>` +
       `<td class="num">${fmtB(x.bytes)}</td><td class="dim small">${esc(fmtD(x.produced))}</td><td class="mono dim" title="SHA-256 ${esc(x.sha256)}">${esc((x.sha256 || '').slice(0, 10))}</td></tr>`;
   }).join('');
-  rows += (m.missing || []).map(gp => `<tr class="missing"><td>${esc(groupLabel(m, gp))}</td><td colspan="4">non generato in questa versione</td></tr>`).join('');
-  if (!v.m) rows = v.disks.map(f => `<tr><td>disco</td><td><a class="mono" href="${esc(base + encodeURIComponent(f))}">${esc(f)}</a></td><td colspan="3" class="dim">senza manifest.json</td></tr>`).join('');
+  rows += (m.missing || []).map(gp => `<tr class="missing"><td>${esc(groupLabel(m, gp))}</td><td colspan="4">not generated in this version</td></tr>`).join('');
+  if (!v.m) rows = v.disks.map(f => `<tr><td>disk</td><td><a class="mono" href="${esc(base + encodeURIComponent(f))}">${esc(f)}</a></td><td colspan="3" class="dim">no manifest.json</td></tr>`).join('');
   const info = (st.info || []).map(x => ' · ' + esc(x.label) + ' ' + esc(x.value)).join('');
-  const dirList = st.disk && st.disk.files ? `<details><summary>Directory del disco (${st.disk.files.length} file, ${st.disk.blocks_used} blocchi usati)</summary><div class="tablewrap">
-      <table><tr><th>Nome</th><th>Tipo</th><th class="num">Blocchi</th></tr>${st.disk.files.map(f => `<tr><td class="mono">${esc(f.name)}</td><td class="mono">${esc(f.type)}</td><td class="num">${f.blocks}</td></tr>`).join('')}</table></div></details>` : '';
-  const testDet = t.ran ? `<details data-tests="${esc(base + 'test_report.json')}"><summary>Test: ${t.fail ? 'dettaglio dei FAIL' : 'elenco'} (${t.total})</summary><div class="small dim">caricamento...</div></details>` : '';
+  const dirList = st.disk && st.disk.files ? `<details><summary>Disk directory (${st.disk.files.length} files, ${st.disk.blocks_used} blocks used)</summary><div class="tablewrap">
+      <table><tr><th>Name</th><th>Type</th><th class="num">Blocks</th></tr>${st.disk.files.map(f => `<tr><td class="mono">${esc(f.name)}</td><td class="mono">${esc(f.type)}</td><td class="num">${f.blocks}</td></tr>`).join('')}</table></div></details>` : '';
+  const testDet = t.ran ? `<details data-tests="${esc(base + 'test_report.json')}"><summary>Tests: ${t.fail ? 'FAIL details' : 'list'} (${t.total})</summary><div class="small dim">loading...</div></details>` : '';
   return `<div class="card${v.latest ? ' latest' : ''}">
     <div class="head"><h3>${esc(v.dir)}</h3><div class="chips">${chips.join('')}</div></div>
-    <div class="meta" style="margin-top:4px">${m.built_at ? 'build ' + esc(fmtD(m.built_at)) : ''}${m.updated_at && m.updated_at !== m.built_at ? ' · aggiornata ' + esc(fmtD(m.updated_at)) : ''}${
+    <div class="meta" style="margin-top:4px">${m.built_at ? 'build ' + esc(fmtD(m.built_at)) : ''}${m.updated_at && m.updated_at !== m.built_at ? ' · updated ' + esc(fmtD(m.updated_at)) : ''}${
       g.commit ? ` · commit ${esc(g.commit)} <span style="font-family:var(--sans)">${esc(g.subject || '')}</span>` : ''}${info}</div>
     <div class="actions">${acts.join('')}</div>
     ${kv.length ? `<div class="kv">${kv.join('')}</div>` : ''}
-    <div class="tablewrap"><table><tr><th>Artefatto</th><th>File</th><th class="num">Dim.</th><th>Prodotto</th><th>SHA-256</th></tr>${rows}</table></div>
+    <div class="tablewrap"><table><tr><th>Artifact</th><th>File</th><th class="num">Size</th><th>Produced</th><th>SHA-256</th></tr>${rows}</table></div>
     ${dirList}${testDet}
   </div>`;
 }
 
 function render() {
   let html = VERS.map(card).join('');
-  if (LOOSE.length) html += `<section><h2>Dischi in out/</h2>${LOOSE.map(f => {
+  if (LOOSE.length) html += `<section><h2>Disks in out/</h2>${LOOSE.map(f => {
     const u = vcLink(f);
     return `<div class="actions"><span class="mono">${esc(f)}</span>${u ? `<a class="key" href="${esc(u)}" target="_blank">vc64web</a>` : ''}<button data-play="${esc(f)}">VICE live</button></div>`;
   }).join('')}</section>`;
-  $('cards').innerHTML = html || '<section class="dim">Nessuna versione in out/releases/</section>';
+  $('cards').innerHTML = html || '<section class="dim">No version in out/releases/</section>';
   renderTrends(); renderCompareSelects(); headerLine(); loadMine();
 }
 
-// dettaglio dei test di una versione, caricato quando si apre
+// test details of a version, loaded when opened
 document.addEventListener('toggle', async e => {
   const d = e.target;
   if (!(d instanceof HTMLDetailsElement) || !d.open || !d.dataset.tests || d.dataset.loaded) return;
   d.dataset.loaded = 1;
   const r = await getJSON(d.dataset.tests), box = d.querySelector('div');
-  if (!r) { box.textContent = 'report non trovato'; return; }
+  if (!r) { box.textContent = 'report not found'; return; }
   const res = r.results || [], bad = res.filter(x => x.result !== 'PASS');
   const show = bad.length ? bad : res;
-  box.outerHTML = `<div class="tablewrap"><table><tr><th>ID</th><th>Suite</th><th>Esito</th><th class="num">Tempo</th><th>Test / motivo</th></tr>${show.map(x =>
+  box.outerHTML = `<div class="tablewrap"><table><tr><th>ID</th><th>Suite</th><th>Result</th><th class="num">Time</th><th>Test / reason</th></tr>${show.map(x =>
     `<tr><td class="mono">${esc(x.id)}</td><td>${esc(x.suite)}</td><td><span class="tag ${x.result === 'PASS' ? 'ok' : x.result === 'FAIL' ? 'bad' : ''}">${esc(x.result)}</span></td>` +
     `<td class="num">${x.time.toFixed(2)} s</td><td>${esc(x.desc)}${x.reason ? `<div class="small" style="color:var(--bad)">${esc(x.reason)}</div>` : ''}</td></tr>`).join('')}</table></div>` +
-    (bad.length ? `<p class="small dim">${res.length - bad.length} PASS non mostrati.</p>` : '');
+    (bad.length ? `<p class="small dim">${res.length - bad.length} PASS not shown.</p>` : '');
 }, true);
 
-// pulsanti VICE
+// VICE buttons
 document.addEventListener('click', async e => {
   const bb = e.target.closest('button[data-basic]');
   if (bb) {
@@ -375,21 +375,21 @@ document.addEventListener('click', async e => {
 });
 function alertBox(msg) { $('player').insertAdjacentHTML('beforeend', `<div class="msg">${esc(msg)}</div>`); }
 
-// ---------------------------------------------------------------- misure: quelle del progetto (stats.metrics) e quelle comuni
+// ---------------------------------------------------------------- measures: the project's (stats.metrics) and the common ones
 function sparkline(vals) {
   const w = 160, h = 32, n = vals.length, lo = Math.min(...vals), hi = Math.max(...vals), sp = hi - lo || 1;
   const pts = vals.map((v, i) => [n === 1 ? w / 2 : i * w / (n - 1), h - 3 - (v - lo) / sp * (h - 6)]);
   return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none"><polyline points="${pts.map(p => p.join(',')).join(' ')}" fill="none" stroke="var(--red)" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
     pts.map((p, i) => `<rect x="${p[0] - (i === n - 1 ? 3 : 2)}" y="${p[1] - (i === n - 1 ? 3 : 2)}" width="${i === n - 1 ? 6 : 4}" height="${i === n - 1 ? 6 : 4}" fill="${i === n - 1 ? 'var(--r5)' : 'var(--ink)'}"/>`).join('') + '</svg>';
 }
-function metrics() {                    // [id, etichetta, valore(v), unita', meglio(+1 su, -1 giu', 0)]
+function metrics() {                    // [id, label, value(v), unit, better(+1 up, -1 down, 0)]
   const ids = new Map();
   for (const v of [...VERS].reverse()) for (const x of v.m?.stats?.metrics || []) ids.set(x.id, [x.label, x.unit, x.better === 'up' ? 1 : x.better === 'down' ? -1 : 0]);
   const out = [...ids].map(([id, [label, unit, better]]) => [id, label, v => (v.m?.stats?.metrics || []).find(x => x.id === id)?.value, unit, better]);
   const suites = (VERS.find(v => v.m?.tests?.ran)?.m.tests.suites || []).join(' + ');
-  out.push(['_blocks', 'blocchi liberi sul disco', v => v.m?.stats?.disk?.blocks_free, '', 1]);
-  out.push(['_build', 'durata build', v => v.m?.stats?.build_seconds, 's', -1]);
-  if (suites) out.push(['_tests', 'durata test (' + suites + ')', v => (v.m?.tests?.ran && (v.m.tests.suites || []).join(' + ') === suites) ? v.m.tests.seconds : undefined, 's', -1]);
+  out.push(['_blocks', 'free disk blocks', v => v.m?.stats?.disk?.blocks_free, '', 1]);
+  out.push(['_build', 'build time', v => v.m?.stats?.build_seconds, 's', -1]);
+  if (suites) out.push(['_tests', 'test time (' + suites + ')', v => (v.m?.tests?.ran && (v.m.tests.suites || []).join(' + ') === suites) ? v.m.tests.seconds : undefined, 's', -1]);
   return out;
 }
 function renderTrends() {
@@ -404,7 +404,7 @@ function renderTrends() {
   $('trendbox').hidden = !out; $('trends').innerHTML = out;
 }
 
-// ---------------------------------------------------------------- confronto
+// ---------------------------------------------------------------- comparison
 function renderCompareSelects() {
   const ms = VERS.filter(v => v.m);
   $('cmpbox').hidden = ms.length < 2;
@@ -426,10 +426,10 @@ async function compare() {
     if (typeof x === 'number' && typeof y === 'number' && x !== y) {
       const good = better ? (y - x) * better > 0 : null, dv = y - x;
       d = `<span class="${good === null ? '' : good ? 'up' : 'down'}">${dv > 0 ? '+' : ''}${unit === 's' ? dv.toFixed(1) + ' s' : unit === 'B' ? dv + ' B' : Number.isInteger(dv) ? dv : dv.toFixed(1)}</span>`;
-    } else if (x != null && y != null && x !== y) d = '<span class="dim">cambiato</span>';
+    } else if (x != null && y != null && x !== y) d = '<span class="dim">changed</span>';
     return `<tr><td>${esc(label)}</td><td class="num">${esc(unit === undefined ? (x ?? '–') : fmtUnit(x, unit))}</td><td class="num">${esc(unit === undefined ? (y ?? '–') : fmtUnit(y, unit))}</td><td class="num">${d}</td></tr>`;
   };
-  let h = `<div class="tablewrap"><table><tr><th>Misura</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th><th class="num">Differenza</th></tr>`;
+  let h = `<div class="tablewrap"><table><tr><th>Measure</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th><th class="num">Difference</th></tr>`;
   h += metrics().map(([, l, g, u, b]) => row(l, g, u, b)).join('');
   h += row('commit', v => v.m?.stats?.git?.commit);
   const infoLabels = [...new Set([A, B].flatMap(v => (v.m.stats?.info || []).map(x => x.label)))];
@@ -437,43 +437,43 @@ async function compare() {
   h += '</table></div>';
   const fa = Object.fromEntries((A.m.stats?.disk?.files || []).map(f => [f.name, f.blocks])), fb = Object.fromEntries((B.m.stats?.disk?.files || []).map(f => [f.name, f.blocks]));
   const names = [...new Set([...Object.keys(fa), ...Object.keys(fb)])].filter(n => fa[n] !== fb[n]);
-  if (A.m.stats?.disk && B.m.stats?.disk) h += `<details><summary>File del disco cambiati di dimensione (${names.length})</summary>` + (names.length ? `<div class="tablewrap"><table><tr><th>File</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th></tr>` +
-    names.map(n => `<tr><td class="mono">${esc(n)}</td><td class="num">${fa[n] ?? '–'}</td><td class="num">${fb[n] ?? '–'}</td></tr>`).join('') + '</table></div>' : '<p class="small dim">nessuno</p>') + '</details>';
+  if (A.m.stats?.disk && B.m.stats?.disk) h += `<details><summary>Disk files with a different size (${names.length})</summary>` + (names.length ? `<div class="tablewrap"><table><tr><th>File</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th></tr>` +
+    names.map(n => `<tr><td class="mono">${esc(n)}</td><td class="num">${fa[n] ?? '–'}</td><td class="num">${fb[n] ?? '–'}</td></tr>`).join('') + '</table></div>' : '<p class="small dim">none</p>') + '</details>';
   const [ra, rb] = await Promise.all([A, B].map(v => v.m.tests?.ran ? getJSON('out/releases/' + encodeURIComponent(v.dir) + '/test_report.json') : null));
   if (ra && rb) {
     const ia = Object.fromEntries(ra.results.map(x => [x.id, x])), ib = Object.fromEntries(rb.results.map(x => [x.id, x]));
     const ids = [...new Set([...Object.keys(ia), ...Object.keys(ib)])];
     const changed = ids.filter(i => (ia[i]?.result) !== (ib[i]?.result));
     const slower = ids.filter(i => ia[i] && ib[i]).map(i => [i, ib[i].time - ia[i].time]).filter(([, d]) => Math.abs(d) >= 0.5).sort((p, q) => q[1] - p[1]).slice(0, 8);
-    h += `<details ${changed.length ? 'open' : ''}><summary>Test con esito diverso (${changed.length})</summary>` + (changed.length ? `<div class="tablewrap"><table><tr><th>ID</th><th>${esc(A.dir)}</th><th>${esc(B.dir)}</th></tr>` +
-      changed.map(i => `<tr><td class="mono">${esc(i)}</td><td>${esc(ia[i]?.result || 'assente')}</td><td>${esc(ib[i]?.result || 'assente')}</td></tr>`).join('') + '</table></div>' : '<p class="small dim">nessuno</p>') + '</details>';
-    if (slower.length) h += `<details><summary>Test con il tempo cambiato di almeno 0,5 s (${slower.length})</summary><div class="tablewrap"><table><tr><th>ID</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th><th class="num">Differenza</th></tr>` +
+    h += `<details ${changed.length ? 'open' : ''}><summary>Tests with a different result (${changed.length})</summary>` + (changed.length ? `<div class="tablewrap"><table><tr><th>ID</th><th>${esc(A.dir)}</th><th>${esc(B.dir)}</th></tr>` +
+      changed.map(i => `<tr><td class="mono">${esc(i)}</td><td>${esc(ia[i]?.result || 'missing')}</td><td>${esc(ib[i]?.result || 'missing')}</td></tr>`).join('') + '</table></div>' : '<p class="small dim">none</p>') + '</details>';
+    if (slower.length) h += `<details><summary>Tests whose time changed by at least 0.5 s (${slower.length})</summary><div class="tablewrap"><table><tr><th>ID</th><th class="num">${esc(A.dir)}</th><th class="num">${esc(B.dir)}</th><th class="num">Difference</th></tr>` +
       slower.map(([i, d]) => `<tr><td class="mono">${esc(i)}</td><td class="num">${ia[i].time.toFixed(2)} s</td><td class="num">${ib[i].time.toFixed(2)} s</td><td class="num ${d > 0 ? 'down' : 'up'}">${d > 0 ? '+' : ''}${d.toFixed(2)} s</td></tr>`).join('') + '</table></div></details>';
-    if ((ra.suites || []).join() !== (rb.suites || []).join()) h += `<p class="small dim">Suite diverse (${esc((ra.suites || []).join('+'))} / ${esc((rb.suites || []).join('+'))}): i test presenti solo in una risultano "assente".</p>`;
-  } else h += '<p class="small dim">Confronto dei test: serve il report in entrambe le versioni.</p>';
+    if ((ra.suites || []).join() !== (rb.suites || []).join()) h += `<p class="small dim">Different suites (${esc((ra.suites || []).join('+'))} / ${esc((rb.suites || []).join('+'))}): tests present in only one show as "missing".</p>`;
+  } else h += '<p class="small dim">Test comparison: both versions need the report.</p>';
   $('cmp').innerHTML = h;
 }
 $('cmpA').onchange = compare; $('cmpB').onchange = compare;
 
-// ---------------------------------------------------------------- stato dal vivo
+// ---------------------------------------------------------------- live status
 let lastBuild = null, lastTestsState = null;
 async function pollStatus() {
   const b = await getJSON('out/tmp/build.json'), t = await getJSON('out/tmp/tests.json');
-  if (!b) $('build').innerHTML = '<div class="dim">nessuna build registrata</div>';
+  if (!b) $('build').innerHTML = '<div class="dim">no build recorded</div>';
   else {
-    const lbl = { running: 'IN CORSO', ok: 'RIUSCITA', fail: 'FALLITA' }[b.state] || b.state;
+    const lbl = { running: 'RUNNING', ok: 'SUCCEEDED', fail: 'FAILED' }[b.state] || b.state;
     const dur = (b.state === 'running' ? Date.now() / 1000 : b.updated) - b.started;
     $('build').innerHTML = `<div class="state"><span class="led ${esc(b.state)}"></span>${esc(lbl)}</div>` +
-      `<div style="margin-top:6px">${b.state === 'running' ? 'fase <span class="tag">' + esc(b.phase) + '</span>' : b.state === 'fail' ? 'fallita nella fase <span class="tag bad">' + esc(b.phase) + '</span>' : 'completata'} · ${fmtT(dur)}</div>` +
-      `<div class="meta" style="margin-top:6px">./build.sh ${esc(b.flags || '')}<br>${b.state === 'running' ? 'avviata ' + ago(b.started) : 'finita ' + ago(b.updated)}</div>`;
+      `<div style="margin-top:6px">${b.state === 'running' ? 'phase <span class="tag">' + esc(b.phase) + '</span>' : b.state === 'fail' ? 'failed in phase <span class="tag bad">' + esc(b.phase) + '</span>' : 'completed'} · ${fmtT(dur)}</div>` +
+      `<div class="meta" style="margin-top:6px">./build.sh ${esc(b.flags || '')}<br>${b.state === 'running' ? 'started ' + ago(b.started) : 'finished ' + ago(b.updated)}</div>`;
     if (lastBuild && lastBuild.state === 'running' && b.state !== 'running') loadVersions();
     lastBuild = b;
   }
-  if (!t) $('tests').innerHTML = '<div class="dim">nessuna esecuzione registrata</div>';
+  if (!t) $('tests').innerHTML = '<div class="dim">no run recorded</div>';
   else {
     const res = t.results || [], n = k => res.filter(x => x.result === k).length, fail = n('FAIL'), pass = n('PASS'), skip = n('SKIP');
-    const st = t.state === 'running' && b && b.state !== 'running' && b.updated > t.updated ? 'fail' : t.state;   // test interrotti a meta'
-    const lbl = { running: 'IN CORSO', ok: 'SUPERATI', fail: st !== t.state ? 'INTERROTTI' : 'CON ERRORI' }[st] || st;
+    const st = t.state === 'running' && b && b.state !== 'running' && b.updated > t.updated ? 'fail' : t.state;   // tests interrupted halfway
+    const lbl = { running: 'RUNNING', ok: 'PASSED', fail: st !== t.state ? 'INTERRUPTED' : 'FAILED' }[st] || st;
     const w = k => t.total ? (k / t.total * 100).toFixed(2) + '%' : '0';
     const cur = t.current ? `<div class="meta" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:4px" title="${esc(t.current.desc)}">▶ ${esc(t.current.id)} · ${esc(t.current.desc)}</div>` : '';
     const recent = res.slice().reverse().filter(x => x.result !== 'PASS').concat(res.slice(-6).reverse().filter(x => x.result === 'PASS')).slice(0, 12);
@@ -483,7 +483,7 @@ async function pollStatus() {
       `<div class="meta">${res.length}/${t.total} · <span class="up">${pass} PASS</span> · <span class="${fail ? 'down' : ''}">${fail} FAIL</span> · ${skip} SKIP · ${fmtT(t.seconds ?? (Date.now() / 1000 - t.started))}</div>` +
       cur + (t.caps && t.caps.length ? `<div class="small down">${esc(t.caps.join('; '))}</div>` : '') +
       `<div class="results">${recent.map(x => `<div title="${esc(x.desc + (x.reason ? ' -> ' + x.reason : ''))}"><span class="${x.result === 'FAIL' ? 'down' : x.result === 'PASS' ? 'up' : 'dim'}">${esc(x.result.padEnd(4))}</span> ${esc(x.id)} <span class="dim">${esc(x.reason || x.desc)}</span></div>`).join('')}</div>`;
-    if (t.state === 'running' && lastTestsState !== 'running' && lastTestsState !== null) miniOpen(true);   // test partiti: si apre la miniatura
+    if (t.state === 'running' && lastTestsState !== 'running' && lastTestsState !== null) miniOpen(true);   // tests started: the thumbnail opens
     lastTestsState = t.state;
   }
 }
@@ -492,26 +492,26 @@ async function pollPlayer() {
   const was = JSON.stringify(PLAYER);
   if (!r.ok) {
     PLAYER = false;
-    $('player').innerHTML = `<div class="state"><span class="led"></span>NON DISPONIBILE</div><div class="meta" style="margin-top:6px">${esc(r.error)}</div>`;
+    $('player').innerHTML = `<div class="state"><span class="led"></span>NOT AVAILABLE</div><div class="meta" style="margin-top:6px">${esc(r.error)}</div>`;
   } else {
     PLAYER = r;
     $('player').innerHTML = r.running
-      ? `<div class="state"><span class="led running"></span>IN ESECUZIONE</div><div class="meta" style="margin-top:6px;word-break:break-all">${r.disk ? esc(r.disk) : 'senza disco (READY.)'}</div><div class="meta">da ${ago(r.since)}</div>` +
-        `<div class="actions"><button id="plive" class="dark">▶ Gioca / prova</button><button id="pstop" class="warnk">■ Chiudi</button></div>`
-      : `<div class="state"><span class="led"></span>FERMO</div><div class="note" style="margin-top:6px">"VICE live" su una versione o "VICE vuoto" qui sotto: velocità reale, audio, tastiera e joystick dal browser.</div>`;
+      ? `<div class="state"><span class="led running"></span>RUNNING</div><div class="meta" style="margin-top:6px;word-break:break-all">${r.disk ? esc(r.disk) : 'no disk (READY.)'}</div><div class="meta">since ${ago(r.since)}</div>` +
+        `<div class="actions"><button id="plive" class="dark">▶ Play / try</button><button id="pstop" class="warnk">■ Close</button></div>`
+      : `<div class="state"><span class="led"></span>STOPPED</div><div class="note" style="margin-top:6px">"VICE live" on a version or "Empty VICE" below: real speed, audio, keyboard and joysticks from the browser.</div>`;
     if ($('pstop')) $('pstop').onclick = async () => { await control('stop'); await pollPlayer(); };
     if ($('plive')) $('plive').onclick = () => showBig(true);
   }
   if (was !== JSON.stringify(PLAYER) && VERS.length) render();
 }
 
-// ---------------------------------------------------------------- schermo dal vivo
-// miniatura: client KasmVNC in sola vista e scalato (resize=scale: non cambia la risoluzione dello schermo); il clic apre la finestra
-// grande = live.html (interattiva). Aperta la grande, la miniatura si stacca (una connessione VNC alla volta da questa pagina).
+// ---------------------------------------------------------------- live screen
+// thumbnail: KasmVNC client view-only and scaled (resize=scale: the screen resolution does not change); a click opens the big
+// window = live.html (interactive). With the big one open, the thumbnail disconnects (one VNC connection at a time from this page).
 const MINI_URL = 'vnc/index.html?autoconnect=1&resize=scale&view_only=1&show_control_bar=false&reconnect=1&reconnect_delay=2000';
 function miniOn(on) {
   const fr = document.querySelector('#mini .frame'), ifr = fr.querySelector('iframe');
-  if (on && !ifr) fr.insertAdjacentHTML('afterbegin', `<iframe src="${MINI_URL}" title="schermo dal vivo (miniatura)" tabindex="-1"></iframe>`);
+  if (on && !ifr) fr.insertAdjacentHTML('afterbegin', `<iframe src="${MINI_URL}" title="live screen (thumbnail)" tabindex="-1"></iframe>`);
   if (!on && ifr) ifr.remove();
 }
 function miniOpen(open) {
@@ -524,7 +524,7 @@ function miniOpen(open) {
 function showBig(on) {
   const big = $('big'), win = big.querySelector('.win');
   if (on && !big.classList.contains('open')) {
-    win.insertAdjacentHTML('beforeend', '<iframe src="live.html" allow="autoplay; clipboard-read; clipboard-write" title="schermo dal vivo"></iframe>');
+    win.insertAdjacentHTML('beforeend', '<iframe src="live.html" allow="autoplay; clipboard-read; clipboard-write" title="live screen"></iframe>');
     big.classList.add('open'); miniOn(false);
     setTimeout(() => { const f = win.querySelector('iframe'); if (f) f.focus(); }, 300);
   } else if (!on && big.classList.contains('open')) {
@@ -540,10 +540,10 @@ $('minitog').onclick = () => miniOpen($('mini').classList.contains('closed'));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && $('big').classList.contains('open')) showBig(false); });
 miniOpen(store.get('mini') !== '0');
 
-// ---------------------------------------------------------------- prove a mano: file in out/tmp/
+// ---------------------------------------------------------------- try it yourself: files in out/tmp/
 async function loadMine() {
   const f = (await listing('out/tmp/')).filter(([n, d]) => !d && /\.(d64|g64|prg|t64|crt)$/i.test(n)).map(([n]) => 'tmp/' + n);
-  $('mine').innerHTML = f.length ? '<div class="meta" style="margin-top:8px">File in out/tmp/:</div>' + f.map(p => {
+  $('mine').innerHTML = f.length ? '<div class="meta" style="margin-top:8px">Files in out/tmp/:</div>' + f.map(p => {
     const u = vcLink(p);
     return `<div class="actions" style="margin:6px 0"><span class="mono">${esc(p)}</span><button data-play="${esc(p)}">▶ VICE live</button>${u ? `<a class="key" href="${esc(u)}" target="_blank">vc64web</a>` : ''}</div>`;
   }).join('') : '';

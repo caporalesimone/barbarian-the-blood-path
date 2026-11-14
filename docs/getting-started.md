@@ -154,12 +154,12 @@ vale per qualunque progetto C64 che pubblichi le versioni in `out/releases/v<V>/
 [toolchain/README.md](../toolchain/README.md) ("Manifest per il viewer"); cio' che e' del gioco (misure, etichette dei file, nome del
 progetto) arriva dal manifest e da `toolchain.env` (`C64_VIEW_TITLE`, `C64_VIEW_PLAYER`). Tema: moderno ma che ricorda il C64 e il
 manuale del gioco (carta beige, inchiostro marrone, rosso scuro, barra arcobaleno, pulsanti ed etichette a forma di tasto; chiaro o
-scuro secondo il sistema, pulsante TEMA per cambiarlo):
+scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagina in inglese, come tutta la toolchain):
 - **Stato dal vivo** (aggiornato ogni 2 s): **BUILD** (fase e esito di `./build.sh`, da `out/tmp/build.json`), **TEST** (barra di
   avanzamento, test in corso, ultimi esiti e FAIL, da `out/tmp/tests.json` che `tests/run.py` riscrive dopo ogni test), **VICE LIVE**
-  (il VICE avviato dalla pagina, con "Gioca / prova" e "Chiudi").
+  (il VICE avviato dalla pagina, con "Play / try" e "Close").
 - **Miniatura dello schermo dal vivo** fissa in basso a destra (client KasmVNC in sola vista, `view_only=1&resize=scale`): un clic la
-  apre **grande e interattiva** (`/live.html`: tastiera fisica, overlay Tastiera / Joy 1 / Joy 2, Audio). Se il viewer e' acceso,
+  apre **grande e interattiva** (`/live.html`: tastiera fisica, overlay Keyboard / Joy 1 / Joy 2, Audio). Se il viewer e' acceso,
   `./build.sh` fa girare i test sul suo schermo da solo (`--no-view` per evitarlo) e la miniatura si apre quando partono i test.
   [misurato 14/11, una volta sola] smoke + sanity con la vista accesa e VICE del lettore in esecuzione: 28,3 s contro 17,9 s senza
   (tetto 35 s).
@@ -169,7 +169,7 @@ scuro secondo il sistema, pulsante TEMA per cambiarlo):
   del disco; elenco dei test (o solo i FAIL, con il motivo).
 - **Andamento** fra le versioni tenute (le misure del progetto, blocchi liberi, durata di build e dei test con le stesse suite) e
   **confronto** fra due versioni (misure, file del disco cambiati, test con esito o tempo diverso).
-- **Prove a mano**: "VICE vuoto (READY.)" (`play.sh --bare`), "vc64web vuoto", e i **file propri**: un `.d64 .g64 .prg .t64 .crt`
+- **Prove a mano** ("Try it yourself"): "Empty VICE · READY." (`play.sh --bare`), "Empty vc64web", e i **file propri**: un `.d64 .g64 .prg .t64 .crt`
   copiato in `out/tmp/` compare nella pagina con i pulsanti VICE e vc64web. Nella finestra di VICE il menu (File -> Smart attach)
   monta qualunque file del progetto (`/work`).
 
@@ -179,8 +179,7 @@ lo ha e' root sull'host). `viewer.sh start` avvia anche **`c64-emu-player`** (im
 passa al lettore da un socket Unix nel volume `c64-x11` (`c64-player.sock`). Comandi: `status`, `play` (percorso sotto `out/`, solo
 `.d64 .g64 .prg .t64 .crt`, niente `..`, il file deve esistere), `basic`, `stop`. Protezioni del server: Host solo `localhost`,
 `127.0.0.1`, `[::1]` (o `VIEW_HOSTS`) contro il DNS rebinding; `/control` e i WebSocket solo dalla stessa origine; `/control` solo con
-`Content-Type: application/json`. [provato 14/11 con curl: 421 con Host estraneo, 403 con Origin estraneo, 415 senza JSON, `disco non
-valido` per `../version.yaml`; in un browser headless: VICE avviato dalla pagina, 100% e 50 fps nello schermo grande]
+`Content-Type: application/json`. [provato 14/11 con curl: 421 con Host estraneo, 403 con Origin estraneo, 415 senza JSON, `invalid disk` per `../version.yaml`; in un browser headless: VICE avviato dalla pagina, 100% e 50 fps nello schermo grande]
 
 Dettagli dello schermo dal vivo:
 - **Schermo dal vivo con l'audio** (`/live.html`, 14/11): lo schermo X condiviso e' il server X di **KasmVNC** (volume `c64-x11`),

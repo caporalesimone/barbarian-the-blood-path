@@ -1,88 +1,88 @@
-# toolchain/ — toolchain C64 in container
+# toolchain/ — C64 toolchain in containers
 
-Copyright © 2026 - Simone Caporale (note). Ogni programma esterno ha nella sua cartella la licenza e il suo `.gitignore`.
+Copyright © 2026 - Simone Caporale (notes). Every external program has its license and its own `.gitignore` in its folder.
 
-Ambiente **generico** per costruire e provare programmi per il Commodore 64: immagini Docker, programmi esterni compilati una volta,
-ROM e script per usarli. **Non sa nulla del gioco**: il progetto che la usa la configura con un file `toolchain.env` nella sua
-radice (la cartella sopra `toolchain/`, oppure `C64_PROJECT`). Il progetto si monta nei container in `/work`.
+A **generic** environment to build and test programs for the Commodore 64: Docker images, external programs compiled once, ROMs
+and the scripts that use them. **It knows nothing about the game**: the project that uses it configures it with a `toolchain.env`
+file in its root (the folder above `toolchain/`, or `C64_PROJECT`). The project is mounted in the containers at `/work`.
 
-## Immagini
+## Images
 
-Un solo Dockerfile multi-stage, `docker/Dockerfile`: una immagine per target, tutte con lo stesso genitore.
+One multi-stage Dockerfile, `docker/Dockerfile`: one image per target, all with the same parent.
 
-| Immagine | Target | Contenuto |
+| Image | Target | Contents |
 |---|---|---|
-| (nessuna) | `base` | ubuntu (`ARG UBUNTU`, oggi 24.04) + CA + locale + `/work`. Genitore comune: **non ha un nome**, non si avvia mai |
-| (nessuna) | `tools-builder`, `vice-build`, `zx0-build`, `cc1541-build` | compilatori e librerie di sviluppo; compilano i programmi esterni. Restano nella cache di BuildKit, non diventano immagini |
-| `c64-builder` | `builder` | 64tass, cc65, make, perl, zip, git, Python 3 con Pillow, PyYAML, NumPy, Matplotlib; zx0 e cc1541 in `/opt/c64/bin` |
-| `c64-emu-vice` | `emu-vice` | builder + VICE (`x64sc`, `c1541` e i dati in `/opt/vice`), librerie gtk3, Xvfb, ffmpeg |
-| `c64-emu-viewer` | `viewer` | Xvnc di KasmVNC (pacchetto ufficiale) + PulseAudio + server Node (`docker/viewer/server.js`): centro di controllo, schermo con audio, `out/`, overlay con tastiera C64 e joystick (`/input`), `/control` verso il lettore. |
-| `c64-emu-vc64web` | (Dockerfile di `vc64web-custom/`) | node, Playwright + Chromium, ffmpeg, demone dell'emulatore nel browser |
+| (none) | `base` | ubuntu (`ARG UBUNTU`, today 24.04) + CA + locale + `/work`. Common parent: **it has no name**, it never runs |
+| (none) | `tools-builder`, `vice-build`, `zx0-build`, `cc1541-build` | compilers and development libraries; they compile the external programs. They stay in the BuildKit cache and never become images |
+| `c64-builder` | `builder` | 64tass, cc65, make, perl, zip, git, Python 3 with Pillow, PyYAML, NumPy, Matplotlib; zx0 and cc1541 in `/opt/c64/bin` |
+| `c64-emu-vice` | `emu-vice` | builder + VICE (`x64sc`, `c1541` and its data in `/opt/vice`), gtk3 libraries, Xvfb, ffmpeg |
+| `c64-emu-viewer` | `viewer` | KasmVNC Xvnc (official package) + PulseAudio + Node server (`docker/viewer/server.js`): control center, screen with audio, `out/`, C64 keyboard and joystick overlay (`/input`), `/control` towards the player |
+| `c64-emu-vc64web` | (Dockerfile of `vc64web-custom/`) | node, Playwright + Chromium, ffmpeg, daemon of the in-browser emulator |
 
-Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` (ricompila anche VICE, zx0 e cc1541 sulla base nuova).
+To change Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, then `images.sh --force` (it also recompiles VICE, zx0 and cc1541 on the new base).
 
-## Script
+## Scripts
 
-| Script | Cosa fa |
+| Script | What it does |
 |---|---|
-| `images.sh [--force] [nomi]` | costruisce le immagini mancanti (`builder emu-vice emu-viewer emu-vc64web`); scarica sull'host il tarball di VICE se manca |
-| `run.sh <immagine> [comando]` | esegue un comando con il progetto in `/work`, con l'utente dell'host; `builder` = `c64-builder`, un nome completo si usa cosi' com'e' |
-| `viewer.sh start\|stop\|exec` | http://localhost:6080: centro di controllo (stato di build e test, una scheda per versione di `out/releases/`, andamento e confronto), schermo dal vivo con audio (KasmVNC + PulseAudio), vc64web nel browser, `out/` del progetto; `exec <comando>` = comando in `c64-emu-vice` collegato a schermo e audio. Con `C64_VIEW_PLAYER` avvia anche `c64-emu-player` |
-| `viewer_player.py` | lettore del viewer (container `c64-emu-player`): avvia `C64_VIEW_PLAYER <file>` sullo schermo dal vivo quando lo chiede la pagina (`POST /control`), da un socket Unix nel volume `c64-x11`; il viewer non ha il socket di Docker |
-| `memmap/c64map.py` | mappa della memoria e del disco **automatica**, senza configurazione (nel container `c64-builder`): legge i listati di 64tass (`-L`), le etichette (`-l`), i PRG e il `.d64`; scrive `index.html` e `memmap.json`. `--work`, `--disk`, `--out`, `--title` (default `C64_VIEW_TITLE`). Analisi statica: limiti nella pagina |
-| `validate_env.sh` | controlla l'host: sistema, WSL e posizione del progetto, Docker, fine riga, ROM, immagini, tool |
+| `images.sh [--force] [names]` | builds the missing images (`builder emu-vice emu-viewer emu-vc64web`); downloads the VICE tarball on the host if missing |
+| `run.sh <image> [command]` | runs a command with the project in `/work`, as the host user; `builder` = `c64-builder`, a full name is used as is |
+| `viewer.sh start\|stop\|exec` | http://localhost:6080: control center (build and test status, one card per version of `out/releases/`, trends and comparison), live screen with audio (KasmVNC + PulseAudio), vc64web in the browser, the project `out/`; `exec <command>` = command in `c64-emu-vice` attached to screen and audio. With `C64_VIEW_PLAYER` it also starts `c64-emu-player` |
+| `viewer_player.py` | viewer player (container `c64-emu-player`): runs `C64_VIEW_PLAYER <file>` on the live screen when the page asks (`POST /control`), through a Unix socket in the `c64-x11` volume; the viewer has no Docker socket |
+| `memmap/c64map.py` | **automatic** memory and disk map, with no configuration (in the `c64-builder` container): reads the 64tass listings (`-L`), the labels (`-l`), the PRGs and the `.d64`; writes `index.html` and `memmap.json`. `--work`, `--disk`, `--out`, `--title` (default `C64_VIEW_TITLE`). Static analysis: limits in the page |
+| `validate_env.sh` | checks the host: system, WSL and project location, Docker, line endings, ROMs, images, tools |
 
-## Configurazione del progetto (`toolchain.env`)
+## Project configuration (`toolchain.env`)
 
-| Variabile | Uso |
+| Variable | Use |
 |---|---|
-| `C64_PASS_ENV` | variabili dell'host passate ai container da `run.sh` (oltre a `EMU_URL`, `C64_VIEW`, `DISPLAY`) |
-| `C64_EXTRA_IMAGES` | immagini del progetto controllate da `validate_env.sh` |
-| `C64_VIEW_DISK` | disco proposto per primo nella pagina del viewer (modello con `*`, vince la versione piu' alta) |
-| `C64_VIEW_TITLE` | nome del progetto nella testata della pagina del viewer |
-| `C64_VIEW_PLAYER` | comando che apre un file (`.d64 .g64 .prg .t64 .crt`, percorso relativo al progetto; `--bare` = senza disco) sullo schermo del viewer; se manca, i pulsanti VICE della pagina sono spenti |
-| `C64_KRILL_ZIP` | zip di Krill's Loader da cui si compila cc1541 |
+| `C64_PASS_ENV` | host variables passed to the containers by `run.sh` (besides `EMU_URL`, `C64_VIEW`, `DISPLAY`) |
+| `C64_EXTRA_IMAGES` | project images checked by `validate_env.sh` |
+| `C64_VIEW_DISK` | disk proposed first in the viewer page (pattern with `*`, the highest version wins) |
+| `C64_VIEW_TITLE` | project name in the header of the viewer page |
+| `C64_VIEW_PLAYER` | command that opens a file (`.d64 .g64 .prg .t64 .crt`, path relative to the project; `--bare` = no disk) on the viewer screen; without it the VICE buttons of the page are off |
+| `C64_KRILL_ZIP` | Krill's Loader zip from which cc1541 is compiled |
 
-Altre variabili: `C64_CA_BUNDLE` (CA di un proxy che intercetta TLS, segreto per npm/pip nelle build), `C64_DOCKER_ARGS` (opzioni di
-`docker run` in piu'), `VIEW_PORT`, `VIEW_PASSWORD` (password di tutto il viewer, di default nessuna), `VIEW_SIZE`, `VIEW_HOSTS` (nomi di host ammessi oltre
-a localhost: il server rifiuta gli altri contro il DNS rebinding).
+Other variables: `C64_CA_BUNDLE` (CA of a TLS-intercepting proxy, a secret for npm/pip in the builds), `C64_DOCKER_ARGS` (extra
+`docker run` options), `VIEW_PORT`, `VIEW_PASSWORD` (password of the whole viewer, none by default), `VIEW_SIZE`, `VIEW_HOSTS` (host
+names allowed besides localhost: the server refuses the others against DNS rebinding).
 
-## Manifest per il viewer (contratto con il progetto, 14/11)
+## Manifest for the viewer (contract with the project, 14/11)
 
-La pagina del viewer (`docker/viewer/www/index.html`) e' generica: legge solo questi file, che scrive il progetto. Tutto e' facoltativo
-tranne `files`; un campo che manca non si mostra.
+The viewer page (`docker/viewer/www/index.html`) is generic: it reads only these files, written by the project. Everything is
+optional except `files`; a missing field is not shown.
 
-`out/releases/v<V>/manifest.json` (una cartella per versione; `out/releases/latest` = collegamento all'ultima):
+`out/releases/v<V>/manifest.json` (one folder per version; `out/releases/latest` = link to the latest):
 
-| Campo | Contenuto |
+| Field | Contents |
 |---|---|
 | `schema` | 1 |
-| `version`, `branch`, `built_at`, `updated_at`, `release` | versione, ramo git, date ISO 8601 UTC, `true` se e' una release |
-| `files` | `{nome: {group, type: file\|dir, files, bytes, sha256, produced}}`: i `.d64` fra questi hanno i pulsanti vc64web / VICE / download |
-| `groups` | `{gruppo: etichetta}`: come mostrare i gruppi di `files` e di `missing` |
-| `missing` | gruppi non generati in questa versione |
-| `tests` | `{ran, suites[], total, pass, fail, skip, seconds}`; il dettaglio in `test_report.json` (`{suites, total_s, results: [{id, suite, desc, result PASS\|FAIL\|SKIP, reason, time}]}`) |
-| `stats.metrics` | misure del progetto: `[{id, label, value, unit: B\|s\|"", better: up\|down\|null, hint}]` (schede, andamento, confronto) |
-| `stats.info` | `[{label, value}]`: dati da mostrare e confrontare, senza grafico |
-| `stats.disk` | `{blocks_total, blocks_free, blocks_used, files: [{name, type, blocks}]}` (directory del disco) |
+| `version`, `branch`, `built_at`, `updated_at`, `release` | version, git branch, ISO 8601 UTC dates, `true` for a release |
+| `files` | `{name: {group, type: file\|dir, files, bytes, sha256, produced}}`: the `.d64` files among them get the vc64web / VICE / download buttons |
+| `groups` | `{group: label}`: how to show the groups of `files` and `missing` |
+| `missing` | groups not generated in this version |
+| `tests` | `{ran, suites[], total, pass, fail, skip, seconds}`; the details in `test_report.json` (`{suites, total_s, results: [{id, suite, desc, result PASS\|FAIL\|SKIP, reason, time}]}`) |
+| `stats.metrics` | project measures: `[{id, label, value, unit: B\|s\|"", better: up\|down\|null, hint}]` (cards, trends, comparison) |
+| `stats.info` | `[{label, value}]`: data to show and compare, with no chart |
+| `stats.disk` | `{blocks_total, blocks_free, blocks_used, files: [{name, type, blocks}]}` (disk directory) |
 | `stats.git` | `{commit, subject, dirty}` |
-| `stats.build_seconds` | durata della build |
+| `stats.build_seconds` | build duration |
 
-Stato dal vivo, in `out/tmp/` (riscritti in modo atomico: file temporaneo e rinomina):
-- `build.json`: `{state: running|ok|fail, phase, flags, started, updated}` (tempi in secondi Unix);
-- `tests.json`: `{state, suites, filter, total, started, updated, seconds, current: {id, suite, desc, since}, results: [come sopra], caps}`.
+Live status, in `out/tmp/` (rewritten atomically: temporary file and rename):
+- `build.json`: `{state: running|ok|fail, phase, flags, started, updated}` (times in Unix seconds);
+- `tests.json`: `{state, suites, filter, total, started, updated, seconds, current: {id, suite, desc, since}, results: [as above], caps}`.
 
-In questo progetto li scrivono `tools/build/publish.py`, `build.sh` e `tests/run.py`.
+In this project they are written by `tools/build/publish.py`, `build.sh` and `tests/run.py`.
 
-## Programmi esterni
+## External programs
 
-| Cartella | Programma | Licenza | Come si ottiene |
+| Folder | Program | License | How it is obtained |
 |---|---|---|---|
-| `vice/` | VICE 3.10 (emulatore di riferimento, interfaccia gtk3) | GPL-2.0 (`vice/LICENSE`) | tarball ufficiale scaricato sull'host in `vice/download/` (`VICE_VERSION`, `VICE_URL`), compilato nello stage `vice-build` |
-| `zx0/` | ZX0 v2.2 di Einar Saukas (compressore) | BSD-3 (`zx0/LICENSE`) | sorgenti C in git, compilati nello stage `zx0-build` |
-| `cc1541/` | cc1541 (scrive i dischi .d64) | MIT (`cc1541/LICENSE`) | dallo zip di Krill (`C64_KRILL_ZIP`), compilato nello stage `cc1541-build` |
-| `vc64web-custom/` | la nostra variante di vc64web: emulatore nel browser + controllo da riga di comando | vedi `vc64web-custom/docs/INCLUSIONE.md` (non verificata) | pacchetto autonomo; immagine `c64-emu-vc64web` (`images.sh emu-vc64web`) |
-| `kasmvnc/` | KasmVNC 1.5.2 (server X con client web) | GPL-2.0 (`kasmvnc/LICENSE`) | pacchetto ufficiale `.deb` per Ubuntu 24.04, scaricato sull'host in `kasmvnc/download/` (`KASMVNC_VERSION`), estratto nel target `viewer` |
-| `roms/` | ROM del C64 (`vice-roms/{C64,DRIVES}`, `open-roms/`) | vedi `roms/roms.md` | in git; identica a `vc64web-custom/roms/` (`validate_env.sh` lo controlla) |
+| `vice/` | VICE 3.10 (reference emulator, gtk3 interface) | GPL-2.0 (`vice/LICENSE`) | official tarball downloaded on the host into `vice/download/` (`VICE_VERSION`, `VICE_URL`), compiled in the `vice-build` stage |
+| `zx0/` | ZX0 v2.2 by Einar Saukas (compressor) | BSD-3 (`zx0/LICENSE`) | C sources in git, compiled in the `zx0-build` stage |
+| `cc1541/` | cc1541 (writes .d64 disks) | MIT (`cc1541/LICENSE`) | from the Krill zip (`C64_KRILL_ZIP`), compiled in the `cc1541-build` stage |
+| `vc64web-custom/` | our variant of vc64web: in-browser emulator + command-line control | see `vc64web-custom/docs/INCLUSION.md` (not verified) | self-contained package; image `c64-emu-vc64web` (`images.sh emu-vc64web`) |
+| `kasmvnc/` | KasmVNC 1.5.2 (X server with web client) | GPL-2.0 (`kasmvnc/LICENSE`) | official `.deb` for Ubuntu 24.04, downloaded on the host into `kasmvnc/download/` (`KASMVNC_VERSION`), unpacked in the `viewer` target |
+| `roms/` | C64 ROMs (`vice-roms/{C64,DRIVES}`, `open-roms/`) | see `roms/roms.md` | in git; identical to `vc64web-custom/roms/` (`validate_env.sh` checks it) |
 
-Dettagli per il gioco: `docs/getting-started.md` e `docs/build.md` (sezione 4b) del progetto.
+Details for the game: `docs/getting-started.md` and `docs/build.md` (section 4b) of the project.

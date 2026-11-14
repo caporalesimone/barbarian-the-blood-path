@@ -1,12 +1,12 @@
 #!/bin/sh
-# Esegue un comando in un container della toolchain, con il progetto montato in /work (13/11). Copyright (c) 2026 - Simone Caporale
+# Runs a command in a toolchain container, with the project mounted at /work (13/11). Copyright (c) 2026 - Simone Caporale
 #   toolchain/run.sh builder tools/build/asm.sh                 toolchain/run.sh emu-vice python3 tests/run.py -k SAVE
-#   toolchain/run.sh builder                                    (shell interattiva)
-#   toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py      (immagine del progetto: nome completo)
-# Nome: builder, emu-vice, ... = immagine c64-<nome>; un nome completo di un'immagine esistente si usa cosi' com'e'.
-# Gira con l'utente dell'host (i file in out/ restano suoi); HOME in out/tmp/home.
-# Variabili passate: EMU_URL, C64_VIEW, DISPLAY, PULSE_SERVER e quelle di C64_PASS_ENV (toolchain.env del progetto).
-# Opzioni docker in piu': C64_DOCKER_ARGS="--network c64 ...". Progetto: la cartella sopra toolchain/ (o C64_PROJECT).
+#   toolchain/run.sh builder                                    (interactive shell)
+#   toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py      (project image: full name)
+# Name: builder, emu-vice, ... = image c64-<name>; the full name of an existing image is used as is.
+# Runs as the host user (the files in out/ stay theirs); HOME in out/tmp/home.
+# Variables passed: EMU_URL, C64_VIEW, DISPLAY, PULSE_SERVER and those of C64_PASS_ENV (project toolchain.env).
+# Extra docker options: C64_DOCKER_ARGS="--network c64 ...". Project: the folder above toolchain/ (or C64_PROJECT).
 set -eu
 TC=$(cd "$(dirname "$0")" && pwd)
 ROOT=${C64_PROJECT:-$(dirname "$TC")}

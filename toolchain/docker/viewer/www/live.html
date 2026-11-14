@@ -1,14 +1,14 @@
 <!doctype html>
-<html lang="it">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>C64 dal vivo</title>
-<!-- Schermo del viewer dal vivo (client web di KasmVNC) con l'audio (13/11). Copyright (c) 2026 - Simone Caporale
-     L'audio arriva da /audio (WebSocket, PCM s16le stereo 44100 Hz) e si riproduce con WebAudio con un piccolo margine (~30 ms).
-     Il browser accende l'audio solo dopo un clic: pulsante "Audio". -->
+<!-- Live viewer screen (KasmVNC web client) with audio (13/11). Copyright (c) 2026 - Simone Caporale
+     The audio comes from /audio (WebSocket, PCM s16le stereo 44100 Hz) and is played with WebAudio with a small margin (~30 ms).
+     The browser turns the audio on only after a click: "Audio" button. -->
 <style>
-  /* (14/11) testata con il tema del centro di controllo: barra scura, arcobaleno, pulsanti a forma di tasto */
+  /* (14/11) header with the control center theme: dark bar, rainbow, key-shaped buttons */
   :root { --bar:#14121c; --fg:#f0e6c8; --acc:#f2c230; --dim:#c9bd9c; --key:#fffaf0; --ink:#2a2118; }
   html, body { margin:0; height:100%; background:#000; color:var(--fg); font:14px/1.4 system-ui, sans-serif; }
   body { display:flex; flex-direction:column; }
@@ -22,7 +22,7 @@
   #st { color:var(--dim); }
   iframe { flex:1; border:0; width:100%; }
 
-  /* overlay (14/11): tastiera C64 e joystick sopra lo schermo, semitrasparenti */
+  /* overlay (14/11): C64 keyboard and joysticks over the screen, semi-transparent */
   #ov { position:fixed; inset:0; pointer-events:none; z-index:10; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; touch-action:none; }
   #kb { position:fixed; left:50%; bottom:8px; transform:translateX(-50%); width:min(96vw, 1040px); display:none; gap:1.2%; pointer-events:none; opacity:.82; }
   #kb.show { display:flex; }
@@ -50,11 +50,11 @@
 </head>
 <body>
 <header>
-  <a href="./">&larr; indice</a>
-  <button id="audioBtn" title="Accende o spegne l'audio dello schermo">Audio: spento</button>
-  <button id="kbBtn" title="Tastiera del Commodore 64 sopra lo schermo">Tastiera</button>
-  <button id="j1Btn" title="Joystick 1 sopra lo schermo (porta 1)">Joy 1</button>
-  <button id="j2Btn" title="Joystick 2 sopra lo schermo (porta 2: quello che usa il gioco)">Joy 2</button>
+  <a href="./">&larr; index</a>
+  <button id="audioBtn" title="Turns the screen audio on or off">Audio: off</button>
+  <button id="kbBtn" title="Commodore 64 keyboard over the screen">Keyboard</button>
+  <button id="j1Btn" title="Joystick 1 over the screen (port 1)">Joy 1</button>
+  <button id="j2Btn" title="Joystick 2 over the screen (port 2: the one most games use)">Joy 2</button>
   <span id="st"></span>
 </header>
 <iframe src="vnc/index.html?autoconnect=1&amp;view_only=0&amp;resize=remote&amp;show_control_bar=true&amp;clipboard_up=true&amp;clipboard_down=true" allow="clipboard-read; clipboard-write"></iframe>
@@ -65,7 +65,7 @@ const btn = document.getElementById('audioBtn'), st = document.getElementById('s
 function play(data) {
   let b = new Uint8Array(data);
   if (rest) { const m = new Uint8Array(rest.length + b.length); m.set(rest); m.set(b, rest.length); b = m; rest = null; }
-  const keep = b.length % 4;                               // 4 byte = un campione stereo s16le
+  const keep = b.length % 4;                               // 4 bytes = one stereo s16le sample
   if (keep) { rest = b.slice(b.length - keep); b = b.subarray(0, b.length - keep); }
   const n = b.length / 4; if (!n) return;
   const i16 = new Int16Array(b.buffer, b.byteOffset, n * 2);
@@ -73,7 +73,7 @@ function play(data) {
   for (let i = 0; i < n; i++) { L[i] = i16[2 * i] / 32768; R[i] = i16[2 * i + 1] / 32768; }
   const s = ctx.createBufferSource(); s.buffer = ab; s.connect(ctx.destination);
   const now = ctx.currentTime;
-  if (next < now + 0.005 || next > now + 0.25) next = now + 0.03;     // ripartenza o ritardo accumulato: si torna a ~30 ms
+  if (next < now + 0.005 || next > now + 0.25) next = now + 0.03;     // restart or accumulated delay: back to ~30 ms
   s.start(next); next += ab.duration;
 }
 function on() {
@@ -81,18 +81,18 @@ function on() {
   ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/audio');
   ws.binaryType = 'arraybuffer';
   ws.onmessage = e => play(e.data);
-  ws.onopen = () => { st.textContent = 'audio collegato'; };
-  ws.onclose = () => { st.textContent = ws ? 'audio scollegato' : ''; if (ws) off(); };
-  btn.textContent = 'Audio: acceso'; btn.classList.add('on');
+  ws.onopen = () => { st.textContent = 'audio connected'; };
+  ws.onclose = () => { st.textContent = ws ? 'audio disconnected' : ''; if (ws) off(); };
+  btn.textContent = 'Audio: on'; btn.classList.add('on');
 }
 function off() {
   const w = ws; ws = null; if (w) w.close();
-  btn.textContent = 'Audio: spento'; btn.classList.remove('on');
+  btn.textContent = 'Audio: off'; btn.classList.remove('on');
 }
 btn.onclick = () => (ws ? off() : on());
-window.audio = on;                                         // per le prove automatiche
+window.audio = on;                                         // for automated tests
 
-// ---------- overlay: tastiera C64 e joystick -> /input (tasti iniettati in Xvnc da server.js)
+// ---------- overlay: C64 keyboard and joysticks -> /input (keys injected into Xvnc by server.js)
 let inws = null, inq = [], lastFocus = 0;
 function inSend(c) {
   if (inws && inws.readyState === 1) inws.send(c); else { inq.push(c); inOpen(); }
@@ -103,13 +103,13 @@ function inOpen() {
   inws.onopen = () => { for (const c of inq.splice(0)) inws.send(c); };
   inws.onclose = () => { inws = null; };
 }
-const held = new Map();                                    // keysym -> quanti elementi lo tengono premuto (SHIFT a scatto e SHIFT LOCK usano lo stesso Shift)
+const held = new Map();                                    // keysym -> how many elements hold it down (latched SHIFT and SHIFT LOCK use the same Shift)
 function keyDown(s) { focusVice(); const n = (held.get(s) || 0) + 1; held.set(s, n); if (n === 1) inSend('d ' + s); }
 function keyUp(s) { const n = (held.get(s) || 0) - 1; if (n > 0) { held.set(s, n); return; } held.delete(s); inSend('u ' + s); }
-function focusVice() { const n = Date.now(); if (n - lastFocus > 2500) { lastFocus = n; inSend('f'); } }   // senza window manager il tasto va alla finestra sotto il puntatore
+function focusVice() { const n = Date.now(); if (n - lastFocus > 2500) { lastFocus = n; inSend('f'); } }   // with no window manager the key goes to the window under the pointer
 const KS = { Return:0xff0d, BackSpace:0xff08, Insert:0xff63, Home:0xff50, End:0xff57, Escape:0xff1b, Tab:0xff09, Up:0xff52, Down:0xff54, Left:0xff51, Right:0xff53,
   ShiftL:0xffe1, ShiftR:0xffe2, CtrlL:0xffe3, PgUp:0xff55, F1:0xffbe, F2:0xffbf, F3:0xffc0, F4:0xffc1, F5:0xffc2, F6:0xffc3, F7:0xffc4, F8:0xffc5 };
-// tasto: [etichetta, keysym normale, keysym con SHIFT (se diverso), legenda SHIFT, larghezza, tipo]  tipo: m = modificatore a scatto, l = SHIFT LOCK, f = tasto funzione
+// key: [label, normal keysym, keysym with SHIFT (if different), SHIFT legend, width, kind]  kind: m = latching modifier, l = SHIFT LOCK, f = function key
 const c = ch => ch.charCodeAt(0), K = (l, k, ks, sl, w, ty) => ({ l, k, ks: ks ?? k, sl: sl || '', w: w || 1, ty: ty || '' });
 const L = ch => K(ch, c(ch.toLowerCase()), c(ch));
 const ROWS = [
@@ -123,7 +123,7 @@ const ROWS = [
   [{ spacer: 3.5 }, K('', c(' '), c(' '), '', 8), { spacer: 4.5 }]
 ];
 const FKEYS = [K('f1\nf2', KS.F1, KS.F2, '', 1, 'fn'), K('f3\nf4', KS.F3, KS.F4, '', 1, 'fn'), K('f5\nf6', KS.F5, KS.F6, '', 1, 'fn'), K('f7\nf8', KS.F7, KS.F8, '', 1, 'fn')];
-const latched = new Map();                                  // tasto C64 a scatto -> elemento (SHIFT, CTRL, C=)
+const latched = new Map();                                  // latching C64 key -> element (SHIFT, CTRL, C=)
 let locked = false;
 const shiftOn = () => locked || [...latched.keys()].some(d => d.k === KS.ShiftL || d.k === KS.ShiftR);
 function releaseLatched() { for (const [d, el] of latched) { keyUp(d.k); el.classList.remove('latched'); } latched.clear(); }
@@ -135,11 +135,11 @@ function mkKey(d) {
   let sent = null;
   el.addEventListener('pointerdown', e => {
     e.preventDefault(); el.setPointerCapture(e.pointerId);
-    if (d.ty === 'm') {                                      // a scatto: un tocco accende, un altro spegne
+    if (d.ty === 'm') {                                      // latching: one touch turns on, another turns off
       if (latched.has(d)) { latched.delete(d); el.classList.remove('latched'); keyUp(d.k); } else { latched.set(d, el); el.classList.add('latched'); keyDown(d.k); }
       return;
     }
-    if (d.ty === 'l') {                                      // SHIFT LOCK come sul C64: tiene premuto lo Shift sinistro finche' non si tocca di nuovo
+    if (d.ty === 'l') {                                      // SHIFT LOCK as on the C64: holds the left Shift down until touched again
       locked = !locked; el.classList.toggle('lock', locked); if (locked) keyDown(KS.ShiftL); else keyUp(KS.ShiftL); return;
     }
     sent = shiftOn() ? d.ks : d.k; el.classList.add('down'); keyDown(sent);
@@ -155,16 +155,16 @@ function mkKey(d) {
   for (const d of FKEYS) fk.appendChild(mkKey(d));
   kb.append(main, fk);
 })();
-// joystick: base + pomello (stick a 8 direzioni) e pulsante di fire. Joy 1 = porta 1 (keyset 1 di VICE su F13-F17), Joy 2 = porta 2 (tastierino numerico di VICE).
+// joystick: base + knob (8-direction stick) and fire button. Joy 1 = port 1 (VICE keyset 1 on F13-F17), Joy 2 = port 2 (VICE numeric keypad).
 const JOY = {
   j1: { name: 'JOY 1', up: 0xffca, down: 0xffcb, left: 0xffcc, right: 0xffcd, fire: 0xffce, diag: false },
   j2: { name: 'JOY 2', up: 0xffb8, down: 0xffb2, left: 0xffb4, right: 0xffb6, fire: 0xffb0, nw: 0xffb7, ne: 0xffb9, sw: 0xffb1, se: 0xffb3, diag: true }
 };
 const SECT = [['right'], ['right', 'down'], ['down'], ['left', 'down'], ['left'], ['left', 'up'], ['up'], ['right', 'up']], DIAG = { 1: 'se', 3: 'sw', 5: 'nw', 7: 'ne' };
-function dirKeys(j, dx, dy) {                              // dx, dy in -1..1 (y verso il basso) -> keysym da tenere premuti
+function dirKeys(j, dx, dy) {                              // dx, dy in -1..1 (y downwards) -> keysyms to hold down
   if (Math.hypot(dx, dy) < 0.35) return [];
-  const s = Math.round(((Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360) / 45) % 8;    // 0 = destra, 2 = giu', 4 = sinistra, 6 = su
-  return j.diag && s % 2 ? [j[DIAG[s]]] : SECT[s].map(n => j[n]);   // Joy 2: tasto diagonale del tastierino; Joy 1: due direzioni insieme
+  const s = Math.round(((Math.atan2(dy, dx) * 180 / Math.PI + 360) % 360) / 45) % 8;    // 0 = right, 2 = down, 4 = left, 6 = up
+  return j.diag && s % 2 ? [j[DIAG[s]]] : SECT[s].map(n => j[n]);   // Joy 2: diagonal keypad key; Joy 1: two directions together
 }
 function buildJoy(id) {
   const j = JOY[id], box = document.getElementById(id);
