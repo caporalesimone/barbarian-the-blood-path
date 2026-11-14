@@ -21,7 +21,7 @@ import os, sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
-from vice_rom import ROM_ARGS, XRUN  # noqa: E402  (x64sc: -default + tutte le ROM da ../lab64/roms/)
+from vicemon import ROM_ARGS, XRUN  # noqa: E402  (Lab64: x64sc con -default + tutte le ROM di Lab64)
 sys.path.insert(0, HERE)
 import songs  # noqa: E402
 

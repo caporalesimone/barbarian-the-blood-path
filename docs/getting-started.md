@@ -9,19 +9,21 @@ come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in
 ## 1. In breve
 
 ```sh
-./validate_env.sh          # una volta su un computer nuovo: controlla host, Docker, ROM, posizione del progetto (WSL/Windows)
+git clone <Lab64> ~/lab64 && ~/lab64/bin/lab64 install   # una volta: Lab64 dove si vuole, il comando lab64 nel PATH
+lab64 doctor               # una volta su un computer nuovo: controlla host, Docker, ROM, posizione del progetto (WSL/Windows)
 ./build.sh                 # TUTTO: disco + mappe + atlante + smoke e sanity + manuale PDF
 ./build.sh --fast          # solo il disco (salta atlante, mappe, manuale); smoke e sanity restano: il comando di tutti i giorni
 ./build.sh --fast --no-test  # il minimo: solo il disco
 ./build.sh --release       # build completa + tutti i test (anche regression ed EMU-*) + manuale PDF (solo su richiesta)
                            # tutti i parametri (--no-atlas, --no-maps, --no-manual, --keep N, ...): tabella nel README
 ./build.sh --view          # come ./build.sh, ma VICE si vede dal vivo nel browser: http://localhost:6080
-../lab64/run.sh tools python3 tests/run.py -k SAVE      # un comando qualunque in un container (qui: i test SAVE)
+lab64 test -k SAVE         # solo i test SAVE (motore dei test di Lab64)
+lab64 run tools/build/mkdisk.sh   # un comando qualunque nel container lab64-tools
 ```
 
 Sull'host servono **solo** `sh`, Docker (con BuildKit), `git` e `curl`. Python, 64tass, cc65, VICE, node, Chromium, WeasyPrint:
 tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, con il progetto nel filesystem di WSL (non in `/mnt/c`):
-`./validate_env.sh` lo controlla dal tipo di filesystem del punto di montaggio (`/proc/self/mountinfo`).
+`lab64 doctor` lo controlla dal tipo di filesystem del punto di montaggio (`/proc/self/mountinfo`).
 
 ## 2. Cartelle
 
@@ -32,32 +34,33 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `tools/build/` | generatori e script della build (Python, bash) | sì |
 | `tools/atlas/`, `tools/memory-map/`, `tools/manual/`, `tools/simulators/` | generatori dei documenti riproducibili e simulatori; scrivono in `out/work/<nome>/` | sì |
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
-| `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, runner `run.py` | sì |
+| `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, `run_tests.sh` (suite della build); motore: `lab64 test` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
-| `../lab64/` | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, cartella accanto al gioco o variabile `LAB64`; non sa nulla del gioco, [README](../../lab64/README.md), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-images.sh`, `viewer.sh`, `validate_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `vc64web-custom/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
+| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-images.sh`, `viewer.sh`, `validate_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `vc64web-custom/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
 | `lab64.env` | configurazione di Lab64 per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
 | `out/` | **tutto cio' che si genera**: `work/` (intermedi e uscite della build in corso), `cache/` (zx0, steps, vc64web: si riusano), `tmp/` (usa e getta), `releases/` (artefatti per versione, ultime 5) | no (solo `.gitkeep`) |
 
 ## 2b. Il comando `./lab64` (14/11)
 
-`./lab64` e' il comando di Lab64 per questo progetto (lanciatore di `../lab64/bin/lab64`; serve solo Docker sull'host).
-`./lab64 build` = `./build.sh` (`C64_BUILD` in `lab64.env`); `./lab64 test [smoke|sanity|regression] [-k ID]` = motore dei test
-di Lab64 sulla cartella `tests/`; `./lab64 up` accende il demone vc64web (poi `./lab64 test regression -k EMU`), `./lab64 down` lo
-spegne; `./lab64 view` / `stop` il viewer (con **♪ play** sulle musiche `.sid` di ogni versione, [musica.md](musica.md)); `./lab64 run <comando>` un comando in `lab64-tools`; `./lab64 images`, `doctor`,
-`version`. Dettagli: [../lab64/README.md](../../lab64/README.md), sezione "Command line".
+`lab64` e' il comando di Lab64 (una volta: `<cartella di Lab64>/bin/lab64 install`, poi e' nel PATH; serve solo Docker sull'host).
+Il gioco non sa dove sta Lab64: lo usa solo con questo comando.
+`lab64 build` = `./build.sh` (`C64_BUILD` in `lab64.env`); `lab64 test [smoke|sanity|regression] [-k ID]` = motore dei test
+di Lab64 sulla cartella `tests/`; `lab64 up` accende il demone vc64web (poi `lab64 test regression -k EMU`), `lab64 down` lo
+spegne; `lab64 view` / `stop` il viewer (con **♪ play** sulle musiche `.sid` di ogni versione, [musica.md](musica.md)); `lab64 run <comando>` un comando in `lab64-tools`; `lab64 images`, `doctor`,
+`version`. Dettagli: README di Lab64, sezione "Command line".
 
 ## 3. I container
 
 Diagrammi e dettagli completi: [docker-architecture.md](docker-architecture.md).
 
-Immagini di **Lab64** (`lab64-*`, generiche, repository `../lab64`) e del **gioco** (`barbarian-*`, accanto al loro codice). Le prime
-vengono da un solo Dockerfile multi-stage (`../lab64/docker/Dockerfile`): lo stage `base` (ubuntu + CA + locale) e' il genitore
+Immagini di **Lab64** (`lab64-*`, generiche, repository Lab64) e del **gioco** (`barbarian-*`, accanto al loro codice). Le prime
+vengono da un solo Dockerfile multi-stage (`docker/Dockerfile` di Lab64): lo stage `base` (ubuntu + CA + locale) e' il genitore
 comune, **non ha un nome di immagine** (non si avvia mai) e contiene la versione di Ubuntu in un solo punto (`ARG UBUNTU`). I suoi
 layer sono gli stessi in tutte le immagini che ne derivano (13/11, misurato: stessi id dei layer).
 
 Nei container il progetto sta in **`/work`** (lettura e scrittura) e Lab64 in **`/lab64`** (sola lettura, variabile `LAB64=/lab64`):
-gli script lanciati dalla cartella del gioco (`../lab64/run.sh tools ...`) montano entrambi. Dal 14/11 build e test girano in **una
+gli script lanciati dalla cartella del gioco (`lab64 run ...`) montano entrambi. Dal 14/11 build e test girano in **una
 sola immagine**, `lab64-tools` (il builder e VICE insieme: i test assemblano varianti e le provano in VICE).
 
 | Immagine | Da | Cosa contiene | Quando si usa | Dimensione (13/11) |
@@ -75,13 +78,13 @@ Le dimensioni sono quelle di `docker image inspect` (layer comuni contati in ogn
 flowchart LR
   subgraph host["Host (Linux o WSL2): sh, Docker, git, curl"]
     B["./build.sh"]
-    V["./validate_env.sh"]
+    V["lab64 doctor"]
   end
-  subgraph img["build delle immagini (../lab64/build-images.sh)"]
+  subgraph img["build delle immagini (lab64 images)"]
     TB["stage *-build<br/>compilano VICE, zx0, cc1541"]
   end
   subgraph proj["progetto (montato in /work)"]
-    SRC["src/ data/ tools/ tests/ ../lab64/roms/"]
+    SRC["src/ data/ tools/ tests/ roms/ di Lab64"]
     OUT["out/"]
   end
   B -->|"se mancano le immagini"| TB
@@ -99,17 +102,17 @@ flowchart LR
   EV -.->|"DISPLAY :99 (volume lab64-x11)"| VW
 ```
 
-Regole: i container girano con l'utente dell'host (`../lab64/run.sh`: i file in `out/` restano suoi), il progetto e' montato in
-`/work`, nessun file del progetto sta nelle immagini (tranne le pagine di vc64web nella sua immagine). `../lab64/run.sh tools ...`
+Regole: i container girano con l'utente dell'host (`lab64 run`: i file in `out/` restano suoi), il progetto e' montato in
+`/work`, nessun file del progetto sta nelle immagini (tranne le pagine di vc64web nella sua immagine). `lab64 run ...`
 usa `lab64-tools`; `pdf-gen` usa `lab64-pdf-gen`; un nome completo di immagine si usa cosi' com'e'. Le immagini mancanti le
-costruisce `../lab64/build-images.sh` (lo chiama `./build.sh`), compilando dentro anche VICE, zx0 e cc1541.
+costruisce `lab64 images` (lo chiama `./build.sh`), compilando dentro anche VICE, zx0 e cc1541.
 
 ## 4. La build
 
 ```mermaid
 flowchart TD
   A["./build.sh"] --> C{"immagini<br/>presenti?"}
-  C -->|no| D["../lab64/build-images.sh<br/>(compila anche VICE, zx0, cc1541)"] --> E
+  C -->|no| D["lab64 images<br/>(compila anche VICE, zx0, cc1541)"] --> E
   C -->|si| E["lab64-tools:<br/>tools/build/build_game.sh"]
   E --> E1["versione: bump_version.py<br/>(impronta in version.yaml)"]
   E1 --> E2["generatori: grafica, font,<br/>musica, tabelle (tools/build/gen_*.py)"]
@@ -126,7 +129,7 @@ flowchart TD
 
 - **Versione**: cresce da sola a ogni build con sorgenti cambiati (`version.yaml`: `version` e `source_hash`).
 - **Cache**: i passi lenti indipendenti dal gioco passano da `tools/build/cache_run.py` (girano solo se cambiano gli ingressi).
-- Comandi singoli: `../lab64/run.sh tools tools/build/asm.sh` (solo assemblaggio), `../lab64/run.sh tools python3 tools/simulators/sim_rules.py`.
+- Comandi singoli: `lab64 run tools/build/asm.sh` (solo assemblaggio), `lab64 run python3 tools/simulators/sim_rules.py`.
 
 ## 5. I test
 
@@ -137,9 +140,9 @@ sequenceDiagram
   participant X as VICE x64sc (+ Xvfb)
   participant W as lab64-vc64web
   H->>V: tests/run_tests.sh (RELEASE, EMU_URL)
-  V->>V: tests/run.py smoke sanity [regression]
+  V->>V: lab64 test smoke sanity [regression]
   loop ogni test VICE
-    V->>X: avvio con -default + ROM di ../lab64/roms/ + monitor remoto
+    V->>X: avvio con -default + ROM di roms/ di Lab64 + monitor remoto
     V->>X: memoria, routine, tasti, screenshot
   end
   opt --release / --emu
@@ -152,23 +155,23 @@ sequenceDiagram
 ```
 
 - `smoke/` (veloci, happy path) + `sanity/` (feature corrente): a ogni build e prima di ogni commit. `regression/`: in release.
-- Tetti di durata (`CAPS` in `tests/run.py`): smoke 20 s, smoke + sanity 35 s, un test 10 s. Valgono anche con il viewer acceso
+- Tetti di durata (`CAPS` in `lab64 test`): smoke 20 s, smoke + sanity 35 s, un test 10 s. Valgono anche con il viewer acceso
   (i test sul suo schermo sono piu' lenti: 28,3 s contro 17,9 s, una misura del 14/11; `./build.sh --no-view` li tiene sui display virtuali).
-- Test singoli: `../lab64/run.sh tools python3 tests/run.py -k INN`, `../lab64/run.sh tools python3 tests/run.py all --list`.
+- Test singoli: `lab64 test -k INN`, `lab64 test all --list`.
 - Test su vc64web: `./build.sh --emu` (poi i `EMU-*` sono in regression: `-k EMU`). Senza demone sono SKIP, non FAIL.
 - Regole dei test (ID, lingua, eroe di prova, dove va un test nuovo): [tests/CLAUDE.md](../tests/CLAUDE.md) e [test.md](test.md).
 
 ## 6. Vedere l'emulatore dal vivo
 
-`./build.sh --view` (o `../lab64/viewer.sh start`) avvia `lab64-viewer`; **http://localhost:6080** (una sola porta, aperta solo
+`./build.sh --view` (o `lab64 view`) avvia `lab64-viewer`; **http://localhost:6080** (una sola porta, aperta solo
 su localhost) e' il **centro di controllo** del progetto (14/11, richiesta del committente). E' di Lab64, quindi **generico**:
 vale per qualunque progetto C64 che pubblichi le versioni in `out/releases/v<V>/` con un `manifest.json` nel formato descritto in
-[../lab64/README.md](../../lab64/README.md) ("Manifest per il viewer"); cio' che e' del gioco (misure, etichette dei file, nome del
+README di Lab64 ("Manifest per il viewer"); cio' che e' del gioco (misure, etichette dei file, nome del
 progetto) arriva dal manifest e da `lab64.env` (`C64_VIEW_TITLE`, `C64_VIEW_PLAYER`). Tema: moderno ma che ricorda il C64 e il
 manuale del gioco (carta beige, inchiostro marrone, rosso scuro, barra arcobaleno, pulsanti ed etichette a forma di tasto; chiaro o
 scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagina in inglese, come tutto Lab64):
 - **Stato dal vivo** (aggiornato ogni 2 s): **BUILD** (fase e esito di `./build.sh`, da `out/tmp/build.json`), **TEST** (barra di
-  avanzamento, test in corso, ultimi esiti e FAIL, da `out/tmp/tests.json` che `tests/run.py` riscrive dopo ogni test), **VICE LIVE**
+  avanzamento, test in corso, ultimi esiti e FAIL, da `out/tmp/tests.json` che `lab64 test` riscrive dopo ogni test), **VICE LIVE**
   (il VICE avviato dalla pagina, con "Play / try" e "Close").
 - **Miniatura dello schermo dal vivo** fissa in basso a destra (client KasmVNC in sola vista, `view_only=1&resize=scale`): un clic la
   apre **grande e interattiva** (`/live.html`: tastiera fisica, overlay Keyboard / Joy 1 / Joy 2, Audio). Se il viewer e' acceso,
@@ -186,7 +189,7 @@ scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagin
   monta qualunque file del progetto (`/work`).
 
 **Come la pagina comanda VICE** (14/11, scelta piu' sicura confermata dal committente): il viewer **non** ha il socket di Docker (chi
-lo ha e' root sull'host). `viewer.sh start` avvia anche **`lab64-player`** (immagine `lab64-tools`, `../lab64/viewer_player.py`) se
+lo ha e' root sull'host). `viewer.sh start` avvia anche **`lab64-player`** (immagine `lab64-tools`, `viewer_player.py` di Lab64) se
 `lab64.env` definisce `C64_VIEW_PLAYER` (qui `tools/vice/play.sh`): la pagina manda `POST /control` al server del viewer, che lo
 passa al lettore da un socket Unix nel volume `lab64-x11` (`c64-player.sock`). Comandi: `status`, `play` (percorso sotto `out/`, solo
 `.d64 .g64 .prg .t64 .crt`, niente `..`, il file deve esistere), `basic`, `stop`. Protezioni del server: Host solo `localhost`,
@@ -201,7 +204,7 @@ Dettagli dello schermo dal vivo:
   valore resta nel browser, `localStorage`). Agisce solo sull'ascolto, non su VICE ne' sulle registrazioni. Gli emulatori di un altro container usano schermo e audio
   con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
   aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
-  **VICE con il suono**, a velocita' reale, sull'ultima build: `../lab64/viewer.sh exec tools/vice/play.sh [disco.d64|versione]` (senza argomento `out/releases/latest`, con `1.239` quella versione)
+  **VICE con il suono**, a velocita' reale, sull'ultima build: `lab64 play tools/vice/play.sh [disco.d64|versione]` (senza argomento `out/releases/latest`, con `1.239` quella versione)
   (`viewer.sh exec` = un comando in `lab64-tools` collegato a schermo e audio del viewer). La tastiera fisica del browser arriva a VICE.
   **Overlay** in `/live.html` (14/11): tre pulsanti nell'intestazione accendono, sopra lo schermo e semitrasparenti, la **tastiera del C64**
   (66 tasti con la disposizione originale e i tasti funzione a destra; SHIFT, CTRL e C= restano premuti fino al tasto successivo, SHIFT LOCK
@@ -221,9 +224,9 @@ Dettagli dello schermo dal vivo:
   il server risponde 304).
 - la cartella `out/` (sola lettura: il viewer la monta in `/srv/out`).
 
-Password facoltativa: `VIEW_PASSWORD=... ../lab64/viewer.sh start` (di default nessuna): autenticazione HTTP del browser su
+Password facoltativa: `VIEW_PASSWORD=... lab64 view` (di default nessuna): autenticazione HTTP del browser su
 **tutto** il viewer (pagine, `out/`, schermo, audio; utente qualsiasi). Il server X di KasmVNC ascolta solo dentro il container
-(127.0.0.1:6901): fuori c'e' solo la porta 6080. `../lab64/viewer.sh stop` lo ferma.
+(127.0.0.1:6901): fuori c'e' solo la porta 6080. `lab64 stop` lo ferma.
 
 ## 7. Dove finisce cosa (`out/`)
 
@@ -237,7 +240,7 @@ Password facoltativa: `VIEW_PASSWORD=... ../lab64/viewer.sh start` (di default n
 | `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
 | `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
 | `out/work/atlas/` | atlante grafico (`index.html`) |
-| `out/work/memory-map/` | mappa automatica della memoria e del disco (`index.html`, `memmap.json`, `../lab64/memmap/c64map.py`) e mappe curate a mano (`mappa_ram.html`, `mappa_disco.html`) |
+| `out/work/memory-map/` | mappa automatica della memoria e del disco (`index.html`, `memmap.json`, `memmap/c64map.py` di Lab64) e mappe curate a mano (`mappa_ram.html`, `mappa_disco.html`) |
 | `out/work/memprobe/` | (14/11) dump della RAM della sonda in VICE (`./build.sh --probe`, uno per sessione VICE dei test, con scenario e impronta del disco nel `.json` accanto) |
 | `out/work/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
 | `out/work/simulators/` | report dei simulatori |
@@ -251,9 +254,9 @@ Password facoltativa: `VIEW_PASSWORD=... ../lab64/viewer.sh start` (di default n
 
 | Sintomo | Causa e rimedio |
 |---|---|
-| `./validate_env.sh`: "disco Windows" | il progetto sta in `/mnt/c/...`: clonarlo nel filesystem di WSL (`~/...`) |
-| `pack: manca zx0` / `mkdisk: manca cc1541` | lo script e' stato lanciato fuori da `lab64-tools`: `../lab64/run.sh tools ...` |
-| download di un sorgente fallito (`../lab64/build-images.sh`) | rete o proxy dell'host: scaricare il file indicato da `../lab64/sources.conf` a mano in `../lab64/downloads/` con il nome che stampa lo script (lo SHA-256 viene controllato) |
-| pip/npm: `SELF_SIGNED_CERT_IN_CHAIN` nella build di un'immagine | proxy che intercetta TLS: `C64_CA_BUNDLE=/percorso/ca.crt ../lab64/build-images.sh --force vc64web` e `./build.sh --images` (manuale) |
+| `lab64 doctor`: "disco Windows" | il progetto sta in `/mnt/c/...`: clonarlo nel filesystem di WSL (`~/...`) |
+| `pack: manca zx0` / `mkdisk: manca cc1541` | lo script e' stato lanciato fuori da `lab64-tools`: `lab64 run ...` |
+| download di un sorgente fallito (`lab64 images`) | rete o proxy dell'host: scaricare il file indicato da `sources.conf` di Lab64 a mano in `downloads/` di Lab64 con il nome che stampa lo script (lo SHA-256 viene controllato) |
+| pip/npm: `SELF_SIGNED_CERT_IN_CHAIN` nella build di un'immagine | proxy che intercetta TLS: `C64_CA_BUNDLE=/percorso/ca.crt lab64 images --force vc64web` e `./build.sh --images` (manuale) |
 | Docker Hub `429 Too Many Requests` | limite delle richieste anonime: `docker login`, poi riprovare (le immagini restano in cache). In alternativa lo specchio di Google: `docker pull mirror.gcr.io/library/node:22-bookworm-slim` e `docker tag` col nome originale (usato il 13/11) |
 | test `EMU-*` SKIP | demone non acceso: `./build.sh --emu` |

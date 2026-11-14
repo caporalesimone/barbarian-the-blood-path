@@ -4,7 +4,7 @@ Copyright © 2026 - Simone Caporale
 
 Ristrutturati l'11/11 (richiesta del committente). Tre suite, tre cartelle in `tests/`, un solo runner con report.
 Dal 13/11 tutti i test girano nel container **`lab64-tools`** (i test `EMU-*` parlano con il demone di vc64web nel
-container `lab64-vc64web`): `./build.sh`, oppure `../lab64/run.sh tools python3 tests/run.py ...` per i comandi di questa pagina
+container `lab64-vc64web`): `./build.sh`, oppure `lab64 test ...` per i comandi di questa pagina
 (panoramica: [Getting started](getting-started.md) sezione 5; regole: `tests/CLAUDE.md`).
 I test sono scritti **in inglese** (ID, descrizioni, motivi dei fallimenti, commenti dei file nuovi; gli script storici
 spostati in `regression/` hanno ancora commenti e messaggi in italiano, da tradurre: TODO).
@@ -12,8 +12,8 @@ spostati in `regression/` hanno ancora commenti e messaggi in italiano, da tradu
 ```mermaid
 flowchart LR
     B["./build.sh"] --> RT["tests/run_tests.sh<br/>(lab64-tools)"]
-    RT -->|debug| S1["tests/run.py smoke sanity"]
-    RT -->|"--release / --all"| S2["tests/run.py smoke sanity regression"]
+    RT -->|debug| S1["lab64 test smoke sanity"]
+    RT -->|"--release / --all"| S2["lab64 test smoke sanity regression"]
     S1 --> REP["out/work/test_report.txt / .json"]
     S2 --> REP
 ```
@@ -37,23 +37,23 @@ si scrivono quelli della feature nuova.
   `regression/gen/gen_ref.json`).
 - **ID**: maiuscoli, `AREA-NN` (`SHOP-01`, `INN-CHEST-01`, `DUNG-CHEST-01`). Numerazione: `01`–`09` smoke, `10`+
   sanity e regression (un test che passa da una suite all'altra conserva il suo ID). Il runner rifiuta ID duplicati.
-- (14/11) **motore e libreria VICE stanno in Lab64**: `../lab64/test/run.py` (motore), `../lab64/py/c64test.py` (registro),
-  `../lab64/py/vicemon.py` (`Vice`). Nel gioco restano solo rimandi (`tests/run.py`, `tests/lib/runner.py`) e cio' che e' del gioco.
+- (14/11) **motore e libreria VICE stanno in Lab64**: `test/run.py` di Lab64 (motore), `py/c64test.py` di Lab64 (registro),
+  `py/vicemon.py` di Lab64 (`Vice`). Nel gioco resta solo cio' che e' del gioco; i `cases.py` importano `c64test` e `vicemon` di Lab64 direttamente.
 - `tests/lib/c64.py`: libreria del gioco. `Vice` (di Lab64: x64sc in warp con monitor remoto: **nessun tempo fisso**, ogni
   comando aspetta il prompt, `go` aspetta la fermata e ne legge il contatore di cicli), `Game` (il disco, menu,
   partita, `frames(n, joy, fire, keys)` con l'input scritto all'`rts` di `read_input`, `in_game()` dal ritorno nello
   stack, `teleport`), `sync`/`settle` per gli script storici con il loro socket.
-- `tests/lib/runner.py` (rimando a `../lab64/py/c64test.py`): registro, `check(cond, reason)`, `Skip`, `script(id, desc, argv)` per gli script esterni.
+- `c64test` di Lab64 (`from c64test import test, check, Skip, script`): registro, `check(cond, reason)`, `Skip`, `script(id, desc, argv)` per gli script esterni.
   Un `cases.py` può avere `setup`/`teardown` (una sessione di VICE per tutti i suoi test) e `CHAIN = True` (sequenza:
   dopo un fallimento i test seguenti sono SKIP con il motivo).
-- `tests/run.py [smoke|sanity|regression|all] [-k ID|prefisso] [--list]` (o `./lab64 test ...`, che con `./lab64 up` passa anche il demone vc64web); report a schermo e in
+- `lab64 test [smoke|sanity|regression|all] [-k ID|prefisso] [--list]` (o `lab64 test ...`, che con `lab64 up` passa anche il demone vc64web); report a schermo e in
   `out/work/test_report.txt` / `out/work/test_report.json`: ID, suite, esito (PASS/FAIL/SKIP), tempo, motivo.
   Stato dal vivo (14/11): `out/tmp/tests.json`, riscritto dopo ogni test (stato, test in corso, esiti fin qui): lo legge il centro di
   controllo del viewer ([getting-started](getting-started.md) sezione 6).
 
 ## Tetti di durata (12/11, committente)
 
-`tests/run.py` fallisce (exit 1, righe `TIME CAP`; 14/11: i valori stanno in `lab64.env`, `C64_TEST_CAPS`) se: la suite **smoke** da sola supera **20 s**; **smoke + sanity** supera
+`lab64 test` fallisce (exit 1, righe `TIME CAP`; 14/11: i valori stanno in `lab64.env`, `C64_TEST_CAPS`) se: la suite **smoke** da sola supera **20 s**; **smoke + sanity** supera
 **35 s** (somma dei tempi dei test, setup compreso); un **singolo** test di smoke o sanity supera **10 s**. Regression senza
 tetto. I tetti di somma si controllano solo senza `-k`. `TEST_CAP_SCALE=0.2` li riduce per provare il controllo. Misura
 del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHAP-SAVE-10` 4,7 s.
@@ -85,8 +85,8 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
 - Prestazioni (`regression/perf`): durata di ogni fotogramma = cicli fra due letture dell'input; perso = più di 1,5
   fotogrammi PAL. Le soglie sono le misure dell'11/11 più un margine ([prestazioni](prestazioni.md)).
 - **Sonda della memoria** (14/11, `C64_MEMPROBE=1`, `./build.sh --probe`): ogni `Vice()` avviato senza `-autostart` riempie la RAM
-  con lo schema di `../lab64/memmap/probe.py` subito dopo il boot e `close()` la salva in `out/work/memprobe/<suite.area>_<pid>_<n>.bin`
-  (lo scenario è il modulo dei test, `C64_MEMPROBE_TAG` messo da `tests/run.py`). Serve alla mappa automatica ([build.md](build.md)).
+  con lo schema di `memmap/probe.py` di Lab64 subito dopo il boot e `close()` la salva in `out/work/memprobe/<suite.area>_<pid>_<n>.bin`
+  (lo scenario è il modulo dei test, `C64_MEMPROBE_TAG` messo da `lab64 test`). Serve alla mappa automatica ([build.md](build.md)).
   Un test che fallisce solo con la sonda sta leggendo memoria mai inizializzata (il C64 vero all'accensione non ha la RAM a zero).
 
 ## Il secondo emulatore (13/11)
@@ -100,7 +100,7 @@ container `lab64-vc64web` all'indirizzo `EMU_URL`, `boot`, `run_script`, `run_lo
 
 ## Elenco
 
-Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test).
+Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 ### smoke (31)
 
@@ -223,7 +223,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
 | `KRILL-13` | no KERNAL disk call left in GAME, LOBBY, MENU and START (listing scan: after the install the drive does not answer the KERNAL) |
 | `KRILL-17` | 1541-II (VICE 1542): START with Krill, menu, new hero (save plugin), village read |
-| `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 from ../lab64/roms/) |
+| `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 of Lab64) |
 | `KRILL-14` | Krill install fails (simulated: from the install straight to kr_fail): message, a key, BARBARIAN loaded again |
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
 | `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |

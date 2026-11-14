@@ -2,7 +2,7 @@
 last one of chapters 1-3 is the boss level (fixed map BOSSCHc, placeholder; boss drawn with the final boss graphics);
 killing that boss unlocks chapter c+1 (c_unl) and the exit of the village (tiles '=' of data/town_map.txt) takes the
 hero to the next village (save of hero + levels, then TWNc+1). One VICE session, tests in order (CHAIN)."""
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import Game
 from lib.play import new_game, find, fire_to, U
 

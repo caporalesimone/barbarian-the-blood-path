@@ -1,7 +1,7 @@
 """Second emulator (13/11, committente): the game must also run on vc64web (VirtualC64 in WebAssembly, another core and
 another 1541 emulation than VICE). VICE stays the only authoritative reference: these tests do not decide what is
 correct, they check that the real disk, played like a player with joystick and keyboard only, works there too.
-Package: ../lab64/vc64web-custom, helper: tests/lib/emu.py, guide: docs/emulatore.md.
+Package: vc64web-custom of Lab64 (image lab64-vc64web), helper: tests/lib/emu.py, guide: docs/emulatore.md.
 
 One session, a chain (after a failure the following tests are SKIP): real boot from the disk -> LOBBY -> new barbarian
 (saved with Krill's save plugin on the emulated 1541-II) -> village (HUD text read from the screen RAM) -> alchemist
@@ -9,7 +9,7 @@ One session, a chain (after a failure the following tests are SKIP): real boot f
 saved hero is in the list. About 4 minutes. The bots (bots/*.js) run inside the emulator and read the game RAM through
 the labels of out/work/game.lbl. SKIP (not FAIL) when the daemon (container lab64-vc64web, EMU_URL) is not running."""
 import os
-from lib.runner import test, check, Skip
+from c64test import test, check, Skip
 from lib.c64 import OUT, ROOT
 from lib.emu import Emu
 from lib.play import NAME, SEED

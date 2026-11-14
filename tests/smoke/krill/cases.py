@@ -1,7 +1,7 @@
 """Krill's Loader, happy path (11/11): after the real START the game loads its files with Krill; a dungeon theme and
 a song arrive in RAM equal to the files of out/ (the theme under the KERNAL, read with 'bank ram')."""
 import os
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import OUT, Game
 
 

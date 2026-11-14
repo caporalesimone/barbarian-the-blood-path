@@ -2,7 +2,7 @@
 removed: it measured, now it checks; until 11/11 the inn module OVL2 was overwritten by the theme prefetch), the
 fountain. One VICE session, development disk."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, fire_to, find, INN_DOOR, SMITH_DOOR, go_level, go_village
 
 CHAIN = True

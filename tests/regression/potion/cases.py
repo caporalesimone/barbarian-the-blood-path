@@ -2,7 +2,7 @@
 in the HUD, save/load, death, buying with a full belt. One VICE session (development disk), the village (no monsters).
 BELT_SLOTS = 4 today: with the 8-slot belt (TODO 3.1) the tests follow the constant and the keys of lib.play."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, key, BELT_KEYS, fire_to, find, alive, mpos, floor_next, go_level, go_village, K_RUNSTOP
 
 BELT_SLOTS = 4

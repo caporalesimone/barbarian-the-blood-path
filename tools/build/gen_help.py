@@ -17,7 +17,7 @@ import json, os, re, socket, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
-from vice_rom import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (x64sc: -default + tutte le ROM da ../lab64/roms/)
+from vicemon import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (Lab64: x64sc con -default + tutte le ROM di Lab64)
 SNAP = os.path.join(ROOT, "data", "help_hud.json")
 COL_TXT, COL_KEY, COL_NOTE, COL_TITLE = 1, 7, 3, 7       # colori < 8: caratteri in alta risoluzione (schermo multicolore)
 HUD_X0, HUD_X1 = 1, 39                                     # colonne 1..38 (l'HUD del gioco e' a 38 colonne)

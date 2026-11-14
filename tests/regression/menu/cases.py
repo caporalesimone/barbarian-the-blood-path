@@ -3,7 +3,7 @@ PG-NEW-10 in regression/saves covers the field logic: here the full 12-character
 The keys are written at the exit of read_input (the menu reads them through ui_input -> read_input, like the game);
 the key matrix comes from the menu's own table (keymap: index = row * 8 + bit, value = character code)."""
 from lib.c64 import Game, addr_after, listing
-from lib.runner import test, check
+from c64test import test, check
 
 NAME = "black thorne"                                    # project rule: 12 characters with a space
 STUB = 0x0340

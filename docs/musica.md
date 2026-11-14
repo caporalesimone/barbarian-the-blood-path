@@ -114,12 +114,12 @@ Rilocabile: tutti gli indirizzi sono offset dall'inizio del brano (16 bit little
 
 Ogni build scrive un **file .sid per brano** (`tools/build/gen_sid.py` -> `out/work/sid/<nome>.sid`), pubblicati con la versione in
 `out/releases/v<V>/music_sid_v<V>/` (gruppo `music` del manifest, `kind: "sid"`). Ogni `.sid` (PSID v2, intestazione scritta da
-`../lab64/py/psid.py`) contiene il **player vero del gioco** (`src/common/sid_player.inc`, assemblato a `$1000`, variabili a `$C000`,
+`py/psid.py` di Lab64) contiene il **player vero del gioco** (`src/common/sid_player.inc`, assemblato a `$1000`, variabili a `$C000`,
 voci come nel gioco: lead sulla 2, accordi sulla 1, basso sulla 3) e i dati del brano (`out/work/snd/<nome>.bin`): init `$1000`,
 play `$1003` una volta per fotogramma (50 Hz, PAL), SID 6581. Titolo dal nome in `songs.TITLES`, autore "Barbarian: The Blood Path",
 rilascio con la versione.
 
-**Ascolto** (14/11): nella pagina di controllo di Lab64 (`./lab64 view`, http://localhost:6080) la riga delle musiche di ogni versione
+**Ascolto** (14/11): nella pagina di controllo di Lab64 (`lab64 view`, http://localhost:6080) la riga delle musiche di ogni versione
 ha **♪ play**, che apre il **SID Studio** (`sid.html`, jsSID 0.9.1 di Hermit servito in locale). Elenco dei brani sempre a sinistra,
 con i `.sid` della release e quelli che aggiungi tu (pulsante "+ SID" o trascinandoli: restano nel browser); trasporto con sottobrani,
 fine brano CONT / NEXT (passa al successivo) / LOOP (ricomincia) dopo la durata scelta, chip 6581/8580, volume, **registrazione WAV**.

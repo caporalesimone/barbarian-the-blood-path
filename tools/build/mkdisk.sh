@@ -20,9 +20,9 @@ sv, hl = g("SV_LEN"), g("HDR_LEN")
 open("out/work/hl.prg", "wb").write(bytes([0, 0, g("SAVE_VER")]) + bytes(hl - 1))     # elenco vuoto della versione attuale
 open("out/work/save.prg", "wb").write(bytes([0, 0xe0]) + bytes(sv))
 PY
-# cc1541 (nel PATH di lab64-tools: 4.2, compilato dai sorgenti nella build dell'immagine, ../lab64/sources.conf): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
+# cc1541 (nel PATH di lab64-tools: 4.2, compilato dai sorgenti nella build dell'immagine, sources.conf di Lab64): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
 CC=cc1541
-command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container lab64-tools (../lab64/run.sh tools ...)"; exit 1; }
+command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container lab64-tools (lab64 run ...)"; exit 1; }
 # (14/11) -S 4 = interleave dei settori 4 (quello dei benchmark di Krill): con cc1541 4.2 l'interleave predefinito (10) dava il MENU
 # in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s.
 # I file caricati dal KERNAL (BARBARIAN, START, LORE, HELP) misurati con LOAD: stessi tempi con 10 e con 4 (entro 0,1 s).

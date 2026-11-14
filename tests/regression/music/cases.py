@@ -1,5 +1,5 @@
 import os, sys
-from lib.runner import script
+from c64test import script
 from lib.c64 import ROOT
 H = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
@@ -8,7 +8,7 @@ script("MUSIC-10", "songs per level, buffer = SNDn files, combat and resume, cop
 
 
 # (14/11) the .sid files of the songs (tools/build/gen_sid.py): every one is a valid PSID and its player really plays
-from lib.runner import test, check  # noqa: E402
+from c64test import test, check  # noqa: E402
 from lib.c64 import Vice, OUT  # noqa: E402
 
 

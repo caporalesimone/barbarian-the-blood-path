@@ -3,7 +3,7 @@
 rule (no shield with a two-handed weapon) must hold in the inn too (module OVL2, h_equip), not only in the inventory
 (INV-2H-10/11). The first tests are pure Python; the inn tests share one VICE session in the village."""
 import os, sys, tempfile
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, INN_DOOR
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))

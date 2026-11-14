@@ -5,13 +5,12 @@ pagina di controllo di Lab64 (sid.html, jsSID), con VICE vsid o con qualunque pl
 Per ogni brano di tools/build/songs.py: un programma a $1000 con il player vero del gioco (src/common/sid_player.inc, assemblato
 con 64tass come nel gioco) e i dati del brano (out/work/snd/<nome>.bin, da tools/build/gen_music.py): init a $1000 (azzera le
 variabili del player in $C000 e avvia il brano), play a $1003 (sp_play, una volta per fotogramma). Intestazione PSID scritta da
-../lab64/py/psid.py. Uscite: out/work/sid/<nome>.sid (i nomi di songs.py hanno gia' il numero: 00_tavern.sid, ...)."""
+psid.py di Lab64. Uscite: out/work/sid/<nome>.sid (i nomi di songs.py hanno gia' il numero: 00_tavern.sid, ...)."""
 import os, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
-LAB64 = os.environ.get("LAB64") or os.path.normpath(os.path.join(ROOT, "..", "lab64"))
-sys.path[:0] = [HERE, os.path.join(LAB64, "py")]
+sys.path[:0] = [HERE]                  # psid: libreria di Lab64 (importabile nei suoi container)
 import songs  # noqa: E402
 TITLES = songs.TITLES
 from psid import write_psid  # noqa: E402

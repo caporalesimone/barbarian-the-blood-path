@@ -59,7 +59,7 @@ GROUP_LABELS = {"disk": "Disco 1541", "atlas": "Atlante grafico", "memory-map": 
 
 
 def metric(mid, label, value, unit="", better=None, hint=""):
-    """una misura del progetto nel formato del viewer (../lab64/README.md, "Manifest per il viewer"):
+    """una misura del progetto nel formato del viewer (README di Lab64, "Manifest for the viewer"):
     better = "up" (piu' alto e' meglio), "down" (piu' basso e' meglio) o None"""
     return {"id": mid, "label": label, "value": value, "unit": unit, "better": better, "hint": hint}
 
@@ -207,7 +207,7 @@ def main():
     if not a.only_manual:
         stats["metrics"] = game_metrics()
         mm = os.path.join(OUT, "work", "memory-map", "memmap.json")
-        if a.maps and os.path.isfile(mm):          # (14/11) misure generiche della mappa automatica (../lab64/memmap/c64map.py)
+        if a.maps and os.path.isfile(mm):          # (14/11) misure generiche della mappa automatica (lab64 map)
             stats["metrics"] += json.load(open(mm)).get("metrics", [])
         stats["info"] = [{"label": "salvataggi", "value": "v%s" % ver.get("save_version")}]
         stats["disk"] = d64_info(os.path.join(vdir, "blood_path_v%s_1541.d64" % v))

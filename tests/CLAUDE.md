@@ -5,14 +5,14 @@ dettagli di suite e runner: `docs/test.md`.
 
 ## Dove girano
 - Nel container **`lab64-tools`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
-  `./build.sh --release` (anche regression), `../lab64/run.sh tools python3 tests/run.py -k ID`. Mai sull'host.
-- VICE si avvia sempre con `-default` e con **tutte** le ROM di `../lab64/roms/vice-roms/` passate a mano (`../lab64/py/vicemon.py`,
-  `../lab64/py/vice_env.sh`; nel gioco `tools/vice/vice_rom.py` e `vice_env.sh` sono rimandi): niente configurazione o cartella dati dell'utente.
+  `./build.sh --release` (anche regression), `lab64 test -k ID`. Mai sull'host.
+- VICE si avvia sempre con `-default` e con **tutte** le ROM di `roms/vice-roms/` di Lab64 passate a mano (`py/vicemon.py` di Lab64,
+  `py/vice_env.sh` di Lab64; nel gioco `tools/vice/vice_env.sh` aggiunge solo `ROOT`): niente configurazione o cartella dati dell'utente.
 - Test sull'emulatore secondario (`EMU-*`): il demone sta in `lab64-vc64web`, acceso da `./build.sh --emu` o `--release`
   (`EMU_URL`); senza demone sono SKIP, non FAIL.
 
 ## Suite (11/11, regole del committente)
-- Tre suite in tre cartelle, un runner (`tests/run.py`, report con ID, esito, tempo e motivo in `out/work/test_report.txt` / `.json`):
+- Tre suite in tre cartelle, un runner (`lab64 test`, report con ID, esito, tempo e motivo in `out/work/test_report.txt` / `.json`):
   - `smoke/`: pochi test **veloci** sull'**happy path** delle funzioni principali, con le scorciatoie di VICE (memoria,
     routine chiamate, teletrasporto, tasti scritti all'uscita di `read_input`).
   - `sanity/`: i test della **feature appena implementata**. **Quando si passa a una feature nuova, i test di `sanity/` si
@@ -23,7 +23,7 @@ dettagli di suite e runner: `docs/test.md`.
   Sono un freno contro l'aumento dei tempi, non un obiettivo; con il viewer (`--view`) non contano.
 - **debug = smoke + sanity** (deve passare prima di ogni consegna e di ogni commit); **release = anche regression**. Se si tocca
   un'area coperta da un test di regression (generatore, salvataggi, oggetti, mostri, musica, regole) lanciare a mano quei test
-  (`../lab64/run.sh tools python3 tests/run.py regression -k SAVE`) prima di consegnare, anche in debug.
+  (`lab64 test regression -k SAVE`) prima di consegnare, anche in debug.
 - **Ogni correzione di un difetto** (11/11): valutare un test che l'avrebbe trovato. Si scrive se ha senso (il difetto può
   tornare, il caso è realistico) e se non è troppo lungo né troppo complicato; altrimenti scrivere nel commit (o nel TODO) perché
   non c'è. Il test va nella suite giusta (smoke se veloce e sull'happy path, altrimenti regression).
@@ -32,7 +32,7 @@ dettagli di suite e runner: `docs/test.md`.
 - Una cartella per feature in ogni suite, con un `cases.py` che registra i test (gli altri file sono script e dati della feature).
 - **ID** maiuscoli e significativi `AREA-NN` (`SHOP-01`, `INN-CHEST-01`): `01`–`09` smoke, `10`+ sanity e regression; un test
   spostato conserva l'ID. Test (ID, descrizioni, motivi, commenti) **in inglese**.
-- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `Vice` di `../lab64/py/vicemon.py`, usata da `tests/lib/c64.py`). **All'avvio si aspetta il
+- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `Vice` di `py/vicemon.py` di Lab64, usata da `tests/lib/c64.py`). **All'avvio si aspetta il
   C64, non un tempo** (14/11, TODO I11): `Vice()` chiama `wait_boot` (Lab64) (vettori IRQ `$0314/5` = `$EA31` e `READY.` sullo schermo; tetto 30 s),
   perche' VICE apre la porta del monitor ~7 s prima di finire il boot a freddo. Un VICE lanciato con `-autostart` non mostra `READY.`:
   `Vice(boot_wait=<s>)`. `Vice.close()` uccide l'intero gruppo di processi (xvfb-run, Xvfb, x64sc).
@@ -52,5 +52,5 @@ dettagli di suite e runner: `docs/test.md`.
 ## Emulatore secondario (vc64web, 13/11)
 - **VICE resta l'unico riferimento autorevole**: i numeri misurati su vc64web non sono misure del gioco, si confermano in VICE.
 - Il gioco deve andare anche lì: test `EMU-10..16` (`tests/regression/emu/`, `tests/lib/emu.py`, ~2 minuti). Se si tocca loader,
-  salvataggi, avvio, HUD o input: `./build.sh --emu` e `python3 tests/run.py regression -k EMU`.
+  salvataggi, avvio, HUD o input: `./build.sh --emu` e `lab64 test regression -k EMU`.
 - I test non assumono l'ordine delle merci dell'alchimista (casuale a ogni visita).

@@ -2,7 +2,7 @@
 an item, the weapon cannot be taken off, full pack. Inventory cursor (ui_cur): 0..7 pack, 8..11 weapon, armor, shield,
 ring. One VICE session, the village."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, key, K_I, K_DEL, K_Y, K_N
 
 CHAIN = True

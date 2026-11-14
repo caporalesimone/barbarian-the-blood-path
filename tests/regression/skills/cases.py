@@ -2,7 +2,7 @@
 around, Battle Cry stuns, Smash hits the monsters in its area, cooldowns. Frenzy and Rage: regression/dungeon
 (SKILL-10/11). Hits are counted on hit_one (one attack roll per monster). One VICE session, level 1, godmode."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, go_level, key, alive, clear_around, floor_next, find, FLOOR_D
 
 CHAIN = True

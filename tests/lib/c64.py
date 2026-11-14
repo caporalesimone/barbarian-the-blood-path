@@ -13,8 +13,7 @@ import glob, os, re, shutil, signal, socket, subprocess, sys, time
 # (14/11) the generic VICE library is Lab64's (py/vicemon.py): Vice, labels, listing, addr_after, ROMS, FRAME, ... come from there
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("C64_ROOT", ROOT)
-LAB64 = os.environ.get("LAB64") or os.path.normpath(os.path.join(ROOT, "..", "lab64"))   # Lab64 (run.sh: /lab64; else sibling folder)
-sys.path[:0] = [os.path.join(LAB64, "py")] + [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
 from vicemon import *  # noqa: E402,F401,F403
 from vicemon import OUT, ROMS, FRAME, PROMPT, STOP, MonitorError, Vice, drain, sync, settle  # noqa: E402,F401
 

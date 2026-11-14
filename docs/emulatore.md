@@ -1,4 +1,4 @@
-# Il secondo emulatore: vc64web (`../lab64/vc64web-custom`)
+# Il secondo emulatore: vc64web (`vc64web-custom` di Lab64)
 
 Copyright © 2026 - Simone Caporale
 
@@ -15,8 +15,8 @@ I numeri ottenuti qui (cicli, durate) **non sono misure del gioco**: si conferma
 La precisione di questo core rispetto a VICE non è stata confrontata ciclo per ciclo [NON VERIFICATO]: l'unica prova è che il
 gioco parte e si gioca (test `EMU-10..16`).
 
-Provenienza, cosa è versionato e cosa no (le ROM Commodore no: la build le prende da `../lab64/roms/`), come aggiornare il pacchetto:
-[../lab64/vc64web-custom/docs/INCLUSION.md](../../lab64/vc64web-custom/docs/INCLUSION.md).
+Provenienza, cosa è versionato e cosa no (le ROM Commodore no: la build le prende da `roms/` di Lab64), come aggiornare il pacchetto:
+vc64web-custom/docs/INCLUSION.md di Lab64 (`vc64web-custom/docs/INCLUSION.md` di Lab64).
 
 ## Architettura
 
@@ -36,7 +36,7 @@ copia finché il demone resta acceso).
 
 ## Cosa sa fare (con i riferimenti ai file del pacchetto)
 
-Tutto il pacchetto è in `../lab64/vc64web-custom/`. Documenti: `README.md` (build, registrazioni), `docs/CHANGELOG.md`, `docs/c64-cli.md`
+Tutto il pacchetto è in `vc64web-custom/` di Lab64. Documenti: `README.md` (build, registrazioni), `docs/CHANGELOG.md`, `docs/c64-cli.md`
 (**ogni comando**, con output reali e «What is not verified»), `docs/C64-API.md` (API JavaScript `window.c64`, «Limits
 found»), `docs/scripting.md` (script di testo), `docs/getting-started.md` (prime prove), `docs/C64-TODO.md` (limiti del core),
 `examples/` (script, cicli, shell). Nel seguito «cli §N» = `docs/c64-cli.md` sezione N. Dal 14/11 il pacchetto (documenti,
@@ -82,7 +82,7 @@ tasti dice `KEY AND JOYSTICK TEST`; i titoli citati qui (es. «Limits found») s
 | Video dimostrativo con audio e comandi a schermo | `grabBrowserVideoAndAudio` | in VICE servirebbero strumenti esterni (non provato) |
 | Esplorare molte varianti di un combattimento con un bot | `c64-batch` (+ `arena.py` di VICE per confermare) | più istanze in parallelo; il bilancio si decide con simulatore e arena |
 
-Regola pratica: **se una modifica tocca loader, salvataggi, avvio, HUD o input, lanciare `python3 tests/run.py regression -k EMU`
+Regola pratica: **se una modifica tocca loader, salvataggi, avvio, HUD o input, lanciare `lab64 test regression -k EMU`
 oltre ai test di VICE** (2 minuti). Un fallimento qui con VICE verde non dice che il gioco è sbagliato: dice che il gioco
 dipende da un comportamento che i due emulatori non hanno in comune, da capire (e, se è un difetto dell'emulatore, da
 segnalare al team: sezione «Trappole»).
@@ -90,15 +90,15 @@ segnalare al team: sezione «Trappole»).
 ## Come si usa
 
 Dal 13/11 il demone gira nel container **`lab64-vc64web`** (immagine costruita dal `Dockerfile` del pacchetto, con le pagine
-già pronte dentro: `../lab64/build-images.sh vc64web` le genera nel builder con `build.py --no-docker --out out/cache/vc64web` e poi fa la
+già pronte dentro: `lab64 images vc64web` le genera nel builder con `build.py --no-docker --out out/cache/vc64web` e poi fa la
 `docker build` con il contesto `pages=out/cache/vc64web`). Il pacchetto è autonomo e parametrizzato: `--vice-roms`, `--open-roms`, `--out`,
-`--tag` (README e `docs/INCLUSION.md` del pacchetto); le ROM le prende dalla sua `roms/` (`../lab64/vc64web-custom/roms/`), identica a `../lab64/roms/` del progetto.
+`--tag` (README e `docs/INCLUSION.md` del pacchetto); le ROM le prende dalla sua `roms/` (`vc64web-custom/roms/` di Lab64), identica a `roms/` di Lab64 del progetto.
 
 ```sh
 ./build.sh --emu                                          # build + smoke/sanity con il demone acceso (EMU-* sono in regression)
-../lab64/run.sh tools python3 tests/run.py -k EMU        # solo i test EMU-*, con il demone acceso a mano:
+lab64 test -k EMU        # solo i test EMU-*, con il demone acceso a mano:
 docker network create c64 2>/dev/null; docker run -d --rm --init --shm-size 1g --name lab64-vc64web --network c64 lab64-vc64web
-EMU_URL=http://lab64-vc64web:7064 C64_DOCKER_ARGS="--network c64" ../lab64/run.sh tools python3 tests/run.py -k EMU
+EMU_URL=http://lab64-vc64web:7064 C64_DOCKER_ARGS="--network c64" lab64 test -k EMU
 
 # a mano, dentro il container del demone (client node del pacchetto)
 docker exec -it lab64-vc64web node headless/c64 start

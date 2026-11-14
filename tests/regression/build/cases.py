@@ -1,10 +1,10 @@
 import os, sys
-from lib.runner import script
+from c64test import script
 from lib.c64 import ROOT
 H = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
 """Test variants of the build (used for screenshots and tests): they must assemble."""
-from lib.runner import test, check  # noqa: E402
+from c64test import test, check  # noqa: E402
 import subprocess  # noqa: E402
 
 

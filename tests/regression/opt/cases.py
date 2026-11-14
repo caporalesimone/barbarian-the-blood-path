@@ -1,7 +1,7 @@
 """The optimizations O1-O14 (11/11, docs/ottimizzazione.md): the shared routines called directly, at their
 limits. Fast: one VICE session, the village. (Sanity of the optimization work, moved to regression on 11/11.)"""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game
 
 CHAIN = True

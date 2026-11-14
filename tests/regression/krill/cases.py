@@ -2,7 +2,7 @@
 $0200, the disk has the pre-allocated save files with the right number of blocks, a hero saved with the plugin comes
 back the same from disk, the hero list (file hl) is rewritten by the plugin. One VICE session."""
 import os, re
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import OUT, Game
 from lib.play import new_game
 

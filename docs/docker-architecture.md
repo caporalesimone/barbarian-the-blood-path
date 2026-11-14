@@ -4,15 +4,15 @@ Copyright © 2026 - Simone Caporale (note)
 
 Come sono fatte le immagini e i container del progetto, chi dipende da chi, e come si parlano. Aggiornato al 14/11/2026 (versione 1.240).
 Per l'uso pratico (comandi, prerequisiti) vedi [getting-started.md](getting-started.md); per i dettagli di ciascuna immagine
-[../lab64/README.md](../../lab64/README.md).
+README.md di Lab64 (`README.md` di Lab64).
 
 **Legenda delle affermazioni**: *[misurato]* = verificato con una prova; *[dal codice]* = letto negli script o nel Dockerfile, non rieseguito
 per questo documento; *[non verificato]* = ipotesi.
 
 ## 1. Due livelli: immagini e container
 
-- **Immagini** (si costruiscono una volta, `../lab64/build-images.sh`): modelli di sola lettura. Sono 4, tutte di **Lab64** (`lab64-*`, la
-  toolchain che dal 14/11 e' un repository a parte, cartella `../lab64`, e non sa nulla del gioco): `lab64-tools`, `lab64-pdf-gen`,
+- **Immagini** (si costruiscono una volta, `lab64 images`): modelli di sola lettura. Sono 4, tutte di **Lab64** (`lab64-*`, la
+  toolchain che dal 14/11 e' un repository a parte, cartella Lab64, e non sa nulla del gioco): `lab64-tools`, `lab64-pdf-gen`,
   `lab64-viewer`, `lab64-vc64web`, con la versione di Lab64 nel tag (`:1.0`, e `:latest`). Il gioco non ha piu' immagini proprie.
 - **Due cartelle**: il progetto si monta in `/work` (lettura e scrittura), Lab64 in `/lab64` (sola lettura, `LAB64=/lab64`).
 - **Container** (nascono e muoiono a ogni comando): quasi tutti con `--rm`. **Nessuno è sempre acceso**: dipendono da cosa chiedi a
@@ -23,7 +23,7 @@ per questo documento; *[non verificato]* = ipotesi.
 
 ## 2. Immagini e parentela
 
-Un solo Dockerfile multi-stage (`../lab64/docker/Dockerfile`) produce due immagini (14/11: builder e VICE uniti in `lab64-tools`); `vc64web` ha un Dockerfile a parte; il manuale ne ha uno nel progetto.
+Un solo Dockerfile multi-stage (`docker/Dockerfile` di Lab64) produce due immagini (14/11: builder e VICE uniti in `lab64-tools`); `vc64web` ha un Dockerfile a parte; il manuale ne ha uno nel progetto.
 
 ```mermaid
 flowchart TD
@@ -51,7 +51,7 @@ flowchart TD
 
     BASE --> MAN["lab64-pdf-gen<br/>Python + WeasyPrint (venv da uno stage pdf-build)"]
 
-    NODE["node:22-bookworm-slim"] --> VC["lab64-vc64web<br/>Playwright + Chromium + ffmpeg<br/>(../lab64/vc64web-custom/Dockerfile)"]
+    NODE["node:22-bookworm-slim"] --> VC["lab64-vc64web<br/>Playwright + Chromium + ffmpeg<br/>(vc64web-custom/Dockerfile di Lab64)"]
 
     classDef gen fill:#e8f0ff,stroke:#4a6fb5;
     classDef game fill:#fff0e0,stroke:#b5834a;
@@ -69,28 +69,28 @@ Linea piena = `FROM`, cioè si ereditano tutti i layer.
 | (stage interno) | `builder` | 64tass, cc65, make, perl, zip, git, Python, zx0, cc1541 | - |
 | `lab64-tools` | `tools` | il builder + VICE 3.10 (gtk3), Xvfb, ffmpeg | 1553 MB (come la vecchia `c64-emu-vice`) |
 | `lab64-viewer` | `viewer` | Xvnc di KasmVNC 1.5.2, PulseAudio, Node + `server.js` | 780 MB |
-| `lab64-vc64web` | `../lab64/vc64web-custom/Dockerfile` | Node, Playwright, Chromium, ffmpeg, demone dell'emulatore nel browser | 2116 MB |
+| `lab64-vc64web` | `vc64web-custom/Dockerfile` di Lab64 | Node, Playwright, Chromium, ffmpeg, demone dell'emulatore nel browser | 2116 MB |
 | `lab64-pdf-gen` | `pdf-gen` | Python 3, PyYAML, Pillow, pango, DejaVu + WeasyPrint 70 (venv) | 276 MB [misurato 14/11; il vecchio `barbarian-manual` era 937 MB] |
 
 Conseguenze della struttura:
 - **Layer condivisi** [misurato 13/11]: `lab64-tools` e `lab64-viewer` hanno gli stessi layer fino a `base`, quindi occupano
   disco una volta sola per la parte comune. `vc64web` parte da un'altra base e non condivide nulla.
-- **Cambiare Ubuntu**: `ARG UBUNTU` in un solo punto, poi `../lab64/build-images.sh --force` ricompila tutto (VICE, zx0 e cc1541 compresi) sulla base nuova.
+- **Cambiare Ubuntu**: `ARG UBUNTU` in un solo punto, poi `lab64 images --force` ricompila tutto (VICE, zx0 e cc1541 compresi) sulla base nuova.
 - **`lab64-pdf-gen`** (14/11) parte da `base`, non da `lab64-tools`: WeasyPrint si installa con pip in uno stage a parte (`pdf-build`) e nell'immagine finale entra solo l'ambiente virtuale, senza pip.
-- **Sorgenti scaricati sull'host, non nel build** (14/11: tutti, all'ultima versione, elencati in `../lab64/sources.conf` con SHA-256 o
-  commit): li scarica `build-images.sh` con `curl` o `git` dell'host (certificati e proxy del computer) in `../lab64/downloads/` e li passa
+- **Sorgenti scaricati sull'host, non nel build** (14/11: tutti, all'ultima versione, elencati in `sources.conf` di Lab64 con SHA-256 o
+  commit): li scarica `build-images.sh` con `curl` o `git` dell'host (certificati e proxy del computer) in `downloads/` di Lab64 e li passa
   al Dockerfile come *build context* `downloads`. Un eventuale proxy che intercetta TLS entra come segreto
   (`C64_CA_BUNDLE`) solo per le build che usano npm.
 - Le pagine di `vc64web` si generano in `lab64-tools` (`build.py`, nella cartella `out/cache/vc64web/` **di Lab64**) e poi entrano nell'immagine come build context `pages`.
-- **File di sola costruzione** (14/11, regola del committente): a immagini fatte `../lab64/build-images.sh` cancella il tarball di VICE
-  (`../lab64/downloads/`, con tutti gli altri sorgenti e il `.deb` di KasmVNC) e `../lab64/out/cache/vc64web/c64-headless.html` (serve solo a
+- **File di sola costruzione** (14/11, regola del committente): a immagini fatte `lab64 images` cancella il tarball di VICE
+  (`downloads/` di Lab64, con tutti gli altri sorgenti e il `.deb` di KasmVNC) e `out/cache/vc64web/c64-headless.html` di Lab64 (serve solo a
   costruire l'immagine). `--force` riscarica da solo; il contenuto e' lo stesso, quindi la cache di BuildKit resta valida [dal codice, non
-  provato un `--force` dopo la cancellazione: serve la rete]. La pagina `VirtualC64-v*.html` in `../lab64/out/cache/vc64web/` resta: la usa l'indice del
+  provato un `--force` dopo la cancellazione: serve la rete]. La pagina `VirtualC64-v*.html` in `out/cache/vc64web/` di Lab64 resta: la usa l'indice del
   viewer (`viewer.sh` la monta sopra `out/cache/vc64web/` del progetto), e `build-images.sh viewer` la rigenera se manca.
 
 ## 3. Container a runtime
 
-Chi li avvia: `build.sh` (build e test), `../lab64/run.sh` (qualsiasi comando in un'immagine) e `../lab64/viewer.sh` (viewer e VICE dal vivo).
+Chi li avvia: `build.sh` (build e test), `lab64 run` (qualsiasi comando in un'immagine) e `viewer.sh` di Lab64 (viewer e VICE dal vivo).
 
 ```mermaid
 flowchart LR
@@ -154,9 +154,9 @@ Chi crea cosa:
 | `./build.sh --view` | come sopra, più `lab64-viewer` e `lab64-player` (restano accesi dopo la fine) e i test sul suo schermo; se il viewer è già acceso i test lo usano anche senza `--view` (`--no-view` per evitarlo) |
 | `./build.sh --manual` | solo `lab64-pdf-gen` |
 | `./build.sh --release` | tutto: `--emu`, tutti i test, `lab64-pdf-gen`, poi `lab64-tools` per il pacchetto |
-| `../lab64/viewer.sh start` | `lab64-viewer`, poi `lab64-player` (immagine `lab64-tools`, `../lab64/viewer_player.py`) se `lab64.env` definisce `C64_VIEW_PLAYER` |
-| `../lab64/viewer.sh exec tools/vice/play.sh` | `lab64-viewer` se non c'è, poi `lab64-tools` con VICE dal vivo e audio |
-| `../lab64/run.sh tools …` | un container `lab64-tools` per quel comando |
+| `lab64 view` | `lab64-viewer`, poi `lab64-player` (immagine `lab64-tools`, `viewer_player.py` di Lab64) se `lab64.env` definisce `C64_VIEW_PLAYER` |
+| `lab64 play tools/vice/play.sh` | `lab64-viewer` se non c'è, poi `lab64-tools` con VICE dal vivo e audio |
+| `lab64 run …` | un container `lab64-tools` per quel comando |
 
 Il container di test e quello di `play.sh` sono lo stesso tipo di immagine (`lab64-tools`) con parametri diversi. [dal codice]
 
@@ -259,9 +259,9 @@ In un browser reale e su una macchina diversa **non** sono state misurate.
 ## 8. Cosa non è verificato
 
 - **Docker su Windows (WSL2/Docker Desktop)**: tutto qui è stato provato in un solo ambiente Linux. Il comportamento di `127.0.0.1:6080`, del volume
-  `lab64-x11` e dei socket Unix su Windows è *[non verificato]* (TODO I9).
+  `lab64-x11` e dei socket Unix su Windows è *[non verificato]* (TODO di Lab64).
 - **Memoria condivisa X (MIT-SHM)**: non può essere condivisa fra due container (IPC separati). Se VICE la richiede, ripiega sul socket, ma non ho verificato che lo faccia.
-- **Browser e tastiera reali, schermo a sfioramento, gamepad fisico** per l'overlay (TODO J13); **audio con un browser vero** in WSL2/Windows.
+- **Browser e tastiera reali, schermo a sfioramento, gamepad fisico** per l'overlay (TODO di Lab64); **audio con un browser vero** in WSL2/Windows.
 - **Client VNC nativi** (TigerVNC, ecc.): oggi non ci si può collegare, perché Xvnc non pubblica una porta RFB; vedi la discussione nel TODO se verrà aggiunta.
 - Il **monitor remoto di VICE** nei test si blocca di tanto in tanto (TODO I11): durante le prove di questa sessione si è bloccato quando chiudevo la
   connessione subito dopo il comando `x`; non è dimostrato che sia la stessa causa dei blocchi nei test.

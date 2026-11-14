@@ -146,8 +146,8 @@ sequenceDiagram
 |---|---|
 | VICE `x64sc`, true drive emulation, 1541 | funziona (tutti i test) [MISURATO] |
 | VICE, 1541-II (`-drive8type 1542`) | START, menu, nuovo eroe salvato, villaggio: test `KRILL-17` (12/11) [MISURATO] |
-| VICE, 1570 / 1571 | non provabile qui: mancano le ROM dei drive (`KRILL-18` SKIP, 12/11) |
-| Emulatore web **vc64web** (VirtualC64 in WebAssembly, ROM originali, 1541-II; dal 13/11 **dentro il repository**: `../lab64/vc64web-custom`, build 32 / API 25, vedi [emulatore.md](emulatore.md)) | **funziona** [MISURATO, 13/11, disco v1.225]: `LOAD"*",8` e `POKE1020,1:RUN` → `START` con Krill → lobby → nuovo eroe (salvataggio con il plugin di Krill sul 1541-II emulato) → villaggio (`GFX0`, `MENU`) → alchimista → cripta (piano 1) → mostro ucciso → pergamena del portale → villaggio → reset e nuovo avvio con l'eroe nell'elenco: test di regression `EMU-10..16`. `LORE` dal menu di `BARBARIAN` provato a schermo il 12/11 (non nei test). "save game" dal menu del gioco, i cambi di piano oltre il primo e gli altri drive non provati lì. VICE resta il riferimento |
+| VICE, 1570 / 1571 | **funziona** in modo 1541 (`KRILL-18` PASS dal 13/11, ROM `dos1570`/`dos1571` di Lab64; verificato il 15/11) |
+| Emulatore web **vc64web** (VirtualC64 in WebAssembly, ROM originali, 1541-II; dal 13/11 **dentro il repository**: `vc64web-custom` di Lab64, build 32 / API 25, vedi [emulatore.md](emulatore.md)) | **funziona** [MISURATO, 13/11, disco v1.225]: `LOAD"*",8` e `POKE1020,1:RUN` → `START` con Krill → lobby → nuovo eroe (salvataggio con il plugin di Krill sul 1541-II emulato) → villaggio (`GFX0`, `MENU`) → alchimista → cripta (piano 1) → mostro ucciso → pergamena del portale → villaggio → reset e nuovo avvio con l'eroe nell'elenco: test di regression `EMU-10..16`. `LORE` dal menu di `BARBARIAN` provato a schermo il 12/11 (non nei test). "save game" dal menu del gioco, i cambi di piano oltre il primo e gli altri drive non provati lì. VICE resta il riferimento |
 | Emulatore web "C64 Emulator" di T. Hochgoetz (11/11, sostituito dal precedente il 12/11) | l'install termina, il primo load non finisce: non compatibile [MISURATO] |
 | 1541 reale, 1541-II, 1570/71 in modo 1541 | [NON VERIFICATO] |
 | 1581, CMD FD, SD2IEC | non supportati dalla nostra build (solo 1541); SD2IEC con il firmware di thierer supporta Krill, ma servirebbe la build con `LOAD_VIA_KERNAL_FALLBACK` (TODO B16) |
@@ -195,6 +195,6 @@ prima del plugin (1389 B invece di 1998 B); (3) codice KERNAL morto in START (`c
 | D7: `MENU` in tre file **non** compressi, ZX0 fuori dal gioco | tre file compressi ZX0 (misurati 2,0–2,3 s; l'alternativa non è misurata) | `pack_menu.py` |
 | 4.2: `SAVE_VER` cambiato | invariato (`$C6`): il blocco dell'eroe e lo stato del piano hanno gli stessi byte; cambia solo dove stanno | — |
 | 5.1: passo `krill` con `cache_run.py` | gira a ogni build (~1,3 s) | `tools/build/asm.sh` |
-| ~~7.2: test `KRILL-14` (errore d'install), `KRILL-17` (tipi di drive)~~ | **fatti** (12/11): `KRILL-14`, `KRILL-17` (1541-II, `tests/regression/krill_drives`); `KRILL-18` (1570/1571) SKIP: le ROM dei due drive non ci sono in questo ambiente | — |
+| ~~7.2: test `KRILL-14` (errore d'install), `KRILL-17` (tipi di drive)~~ | **fatti** (12/11): `KRILL-14`, `KRILL-17` (1541-II, `tests/regression/krill_drives`); `KRILL-18` (1570/1571) PASS (ROM di Lab64, verificato il 15/11) | — |
 | 8: un commit per passo | un commit unico (`4993696`) | — |
 | salvataggi almeno −35% | **più lenti** (sezione 7) | B15, M4 |

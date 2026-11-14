@@ -2,7 +2,7 @@
 
 Copyright © 2026 - Simone Caporale
 
-**Esito (14/11)**: scelta la **KasmVNC leggera**, integrata nella toolchain (oggi Lab64) come `lab64-viewer` (`../lab64/docker/Dockerfile`, target
+**Esito (14/11)**: scelta la **KasmVNC leggera**, integrata nella toolchain (oggi Lab64) come `lab64-viewer` (`docker/Dockerfile` di Lab64, target
 `viewer`; al posto di kclient un server Node nostro con una porta sola, audio su WebSocket e password facoltativa). Pagina:
 `docs/getting-started.md` sezione 6.
 

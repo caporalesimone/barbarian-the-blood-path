@@ -3,7 +3,7 @@ with the VICE stopwatch (emulated 1541) and has a hard-coded limit: the measure 
 (measure <= 0.9 x limit, rule of the project owner), so a slower loader or save fails before reaching the limit.
 One VICE session: the real START, a new hero in the village, then each routine called from the monitor."""
 import re
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import Game
 from lib.play import new_game
 

@@ -1,7 +1,7 @@
 """Build versions per git branch (11/11, tools/build/verinfo.py; sanity moved to regression on 11/11): main keeps `version` of version.yaml (N.N), any other
 branch gets its own `tag.N` (branch_versions), so branch builds never use main's numbers. Pure Python."""
 import os, re, shutil, sys, tempfile
-from lib.runner import test, check
+from c64test import test, check
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]

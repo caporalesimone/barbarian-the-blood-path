@@ -2,7 +2,7 @@
 gives every chapter its LOCAL levels 1..n (they restart in every chapter) and the GLOBAL depth 1..255 that drives the
 difficulty (tools/build/chapters_db.py); the balancing simulators work by chapter (tools/simulators/chapters.py). Pure Python, no VICE."""
 import contextlib, io, os, sys
-from lib.runner import test, check
+from c64test import test, check
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, os.path.join(ROOT, "tools", "simulators"))

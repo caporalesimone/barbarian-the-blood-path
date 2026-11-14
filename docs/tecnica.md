@@ -100,14 +100,14 @@ File sorgente generati (11/11, G1: non più in `src/` né in git, li scrivono i 
 Tutto gira nei container Docker (13/11; panoramica, container e comandi in [Getting started](getting-started.md)): sul PC dello
 sviluppatore servono solo sh, Docker, git e curl. La build gira in `lab64-tools` (64tass, cc65, Python con
 Pillow/PyYAML/NumPy/Matplotlib), i test in `lab64-tools` (+ VICE, Xvfb); VICE, zx0 e cc1541 sono compilati dentro le
-immagini; le ROM stanno in `../lab64/roms/` e VICE le riceve a mano (`-default` + tutte le ROM). Verificato il 13/11:
+immagini; le ROM stanno in `roms/` di Lab64 e VICE le riceve a mano (`-default` + tutte le ROM). Verificato il 13/11:
 `./build.sh` e `./build.sh --release` completi nei container.
 
 | Comando | Cosa fa |
 |---|---|
 | `./build.sh` | versioni → generatori (`gen_gfx`, `gen_font`, `gen_music`: brani da `tools/build/songs.py`, `gen_db`) → assemblaggio → dischi → mappe RAM/disco e atlante grafico (`gen_atlas.py` → `out/work/atlas/`) → test |
 | `./build.sh --no-test` | come sopra senza test |
-| `../lab64/run.sh <container> <comando>` | (13/11) un comando qualunque in un container (`tools` = `lab64-tools`; `pdf-gen` = `lab64-pdf-gen`; un nome completo si usa com'e') |
+| `lab64 run <container> <comando>` | (13/11) un comando qualunque in un container (`tools` = `lab64-tools`; `pdf-gen` = `lab64-pdf-gen`; un nome completo si usa com'e') |
 | `tools/build/asm_audit.py` | (11/11) analisi del codice assemblato dai listati di tutti i programmi: codice non raggiunto, ripetuto, spioncino, routine più grandi → `out/work/asm_audit/analisi_assembly.md` |
 | `tools/vice/frame_prof.py` | (11/11) cicli di ogni routine del ciclo principale a ogni giro, su un piano e con una corsa di Frenzy scelti ([prestazioni](prestazioni.md)) |
 | `tools/vice/menu_time.py` | (11/11) cronometro del modulo MENU: caricamento dal disco e apertura di negozi e locanda |

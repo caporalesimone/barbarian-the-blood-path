@@ -1,7 +1,7 @@
 """The disk (11/11: one build, one disk; POKE 1020,1 replaces the development disk); the tests enter the game through the
 real START (Krill)."""
 import os, re, subprocess, sys
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import ROOT, OUT
 
 D64 = (os.path.join(OUT, "disk.d64"),)

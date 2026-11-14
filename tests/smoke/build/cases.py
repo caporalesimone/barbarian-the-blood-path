@@ -2,7 +2,7 @@
 atlas. They read the files produced by the build in out/work/."""
 import os, re, subprocess, sys
 from lib.c64 import ROOT, labels
-from lib.runner import test, check
+from c64test import test, check
 
 
 @test("BUILD-01", "memory margin positive (code below $8720 >= 128 B, total >= 256 B)")

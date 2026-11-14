@@ -5,7 +5,7 @@ also runs on a different core (drive 1541-II, Krill's Loader, save plugin, raste
 input) and for scenarios played with a bot from the real disk. A result obtained here is never a measure of the game:
 cycles and timing are confirmed in VICE.
 
-The package lives in ../lab64/vc64web-custom (docs: docs/emulatore.md). Since 13/11 the daemon runs in its own container,
+The package is vc64web-custom of Lab64 (docs: docs/emulatore.md). Since 13/11 the daemon runs in its own container,
 lab64-vc64web (node, Playwright, Chromium, ffmpeg and the page already built in the image): ./build.sh --release (or
 --emu) starts it and passes its address in EMU_URL (e.g. http://lab64-vc64web:7064) to the tests, which run in
 lab64-tools. Without EMU_URL the tests are SKIP with the reason, not FAIL. The disk is sent to the daemon in base64
@@ -16,7 +16,7 @@ lab64-tools. Without EMU_URL the tests are SKIP with the reason, not FAIL. The d
 """
 import base64, json, os, shutil, subprocess, sys, time, urllib.request
 from lib.c64 import ROOT, OUT
-from lib.runner import Skip
+from c64test import Skip
 
 URL = os.environ.get("EMU_URL", "").rstrip("/")         # daemon of the container lab64-vc64web
 LOBBY_MENU = 0xC00C                                   # menu_main of out/work/lobby.lbl (module LOBBY at $C000)
@@ -24,7 +24,7 @@ LOBBY_MENU = 0xC00C                                   # menu_main of out/work/lo
 
 def ensure_built():
     """the daemon must be reachable (./build.sh --emu / --release start the container lab64-vc64web)"""
-    if not URL: raise Skip("EMU_URL not set: the vc64web daemon (container lab64-vc64web) is not running (./build.sh --emu)")
+    if not URL: raise Skip("EMU_URL not set: the vc64web daemon (container lab64-vc64web) is not running (lab64 up, or ./build.sh --emu)")
 
 
 class Emu:

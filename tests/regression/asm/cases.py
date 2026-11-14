@@ -2,7 +2,7 @@
 but the entries of the jump tables, the dead code found on 11/11 is gone, and the generated sources given to the
 assembler carry their comments (tile names, item and monster indexes). Pure Python on the listings of the build."""
 import json, os, re, subprocess, sys
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import ROOT, OUT
 
 

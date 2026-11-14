@@ -3,7 +3,7 @@ zone by zone in one file (tools/build/pack_menu.py); GAME loads it once when ent
 the theme prefetch writes straight into the theme cache ($ED00), no more into $F500. The shops left GAME (only the item
 box of the dungeon chest, ch_item, stays). One VICE session for the in-game cases."""
 import os
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import ROOT, OUT, Game
 from lib.play import new_game, fire_to, SMITH_DOOR, INN_DOOR
 

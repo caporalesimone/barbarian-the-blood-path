@@ -225,7 +225,7 @@ distanze `tools/village_audit.py`) per non sovrascriverlo; ogni ingresso nella l
 1. Il villaggio **ha sempre una locanda** (tile `DHOME`) con **lo stesso baule** di tutte le altre (decisione del 09/11:
    il baule è nel record dell'eroe).
 2. La mappa del villaggio (`MAP`, `$C000`–`$C8FF`) non deve usare `$C900`–`$CFFF` (zona 1 del modulo MENU).
-3. `python3 tests/run.py regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
+3. `lab64 test regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
 4. Aggiornare `docs/quests.md` (sez. 3.6, villaggi multipli) e il `TODO.md` se resta qualcosa.
 5. (12/11) Il file del villaggio del capitolo *c* è `TWNc` (`tools/build/mkdisk.sh`; oggi `TWN1`…`TWN4` sono copie di `out/work/gfx0.prg`).
    Un villaggio con una mappa diversa richiede le sue costanti (portale, cripta, ingresso `TOWN_*` in `levels.asm`; uscita

@@ -2,7 +2,7 @@
 "no points to spend.", RUN/STOP goes back. With a respec token the only entry is "respec" (my exception, to be
 confirmed: otherwise a respec could never be used once all the points are spent). One VICE session, the village."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, key, K_Y
 
 CHAIN = True

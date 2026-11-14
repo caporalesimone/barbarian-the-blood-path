@@ -5,7 +5,7 @@ with a simulated confirmation) with the state written to memory, $01 = $35 as in
 KERNAL): one session, ~2 s."""
 import os
 from lib.c64 import Vice, labels, OUT
-from lib.runner import test, check
+from c64test import test, check
 
 GOLD_MAX = 10000
 PACK_N = 8

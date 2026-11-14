@@ -6,8 +6,8 @@ Also: time to change level, to open the inventory, the shops and the inn, to sav
 second); every level 1..19 and the throne room boss fight; the level generator on every level 1..255 (the Abyss levels
 21..255 too: the generator is the only part of the Abyss that exists in the code today)."""
 from lib.c64 import Game, FRAME
-from lib.runner import test, check
-from lib.runner import Skip
+from c64test import test, check
+from c64test import Skip
 from lib.play import (new_game, go_level, alive, mpos, floor_next, fire_to, find, key, K_I, K_RUNSTOP, U, D, LF, RT,
                       INN_DOOR, SMITH_DOOR)
 

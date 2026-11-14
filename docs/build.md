@@ -29,7 +29,7 @@ flowchart TD
 | `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`lab64-pdf-gen`) e `tools/build/release.sh` (senza zip dei sorgenti) (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
 | `./build.sh --manual` | solo il manuale (`out/work/manual/`, poi copiato in `out/releases/v<V>/`) |
 | `./build.sh --keep N` | quante versioni tenere in `out/releases/` (default 5, anche `KEEP_VERSIONS=N`) |
-| `../lab64/run.sh tools tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
+| `lab64 run tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
 
 ## 2. Assemblaggio (`tools/build/asm.sh`)
 
@@ -131,25 +131,25 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 
 | Strumento | Uso |
 |---|---|
-| `../lab64/memmap/c64map.py` (14/11, generico) | `out/work/memory-map/index.html` + `memmap.json` a ogni build: mappa **automatica**, senza configurazione, dai listati di 64tass (`-L`), dalle etichette (`-l`) e dal disco. Moduli = listati il cui file e' sul disco (stesso contenuto o stesso nome: `game` compresso, `menu` diviso in `menu1..3`); per ogni byte: indirizzo nel file, indirizzo di esecuzione (`.logical`) e file sorgente; variabili di `.virtual`; indirizzi usati dalle istruzioni (pagina zero, I/O, KERNAL). Mostra: panoramica per pagine, strati per modulo, spazio libero per banco, moduli nella stessa memoria (overlay), disco completo. **Analisi statica**: non vede dati copiati o decompressi all'avvio, buffer dietro puntatori, dati che diventano liberi (es. `gfx_data` dopo `copy_gfx`). Verifica: il libero `$9E7B-$9FFF` = 389 B coincide con il margine del blocco `$9C00` di `asm.sh`. **Sonda in VICE** (14/11, `./build.sh --probe`, `../lab64/memmap/probe.py`): con `C64_MEMPROBE=1` ogni sessione VICE dei test (`tests/lib/c64.py`) riempie la RAM (`$033C-$03FB`, `$0400-$07FF`, `$0803-$FFFF`, anche sotto ROM e I/O) con uno schema noto subito dopo il boot e la salva alla fine in `out/work/memprobe/` (scenario = modulo dei test, impronta del disco); `c64map.py` usa solo i dump fatti con lo stesso disco e aggiunge la sezione "Measured in VICE" (byte mai scritti per banco e per pagina, confronto con l'analisi statica, scenari) e la misura `ram_never_written`. Misurato [14/11]: smoke + sanity con la sonda 28,6 s contro 29,8 s senza (una misura per parte: costo trascurabile); mai scritti 1862 B in 3 sessioni, fra cui `$9E7D-$9FFF` (387 B: il libero statico del blocco `$9C00` meno 2 byte). Limiti: vede solo cio' che i test eseguono; le scorciatoie del monitor contano come scritture; un byte scritto con lo stesso valore dello schema sembra intatto (schema senza `$00`/`$FF`/`$20`). `memmap.json` porta anche `metrics` (`ram_free_static`, `ram_never_written`), che `publish.py` mette nel manifest quando pubblica le mappe. Aggiunte: TODO T1 |
+| `memmap/c64map.py` di Lab64 (14/11, generico) | `out/work/memory-map/index.html` + `memmap.json` a ogni build: mappa **automatica**, senza configurazione, dai listati di 64tass (`-L`), dalle etichette (`-l`) e dal disco. Moduli = listati il cui file e' sul disco (stesso contenuto o stesso nome: `game` compresso, `menu` diviso in `menu1..3`); per ogni byte: indirizzo nel file, indirizzo di esecuzione (`.logical`) e file sorgente; variabili di `.virtual`; indirizzi usati dalle istruzioni (pagina zero, I/O, KERNAL). Mostra: panoramica per pagine, strati per modulo, spazio libero per banco, moduli nella stessa memoria (overlay), disco completo. **Analisi statica**: non vede dati copiati o decompressi all'avvio, buffer dietro puntatori, dati che diventano liberi (es. `gfx_data` dopo `copy_gfx`). Verifica: il libero `$9E7B-$9FFF` = 389 B coincide con il margine del blocco `$9C00` di `asm.sh`. **Sonda in VICE** (14/11, `./build.sh --probe`, `memmap/probe.py` di Lab64): con `C64_MEMPROBE=1` ogni sessione VICE dei test (`tests/lib/c64.py`) riempie la RAM (`$033C-$03FB`, `$0400-$07FF`, `$0803-$FFFF`, anche sotto ROM e I/O) con uno schema noto subito dopo il boot e la salva alla fine in `out/work/memprobe/` (scenario = modulo dei test, impronta del disco); `c64map.py` usa solo i dump fatti con lo stesso disco e aggiunge la sezione "Measured in VICE" (byte mai scritti per banco e per pagina, confronto con l'analisi statica, scenari) e la misura `ram_never_written`. Misurato [14/11]: smoke + sanity con la sonda 28,6 s contro 29,8 s senza (una misura per parte: costo trascurabile); mai scritti 1862 B in 3 sessioni, fra cui `$9E7D-$9FFF` (387 B: il libero statico del blocco `$9C00` meno 2 byte). Limiti: vede solo cio' che i test eseguono; le scorciatoie del monitor contano come scritture; un byte scritto con lo stesso valore dello schema sembra intatto (schema senza `$00`/`$FF`/`$20`). `memmap.json` porta anche `metrics` (`ram_free_static`, `ram_never_written`), che `publish.py` mette nel manifest quando pubblica le mappe. Aggiunte: TODO T1 |
 | `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build: mappe **curate a mano** con scenari e verifiche in VICE (se cambia la memoria o il disco vanno aggiornate); restano finche' la mappa automatica non le sostituisce (TODO T1) |
 | `tools/atlas/gen_atlas.py` (+ `atlas_names.py`, `atlas_template.html`) | atlante grafico `out/work/atlas/` ([regole in CLAUDE.md](../CLAUDE.md)) |
 | `tools/build/asm_audit.py` | analisi del codice assemblato (`out/work/asm_audit/analisi_assembly.md`, test `ASM-10`) |
-| `tools/manual/gen_manual.py` | manuale per la release |
+| `tools/manual/gen_manual.py` | manuale per la release (`lab64 manual`): ritagli e dati del gioco, poi `c64manual` di Lab64 con il tema base "c64" + `docs/manual/tema.css` |
 | `tools/vice/arena.py` + `src/test/arena.asm` | combattimenti veri in VICE per controllare i simulatori |
 | `tools/vice/*` | screenshot (`shots_menus.sh`, `shots_manual.sh`), profilo per fotogramma (`frame_prof.py`), cronometro del MENU (`menu_time.py`) |
 | `tools/simulators/*.py` | simulatori di combattimento, progressione, economia ([Bilanciamento](balancing-guide.md)) |
-| `tests/run.py` | i test: `smoke`, `sanity`, `regression` ([Test](test.md)) |
+| `lab64 test` | i test: `smoke`, `sanity`, `regression` ([Test](test.md)) |
 
 ## 4b. Programmi esterni compilati dentro le immagini (13/11; 14/11 ultime versioni dai sorgenti)
 (14/11, regola del committente) i programmi esterni sono **all'ultima versione** e si compilano **dai sorgenti** dentro la build
-delle immagini di Lab64 (`../lab64/docker/Dockerfile`, stage `vice-build`, `tass64-build`, `cc65-build`, `cc1541-build`,
+delle immagini di Lab64 (`docker/Dockerfile` di Lab64, stage `vice-build`, `tass64-build`, `cc65-build`, `cc1541-build`,
 `zx0-build`, tutti da `tools-builder` = base + compilatori e librerie di sviluppo). Versioni, URL e SHA-256 stanno **solo** in
-`../lab64/sources.conf`; `../lab64/build-images.sh` scarica i sorgenti sull'host (curl o git) in `../lab64/downloads/`, li
+`sources.conf` di Lab64; `lab64 images` scarica i sorgenti sull'host (curl o git) in `downloads/` di Lab64, li
 controlla e li cancella a immagini fatte. Nelle immagini finali entrano **solo i binari e le licenze** (`/opt/c64/licenses/`).
 I compilatori non ci sono. La cache di BuildKit tiene gli stage
 compilati: si ricompila solo se cambia un sorgente o la base (`docker builder prune` svuota la cache: poi VICE si ricompila, ~5 min
-misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagini mancanti da solo (`../lab64/build-images.sh`).
+misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagini mancanti da solo (`lab64 images`).
 
 | Programma | Versione (14/11) | Sorgente | Dove finisce | Licenza |
 |---|---|---|---|---|
@@ -162,14 +162,14 @@ misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagin
 - Effetto misurato il 14/11 del passaggio a 64tass 1.60 e cc1541 4.2: **tutti i `.prg` identici** byte per byte; il **disco cambia**
   (cc1541 4.2 scrive la stessa lista di file in modo diverso) e passa smoke, sanity e regression (Krill su 1541, 1541-II, 1570/1571,
   salvataggi, `EMU-*` su vc64web).
-- Per aggiornare un programma: versione, URL o commit e SHA-256 in `../lab64/sources.conf`, poi `../lab64/build-images.sh --force tools`.
+- Per aggiornare un programma: versione, URL o commit e SHA-256 in `sources.conf` di Lab64, poi `lab64 images --force tools`.
 - **Prova da ambiente pulito** (14/11): immagini, cache di BuildKit, rete e volume cancellati; clone dei due repository affiancati;
-  `./validate_env.sh`, `./build.sh --release` (immagini ricostruite da zero, tutto ricompilato: ~8 min; 185 PASS + 1 SKIP, `EMU-*`
-  compresi), `../lab64/build-images.sh --force` (riscarica i sorgenti, la cache resta valida), progetto di esempio di `lab64 init`
+  `lab64 doctor`, `./build.sh --release` (immagini ricostruite da zero, tutto ricompilato: ~8 min; 185 PASS + 1 SKIP, `EMU-*`
+  compresi), `lab64 images --force` (riscarica i sorgenti, la cache resta valida), progetto di esempio di `lab64 init`
   (build e test passati). Unico intoppo esterno: Docker Hub ha risposto 429 (troppe richieste) all'immagine `node`, riuscito dopo
   qualche minuto.
 - VICE e' installato con `--prefix=/opt/vice` e sta in `/opt/vice` anche nell'immagine finale: trova i suoi dati (keymap, risorse)
-  dove li cerca. Prima (fino al passo A del 13/11) era compilato nel progetto in `../lab64/vice/bin` con i dati copiati accanto
+  dove li cerca. Prima (fino al passo A del 13/11) era compilato nel progetto in `vice/bin` di Lab64 con i dati copiati accanto
   all'eseguibile per renderlo spostabile.
 - **Stessa base** (stage `base`, ubuntu:24.04) per gli stage di compilazione e per le immagini che eseguono i binari: i binari
   compilati su una base più recente non partono su una più vecchia (una VICE compilata su 26.04 vuole glibc 2.42, la 24.04 ha la
@@ -184,7 +184,7 @@ misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagin
 
 ```mermaid
 flowchart LR
-    RT["tests/run_tests.sh<br/>(container lab64-tools)"] --> RU["tests/run.py smoke sanity<br/>(--release / --all: + regression)"]
+    RT["tests/run_tests.sh<br/>(container lab64-tools)"] --> RU["lab64 test smoke sanity<br/>(--release / --all: + regression)"]
     RU --> LIB["tests/lib/c64.py: VICE (x64sc) con il monitor remoto"]
     LIB --> FAST["Game.to_menu(): GAME, LOBBY, villaggio scritti in RAM;<br/>menu_return(): modulo MENU scritto in RAM (out/work/menu_zK.prg)"]
     RU --> REP["out/work/test_report.txt / .json"]
@@ -192,10 +192,10 @@ flowchart LR
 ```
 
 ## 6. Container, programmi esterni, Windows e WSL (13/11)
-Nel progetto stanno **tutti i file** (sorgenti, dati, ROM in `../lab64/roms/`, sorgenti di VICE, zx0 e cc1541). I
-**programmi** stanno nei container (`../lab64/docker/Dockerfile`, `tools/manual/Dockerfile`, tabella in
+Nel progetto stanno **tutti i file** (sorgenti, dati, ROM in `roms/` di Lab64, sorgenti di VICE, zx0 e cc1541). I
+**programmi** stanno nei container (`docker/Dockerfile` di Lab64, `tools/manual/Dockerfile`, tabella in
 [Getting started](getting-started.md) sezione 3); sull'host servono solo
-sh, Docker con BuildKit, git e curl (`./validate_env.sh` li controlla).
+sh, Docker con BuildKit, git e curl (`lab64 doctor` li controlla).
 
 | Programma | Container | A cosa serve |
 |---|---|---|
@@ -214,7 +214,7 @@ lab64-tools e lab64-viewer [MISURATO 13/11: stessi id dei layer]. **Costo di Doc
 prove): nessuna perdita misurabile. **Non misurato** su Docker Desktop / WSL2.
 
 **Windows**: si lavora **dentro WSL2** con il progetto nel filesystem di WSL (`~/...`), non in `/mnt/c` (accessi lenti, permessi e fine
-riga). `./validate_env.sh` lo riconosce dal tipo di filesystem del punto di montaggio che contiene il progetto (`/proc/self/mountinfo`:
+riga). `lab64 doctor` lo riconosce dal tipo di filesystem del punto di montaggio che contiene il progetto (`/proc/self/mountinfo`:
 `9p`/`drvfs`/`virtiofs` = disco Windows o condiviso, `ext4` & simili = filesystem Linux) e dai segni di WSL (`microsoft` nel kernel,
 `WSL_DISTRO_NAME`). **Non provato su Windows** (solo la logica, con un `mountinfo` di prova). Fine riga: `.gitattributes` forza LF.
 Windows nativo (senza WSL) non è supportato: gli script sono shell Unix.

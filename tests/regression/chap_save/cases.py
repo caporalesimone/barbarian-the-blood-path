@@ -3,7 +3,7 @@ CH_LV = 5 levels) keep their compact state in RAM slots (LVRAM, under the I/O); 
 by the creation of the hero and when a level of another chapter is entered (hero + levels of the chapter). Quit, stairs,
 inn and character sheet do not write the disk. One VICE session, the tests run in order (CHAIN)."""
 import os, re
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import OUT, Game
 from lib.play import new_game, go_level, fire_to, find, K_Y, D
 

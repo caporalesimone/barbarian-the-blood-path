@@ -2,7 +2,7 @@
 monsters; the game takes the rows implemented = yes (today's 9 monsters, out/work/db.asm unchanged), every chapter has its own
 bestiary (base, strong variants of its bases, one boss), the final boss is in the last story chapter. Pure Python."""
 import os, re, sys, tempfile
-from lib.runner import test, check
+from c64test import test, check
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]

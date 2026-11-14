@@ -2,7 +2,7 @@
 decompressor (src/help/zx0sfx.asm) followed by out/work/help.zx0; at $080D it unpacks HELP to $0801 and jumps to it.
 Pure Python checks (fast); the run from the disk is covered by LORE-10 (release)."""
 import os, sys
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import OUT
 
 ROOT = os.path.dirname(OUT)

@@ -3,7 +3,7 @@ the game too. Closing the inventory or the minimap with RUN/STOP must not open t
 "resume" / "save game" of the game menu in front of a door must not open the shop or the inn (found by BELT-13: ui_exit
 clears joynew/keynew). Real game from the development disk, keys written at the exit of read_input."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, fire_to, key, SMITH_DOOR, INN_DOOR, K_RUNSTOP, D
 
 

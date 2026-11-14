@@ -3,7 +3,7 @@
 spends them (+/-, confirm, reset), saves on exit, and a respec token gives them all back. Respec tokens: +1 for the
 final boss, a low chance in the chests of the Abyss (resp_roll), at most RESP_MAX. One VICE session, the village."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game, key, K_RUNSTOP, K_Y, LF, RT, D, U
 
 CHAIN = True

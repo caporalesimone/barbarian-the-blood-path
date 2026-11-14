@@ -1,5 +1,5 @@
 import os, sys
-from lib.runner import script
+from c64test import script
 from lib.c64 import ROOT
 H = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable

@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 """Genera out/work/manual/manuale.html e out/work/manual/Barbarian_Blood_Path_Manuale.pdf (A5, WeasyPrint).
 
-Gira nel container lab64-pdf-gen (di Lab64; 13/11: WeasyPrint al posto di Chrome; stesse 19 pagine, l'ombra del
-titolo in copertina non c'e' perche' WeasyPrint ignora text-shadow). Dall'host: ./build.sh --manual.
+Gira nel container lab64-pdf-gen di Lab64 (WeasyPrint; l'ombra del titolo in copertina non c'e' perche' WeasyPrint ignora
+text-shadow). Dall'host: ./build.sh --manual (o lab64 manual, C64_MANUAL in lab64.env).
 
-Sorgente editabile: docs/manual/manuale_src.html (+ stile.css). Questo script:
+Sorgente editabile: docs/manual/manuale_src.html. Stile (15/11): il tema base "c64" di Lab64 (manual/themes/c64.css) +
+docs/manual/tema.css (solo le regole del gioco). Questo script fa le parti del gioco:
   1. ritaglia gli screenshot grezzi (docs/manual/shots/*.png) in out/work/manual/img/*.png (area utile 320x200 senza bordo);
-  2. riempie i segnaposto con i dati di data/rules.yaml e data/balance.yaml:  {{MONSTER_ROWS}} {{STEP_HDR}} {{MIN_ROW}} {{MAX_ROW}};
-  3. numera le pagine e scrive manuale.html;
-  4. stampa il PDF con WeasyPrint.
+  2. prepara i dati di data/rules.yaml e data/balance.yaml per i segnaposto {{MONSTER_ROWS}} {{STEP_HDR}} {{MIN_ROW}} {{MAX_ROW}};
+  3. il resto lo fa c64manual.build di Lab64: segnaposto, tema, tasti <kbd> disegnati, numeri di pagina, manuale.html, PDF
+     (WeasyPrint) e avviso per le pagine che traboccano.
 Screenshot: tools/vice/shots_manual.sh (la schermata del nuovo barbaro: variante TESTUI 31); sprite mostri: docs/manual/mon.
 Lingua (11/11): python3 tools/manual/gen_manual.py [--lang it|en]. it (default): manuale_src.html -> manuale.html +
 Barbarian_Blood_Path_Manuale.pdf; en: manual_src_en.html -> manual_en.html + Barbarian_Blood_Path_Manual_EN.pdf (il
@@ -79,65 +80,9 @@ for g in range(1, nst + 1):
     fl = [L for L in range(1, NF + 1) if step(L) == g]
     hdr += f"<th>{fl[0]}–{fl[-1]}</th>" if len(fl) > 1 else f"<th>{fl[0]}</th>"
 
-# ------------------------------------------------------------------ 3. composizione
-html = open(os.path.join(M, SRC), encoding="utf-8").read()
-for ph, val in (("{{MONSTER_ROWS}}", rows), ("{{STEP_HDR}}", hdr), ("{{MIN_ROW}}", cells(mn)), ("{{MAX_ROW}}", cells(mx))):
-    assert ph in html, "segnaposto mancante nel sorgente: " + ph
-    html = html.replace(ph, val)
-# tasti (09/11): ogni <kbd>X</kbd> diventa un piccolo SVG disegnato in unita' del font (DejaVu Sans Mono, 2048/em,
-# avanzamento 1233, altezza delle maiuscole 1493). Il testo e' centrato geometricamente nel riquadro: nell'HTML Chrome
-# aggancia la linea di base al pixel intero e lo scarto cambiava da tasto a tasto (W A S D piu' bassi di ~1 px);
-# dentro l'SVG la posizione e' esatta e uguale per tutti i tasti.
-import html as _h
-U, ADV, CAP = 2048, 1233, 1493
-KH, PADX, BRD, RAD, SH = 2908, 941, 196, 785, 314      # 1,42 em; 1,2 mm; 0,25 mm; 1 mm; ombra 0,4 mm (a 7,4 pt)
-def kbd(m):
-    t = _h.unescape(m.group(1))
-    w = max(KH, len(t) * ADV + 2 * PADX)
-    th = KH + SH
-    base = KH / 2 + CAP / 2                              # maiuscole e cifre centrate in verticale
-    return (f'<svg class="key" viewBox="0 0 {w} {th}" style="width:{w / U:.4f}em;height:{th / U:.4f}em;'
-            f'vertical-align:-{(th - base) / U:.4f}em">'
-            f'<rect x="{BRD / 2}" y="{BRD / 2 + SH}" width="{w - BRD}" height="{KH - BRD}" rx="{RAD}" fill="#2a2118"/>'
-            f'<rect x="{BRD / 2}" y="{BRD / 2}" width="{w - BRD}" height="{KH - BRD}" rx="{RAD}" fill="#fffaf0" '
-            f'stroke="#2a2118" stroke-width="{BRD}"/>'
-            f'<text x="{w / 2}" y="{base:.0f}" text-anchor="middle" font-family="DejaVu Sans Mono" font-size="{U}" '
-            f'fill="#2a2118">{_h.escape(t)}</text></svg>')
-html = re.sub(r"<kbd>(.*?)</kbd>", kbd, html)
-
-n = [0]
-def number(m):
-    n[0] += 1
-    return m.group(0) if n[0] == 1 else f'<div data-n="— {n[0]-1} —" class="page'
-html = re.sub(r'<div class="page', number, html)
-# l'HTML sta in out/work/manual/: foglio di stile e sprite dei mostri restano nel sorgente (docs/manual/)
-html = html.replace('href="stile.css"', 'href="../../docs/manual/stile.css"').replace('src="mon/', 'src="../../docs/manual/mon/')
-open(os.path.join(R, OUT), "w", encoding="utf-8").write(html)
-
-# ------------------------------------------------------------------ 4. PDF
-pdf = os.path.join(R, PDF)
-if "--html" in sys.argv:                         # solo l'HTML (senza WeasyPrint)
-    print(os.path.join(R, OUT), n[0], "pagine"); sys.exit(0)
-import logging                                   # noqa: E402
-logging.getLogger("weasyprint").setLevel(logging.ERROR)   # avvisi noti: text-shadow, print-color-adjust
-import weasyprint                                # noqa: E402  (container lab64-pdf-gen)
-weasyprint.HTML(os.path.join(R, OUT)).write_pdf(pdf)
-print(pdf, n[0], "pagine")
-
-# ------------------------------------------------------------------ 5. controllo: pagine che traboccano (testo tagliato)
-try:
-    from playwright.sync_api import sync_playwright
-    with sync_playwright() as pw:
-        b = pw.chromium.launch()
-        pg = b.new_page()
-        pg.goto("file://" + os.path.abspath(os.path.join(R, OUT)))
-        pg.emulate_media(media="print")
-        over = pg.evaluate("""() => [...document.querySelectorAll('.page')].map((p, i) => {
-            const r = p.getBoundingClientRect(); let m = 0;
-            for (const e of p.querySelectorAll('*')) m = Math.max(m, e.getBoundingClientRect().bottom - r.top);
-            return [i, Math.round(m - p.clientHeight + 38)]; }).filter(x => x[1] > 0)""")
-        b.close()
-    for i, px in over:
-        print(f"ATTENZIONE: pagina {i} trabocca di ~{px} px (testo tagliato)")
-except ImportError:
-    pass
+# ------------------------------------------------------------------ 3. manuale (Lab64: tema, tasti, numeri di pagina, PDF)
+from c64manual import build  # noqa: E402  (Lab64, container lab64-pdf-gen; tema base "c64" + docs/manual/tema.css)
+hp, pdf, n = build(os.path.join(M, SRC), out_dir=R, pdf_name=PDF, html_name=OUT, theme=os.path.join(M, "tema.css"),
+                   values={"MONSTER_ROWS": rows, "STEP_HDR": hdr, "MIN_ROW": cells(mn), "MAX_ROW": cells(mx)},
+                   html_only="--html" in sys.argv)
+print(pdf or hp, n, "pagine numerate")

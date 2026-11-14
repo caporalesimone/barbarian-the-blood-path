@@ -436,7 +436,7 @@ Sono stime per analogia con il codice esistente (`ov_stash` 407 B, `menu_help` 1
      villaggio e poi residente; il precaricamento scrive nella cache del tema: niente più conflitto, niente N né audit delle
      distanze ([Villaggio](villaggio.md#menu-del-villaggio-modulo-menu-1111)).
   3. **Per ogni villaggio nuovo**: la mappa non usa `$C900-$CFFF` (zona 1 del MENU).
-  4. Misura finale: `python3 tests/run.py regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
+  4. Misura finale: `lab64 test regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
 - Le scale del piano 1 portano ad Aldric's Crossing; le scale su del piano 8 al pozzo di Blackwater Mill; quelle
   del piano 15 alla breccia del Last Camp. Dal piano 7 al piano 8 e dal 14 al 15 si continua con le scale normali
   (il dungeon resta contiguo; i tre ingressi sono scorciatoie).

@@ -1,0 +1,5 @@
+/* Tema del manuale di Barbarian (15/11): si carica DOPO il tema base "c64" di Lab64 (manual/themes/c64.css, che ha pagina A5,
+   colori, copertina, titoli, tabelle, figure, note, tasti). Qui solo le regole del gioco: la tabella dei mostri.
+   Copyright (c) 2026 - Simone Caporale */
+td.spr { width: 9mm; padding: .4mm } td.spr img { width: 8.5mm; image-rendering: pixelated; display: block; background: #15151c }
+.mt td, .mt th { text-align: center } .mt td:first-child, .mt th:first-child { text-align: left }

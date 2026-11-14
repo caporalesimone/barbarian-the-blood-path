@@ -2,7 +2,7 @@
 portal after a change of level, Frenzy and Rage, the throne room (boss, wall, epic chest, lever) and death on level
 20. One VICE session (development disk), chained: the tests share the game state."""
 from lib.c64 import Game, addr_after, listing
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import (new_game, fire_to, find, alive, mpos, floor_next, clear_around, go_level, go_village, key,
                       FLOOR_D, K_M, K_5, RT, D)
 

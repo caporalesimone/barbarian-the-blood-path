@@ -4,7 +4,7 @@ redraws only the panel that changed (hit taken: HP row; experience: XP row; skil
 One VICE session, the village (EXPL is saved and restored: in the village it holds the inn chest)."""
 import random
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import new_game
 
 CHAIN = True

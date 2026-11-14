@@ -2,7 +2,7 @@
 loaded at $C000 by START and by GAME (load_menu) when the player goes back to the start menu. The name MENU is kept for
 the village menus module."""
 import os
-from lib.runner import test, check
+from c64test import test, check
 from lib.c64 import ROOT, OUT
 
 

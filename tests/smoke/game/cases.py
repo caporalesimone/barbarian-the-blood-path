@@ -3,7 +3,7 @@ Speed shortcuts: the hero is teleported (px/py) next to doors, stairs, chests an
 exit of read_input (lib/c64.py). Everything else is the real game (menus, shops, inn, levels, UI).
 CHAIN: if a step fails the following ones are skipped (they depend on the game state)."""
 from lib.c64 import Game
-from lib.runner import test, check
+from c64test import test, check
 from lib.play import (NAME, SEED, SOLID_V, FLOOR_D, U, D, LF, RT, GG, find, mpos, alive, fire_to,  # noqa: F401
                       minimap, new_game, key, clear_around, floor_next, SMITH_DOOR, K_5)
 
