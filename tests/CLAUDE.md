@@ -32,7 +32,10 @@ dettagli di suite e runner: `docs/test.md`.
 - Una cartella per feature in ogni suite, con un `cases.py` che registra i test (gli altri file sono script e dati della feature).
 - **ID** maiuscoli e significativi `AREA-NN` (`SHOP-01`, `INN-CHEST-01`): `01`–`09` smoke, `10`+ sanity e regression; un test
   spostato conserva l'ID. Test (ID, descrizioni, motivi, commenti) **in inglese**.
-- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `tests/lib/c64.py`).
+- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `tests/lib/c64.py`). **All'avvio si aspetta il
+  C64, non un tempo** (14/11, TODO I11): `Vice()` chiama `vice_rom.wait_boot` (vettori IRQ `$0314/5` = `$EA31` e `READY.` sullo schermo; tetto 30 s),
+  perche' VICE apre la porta del monitor ~7 s prima di finire il boot a freddo. Un VICE lanciato con `-autostart` non mostra `READY.`:
+  `Vice(boot_wait=<s>)`. `Vice.close()` uccide l'intero gruppo di processi (xvfb-run, Xvfb, x64sc).
   `Game.to_menu()` carica `START` dal monitor e lo avvia (Krill's Loader installato, tutto in ~1 s reale); il modulo MENU lo scrive
   il monitor (`C64_REALMENU=1` per leggerlo dal disco). Gli strumenti in VICE partono da `START` (`g 080d`), mai da GAME a `$0400`.
 - File temporanei in `out/` (mai `/tmp`); un test che assembla una variante del gioco deve lasciare la build normale

@@ -17,7 +17,7 @@ import json, os, re, socket, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
-from vice_rom import ROM_ARGS, XRUN  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/)
+from vice_rom import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/)
 SNAP = os.path.join(ROOT, "data", "help_hud.json")
 COL_TXT, COL_KEY, COL_NOTE, COL_TITLE = 1, 7, 3, 7       # colori < 8: caratteri in alta risoluzione (schermo multicolore)
 HUD_X0, HUD_X1 = 1, 39                                     # colonne 1..38 (l'HUD del gioco e' a 38 colonne)
@@ -44,8 +44,8 @@ def snap(path=SNAP):
                 s = socket.create_connection(("127.0.0.1", 6510)); break
             except OSError:
                 time.sleep(0.25)
+        wait_boot(s)                         # (14/11, TODO I11) il C64 pronto, non un tempo fisso
         s.settimeout(1)
-        time.sleep(3)
 
         def cmd(c, w=0.4):
             s.sendall((c + "\n").encode()); time.sleep(w); out = ""

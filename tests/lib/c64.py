@@ -8,13 +8,13 @@ the next stop ("Stop on ..."): the stop line holds the C64 cycle counter, used t
 Input: the game reads joystick and keyboard only in read_input (menus too, via ui_input). A stop on the final rts of
 read_input lets the test write joy / joynew / keynew as if the player had pressed them: the fastest way and the
 closest to the real game (everything else runs as usual)."""
-import glob, os, re, shutil, socket, subprocess, sys, time
+import glob, os, re, shutil, signal, socket, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "out")
 ROMS = os.path.join(ROOT, "toolchain", "roms", "vice-roms", "DRIVES")   # drive ROMs (toolchain/roms/roms.md)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
-from vice_rom import ROM_ARGS, XRUN  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/, tools/vice/vice_rom.py)
+from vice_rom import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/, tools/vice/vice_rom.py)
 PROMPT = re.compile(r"\(C:\$[0-9a-f]{4}\) $")
 STOP = re.compile(r"Stop on[^\n]*\n[^\n]*?(\d+)\s*\n", re.S)
 FRAME = 19656                                     # cycles of a PAL frame
@@ -97,9 +97,12 @@ def settle(s, boot=1.0, gap=0.1):
 class Vice:
     """x64sc in warp with the remote monitor. disk: d64 mounted in drive 8 (a copy, so the original is untouched)."""
 
-    def __init__(self, disk=None, boot_wait=1.0, extra=(), inplace=False, warp=True, show=False):
+    def __init__(self, disk=None, extra=(), inplace=False, warp=True, show=False, boot_tmax=30, boot_wait=None):
         """inplace=True: the disk is mounted as is (writes persist: needed by save tests across sessions).
-        warp=False: real speed; show=True: a visible VICE window (no xvfb-run; tools/vice/arena.py --show)"""
+        warp=False: real speed; show=True: a visible VICE window (no xvfb-run; tools/vice/arena.py --show).
+        (14/11, TODO I11) it waits for the C64 itself to be ready (IRQ vectors and READY. on the screen, vice_rom.wait_boot),
+        not for a fixed time: the monitor port opens ~7 s before the boot ends on a cold machine.
+        boot_wait=<seconds>: the old fixed wait, only for VICE started with -autostart (no READY. on the screen then)."""
         self.disk = None
         args = ([] if show else XRUN) + [
                 "x64sc", "-silent", "-sounddev", "dummy"] + ROM_ARGS + (["-warp"] if warp else [])
@@ -110,7 +113,7 @@ class Vice:
             shutil.copy(disk, self.disk)
             args += ["-8", self.disk]
         args += list(extra) + ["-remotemonitor"]
-        self.p = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.p = subprocess.Popen(args, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)   # own group: close() kills xvfb-run AND x64sc
         self.s = None
         t0 = time.time()
         while time.time() - t0 < 20:
@@ -118,11 +121,21 @@ class Vice:
                 self.s = socket.create_connection(("127.0.0.1", 6510)); break
             except OSError:
                 time.sleep(0.05)
-        if not self.s:
-            raise MonitorError("VICE: remote monitor not reachable")
-        self.s.settimeout(0.02)
-        time.sleep(boot_wait)                       # the C64 reaches READY. (warp)
-        self.quiet()
+        try:
+            if not self.s:
+                raise MonitorError("VICE: remote monitor not reachable")
+            if boot_wait is None:
+                try:
+                    wait_boot(self.s, boot_tmax)        # the C64 reaches READY. (warp)
+                except RuntimeError as e:
+                    raise MonitorError(str(e))
+            else:
+                time.sleep(boot_wait)
+            self.s.settimeout(0.02)
+            self.quiet()
+        except Exception:
+            self.close()                                # no VICE left running (it would hold port 6510 for the next Vice())
+            raise
 
     # ---- protocol
     def quiet(self, gap=0.15, tmax=5):
@@ -208,9 +221,17 @@ class Vice:
         except Exception:
             pass
         try:
-            self.p.wait(1)
+            self.p.wait(2)
         except Exception:
-            self.p.kill()
+            pass
+        try:
+            os.killpg(self.p.pid, signal.SIGKILL)       # whatever is left of the group (x64sc that ignored quit, Xvfb)
+        except Exception:
+            pass
+        try:
+            self.p.wait(2)
+        except Exception:
+            pass
         if self.disk and os.path.exists(self.disk):
             os.remove(self.disk)
 

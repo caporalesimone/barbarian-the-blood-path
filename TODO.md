@@ -321,17 +321,16 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   (MonitorError dopo 30 s); rilanciati da soli subito dopo: 6/6 PASS. Stesso sintomo (il monitor remoto di VICE smette di rispondere),
   in un momento qualsiasi della sessione, non solo al primo avvio. Da fare: registrare il log di VICE e del monitor quando succede.
   Release successiva (stessa sera, tool dentro le immagini): 185 PASS, 0 FAIL, 1 SKIP.
-  **14/11, causa trovata per il caso del primo avvio a freddo** (analisi con un sottoagente Opus, riprodotto 1 volta su 1 dopo un vero
-  riavvio della macchina, 0 su 3 senza riavvio): corsa all'avvio nel harness. VICE apre la porta del monitor ~7 s prima di aver finito
-  il boot (disco lento a freddo: x64sc ~3 s in stato D); `tests/lib/c64.py` (`Vice.__init__`, righe ~115-125) si connette, aspetta `sleep(1.0)` e manda
-  load/break/pc/x; se il KERNAL non ha ancora inizializzato i vettori IRQ (`$0314` = `00 00`) il C64 gira a vuoto in warp, il breakpoint non
-  arriva e `x` scade a 120 s (VICE e il monitor funzionano: provato anche a caldo con SIGSTOP di 0,9 s subito dopo la connessione). I 24 FAIL
-  sono un solo errore di setup copiato su tutti i test del modulo (`tests/run.py:109-110`; per questo "0,00 s"). **Correzione proposta, non
-  applicata**: al posto di `sleep(boot_wait)` attendere `READY.` (riga 6 dello schermo) o `$0314/$0315` = `31 EA`, tetto 30 s; stessa
-  attesa in `tools/build/gen_help.py:42-48` e `settle()`; un nuovo tentativo del setup (una sola riga di errore); `start_new_session=True` +
-  `os.killpg` in `Vice.close` (rischio latente: x64sc non risponde al `quit` e resta vivo con la 6510 aperta). **Non spiegati**: il blocco
-  a meta' sessione del 13/11 (PERF-DISK `load` senza risposta) e' un sintomo diverso; l'origine della lentezza sotto il guest (hypervisor o
-  disco) e' un'ipotesi. dockerd dopo il riavvio e' fallito una volta al primo avvio (`failed to start containerd: timeout`), poi ok.
+  **14/11, primo avvio a freddo: causa trovata e corretta** (analisi con un sottoagente Opus, riprodotto 1 volta su 1 dopo un vero
+  riavvio della macchina, 0 su 3 senza): corsa all'avvio nel harness. VICE apre la porta del monitor ~7 s prima di aver finito il boot
+  (disco lento a freddo), `tests/lib/c64.py` aspettava 1 s fisso; se il KERNAL non aveva inizializzato i vettori IRQ il C64 girava a
+  vuoto e `x` scadeva a 120 s. I 24 FAIL erano un solo errore di setup copiato su tutti i test del modulo. Ora `Vice()` e `gen_help.py`
+  usano `vice_rom.wait_boot` (vettori IRQ + `READY.`, tetto 30 s) e `Vice.close()` uccide il gruppo di processi. Provato **solo con una
+  simulazione** (VICE fermato con SIGSTOP 3 s dopo l'apertura della porta: avvio del gioco ok due volte di fila; col codice vecchio
+  l'analisi aveva misurato il fallimento gia' a 0,9 s di stallo) e a caldo (33/33); **non rivisto con un vero riavvio a freddo**:
+  se capita ancora, e' un'altra causa. **Resta aperto** il sintomo del 13/11 a meta' sessione (PERF-DISK `load` senza risposta, PERF-OPT-11):
+  non spiegato dalla corsa all'avvio. L'origine della lentezza sotto il guest (hypervisor o disco) e' un'ipotesi; dockerd dopo il riavvio
+  e' fallito una volta al primo avvio (`failed to start containerd: timeout`), poi ok.
 
 ## J — Idee per dopo
 
