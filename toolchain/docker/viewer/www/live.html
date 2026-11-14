@@ -8,13 +8,17 @@
      L'audio arriva da /audio (WebSocket, PCM s16le stereo 44100 Hz) e si riproduce con WebAudio con un piccolo margine (~30 ms).
      Il browser accende l'audio solo dopo un clic: pulsante "Audio". -->
 <style>
-  :root { --bar:#16151a; --fg:#ebe7df; --acc:#9aa8ff; --dim:#9a958b; }
+  /* (14/11) testata con il tema del centro di controllo: barra scura, arcobaleno, pulsanti a forma di tasto */
+  :root { --bar:#14121c; --fg:#f0e6c8; --acc:#f2c230; --dim:#c9bd9c; --key:#fffaf0; --ink:#2a2118; }
   html, body { margin:0; height:100%; background:#000; color:var(--fg); font:14px/1.4 system-ui, sans-serif; }
   body { display:flex; flex-direction:column; }
   header { display:flex; gap:12px; align-items:center; padding:6px 12px; background:var(--bar); flex-wrap:wrap; }
-  header a { color:var(--acc); text-decoration:none; }
-  button { font:inherit; padding:4px 12px; border-radius:6px; border:1px solid #444; background:#2a2833; color:var(--fg); cursor:pointer; }
-  button.on { background:#3d4fb8; border-color:#3d4fb8; }
+  header { border-bottom:10px solid; border-image:linear-gradient(#c8301e 0 20%, #e8762b 20% 40%, #f2c230 40% 60%, #4f9d45 60% 80%, #2f6db5 80%) 1; }
+  header a { color:var(--acc); text-decoration:none; font:600 13px "DejaVu Sans Mono", ui-monospace, monospace; }
+  button { font:600 13px "DejaVu Sans Mono", ui-monospace, monospace; padding:3px 11px 2px; border-radius:6px; border:1.5px solid var(--ink);
+           background:var(--key); color:var(--ink); cursor:pointer; box-shadow:0 3px 0 #000; margin-bottom:3px; }
+  button:active { transform:translateY(3px); box-shadow:none; }
+  button.on { background:#f2c230; }
   #st { color:var(--dim); }
   iframe { flex:1; border:0; width:100%; }
 

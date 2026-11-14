@@ -58,7 +58,7 @@ target() {                             # docker build di un target del Dockerfil
     DOCKER_BUILDKIT=1 docker build -q $SECRET --target "$1" -t "$2" \
         --build-arg VICE_VERSION="$VICE_VERSION" --build-arg KRILL_ZIP="$(basename "$K")" --build-arg KASMVNC_DEB="$KASMVNC_DEB" \
         --build-context vicesrc="$TC/vice/download" --build-context zx0src="$TC/zx0" --build-context krill="$(dirname "$K")" \
-        --build-context kasmvnc="$TC/kasmvnc/download" --build-context roms="$TC/roms" "$TC/docker" >/dev/null
+        --build-context kasmvnc="$TC/kasmvnc/download" "$TC/docker" >/dev/null
 }
 for n in $NAMES; do
     if [ $FORCE = 0 ] && have "$n"; then continue; fi

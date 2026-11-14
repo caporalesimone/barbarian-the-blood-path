@@ -37,10 +37,8 @@ flowchart TD
     VB -. "copia /opt/vice (x64sc, c1541, share)" .-> EVICE
 
     BASE --> VN["stage viewer-node<br/>npm + modulo nativo pulseaudio2"]
-    BASE --> VF["stage viewer-font<br/>fonttools: c64.ttf dal chargen"]
     BASE --> VW["c64-emu-viewer<br/>Xvnc (KasmVNC) + PulseAudio + server Node"]
     VN -. "copia node_modules" .-> VW
-    VF -. "copia c64.ttf" .-> VW
 
     BLD --> MAN["barbarian-manual<br/>+ WeasyPrint (tools/manual/Dockerfile)"]
 
@@ -51,7 +49,7 @@ flowchart TD
     classDef stage fill:#f2f2f2,stroke:#999,stroke-dasharray:4 3;
     class BLD,EVICE,VW,VC gen;
     class MAN game;
-    class BASE,TB,VB,ZB,CB,VN,VF stage;
+    class BASE,TB,VB,ZB,CB,VN stage;
 ```
 
 Linea tratteggiata = si copia solo il risultato: **i compilatori non finiscono mai nelle immagini finali** (restano nella cache di BuildKit).

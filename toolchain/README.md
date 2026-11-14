@@ -16,7 +16,7 @@ Un solo Dockerfile multi-stage, `docker/Dockerfile`: una immagine per target, tu
 | (nessuna) | `tools-builder`, `vice-build`, `zx0-build`, `cc1541-build` | compilatori e librerie di sviluppo; compilano i programmi esterni. Restano nella cache di BuildKit, non diventano immagini |
 | `c64-builder` | `builder` | 64tass, cc65, make, perl, zip, git, Python 3 con Pillow, PyYAML, NumPy, Matplotlib; zx0 e cc1541 in `/opt/c64/bin` |
 | `c64-emu-vice` | `emu-vice` | builder + VICE (`x64sc`, `c1541` e i dati in `/opt/vice`), librerie gtk3, Xvfb, ffmpeg |
-| `c64-emu-viewer` | `viewer` | Xvnc di KasmVNC (pacchetto ufficiale) + PulseAudio + server Node (`docker/viewer/server.js`): centro di controllo, schermo con audio, `out/`, overlay con tastiera C64 e joystick (`/input`), `/control` verso il lettore. Font della pagina `c64.ttf` dal chargen del C64 (stage `viewer-font`, `docker/viewer/c64font.py`, fonttools solo nello stage) |
+| `c64-emu-viewer` | `viewer` | Xvnc di KasmVNC (pacchetto ufficiale) + PulseAudio + server Node (`docker/viewer/server.js`): centro di controllo, schermo con audio, `out/`, overlay con tastiera C64 e joystick (`/input`), `/control` verso il lettore. |
 | `c64-emu-vc64web` | (Dockerfile di `vc64web-custom/`) | node, Playwright + Chromium, ffmpeg, demone dell'emulatore nel browser |
 
 Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` (ricompila anche VICE, zx0 e cc1541 sulla base nuova).
@@ -38,12 +38,40 @@ Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` (r
 | `C64_PASS_ENV` | variabili dell'host passate ai container da `run.sh` (oltre a `EMU_URL`, `C64_VIEW`, `DISPLAY`) |
 | `C64_EXTRA_IMAGES` | immagini del progetto controllate da `validate_env.sh` |
 | `C64_VIEW_DISK` | disco proposto per primo nella pagina del viewer (modello con `*`, vince la versione piu' alta) |
+| `C64_VIEW_TITLE` | nome del progetto nella testata della pagina del viewer |
 | `C64_VIEW_PLAYER` | comando che apre un file (`.d64 .g64 .prg .t64 .crt`, percorso relativo al progetto; `--bare` = senza disco) sullo schermo del viewer; se manca, i pulsanti VICE della pagina sono spenti |
 | `C64_KRILL_ZIP` | zip di Krill's Loader da cui si compila cc1541 |
 
 Altre variabili: `C64_CA_BUNDLE` (CA di un proxy che intercetta TLS, segreto per npm/pip nelle build), `C64_DOCKER_ARGS` (opzioni di
 `docker run` in piu'), `VIEW_PORT`, `VIEW_PASSWORD` (password di tutto il viewer, di default nessuna), `VIEW_SIZE`, `VIEW_HOSTS` (nomi di host ammessi oltre
 a localhost: il server rifiuta gli altri contro il DNS rebinding).
+
+## Manifest per il viewer (contratto con il progetto, 14/11)
+
+La pagina del viewer (`docker/viewer/www/index.html`) e' generica: legge solo questi file, che scrive il progetto. Tutto e' facoltativo
+tranne `files`; un campo che manca non si mostra.
+
+`out/releases/v<V>/manifest.json` (una cartella per versione; `out/releases/latest` = collegamento all'ultima):
+
+| Campo | Contenuto |
+|---|---|
+| `schema` | 1 |
+| `version`, `branch`, `built_at`, `updated_at`, `release` | versione, ramo git, date ISO 8601 UTC, `true` se e' una release |
+| `files` | `{nome: {group, type: file\|dir, files, bytes, sha256, produced}}`: i `.d64` fra questi hanno i pulsanti vc64web / VICE / download |
+| `groups` | `{gruppo: etichetta}`: come mostrare i gruppi di `files` e di `missing` |
+| `missing` | gruppi non generati in questa versione |
+| `tests` | `{ran, suites[], total, pass, fail, skip, seconds}`; il dettaglio in `test_report.json` (`{suites, total_s, results: [{id, suite, desc, result PASS\|FAIL\|SKIP, reason, time}]}`) |
+| `stats.metrics` | misure del progetto: `[{id, label, value, unit: B\|s\|"", better: up\|down\|null, hint}]` (schede, andamento, confronto) |
+| `stats.info` | `[{label, value}]`: dati da mostrare e confrontare, senza grafico |
+| `stats.disk` | `{blocks_total, blocks_free, blocks_used, files: [{name, type, blocks}]}` (directory del disco) |
+| `stats.git` | `{commit, subject, dirty}` |
+| `stats.build_seconds` | durata della build |
+
+Stato dal vivo, in `out/tmp/` (riscritti in modo atomico: file temporaneo e rinomina):
+- `build.json`: `{state: running|ok|fail, phase, flags, started, updated}` (tempi in secondi Unix);
+- `tests.json`: `{state, suites, filter, total, started, updated, seconds, current: {id, suite, desc, since}, results: [come sopra], caps}`.
+
+In questo progetto li scrivono `tools/build/publish.py`, `build.sh` e `tests/run.py`.
 
 ## Programmi esterni
 

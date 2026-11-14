@@ -149,8 +149,12 @@ sequenceDiagram
 ## 6. Vedere l'emulatore dal vivo
 
 `./build.sh --view` (o `toolchain/viewer.sh start`) avvia `c64-emu-viewer`; **http://localhost:6080** (una sola porta, aperta solo
-su localhost) e' il **centro di controllo** (14/11, richiesta del committente; tema Commodore 64: palette del VIC-II e font ricavato dal
-chargen nell'immagine, stage `viewer-font`):
+su localhost) e' il **centro di controllo** del progetto (14/11, richiesta del committente). E' della toolchain, quindi **generico**:
+vale per qualunque progetto C64 che pubblichi le versioni in `out/releases/v<V>/` con un `manifest.json` nel formato descritto in
+[toolchain/README.md](../toolchain/README.md) ("Manifest per il viewer"); cio' che e' del gioco (misure, etichette dei file, nome del
+progetto) arriva dal manifest e da `toolchain.env` (`C64_VIEW_TITLE`, `C64_VIEW_PLAYER`). Tema: moderno ma che ricorda il C64 e il
+manuale del gioco (carta beige, inchiostro marrone, rosso scuro, barra arcobaleno, pulsanti ed etichette a forma di tasto; chiaro o
+scuro secondo il sistema, pulsante TEMA per cambiarlo):
 - **Stato dal vivo** (aggiornato ogni 2 s): **BUILD** (fase e esito di `./build.sh`, da `out/tmp/build.json`), **TEST** (barra di
   avanzamento, test in corso, ultimi esiti e FAIL, da `out/tmp/tests.json` che `tests/run.py` riscrive dopo ogni test), **VICE LIVE**
   (il VICE avviato dalla pagina, con "Gioca / prova" e "Chiudi").
@@ -160,10 +164,10 @@ chargen nell'immagine, stage `viewer-font`):
   [misurato 14/11, una volta sola] smoke + sanity con la vista accesa e VICE del lettore in esecuzione: 28,3 s contro 17,9 s senza
   (tetto 35 s).
 - **Una scheda per versione** di `out/releases/` (da `manifest.json`): esito dei test, commit, release/branch, modifiche non
-  committate; pulsanti **vc64web (browser)**, **VICE sullo schermo dal vivo**, **Scarica .d64**; margini di RAM, blocchi liberi del
-  disco, dimensione di GAME compresso, durate; tabella degli artefatti (dimensione, data, SHA-256) con quelli **non generati**; directory
+  committate; pulsanti **vc64web**, **VICE live**, **.d64** (download); le misure del progetto (`stats.metrics`: per questo gioco
+  margini di RAM e GAME compresso, da `tools/build/publish.py`), blocchi liberi del disco, durate; tabella degli artefatti (dimensione, data, SHA-256) con quelli **non generati**; directory
   del disco; elenco dei test (o solo i FAIL, con il motivo).
-- **Andamento** fra le versioni tenute (margini di RAM, blocchi liberi, GAME compresso, durata di build e di smoke + sanity) e
+- **Andamento** fra le versioni tenute (le misure del progetto, blocchi liberi, durata di build e dei test con le stesse suite) e
   **confronto** fra due versioni (misure, file del disco cambiati, test con esito o tempo diverso).
 - **Prove a mano**: "VICE vuoto (READY.)" (`play.sh --bare`), "vc64web vuoto", e i **file propri**: un `.d64 .g64 .prg .t64 .crt`
   copiato in `out/tmp/` compare nella pagina con i pulsanti VICE e vc64web. Nella finestra di VICE il menu (File -> Smart attach)

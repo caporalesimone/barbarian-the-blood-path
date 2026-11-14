@@ -53,21 +53,33 @@ def git_info():
         return {}
 
 
-def memory_stats():
-    """margini di memoria dalle etichette di out/work/game.lbl (stesse formule di tools/build/asm.sh)"""
+# Etichette dei gruppi di file, per la pagina del viewer (la toolchain non sa cosa sono: le legge dal manifest)
+GROUP_LABELS = {"disk": "Disco 1541", "atlas": "Atlante grafico", "memory-map": "Mappe RAM e disco", "tests": "Report dei test",
+                "manual": "Manuale PDF"}
+
+
+def metric(mid, label, value, unit="", better=None, hint=""):
+    """una misura del progetto nel formato del viewer (toolchain/README.md, "Manifest per il viewer"):
+    better = "up" (piu' alto e' meglio), "down" (piu' basso e' meglio) o None"""
+    return {"id": mid, "label": label, "value": value, "unit": unit, "better": better, "hint": hint}
+
+
+def game_metrics():
+    """misure del gioco: margini di memoria dalle etichette di out/work/game.lbl (stesse formule di tools/build/asm.sh), dimensioni di GAME"""
+    ms = []
     p = os.path.join(OUT, "work", "game.lbl")
-    if not os.path.isfile(p):
-        return {}
-    lb = {m.group(1): int(m.group(2), 16) for m in (re.match(r"(\w+)\s*=\s*\$([0-9a-f]+)", x) for x in open(p)) if m}
-    try:
-        st = {"code_free_below_8720": lb["SCR_H"] + 800 - lb["gfx_data"], "code_free_9c00_block": lb["FREE_RAM_END"] + 1 - lb["code2_end"]}
-    except KeyError:
-        st = {}
-    for k, f in (("game_prg_bytes", "game.prg"), ("game_zx0_bytes", "game.zx0")):
-        q = os.path.join(OUT, "work", f)
-        if os.path.isfile(q):
-            st[k] = os.path.getsize(q) - 2
-    return st
+    if os.path.isfile(p):
+        lb = {m.group(1): int(m.group(2), 16) for m in (re.match(r"(\w+)\s*=\s*\$([0-9a-f]+)", x) for x in open(p)) if m}
+        if all(k in lb for k in ("SCR_H", "gfx_data", "FREE_RAM_END", "code2_end")):
+            ms.append(metric("ram_free_8720", "RAM libera sotto $8720", lb["SCR_H"] + 800 - lb["gfx_data"], "B", "up",
+                             "codice del gioco fino allo schermo dell'HUD"))
+            ms.append(metric("ram_free_9c00", "RAM libera blocco $9C00", lb["FREE_RAM_END"] + 1 - lb["code2_end"], "B", "up"))
+    q = os.path.join(OUT, "work", "game.zx0")
+    if os.path.isfile(q):
+        prg = os.path.join(OUT, "work", "game.prg")
+        ms.append(metric("game_zx0", "GAME compresso (zx0)", os.path.getsize(q) - 2, "B", "down",
+                         ("non compresso: %d B" % (os.path.getsize(prg) - 2)) if os.path.isfile(prg) else ""))
+    return ms
 
 
 def d64_info(path):
@@ -190,14 +202,15 @@ def main():
                  "fail": res.count("FAIL"), "skip": res.count("SKIP"), "seconds": r.get("total_s"), "at": stamp}
     stats = man.get("stats") or {}
     if not a.only_manual:
-        stats.update(memory_stats())
+        stats["metrics"] = game_metrics()
+        stats["info"] = [{"label": "salvataggi", "value": "v%s" % ver.get("save_version")}]
         stats["disk"] = d64_info(os.path.join(vdir, "blood_path_v%s_1541.d64" % v))
         stats["git"] = git_info()
         if a.build_seconds is not None:
             stats["build_seconds"] = a.build_seconds
     if a.tests:
         stats["test_seconds"] = tests.get("seconds")
-    man.update({"stats": stats, "version": v, "branch": branch, "save_version": ver.get("save_version"), "source_hash": ver.get("source_hash"),
+    man.update({"schema": 1, "groups": GROUP_LABELS, "stats": stats, "version": v, "branch": branch, "save_version": ver.get("save_version"), "source_hash": ver.get("source_hash"),
                 "updated_at": stamp, "tests": tests, "release": bool(man.get("release") or a.release),
                 "missing": sorted({"disk", "atlas", "memory-map", "tests", "manual"} - {m["group"] for m in man["files"].values()})})
     with open(mpath, "w") as f:

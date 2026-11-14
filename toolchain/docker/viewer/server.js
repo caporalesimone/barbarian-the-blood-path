@@ -1,6 +1,6 @@
 // Server di c64-emu-viewer (13/11). Copyright (c) 2026 - Simone Caporale
 // UNA sola porta (6080, pubblicata solo su localhost):
-//   /            pagina indice (www/index.html), /live.html schermo dal vivo con audio, /config.js disco proposto
+//   /            pagina indice (www/index.html), /live.html schermo dal vivo con audio, /config.js disco proposto e nome del progetto
 //   /vnc/        client web di KasmVNC (file del pacchetto ufficiale)
 //   /websockify  WebSocket verso Xvnc (127.0.0.1:6901, non pubblicato): passaggio dei byte cosi' come sono
 //   /audio       WebSocket con l'audio dello schermo: PulseAudio (monitor della scheda "c64"), PCM s16le stereo 44100 Hz
@@ -20,6 +20,8 @@ const PulseAudio = require('pulseaudio2');
 
 const PORT = 6080, VNC_PORT = 6901, PASS = process.env.VIEW_PASSWORD || '';
 const DISK = (process.env.VIEW_DISK || '').replace(/["\\]/g, '');
+const PLAYER = JSON.stringify((process.env.VIEW_PLAYER || '').slice(0, 200)).replace(/</g, '\\u003c');   // comando del lettore (per la pagina)
+const TITLE = JSON.stringify((process.env.VIEW_TITLE || '').slice(0, 80)).replace(/</g, '\\u003c');   // nome del progetto nella pagina
 const PLAYER_SOCK = '/tmp/.X11-unix/c64-player.sock';
 const HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', ...(process.env.VIEW_HOSTS || '').split(',').map(s => s.trim().toLowerCase()).filter(Boolean)]);
 function hostOk(req) {                                          // nome dell'Host senza porta
@@ -93,7 +95,7 @@ const server = http.createServer((req, res) => {
   try { urlPath = decodeURIComponent(new URL(req.url, 'http://x').pathname); } catch (e) { res.statusCode = 400; return res.end(); }
   if (urlPath === '/config.js') {
     res.setHeader('Content-Type', 'text/javascript'); res.setHeader('Cache-Control', 'no-cache');
-    return res.end(`window.VIEW_DISK = "${DISK}";\n`);
+    return res.end(`window.VIEW_DISK = "${DISK}";\nwindow.VIEW_TITLE = ${TITLE};\nwindow.VIEW_PLAYER = ${PLAYER};\n`);
   }
   if (urlPath === '/control') return control(req, res);
   if (urlPath === '/out') { res.statusCode = 301; res.setHeader('Location', '/out/'); return res.end(); }
