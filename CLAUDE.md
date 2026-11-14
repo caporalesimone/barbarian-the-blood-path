@@ -22,9 +22,12 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   variabile `LAB64`; scelta del committente: niente submodule, storia non conservata). Immagini **`lab64-<nome>`**: `lab64-tools`
   (build **e** test e strumenti in VICE: builder e VICE uniti il 14/11), `lab64-vc64web` emulatore secondario, `lab64-viewer` vista
   dal vivo con l'audio (KasmVNC). Le immagini proprie del gioco si chiamano **`barbarian-<nome>`** e stanno accanto al loro codice
-  (`barbarian-manual`: `tools/manual/Dockerfile`; diventera' `lab64-pdf-gen`, TODO T2). La configurazione di Lab64 per il gioco
+  (oggi nessuna: dal 14/11 il manuale si fa con `lab64-pdf-gen` di Lab64). La configurazione di Lab64 per il gioco
   sta in `lab64.env`. Sull'host servono solo sh, Docker, git, curl. Python gira **solo nei container**. Comandi (dalla cartella del
-  gioco): `./build.sh [...]`, `../lab64/run.sh tools <comando>`, `./validate_env.sh`.
+  gioco): `./build.sh [...]` (o `./lab64 build`), `./lab64 test [...]`, `./lab64 up|down|view`, `../lab64/run.sh tools <comando>`,
+  `./validate_env.sh`. Immagini con la versione di Lab64 nel tag (`lab64-tools:1.0`); il gioco la fissa con `LAB64_VERSION` in
+  `lab64.env`. Motore dei test e libreria VICE stanno in Lab64 (`test/run.py`, `py/vicemon.py`); nel gioco `tests/run.py`,
+  `tests/lib/runner.py` e `tools/vice/vice_rom.py` / `vice_env.sh` sono solo rimandi.
 - Un cambiamento a Lab64 si committa **nel suo repository** (in inglese, con le sue regole) e deve lasciare verde la build del gioco.
 - I container devono restare **minimi**: ognuno ha solo cio' che serve al suo compito; niente strumenti usati una volta sola
   (compilatori dei tool: solo negli stage `*-build` del Dockerfile, che non diventano immagini). Immagini con la **versione** nel tag
@@ -78,7 +81,7 @@ diventa un test in `tests/`, non resta in `tools/`.
 - **Screenshot dei menu** (08/11, regola del committente): si conservano **in git** in `docs/screens/` (uno per schermata +
   mosaico `tutti_i_menu.png`; 13/11: restano versionati). Si rifanno solo quelli cambiati:
   `../lab64/run.sh tools tools/vice/shots_menus.sh inventario locanda ...` (senza nomi: tutti), il mosaico si rigenera da solo.
-- **Manuale**: PDF con WeasyPrint nel container `barbarian-manual` (`./build.sh --manual`, `tools/manual/gen_manual.py`).
+- **Manuale**: PDF con WeasyPrint nel container `lab64-pdf-gen` (`./build.sh --manual`, `tools/manual/gen_manual.py`).
   **Copertina** sempre con il **tema rosso** dei dungeon (palette 4): screenshot `dungeon` in `tools/vice/shots_manual.sh` (piano 8
   con il seed di prova). **Screenshot del manuale**: il PG sta sempre in una posizione valida (casella percorribile); per il
   villaggio lo controlla `tools/vice/check_pos.py`, nei dungeon guardare lo screenshot prima di consegnare.

@@ -107,7 +107,7 @@ immagini; le ROM stanno in `../lab64/roms/` e VICE le riceve a mano (`-default` 
 |---|---|
 | `./build.sh` | versioni → generatori (`gen_gfx`, `gen_font`, `gen_music`: brani da `tools/build/songs.py`, `gen_db`) → assemblaggio → dischi → mappe RAM/disco e atlante grafico (`gen_atlas.py` → `out/work/atlas/`) → test |
 | `./build.sh --no-test` | come sopra senza test |
-| `../lab64/run.sh <container> <comando>` | (13/11) un comando qualunque in un container (`tools` = `lab64-tools`; `barbarian-manual` col nome completo) |
+| `../lab64/run.sh <container> <comando>` | (13/11) un comando qualunque in un container (`tools` = `lab64-tools`; `pdf-gen` = `lab64-pdf-gen`; un nome completo si usa com'e') |
 | `tools/build/asm_audit.py` | (11/11) analisi del codice assemblato dai listati di tutti i programmi: codice non raggiunto, ripetuto, spioncino, routine più grandi → `out/work/asm_audit/analisi_assembly.md` |
 | `tools/vice/frame_prof.py` | (11/11) cicli di ogni routine del ciclo principale a ogni giro, su un piano e con una corsa di Frenzy scelti ([prestazioni](prestazioni.md)) |
 | `tools/vice/menu_time.py` | (11/11) cronometro del modulo MENU: caricamento dal disco e apertura di negozi e locanda |

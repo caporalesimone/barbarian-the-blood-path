@@ -560,17 +560,12 @@ unico in `../lab64/sources.conf`, wiki: [docs/build.md](docs/build.md) 4b). VS C
   senza annotazioni si perderebbero le descrizioni scritte a mano.)
 
 ### T2 Lab64: cosa resta dopo la separazione
-- **CLI `lab64`** (decisione del 14/11, il committente l'accetta "per ora"): la logica in Python dentro `lab64-tools`; sull'host solo
-  un lanciatore minimo (`sh` + `docker`) creato nel progetto da `lab64 init`; il lanciatore sceglie il container per comando (`build`,
-  `test`, `analyze` in `tools`; `pdf` in `pdf-gen`; `up`, `down`, `build-images`, `doctor`, `upgrade` sull'host), nessun container
-  ha il socket di Docker. Stack con compose: `tools` e `vc64web` sempre accesi, `viewer` a richiesta; senza stack ogni comando fa un
-  `docker run --rm`. Primo `init` di un progetto nuovo: `docker run --rm -v "$PWD":/work lab64-tools lab64 init`.
-- **Parti generiche del gioco da spostare in Lab64** (tradotte in inglese): `tests/run.py` e `tests/lib/runner.py` (motore dei test),
-  la parte VICE di `tests/lib/c64.py` (con la sonda), `tools/vice/vice_rom.py` e `vice_env.sh`, la parte generica di
-  `tools/build/publish.py` (con un aggancio del progetto per le misure del gioco), cache dei passi, versioni.
-- **`lab64-pdf-gen`**: generatore generico del manuale (WeasyPrint + tema "manuale C64" + tasti `<kbd>`); oggi `barbarian-manual`
-  del gioco (dal 14/11 parte da `lab64-tools`: 1620 MB contro 937 MB, misurato; `lab64-pdf-gen` dovra' partire da una base piu' piccola).
-- **Versioni nel tag** delle immagini (`lab64-tools:1.0`) e versione di Lab64 richiesta dal progetto (in `lab64.env`).
-- **Progetto di esempio** minimo che prova che Lab64 e' davvero generico; **prova da ambiente pulito** (clone dei due repository
-  affiancati, `validate_env`, `./build.sh --release`, `build-images.sh --force`).
+- Fatto il 14/11: CLI `lab64` (lanciatore sull'host + parte nel container; `./lab64` nel gioco, `lab64 init` con progetto di
+  esempio provato), motore dei test e libreria VICE in Lab64 (`test/run.py`, `py/`), `lab64-pdf-gen` (276 MB), versione nei tag.
+- **Stack con compose**: `tools` sempre acceso e comandi con `docker compose exec`; oggi ogni comando e' un `docker run --rm`
+  (vc64web con `./lab64 up`). **Complessita'**: S.
+- **Pubblicazione generica** in Lab64: la parte generica di `tools/build/publish.py` (cartelle `out/releases/v<V>/`, manifest,
+  retention) con un aggancio del progetto per le misure del gioco; `lab64 build` predefinito che pubblica anche lui. **Complessita'**: M.
+- **Tema "manuale C64" generico** per `lab64-pdf-gen` (oggi stile e tasti `<kbd>` sono in `tools/manual/gen_manual.py` del gioco).
+- **Prova da ambiente pulito**: clone dei due repository affiancati, `validate_env`, `./build.sh --release`, `build-images.sh --force`.
 - **Licenza di Lab64**: da scegliere prima di pubblicare (oggi nessuna = nessun riuso permesso).

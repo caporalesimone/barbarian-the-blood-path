@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Genera out/work/manual/manuale.html e out/work/manual/Barbarian_Blood_Path_Manuale.pdf (A5, WeasyPrint).
 
-Gira nel container barbarian-manual (tools/manual, 13/11: WeasyPrint al posto di Chrome; stesse 19 pagine, l'ombra del
+Gira nel container lab64-pdf-gen (di Lab64; 13/11: WeasyPrint al posto di Chrome; stesse 19 pagine, l'ombra del
 titolo in copertina non c'e' perche' WeasyPrint ignora text-shadow). Dall'host: ./build.sh --manual.
 
 Sorgente editabile: docs/manual/manuale_src.html (+ stile.css). Questo script:
@@ -120,7 +120,7 @@ if "--html" in sys.argv:                         # solo l'HTML (senza WeasyPrint
     print(os.path.join(R, OUT), n[0], "pagine"); sys.exit(0)
 import logging                                   # noqa: E402
 logging.getLogger("weasyprint").setLevel(logging.ERROR)   # avvisi noti: text-shadow, print-color-adjust
-import weasyprint                                # noqa: E402  (container barbarian-manual)
+import weasyprint                                # noqa: E402  (container lab64-pdf-gen)
 weasyprint.HTML(os.path.join(R, OUT)).write_pdf(pdf)
 print(pdf, n[0], "pagine")
 

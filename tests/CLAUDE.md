@@ -6,8 +6,8 @@ dettagli di suite e runner: `docs/test.md`.
 ## Dove girano
 - Nel container **`lab64-tools`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
   `./build.sh --release` (anche regression), `../lab64/run.sh tools python3 tests/run.py -k ID`. Mai sull'host.
-- VICE si avvia sempre con `-default` e con **tutte** le ROM di `../lab64/roms/vice-roms/` passate a mano (`tools/vice/vice_rom.py`,
-  `tools/vice/vice_env.sh`): niente configurazione o cartella dati dell'utente.
+- VICE si avvia sempre con `-default` e con **tutte** le ROM di `../lab64/roms/vice-roms/` passate a mano (`../lab64/py/vicemon.py`,
+  `../lab64/py/vice_env.sh`; nel gioco `tools/vice/vice_rom.py` e `vice_env.sh` sono rimandi): niente configurazione o cartella dati dell'utente.
 - Test sull'emulatore secondario (`EMU-*`): il demone sta in `lab64-vc64web`, acceso da `./build.sh --emu` o `--release`
   (`EMU_URL`); senza demone sono SKIP, non FAIL.
 
@@ -19,7 +19,7 @@ dettagli di suite e runner: `docs/test.md`.
     spostano in `smoke/` (happy path veloce) o in `regression/` (casi particolari, lenti)**, poi si scrivono i sanity
     della feature nuova. Ogni feature nuova ha i suoi sanity prima di essere consegnata.
   - `regression/`: **tutti i casi particolari**, il più vicino possibile al gioco vero (anche lenti).
-- **Tetti di durata** (`CAPS` in `tests/run.py`): smoke 20 s, smoke + sanity 35 s, singolo test 10 s; oltre, la build fallisce.
+- **Tetti di durata** (`C64_TEST_CAPS` in `lab64.env`, letti dal motore dei test di Lab64): smoke 20 s, smoke + sanity 35 s, singolo test 10 s; oltre, la build fallisce.
   Sono un freno contro l'aumento dei tempi, non un obiettivo; con il viewer (`--view`) non contano.
 - **debug = smoke + sanity** (deve passare prima di ogni consegna e di ogni commit); **release = anche regression**. Se si tocca
   un'area coperta da un test di regression (generatore, salvataggi, oggetti, mostri, musica, regole) lanciare a mano quei test
@@ -32,8 +32,8 @@ dettagli di suite e runner: `docs/test.md`.
 - Una cartella per feature in ogni suite, con un `cases.py` che registra i test (gli altri file sono script e dati della feature).
 - **ID** maiuscoli e significativi `AREA-NN` (`SHOP-01`, `INN-CHEST-01`): `01`–`09` smoke, `10`+ sanity e regression; un test
   spostato conserva l'ID. Test (ID, descrizioni, motivi, commenti) **in inglese**.
-- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `tests/lib/c64.py`). **All'avvio si aspetta il
-  C64, non un tempo** (14/11, TODO I11): `Vice()` chiama `vice_rom.wait_boot` (vettori IRQ `$0314/5` = `$EA31` e `READY.` sullo schermo; tetto 30 s),
+- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `Vice` di `../lab64/py/vicemon.py`, usata da `tests/lib/c64.py`). **All'avvio si aspetta il
+  C64, non un tempo** (14/11, TODO I11): `Vice()` chiama `wait_boot` (Lab64) (vettori IRQ `$0314/5` = `$EA31` e `READY.` sullo schermo; tetto 30 s),
   perche' VICE apre la porta del monitor ~7 s prima di finire il boot a freddo. Un VICE lanciato con `-autostart` non mostra `READY.`:
   `Vice(boot_wait=<s>)`. `Vice.close()` uccide l'intero gruppo di processi (xvfb-run, Xvfb, x64sc).
   `Game.to_menu()` carica `START` dal monitor e lo avvia (Krill's Loader installato, tutto in ~1 s reale); il modulo MENU lo scrive

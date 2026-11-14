@@ -37,21 +37,23 @@ si scrivono quelli della feature nuova.
   `regression/gen/gen_ref.json`).
 - **ID**: maiuscoli, `AREA-NN` (`SHOP-01`, `INN-CHEST-01`, `DUNG-CHEST-01`). Numerazione: `01`–`09` smoke, `10`+
   sanity e regression (un test che passa da una suite all'altra conserva il suo ID). Il runner rifiuta ID duplicati.
-- `tests/lib/c64.py`: libreria comune. `Vice` (x64sc in warp con monitor remoto: **nessun tempo fisso**, ogni
+- (14/11) **motore e libreria VICE stanno in Lab64**: `../lab64/test/run.py` (motore), `../lab64/py/c64test.py` (registro),
+  `../lab64/py/vicemon.py` (`Vice`). Nel gioco restano solo rimandi (`tests/run.py`, `tests/lib/runner.py`) e cio' che e' del gioco.
+- `tests/lib/c64.py`: libreria del gioco. `Vice` (di Lab64: x64sc in warp con monitor remoto: **nessun tempo fisso**, ogni
   comando aspetta il prompt, `go` aspetta la fermata e ne legge il contatore di cicli), `Game` (il disco, menu,
   partita, `frames(n, joy, fire, keys)` con l'input scritto all'`rts` di `read_input`, `in_game()` dal ritorno nello
   stack, `teleport`), `sync`/`settle` per gli script storici con il loro socket.
-- `tests/lib/runner.py`: registro, `check(cond, reason)`, `Skip`, `script(id, desc, argv)` per gli script esterni.
+- `tests/lib/runner.py` (rimando a `../lab64/py/c64test.py`): registro, `check(cond, reason)`, `Skip`, `script(id, desc, argv)` per gli script esterni.
   Un `cases.py` può avere `setup`/`teardown` (una sessione di VICE per tutti i suoi test) e `CHAIN = True` (sequenza:
   dopo un fallimento i test seguenti sono SKIP con il motivo).
-- `tests/run.py [smoke|sanity|regression|all] [-k ID|prefisso] [--list]`; report a schermo e in
+- `tests/run.py [smoke|sanity|regression|all] [-k ID|prefisso] [--list]` (o `./lab64 test ...`, che con `./lab64 up` passa anche il demone vc64web); report a schermo e in
   `out/work/test_report.txt` / `out/work/test_report.json`: ID, suite, esito (PASS/FAIL/SKIP), tempo, motivo.
   Stato dal vivo (14/11): `out/tmp/tests.json`, riscritto dopo ogni test (stato, test in corso, esiti fin qui): lo legge il centro di
   controllo del viewer ([getting-started](getting-started.md) sezione 6).
 
 ## Tetti di durata (12/11, committente)
 
-`tests/run.py` fallisce (exit 1, righe `TIME CAP`) se: la suite **smoke** da sola supera **20 s**; **smoke + sanity** supera
+`tests/run.py` fallisce (exit 1, righe `TIME CAP`; 14/11: i valori stanno in `lab64.env`, `C64_TEST_CAPS`) se: la suite **smoke** da sola supera **20 s**; **smoke + sanity** supera
 **35 s** (somma dei tempi dei test, setup compreso); un **singolo** test di smoke o sanity supera **10 s**. Regression senza
 tetto. I tetti di somma si controllano solo senza `-k`. `TEST_CAP_SCALE=0.2` li riduce per provare il controllo. Misura
 del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHAP-SAVE-10` 4,7 s.

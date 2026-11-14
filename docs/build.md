@@ -26,7 +26,7 @@ flowchart TD
 | `./build.sh` | **tutto**: disco, mappe, atlante, smoke e sanity (devono passare prima di ogni commit) e manuale PDF |
 | `./build.sh --fast` | solo il disco + smoke e sanity (salta atlante, mappe, manuale: `--no-atlas`, `--no-maps`, `--no-manual`, tutti separati) |
 | `./build.sh --no-test` | salta smoke e sanity (si combina con `--fast`) |
-| `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`barbarian-manual`) e `tools/build/release.sh` (senza zip dei sorgenti) (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
+| `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`lab64-pdf-gen`) e `tools/build/release.sh` (senza zip dei sorgenti) (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
 | `./build.sh --manual` | solo il manuale (`out/work/manual/`, poi copiato in `out/releases/v<V>/`) |
 | `./build.sh --keep N` | quante versioni tenere in `out/releases/` (default 5, anche `KEEP_VERSIONS=N`) |
 | `../lab64/run.sh tools tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
@@ -198,13 +198,13 @@ sh, Docker con BuildKit, git e curl (`./validate_env.sh` li controlla).
 | `python3` 3.12 + Pillow, PyYAML, NumPy, Matplotlib | `lab64-tools` | generatori, atlante, mappe, simulatori |
 | VICE (`x64sc`, `c1541`) e le sue librerie (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `lab64-tools` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
 | node 22, Playwright 1.63 + Chromium, ffmpeg | `lab64-vc64web` | demone di vc64web (test `EMU-*`, video) |
-| WeasyPrint 70 (+ PyYAML, Pillow) | `barbarian-manual` (= `lab64-tools` + WeasyPrint) | PDF del manuale |
+| WeasyPrint 70 (+ PyYAML, Pillow, pango, font DejaVu) | `lab64-pdf-gen` (14/11, di Lab64: 276 MB) | PDF del manuale |
 | Xvnc di KasmVNC 1.5.2, PulseAudio, node (server del viewer) | `lab64-viewer` | vista dal vivo nel browser, con l'audio |
 | gcc e librerie di sviluppo | stage `tools-builder` (non e' un'immagine) | compilare VICE, zx0, cc1541 |
 
 Dimensioni misurate il 13/11 (`docker image inspect`, layer comuni contati in ogni immagine), con i nomi di oggi: lab64-tools
 1553 MB (il builder e VICE: dal 14/11 un'immagine sola; il builder da solo era 868 MB), lab64-vc64web 2116 MB, lab64-viewer 803 MB;
-barbarian-manual: vedi `docker images` (dal 14/11 parte da lab64-tools). Lo stage `base` (ubuntu + CA + `/work`) e' in comune fra
+lab64-pdf-gen 276 MB (14/11; il vecchio barbarian-manual era 937 MB, 1620 MB quando partiva da lab64-tools). Lo stage `base` (ubuntu + CA + `/work`) e' in comune fra
 lab64-tools e lab64-viewer [MISURATO 13/11: stessi id dei layer]. **Costo di Docker** [MISURATO 13/11, Linux su Linux]: smoke in container 15,1 s di media contro 15,6 s sull'host (3
 prove): nessuna perdita misurabile. **Non misurato** su Docker Desktop / WSL2.
 

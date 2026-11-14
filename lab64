@@ -1,0 +1,5 @@
+#!/bin/sh
+# Comando di Lab64 per questo progetto (14/11): ./lab64 help. Lab64 sta nella cartella accanto (../lab64) o in LAB64.
+L=${LAB64:-$(cd "$(dirname "$0")/.." && pwd)/lab64}
+[ -x "$L/bin/lab64" ] || { echo "Lab64 non trovato in $L: clonarlo accanto al progetto (../lab64) o impostare LAB64"; exit 1; }
+cd "$(dirname "$0")" && exec "$L/bin/lab64" "$@"

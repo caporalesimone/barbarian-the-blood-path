@@ -1,6 +1,6 @@
 #!/bin/sh
 # Build e test di "Barbarian: The Blood Path" (13/11: tutto nei container Docker; sull'host servono solo sh, Docker, git e curl).
-#   ./build.sh               TUTTO: disco + mappe RAM/disco + atlante + smoke e sanity + manuale PDF (barbarian-manual)
+#   ./build.sh               TUTTO: disco + mappe RAM/disco + atlante + smoke e sanity + manuale PDF (lab64-pdf-gen)
 #   ./build.sh --fast        solo il disco (salta atlante, mappe e manuale); smoke e sanity restano
 #   ./build.sh --no-atlas    salta l'atlante grafico         --no-maps    salta le mappe della RAM e del disco
 #   ./build.sh --no-manual   salta il manuale PDF            --no-test    salta smoke e sanity
@@ -11,12 +11,12 @@
 #   ./build.sh --no-view     i test su display virtuali anche con il viewer acceso
 #   ./build.sh --probe       (14/11) sonda della memoria in VICE: RAM riempita con uno schema dopo il boot, salvata alla fine di ogni
 #                            sessione dei test; la mappa automatica (memmap di Lab64) aggiunge la memoria scritta davvero
-#   ./build.sh --manual      SOLO il manuale PDF (barbarian-manual), senza rifare il disco
-#   ./build.sh --images      rifa' tutte le immagini Docker (Lab64 e manuale; poi la build)
+#   ./build.sh --manual      SOLO il manuale PDF (lab64-pdf-gen), senza rifare il disco
+#   ./build.sh --images      rifa' tutte le immagini Docker (tutte quelle di Lab64; poi la build)
 #   ./build.sh --keep N      quante versioni tenere in out/releases/ (default 5, KEEP_VERSIONS nell'ambiente)
 # I flag si combinano (es. --fast --no-test = solo il disco). Gli artefatti di ogni build (disco, atlante, mappe, report dei
 # test, manuale) finiscono in out/releases/v<versione>/ con manifest.json (tools/build/publish.py); out/releases/latest e' l'ultima.
-# Le immagini mancanti si costruiscono da sole (build-images.sh di Lab64; il manuale: tools/manual/Dockerfile); i programmi esterni
+# Le immagini mancanti si costruiscono da sole (build-images.sh di Lab64); i programmi esterni
 # (VICE, zx0, cc1541) si compilano dentro le immagini. Prima volta su un computer nuovo: ./validate_env.sh.
 # Toolchain: Lab64 (14/11, repository a parte), nella cartella accanto (../lab64) o dove dice la variabile LAB64.
 # Configurazione di Lab64 per questo progetto: lab64.env.
@@ -50,24 +50,16 @@ L=${LAB64:-../lab64}                       # Lab64 (toolchain): cartella accanto
 [ -x "$L/run.sh" ] || { echo "Lab64 non trovato in $L: clonarlo accanto al progetto (../lab64) o impostare LAB64"; exit 1; }
 command -v docker >/dev/null || { echo "Docker non trovato: ./validate_env.sh"; exit 1; }
 docker info >/dev/null 2>&1 || { echo "il demone Docker non risponde: ./validate_env.sh"; exit 1; }
-manual_image() {                          # immagine del progetto per il manuale (parte da lab64-tools)
-    if [ "${1:-}" = force ] || ! docker image inspect barbarian-manual >/dev/null 2>&1; then
-        echo "== immagine barbarian-manual =="
-        SECRET=""; [ -n "${C64_CA_BUNDLE:-}" ] && SECRET="--secret id=ca,src=$C64_CA_BUNDLE"
-        # shellcheck disable=SC2086
-        DOCKER_BUILDKIT=1 docker build -q $SECRET -t barbarian-manual tools/manual >/dev/null
-    fi
-}
 phase immagini
-if [ $IMAGES = 1 ]; then "$L/build-images.sh" --force; manual_image force; fi
+if [ $IMAGES = 1 ]; then "$L/build-images.sh" --force; fi
 "$L/build-images.sh" tools
 export RELEASE=$REL BUILD_ATLAS=$ATLAS BUILD_MAPS=$MAPS
 [ $REL = 1 ] && export ZX0_BEST=1          # release: GAME compresso in modo ottimo (tools/build/pack.py)
 
 if [ $MANUAL = 1 ]; then
     phase manuale
-    manual_image
-    "$L/run.sh" barbarian-manual python3 tools/manual/gen_manual.py
+    "$L/build-images.sh" pdf-gen
+    "$L/run.sh" pdf-gen python3 tools/manual/gen_manual.py
     "$L/run.sh" tools python3 tools/build/publish.py --keep "$KEEP" --only-manual; exit 0
 fi
 
@@ -109,8 +101,8 @@ fi
 PUB="$PUB --tests"
 if [ $REL = 1 ] || [ $MANUALDEF = 1 ]; then
     phase manuale
-    manual_image
-    "$L/run.sh" barbarian-manual python3 tools/manual/gen_manual.py
+    "$L/build-images.sh" pdf-gen
+    "$L/run.sh" pdf-gen python3 tools/manual/gen_manual.py
     PUB="$PUB --manual"
 fi
 if [ $REL = 1 ]; then

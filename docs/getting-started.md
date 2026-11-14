@@ -39,6 +39,14 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
 | `out/` | **tutto cio' che si genera**: `work/` (intermedi e uscite della build in corso), `cache/` (zx0, steps, vc64web: si riusano), `tmp/` (usa e getta), `releases/` (artefatti per versione, ultime 5) | no (solo `.gitkeep`) |
 
+## 2b. Il comando `./lab64` (14/11)
+
+`./lab64` e' il comando di Lab64 per questo progetto (lanciatore di `../lab64/bin/lab64`; serve solo Docker sull'host).
+`./lab64 build` = `./build.sh` (`C64_BUILD` in `lab64.env`); `./lab64 test [smoke|sanity|regression] [-k ID]` = motore dei test
+di Lab64 sulla cartella `tests/`; `./lab64 up` accende il demone vc64web (poi `./lab64 test regression -k EMU`), `./lab64 down` lo
+spegne; `./lab64 view` / `stop` il viewer; `./lab64 run <comando>` un comando in `lab64-tools`; `./lab64 images`, `doctor`,
+`version`. Dettagli: [../lab64/README.md](../../lab64/README.md), sezione "Command line".
+
 ## 3. I container
 
 Diagrammi e dettagli completi: [docker-architecture.md](docker-architecture.md).
@@ -59,7 +67,7 @@ sola immagine**, `lab64-tools` (il builder e VICE insieme: i test assemblano var
 | `lab64-tools` | builder | + VICE 3.10 (`x64sc`, `c1541`), librerie gtk3, Xvfb, ffmpeg | build del gioco, generatori, simulatori, test, screenshot, arena, misure in VICE, MP3 dei brani | 1553 MB |
 | `lab64-viewer` | base | Xvnc di KasmVNC, PulseAudio, server Node (pagina indice, schermo con audio) | facoltativo: emulatori dal vivo **con l'audio** e ultima build in vc64web nel browser | 780 MB |
 | `lab64-vc64web` | node:22-bookworm-slim | node, Playwright, Chromium, ffmpeg, pagine di vc64web gia' costruite (Dockerfile del pacchetto) | demone dei test `EMU-*` | 2116 MB |
-| `barbarian-manual` | lab64-tools | + WeasyPrint, pango (`tools/manual/Dockerfile`) | PDF del manuale | vedi `docker images` |
+| `lab64-pdf-gen` | base | Python 3, PyYAML, Pillow, pango, font DejaVu + WeasyPrint 70 (venv) | PDF del manuale | 276 MB (14/11) |
 
 Le dimensioni sono quelle di `docker image inspect` (layer comuni contati in ogni immagine: sul disco i layer condivisi stanno una volta).
 
@@ -83,7 +91,7 @@ flowchart LR
   B --> EV["lab64-tools"]
   B -->|"--release / --emu"| EW["lab64-vc64web"]
   B -->|"--view"| VW["lab64-viewer"]
-  B -->|"--release / --manual"| MA["barbarian-manual<br/>(tools/manual)"]
+  B -->|"--release / --manual"| MA["lab64-pdf-gen<br/>(tools/manual/gen_manual.py)"]
   BL -->|"legge"| SRC
   BL -->|"scrive"| OUT
   EV -->|"report"| OUT
@@ -93,7 +101,7 @@ flowchart LR
 
 Regole: i container girano con l'utente dell'host (`../lab64/run.sh`: i file in `out/` restano suoi), il progetto e' montato in
 `/work`, nessun file del progetto sta nelle immagini (tranne le pagine di vc64web nella sua immagine). `../lab64/run.sh tools ...`
-usa `lab64-tools`; un nome completo (`../lab64/run.sh barbarian-manual ...`) si usa cosi' com'e'. Le immagini mancanti le
+usa `lab64-tools`; `pdf-gen` usa `lab64-pdf-gen`; un nome completo di immagine si usa cosi' com'e'. Le immagini mancanti le
 costruisce `../lab64/build-images.sh` (lo chiama `./build.sh`), compilando dentro anche VICE, zx0 e cc1541.
 
 ## 4. La build
@@ -113,7 +121,7 @@ flowchart TD
   F -->|no| G["lab64-tools:<br/>tests/run_tests.sh"]
   G --> H{"--release?"}
   H -->|no| Y["out/releases/vX.Y/ (publish.py)"]
-  H -->|si| I["barbarian-manual: PDF<br/>lab64-tools: release.sh<br/>(disco ottimo, mappe, zip)"] --> Y
+  H -->|si| I["lab64-pdf-gen: PDF<br/>lab64-tools: release.sh<br/>(disco ottimo, mappe, zip)"] --> Y
 ```
 
 - **Versione**: cresce da sola a ogni build con sorgenti cambiati (`version.yaml`: `version` e `source_hash`).

@@ -11,9 +11,9 @@ per questo documento; *[non verificato]* = ipotesi.
 
 ## 1. Due livelli: immagini e container
 
-- **Immagini** (si costruiscono una volta, `../lab64/build-images.sh`): modelli di sola lettura. Sono 4: tre generiche (`lab64-*`, di
-  **Lab64**, la toolchain che dal 14/11 e' un repository a parte, cartella `../lab64`, e non sa nulla del gioco) e una del gioco
-  (`barbarian-manual`, che diventera' `lab64-pdf-gen`, TODO T2).
+- **Immagini** (si costruiscono una volta, `../lab64/build-images.sh`): modelli di sola lettura. Sono 4, tutte di **Lab64** (`lab64-*`, la
+  toolchain che dal 14/11 e' un repository a parte, cartella `../lab64`, e non sa nulla del gioco): `lab64-tools`, `lab64-pdf-gen`,
+  `lab64-viewer`, `lab64-vc64web`, con la versione di Lab64 nel tag (`:1.0`, e `:latest`). Il gioco non ha piu' immagini proprie.
 - **Due cartelle**: il progetto si monta in `/work` (lettura e scrittura), Lab64 in `/lab64` (sola lettura, `LAB64=/lab64`).
 - **Container** (nascono e muoiono a ogni comando): quasi tutti con `--rm`. **Nessuno è sempre acceso**: dipendono da cosa chiedi a
   `build.sh` o a `viewer.sh`. Il progetto sta sull'host e si monta in `/work`.
@@ -49,7 +49,7 @@ flowchart TD
     BASE --> VW["lab64-viewer<br/>Xvnc (KasmVNC) + PulseAudio + server Node"]
     VN -. "copia node_modules" .-> VW
 
-    EVICE --> MAN["barbarian-manual<br/>+ WeasyPrint (tools/manual/Dockerfile)"]
+    BASE --> MAN["lab64-pdf-gen<br/>Python + WeasyPrint (venv da uno stage pdf-build)"]
 
     NODE["node:22-bookworm-slim"] --> VC["lab64-vc64web<br/>Playwright + Chromium + ffmpeg<br/>(../lab64/vc64web-custom/Dockerfile)"]
 
@@ -57,7 +57,7 @@ flowchart TD
     classDef game fill:#fff0e0,stroke:#b5834a;
     classDef stage fill:#f2f2f2,stroke:#999,stroke-dasharray:4 3;
     class EVICE,VW,VC gen;
-    class MAN game;
+    class MAN gen;
     class BASE,TB,VB,ZB,CB,T64,C65,VN,BLD stage;
 ```
 
@@ -70,13 +70,13 @@ Linea piena = `FROM`, cioè si ereditano tutti i layer.
 | `lab64-tools` | `tools` | il builder + VICE 3.10 (gtk3), Xvfb, ffmpeg | 1553 MB (come la vecchia `c64-emu-vice`) |
 | `lab64-viewer` | `viewer` | Xvnc di KasmVNC 1.5.2, PulseAudio, Node + `server.js` | 780 MB |
 | `lab64-vc64web` | `../lab64/vc64web-custom/Dockerfile` | Node, Playwright, Chromium, ffmpeg, demone dell'emulatore nel browser | 2116 MB |
-| `barbarian-manual` | `tools/manual/Dockerfile` | `lab64-tools` + WeasyPrint 70 | 1620 MB [misurato 14/11, da `lab64-tools`; 937 MB quando partiva dal solo builder] |
+| `lab64-pdf-gen` | `pdf-gen` | Python 3, PyYAML, Pillow, pango, DejaVu + WeasyPrint 70 (venv) | 276 MB [misurato 14/11; il vecchio `barbarian-manual` era 937 MB] |
 
 Conseguenze della struttura:
 - **Layer condivisi** [misurato 13/11]: `lab64-tools` e `lab64-viewer` hanno gli stessi layer fino a `base`, quindi occupano
   disco una volta sola per la parte comune. `vc64web` parte da un'altra base e non condivide nulla.
 - **Cambiare Ubuntu**: `ARG UBUNTU` in un solo punto, poi `../lab64/build-images.sh --force` ricompila tutto (VICE, zx0 e cc1541 compresi) sulla base nuova.
-- **`barbarian-manual`** eredita da `lab64-tools` (`FROM lab64-tools`): e' del gioco, per questo `build-images.sh` di Lab64 non lo costruisce, lo fa `build.sh` (funzione `manual_image`).
+- **`lab64-pdf-gen`** (14/11) parte da `base`, non da `lab64-tools`: WeasyPrint si installa con pip in uno stage a parte (`pdf-build`) e nell'immagine finale entra solo l'ambiente virtuale, senza pip.
 - **Sorgenti scaricati sull'host, non nel build** (14/11: tutti, all'ultima versione, elencati in `../lab64/sources.conf` con SHA-256 o
   commit): li scarica `build-images.sh` con `curl` o `git` dell'host (certificati e proxy del computer) in `../lab64/downloads/` e li passa
   al Dockerfile come *build context* `downloads`. Un eventuale proxy che intercetta TLS entra come segreto
@@ -107,7 +107,7 @@ flowchart LR
     end
 
     BLDC["lab64-tools<br/>(solo durante la build)"]
-    MANC["barbarian-manual<br/>(--manual, --release)"]
+    MANC["lab64-pdf-gen<br/>(--manual, --release)"]
 
     subgraph VOL["volume «lab64-x11» → /tmp/.X11-unix"]
         XSOCK(["socket X: X99<br/>socket audio: pulse<br/>socket del lettore: lab64-player.sock"])
@@ -152,8 +152,8 @@ Chi crea cosa:
 | `./build.sh --no-test` | solo `lab64-tools` |
 | `./build.sh --emu` | come sopra, più `lab64-vc64web` (demone, spento a fine comando) |
 | `./build.sh --view` | come sopra, più `lab64-viewer` e `lab64-player` (restano accesi dopo la fine) e i test sul suo schermo; se il viewer è già acceso i test lo usano anche senza `--view` (`--no-view` per evitarlo) |
-| `./build.sh --manual` | solo `barbarian-manual` |
-| `./build.sh --release` | tutto: `--emu`, tutti i test, `barbarian-manual`, poi `lab64-tools` per il pacchetto |
+| `./build.sh --manual` | solo `lab64-pdf-gen` |
+| `./build.sh --release` | tutto: `--emu`, tutti i test, `lab64-pdf-gen`, poi `lab64-tools` per il pacchetto |
 | `../lab64/viewer.sh start` | `lab64-viewer`, poi `lab64-player` (immagine `lab64-tools`, `../lab64/viewer_player.py`) se `lab64.env` definisce `C64_VIEW_PLAYER` |
 | `../lab64/viewer.sh exec tools/vice/play.sh` | `lab64-viewer` se non c'è, poi `lab64-tools` con VICE dal vivo e audio |
 | `../lab64/run.sh tools …` | un container `lab64-tools` per quel comando |
