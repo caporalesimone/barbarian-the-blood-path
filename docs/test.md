@@ -3,15 +3,15 @@
 Copyright © 2026 - Simone Caporale
 
 Ristrutturati l'11/11 (richiesta del committente). Tre suite, tre cartelle in `tests/`, un solo runner con report.
-Dal 13/11 tutti i test girano nel container **`c64-emu-vice`** (i test `EMU-*` parlano con il demone di vc64web nel
-container `c64-emu-vc64web`): `./build.sh`, oppure `toolchain/run.sh emu-vice python3 tests/run.py ...` per i comandi di questa pagina
+Dal 13/11 tutti i test girano nel container **`lab64-tools`** (i test `EMU-*` parlano con il demone di vc64web nel
+container `lab64-vc64web`): `./build.sh`, oppure `../lab64/run.sh tools python3 tests/run.py ...` per i comandi di questa pagina
 (panoramica: [Getting started](getting-started.md) sezione 5; regole: `tests/CLAUDE.md`).
 I test sono scritti **in inglese** (ID, descrizioni, motivi dei fallimenti, commenti dei file nuovi; gli script storici
 spostati in `regression/` hanno ancora commenti e messaggi in italiano, da tradurre: TODO).
 
 ```mermaid
 flowchart LR
-    B["./build.sh"] --> RT["tests/run_tests.sh<br/>(c64-emu-vice)"]
+    B["./build.sh"] --> RT["tests/run_tests.sh<br/>(lab64-tools)"]
     RT -->|debug| S1["tests/run.py smoke sanity"]
     RT -->|"--release / --all"| S2["tests/run.py smoke sanity regression"]
     S1 --> REP["out/work/test_report.txt / .json"]
@@ -83,7 +83,7 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
 - Prestazioni (`regression/perf`): durata di ogni fotogramma = cicli fra due letture dell'input; perso = più di 1,5
   fotogrammi PAL. Le soglie sono le misure dell'11/11 più un margine ([prestazioni](prestazioni.md)).
 - **Sonda della memoria** (14/11, `C64_MEMPROBE=1`, `./build.sh --probe`): ogni `Vice()` avviato senza `-autostart` riempie la RAM
-  con lo schema di `toolchain/memmap/probe.py` subito dopo il boot e `close()` la salva in `out/work/memprobe/<suite.area>_<pid>_<n>.bin`
+  con lo schema di `../lab64/memmap/probe.py` subito dopo il boot e `close()` la salva in `out/work/memprobe/<suite.area>_<pid>_<n>.bin`
   (lo scenario è il modulo dei test, `C64_MEMPROBE_TAG` messo da `tests/run.py`). Serve alla mappa automatica ([build.md](build.md)).
   Un test che fallisce solo con la sonda sta leggendo memoria mai inizializzata (il C64 vero all'accensione non ha la RAM a zero).
 
@@ -93,7 +93,7 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
 un'altra emulazione del 1541-II): avvio dal disco vero, nuovo eroe con salvataggio Krill, HUD letto a schermo, alchimista,
 cripta, mostro ucciso, portale, ritorno e nuovo avvio con l'eroe salvato. **VICE resta l'unico riferimento**: questi test
 non stabiliscono cosa è giusto, dicono che il gioco funziona anche lì. Libreria `tests/lib/emu.py` (classe `Emu`: demone nel
-container `c64-emu-vc64web` all'indirizzo `EMU_URL`, `boot`, `run_script`, `run_loop`, `peek`, `findText`); bot in
+container `lab64-vc64web` all'indirizzo `EMU_URL`, `boot`, `run_script`, `run_loop`, `peek`, `findText`); bot in
 `tests/regression/emu/bots/`. Senza il demone (`./build.sh --emu` o `--release` lo accendono) i test sono **SKIP** con il motivo. (14/11: prima erano FAIL, perche' il runner contava come fallimento ogni eccezione del `setup` del modulo; ora un `Skip` nel `setup` da' SKIP a tutti i test del modulo.) Guida e trappole: [emulatore.md](emulatore.md).
 
 ## Elenco

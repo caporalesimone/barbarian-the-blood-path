@@ -2,7 +2,7 @@
 
 Copyright © 2026 - Simone Caporale
 
-**Esito (14/11)**: scelta la **KasmVNC leggera**, integrata nella toolchain come `c64-emu-viewer` (`toolchain/docker/Dockerfile`, target
+**Esito (14/11)**: scelta la **KasmVNC leggera**, integrata nella toolchain (oggi Lab64) come `lab64-viewer` (`../lab64/docker/Dockerfile`, target
 `viewer`; al posto di kclient un server Node nostro con una porta sola, audio su WebSocket e password facoltativa). Pagina:
 `docs/getting-started.md` sezione 6.
 
@@ -12,7 +12,7 @@ degli emulatori (oggi il viewer usa noVNC, che non trasporta l'audio).
 ## Cosa e' stato provato
 | | Guacamole | KasmVNC |
 |---|---|---|
-| Componenti | `c64-emu-viewer` + PulseAudio (scheda nulla, socket e TCP anonimi) + `guacd` 1.6.0 (immagine ufficiale) + tunnel `guacamole-lite` 1.2.0 (Node) + pagina con `guacamole-common-js` 1.5.0 | immagine `lscr.io/linuxserver/baseimage-kasmvnc:ubuntunoble` (Xvnc di KasmVNC + client web + kclient Node per l'audio + PulseAudio + nginx + openbox) |
+| Componenti | `lab64-viewer` + PulseAudio (scheda nulla, socket e TCP anonimi) + `guacd` 1.6.0 (immagine ufficiale) + tunnel `guacamole-lite` 1.2.0 (Node) + pagina con `guacamole-common-js` 1.5.0 | immagine `lscr.io/linuxserver/baseimage-kasmvnc:ubuntunoble` (Xvnc di KasmVNC + client web + kclient Node per l'audio + PulseAudio + nginx + openbox) |
 | Audio | da PulseAudio, letto da `guacd` e mandato **nello stesso WebSocket** dell'immagine | kclient legge PulseAudio e lo manda su un **canale separato** (socket.io), riprodotto con WebAudio |
 | Cartella | `viewer/`, `guac/` | (immagine pronta, nessun file) |
 
@@ -30,9 +30,9 @@ supera la soglia all'uscita audio della pagina (AnalyserNode inserito prima dell
 | Audio rispetto all'immagine | **in ritardo** di ~120 ms (94-197) | **in anticipo** di ~80 ms (26-95) |
 | Immagini Docker | guacd 377 MB + tunnel 332 MB (base node:22 gia' usata da vc64web: propri ~3 MB) + viewer con PulseAudio 1,08 GB (+280 MB rispetto a 803) | 3,02 GB (la base di linuxserver contiene un desktop intero) |
 | Memoria a riposo | viewer 55 MB + guacd 11 MB + tunnel 15 MB | 90 MB |
-| VICE vero (`c64-emu-vice`, `-sounddev pulse`, tono continuo del SID da `sidtone.prg`) | **funziona** al primo colpo: `PULSE_SERVER=tcp:viewer:4713`, schermo con il volume X come oggi | **funziona** dopo 4 aggiustamenti (sotto) |
+| VICE vero (`lab64-tools`, `-sounddev pulse`, tono continuo del SID da `sidtone.prg`) | **funziona** al primo colpo: `PULSE_SERVER=tcp:viewer:4713`, schermo con il volume X come oggi | **funziona** dopo 4 aggiustamenti (sotto) |
 
-VICE 3.10 della toolchain e' compilato con PulseAudio (`Sound: Available sound devices: pulse alsa dummy ...`).
+VICE 3.10 di Lab64 e' compilato con PulseAudio (`Sound: Available sound devices: pulse alsa dummy ...`).
 
 ## KasmVNC leggera (`kasmvnc-lite/`, 13/11 sera) [MISURATO]
 Al posto dell'immagine di linuxserver: ubuntu:24.04 + **Xvnc di KasmVNC 1.5.2** (pacchetto ufficiale `.deb`, estratto senza le

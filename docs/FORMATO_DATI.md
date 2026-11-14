@@ -199,7 +199,7 @@ suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test
 build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
 
 ### Compressione (ZX0)
-- Compressore: **ZX0 v2** di Einar Saukas (C, `toolchain/zx0/`, licenza BSD-3 in `toolchain/zx0/LICENSE`), compilato con
+- Compressore: **ZX0 v2** di Einar Saukas (C, `../lab64/zx0/`, licenza BSD-3 in `../lab64/zx0/LICENSE`), compilato con
   gcc da `tools/build/pack.py` (chiamato da `tools/build/asm.sh`). Modo rapido (`-q`, ~1,5 s) nei build normali, modo ottimo
   (`ZX0_BEST=1`, ~20 s) in `tools/build/release.sh`. Cache in `out/cache/zx0/`.
 - Formato del flusso: `tools/build/zx0dec.py` (decompressore Python di riferimento, = `dzx0.c` originale).

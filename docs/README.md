@@ -36,7 +36,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | [Ottimizzazione](ottimizzazione.md) | Analisi dell'11/11: codice morto tolto, procedure duplicate e generalizzazioni da valutare, prestazioni (test PERF), organizzazione |
 | [Test](test.md) | Suite smoke / sanity / regression, ID, runner con report, libreria VICE veloce, elenco dei test |
 | [Tecnica](tecnica.md) | Memoria, disco, loader, moduli, precaricamento, build, test, arena, simulatori (`tools/simulators/`) |
-| [Secondo emulatore](emulatore.md) | (13/11) **vc64web** in `toolchain/vc64web-custom`: cosa sa fare (con i riferimenti ai suoi documenti), quando usarlo al posto o oltre a VICE, test `EMU-10..16`, trappole misurate |
+| [Secondo emulatore](emulatore.md) | (13/11) **vc64web** in `../lab64/vc64web-custom`: cosa sa fare (con i riferimenti ai suoi documenti), quando usarlo al posto o oltre a VICE, test `EMU-10..16`, trappole misurate |
 | [Fast loader](FastLoader.md) | (11/11, ramo `fast-loader`) **Krill's Loader r194**: architettura (chi installa, residente, caricamenti, salvataggi con il plugin, memoria), build, misure prima/dopo, compatibilità |
 | [Quest system](quests.md) | **Progetto, non nel codice** (07/11): quest, NPC, tre villaggi, trama e sottotrama, stanze fisse e dal seed, costi, open point |
 | [Analisi dell'assembly](../out/work/asm_audit/analisi_assembly.md) | Analisi del codice assemblato (11/11, `tools/build/asm_audit.py`): codice non raggiunto, ripetuto, spioncino, routine più grandi |
@@ -48,7 +48,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | Documento | Contenuto |
 |---|---|
 | [FORMATO_DATI.md](FORMATO_DATI.md) | Formato byte per byte dei file su disco e dei salvataggi |
-| [memory-map/index.html](../out/work/memory-map/index.html) | Mappa automatica della memoria e del disco (toolchain, a ogni build) |
+| [memory-map/index.html](../out/work/memory-map/index.html) | Mappa automatica della memoria e del disco (Lab64, a ogni build) |
 | [mappa_ram.html](../out/work/memory-map/mappa_ram.html) / [mappa_disco.html](../out/work/memory-map/mappa_disco.html) | Mappe curate a mano, generate a ogni build |
 | [grafica/index.html](../out/work/atlas/index.html) | Atlante grafico (generato a ogni build): tutti i tile di villaggio, dungeon (8 palette) e sala del trono con id e lettere, mappe a griglia con zoom al passaggio del mouse, composizioni, titolo, charset, sprite, font; `out/work/atlas/tiles.json` |
 | [SISTEMA_COMBATTIMENTO.md](SISTEMA_COMBATTIMENTO.md) | Progetto del sistema d20 (05/11) |

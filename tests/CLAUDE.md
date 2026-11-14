@@ -4,11 +4,11 @@ Regole generali nel `CLAUDE.md` della radice; come girano i test (container, flu
 dettagli di suite e runner: `docs/test.md`.
 
 ## Dove girano
-- Nel container **`c64-emu-vice`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
-  `./build.sh --release` (anche regression), `toolchain/run.sh emu-vice python3 tests/run.py -k ID`. Mai sull'host.
-- VICE si avvia sempre con `-default` e con **tutte** le ROM di `toolchain/roms/vice-roms/` passate a mano (`tools/vice/vice_rom.py`,
+- Nel container **`lab64-tools`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
+  `./build.sh --release` (anche regression), `../lab64/run.sh tools python3 tests/run.py -k ID`. Mai sull'host.
+- VICE si avvia sempre con `-default` e con **tutte** le ROM di `../lab64/roms/vice-roms/` passate a mano (`tools/vice/vice_rom.py`,
   `tools/vice/vice_env.sh`): niente configurazione o cartella dati dell'utente.
-- Test sull'emulatore secondario (`EMU-*`): il demone sta in `c64-emu-vc64web`, acceso da `./build.sh --emu` o `--release`
+- Test sull'emulatore secondario (`EMU-*`): il demone sta in `lab64-vc64web`, acceso da `./build.sh --emu` o `--release`
   (`EMU_URL`); senza demone sono SKIP, non FAIL.
 
 ## Suite (11/11, regole del committente)
@@ -23,7 +23,7 @@ dettagli di suite e runner: `docs/test.md`.
   Sono un freno contro l'aumento dei tempi, non un obiettivo; con il viewer (`--view`) non contano.
 - **debug = smoke + sanity** (deve passare prima di ogni consegna e di ogni commit); **release = anche regression**. Se si tocca
   un'area coperta da un test di regression (generatore, salvataggi, oggetti, mostri, musica, regole) lanciare a mano quei test
-  (`toolchain/run.sh emu-vice python3 tests/run.py regression -k SAVE`) prima di consegnare, anche in debug.
+  (`../lab64/run.sh tools python3 tests/run.py regression -k SAVE`) prima di consegnare, anche in debug.
 - **Ogni correzione di un difetto** (11/11): valutare un test che l'avrebbe trovato. Si scrive se ha senso (il difetto può
   tornare, il caso è realistico) e se non è troppo lungo né troppo complicato; altrimenti scrivere nel commit (o nel TODO) perché
   non c'è. Il test va nella suite giusta (smoke se veloce e sull'happy path, altrimenti regression).

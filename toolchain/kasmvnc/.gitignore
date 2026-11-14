@@ -1,3 +1,0 @@
-# KasmVNC (13/11): official .deb package downloaded on the HOST by toolchain/images.sh (not in git), extracted in the build
-# of the c64-emu-viewer image (target viewer of toolchain/docker/Dockerfile): no binaries here.
-download/

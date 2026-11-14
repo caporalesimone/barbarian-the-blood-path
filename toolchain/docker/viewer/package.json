@@ -1,9 +1,0 @@
-{
-  "name": "c64-emu-viewer",
-  "private": true,
-  "description": "C64 toolchain viewer server: control center page, KasmVNC client, PulseAudio audio (13/11)",
-  "dependencies": {
-    "pulseaudio2": "0.5.5",
-    "ws": "8.18.3"
-  }
-}

@@ -6,7 +6,7 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
 
 ## Sorgenti (`src/`, 07/11)
 - In `src/` solo: **sorgenti del gioco**, **librerie esterne del gioco** (`src/third-party/`, es. Krill's Loader, con licenza e
-  `.gitignore`), **solo codice per la CPU del C64**. Emulatori e programmi dell'host stanno in `toolchain/` (13/11, regola del
+  `.gitignore`), **solo codice per la CPU del C64**. Emulatori e programmi dell'host stanno in Lab64 (`../lab64`, repository a parte dal 14/11; 13/11, regola del
   committente).
 - Sorgenti principali, **uno per file del disco**: `barbarian.asm` (BARBARIAN, il loader), `start.asm` (START), `game.asm` (GAME),
   `lobby.asm` (LOBBY), `menu.asm` (MENU: menu del villaggio, parti in `menu/`, compresso da `tools/build/pack_menu.py`), `lore.asm`
@@ -43,13 +43,13 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
   commenti del codice (`T_DHOME`, `home`, `stash`, `ov_stash`, `ls_home`) restano com'erano.
 - **Menu del villaggio** (11/11): locanda e negozi stanno nel modulo **MENU** (`src/menu.asm`, tre zone di RAM, caricato a ogni
   ingresso nel villaggio). **Per ogni villaggio nuovo**: la mappa non deve usare `$C900-$CFFF` (zona 1 del MENU), il tile `DHOME`
-  della locanda c'è; poi `toolchain/run.sh emu-vice python3 tests/run.py regression -k VIL-MENU`. Lo spazio libero delle zone lo stampa
+  della locanda c'è; poi `../lab64/run.sh tools python3 tests/run.py regression -k VIL-MENU`. Lo spazio libero delle zone lo stampa
   la build (`menu: zona 1 ... libera N B`): ogni modifica a locanda e negozi deve starci (`.cerror`).
 - **Help**: se cambia un tasto o una schermata, `data/help.txt` nello stesso lavoro (vedi `CLAUDE.md` della radice).
 - **Musica** ([docs/musica.md](../docs/musica.md)): i brani sono dati in `tools/build/songs.py` (elenchi del gioco in `PLAYLIST`),
   compilati da `tools/build/gen_music.py` in file `SNDn` sul disco; un solo player (`src/common/sid_player.inc`) per loader, gioco
   e jukebox. Brani ed effetti si provano con `JUKEBOX` (da rifare più bello, TODO E8). MP3 di ascolto: `gen_music.py --render`
-  nel container `c64-emu-vice` (VICE + ffmpeg) in `out/work/music/`.
+  nel container `lab64-tools` (VICE + ffmpeg) in `out/work/music/`.
 
 ## Atlante grafico (`out/work/atlas/`): a ogni modifica grafica
 - L'atlante (`index.html`, un PNG per tile, `tiles.json` con gli id `SET`+lettera) si rigenera a ogni build

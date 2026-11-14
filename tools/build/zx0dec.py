@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Decompressore di riferimento ZX0 v2 (stesso algoritmo di dzx0.c di Einar Saukas, toolchain/zx0/LICENSE): e' la
+"""Decompressore di riferimento ZX0 v2 (stesso algoritmo di dzx0.c di Einar Saukas, ../lab64/zx0/LICENSE): e' la
 specifica esatta del flusso che legge il decompressore 6502 (src/common/zx0.inc). Il flusso lo produce il compressore C
-in toolchain/zx0/ (compilato nella build di c64-builder, usato da tools/build/pack.py), formato v2 in avanti.
+in ../lab64/zx0/ (compilato nella build di lab64-tools, usato da tools/build/pack.py), formato v2 in avanti.
 
 Formato (bit letti MSB per primo da un byte dei bit che si ricarica quando e' esaurito; byte e bit nello stesso flusso):
   elias(inv): v = 1; finche' bit() == 0: v = v*2 + (bit() XOR inv); il bit 1 chiude

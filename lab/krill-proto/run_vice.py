@@ -1,5 +1,5 @@
 import sys,time
-sys.path.insert(0,'/home/claude/c64game/tests')
+sys.path.insert(0, __import__('os').path.join(__import__('os').path.dirname(__import__('os').path.abspath(__file__)), '..', '..', 'tests'))
 from lib.c64 import Vice
 d='/tmp/claude-0/proto/t2.d64'
 drv=sys.argv[1] if len(sys.argv)>1 else '1541'

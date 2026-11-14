@@ -1,3 +1,0 @@
-# VICE (13/11): official tarball downloaded on the HOST by toolchain/images.sh (not in git). Compiled inside the build
-# of the c64-emu-vice image (stage vice-build of toolchain/docker/Dockerfile): no binaries here.
-download/

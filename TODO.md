@@ -26,7 +26,7 @@ Il branch `feature/stat-points` (v1.196, A1) ha `SAVE_VER $C6` e margine 1049 B.
 | [J](#j--idee-per-dopo) | idee per dopo (bassa priorità) |
 | [K](#k--frenzy-prove-in-gioco-del-committente) | Frenzy: prove in gioco del committente (11/11) |
 | [M](#m--capitoli--loader-macro-capitolo-1211-committente) | **Capitoli + loader** (macro capitolo): sequenza dei capitoli, brano per capitolo, prestazioni dei caricamenti, fast loader, capitoli nel codice e bestiari |
-| [T](#t--toolchain-condivisa-1411-committente) | **toolchain condivisa** fra piu' giochi: mappa della memoria automatica, estrazione in un repository a parte |
+| [T](#t--toolchain-condivisa-lab64-1411-committente) | **toolchain condivisa** fra piu' giochi, **Lab64** (repository a parte dal 14/11): mappa della memoria automatica, cc1541, CLI, parti generiche, pdf-gen |
 
 ---
 
@@ -299,11 +299,11 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
 - **I4** B2 minimappa corrotta nel dungeon (05/11, mai riprodotto): servono screenshot e passi.
 - **I5** RUN/STOP fantasma nelle build NOKEYS in VICE (solo strumenti di test).
 - **I6** Glitch del brano del villaggio (hard restart): da riascoltare.
-- **I7** (13/11) Licenze del secondo emulatore (`toolchain/vc64web-custom`) **prima di pubblicare il repository**: vc64web / VirtualC64
+- **I7** (13/11) Licenze del secondo emulatore (`../lab64/vc64web-custom`) **prima di pubblicare il repository**: vc64web / VirtualC64
   (probabile GPL-3.0: sorgente corrispondente del wasm), librerie JS, `open-roms` (LGPL-3+, font PXLfont da verificare); le ROM
-  Commodore (14 file in `toolchain/roms/vice-roms/` e la stessa copia in `toolchain/vc64web-custom/roms/`, **in git dal 13/11 su richiesta
-  del committente**, che le toglierà dal repository prima di pubblicare: `toolchain/roms/roms.md` ha SHA-256, licenze e URL, **URL da verificare**)
-  e le pagine generate di vc64web (`out/cache/vc64web/`, che le incorporano; anche l'immagine `c64-emu-vc64web`) non vanno pubblicate.
+  Commodore (14 file in `../lab64/roms/vice-roms/` e la stessa copia in `../lab64/vc64web-custom/roms/`, **in git dal 13/11 su richiesta
+  del committente**, che le toglierà dal repository prima di pubblicare: `../lab64/roms/roms.md` ha SHA-256, licenze e URL, **URL da verificare**)
+  e le pagine generate di vc64web (`out/cache/vc64web/`, che le incorporano; anche l'immagine `lab64-vc64web`) non vanno pubblicate.
   Licenze di VICE (GPL-2.0), zx0 (BSD-3), cc1541 (MIT), Krill (BSD-3 con attribuzione): file nelle loro cartelle. Complessità S.
 - **I8** (13/11) Segnalazioni al team dell'emulatore da riprovare a ogni nuova build: `runLoop` non esatto con un caricamento da disco
   dentro il ciclo (`framesActual` 490 su 480 nel passo del portale, `docs/emulatore.md`); il pacchetto dichiara quel caso non verificato.
@@ -339,9 +339,9 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   `.gitattributes` con `eol=lf`; `./validate_env.sh` controlla dove sta il progetto). Da fare allora: `./validate_env.sh`, `./build.sh`
   e `./build.sh --view` su WSL2 + Docker Desktop (mai provati: rilevamento WSL provato solo con un `mountinfo` di prova; costo di Docker
   misurato solo Linux su Linux). Complessità S.
-- **I10** (13/11) Immagini Docker più piccole (non urgente): `c64-emu-viewer` 780 MB (14/11, KasmVNC: mesa e LLVM ~180 MB li vuole
-  Xvnc; codec e GStreamer ~55 MB arrivano con `pulseaudio`), `c64-emu-vc64web` 2,12 GB (provare solo
-  `chromium-headless-shell` di Playwright, togliere ffmpeg di sistema se basta quello di Playwright), `c64-emu-vice` 1,55 GB (con VICE dentro dal 13/11)
+- **I10** (13/11) Immagini Docker più piccole (non urgente): `lab64-viewer` 780 MB (14/11, KasmVNC: mesa e LLVM ~180 MB li vuole
+  Xvnc; codec e GStreamer ~55 MB arrivano con `pulseaudio`), `lab64-vc64web` 2,12 GB (provare solo
+  `chromium-headless-shell` di Playwright, togliere ffmpeg di sistema se basta quello di Playwright), `lab64-tools` 1,55 GB (con VICE dentro dal 13/11)
   (le librerie gtk3 e ffmpeg pesano ~650 MB). Misurare dopo ogni prova. Complessità S-M.
 - **J1** Prefetch nuovo (salvataggio del piano in sottofondo, record N±1, brano successivo): 300–500 B + ~1 KB di buffer.
 - **J2** Anello della velocità (ex 2.7): riuso di `fz_move`; dopo E1.
@@ -524,19 +524,22 @@ sentiero di uscita a nord con la casella generica `=` e `travel to next chapter`
 
 ---
 
-## T — Toolchain condivisa (14/11, committente)
+## T — Toolchain condivisa: Lab64 (14/11, committente)
 
-Decisioni del 14/11: la toolchain diventera' un repository a parte, **senza submodule**: versione nelle immagini (`c64-builder:1.3`),
-comando dell'host **`c64t`** (`c64t init` crea un progetto chiedendo nome e informazioni, scrive il `.env`); nel gioco restano sorgenti,
-grafica, dati, testo del manuale, test e i generatori propri. Il codice 6502 di librerie esterne (Krill, decompressore zx0) resta
-**nel gioco** con la sua versione; nella toolchain solo i programmi dell'host (cc1541 dal suo sorgente, non dallo zip di Krill).
-VS Code: niente per ora. Prima la mappa della memoria (T1), poi il resto (T2).
+Decisioni del 14/11: la toolchain e' un repository a parte, **Lab64** (*assemble, test, emulate and analyze C64 programs*), nella
+cartella accanto al gioco (`../lab64`, o variabile `LAB64`), **senza submodule** e **senza la storia** di `toolchain/` (inizia il 14/11;
+commit in inglese, ha il suo `CLAUDE.md`). Nel gioco restano sorgenti, grafica, dati, testo del manuale, test e i generatori propri.
+Il codice 6502 di librerie esterne (Krill, decompressore zx0) resta **nel gioco** con la sua versione; in Lab64 solo i programmi
+dell'host. Immagini: `lab64-tools` (builder e VICE uniti), `lab64-viewer`, `lab64-vc64web`; il manuale diventera' `lab64-pdf-gen`
+(separata). Windows: **solo WSL2**. Le immagini si costruiscono con `build-images.sh`; si pubblicheranno con il passaggio a GitHub.
+VS Code: niente per ora. Fatto il 14/11: separazione dei repository (cartelle `barbarian/` e `lab64/`, progetto in `/work`, Lab64 in
+`/lab64` in sola lettura, `lab64.env`).
 
 ### T1 Mappa della memoria automatica: aggiunte
-- Fatto il 14/11: `toolchain/memmap/c64map.py` (generico, nessuna configurazione) -> `out/work/memory-map/index.html` + `memmap.json`:
+- Fatto il 14/11: `../lab64/memmap/c64map.py` (generico, nessuna configurazione) -> `out/work/memory-map/index.html` + `memmap.json`:
   moduli dai listati di 64tass collegati al disco, panoramica per pagine, strati, spazio libero per banco, moduli nella stessa memoria,
   pagina zero / I/O / KERNAL per modulo, disco completo. Pagina in [docs/build.md](docs/build.md) sezione 4.
-- Fatto il 14/11: **sonda in VICE** (`./build.sh --probe`, `toolchain/memmap/probe.py`, sezione "Measured in VICE" della pagina;
+- Fatto il 14/11: **sonda in VICE** (`./build.sh --probe`, `../lab64/memmap/probe.py`, sezione "Measured in VICE" della pagina;
   [docs/build.md](docs/build.md)) e misure generiche nel manifest (`metrics` di `memmap.json`: `ram_free_static`, `ram_never_written`).
   Prima misura (smoke + sanity + regression, 39 sessioni con lo stesso disco): **1791 B mai scritti** contro 6398 B liberi per l'analisi
   statica. Da guardare [non verificato, sono indizi]: zone libere per l'analisi statica ma scritte durante i test (`$8E39-$8FFF` 455 B,
@@ -555,11 +558,22 @@ VS Code: niente per ora. Prima la mappa della memoria (T1), poi il resto (T2).
   tolgono e le descrizioni passano nelle annotazioni. La pagina automatica le collega ("Altre pagine"). (14/11: non tolte, perche'
   senza annotazioni si perderebbero le descrizioni scritte a mano.)
 
-### T2 Estrazione della toolchain in un repository a parte
-- Piano da preparare dopo T1 (14/11): rendere `toolchain/` autosufficiente (dentro: `tools/vice/` generici, `tests/lib/` motore dei
-  test, `publish.py`, cache dei passi, versioni), immagini con la versione nel tag, comando `c64t` (`init`, `build`, `test`, `view`,
-  `play`, `images`, `doctor`, `upgrade`), container generico del manuale (WeasyPrint + tema "manuale C64" + tasti `<kbd>`), progetto
-  di esempio che prova che la toolchain e' davvero generica, prova da ambiente pulito.
-- Cavillo (14/11): cio' che passa in `toolchain/` va tradotto in inglese nello stesso lavoro (regola in CLAUDE.md); per esempio i
-  messaggi di `tools/build/publish.py` ("publish: ... voci, manca: ...") e i commenti di `tests/lib/`.
-
+### T2 Lab64: cosa resta dopo la separazione
+- **cc1541 dai suoi sorgenti** in `../lab64/cc1541/` (come `zx0/`), versione fissata: prima la **4.0** (quella dello zip di Krill, disco
+  identico byte per byte, da verificare con lo SHA-256 del `.d64`), poi eventualmente la 4.2 (la usa l'immagine `c64build` di Vintage
+  Computing Carinthia, ispezionata il 14/11). Toglie `C64_KRILL_ZIP` da `lab64.env`: le immagini non dipendono piu' da un file del gioco.
+  Sorgente: repository ufficiale di cc1541 [non verificato dove sia: probabilmente Bitbucket].
+- **CLI `lab64`** (decisione del 14/11, il committente l'accetta "per ora"): la logica in Python dentro `lab64-tools`; sull'host solo
+  un lanciatore minimo (`sh` + `docker`) creato nel progetto da `lab64 init`; il lanciatore sceglie il container per comando (`build`,
+  `test`, `analyze` in `tools`; `pdf` in `pdf-gen`; `up`, `down`, `build-images`, `doctor`, `upgrade` sull'host), nessun container
+  ha il socket di Docker. Stack con compose: `tools` e `vc64web` sempre accesi, `viewer` a richiesta; senza stack ogni comando fa un
+  `docker run --rm`. Primo `init` di un progetto nuovo: `docker run --rm -v "$PWD":/work lab64-tools lab64 init`.
+- **Parti generiche del gioco da spostare in Lab64** (tradotte in inglese): `tests/run.py` e `tests/lib/runner.py` (motore dei test),
+  la parte VICE di `tests/lib/c64.py` (con la sonda), `tools/vice/vice_rom.py` e `vice_env.sh`, la parte generica di
+  `tools/build/publish.py` (con un aggancio del progetto per le misure del gioco), cache dei passi, versioni.
+- **`lab64-pdf-gen`**: generatore generico del manuale (WeasyPrint + tema "manuale C64" + tasti `<kbd>`); oggi `barbarian-manual`
+  del gioco (dal 14/11 parte da `lab64-tools`: 1620 MB contro 937 MB, misurato; `lab64-pdf-gen` dovra' partire da una base piu' piccola).
+- **Versioni nel tag** delle immagini (`lab64-tools:1.0`) e versione di Lab64 richiesta dal progetto (in `lab64.env`).
+- **Progetto di esempio** minimo che prova che Lab64 e' davvero generico; **prova da ambiente pulito** (clone dei due repository
+  affiancati, `validate_env`, `./build.sh --release`, `build-images.sh --force`).
+- **Licenza di Lab64**: da scegliere prima di pubblicare (oggi nessuna = nessun riuso permesso).

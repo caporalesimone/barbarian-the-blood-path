@@ -1,12 +1,14 @@
 """Opzioni di x64sc comuni (13/11, regola del committente: niente percorsi del sistema, tutto relativo al progetto).
-ROM_ARGS: impostazioni di fabbrica (-default: non conta la configurazione dell'utente) e TUTTE le ROM da <progetto>/toolchain/roms/vice-roms
+ROM_ARGS: impostazioni di fabbrica (-default: non conta la configurazione dell'utente) e TUTTE le ROM da roms/vice-roms di Lab64
 (Kernal, Basic, chargen e quelle dei drive 1541, 1541-II, 1570, 1571): VICE non cerca nulla nella sua cartella dati ne' in
-/usr/share/vice. VICE (x64sc) e' quello del container c64-emu-vice (/opt/vice/bin, nel PATH). Lo usano tests/lib/c64.py, tools/build/gen_help.py, tools/build/gen_music.py; la copia per gli script shell e'
+/usr/share/vice. VICE (x64sc) e' quello del container lab64-tools (/opt/vice/bin, nel PATH). Lo usano tests/lib/c64.py, tools/build/gen_help.py, tools/build/gen_music.py; la copia per gli script shell e'
 tools/vice/vice_env.sh (tenerle uguali)."""
 import os, re, socket, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))   # ricavata dalla posizione del file
-ROMS = os.path.join(ROOT, "toolchain", "roms", "vice-roms")          # (13/11) sottocartelle come VICE: C64/ e DRIVES/ (toolchain/roms/roms.md)
+# (14/11) Lab64, la toolchain: variabile LAB64 (nei container /lab64, run.sh) o la cartella accanto al progetto (/work/../lab64 = /lab64)
+LAB64 = os.environ.get("LAB64") or os.path.normpath(os.path.join(ROOT, "..", "lab64"))
+ROMS = os.path.join(LAB64, "roms", "vice-roms")                     # (13/11) sottocartelle come VICE: C64/ e DRIVES/ (roms/roms.md di Lab64)
 ROMS_C64 = os.path.join(ROMS, "C64")
 ROMS_DRIVES = os.path.join(ROMS, "DRIVES")
 ROM_ARGS = ["-default",
@@ -16,7 +18,7 @@ ROM_ARGS = ["-default",
             "-dos1570", ROMS_DRIVES + "/dos1570-315090-01.bin", "-dos1571", ROMS_DRIVES + "/dos1571-310654-05.bin"]
 
 # Display (13/11): di norma ogni VICE ha il suo display virtuale (xvfb-run); con C64_VIEW=1 (./build.sh --view, container
-# c64-emu-viewer) VICE si apre sullo schermo condiviso DISPLAY, che il viewer mostra nel browser (KasmVNC).
+# lab64-viewer) VICE si apre sullo schermo condiviso DISPLAY, che il viewer mostra nel browser (KasmVNC).
 XRUN = [] if os.environ.get("C64_VIEW") == "1" and os.environ.get("DISPLAY") else ["xvfb-run", "-a"]
 
 

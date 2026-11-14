@@ -6,19 +6,20 @@
 #   ./build.sh --no-manual   salta il manuale PDF            --no-test    salta smoke e sanity
 #   ./build.sh --release     build completa + tutti i test (anche regression ed EMU-*) + manuale + tools/build/release.sh
 #   ./build.sh --emu         i test con il demone vc64web acceso (test EMU-*: python3 tests/run.py regression -k EMU)
-#   ./build.sh --view        i test aprono VICE sullo schermo del viewer: http://localhost:6080 (c64-emu-viewer); se il viewer e'
+#   ./build.sh --view        i test aprono VICE sullo schermo del viewer: http://localhost:6080 (lab64-viewer); se il viewer e'
 #                            gia' acceso lo fanno da soli (14/11), salvo --no-view
 #   ./build.sh --no-view     i test su display virtuali anche con il viewer acceso
 #   ./build.sh --probe       (14/11) sonda della memoria in VICE: RAM riempita con uno schema dopo il boot, salvata alla fine di ogni
-#                            sessione dei test; la mappa automatica (toolchain/memmap) aggiunge la memoria scritta davvero
+#                            sessione dei test; la mappa automatica (memmap di Lab64) aggiunge la memoria scritta davvero
 #   ./build.sh --manual      SOLO il manuale PDF (barbarian-manual), senza rifare il disco
-#   ./build.sh --images      rifa' tutte le immagini Docker (toolchain e manuale; poi la build)
+#   ./build.sh --images      rifa' tutte le immagini Docker (Lab64 e manuale; poi la build)
 #   ./build.sh --keep N      quante versioni tenere in out/releases/ (default 5, KEEP_VERSIONS nell'ambiente)
 # I flag si combinano (es. --fast --no-test = solo il disco). Gli artefatti di ogni build (disco, atlante, mappe, report dei
 # test, manuale) finiscono in out/releases/v<versione>/ con manifest.json (tools/build/publish.py); out/releases/latest e' l'ultima.
-# Le immagini mancanti si costruiscono da sole (toolchain/images.sh; il manuale: tools/manual/Dockerfile); i programmi esterni
+# Le immagini mancanti si costruiscono da sole (build-images.sh di Lab64; il manuale: tools/manual/Dockerfile); i programmi esterni
 # (VICE, zx0, cc1541) si compilano dentro le immagini. Prima volta su un computer nuovo: ./validate_env.sh.
-# Configurazione della toolchain per questo progetto: toolchain.env.
+# Toolchain: Lab64 (14/11, repository a parte), nella cartella accanto (../lab64) o dove dice la variabile LAB64.
+# Configurazione di Lab64 per questo progetto: lab64.env.
 # Stato dal vivo (14/11, per la pagina del viewer): out/tmp/build.json (fase, esito), out/tmp/tests.json (tests/run.py).
 # Copyright (c) 2026 - Simone Caporale
 set -eu
@@ -40,14 +41,16 @@ status() {
         > out/tmp/build.json.tmp && mv out/tmp/build.json.tmp out/tmp/build.json
 }
 phase() { PHASE=$1; status running; }
-cleanup() { [ $EMU = 1 ] && docker rm -f c64-emu-vc64web >/dev/null 2>&1 || true; }
+cleanup() { [ $EMU = 1 ] && docker rm -f lab64-vc64web >/dev/null 2>&1 || true; }
 on_exit() { rc=$?; cleanup; if [ $rc = 0 ]; then PHASE=fine; status ok; else status fail; fi; }
 trap on_exit EXIT
 trap 'exit 130' INT TERM
 phase avvio
+L=${LAB64:-../lab64}                       # Lab64 (toolchain): cartella accanto al progetto, salvo LAB64
+[ -x "$L/run.sh" ] || { echo "Lab64 non trovato in $L: clonarlo accanto al progetto (../lab64) o impostare LAB64"; exit 1; }
 command -v docker >/dev/null || { echo "Docker non trovato: ./validate_env.sh"; exit 1; }
 docker info >/dev/null 2>&1 || { echo "il demone Docker non risponde: ./validate_env.sh"; exit 1; }
-manual_image() {                          # immagine del progetto per il manuale (parte da c64-builder)
+manual_image() {                          # immagine del progetto per il manuale (parte da lab64-tools)
     if [ "${1:-}" = force ] || ! docker image inspect barbarian-manual >/dev/null 2>&1; then
         echo "== immagine barbarian-manual =="
         SECRET=""; [ -n "${C64_CA_BUNDLE:-}" ] && SECRET="--secret id=ca,src=$C64_CA_BUNDLE"
@@ -56,67 +59,67 @@ manual_image() {                          # immagine del progetto per il manuale
     fi
 }
 phase immagini
-if [ $IMAGES = 1 ]; then toolchain/images.sh --force; manual_image force; fi
-toolchain/images.sh builder emu-vice
+if [ $IMAGES = 1 ]; then "$L/build-images.sh" --force; manual_image force; fi
+"$L/build-images.sh" tools
 export RELEASE=$REL BUILD_ATLAS=$ATLAS BUILD_MAPS=$MAPS
 [ $REL = 1 ] && export ZX0_BEST=1          # release: GAME compresso in modo ottimo (tools/build/pack.py)
 
 if [ $MANUAL = 1 ]; then
     phase manuale
     manual_image
-    toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py
-    toolchain/run.sh builder python3 tools/build/publish.py --keep "$KEEP" --only-manual; exit 0
+    "$L/run.sh" barbarian-manual python3 tools/manual/gen_manual.py
+    "$L/run.sh" tools python3 tools/build/publish.py --keep "$KEEP" --only-manual; exit 0
 fi
 
 phase build
 TB=$(date +%s)
-toolchain/run.sh builder tools/build/build_game.sh
+"$L/run.sh" tools tools/build/build_game.sh
 PUB="--keep $KEEP --build-seconds $(( $(date +%s) - TB ))"
 [ $ATLAS = 1 ] && PUB="$PUB --atlas"
 [ $MAPS = 1 ] && PUB="$PUB --maps"
 if [ $NOTEST = 1 ]; then
     phase pubblicazione
     # shellcheck disable=SC2086
-    toolchain/run.sh builder python3 tools/build/publish.py $PUB; exit 0
+    "$L/run.sh" tools python3 tools/build/publish.py $PUB; exit 0
 fi
 
 # --- servizi per i test: rete comune, demone vc64web, viewer
-NET=c64; docker network inspect $NET >/dev/null 2>&1 || docker network create $NET >/dev/null
+NET=lab64; docker network inspect $NET >/dev/null 2>&1 || docker network create $NET >/dev/null
 DARGS="--network $NET"
 phase test
 if [ $EMU = 1 ]; then
-    toolchain/images.sh emu-vc64web
-    docker rm -f c64-emu-vc64web >/dev/null 2>&1 || true
-    docker run -d --rm --init --shm-size 1g --name c64-emu-vc64web --network $NET c64-emu-vc64web >/dev/null
-    export EMU_URL=http://c64-emu-vc64web:7064
+    "$L/build-images.sh" vc64web
+    docker rm -f lab64-vc64web >/dev/null 2>&1 || true
+    docker run -d --rm --init --shm-size 1g --name lab64-vc64web --network $NET lab64-vc64web >/dev/null
+    export EMU_URL=http://lab64-vc64web:7064
 fi
 # viewer gia' acceso: i test si vedono sullo schermo dal vivo senza chiederlo (salvo --no-view)
-[ $NOVIEW = 0 ] && [ -n "$(docker ps -q -f name=^c64-emu-viewer$)" ] && VIEW=1
+[ $NOVIEW = 0 ] && [ -n "$(docker ps -q -f name=^lab64-viewer$)" ] && VIEW=1
 if [ $VIEW = 1 ] && [ $NOVIEW = 0 ]; then
-    toolchain/viewer.sh start
-    DARGS="$DARGS -v c64-x11:/tmp/.X11-unix"; export C64_VIEW=1 DISPLAY=:99 PULSE_SERVER=unix:/tmp/.X11-unix/pulse
+    "$L/viewer.sh" start
+    DARGS="$DARGS -v lab64-x11:/tmp/.X11-unix"; export C64_VIEW=1 DISPLAY=:99 PULSE_SERVER=unix:/tmp/.X11-unix/pulse
 fi
 if [ $PROBE = 1 ]; then rm -rf out/work/memprobe; export C64_MEMPROBE=1; fi
-C64_DOCKER_ARGS="$DARGS" toolchain/run.sh emu-vice tests/run_tests.sh
+C64_DOCKER_ARGS="$DARGS" "$L/run.sh" tools tests/run_tests.sh
 if [ $PROBE = 1 ]; then                    # mappa automatica di nuovo, con i dump della sonda (out/work/memprobe/)
     phase mappa
-    toolchain/run.sh builder python3 toolchain/memmap/c64map.py --work out/work --disk out/work/disk.d64 --out out/work/memory-map
+    "$L/run.sh" tools python3 /lab64/memmap/c64map.py --work out/work --disk out/work/disk.d64 --out out/work/memory-map
 fi
 
 PUB="$PUB --tests"
 if [ $REL = 1 ] || [ $MANUALDEF = 1 ]; then
     phase manuale
     manual_image
-    toolchain/run.sh barbarian-manual python3 tools/manual/gen_manual.py
+    "$L/run.sh" barbarian-manual python3 tools/manual/gen_manual.py
     PUB="$PUB --manual"
 fi
 if [ $REL = 1 ]; then
     phase release
-    toolchain/run.sh builder tools/build/release.sh
+    "$L/run.sh" tools tools/build/release.sh
     PUB="$PUB --release --maps"          # release.sh rifa' sempre le mappe (RELEASE=1)
 fi
 phase pubblicazione
 # shellcheck disable=SC2086
-toolchain/run.sh builder python3 tools/build/publish.py $PUB
+"$L/run.sh" tools python3 tools/build/publish.py $PUB
 echo "== build OK =="
 [ $REL = 1 ] || echo "   (test: smoke + sanity; tutti i test con ./build.sh --release; build veloce: ./build.sh --fast)"

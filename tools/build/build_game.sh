@@ -1,6 +1,6 @@
 #!/bin/bash
-# Build del gioco DENTRO il container c64-builder (13/11): niente test, niente VICE. Dall'host si usa ./build.sh, che
-# lancia questo script nel container e poi i test in c64-emu-vice.   Uso (nel container): tools/build/build_game.sh
+# Build del gioco DENTRO il container lab64-tools (13/11): niente test, niente VICE. Dall'host si usa ./build.sh, che
+# lancia questo script nel container e poi i test in lab64-tools.   Uso (nel container): tools/build/build_game.sh
 #  1. versioni: se i sorgenti sono cambiati dall'ultima build la versione cresce (tools/build/bump_version.py, impronta in
 #     version.yaml), poi version.yaml -> out/work/version.inc
 #  2. generatori dati: grafica, font, musica, tabelle di bilanciamento (balance.yaml)
@@ -27,7 +27,7 @@ DISK=out/work/disk.d64
 if [ "${BUILD_MAPS:-1}" = 1 ]; then
     echo "== mappe RAM e disco ($DISK, out/work/memory-map/) =="
     python3 tools/memory-map/gen_rammap.py && python3 tools/memory-map/gen_diskmap.py $DISK || exit 1
-    python3 toolchain/memmap/c64map.py --work out/work --disk $DISK --out out/work/memory-map || exit 1   # (14/11) mappa automatica della toolchain: index.html
+    python3 "${LAB64:-../lab64}/memmap/c64map.py" --work out/work --disk $DISK --out out/work/memory-map || exit 1   # (14/11) mappa automatica di Lab64: index.html
 fi
 if [ "${BUILD_ATLAS:-1}" = 1 ]; then
     echo "== atlante grafico (out/work/atlas/) =="

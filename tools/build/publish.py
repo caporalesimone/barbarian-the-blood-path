@@ -2,7 +2,7 @@
 """Pubblica gli artefatti della build in out/releases/v<versione>/ (14/11, decisione del committente: una cartella per versione,
 retention delle ultime N versioni). Copyright (c) 2026 - Simone Caporale
 
-Uso (dalla radice del progetto, nel container c64-builder):
+Uso (dalla radice del progetto, nel container lab64-tools):
     publish.py [--keep N] [--atlas] [--maps] [--tests] [--manual] [--release] [--only-manual]
 
   sempre      il disco (out/work/disk.d64 -> blood_path_v<V>_1541.d64)
@@ -48,18 +48,18 @@ def git_info():
         return subprocess.run(["git", "-C", ROOT] + list(a), capture_output=True, text=True, timeout=20).stdout.strip()
     try:
         return {"commit": g("rev-parse", "--short", "HEAD"), "subject": g("log", "-1", "--format=%s"),
-                "dirty": bool(g("status", "--porcelain", "--", "src", "data", "tools", "tests", "toolchain", "docs", "version.yaml"))}
+                "dirty": bool(g("status", "--porcelain", "--", "src", "data", "tools", "tests", "docs", "lab64.env", "version.yaml"))}
     except Exception:
         return {}
 
 
-# Etichette dei gruppi di file, per la pagina del viewer (la toolchain non sa cosa sono: le legge dal manifest)
+# Etichette dei gruppi di file, per la pagina del viewer (Lab64 non sa cosa sono: le legge dal manifest)
 GROUP_LABELS = {"disk": "Disco 1541", "atlas": "Atlante grafico", "memory-map": "Mappe RAM e disco", "tests": "Report dei test",
                 "manual": "Manuale PDF"}
 
 
 def metric(mid, label, value, unit="", better=None, hint=""):
-    """una misura del progetto nel formato del viewer (toolchain/README.md, "Manifest per il viewer"):
+    """una misura del progetto nel formato del viewer (../lab64/README.md, "Manifest per il viewer"):
     better = "up" (piu' alto e' meglio), "down" (piu' basso e' meglio) o None"""
     return {"id": mid, "label": label, "value": value, "unit": unit, "better": better, "hint": hint}
 
@@ -204,7 +204,7 @@ def main():
     if not a.only_manual:
         stats["metrics"] = game_metrics()
         mm = os.path.join(OUT, "work", "memory-map", "memmap.json")
-        if a.maps and os.path.isfile(mm):          # (14/11) misure generiche della mappa automatica (toolchain/memmap/c64map.py)
+        if a.maps and os.path.isfile(mm):          # (14/11) misure generiche della mappa automatica (../lab64/memmap/c64map.py)
             stats["metrics"] += json.load(open(mm)).get("metrics", [])
         stats["info"] = [{"label": "salvataggi", "value": "v%s" % ver.get("save_version")}]
         stats["disk"] = d64_info(os.path.join(vdir, "blood_path_v%s_1541.d64" % v))

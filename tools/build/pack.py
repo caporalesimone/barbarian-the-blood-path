@@ -7,8 +7,8 @@ gioco (regola di ZX0 per la decompressione sul posto) e sotto $A000 (corpo di ST
 Scrive anche out/work/pack.inc (indirizzi per START) e verifica in Python (tools/build/zx0dec.py) che la decompressione
 sul posto in una memoria di 64 KB ricostruisca il gioco byte per byte.
 
-Compressore: il programma C originale (toolchain/zx0/, Einar Saukas, BSD-3), compilato nella build dell'immagine
-c64-builder (stage zx0-build: il compilatore resta fuori dall'immagine) e messo nel PATH (/opt/c64/bin/zx0, 13/11).
+Compressore: il programma C originale (../lab64/zx0/, Einar Saukas, BSD-3), compilato nella build dell'immagine
+lab64-tools (stage zx0-build: il compilatore resta fuori dall'immagine) e messo nel PATH (/opt/c64/bin/zx0, 13/11).
 Modo rapido (-q, ~1,5 s) di norma; ZX0_BEST=1 (tools/build/release.sh) per il modo ottimo (~20 s, ~1,2 KB in meno).
 Cache in out/cache/zx0/: se il gioco non cambia non si ricomprime."""
 import hashlib, os, re, shutil, subprocess, sys
@@ -22,10 +22,10 @@ BEST = os.environ.get("ZX0_BEST") == "1"
 
 
 def compressor():
-    """zx0 nel PATH di c64-builder (compilato nella build dell'immagine da toolchain/zx0/, 13/11)"""
+    """zx0 nel PATH di lab64-tools (compilato nella build dell'immagine da ../lab64/zx0/, 13/11)"""
     z = shutil.which("zx0")
     if not z:
-        sys.exit("pack: manca zx0: gira nel container c64-builder (toolchain/run.sh builder ...)")
+        sys.exit("pack: manca zx0: gira nel container lab64-tools (../lab64/run.sh tools ...)")
     return z
 
 

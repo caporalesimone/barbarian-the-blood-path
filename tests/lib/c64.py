@@ -12,11 +12,12 @@ import glob, os, re, shutil, signal, socket, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "out", "work")
-ROMS = os.path.join(ROOT, "toolchain", "roms", "vice-roms", "DRIVES")   # drive ROMs (toolchain/roms/roms.md)
+LAB64 = os.environ.get("LAB64") or os.path.normpath(os.path.join(ROOT, "..", "lab64"))   # Lab64 (run.sh: /lab64; else sibling folder)
+ROMS = os.path.join(LAB64, "roms", "vice-roms", "DRIVES")   # drive ROMs (Lab64 roms/roms.md)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
-sys.path.insert(0, os.path.join(ROOT, "toolchain", "memmap"))
-import probe as memprobe  # noqa: E402  (run-time memory probe: C64_MEMPROBE=1, toolchain/memmap/probe.py)
-from vice_rom import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/, tools/vice/vice_rom.py)
+sys.path.insert(0, os.path.join(LAB64, "memmap"))
+import probe as memprobe  # noqa: E402  (run-time memory probe: C64_MEMPROBE=1, Lab64 memmap/probe.py)
+from vice_rom import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (x64sc: -default + all the ROMs of Lab64 roms/, tools/vice/vice_rom.py)
 PROMPT = re.compile(r"\(C:\$[0-9a-f]{4}\) $")
 STOP = re.compile(r"Stop on[^\n]*\n[^\n]*?(\d+)\s*\n", re.S)
 FRAME = 19656                                     # cycles of a PAL frame
@@ -227,7 +228,7 @@ class Vice:
 
     def close(self):
         if self.probing:
-            try:                                        # memory probe: the whole RAM of this session (toolchain/memmap/probe.py)
+            try:                                        # memory probe: the whole RAM of this session (Lab64 memmap/probe.py)
                 Vice._probe_n += 1
                 tag = os.environ.get("C64_MEMPROBE_TAG", "vice")
                 p = os.path.join(PROBE_DIR, "%s_%d_%d.bin" % (re.sub(r"\W+", "_", tag), os.getpid(), Vice._probe_n))
