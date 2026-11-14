@@ -15,16 +15,16 @@ Usage: python3 tests/regression/saves/test_saves.py [1 2 3 4 5 6 7 8]"""
 import os, random, re, shutil, socket, subprocess, sys, time
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 os.chdir(ROOT)
-lbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open("out/game.lbl").read(), re.M)}
-num = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", open("out/game.lbl").read(), re.M)}
+lbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open("out/work/game.lbl").read(), re.M)}
+num = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", open("out/work/game.lbl").read(), re.M)}
 SAVE_VER = lbl["SAVE_VER"]
-mlst = open("out/lobby.lst").read()
-mlbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open("out/lobby.lbl").read(), re.M)}
+mlst = open("out/work/lobby.lst").read()
+mlbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open("out/work/lobby.lbl").read(), re.M)}
 after_scan = "%04x" % (int(re.search(r"^\.(\w+)\s+20 \w\w \w\w\s+jsr \$\w+\s+jsr scan_slots", mlst, re.M).group(1), 16) + 3)
 rts = re.search(r"^\.(\w+)\s+60\s", mlst, re.M).group(1)
-gl = open("out/game.lst").read()
+gl = open("out/work/game.lst").read()
 a_quit = int(re.search(r"^\.(\w+)\s+[0-9a-f ]+\s+\w+(?: \S+)?\s+_quit\s", gl, re.M).group(1), 16)
-DISK = os.path.join(ROOT, "out", "test_saves.d64")
+DISK = os.path.join(ROOT, "out", "work", "test_saves.d64")
 err = []
 
 
@@ -82,7 +82,7 @@ class Vice(C64.Vice):
 
     def menu(self, lim=200):
         """from the RUN of START (debug) to the menu, after the hero list is read"""
-        self.cmd("", 0.3); self.cmd('l "%s" 0' % os.path.join(ROOT, "out", "start.prg"), 2)
+        self.cmd("", 0.3); self.cmd('l "%s" 0' % os.path.join(ROOT, "out", "work", "start.prg"), 2)
         self.cmd("break " + after_scan); self.cmd("r pc=080d")
         ok = self.go(lim); self.cmd("del")
         return ok
@@ -113,7 +113,7 @@ class Vice(C64.Vice):
 
 
 def fresh():
-    shutil.copy(os.path.join(ROOT, "out", "disk.d64"), DISK)
+    shutil.copy(os.path.join(ROOT, "out", "work", "disk.d64"), DISK)
 
 
 def case(name, prep, check):
@@ -172,7 +172,7 @@ def c6():
         n, un = v.mem(lbl["nvalid"], 1)[0], v.mem(lbl["ui_n"], 1)[0]
         print("6 menu: nvalid %d, ui_n %d" % (n, un))
         if un != n + 2: err.append("menu: ui_n %d (attese %d: eroi + create + quit)" % (un, n + 2))
-        v.cmd('screenshot "%s" 2' % os.path.join(ROOT, "out", "test_menu.png"), 1.5)
+        v.cmd('screenshot "%s" 2' % os.path.join(ROOT, "out", "work", "test_menu.png"), 1.5)
         v.cmd("break a483"); v.cmd("r pc=%04x" % mlbl["bb_quit"])         # BASIC: READY. loop
         if not v.go(20): err.append("quit the game: no READY."); return
         v.cmd("del")
@@ -197,11 +197,11 @@ def c6():
 def c7():
     """deleting a barbarian from the details screen (menu): simulated keys, down on delete, N with RUN/STOP, then fire
     (= yes, 07/11); persistence on disk"""
-    ml = open("out/lobby.lst").read()
+    ml = open("out/work/lobby.lst").read()
     # return from "jsr ui_input" in ui_nav (the menu engine, first instruction) and the _hero point
     det = lbl["ui_nav"] + 3
     hero = int(re.search(r"^\.(\w+)\s+aa\s+tax\s+_hero\s+tax", ml, re.M).group(1), 16)
-    dtsel = int(re.search(r"^dt_sel\s*=\s*\$([0-9a-f]+)", open("out/lobby.lbl").read(), re.M).group(1), 16)
+    dtsel = int(re.search(r"^dt_sel\s*=\s*\$([0-9a-f]+)", open("out/work/lobby.lbl").read(), re.M).group(1), 16)
     yn = lbl["yn_wait"] + 3                             # (09/11: ui_yesno saves row 24 first)
     kn, jn = lbl["keynew"], 0x32
 
@@ -271,9 +271,9 @@ def c8():
     """new barbarian (09/11): the name is typed, ENTER (not empty, not already used), the seed, ENTER (6 characters); on
     start the choice among name, seed and start only with joystick or W/S, fire reopens the field; keys simulated by
     writing keynew and joynew after ui_input"""
-    ml = open("out/lobby.lst").read()
+    ml = open("out/work/lobby.lst").read()
     brk = int(re.search(r"^\.(\w+)\s+20 \w\w \w\w\s+jsr \$\w+\s+_in\s+jsr ui_input", ml, re.M).group(1), 16) + 3
-    mlb = {m.group(1): int(m.group(2), 16) for m in (re.match(r"(\w+)\s*=\s*\$([0-9a-f]+)", x) for x in open("out/lobby.lbl")) if m}
+    mlb = {m.group(1): int(m.group(2), 16) for m in (re.match(r"(\w+)\s*=\s*\$([0-9a-f]+)", x) for x in open("out/work/lobby.lbl")) if m}
     kn, jn = lbl["keynew"], 0x32
     fresh()
     v = Vice()

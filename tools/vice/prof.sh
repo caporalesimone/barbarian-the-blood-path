@@ -3,12 +3,12 @@
 source "$(dirname "${BASH_SOURCE[0]}")/vice_env.sh"
 cd "$ROOT"
 tools/build/mkdisk.sh
-($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/disk.d64 -remotemonitor >/dev/null 2>&1 &)
+($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/work/disk.d64 -remotemonitor >/dev/null 2>&1 &)
 sleep 8
 python3 - "$@" <<'PY'
 import socket,time,re,sys
 lbl={}
-for l in open('out/game.lbl'):
+for l in open('out/work/game.lbl'):
     m=re.match(r'(\w+)\s*=\s*\$([0-9a-f]+)',l)
     if m: lbl[m.group(1)]=m.group(2)
 s=socket.create_connection(("127.0.0.1",6510)); s.settimeout(4)
@@ -17,7 +17,7 @@ def cmd(c,w=0.2):
     try: return s.recv(65536).decode(errors='ignore')
     except Exception as e: return ""
 cmd("",0.5)
-cmd('l "out/start.prg" 0',3)   # (11/11) START: installa Krill e carica GAME dal disco
+cmd('l "out/work/start.prg" 0',3)   # (11/11) START: installa Krill e carica GAME dal disco
 cmd("g 080d",0.3)
 time.sleep(2.5)
 for f in sys.argv[1:]:

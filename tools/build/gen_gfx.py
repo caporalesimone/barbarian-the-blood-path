@@ -2,10 +2,10 @@
 """Genera charset (tile 16x16 multicolor), sprite e costanti per il gioco C64.
 
 Uscite:
-  out/gfx/charset.bin   2048 byte  (256 caratteri)
-  out/gfx/sprites.bin   2048 byte  (32 sprite da 64 byte)
-  out/gfx_consts.inc  costanti per 64tass
-  out/gfx/tiles.png, out/gfx/sprites.png  anteprime
+  out/work/gfx/charset.bin   2048 byte  (256 caratteri)
+  out/work/gfx/sprites.bin   2048 byte  (32 sprite da 64 byte)
+  out/work/gfx_consts.inc  costanti per 64tass
+  out/work/gfx/tiles.png, out/work/gfx/sprites.png  anteprime
 """
 import random, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -1008,7 +1008,7 @@ def build_sprites():
         sp[i] = d
     for d in range(4):
         sp[8 + d] = slash_sprite(d)
-    for t, (_, fr, _) in enumerate(M.SETS[1][0]):    # slot 12..19 (bank $A000): set 1 (out/gfx/sprites.png, anteprima)
+    for t, (_, fr, _) in enumerate(M.SETS[1][0]):    # slot 12..19 (bank $A000): set 1 (out/work/gfx/sprites.png, anteprima)
         sp[12 + t * 2] = mc_bytes(fr[0])
         sp[13 + t * 2] = mc_bytes(fr[1])
     sp[24] = hud_blank()
@@ -1071,7 +1071,7 @@ def preview(cs, sp):
                                 X = i * 8 * 2 * sc + (ox + p) * 2 * sc + xx
                                 Y = row * (16 * sc + 8) + (oy + y) * sc + yy
                                 img.putpixel((X, Y), pal[c])
-    img.save(os.path.join(ROOT, "out", "gfx", "tiles.png"))
+    img.save(os.path.join(ROOT, "out", "work", "gfx", "tiles.png"))
     # sprite
     sc = 3
     img = Image.new("RGB", (16 * 25 * sc + 8, 2 * 22 * sc + 8), (30, 30, 30))
@@ -1101,7 +1101,7 @@ def preview(cs, sp):
                             for yy in range(sc):
                                 for xx in range(sc):
                                     img.putpixel((ox + (bx * 8 + p) * sc + xx, oy + y * sc + yy), (230, 230, 230))
-    img.save(os.path.join(ROOT, "out", "gfx", "sprites.png"))
+    img.save(os.path.join(ROOT, "out", "work", "gfx", "sprites.png"))
 
 
 GFX_TOWN_AT = 0xE000                 # cache: tile del villaggio (RAM sotto il KERNAL)
@@ -1109,7 +1109,7 @@ GFX_DUN_AT = 0xED00                  # cache: tema del dungeon attuale (tile + m
 DUN_NT = 27                          # tile dei dungeon: 0..26 (muri, pavimenti, scale, portale, bauli; 8-11 liberi)
 
 def main():
-    os.makedirs(os.path.join(ROOT, "out", "gfx"), exist_ok=True)   # (11/11) file generati: out/gfx/, non piu' gfx/
+    os.makedirs(os.path.join(ROOT, "out", "work", "gfx"), exist_ok=True)   # (11/11) file generati: out/work/gfx/, non piu' gfx/
     assert len(DUN_LEGEND) == DUN_NT and all(TID[n] < DUN_NT for n in DUN_LEGEND), "DUN_LEGEND: un carattere per posto 0..DUN_NT-1"
     assert len(set(DUN_LEGEND.values())) == DUN_NT, "DUN_LEGEND: caratteri ripetuti"
     assert max(TID[n] for n in ('WALL','FLOORC','STAIRSD','STAIRSU','PORTAL','CHEST')) < DUN_NT
@@ -1118,11 +1118,11 @@ def main():
         assert any(any(cs[TID[n] + q * 64]) for q in range(4)), "tile %s del dungeon senza grafica" % n
     tcs, _ = build_charset(TOWN_TILES)
     sp = build_sprites()
-    with open(os.path.join(ROOT, "out", "gfx", "charset.bin"), "wb") as f:
+    with open(os.path.join(ROOT, "out", "work", "gfx", "charset.bin"), "wb") as f:
         f.write(bytes(b for c in cs for b in c))
-    with open(os.path.join(ROOT, "out", "gfx", "sprites.bin"), "wb") as f:
+    with open(os.path.join(ROOT, "out", "work", "gfx", "sprites.bin"), "wb") as f:
         f.write(bytes(b for s in sp for b in s))
-    with open(os.path.join(ROOT, "out", "gfx", "sprites2.bin"), "wb") as f:
+    with open(os.path.join(ROOT, "out", "work", "gfx", "sprites2.bin"), "wb") as f:
         f.write(bytes(b for s in build_sprites2() for b in s))
     # ---- grafica su file (caricata dal disco all'ingresso in un luogo, tenuta in cache nella RAM sotto il KERNAL)
     NT = len(TILES)
@@ -1131,11 +1131,11 @@ def main():
     core = bytes(b for s in sp[0:12] for b in s)            # eroe + fendenti (slot 0..11)
     misc = bytes(b for s in sp[24:27] for b in s)           # slot 24..26
     mons, strong = mon_bytes(1)                             # mostri base (slot 12..19), forti + boss ($8C00): set 1
-    open(os.path.join(ROOT, "out", "gfx", "fixed_chr.bin"), "wb").write(fixed)
-    open(os.path.join(ROOT, "out", "gfx", "spr_core.bin"), "wb").write(core + misc)
+    open(os.path.join(ROOT, "out", "work", "gfx", "fixed_chr.bin"), "wb").write(fixed)
+    open(os.path.join(ROOT, "out", "work", "gfx", "spr_core.bin"), "wb").write(core + misc)
     prg = lambda addr, data: bytes([addr & 255, addr >> 8]) + data
     ttiles = bytes(b for q in range(4) for c in range(q * 64, q * 64 + NT) for b in tcs[c])        # villaggio: TOWN_TILES
-    open(os.path.join(ROOT, "out", "gfx", "gfx0.prg"), "wb").write(prg(GFX_TOWN_AT, ttiles))
+    open(os.path.join(ROOT, "out", "work", "gfx", "gfx0.prg"), "wb").write(prg(GFX_TOWN_AT, ttiles))
     DN = DUN_NT                                             # dungeon: solo i tile 0..DN-1 (i tile del villaggio restano)
     def theme_tiles(boss):                                  # tile del dungeon (boss=True: sala del trono) senza mostri
         src = {i: i for i in range(DN)}
@@ -1158,15 +1158,15 @@ def main():
         files.append(boss_t + b"".join(mon_bytes(CHAP_SET[c]["boss"])))
     assert len(files) <= 9                                  # nome "GFX" + una cifra
     for f, d in enumerate(files, 1):
-        open(os.path.join(ROOT, "out", "gfx", f"gfx{f}.prg"), "wb").write(prg(GFX_DUN_AT, d))
+        open(os.path.join(ROOT, "out", "work", "gfx", f"gfx{f}.prg"), "wb").write(prg(GFX_DUN_AT, d))
     for f in range(len(files) + 1, 10):                     # file di temi non piu' usati
-        p = os.path.join(ROOT, "out", "gfx", f"gfx{f}.prg")
+        p = os.path.join(ROOT, "out", "work", "gfx", f"gfx{f}.prg")
         if os.path.exists(p):
             os.remove(p)
-    with open(os.path.join(ROOT, "out", "gfx_consts.inc"), "w") as f:
+    with open(os.path.join(ROOT, "out", "work", "gfx_consts.inc"), "w") as f:
         f.write("; generato da tools/build/gen_gfx.py - non modificare\n")
         f.write("; T_* = numero del tile (slot 0..63 del charset: codici i, 64+i, 128+i, 192+i); nome e descrizione da\n")
-        f.write("; tools/atlas/atlas_names.py (TILE), come nell'atlante grafico out/atlas/\n")
+        f.write("; tools/atlas/atlas_names.py (TILE), come nell'atlante grafico out/work/atlas/\n")
         try:
             sys.path.insert(0, os.path.join(ROOT, "tools", "atlas")); import atlas_names as _AN   # (13/11) in tools/atlas/
             _desc = {k: v[1] for k, v in _AN.TILE.items()}

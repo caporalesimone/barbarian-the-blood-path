@@ -11,12 +11,12 @@ fa la build di release, versioni, commit) sono in `CLAUDE.md`; i test in [Test](
 
 ```mermaid
 flowchart TD
-    V["1. versioni<br/>bump_version.py (version.yaml +1 se i sorgenti cambiano)<br/>gen_version.py -> out/version.inc"] --> G
+    V["1. versioni<br/>bump_version.py (version.yaml +1 se i sorgenti cambiano)<br/>gen_version.py -> out/work/version.inc"] --> G
     G["2. generatori<br/>gen_gfx, gen_final, gen_font, gen_music, gen_db"] --> A
     A["3. assemblaggio: tools/build/asm.sh<br/>(sotto, sezione 2)"] --> D
-    D["4. disco: tools/build/mkdisk.sh<br/>out/disk.d64"] --> M
-    M["5. mappe e atlante<br/>out/memory-map/, out/atlas/<br/>(atlante solo se cambiano i suoi ingressi)"] --> C
-    C["6. disco di lavoro out/disk.d64"] --> T{"--no-test?"}
+    D["4. disco: tools/build/mkdisk.sh<br/>out/work/disk.d64"] --> M
+    M["5. mappe e atlante<br/>out/work/memory-map/, out/work/atlas/<br/>(atlante solo se cambiano i suoi ingressi)"] --> C
+    C["6. disco di lavoro out/work/disk.d64"] --> T{"--no-test?"}
     T -->|si'| E1["fine"]
     T -->|no| R["7. test in c64-emu-vice: tests/run_tests.sh<br/>debug: smoke + sanity; --release: anche regression ed EMU-*"]
 ```
@@ -27,7 +27,7 @@ flowchart TD
 | `./build.sh --fast` | solo il disco + smoke e sanity (salta atlante, mappe, manuale: `--no-atlas`, `--no-maps`, `--no-manual`, tutti separati) |
 | `./build.sh --no-test` | salta smoke e sanity (si combina con `--fast`) |
 | `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`barbarian-manual`) e `tools/build/release.sh` (senza zip dei sorgenti) (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
-| `./build.sh --manual` | solo il manuale (`out/manual/`, poi copiato in `out/releases/v<V>/`) |
+| `./build.sh --manual` | solo il manuale (`out/work/manual/`, poi copiato in `out/releases/v<V>/`) |
 | `./build.sh --keep N` | quante versioni tenere in `out/releases/` (default 5, anche `KEEP_VERSIONS=N`) |
 | `toolchain/run.sh builder tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
 
@@ -62,16 +62,16 @@ flowchart TD
     LT --> GLO
     LT --> GHE
     LT --> GTI
-    GDB --> DB["out/db.asm"]
-    GGF --> GC["out/gfx_consts.inc,<br/>out/gfx/*.bin, gfx0/1/2.prg"]
-    GFO --> UF["out/gfx/uifont.bin"]
-    GMU --> MT["out/music_tab.inc,<br/>out/snd/sndN.prg"]
-    GMA --> TP["out/town.map,<br/>out/town_places.inc"]
-    GFI --> FM["out/final_map.inc,<br/>out/fmap.prg"]
-    GTI --> TI["out/title.prg"]
-    GST --> SD["out/start_data.inc"]
-    GLO --> LD["out/ldat.prg, out/lore.inc"]
-    GHE --> HI["out/help.inc"]
+    GDB --> DB["out/work/db.asm"]
+    GGF --> GC["out/work/gfx_consts.inc,<br/>out/work/gfx/*.bin, gfx0/1/2.prg"]
+    GFO --> UF["out/work/gfx/uifont.bin"]
+    GMU --> MT["out/work/music_tab.inc,<br/>out/work/snd/sndN.prg"]
+    GMA --> TP["out/work/town.map,<br/>out/work/town_places.inc"]
+    GFI --> FM["out/work/final_map.inc,<br/>out/work/fmap.prg"]
+    GTI --> TI["out/work/title.prg"]
+    GST --> SD["out/work/start_data.inc"]
+    GLO --> LD["out/work/ldat.prg, out/work/lore.inc"]
+    GHE --> HI["out/work/help.inc"]
     DB --> GAME
     UF --> GAME
     UF --> GST
@@ -80,25 +80,25 @@ flowchart TD
     MT --> GAME
     TP --> GAME
     FM --> GAME
-    GAME["64tass src/game.asm<br/>-> out/game.prg, game.lbl, game.lst"]
-    GAME --> ARENA["build arena: ARENA=1<br/>out/arena_game.prg + src/test/arena.asm"]
-    GAME -->|game.lbl| LOB["src/lobby.asm -> out/lobby.prg"]
-    GAME -->|game.lbl| MEN["src/menu.asm -> out/menu.bin<br/>(immagine piatta, 3 zone)"]
-    MEN --> PM["pack_menu.py: ZX0 per zona,<br/>verifica sul posto -> out/menu.prg"]
-    GAME --> PK["pack.py: ZX0 di GAME<br/>-> out/game.zx0, out/pack.inc"]
-    PK --> STA["src/start.asm (+ pack.inc, start_data.inc)<br/>-> out/start.prg"]
+    GAME["64tass src/game.asm<br/>-> out/work/game.prg, game.lbl, game.lst"]
+    GAME --> ARENA["build arena: ARENA=1<br/>out/work/arena_game.prg + src/test/arena.asm"]
+    GAME -->|game.lbl| LOB["src/lobby.asm -> out/work/lobby.prg"]
+    GAME -->|game.lbl| MEN["src/menu.asm -> out/work/menu.bin<br/>(immagine piatta, 3 zone)"]
+    MEN --> PM["pack_menu.py: ZX0 per zona,<br/>verifica sul posto -> out/work/menu.prg"]
+    GAME --> PK["pack.py: ZX0 di GAME<br/>-> out/work/game.zx0, out/work/pack.inc"]
+    PK --> STA["src/start.asm (+ pack.inc, start_data.inc)<br/>-> out/work/start.prg"]
     SD --> STA
-    LD --> LOR["src/lore.asm -> out/lore.prg"]
-    HI --> HEL["src/help.asm -> out/help.prg"]
-    HEL --> HZ["pack.py: ZX0 di HELP -> out/help.zx0<br/>src/help/zx0sfx.asm -> out/helpz.prg (file HELP sul disco)"]
-    BAR["src/barbarian.asm -> out/barbarian.prg"]
-    JUK["src/jukebox.asm -> out/jukebox.prg"]
-    GC --> G0["out/gfx0.prg = gfx0 + town.map"]
+    LD --> LOR["src/lore.asm -> out/work/lore.prg"]
+    HI --> HEL["src/help.asm -> out/work/help.prg"]
+    HEL --> HZ["pack.py: ZX0 di HELP -> out/work/help.zx0<br/>src/help/zx0sfx.asm -> out/work/helpz.prg (file HELP sul disco)"]
+    BAR["src/barbarian.asm -> out/work/barbarian.prg"]
+    JUK["src/jukebox.asm -> out/work/jukebox.prg"]
+    GC --> G0["out/work/gfx0.prg = gfx0 + town.map"]
     TP --> G0
 ```
 
-- **Ordine obbligato**: GAME per primo (le sue etichette `out/game.lbl` servono a LOBBY e MENU, che lo chiamano);
-  `pack.py` dopo GAME (START deve sapere dove caricare il flusso compresso: `out/pack.inc`); START dopo (conosce anche la
+- **Ordine obbligato**: GAME per primo (le sue etichette `out/work/game.lbl` servono a LOBBY e MENU, che lo chiamano);
+  `pack.py` dopo GAME (START deve sapere dove caricare il flusso compresso: `out/work/pack.inc`); START dopo (conosce anche la
   dimensione di GAME + LOBBY + GFX0 per dosare la barra, `OTHERS`).
 - **Controlli in assemblaggio**: margine del codice (`.cerror`, avviso sotto 1 KB sotto `$8720`), zone del MENU, cache
   del tema, pagina zero, generatore sotto l'I/O. La build stampa i margini:
@@ -106,14 +106,14 @@ flowchart TD
 - **Passi lenti in cache** (`tools/build/cache_run.py`): girano solo se cambiano i loro ingressi (storia `gen_lore`, manuale
   `gen_help`, atlante `gen_atlas`); impronta SHA-1 di ingressi e uscite.
 - **Compressione** (`tools/build/pack.py`, `toolchain/zx0/`): modo rapido nelle build normali, ottimo con `ZX0_BEST=1`
-  (`tools/build/release.sh`); cache in `out/zx0cache/`; decompressore di riferimento `tools/build/zx0dec.py`.
+  (`tools/build/release.sh`); cache in `out/cache/zx0/`; decompressore di riferimento `tools/build/zx0dec.py`.
 
 ## 3. Il disco (`tools/build/mkdisk.sh`)
 
 ```mermaid
 flowchart LR
-    SV["salvataggi vuoti: hl (versione attuale),<br/>save-01..05 (SV_LEN da out/game.lbl)"] --> W
-    W["cc1541 di Krill (-M 8): barbarian (primo), start, game (ZX0), lobby,<br/>menu1..3, gfx0, fmap, gfx1..n, snd0..n, title, lore, ldat,<br/>help, jukebox, hl, ksave, save-01..05"] --> DR["out/disk.d64 (release)"]
+    SV["salvataggi vuoti: hl (versione attuale),<br/>save-01..05 (SV_LEN da out/work/game.lbl)"] --> W
+    W["cc1541 di Krill (-M 8): barbarian (primo), start, game (ZX0), lobby,<br/>menu1..3, gfx0, fmap, gfx1..n, snd0..n, title, lore, ldat,<br/>help, jukebox, hl, ksave, save-01..05"] --> DR["out/work/disk.d64 (release)"]
 ```
 
 **Un solo disco** (11/11 sera, regola del committente): per lo sviluppo `POKE 1020,1` prima del `RUN` salta il menu del
@@ -122,18 +122,18 @@ loader. Comporre il disco costa ~0,1 s. Dall'11/11 il disco lo scrive il `cc1541
 
 ### Krill's Loader (`tools/build/krill_build.sh`, dall'11/11)
 
-`tools/build/asm.sh` lo chiama per primo: scompatta `src/third-party/krill/loader-v194.zip` in `out/krill/pkg` (usa e getta),
+`tools/build/asm.sh` lo chiama per primo: scompatta `src/third-party/krill/loader-v194.zip` in `out/work/krill/pkg` (usa e getta),
 costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/krill/loaderconfig.inc` (indirizzi:
 `INSTALL` `$0840`, `RESIDENT` `$0200`, `TRANSIENT` `$7D00`, pagina zero `$41`), compila `cc1541` e scrive
-`out/krill.inc` (`tools/build/krill_syms.py`) per 64tass. ~1,3 s.
+`out/work/krill.inc` (`tools/build/krill_syms.py`) per 64tass. ~1,3 s.
 
 ## 4. Strumenti di supporto
 
 | Strumento | Uso |
 |---|---|
-| `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/memory-map/mappa_ram.html`, `out/memory-map/mappa_disco.html` a ogni build (se cambia la memoria o il disco vanno aggiornati) |
-| `tools/atlas/gen_atlas.py` (+ `atlas_names.py`, `atlas_template.html`) | atlante grafico `out/atlas/` ([regole in CLAUDE.md](../CLAUDE.md)) |
-| `tools/build/asm_audit.py` | analisi del codice assemblato (`out/asm_audit/analisi_assembly.md`, test `ASM-10`) |
+| `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build (se cambia la memoria o il disco vanno aggiornati) |
+| `tools/atlas/gen_atlas.py` (+ `atlas_names.py`, `atlas_template.html`) | atlante grafico `out/work/atlas/` ([regole in CLAUDE.md](../CLAUDE.md)) |
+| `tools/build/asm_audit.py` | analisi del codice assemblato (`out/work/asm_audit/analisi_assembly.md`, test `ASM-10`) |
 | `tools/manual/gen_manual.py` | manuale per la release |
 | `tools/vice/arena.py` + `src/test/arena.asm` | combattimenti veri in VICE per controllare i simulatori |
 | `tools/vice/*` | screenshot (`shots_menus.sh`, `shots_manual.sh`), profilo per fotogramma (`frame_prof.py`), cronometro del MENU (`menu_time.py`) |
@@ -172,8 +172,8 @@ misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagin
 flowchart LR
     RT["tests/run_tests.sh<br/>(container c64-emu-vice)"] --> RU["tests/run.py smoke sanity<br/>(--release / --all: + regression)"]
     RU --> LIB["tests/lib/c64.py: VICE (x64sc) con il monitor remoto"]
-    LIB --> FAST["Game.to_menu(): GAME, LOBBY, villaggio scritti in RAM;<br/>menu_return(): modulo MENU scritto in RAM (out/menu_zK.prg)"]
-    RU --> REP["out/test_report.txt / .json"]
+    LIB --> FAST["Game.to_menu(): GAME, LOBBY, villaggio scritti in RAM;<br/>menu_return(): modulo MENU scritto in RAM (out/work/menu_zK.prg)"]
+    RU --> REP["out/work/test_report.txt / .json"]
     RU --> FIN["ricostruzione finale del disco<br/>(le varianti di test non restano)"]
 ```
 

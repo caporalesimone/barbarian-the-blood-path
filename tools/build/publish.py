@@ -5,7 +5,7 @@ retention delle ultime N versioni). Copyright (c) 2026 - Simone Caporale
 Uso (dalla radice del progetto, nel container c64-builder):
     publish.py [--keep N] [--atlas] [--maps] [--tests] [--manual] [--release] [--only-manual]
 
-  sempre      il disco (out/disk.d64 -> blood_path_v<V>_1541.d64)
+  sempre      il disco (out/work/disk.d64 -> blood_path_v<V>_1541.d64)
   --atlas     anche l'atlante grafico (atlas/): solo se e' stato generato in QUESTA build
   --maps      anche le mappe RAM e disco (memory-map/): idem
   --tests     anche il report dei test (test_report.txt/.json): solo se i test sono girati in QUESTA build e sono passati
@@ -94,18 +94,18 @@ def main():
     man.setdefault("built_at", now())
 
     # gruppi: nome -> lista di (sorgente, destinazione relativa alla cartella della versione)
-    groups = {"disk": [("out/disk.d64", "blood_path_v%s_1541.d64" % v)]}
+    groups = {"disk": [("out/work/disk.d64", "blood_path_v%s_1541.d64" % v)]}
     if a.atlas:
-        groups["atlas"] = [("out/atlas", "atlas")]
+        groups["atlas"] = [("out/work/atlas", "atlas")]
     if a.maps:
-        groups["memory-map"] = [("out/memory-map", "memory-map")]
+        groups["memory-map"] = [("out/work/memory-map", "memory-map")]
     if a.only_manual:
         groups = {}
         a.manual = True
     if a.tests:
-        groups["tests"] = [("out/test_report.txt", "test_report.txt"), ("out/test_report.json", "test_report.json")]
+        groups["tests"] = [("out/work/test_report.txt", "test_report.txt"), ("out/work/test_report.json", "test_report.json")]
     if a.manual:
-        groups["manual"] = [("out/manual/Barbarian_Blood_Path_Manuale.pdf", "Barbarian_Blood_Path_Manuale_v%s.pdf" % v)]
+        groups["manual"] = [("out/work/manual/Barbarian_Blood_Path_Manuale.pdf", "Barbarian_Blood_Path_Manuale_v%s.pdf" % v)]
 
     stamp = now()
     for g, items in groups.items():
@@ -132,7 +132,7 @@ def main():
 
     tests = man.get("tests") or {"ran": False}
     if a.tests:
-        r = json.load(open(os.path.join(OUT, "test_report.json")))
+        r = json.load(open(os.path.join(OUT, "work", "test_report.json")))
         res = [x["result"] for x in r["results"]]
         tests = {"ran": True, "suites": r.get("suites"), "total": len(res), "pass": res.count("PASS"),
                  "fail": res.count("FAIL"), "skip": res.count("SKIP"), "seconds": r.get("total_s"), "at": stamp}

@@ -8,10 +8,10 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 import test_saves as T
 
 L, err = dict(T.lbl), T.err
-_ml = open(os.path.join(T.ROOT, "out", "menu.lbl")).read()                  # (11/11) i negozi sono nel modulo MENU
+_ml = open(os.path.join(T.ROOT, "out", "work", "menu.lbl")).read()                  # (11/11) i negozi sono nel modulo MENU
 L.update({m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", _ml, re.M)})
 L.update({m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", _ml, re.M)})
-gl = open(os.path.join(T.ROOT, "out", "menu.lst")).read()
+gl = open(os.path.join(T.ROOT, "out", "work", "menu.lst")).read()
 POT = 13                                            # I_RED
 # instruction after "jsr ui_input" in the loop of shop_buy (_l): after it keynew+7 and joynew are read
 sb, ss = L["shop_buy"], L["shop_sell"]

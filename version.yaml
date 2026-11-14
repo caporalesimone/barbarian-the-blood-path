@@ -1,12 +1,12 @@
-# Versioni del progetto. Unica fonte: build, release e manuale le leggono da qui (tools/build/gen_version.py -> out/version.inc).
+# Versioni del progetto. Unica fonte: build, release e manuale le leggono da qui (tools/build/gen_version.py -> out/work/version.inc).
 
 # Versione del software: mostrata nel gioco (menu iniziale e RUN/STOP) e nel nome del d64 (blood_path_vX.Y.d64).
 # Cresce da sola (numero minore) a ogni build con cambiamenti ai sorgenti (tools/build/bump_version.py, chiamato da build.sh);
 # per una nuova versione maggiore modificala a mano.
-version: "1.243"
+version: "1.244"
 
 # Impronta dei sorgenti dell'ultima build (tools/build/bump_version.py): non si modifica a mano.
-source_hash: "81d4631c36cda44efa3ce0e24b154d08b2c4a3bb"
+source_hash: "45cfbcc4fe01fd77c9fe14d20b1831be5f1d0d53"
 
 # Versione del formato dei salvataggi (un byte, 1..255; in esadecimale 0x01..0xff).
 # Da cambiare a mano ogni volta che cambia il formato del personaggio o del livello salvato:

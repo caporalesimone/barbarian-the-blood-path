@@ -37,9 +37,15 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   Gli script shell ricavano la radice dalla posizione del file, i Python da `__file__`. ROM solo da `toolchain/roms/` (`toolchain/roms/roms.md`).
   L'unico percorso assoluto ammesso e' `/work`, dove i container montano il progetto. Dopo ogni modifica a uno script: provarlo
   lanciandolo da un'altra cartella.
-- **Uscite**: tutto cio' che si genera sta in `out/` (non in git, tranne `out/.gitkeep`), ogni strumento nella sua sottocartella
-  (`out/atlas/`, `out/memory-map/`, `out/manual/`, `out/simulators/`, `out/vc64web/`, ...). File temporanei e usa e getta in
-  `out/tmp/` (si puo' cancellare sempre), **mai** in `/tmp`. **Artefatti per versione** (14/11, regola del committente): ogni build pubblica in `out/releases/v<versione>/` (disco; atlante, mappe, report dei test e manuale solo se generati in quella build; **niente zip dei sorgenti**) con `manifest.json` (`tools/build/publish.py`); `out/releases/latest` punta all'ultima; si tengono le ultime **5** versioni (`./build.sh --keep N`, `KEEP_VERSIONS`). Il resto di `out/` sono intermedi riscrivibili della build in corso (spostamento in `out/work/`: TODO J14). La pubblicazione fuori dal computer (GitHub) verra' dopo.
+- **Uscite** (14/11, regola del committente): tutto cio' che si genera sta in `out/` (non in git, tranne `out/.gitkeep`), in **quattro cartelle**:
+  `out/work/` = intermedi e uscite della build in corso (`.prg`, `.lst`, `.lbl`, `.inc`, log, `gfx/`, `snd/`, `krill/`, `atlas/`,
+  `memory-map/`, `manual/`, `simulators/`, `disk.d64`, report dei test...; ogni strumento nella sua sottocartella; riscrivibili, si possono
+  cancellare); `out/cache/` = cio' che si riusa fra le build e non si cancella (`zx0/`, `steps/`, `vc64web/`); `out/tmp/` = usa e getta
+  (si puo' cancellare sempre; **mai** `/tmp`); `out/releases/` = **artefatti per versione**: ogni build pubblica in
+  `out/releases/v<versione>/` (disco; atlante, mappe, report dei test e manuale solo se generati in quella build; **niente zip dei
+  sorgenti**) con `manifest.json` (`tools/build/publish.py`); `out/releases/latest` punta all'ultima; si tengono le ultime **5** versioni
+  (`./build.sh --keep N`, `KEEP_VERSIONS`). Nel codice i percorsi sono `out/work/...`: **mai** scrivere in `out/` direttamente.
+  La pubblicazione fuori dal computer (GitHub) verra' dopo.
 - Fine riga sempre LF (`.gitattributes`); il progetto su Windows sta nel filesystem di WSL2, non su `/mnt/c` (`./validate_env.sh`).
 
 ## Cartelle
@@ -60,7 +66,7 @@ diventa un test in `tests/`, non resta in `tools/`.
 - **Architettura** (11/11, richiesta del committente): `docs/architettura.md` (struttura), `docs/flussi.md` (come gira il
   codice), `docs/build.md` (pipeline) e `docs/getting-started.md` (build e test, container) si aggiornano nello stesso lavoro quando
   cambia un modulo, un flusso, la memoria, un'interruzione, la build o i test.
-- Documenti generati (in `out/`, a ogni build): mappe della RAM e del disco (`tools/memory-map/`), atlante grafico (`tools/atlas/`,
+- Documenti generati (in `out/work/`, pubblicati in `out/releases/`): mappe della RAM e del disco (`tools/memory-map/`), atlante grafico (`tools/atlas/`,
   regole in `src/CLAUDE.md`), manuale (`tools/manual/`, sorgente in `docs/manual/`), report dei simulatori. Se cambia cio' che
   descrivono, si aggiornano i generatori.
 - `docs/FORMATO_DATI.md`: formato esatto dei file su disco e dei salvataggi; aggiornarlo con `SAVE_VER`.
@@ -97,7 +103,7 @@ diventa un test in `tests/`, non resta in `tools/`.
   **Regola del committente (14/11): salvo diversa richiesta, quando costruisco io uso `./build.sh --fast`** (solo il disco + smoke e sanity,
   build veloce), e le build accessorie (atlante, mappe, manuale, release) le faccio solo se richieste o se cambia cio' che descrivono.
   `./build.sh --release` (anche regression, `EMU-*`, manuale): **solo quando la chiede il committente**. Dettagli: [docs/getting-started.md](docs/getting-started.md), [docs/build.md](docs/build.md).
-- **Un solo disco** (11/11 sera, regola del committente): `out/disk.d64` (disco di lavoro) -> `out/releases/vX.Y/blood_path_vX.Y_1541.d64`. Per lo sviluppo:
+- **Un solo disco** (11/11 sera, regola del committente): `out/work/disk.d64` (disco di lavoro) -> `out/releases/vX.Y/blood_path_vX.Y_1541.d64`. Per lo sviluppo:
   `LOAD"*",8`, `POKE 1020,1` (subito `START`; `POKE 1021,1` = god mode), `RUN` ([docs/cheats.md](docs/cheats.md)).
 - **Versione**: cresce da sola (numero minore di `version.yaml`) a **ogni build con cambiamenti** ai sorgenti
   (`tools/build/bump_version.py`; impronta in `version.yaml`, `source_hash`). **Ogni file consegnato porta la versione nel nome**

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera out/gfx/uifont.bin (1024 byte): charset UI 'Reliquia 05 cero', codici schermo 0..127.
+"""Genera out/work/gfx/uifont.bin (1024 byte): charset UI 'Reliquia 05 cero', codici schermo 0..127.
   0..63   glifi normali (lettere/cifre dal font Reliquia, punteggiatura mancante dalla ROM)
   28,30,31,59,60,0 = cornici (H,V,TL,TR,BL,BR)
   91..95 = icone chiave/oro (una moneta, 08/11; il 93 e' libero)/pozione/pergamena
@@ -62,5 +62,5 @@ for c, g in ICON.items():
     full[c] = g
 out = bytes(b for g in full for b in g)
 assert len(out) == 1024
-open(os.path.join(ROOT, "out", "gfx", "uifont.bin"), "wb").write(out)
+open(os.path.join(ROOT, "out", "work", "gfx", "uifont.bin"), "wb").write(out)
 print("ok uifont")

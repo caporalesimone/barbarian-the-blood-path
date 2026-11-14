@@ -49,9 +49,9 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
 - **Musica** ([docs/musica.md](../docs/musica.md)): i brani sono dati in `tools/build/songs.py` (elenchi del gioco in `PLAYLIST`),
   compilati da `tools/build/gen_music.py` in file `SNDn` sul disco; un solo player (`src/common/sid_player.inc`) per loader, gioco
   e jukebox. Brani ed effetti si provano con `JUKEBOX` (da rifare più bello, TODO E8). MP3 di ascolto: `gen_music.py --render`
-  nel container `c64-emu-vice` (VICE + ffmpeg) in `out/music/`.
+  nel container `c64-emu-vice` (VICE + ffmpeg) in `out/work/music/`.
 
-## Atlante grafico (`out/atlas/`): a ogni modifica grafica
+## Atlante grafico (`out/work/atlas/`): a ogni modifica grafica
 - L'atlante (`index.html`, un PNG per tile, `tiles.json` con gli id `SET`+lettera) si rigenera a ogni build
   (`tools/atlas/gen_atlas.py`, modello `tools/atlas/atlas_template.html`) dai file che legge il C64. **Ogni modifica grafica** (tile,
   palette, mappa del villaggio, gruppi, titolo, font della UI, glifi dell'HUD e della minimappa) deve risultare corretta lì,
@@ -70,10 +70,10 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
 
 ## Dati e bilanciamento
 - Regole del combattimento: `data/rules.yaml`; mondo, bottino, negozi: `data/balance.yaml`. Il gioco usa i dati
-  generati da `tools/build/gen_db.py` (`out/db.asm`).
+  generati da `tools/build/gen_db.py` (`out/work/db.asm`).
 - `tools/simulators/` contiene TUTTI gli script di simulazione delle partite (`sim_rules.py` combattimenti e progressione,
   `fit_rules.py` taratura, `cmp_rules.py` confronti, `rules.py` modello condiviso, `sim_durability.py`, `sim_gold.py`,
-  `sim_chest.py`; report in `out/simulators/`). **Ogni cambio di regola nel codice o negli yaml va riportato nello stesso
+  `sim_chest.py`; report in `out/work/simulators/`). **Ogni cambio di regola nel codice o negli yaml va riportato nello stesso
   lavoro nei simulatori**: il simulatore deve riprodurre il gioco com'è (differenze note: `docs/BILANCIAMENTO.md`,
   sezione "Differenze tra simulatore e codice").
 - Come si bilancia (strumenti, obiettivi, procedura, numero di prove): `docs/balancing-guide.md`. Seguirla.

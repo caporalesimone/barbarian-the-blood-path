@@ -1,7 +1,7 @@
 # Combattimento (regole d20)
 
 Sorgenti: `src/game/combat.asm` (tutte le regole), `src/game/game.asm` (`update_attack`, `perform_skill`, `hit_area`,
-`handle_keys`, `kill_monster`), `src/game/hud.asm`. Dati: `data/rules.yaml` → `tools/build/gen_db.py` → `out/db.asm`.
+`handle_keys`, `kill_monster`), `src/game/hud.asm`. Dati: `data/rules.yaml` → `tools/build/gen_db.py` → `out/work/db.asm`.
 Progetto originale: [SISTEMA_COMBATTIMENTO.md](SISTEMA_COMBATTIMENTO.md). Valori al 06/11, provvisori.
 
 Tutto è in tempo reale (50 fotogrammi al secondo), ma ogni colpo è un tiro di d20 alla D&D.

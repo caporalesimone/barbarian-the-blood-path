@@ -125,7 +125,7 @@ misura prima e dopo con `python3 tests/run.py regression -k PERF`. Le voci D1–
 ### D5 (ex P5) Piani pesanti: piano 14 al 14,5% di fotogrammi persi camminando (PERF-21), piano 15 al 3,8%
 - Più mostri svegli: stesso lavoro di D3.
 
-### D12 (11/11) Dall'analisi dell'assembly generato ([out/asm_audit/analisi_assembly.md](out/asm_audit/analisi_assembly.md))
+### D12 (11/11) Dall'analisi dell'assembly generato ([out/work/asm_audit/analisi_assembly.md](out/work/asm_audit/analisi_assembly.md))
 - Già fatto: codice morto tolto (49 B), due `lda` inutili, un `jsr`+`rts` (+55 B di margine), commenti nei sorgenti generati.
 - **Suggeriti**: routine per la casella del mostro (`mxl/mxh → pix2tile` e `myl/myh`, 4 copie ciascuno: ~46 B) e per i
   puntatori della grafica (`GFX_FSTRIP`, 4 copie: ~38 B); le altre ripetizioni sono da 8–15 B (~145 B in tutto, valutare una
@@ -302,7 +302,7 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   (probabile GPL-3.0: sorgente corrispondente del wasm), librerie JS, `open-roms` (LGPL-3+, font PXLfont da verificare); le ROM
   Commodore (14 file in `toolchain/roms/vice-roms/` e la stessa copia in `toolchain/vc64web-custom/roms/`, **in git dal 13/11 su richiesta
   del committente**, che le toglierà dal repository prima di pubblicare: `toolchain/roms/roms.md` ha SHA-256, licenze e URL, **URL da verificare**)
-  e le pagine generate di vc64web (`out/vc64web/`, che le incorporano; anche l'immagine `c64-emu-vc64web`) non vanno pubblicate.
+  e le pagine generate di vc64web (`out/cache/vc64web/`, che le incorporano; anche l'immagine `c64-emu-vc64web`) non vanno pubblicate.
   Licenze di VICE (GPL-2.0), zx0 (BSD-3), cc1541 (MIT), Krill (BSD-3 con attribuzione): file nelle loro cartelle. Complessità S.
 - **I8** (13/11) Segnalazioni al team dell'emulatore da riprovare a ogni nuova build: `runLoop` non esatto con un caricamento da disco
   dentro il ciclo (`framesActual` 490 su 480 nel passo del portale, `docs/emulatore.md`); il pacchetto dichiara quel caso non verificato.
@@ -317,7 +317,7 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   13/11 sera: la macchina di lavoro si riavvia fra un messaggio e l'altro (uptime ~10 minuti a ogni ripresa); un secondo
   `./build.sh` dopo un riavvio (con immagini nuove) e' passato 33/33 al primo colpo: non riprodotto, ipotesi del freddo indebolita.
   13/11 sera, **seconda volta**, in `./build.sh --release` (toolchain nuova): 179 PASS, 6 FAIL, 1 SKIP. PERF-DISK-10..14 con
-  `monitor: no answer to 'load /work/out/start.prg' in 20 s` (il monitor aveva appena risposto al comando prima) e PERF-OPT-11
+  `monitor: no answer to 'load /work/out/work/start.prg' in 20 s` (il monitor aveva appena risposto al comando prima) e PERF-OPT-11
   (MonitorError dopo 30 s); rilanciati da soli subito dopo: 6/6 PASS. Stesso sintomo (il monitor remoto di VICE smette di rispondere),
   in un momento qualsiasi della sessione, non solo al primo avvio. Da fare: registrare il log di VICE e del monitor quando succede.
   Release successiva (stessa sera, tool dentro le immagini): 185 PASS, 0 FAIL, 1 SKIP.
@@ -360,13 +360,9 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   non verificata con altre dimensioni di schermo); con SHIFT a scatto i tasti senza equivalente PC (grafici C64) escono senza shift.
 ---
 
-- **J14** (14/11, decisione del committente: layout B) **Intermedi della build in `out/work/` e cache in `out/cache/`**. Fatto il 14/11: artefatti
-  per versione in `out/releases/v<V>/` + `latest` + retention (`./build.sh --keep N`, 5). Resta: gli intermedi (`.prg`, `.lst`, `.lbl`, `.inc`,
-  log, `gfx/`, `snd/`, `krill/`) stanno ancora nella radice di `out/` insieme a `disk.d64`; da portare in `out/work/`, e `zx0cache`/`.cache`
-  in `out/cache/`. Complessità M, **meccanica ma larga**: ~330 righe di codice con `out/` (script, test, generatori), 34 negli include
-  dell'assembly, ~200 nella documentazione; si fa con una sostituzione controllata e una `./build.sh --release` completa. Cavilli: `out/tmp/`
-  resta com'e'; i test leggono `out/*.lbl` e `out/game.prg`; il viewer monta `out/` in sola lettura. Pubblicazione delle build quando si
-  passera' a GitHub (release/asset del tag): per ora solo locale.
+- **J14** (14/11) **Pubblicare le build quando si passera' a GitHub**: oggi le versioni stanno solo in `out/releases/` (ultime 5, locale).
+  Per GitHub: asset del tag `v<V>` (disco, manuale, `manifest.json` con gli SHA-256) invece di conservarle in locale; niente zip dei
+  sorgenti (regola del committente 14/11: lo da' gia' il tag). Da decidere con il passaggio a GitHub. Complessità S.
 
 ## K — Frenzy: prove in gioco del committente (11/11)
 

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Mappa della RAM del C64 per Barbarian: The Blood Path -> out/memory-map/mappa_ram.html
-Indirizzi letti da out/game.lbl e out/lobby.lbl dove possibile (dopo ./build.sh); il resto e' descritto
+"""Mappa della RAM del C64 per Barbarian: The Blood Path -> out/work/memory-map/mappa_ram.html
+Indirizzi letti da out/work/game.lbl e out/work/lobby.lbl dove possibile (dopo ./build.sh); il resto e' descritto
 qui a mano (zone di sistema, scenari d'uso). Uso: python3 tools/memory-map/gen_rammap.py [out.html]"""
 import html, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "out", "memory-map", "mappa_ram.html")
+OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "out", "work", "memory-map", "mappa_ram.html")
 
 
 def labels(fn):
     d = {}
-    for l in open(os.path.join(ROOT, "out", fn)):
+    for l in open(os.path.join(ROOT, "out", "work", fn)):
         m = re.match(r"\s*(\S+)\s*=\s*\$([0-9a-f]+)", l)
         if m:
             d[m.group(1)] = int(m.group(2), 16)
@@ -25,20 +25,20 @@ M = labels("lobby.lbl")
 GFXD, GFXE = L["gfx_data"], L["gfx_end"]          # grafica fissa nel PRG (dato morto dopo copy_gfx)
 GENI, GENIE = L["gen_img"], L["gen_img_end"]       # immagine del generatore nel PRG (copiata sotto l'I/O)
 GENA = L["GEN_AT"]; GENE = GENA + (GENIE - GENI)   # generatore sotto l'I/O
-FINAT = L["FIN_AT"]; FINE = FINAT + os.path.getsize(os.path.join(ROOT, "out", "fmap.prg")) - 2
+FINAT = L["FIN_AT"]; FINE = FINAT + os.path.getsize(os.path.join(ROOT, "out", "work", "fmap.prg")) - 2
 CODE2E = L["code2_end"]
 MENUE = M["menu_end"]
-ZXAT = int(re.search(r"GAME_ZX_AT\s*=\s*\$([0-9a-f]+)", open(os.path.join(ROOT, "out", "pack.inc")).read()).group(1), 16)
+ZXAT = int(re.search(r"GAME_ZX_AT\s*=\s*\$([0-9a-f]+)", open(os.path.join(ROOT, "out", "work", "pack.inc")).read()).group(1), 16)
 MN = labels("menu.lbl")                            # (11/11) modulo MENU: zone 1-3 (src/menu.asm)
 MZ = [(L["MR%d_AT" % k], MN["mz%d_top" % k], L["MR%d_END" % k]) for k in (1, 2, 3)]
 LVLE, CHRE, RELE = L["LVLEND"], L["CHREND"], L["rel_end"]
-_MT = open(os.path.join(ROOT, "out", "music_tab.inc")).read()
+_MT = open(os.path.join(ROOT, "out", "work", "music_tab.inc")).read()
 SMAX = int(re.search(r"SND_SMAX\s*=\s*(\d+)", _MT).group(1)); FMAX = int(re.search(r"SND_FMAX\s*=\s*(\d+)", _MT).group(1))
-TOWNE = 0xE000 + os.path.getsize(os.path.join(ROOT, "out", "gfx0.prg")) - 2
-ARE = labels("arena.lbl")["ar_end_"] if os.path.exists(os.path.join(ROOT, "out", "arena.lbl")) else 0xCD66
+TOWNE = 0xE000 + os.path.getsize(os.path.join(ROOT, "out", "work", "gfx0.prg")) - 2
+ARE = labels("arena.lbl")["ar_end_"] if os.path.exists(os.path.join(ROOT, "out", "work", "arena.lbl")) else 0xCD66
 LDE = None                                          # fine del corpo di START (indirizzo logico a $A000)
 _SL = "start.lst"                       # (11/11) un solo START per i due dischi
-for l in open(os.path.join(ROOT, "out", _SL)):
+for l in open(os.path.join(ROOT, "out", "work", _SL)):
     m = re.match(r"^\.[0-9a-f]{4}\s+([0-9a-f]{4})\s+body_end", l)
     if m:
         LDE = int(m.group(1), 16)
@@ -516,9 +516,9 @@ table{border-collapse:collapse;width:100%;max-width:720px;margin-top:8px}table.f
 .two{display:grid;grid-template-columns:1fr 1fr;gap:20px}@media (max-width:760px){.two{grid-template-columns:1fr}.cell .adr{flex-basis:78px}}
 </style></head><body><main>""")
 P.append("<h1>Barbarian: The Blood Path · mappa della RAM</h1>")
-P.append('<p class="mut">Commodore 64, 64 KB. Situazione: build v%s, generata da <code>tools/memory-map/gen_rammap.py</code> sulle etichette di <code>out/game.lbl</code> e <code>out/lobby.lbl</code>. '
+P.append('<p class="mut">Commodore 64, 64 KB. Situazione: build v%s, generata da <code>tools/memory-map/gen_rammap.py</code> sulle etichette di <code>out/work/game.lbl</code> e <code>out/work/lobby.lbl</code>. '
          'Altezza delle celle non lineare (cresce con la dimensione, cosi\' anche le zone piccole restano leggibili); negli spaccati invece l\'altezza e\' proporzionale ai byte.</p>'
-         % h(open(os.path.join(ROOT, "out", "version.inc")).read().split('"')[1]))
+         % h(open(os.path.join(ROOT, "out", "work", "version.inc")).read().split('"')[1]))
 P.append('<div class="legend">' + "".join('<span><b style="--c:var(%s)"></b>%s</span>' % (v, h(l)) for l, v in CAT.values()) + "</div>")
 P.append('<div class="legend"><span><span class="badge ok">%s</span> riempita con un valore noto e rimasta intatta dopo cambi di piano, portali e salvataggi (non sono passati negozi, morte, boss)</span>'
          '<span><span class="badge st">%s</span> nessun riferimento nel codice, non provata in esecuzione</span></div>' % (V, S))

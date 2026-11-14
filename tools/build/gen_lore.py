@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Dati della lore (programma LORE): data/lore.txt + immagini -> out/ldat.prg (ZX0), out/lore.inc, anteprime.
+"""Dati della lore (programma LORE): data/lore.txt + immagini -> out/work/ldat.prg (ZX0), out/work/lore.inc, anteprime.
 
 Il programma LORE (src/start.asm con LORE=1 + src/lore/scroll.asm) carica LDAT mentre disegna il titolo, lo decomprime sul
 posto in LD_DST ($2000) e lo fa scorrere dal basso verso l'alto nel modo testo multicolore (banco VIC 0).
 Formato completo: docs/intro.md. In breve, l'immagine decompressa e':
-  $2000  charset (2 KB): codici 0-63 = font del gioco (out/gfx/uifont.bin), 64-254 = forme delle immagini, caricate
+  $2000  charset (2 KB): codici 0-63 = font del gioco (out/work/gfx/uifont.bin), 64-254 = forme delle immagini, caricate
          durante lo scorrimento negli "slot" liberi (eventi SHAPES); 255 non si usa (e' l'escape dell'RLE)
   $2800  sprite (fino a 16 x 64 B): mostri del gioco, 2 fotogrammi l'uno (tools/build/monsters.py)
   $2C00  forme delle immagini (8 B per carattere), poi le righe:
@@ -15,8 +15,8 @@ Immagini: (1) ritagli della copertina (data/title_src.png) convertiti con i due 
 immagine (registri $D022/$D023 cambiati da un raster IRQ alla riga in cui l'immagine comincia: evento SPLIT);
 (2) scene vere del gioco (mappa del villaggio, sala del trono) dai tile; (3) sprite dei mostri raddoppiati.
 I caratteri uguali si riusano; le immagini che non sono mai sullo schermo insieme riusano gli stessi codici.
-Uscite: out/ldat.prg, out/ldat_raw.bin (immagine decompressa, per il test), out/lore.inc, out/lore_preview.png,
-out/atlas/lore.png (atlante grafico)."""
+Uscite: out/work/ldat.prg, out/work/ldat_raw.bin (immagine decompressa, per il test), out/work/lore.inc, out/work/lore_preview.png,
+out/work/atlas/lore.png (atlante grafico)."""
 import itertools, os, re, sys
 import numpy as np
 from PIL import Image
@@ -214,7 +214,7 @@ def post_walls(m):
 def scene(which, x, y, w, h):
     """scena del gioco: x, y, w, h in tile (16x16 pixel, 2x2 caratteri) della mappa"""
     if not _scn:
-        consts = open(os.path.join(ROOT, "out", "gfx_consts.inc")).read()
+        consts = open(os.path.join(ROOT, "out", "work", "gfx_consts.inc")).read()
         nt = int(re.search(r"^GFX_NT = (\d+)", consts, re.M).group(1))
         dn = int(re.search(r"^GFX_DSTRIP = (\d+)", consts, re.M).group(1)) // 8
         pal = _pals()
@@ -233,9 +233,9 @@ def scene(which, x, y, w, h):
         dinv = {c: n for n, c in G.DUN_LEGEND.items()}
         dm = [[G.TID[dinv[c]] for c in r] for r in drows]
         post_walls(dm)
-        _scn["town"] = (tmap, _tiles("out/gfx/gfx0.prg", nt), pal(0))
-        _scn["dungeon"] = (dm, _tiles("out/gfx/gfx1.prg", dn), pal(4))      # tema rosso (palette 4), come la copertina
-        _scn["final"] = (fm, _tiles("out/gfx/gfx2.prg", dn), pal(4))
+        _scn["town"] = (tmap, _tiles("out/work/gfx/gfx0.prg", nt), pal(0))
+        _scn["dungeon"] = (dm, _tiles("out/work/gfx/gfx1.prg", dn), pal(4))      # tema rosso (palette 4), come la copertina
+        _scn["final"] = (fm, _tiles("out/work/gfx/gfx2.prg", dn), pal(4))
     mp, tiles, pal = _scn[which]
     a = np.zeros((h * 16, w * 8, 3))
     for ty in range(h):
@@ -486,7 +486,7 @@ def rle(data):
 
 
 def encode(rows, images, sprites_used):
-    font = open(os.path.join(ROOT, "out", "gfx", "uifont.bin"), "rb").read()[:64 * 8]
+    font = open(os.path.join(ROOT, "out", "work", "gfx", "uifont.bin"), "rb").read()[:64 * 8]
     charset = bytearray(font) + bytearray(2048 - len(font))
     spr = bytearray()
     sprp = {}
@@ -597,7 +597,7 @@ def preview(raw, rows_at, scale=2):
 
 
 def write_logo(im):
-    """il logo per il menu del loader BARBARIAN (src/barbarian.asm): forme ai codici 64.., celle, colori -> out/logo.inc"""
+    """il logo per il menu del loader BARBARIAN (src/barbarian.asm): forme ai codici 64.., celle, colori -> out/work/logo.inc"""
     code = {p: 64 + i for i, p in enumerate(im["shapes"])}
     ch = [code[p] if any(p) else 32 for p, cc in im["cells"]]
     co = [(8 + cc) if any(p) else 0 for p, cc in im["cells"]]
@@ -611,7 +611,7 @@ def write_logo(im):
         L.append(name)
         for i in range(0, len(arr), im["w"]):
             L.append("        .byte " + ", ".join("%d" % b for b in arr[i:i + im["w"]]))
-    open(os.path.join(ROOT, "out", "logo.inc"), "w").write("\n".join(L) + "\n")
+    open(os.path.join(ROOT, "out", "work", "logo.inc"), "w").write("\n".join(L) + "\n")
 
 
 def main():
@@ -627,7 +627,7 @@ def main():
     load_at = last + delta - len(comp) + 1
     assert load_at > LD_DST and load_at + len(comp) <= LD_END
     pack.inplace_check(comp, load_at, LD_DST, raw)
-    out = os.path.join(ROOT, "out")
+    out = os.path.join(ROOT, "out", "work")
     open(os.path.join(out, "ldat.prg"), "wb").write(bytes([load_at & 255, load_at >> 8]) + comp)
     open(os.path.join(out, "ldat_raw.bin"), "wb").write(raw)
     with open(os.path.join(out, "lore.inc"), "w") as f:
@@ -640,7 +640,7 @@ def main():
         f.write(f"LR_HOLD  = {HOLD_FRAMES if hold else 0}            ; fotogrammi di pausa sulla prima schermata\n")
     im, n = preview(raw, rows_at)
     im.save(os.path.join(out, "lore_preview.png"))
-    gd = os.path.join(ROOT, "out", "atlas")
+    gd = os.path.join(ROOT, "out", "work", "atlas")
     os.makedirs(gd, exist_ok=True)
     im.save(os.path.join(gd, "lore.png"))
     blocks = (len(comp) + 2 + 253) // 254

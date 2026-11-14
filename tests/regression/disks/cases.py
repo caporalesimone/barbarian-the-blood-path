@@ -42,6 +42,6 @@ def disk_fast(ctx):
         L = g.L
         check(g.in_game() and g.b(L["cur_level"]) == 0, "not in the village after a new game")
         gp = open(os.path.join(OUT, "game.prg"), "rb").read()
-        check(g.mem(0x0400 + 0x100, 32) == list(gp[2 + 0x100:2 + 0x120]), "GAME in RAM differs from out/game.prg")
+        check(g.mem(0x0400 + 0x100, 32) == list(gp[2 + 0x100:2 + 0x120]), "GAME in RAM differs from out/work/game.prg")
     finally:
         g.close()

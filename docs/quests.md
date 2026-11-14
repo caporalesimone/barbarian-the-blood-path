@@ -7,7 +7,7 @@ semplificato, villaggi o livelli statici in più, trama principale e sottotrama 
 simulazione: in fondo l'elenco degli open point da verificare (sezione 6, "per Opus").
 
 Fonti lette per il contesto: `docs/villaggio.md`, `docs/dungeon.md`, `docs/mostri.md`, `docs/oggetti.md`,
-`docs/combattimento.md`, `docs/FORMATO_DATI.md`, `docs/tecnica.md`, `out/memory-map/mappa_ram.html` (v1.26), `src/lobby.asm`
+`docs/combattimento.md`, `docs/FORMATO_DATI.md`, `docs/tecnica.md`, `out/work/memory-map/mappa_ram.html` (v1.26), `src/lobby.asm`
 (`menu_help`), `src/ovlt.asm`, `src/game/prefetch.asm`, `tools/build/gen_gfx.py`.
 
 Regole fissate dal committente: le quest possono comportare caricamenti; **una quest attiva per volta**; un tasto
@@ -1031,8 +1031,8 @@ data/
   quests.yaml (tabella delle quest: obiettivo, premio, NPC, tratto), quests_text/q01.txt ... (testi)
   lore.txt, manual/p1.txt ... p9.txt, town_map.txt, town2_map.txt, town3_map.txt
 tools/
-  gen_quests.py (quests.yaml + testi -> src/quests_tab.inc + out/qstN.prg), gen_lore.py (lore.txt -> out/lore.prg),
-  gen_manual.py (-> out/manpN.prg), gen_maps.py (tre villaggi), gen_gfx.py (libreria dei tile + liste per tema),
+  gen_quests.py (quests.yaml + testi -> src/quests_tab.inc + out/work/qstN.prg), gen_lore.py (lore.txt -> out/work/lore.prg),
+  gen_manual.py (-> out/work/manpN.prg), gen_maps.py (tre villaggi), gen_gfx.py (libreria dei tile + liste per tema),
   gen_preview.py (anteprima in Python dei generatori), asm.sh (un target per programma), mkdisk.sh
 ```
 
@@ -1177,7 +1177,7 @@ in X e Y** con `$D017`/`$D01D`: costo 0 B, un mostro diventa 48 × 42 px):
 
 Le immagini 7, 9, 10 e il logo sono **grafica nuova**: vanno nell'atlante (regola del progetto) e in
 `data/atlas_dungeon.txt` / `LEGEND` solo se diventano tile del gioco; se restano solo nella lore vivono in
-`data/lore_gfx/` e in una pagina dedicata dell'atlante (`out/atlas/`).
+`data/lore_gfx/` e in una pagina dedicata dell'atlante (`out/work/atlas/`).
 
 ### 14.4 Costo su disco (stima, entro i 30 blocchi)
 

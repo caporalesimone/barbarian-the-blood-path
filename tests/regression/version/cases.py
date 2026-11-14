@@ -18,7 +18,7 @@ def ver_tag(ctx):
 
 @test("VER-11", "branch_versions written at the end of version.yaml without touching version/comments; digest ignores them")
 def ver_write(ctx):
-    d = tempfile.mkdtemp(dir=os.path.join(ROOT, "out"))
+    d = tempfile.mkdtemp(dir=os.path.join(ROOT, "out", "tmp"))
     try:
         ry = os.path.join(d, "version.yaml")
         shutil.copy(V.RY, ry)

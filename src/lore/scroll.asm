@@ -1,7 +1,7 @@
 ; =============================================================================
 ; LORE - la storia a scorrimento (incluso da src/start.asm con LORE=1, gira a $A000 dopo PRESS SPACE)
 ; -----------------------------------------------------------------------------
-; Dati: out/lore.inc + LDAT decompresso a LD_DST ($2000) da tools/build/gen_lore.py (formato in docs/intro.md):
+; Dati: out/work/lore.inc + LDAT decompresso a LD_DST ($2000) da tools/build/gen_lore.py (formato in docs/intro.md):
 ;   $2000 charset (font 0-63 + forme 64-254 caricate durante lo scorrimento), $2800 sprite, LR_ROWS righe.
 ; Video: banco VIC 0, modo testo multicolore a 24 righe, due schermi ($0400 / $0800) che si alternano.
 ;   - scroll fine con $D011 (s = 7..0, un pixel ogni LR_SPEED fotogrammi; fire e spazio non fanno nulla fino

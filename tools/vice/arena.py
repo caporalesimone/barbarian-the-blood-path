@@ -14,11 +14,11 @@ From Python (several scenarios in the same VICE session, without restarting it):
       r = a.run(lvl=3, plvl=3, weapon="sword", monsters=["skeleton"], fights=20)
 
 Phase 1: hero and monsters next to each other (automatic positions), a still bot that turns and attacks (bot="stand").
-Needs the build: ./build.sh (or tools/build/asm.sh) makes out/arena_game.prg and out/arena.prg."""
+Needs the build: ./build.sh (or tools/build/asm.sh) makes out/work/arena_game.prg and out/work/arena.prg."""
 import argparse, csv, json, os, re, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "out")
+OUT = os.path.join(ROOT, "out", "work")
 sys.path.insert(0, os.path.join(ROOT, "tests")); from lib import c64 as C64  # noqa: E402,E702
 
 
@@ -103,7 +103,7 @@ class Arena:
     def load_theme(self, t):
         if self.theme != t:
             self.v.cmd("bank ram")
-            self.v.load(os.path.join(ROOT, "out", "gfx", "gfx%d.prg" % t))
+            self.v.load(os.path.join(ROOT, "out", "work", "gfx", "gfx%d.prg" % t))
             self.v.cmd("bank cpu")
             self.theme = t
 

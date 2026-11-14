@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>C64 viewer</title>
 <!-- Pagina indice di c64-emu-viewer (13/11). Copyright (c) 2026 - Simone Caporale
-     Legge gli elenchi delle cartelle servite dal server del viewer (server.js): /out/ e /out/vc64web/. -->
+     Legge gli elenchi delle cartelle servite dal server del viewer (server.js): /out/ e /out/cache/vc64web/. -->
 <script src="config.js"></script>
 <style>
   :root { --bg:#f4f1ea; --fg:#1d1b18; --dim:#6b665d; --card:#fffdf8; --line:#ddd6c8; --acc:#3d4fb8; }
@@ -53,7 +53,7 @@
   <section>
     <h2>File</h2>
     <div class="row"><a href="out/releases/latest/test_report.txt" target="_blank">Report dei test (ultima versione)</a><span class="meta">out/releases/latest/</span></div>
-    <div class="row"><a href="out/" target="_blank">Cartella out/</a><span class="meta">sola lettura</span></div>
+    <div class="row"><a href="out/" target="_blank">Cartella out/work/</a><span class="meta">sola lettura</span></div>
   </section>
 </main>
 <script>
@@ -86,8 +86,8 @@ const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&
 function globRe(g) { return new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.*').replace(/\?/g, '.') + '$', 'i'); }
 
 (async () => {
-  const pages = (await list('out/vc64web/')).filter(f => /^VirtualC64-v\d+\.html$/.test(f)).sort(natural);
-  const page = pages.length ? 'out/vc64web/' + pages[pages.length - 1] : null;
+  const pages = (await list('out/cache/vc64web/')).filter(f => /^VirtualC64-v\d+\.html$/.test(f)).sort(natural);
+  const page = pages.length ? 'out/cache/vc64web/' + pages[pages.length - 1] : null;
   // (14/11) i dischi stanno in out/releases/v<versione>/ (tools/build/publish.py); si elencano anche quelli sciolti in out/
   const isDisk = f => /\.(d64|g64|t64|crt)$/i.test(f);   // immagini di dischi e cartucce (i .prg sono file intermedi)
   const vers = (await subdirs('out/releases/')).filter(d => /^v/.test(d)).sort(natural);
@@ -109,7 +109,7 @@ function globRe(g) { return new RegExp('^' + g.replace(/[.+^${}()|[\]\\]/g, '\\$
   };
   document.getElementById('latest').innerHTML = !latest ? 'nessun disco in out/' :
     (page ? `<a class="big" href="${esc(open(latest))}" target="_blank">${esc(base(latest))}</a><div class="meta">${esc(when(latest))}</div>`
-          : `${esc(base(latest))}<p class="note">Pagina di vc64web non trovata in out/vc64web/ (si genera con l'immagine c64-emu-vc64web).</p>`);
+          : `${esc(base(latest))}<p class="note">Pagina di vc64web non trovata in out/cache/vc64web/ (si genera con l'immagine c64-emu-vc64web).</p>`);
   const rest = disks.filter(f => f !== latest).sort((a, b) => natural(b, a));   // le versioni piu' recenti in alto
   document.getElementById('others').innerHTML = rest.length ? rest.map(row).join('') : '<span class="meta">nessuno</span>';
 })();

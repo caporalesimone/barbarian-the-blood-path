@@ -7,14 +7,14 @@ that the monsters of the level have stats and hp (floor_types, mon_hp_init), and
 import os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, os.path.join(ROOT, "tests")); from lib import c64 as C64  # noqa: E402,E702  (monitor veloce, 10/11)
-lbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open(os.path.join(ROOT, "out", "game.lbl")).read(), re.M)}
-mlst = open(os.path.join(ROOT, "out", "lobby.lst")).read()
+lbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open(os.path.join(ROOT, "out", "work", "game.lbl")).read(), re.M)}
+mlst = open(os.path.join(ROOT, "out", "work", "lobby.lst")).read()
 ui_menu = re.search(r"^\.(\w+)\s+ui_menu:", mlst, re.M).group(1)
 rts = re.search(r"^\.(\w+)\s+60\s", mlst, re.M).group(1)                 # any rts of the LOBBY module
-_mt = open(os.path.join(ROOT, "out", "menu.lbl")).read()                 # (11/11) locanda nel modulo MENU
+_mt = open(os.path.join(ROOT, "out", "work", "menu.lbl")).read()                 # (11/11) locanda nel modulo MENU
 olbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", _mt, re.M)}
 olbl.update({m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", _mt, re.M)})
-vv = C64.Vice(os.path.join(ROOT, "out", "disk.d64"))      # (11/11, G2: tests/lib/c64.py, a copy of the disk)
+vv = C64.Vice(os.path.join(ROOT, "out", "work", "disk.d64"))      # (11/11, G2: tests/lib/c64.py, a copy of the disk)
 try:
     def cmd(c, w=None): return vv.cmd(c)
     def go(lim):
@@ -29,7 +29,7 @@ try:
         cmd("> 0340 a9 %02x a2 %02x 20 %02x %02x 4c %02x %02x" % (lv, mode, cl & 255, cl >> 8, ml & 255, ml >> 8), 0.3)
         cmd("break %04x" % lbl["main_loop"], 0.2); cmd("r pc=0340", 0.2)
         ok = go(150); cmd("del", 0.2); return ok
-    vv.load(os.path.join(ROOT, "out", "start.prg"))
+    vv.load(os.path.join(ROOT, "out", "work", "start.prg"))
     cmd("break " + ui_menu, 0.2); cmd("r pc=080d", 0.3)     # debug START from its BASIC stub (the loader BARBARIAN is tested by test_start.py)
     if not go(200): sys.exit("menu not reached")
     cmd("del", 0.2); cmd("r pc=" + rts, 0.2); cmd("r a=01", 0.2)     # new game (slot 0)
@@ -60,7 +60,7 @@ try:
     ox, oy = mem(lbl["cx_x"] + first, 1)[0], mem(lbl["cx_y"] + first, 1)[0]     # opened chest: where it is
     level(2, 0); level(1, 1)
     # 07/11 (seed ANOANO): the opened chest must not stay as a tile on the map (Fire did not open it any more)
-    gc = open(os.path.join(ROOT, "out", "gfx_consts.inc")).read()
+    gc = open(os.path.join(ROOT, "out", "work", "gfx_consts.inc")).read()
     tc = [int(re.search(r"^%s\s*=\s*(\d+)" % k, gc, re.M).group(1)) for k in ("T_CHEST", "T_CHEST")]    # 10/11: one tile for all chests
     cmd("bank ram", 0.1); tile = mem(lbl["MAP"] + oy * 48 + ox, 1)[0]; cmd("bank cpu", 0.1)
     print("tile of the opened chest (%d,%d) after the return: %d" % (ox, oy, tile))
@@ -120,7 +120,7 @@ try:
     # load_char: slot 0 comes back from disk. Time of save_char measured (cycle counter)
     level(0, 0)
     def w2(a): return "%02x %02x" % (a & 255, a >> 8)
-    dec = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", open(os.path.join(ROOT, "out", "game.lbl")).read(), re.M)}
+    dec = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", open(os.path.join(ROOT, "out", "work", "game.lbl")).read(), re.M)}
     SW = dec["I_SWORD"]
     cmd("> %04x %02x" % (lbl["c_pack"], SW), 0.2); cmd("> %04x 02" % lbl["c_packb"], 0.2)
     cmd("> %04x 4d" % lbl["c_packd"], 0.2); cmd("> %04x 96" % lbl["c_packm"], 0.2)

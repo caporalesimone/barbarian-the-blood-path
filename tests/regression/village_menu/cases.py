@@ -52,7 +52,7 @@ def game(ctx):
     return ctx["g"]
 
 
-@test("MENU-10", "out/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2")
+@test("MENU-10", "out/work/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2")
 def menu_file(ctx):
     import sys, importlib.util, re
     sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
@@ -84,7 +84,7 @@ def menu_load(ctx):
     c0 = g.last                                      # clock of the last stop (the game is stopped there)
     c = gcall(g, L["ovl_town"], tmax=180)
     bad = zones_ok(g)
-    check(not bad, "zones %s differ from out/menu_zK.prg" % bad)
+    check(not bad, "zones %s differ from out/work/menu_zK.prg" % bad)
     check(g.b(L["ovl_cur"]) == 1, "ovl_cur %d" % g.b(L["ovl_cur"]))
     check(g.b(1) & 7 == 6, "$01 = %02x after the unpack" % g.b(1))
     t = (c - c0) / CPS

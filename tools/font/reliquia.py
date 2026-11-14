@@ -99,7 +99,7 @@ def build(over):
 
 
 def main():
-    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out", "font", "reliquia")   # anteprime (13/11: in out/font/)
+    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out", "work", "font", "reliquia")   # anteprime (13/11: in out/work/font/)
     os.makedirs(out, exist_ok=True)
     F.LOREM[:] = ["LOREM IPSUM DOLOR SIT AMET,", "CONSECTETUR ADIPISCING ELIT.",
                   "QUO VADIS, REX? JUXTA KALENDAS", "WYVERN FLAMMAE ZELOTIS HIC",

@@ -1,16 +1,16 @@
 #!/bin/bash
 # Costruisce Krill's Loader r194 (src/third-party/krill/loader-v194.zip) con la nostra configurazione
-# (src/common/krill/loaderconfig.inc). Tutto in out/krill/ (usa e getta, non si tocca src/third-party/). Serve solo cc65, make e
+# (src/common/krill/loaderconfig.inc). Tutto in out/work/krill/ (usa e getta, non si tocca src/third-party/). Serve solo cc65, make e
 # perl: cc1541 (il programma C che scrive il disco) e' gia' compilato in c64-builder (stage cc1541-build della toolchain).
-# Uscite: out/krill/install.prg (INSTALL), loader.prg (resident, RESIDENT), save.prg (plugin, TRANSIENT),
-#         out/krill.inc (simboli per 64tass, tools/build/krill_syms.py).
+# Uscite: out/work/krill/install.prg (INSTALL), loader.prg (resident, RESIDENT), save.prg (plugin, TRANSIENT),
+#         out/work/krill.inc (simboli per 64tass, tools/build/krill_syms.py).
 # Indirizzi (docs/FastLoader.md): ZP $41 (7 B; il plugin arriva a $57 mentre salva), INSTALL $0840 (dentro START, dopo lo stub BASIC),
 # RESIDENT $0200, TRANSIENT $E820 (plugin di save: caricato dal file KSAVE a ogni save, sotto il KERNAL fra l'immagine
 # del file dell'eroe e il buffer del plugin, src/game/rel.asm)
 set -e
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 ZP=${KRILL_ZP:-41}; INSTALL=${KRILL_INSTALL:-0840}; RESIDENT=${KRILL_RESIDENT:-0200}; TRANSIENT=${KRILL_TRANSIENT:-e820}
-D=out/krill
+D=out/work/krill
 rm -rf $D; mkdir -p $D
 unzip -q src/third-party/krill/loader-v194.zip -d $D/pkg
 L=$D/pkg/loader

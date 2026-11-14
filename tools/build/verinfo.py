@@ -3,7 +3,7 @@
 versione loro, per non bruciare i numeri di main). Su `main` (o fuori da git): `version` di version.yaml (N.N).
 Su un altro branch: `<tag>.<n>` in `branch_versions` di version.yaml; tag = `branch_tags[branch]` o, in mancanza,
 la prima parola dell'ultima parte del nome (feature/stat-points -> "stat"); n cresce a ogni build con cambiamenti.
-La versione e' solo testo nel gioco (VERSION in out/version.inc): lettere minuscole e cifre."""
+La versione e' solo testo nel gioco (VERSION in out/work/version.inc): lettere minuscole e cifre."""
 import os, re, subprocess
 import yaml
 

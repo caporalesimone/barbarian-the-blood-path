@@ -96,7 +96,7 @@ di mostri del capitolo), palette rossa. La sua morte sblocca il capitolo dopo (`
 ## Piano 20: la sala del trono (`gen_final`)
 
 Mappa fissa **pregenerata** (dal 07/11): `tools/build/gen_final.py` (nella build) scrive il file `FMAP` del disco
-(`out/fmap.prg`, RLE come la mappa del villaggio, ~400 B) con la mappa **di base** e `out/final_map.inc` con le
+(`out/work/fmap.prg`, RLE come la mappa del villaggio, ~400 B) con la mappa **di base** e `out/work/final_map.inc` con le
 costanti e le poche tabelle che servono ancora in gioco (`fin_door`, `fin_chest`, `fin_tip`).
 
 - Mappa di base = com'era in `gen_final` subito prima di `post_walls`: rettangoli di pavimento, muro nord chiuso,

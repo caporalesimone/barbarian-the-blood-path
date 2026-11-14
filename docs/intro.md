@@ -8,7 +8,7 @@ gioco, file `START`), `src/lore.asm` (file `LORE`), entrambi su `src/common/boot
 
 ## Un solo disco (11/11 sera, regola del committente)
 
-Una sola build e **un solo disco** (`out/disk.d64` → `blood_path_vX.Y_1541.d64`): `BARBARIAN` (loader con il menu), `START`
+Una sola build e **un solo disco** (`out/work/disk.d64` → `blood_path_vX.Y_1541.d64`): `BARBARIAN` (loader con il menu), `START`
 con schermata di attesa e musica (`TITLE=0`), il gioco, `LORE`, `LDAT`, `TITLE`, `HELP`, `JUKEBOX`. Per lo sviluppo:
 `LOAD"*",8`, **`POKE 1020,1`**, `RUN` → `BARBARIAN` non mostra il menu e carica subito `START` ([cheats](cheats.md)); prima
 c'era un secondo disco con il byte `DEVBOOT` di `BARBARIAN` a 1. Le varianti `MENU=0` / `INTRO=0` non si assemblano più (il codice di
@@ -50,14 +50,14 @@ vettori come all'accensione), caricano il file all'indirizzo del PRG (`$0801`) c
 
 ## Il loader (`BARBARIAN`), release
 
-- In alto il **logo della copertina** (lo stesso della storia: `out/logo.inc` da `tools/build/gen_lore.py`, 27 × 6
+- In alto il **logo della copertina** (lo stesso della storia: `out/work/logo.inc` da `tools/build/gen_lore.py`, 27 × 6
   caratteri, 140 forme ai codici 64–203, colori multicolore `$D022`/`$D023` del logo): lo schermo è in modo testo
   multicolore, i testi hanno colori < 8 (alta risoluzione). Il file passa da 6 a 14 blocchi.
 - La voce 2 carica il programma **HELP** (07/11 sera): il manuale del gioco, [Help](help.md). Il loader non ha più la
   pagina dei tasti (13 blocchi invece di 15).
 
 - Schermo a caratteri ad alta risoluzione, banco VIC 0, schermo `$0400`, font del gioco (codici 0–63 di
-  `out/gfx/uifont.bin`, 512 byte) e forme del logo copiati a **`$3800`** (12/11: a `$2000` i programmi caricati dal
+  `out/work/gfx/uifont.bin`, 512 byte) e forme del logo copiati a **`$3800`** (12/11: a `$2000` i programmi caricati dal
   trampoline, LORE fino a `$2B3D` e START fino a `$262C`, coprivano il font e lo schermo diventava illeggibile). Niente musica, niente IRQ propri: gira con l'IRQ del KERNAL
   (tastiera); il cursore lampeggiante è spento (`$CC`).
 - Voci: **hear the legend** (LORE), **read the game manual** (programma `HELP`, [Help](help.md)), **walk the blood path** (START). Sotto: aiuto,
@@ -74,7 +74,7 @@ vettori come all'accensione), caricano il file all'indirizzo del PRG (`$0801`) c
 
 ## LORE
 
-Il programma (`src/lore.asm` → `out/lore.prg`) è l'avvio di START (`src/common/boot.asm`) con `LORE=1`: titolo
+Il programma (`src/lore.asm` → `out/work/lore.prg`) è l'avvio di START (`src/common/boot.asm`) con `LORE=1`: titolo
 riga per riga con la musica (*Demon's Eye*) mentre legge `LDAT` invece di `GAME`/`LOBBY`/`GFX0`, decompressione ZX0
 sul posto di `LDAT` (stesso decompressore del gioco), PRESS SPACE con le lettere a onda; poi `lore_start`
 (`src/lore/scroll.asm`). Tempo dal tasto `1` a PRESS SPACE: **70 s** (07/11, VICE con il 1541 emulato, KERNAL standard: `LORE` 5,6 KB +
@@ -100,8 +100,8 @@ la stessa. 220 righe: circa 3 minuti e mezzo.
 RUN/STOP torna al menu anche mentre `LORE` carica (l'IRQ della musica legge il tasto, il ciclo del caricamento
 chiude i file e chiama il trampoline) e a PRESS SPACE.
 
-Anteprima completa (generata a ogni build, decodificata dal file vero): [grafica/lore.png](../out/atlas/lore.png), anche
-nell'[atlante grafico](../out/atlas/index.html#lore). I colori dell'anteprima sono quelli della palette "colodore" del
+Anteprima completa (generata a ogni build, decodificata dal file vero): [grafica/lore.png](../out/work/atlas/lore.png), anche
+nell'[atlante grafico](../out/work/atlas/index.html#lore). I colori dell'anteprima sono quelli della palette "colodore" del
 generatore: in VICE (palette di default) il rosso appare più rosato.
 
 ### Tecnica
@@ -141,11 +141,11 @@ generatore: in VICE (palette di default) il rosso appare più rosato.
 | `$2000`–`$27FF` | charset (font + forme) |
 | `$2800`–`$2BFF` | sprite (fino a 16; oggi 10: 5 figure × 2 fotogrammi) |
 | `$2C00`–… | forme delle immagini, poi le righe (`LR_ROWS`); fine dei dati ~`$5570` |
-| `$A000`–`$B5FF` | corpo di START + LORE + musica (`body_end` nel listato `out/lore.lst`) |
+| `$A000`–`$B5FF` | corpo di START + LORE + musica (`body_end` nel listato `out/work/lore.lst`) |
 | `$BE00` | variabili del player SID |
 | `$CC00`, `$D800`, `$E000` | schermo, colori e bitmap del titolo (banco VIC 3, prima di PRESS SPACE) |
 
-Durante il caricamento `LDAT` compresso sta alla fine della propria zona decompressa (`LD_AT` in `out/lore.inc`,
+Durante il caricamento `LDAT` compresso sta alla fine della propria zona decompressa (`LD_AT` in `out/work/lore.inc`,
 ~`$3C3E`) e si decomprime sul posto in `$2000` (verifica in Python in `tools/build/gen_lore.py`, in VICE in
 `tests/regression/boot/test_lore.py`).
 
@@ -198,10 +198,10 @@ Dimensioni oggi (stampate a ogni build): 220 righe, 13,7 KB di dati, 6,5 KB comp
 ## Test
 
 - `tests/regression/boot/test_start.py dev` (build di debug): dal `RUN` di `BARBARIAN` (loader senza menu) a `START` caricato dal
-  disco, `GAME` decompresso uguale a `out/game.prg`, fino al menu del gioco con il villaggio in cache.
+  disco, `GAME` decompresso uguale a `out/work/game.prg`, fino al menu del gioco con il villaggio in cache.
 - Solo con `./build.sh --release`: `tests/regression/boot/test_start.py` (START fino al menu del gioco) e
   `tests/regression/boot/test_lore.py`: il menu mostra le voci; tasto `1` → LORE caricato dal disco, `LDAT` decompresso in VICE
-  uguale byte per byte a `out/ldat_raw.bin`; PRESS SPACE; la storia parte dopo la pausa, il flusso avanza e arriva
+  uguale byte per byte a `out/work/ldat_raw.bin`; PRESS SPACE; la storia parte dopo la pausa, il flusso avanza e arriva
   alla fine; RUN/STOP riporta al menu; tasto `3` avvia START. Con `--shot prefisso` salva gli screenshot
   (fermandosi sull'IRQ del bordo basso: uno screenshot preso a metà fotogramma mescola due fotogrammi e mostra
   righe "doppie" che sullo schermo non ci sono).

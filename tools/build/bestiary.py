@@ -6,7 +6,7 @@ ha il suo bestiario che sostituisce quello del capitolo precedente (docs/bestiar
 Nel gioco di oggi (un solo "capitolo" di 20 piani) entrano solo le righe con implemented = yes, nell'ordine del file
 (base, forti, finale: il tipo del mostro = posizione); le altre sono concept. merge_rules(R) / merge_balance(B) rimettono
 i mostri nelle sezioni `monsters` di rules.yaml (combattimento) e balance.yaml (spawn, colore, velocita', bottino) che
-leggono tools/build/gen_db.py, tools/manual/gen_manual.py e tools/simulators/: out/db.asm identico a prima.
+leggono tools/build/gen_db.py, tools/manual/gen_manual.py e tools/simulators/: out/work/db.asm identico a prima.
 Uso: python3 tools/build/bestiary.py   (controlla la tabella e stampa i bestiari per capitolo)"""
 import csv, os, sys
 import yaml

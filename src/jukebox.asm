@@ -1,9 +1,9 @@
 ; ===================================================================
 ;  jukebox.asm - prova di tutti i suoni del gioco (brani + effetti) con il player del gioco.
 ;  Una sola schermata: elenco con nome e ruolo, cursore, stato. Brani e player come nel gioco (voce 1 del SID
-;  condivisa con gli effetti); i brani sono quelli di tools/build/songs.py (out/jukebox_songs.inc, tools/build/gen_music.py).
+;  condivisa con gli effetti); i brani sono quelli di tools/build/songs.py (out/work/jukebox_songs.inc, tools/build/gen_music.py).
 ;  Tasti: su/giu' (cursore o W/S) scelta, RETURN/fire suona, SPAZIO pausa, R ripetizione/singolo, X stop.
-;  Uscita: out/jukebox.prg (sul disco di sviluppo come JUKEBOX).
+;  Uscita: out/work/jukebox.prg (sul disco di sviluppo come JUKEBOX).
 ; ===================================================================
         .cpu "6502"
 SP_VARS = $c000

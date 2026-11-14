@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """HELP (il manuale nel menu del loader, solo release): pagine da data/help.txt + ritaglio dell'HUD.
 
-  tools/build/gen_help.py          -> out/help.inc (charset: font della UI 0-63 + glifi dell'HUD da 64, pagine RLE)
-                                 + anteprima out/atlas/help.png
+  tools/build/gen_help.py          -> out/work/help.inc (charset: font della UI 0-63 + glifi dell'HUD da 64, pagine RLE)
+                                 + anteprima out/work/atlas/help.png
   tools/build/gen_help.py --check  -> rifa la fotografia in out/ e la confronta con data/help_hud.json (test della release)
   tools/build/gen_help.py --snap   -> data/help_hud.json: fotografia dell'HUD vero (build di test TESTUI=28, VICE):
                                  righe 20-23 dello schermo HUD, colori, i glifi usati del charset del tema, $D022/$D023.
@@ -33,9 +33,9 @@ def snap(path=SNAP):
     env = dict(os.environ, NOKEYS="1", TESTUI="28", TESTCL="15", TESTLVL="2", TESTSP="1")
     subprocess.run(["tools/build/asm.sh", "test"], cwd=ROOT, env=env, check=True, stdout=subprocess.DEVNULL)
     subprocess.run(["tools/build/mkdisk.sh"], cwd=ROOT, check=True)
-    L = lbl(os.path.join(ROOT, "out", "game.lbl"))
+    L = lbl(os.path.join(ROOT, "out", "work", "game.lbl"))
     vice = subprocess.Popen(XRUN + ["x64sc", "-silent", "-sounddev", "dummy"] + ROM_ARGS + ["-warp", "-8",
-                             os.path.join(ROOT, "out", "disk.d64"), "-remotemonitor"],
+                             os.path.join(ROOT, "out", "work", "disk.d64"), "-remotemonitor"],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     try:
         s = None
@@ -67,7 +67,7 @@ def snap(path=SNAP):
             return out[:n]
 
         cmd("", 0.3)
-        cmd('l "%s" 0' % os.path.join(ROOT, "out", "start.prg"), 3)    # (11/11) START: installa Krill, GAME dal disco
+        cmd('l "%s" 0' % os.path.join(ROOT, "out", "work", "start.prg"), 3)    # (11/11) START: installa Krill, GAME dal disco
         cmd("break %04x" % L["main_loop"], 0.2)
         s.sendall(b"g 080d\n"); t0 = time.time(); buf = ""
         while time.time() - t0 < 60 and "Stop on" not in buf:
@@ -195,7 +195,7 @@ def preview(hud, glyph_codes, screens):
         from PIL import Image
     except ImportError:
         return
-    full = open(os.path.join(ROOT, "out", "gfx", "uifont.bin"), "rb").read()
+    full = open(os.path.join(ROOT, "out", "work", "gfx", "uifont.bin"), "rb").read()
     cs = bytearray(2048); cs[:512] = full[:512]
     for i, c in enumerate(glyph_codes):
         cs[(64 + i) * 8:(64 + i) * 8 + 8] = bytes(hud["glyphs"][str(c)])
@@ -220,15 +220,15 @@ def preview(hud, glyph_codes, screens):
                     for k in range(4):
                         v = m[(b >> (6 - 2 * k)) & 3]
                         im.putpixel((ox + x0 + 2 * k, y0 + r), v); im.putpixel((ox + x0 + 2 * k + 1, y0 + r), v)
-    os.makedirs(os.path.join(ROOT, "out", "atlas"), exist_ok=True)
-    im.save(os.path.join(ROOT, "out", "atlas", "help.png"))
+    os.makedirs(os.path.join(ROOT, "out", "work", "atlas"), exist_ok=True)
+    im.save(os.path.join(ROOT, "out", "work", "atlas", "help.png"))
 
 
 def main():
     if "--snap" in sys.argv:
         snap(); return
     if "--check" in sys.argv:           # test della release: la fotografia e' ancora uguale all'HUD del gioco?
-        tmp = os.path.join(ROOT, "out", "help_hud_now.json")
+        tmp = os.path.join(ROOT, "out", "work", "help_hud_now.json")
         snap(tmp)
         a, b = json.load(open(SNAP)), json.load(open(tmp))
         keys = ("d022", "d023", "screen", "color", "glyphs")
@@ -241,7 +241,7 @@ def main():
          "HELP_NG = %d" % (len(glyph_codes) + len(EXTRA)), "help_glyphs"]
     for c in glyph_codes:
         o.append("        .byte " + ",".join("$%02x" % b for b in hud["glyphs"][str(c)]))
-    full = open(os.path.join(ROOT, "out", "gfx", "uifont.bin"), "rb").read()
+    full = open(os.path.join(ROOT, "out", "work", "gfx", "uifont.bin"), "rb").read()
     for ch, code, colr in EXTRA:                    # icone della UI (moneta, spada, armatura, anello)
         o.append("        .byte " + ",".join("$%02x" % b for b in full[code * 8:code * 8 + 8]))
     tot = 0
@@ -252,7 +252,7 @@ def main():
             o.append("        .byte " + ",".join(str(b) for b in d[i:i + 24]))
     o.append("help_plo .byte " + ",".join("<help_p%d" % n for n in range(len(pages))))
     o.append("help_phi .byte " + ",".join(">help_p%d" % n for n in range(len(pages))))
-    open(os.path.join(ROOT, "out", "help.inc"), "w").write("\n".join(o) + "\n")
+    open(os.path.join(ROOT, "out", "work", "help.inc"), "w").write("\n".join(o) + "\n")
     preview(hud, glyph_codes, screens)
     print("help: %d pagine, %d B di pagine (RLE), %d glifi dell'HUD" % (len(pages), tot, len(glyph_codes)))
 

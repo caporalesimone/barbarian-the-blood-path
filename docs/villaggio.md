@@ -19,7 +19,7 @@ dalle porte di negozi e locanda (`tools/build/gen_maps.py` lo controlla a ogni b
 **Sentiero di uscita** (12/11, committente, TODO M1): dalla porta della chiesa un sentiero largo 2 (colonne 26–27) sale fino
 al bordo nord, dalla parte opposta all'ingresso (strada a sud, colonna 16). Le due caselle sul bordo sono scritte `=` nel
 testo della mappa: è la **casella generica di uscita del capitolo** (`ALIASES` in `tools/build/gen_maps.py`: diventa un sentiero, la
-posizione va in `out/town_places.inc`, `tx_exit_x/y`, da 1 a 4 caselle). Fuori dalla mappa è solido, quindi lì il PG si
+posizione va in `out/work/town_places.inc`, `tx_exit_x/y`, da 1 a 4 caselle). Fuori dalla mappa è solido, quindi lì il PG si
 ferma: finché il capitolo dopo è chiuso la strada "continua" ma non succede nulla; dopo l'uccisione del boss del capitolo
 compare `travel to next chapter` e Fire porta al villaggio dopo ([capitoli](capitoli.md)). La mappa RLE è di 1718 B su
 1792 (`TOWN_MAX`).
@@ -83,7 +83,7 @@ lapide, croce, fianchi, tetto e fronte della cripta). I tile con un ruolo nel co
 solidi, così il codice di scale, raccolta e bauli non li incontra mai sotto il PG. La tabella dei tile solidi è in RAM
 (`solidtab`, copiata da `solid_town` o `solid_dun` a ogni `load_location`). 10/11: tolti `BARREL` e `HAY`, aggiunti `WINDOW`
 (posto 33), `CHIMNEY` (42), `FENCEV` (43) e `SPIRE` (44), tutti solidi. Nomi e descrizioni di ogni tile: atlante grafico
-(`out/atlas/`, `tools/atlas/atlas_names.py`).
+(`out/work/atlas/`, `tools/atlas/atlas_names.py`).
 
 Colori: in modo testo multicolor ogni schermata ha 3 colori condivisi (sfondo verde, marrone, grigio chiaro) più
 **uno** per carattere, uguale per tutta la mappa (ciano: acqua, vetri, riflessi). Un colore diverso per tile
@@ -113,7 +113,7 @@ dalle porte `S L H`: lo controlla `tools/build/gen_maps.py` (errore di build).
 **Portale**: tile ridisegnato (06/11 sera) come un arco di pietra in piedi con un ovale luminoso nel vano, perché
 il vecchio (anelli concentrici grigio/ciano) si confondeva con l'acqua e la fontana; nel villaggio non c'è il
 giallo (palette verde/marrone/grigio chiaro + ciano), quindi si distingue per la forma. Nel dungeon prende i colori
-della palette del piano. Atlante: `out/atlas/` (`VILLGO`, `DUNGxO`).
+della palette del piano. Atlante: `out/work/atlas/` (`VILLGO`, `DUNGxO`).
 
 ## Armaiolo: tolto (09/11, decisione del committente)
 
@@ -227,7 +227,7 @@ distanze `tools/village_audit.py`) per non sovrascriverlo; ogni ingresso nella l
 2. La mappa del villaggio (`MAP`, `$C000`–`$C8FF`) non deve usare `$C900`–`$CFFF` (zona 1 del modulo MENU).
 3. `python3 tests/run.py regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
 4. Aggiornare `docs/quests.md` (sez. 3.6, villaggi multipli) e il `TODO.md` se resta qualcosa.
-5. (12/11) Il file del villaggio del capitolo *c* è `TWNc` (`tools/build/mkdisk.sh`; oggi `TWN1`…`TWN4` sono copie di `out/gfx0.prg`).
+5. (12/11) Il file del villaggio del capitolo *c* è `TWNc` (`tools/build/mkdisk.sh`; oggi `TWN1`…`TWN4` sono copie di `out/work/gfx0.prg`).
    Un villaggio con una mappa diversa richiede le sue costanti (portale, cripta, ingresso `TOWN_*` in `levels.asm`; uscita
    `tx_exit`; porte per la minimappa): oggi valgono per tutti, da trasformare in una tabella per capitolo.
 

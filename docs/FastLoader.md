@@ -38,8 +38,8 @@ flowchart LR
 
 | Passo | Dove | Cosa |
 |---|---|---|
-| 1 | `tools/build/krill_build.sh` (chiamato da `tools/build/asm.sh`) | scompatta `src/third-party/krill/loader-v194.zip` in `out/krill/pkg` (usa e getta) e costruisce con `ca65`/`ld65` (pacchetto `cc65`) e la nostra configurazione `src/common/krill/loaderconfig.inc`: `out/krill/install.prg`, `loader.prg` (residente), `save.prg` (plugin), `cc1541` |
-| 2 | `tools/build/krill_syms.py` | `out/krill.inc` per 64tass: `krill_install`, `krill_loadraw`, `krill_save`, `krill_uninstall`, `krill_loadaddrlo/hi`, `krill_endaddrlo/hi`, lunghezze |
+| 1 | `tools/build/krill_build.sh` (chiamato da `tools/build/asm.sh`) | scompatta `src/third-party/krill/loader-v194.zip` in `out/work/krill/pkg` (usa e getta) e costruisce con `ca65`/`ld65` (pacchetto `cc65`) e la nostra configurazione `src/common/krill/loaderconfig.inc`: `out/work/krill/install.prg`, `loader.prg` (residente), `save.prg` (plugin), `cc1541` |
+| 2 | `tools/build/krill_syms.py` | `out/work/krill.inc` per 64tass: `krill_install`, `krill_loadraw`, `krill_save`, `krill_uninstall`, `krill_loadaddrlo/hi`, `krill_endaddrlo/hi`, lunghezze |
 | 3 | `src/start.asm` / `src/common/boot.asm` | include l'install (a `INSTALL = $0840`, dopo lo stub BASIC) e il residente (copiato a `$0200`) |
 | 4 | `src/game/rel.asm` | plugin a `TRANSIENT = $E820` (`krill_save`), fra l'immagine del file dell'eroe e il buffer del plugin, sotto il KERNAL (`.cerror` sulle tre aree) |
 | 5 | `tools/build/mkdisk.sh` | disco con il `cc1541` di Krill (`-M 8` = `FILENAME_MAXLENGTH`: hash dei nomi a 8 caratteri; collisioni rifiutate), `BARBARIAN` primo; crea `hl`, `save-01..05` della lunghezza giusta e `ksave` |

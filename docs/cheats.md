@@ -10,7 +10,7 @@ misurabile. Se se ne aggiunge uno va elencato qui.
 - **Che cosa fa**: `hurt_player` (`src/game/combat.asm`) salta la sottrazione della vita se il byte `godmode` è
   diverso da 0. Tutto il resto (suoni, stordimento, avvisi dell'HUD, usura) resta com'è. Costo: 5 B di codice.
 - **Indirizzo**: `godmode` è un byte del PRG di GAME nel secondo blocco di codice (`CODE2`, `src/game.asm`): l'indirizzo
-  cambia con le build, leggerlo da `out/game.lbl` (`grep '^godmode' out/game.lbl`). `game_start` **non** lo azzera:
+  cambia con le build, leggerlo da `out/work/game.lbl` (`grep '^godmode' out/work/game.lbl`). `game_start` **non** lo azzera:
   resta acceso per tutta la sessione. Non è nel blocco dell'eroe: non finisce nei salvataggi.
 - **Come si attiva**:
   - **Prima del `RUN`** (hardware reale o VICE, 11/11): `LOAD"*",8` poi **`POKE 1021,1`** e `RUN`. `START` legge il
@@ -49,12 +49,12 @@ pausa (`> aaaa vv`, poi `x` per riprendere) o con un cartridge freezer su hardwa
 `POKE a,v` in BASIC = `> aaaa vv` nel monitor (esadecimale). I valori a 16 bit si scrivono basso, alto.
 
 `godmode` è una variabile di GAME. I dati dell'eroe stanno nel blocco `CHRBLK` a `$9500` e cambiano solo se cambia il formato del
-salvataggio; `hud_dirty` può spostarsi a ogni build. Indirizzi della **v1.64**: in dubbio leggerli da `out/game.lbl`
-(`grep '^c_hp' out/game.lbl`).
+salvataggio; `hud_dirty` può spostarsi a ogni build. Indirizzi della **v1.64**: in dubbio leggerli da `out/work/game.lbl`
+(`grep '^c_hp' out/work/game.lbl`).
 
 | Che cosa | Etichetta | Indirizzo | POKE (decimale) | Monitor VICE | Note |
 |---|---|---|---|---|---|
-| God mode on | `godmode` | da `out/game.lbl` | `POKE 1021,1` prima del `RUN` | `> <indirizzo> 01` | `0` per spegnere |
+| God mode on | `godmode` | da `out/work/game.lbl` | `POKE 1021,1` prima del `RUN` | `> <indirizzo> 01` | `0` per spegnere |
 | Avvio diretto (senza menu del loader) | `POKE_SKIP` | `$03FC` | `POKE 1020,1` prima del `RUN` | — | subito `START`, senza il menu del loader |
 | Vita 999 | `c_hp` | `$950A` | `POKE 38154,231: POKE 38155,3` | `> 950a e7 03` | 999 = `$03E7`; sopra la vita massima: comportamento **da verificare** (probabilmente riportata al massimo al primo `recalc_stats`/cura) |
 | Oro addosso 10000 (massimo) | `c_gold` | `$9508` | `POKE 38152,16: POKE 38153,39` | `> 9508 10 27` | 10000 = `$2710` = `GOLD_MAX`; oltre, il gioco lo riporta a 10000 al primo oro raccolto |

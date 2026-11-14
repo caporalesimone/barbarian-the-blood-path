@@ -37,7 +37,7 @@ ST      = $90
 LDFLAGS = $8e                   ; 1 = LOBBY gia' a $C000 (11/11: pagina zero, il residente di Krill occupa $0200-$0312)
 CHRPRE  = $8f                   ; 1 = elenco eroi (file hl) gia' letto, in CHRBUF (lobby.asm)
 POKE_GOD = $03fd                ; (11/11) POKE 1021,1 prima del RUN = god mode (docs/cheats.md); letto prima dell'install
-        .include "krill.inc"    ; out/krill.inc (tools/build/krill_syms.py): START e LORE installano Krill's Loader r194
+        .include "krill.inc"    ; out/work/krill.inc (tools/build/krill_syms.py): START e LORE installano Krill's Loader r194
 CHRTMP  = TXT ? $b800 : $b000                 ; durante il caricamento: stato (1 = letto) + file hl (elenco eroi)
 CHRBUF  = $d000                 ; dopo SPAZIO (RAM sotto l'I/O, liberata dal villaggio)
 HDR_N   = 1 + 5 + 5*12          ; versione + eroi presenti + 5 nomi da 12
@@ -610,7 +610,7 @@ txt_t_n = * - txt_t
 txt_w   .text "please wait"
 txt_w_n = * - txt_w
         .enc "none"
-txt_font .binary "../../out/gfx/uifont.bin", 0, 512
+txt_font .binary "../../out/work/gfx/uifont.bin", 0, 512
 .endif
 
 ; ------------------------------------------------------------------ IRQ: musica e sprite
@@ -705,13 +705,13 @@ colour  txa                     ; colore dello sprite X: tabella sfumata, sfasat
 ZX_ZP   = $50                   ; 15 byte della pagina zero del BASIC (il BASIC non gira; il KERNAL non li usa)
         .include "zx0.inc"
 .if LORE
-        .include "lore.inc"         ; out/lore.inc: LD_AT, LD_DST, LR_ROWS... (tools/build/gen_lore.py)
+        .include "lore.inc"         ; out/work/lore.inc: LD_AT, LD_DST, LR_ROWS... (tools/build/gen_lore.py)
 UNP_AT  = LD_AT
 UNP_DST = LD_DST
         .include "lore/scroll.asm"
         .include "tramp.inc"
 .else
-        .include "pack.inc"         ; out/pack.inc: GAME_ZX_AT, GAME_ZX_DST (tools/build/pack.py)
+        .include "pack.inc"         ; out/work/pack.inc: GAME_ZX_AT, GAME_ZX_DST (tools/build/pack.py)
 UNP_AT  = GAME_ZX_AT
 UNP_DST = GAME_ZX_DST
 .endif
@@ -722,7 +722,7 @@ SP_V0   = 0
 SP_V1   = 7
 SP_V2   = 14
         .include "sid_player.inc"
-        .include "sid_title.inc"        ; out/sid_title.inc (tools/build/gen_music.py)
+        .include "sid_title.inc"        ; out/work/sid_title.inc (tools/build/gen_music.py)
         .cerror SP_VARS + SP_VSIZE > $c000, "variabili del player oltre $BFFF"
 lm_init:
         ldx #$18

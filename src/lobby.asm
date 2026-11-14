@@ -1,8 +1,8 @@
 ; ===================================================================
 ;  menu iniziale: elenco eroi, scheda eroe salvato, nuovo eroe (file LOBBY, eseguito a $C000)
-;  Modulo su file: assemblato a parte (tools/build/asm.sh) con le etichette del gioco (out/game.lbl).
+;  Modulo su file: assemblato a parte (tools/build/asm.sh) con le etichette del gioco (out/work/game.lbl).
 ; ===================================================================
-        .include "../out/game.lbl"
+        .include "../out/work/game.lbl"
         .include "macros.inc"
         * = LOBBY_AT
         jmp menu_main

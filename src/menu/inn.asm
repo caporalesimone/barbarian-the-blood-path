@@ -50,7 +50,7 @@ ov_stash:
 .endif
 _scr    jsr h_screen
 _dr     jsr h_draw
-.if NOKEYS                      ; (da out/game.lbl: build di test per gli screenshot)
+.if NOKEYS                      ; (da out/work/game.lbl: build di test per gli screenshot)
 _hg     jmp _hg
 .endif
 _in     jsr h_flash

@@ -1,5 +1,5 @@
 """Build smoke tests (static, < 2 s): memory margin, save version, centred version string, manual source, graphics
-atlas. They read the files produced by the build in out/."""
+atlas. They read the files produced by the build in out/work/."""
 import os, re, subprocess, sys
 from lib.c64 import ROOT, labels
 from lib.runner import test, check

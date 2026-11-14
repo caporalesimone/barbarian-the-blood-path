@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Graphics atlas of the game: out/atlas/index.html (+ a lossless PNG per tile and per map, tiles.json). English (11/11).
+"""Graphics atlas of the game: out/work/atlas/index.html (+ a lossless PNG per tile and per map, tiles.json). English (11/11).
 
-Reads the same files the C64 reads (out/gfx/gfx0.prg, gfx1.prg, gfx2.prg, charset.bin, uifont.bin, out/title.koa) and
+Reads the same files the C64 reads (out/work/gfx/gfx0.prg, gfx1.prg, gfx2.prg, charset.bin, uifont.bin, out/work/title.koa) and
 the palettes from src/game.asm: the rendering is identical by construction, without VICE.
 Two parts (11/11): the common graphics (charset, HUD, UI font, sprites, menus from docs/screens, title, story) and one
 part per chapter (data/chapters.yaml: village, dungeon themes, final map).
@@ -21,7 +21,7 @@ import gen_final as F
 import atlas_names as AN
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-OUT = os.path.join(ROOT, "out", "atlas")
+OUT = os.path.join(ROOT, "out", "work", "atlas")
 CHECK = "--check" in sys.argv
 # palette VICE "colodore" (la stessa di tools/build/gen_title.py)
 PAL = [(0, 0, 0), (255, 255, 255), (136, 57, 50), (103, 182, 189), (139, 63, 150), (85, 160, 73), (64, 49, 141),
@@ -53,7 +53,7 @@ def palette(i):
 
 
 # ------------------------------------------------------------------ tile dai file GFXn
-consts = open(os.path.join(ROOT, "out", "gfx_consts.inc")).read()
+consts = open(os.path.join(ROOT, "out", "work", "gfx_consts.inc")).read()
 NT = int(re.search(r"^GFX_NT = (\d+)", consts, re.M).group(1))
 DN = int(re.search(r"^GFX_DSTRIP = (\d+)", consts, re.M).group(1)) // 8
 
@@ -75,9 +75,9 @@ def tiles_from(data, n):
     return out
 
 
-town_t = tiles_from(rd("out/gfx/gfx0.prg")[2:], NT)
-dun_t = tiles_from(rd("out/gfx/gfx1.prg")[2:], DN)
-trono_t = tiles_from(rd("out/gfx/gfx2.prg")[2:], DN)
+town_t = tiles_from(rd("out/work/gfx/gfx0.prg")[2:], NT)
+dun_t = tiles_from(rd("out/work/gfx/gfx1.prg")[2:], DN)
+trono_t = tiles_from(rd("out/work/gfx/gfx2.prg")[2:], DN)
 
 
 def post_walls(m, rng):
@@ -272,7 +272,7 @@ for s in SETS:
 json.dump(records, open(os.path.join(OUT, "tiles.json"), "w"), indent=1, ensure_ascii=False)
 
 # ------------------------------------------------------------------ titolo
-koa = rd("out/title.koa")
+koa = rd("out/work/title.koa")
 bm, scr, col, bg = koa[:8000], koa[8000:9000], koa[9000:10000], koa[10000]
 tim = Image.new("RGB", (320, 200))
 used_cells, free_rows, colcount = 0, {}, {}
@@ -294,9 +294,9 @@ for cell in range(1000):
     else:
         free_rows.setdefault(cy, []).append(cx)
 tim.resize((640, 400), Image.NEAREST).save(os.path.join(OUT, "png", "title.png"), optimize=True)
-title_size = len(rd("out/title.prg")) - 2
+title_size = len(rd("out/work/title.prg")) - 2
 import shutil
-shutil.copy(os.path.join(ROOT, "out", "gfx", "sprites.png"), os.path.join(OUT, "png", "sprites.png"))
+shutil.copy(os.path.join(ROOT, "out", "work", "gfx", "sprites.png"), os.path.join(OUT, "png", "sprites.png"))
 
 
 def spans(xs):
@@ -311,7 +311,7 @@ def spans(xs):
 
 
 # ------------------------------------------------------------------ mappa dei 256 codici del charset del gioco
-cs = rd("out/gfx/charset.bin")
+cs = rd("out/work/gfx/charset.bin")
 codes = []
 hud_inv = {c: n for n, c in G.HUD_ID.items()}
 for c in range(256):
@@ -329,7 +329,7 @@ for c in range(256):
     else:
         kind, lab = ("mini", "blank (reserved: minimap)") if c == 63 else (("free" if not any(cs[c * 8:c * 8 + 8]) else "other"), "FREE")
     codes.append(dict(c=c, k=kind, l=lab, b=list(cs[c * 8:c * 8 + 8])))
-uif = list(rd("out/gfx/uifont.bin"))
+uif = list(rd("out/work/gfx/uifont.bin"))
 uiglyphs = AN.ui_glyphs()
 hudglyphs = [dict(c=c, n=n, name=AN.HUD[n][0], key=AN.HUD[n][1], desc=AN.HUD[n][2], b=list(cs[c * 8:c * 8 + 8]))
              for n, c in sorted(G.HUD_ID.items(), key=lambda t: t[1])]
@@ -416,4 +416,4 @@ DATA["menus"] = [dict(file=f, title=MENUS.get(f[:-4], (f[:-4], ""))[0], desc=MEN
 html = html.replace("/*DATA*/null", json.dumps(DATA, separators=(",", ":")))
 html = html.replace("/*TITLE*/null", json.dumps(title_info))
 open(os.path.join(OUT, "index.html"), "w").write(html)
-print("atlas: out/atlas/index.html (%d sets, %d tiles, %d groups, %d chapters)" % (len(SETS), len(records), len(groups), len(DATA["chapters"])))
+print("atlas: out/work/atlas/index.html (%d sets, %d tiles, %d groups, %d chapters)" % (len(SETS), len(records), len(groups), len(DATA["chapters"])))

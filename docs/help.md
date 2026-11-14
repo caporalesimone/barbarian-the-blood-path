@@ -3,15 +3,15 @@
 Copyright © 2026 - Simone Caporale
 
 Sorgenti: `src/help.asm` (programma), `data/help.txt` (testo delle pagine), `data/help_hud.json` (fotografia
-dell'HUD), `tools/build/gen_help.py` (genera `out/help.inc` e l'anteprima `out/atlas/help.png`). Test: `tests/regression/boot/test_lore.py`
+dell'HUD), `tools/build/gen_help.py` (genera `out/work/help.inc` e l'anteprima `out/work/atlas/help.png`). Test: `tests/regression/boot/test_lore.py`
 (pagine e ritorno al menu in VICE), `tools/build/gen_help.py --check` (il ritaglio dell'HUD è ancora uguale al gioco).
 
 ## Dove sta e cosa costa
 
 - File **`HELP`** sul disco di **release** (29 blocchi, 7,1 KB), caricato dalla voce **read the game manual** del loader
   `BARBARIAN` con il trampoline, come `LORE`. Alla fine si torna a `BARBARIAN` (ricaricato dal disco).
-- **Sul disco è compresso** (12/11): il file `HELP` è `out/helpz.prg` (~15 blocchi invece di 32): un decompressore in testa
-  (`src/help/zx0sfx.asm`) si copia a `$8000` con i dati ZX0 (`out/help.zx0`, `tools/build/pack.py`), decomprime `out/help.prg` a
+- **Sul disco è compresso** (12/11): il file `HELP` è `out/work/helpz.prg` (~15 blocchi invece di 32): un decompressore in testa
+  (`src/help/zx0sfx.asm`) si copia a `$8000` con i dati ZX0 (`out/work/help.zx0`, `tools/build/pack.py`), decomprime `out/work/help.prg` a
   `$0801` e salta al suo `$080D`. `BARBARIAN` lo legge con il KERNAL: nell'emulatore web vc64web il manuale compare
   ~11 s dopo la scelta invece di ~20 s (misura a schermo, risoluzione 1 s). Test: `HELP-Z-10/11` (dati e disco), `LORE-10`
   (release: pagine dal disco).
@@ -36,7 +36,7 @@ flowchart LR
 | 4 | menus and saving | come ci si muove in tutte le schermate (W/S o leva, fire, RUN/STOP), menu di gioco (resume, save game, quit game che salva), menu dei barbari, scheda del barbaro (start, delete, back; domande: fire = sì), nuovo barbaro (RETURN, F1, DEL, RUN/STOP; stesso seed = stesso dungeon), morte (metà dell'oro, risveglio al villaggio) |
 | 5 | the hud | **ritaglio dell'HUD vero** con 8 marcatori numerati sopra e sotto, e la legenda: HP/XP, barre, icone dell'usura (lampeggiano al 20%, fisse in rosso se rotte), LV, H J K L (giallo = quella del fire), U O (giallo attiva, bianco pronta, ciano in ricarica), chiavi, cintura (pozioni blu in ricarica, pergamena); la riga in alto del gioco (luogo o mostro con la sua vita) |
 
-Anteprima delle 5 pagine (generata dalla build di release): ![help](../out/atlas/help.png)
+Anteprima delle 5 pagine (generata dalla build di release): ![help](../out/work/atlas/help.png)
 
 ## Tasti dell'help
 
@@ -51,7 +51,7 @@ Riga 0: titolo della pagina in giallo e "n/5" in ciano; riga 24: "fire: next  le
 ## Tecnica
 
 - Banco VIC 0, schermo `$0400`, charset a `$3000` (`$D018` = `$1C`): codici 0–63 = font della UI
-  (`out/gfx/uifont.bin`, lo stesso del gioco), codici 64.. = i glifi dell'HUD usati nel ritaglio (29). Il programma
+  (`out/work/gfx/uifont.bin`, lo stesso del gioco), codici 64.. = i glifi dell'HUD usati nel ritaglio (29). Il programma
   (codice + pagine) sta in `$0801`–`$23D6`; un `.cerror` controlla che non arrivi a `$3000`.
 - Schermo in **modo testo multicolore** (`$D016` = `$18`): il testo ha colori < 8 (alta risoluzione: bianco testo,
   giallo tasti e titoli, ciano note), il ritaglio dell'HUD i suoi colori, con `$D022`/`$D023` del tema fotografato.

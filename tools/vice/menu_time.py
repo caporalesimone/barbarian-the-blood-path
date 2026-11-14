@@ -19,7 +19,7 @@ try:
     c0 = g.last
     c = g.call(L["ovl_town"], tmax=180)
     print("1) ovl_town from the disk (file MENU, %d B): %.2f s" % (os.path.getsize(os.path.join(os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "out", "menu.prg")) - 2, (c - c0) / CPS))
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "out", "work", "menu.prg")) - 2, (c - c0) / CPS))
     g.poke(0x0350, 0x58, 0x4c, pc & 255, pc >> 8); g.pc(0x0350); g.at_input = False
     al = find(g, L["T_DALCH"])[0]
     for name, door in (("smith", SMITH_DOOR), ("alchemist", (al[0], al[1] + 1)), ("inn", INN_DOOR)):

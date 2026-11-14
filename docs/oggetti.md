@@ -1,6 +1,6 @@
 # Oggetti
 
-Sorgenti: `out/db.asm` (generato), `src/game/game.asm` (`give_item`, `add_to_pack`, `use_scroll`, `gen_item`),
+Sorgenti: `out/work/db.asm` (generato), `src/game/game.asm` (`give_item`, `add_to_pack`, `use_scroll`, `gen_item`),
 `src/game/ui.asm` (inventario, negozi, baule della locanda), `src/game/combat.asm` (`recalc_stats`, `drink`). Dati:
 il **database degli oggetti** `data/items/items.tsv` (11/11, una riga per oggetto, colonne in
 [data/items/README.md](../data/items/README.md), letto da `tools/build/items_db.py`); le regole che non sono oggetti

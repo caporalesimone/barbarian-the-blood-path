@@ -140,7 +140,7 @@ hanno il problema. Importante per il quest system: il motore deve riprendersi da
 ## 5. Come ripetere la misura
 
 1. `tools/build/asm.sh test` con `TESTFZ=2 TESTFZS=<n> TESTLVL=<piano> [TESTGOD=1] [TESTX/TESTY]`, poi `tools/build/mkdisk.sh dev`.
-2. VICE con monitor remoto come in 2.2; caricare `out/game.prg`, partire con `g 0400`, attendere.
+2. VICE con monitor remoto come in 2.2; caricare `out/work/game.prg`, partire con `g 0400`, attendere.
 3. Leggere `$03F8..$03FB` all'inizio e alla fine di una finestra (warp spento): persi = Δ`$03F8` − Δ`$03FA`.
 4. Per il tempo per funzione: `tools/vice/prof.sh`; per il ciclo: `TMDBG` + `tools/vice/tmrun.sh`.
 5. Stesso seme, stesso script, stessa versione per confrontare prima/dopo; annotare i numeri qui.

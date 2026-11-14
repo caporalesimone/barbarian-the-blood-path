@@ -4,7 +4,7 @@ Sorgenti: `src/game/game.asm` (`spawn_monsters`, `place_monster`, `init_monsters
 `kill_monster`, `final_tick`), `src/game/bar.asm` (`place_boss`, nomi), `src/game/combat.asm` (`floor_types`,
 `mon_hp_init`, `mon_attack`). Dati: il **bestiario** `data/monsters/bestiary.tsv`
 (11/11: schede, tier, colore, velocità, bonus del bottino; [bestiario](bestiario.md), righe `implemented = yes`),
-`data/rules.yaml` (`growth`, `boss`, `final_summons`) e `data/balance.yaml` (`spawn`, `boss`) → `out/db.asm`.
+`data/rules.yaml` (`growth`, `boss`, `final_summons`) e `data/balance.yaml` (`spawn`, `boss`) → `out/work/db.asm`.
 
 ## Tipi
 

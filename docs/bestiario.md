@@ -8,7 +8,7 @@ dell'**ultimo capitolo**; il **capitolo 1 ha un boss nuovo**; concept per altri 
 varianti potenziate come oggi). Modello: il database dei mostri di Diablo (DevilutionX).
 
 **Stato**: la tabella `data/monsters/bestiary.tsv` è la **sorgente dei mostri** dall'11/11 (`tools/build/bestiary.py`: nel gioco
-entrano le righe `implemented = yes`, out/db.asm identico a prima). Il gioco **non conosce ancora i capitoli** (TODO M9):
+entrano le righe `implemented = yes`, out/work/db.asm identico a prima). Il gioco **non conosce ancora i capitoli** (TODO M9):
 oggi usa i 9 mostri di sempre su 20 piani. Le altre righe sono **concept** (numeri provvisori, niente sprite).
 
 ## Come fa Diablo (DevilutionX, `assets/txtdata/monsters/`)

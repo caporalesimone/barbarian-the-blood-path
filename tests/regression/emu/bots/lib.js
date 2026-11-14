@@ -1,5 +1,5 @@
 // Shared helpers for the bots that run INSIDE the emulator (c64.runLoop, vc64web). They read the game RAM through the
-// labels of out/game.lbl and drive the hero through the joystick on port 2 only, like a player.
+// labels of out/work/game.lbl and drive the hero through the joystick on port 2 only, like a player.
 // The loop code is prepended with this file, so everything here is global for the bot that follows.
 const W = 48, MP = c64.peek('MAP', 2304), SOL = c64.peek('solidtab', 48);
 const solid = (x, y) => x < 0 || y < 0 || x >= W || y >= W || (SOL[MP[y * W + x]] & 1) === 1;

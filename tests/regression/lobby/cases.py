@@ -18,7 +18,7 @@ def lobby_disk(ctx):
     check('"lobby"' in lst.lower(), "START does not name the file lobby")
 
 
-@test("LOBBY-11", "GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/lobby.prg")
+@test("LOBBY-11", "GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg")
 def lobby_load(ctx):
     from lib.c64 import Game
     from lib.play import new_game
@@ -29,7 +29,7 @@ def lobby_load(ctx):
         lp = open(os.path.join(OUT, "lobby.prg"), "rb").read()[2:]
         g.poke(0xC000, *([0] * 64))
         g.call(L["load_menu"], tmax=120)
-        check(g.mem(0xC000, len(lp)) == list(lp), "RAM at $C000 differs from out/lobby.prg after load_menu")
+        check(g.mem(0xC000, len(lp)) == list(lp), "RAM at $C000 differs from out/work/lobby.prg after load_menu")
         check(g.b(L["ovl_cur"]) == 0, "ovl_cur not cleared (LOBBY covers OVLT)")
     finally:
         g.close()

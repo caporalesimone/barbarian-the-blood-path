@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Mappe fisse disegnate a mano (file di testo in data/): villaggio. Una lettera per casella (48x48).
-Uscita: out/town.map (RLE). Formato RLE: byte b < $C0 = tile; b >= $C0 = ripeti il byte successivo (b & $3F) + 2 volte.
+Uscita: out/work/town.map (RLE). Formato RLE: byte b < $C0 = tile; b >= $C0 = ripeti il byte successivo (b & $3F) + 2 volte.
 Uso: python3 tools/build/gen_maps.py [--from-bin map.bin]   (--from-bin: crea data/town_map.txt da un dump della mappa)"""
 import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -18,7 +18,7 @@ LEGEND = {"GRASSA": ".", "GRASSB": ",", "GRASSC": "`", "PATH": ":", "DIRT": "d",
 assert len(set(LEGEND.values())) == len(LEGEND) and set(LEGEND) == set(G.TTID), "legenda incompleta"
 CH = {c: G.TTID[n] for n, c in LEGEND.items()}
 # (12/11, TODO M1) caselle speciali generiche: una lettera in piu' che nella mappa diventa un tile normale ma la cui
-# posizione va in out/town_places.inc. "=" = uscita del capitolo (sentiero): tx_exit, TX_EXIT_N.
+# posizione va in out/work/town_places.inc. "=" = uscita del capitolo (sentiero): tx_exit, TX_EXIT_N.
 ALIASES = {"=": "PATH"}
 EXITS = "="
 CH.update({c: G.TTID[n] for c, n in ALIASES.items()})
@@ -27,7 +27,7 @@ def inv_legend():
     d = {c: n for n, c in LEGEND.items()}
     d.update(ALIASES)
     return d
-# luoghi (porte) per la minimappa: tools/build/gen_maps.py scrive out/town_places.inc
+# luoghi (porte) per la minimappa: tools/build/gen_maps.py scrive out/work/town_places.inc
 PLACES = [("DSMITH", "tp_smith"), ("DALCH", "tp_alch"), ("DHOME", "tp_home"), ("TSTAIRS", "tp_crypt")]
 
 def rle(data):
@@ -72,7 +72,7 @@ def main():
         bad = [(x, y) for y in range(max(0, dy - 3), min(H, dy + 4)) for x in range(max(0, dx - 3), min(W, dx + 4))
                if m[y * W + x] in dec]
         assert not bad, f"arredi entro 3 caselle dalla porta {n} ({dx},{dy}): {bad}"
-    with open(os.path.join(ROOT, "out", "town_places.inc"), "w") as f:
+    with open(os.path.join(ROOT, "out", "work", "town_places.inc"), "w") as f:
         f.write("; generato da tools/build/gen_maps.py: colonna e riga delle porte del villaggio (minimappa)\n")
         for n, lab in PLACES:
             i = m.index(G.TTID[n])
@@ -84,7 +84,7 @@ def main():
         f.write("tx_exit_y .byte " + ", ".join(str(y) for _, y in ex) + "\n")
         f.write(f"TX_EXIT_N = {len(ex)}\n")
     r = rle(m)
-    open(os.path.join(ROOT, "out", "town.map"), "wb").write(r)
+    open(os.path.join(ROOT, "out", "work", "town.map"), "wb").write(r)
     print(f"villaggio: {len(r)} byte RLE (da {len(m)})")
 
 if __name__ == "__main__":

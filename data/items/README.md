@@ -8,7 +8,7 @@ The table of **every item** of the game (11/11), in the spirit of the item table
 build. Loader and checker: `tools/build/items_db.py` (`python3 tools/build/items_db.py` checks the table and prints it). The tools
 read it through `items_db.load_rules()`, which merges the rows into the `data/rules.yaml` sections they always used
 (`weapons`, `armors`, `shields`, `rings`, `potions`, `scrolls`, `void_weapons`): `tools/build/gen_db.py` (game data
-`out/db.asm`), `tools/manual/gen_manual.py` (manual), `tools/simulators/` (balancing). The rules that are not items (durability, `dex_cap`,
+`out/work/db.asm`), `tools/manual/gen_manual.py` (manual), `tools/simulators/` (balancing). The rules that are not items (durability, `dex_cap`,
 `magic_max`, `start_weapon`, where potions drop) stay in `data/rules.yaml`; shops and loot weights in `data/balance.yaml`.
 
 ## Categories and types
@@ -22,7 +22,7 @@ read it through `items_db.load_rules()`, which merges the rows into the `data/ru
 
 | Column | Types | Meaning |
 |---|---|---|
-| `id` | all | identifier (lowercase, `_`): the game constant is `I_<ID>` (`out/db.asm`) |
+| `id` | all | identifier (lowercase, `_`): the game constant is `I_<ID>` (`out/work/db.asm`) |
 | `category` | all | `consumable` or `equipment` (must match the type) |
 | `type` | all | `weapon`, `armor`, `shield`, `ring`, `potion`, `scroll` |
 | `name` | all (void: no) | name in the game, English, lowercase; at most 16 characters shown with the prefix/suffix (`gen_db.py` checks) |

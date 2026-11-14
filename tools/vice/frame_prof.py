@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Profilo del ciclo principale per fotogramma (11/11, docs/prestazioni.md): una fermata dopo ogni `jsr` di main_loop
-(indirizzi presi da out/game.lst), cicli di ogni routine a ogni giro (IRQ compresi), su un piano scelto, camminando come
+(indirizzi presi da out/work/game.lst), cicli di ogni routine a ogni giro (IRQ compresi), su un piano scelto, camminando come
 i test PERF (8 direzioni, teletrasporto vicino ai mostri), con o senza corsa di Frenzy (fz_run).
 Uscita: per ogni routine media / 95° percentile / massimo in cicli, giri lunghi (> 1 fotogramma), fotogrammi video per
 giro (50 / questo = fotogrammi al secondo effettivi).

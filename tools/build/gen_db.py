@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Genera out/db.asm da data/rules.yaml (combattimento: PG, abilita', oggetti, schede e crescita dei mostri,
+"""Genera out/work/db.asm da data/rules.yaml (combattimento: PG, abilita', oggetti, schede e crescita dei mostri,
 esperienza) e data/balance.yaml (mondo: generazione, bottino, bauli, negozi, nomi, colori).
 uso: python3 tools/build/gen_db.py [--check]
 Formule e significato delle tabelle: docs/combattimento.md, docs/mostri.md, docs/oggetti.md."""
@@ -10,7 +10,7 @@ import items_db  # noqa: E402
 import bestiary  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-DST = os.path.join(ROOT, "out", "db.asm")
+DST = os.path.join(ROOT, "out", "work", "db.asm")
 
 CATS = ["weapon", "armor", "shield", "ring", "potion", "scroll"]          # id categoria = indice + 1
 CAT_CONST = ["CAT_WEAPON", "CAT_ARMOR", "CAT_SHIELD", "CAT_RING", "CAT_POTION", "CAT_SCROLL"]

@@ -7,7 +7,7 @@ One session, a chain (after a failure the following tests are SKIP): real boot f
 (saved with Krill's save plugin on the emulated 1541-II) -> village (HUD text read from the screen RAM) -> alchemist
 (buys a portal scroll) -> crypt -> kill a monster -> portal scroll -> back in the village -> reset and boot again: the
 saved hero is in the list. About 4 minutes. The bots (bots/*.js) run inside the emulator and read the game RAM through
-the labels of out/game.lbl. SKIP (not FAIL) when the daemon (container c64-emu-vc64web, EMU_URL) is not running."""
+the labels of out/work/game.lbl. SKIP (not FAIL) when the daemon (container c64-emu-vc64web, EMU_URL) is not running."""
 import os
 from lib.runner import test, check, Skip
 from lib.c64 import OUT, ROOT
@@ -22,7 +22,7 @@ H = os.path.dirname(os.path.abspath(__file__))
 HERO = "black thorne"                                # project rule: 12 characters with a space
 SEED_TXT = "terrar"                                  # village with the alchemist at its door; the same on every run
 TILE = {n: i for i, n in enumerate(GG.TILES)}
-GL = {}                                              # item constants of out/game.lbl (`I_NAME = value`), read in setup
+GL = {}                                              # item constants of out/work/game.lbl (`I_NAME = value`), read in setup
 
 
 def js(name):

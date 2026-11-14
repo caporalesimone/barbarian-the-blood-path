@@ -1,7 +1,7 @@
 ; =============================================================================
-; HELP compresso (12/11, TODO M5b): il file HELP sul disco e' questo programma, lungo meno della meta' di out/help.prg.
+; HELP compresso (12/11, TODO M5b): il file HELP sul disco e' questo programma, lungo meno della meta' di out/work/help.prg.
 ; BARBARIAN lo carica con il KERNAL (tramp.inc) a $0801 e salta a $080D: qui il decompressore si copia a SFX_AT
-; insieme ai dati ZX0 (out/help.zx0, tools/build/pack.py --help), decomprime HELP a $0801 e salta al suo $080D.
+; insieme ai dati ZX0 (out/work/help.zx0, tools/build/pack.py --help), decomprime HELP a $0801 e salta al suo $080D.
 ; Il KERNAL legge ~14 blocchi invece di 32: l'attesa del manuale si accorcia (la decompressione costa una frazione).
 ; =============================================================================
         .cpu "6502"

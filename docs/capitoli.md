@@ -7,7 +7,7 @@ negozi e locanda), un certo numero di **piani di dungeon** e una **mappa finale 
 oggi; l'ultimo capitolo è l'**Abisso**, con una mappa propria (la città) e **255 piani**. Questa pagina è l'analisi:
 dal 12/11 il gioco ha la **sequenza** dei capitoli con contenuti segnaposto (sezione sotto); il resto della pagina è
 l'analisi dell'11/11. Strumenti già divisi per capitoli dall'11/11:
-l'atlante grafico ([grafica/index.html](../out/atlas/index.html)) e i simulatori del bilanciamento (`tools/simulators/chapters.py`), entrambi
+l'atlante grafico ([grafica/index.html](../out/work/atlas/index.html)) e i simulatori del bilanciamento (`tools/simulators/chapters.py`), entrambi
 da `data/chapters.yaml`.
 
 ## Nel codice: la sequenza dei capitoli (12/11, TODO M1)
@@ -28,7 +28,7 @@ flowchart LR
 |---|---|---|
 | Indice dei piani | **1–20 interno** (profondità globale: decide la difficoltà, regola del committente); il gruppo di 5 è il capitolo (`lv_grp`) | `rel.asm`, `chapter.asm` |
 | Stato dell'eroe | `c_chap` (capitolo in cui si gioca) e `c_unl` (capitolo più alto sbloccato), `SAVE_VER` $C7 | `game.asm`, [formato](FORMATO_DATI.md) |
-| Villaggi | file `TWN1`…`TWN4` (`load_gfx 0` con `c_chap`); oggi **copie** del villaggio 1 (`out/gfx0.prg`): stessa mappa, stesse costanti (`TOWN_*`, `tx_exit`) | `disk.asm`, `tools/build/mkdisk.sh` |
+| Villaggi | file `TWN1`…`TWN4` (`load_gfx 0` con `c_chap`); oggi **copie** del villaggio 1 (`out/work/gfx0.prg`): stessa mappa, stesse costanti (`TOWN_*`, `tx_exit`) | `disk.asm`, `tools/build/mkdisk.sh` |
 | Cripta | porta al primo piano del capitolo (`go_tdown`: `5(c−1)+1`); dal primo piano le scale salgono al villaggio | `game.asm`, `bar.asm` |
 | Piano del boss (5, 10, 15) | mappa fissa `BOSSCHc` (`data/maps/bosschapN.txt` → `tools/build/gen_bossmap.py`: 4 byte di intestazione con scale e boss, poi RLE come `FMAP`), letta nel buffer di `FMAP` (`bmap_load`), completata da `gen_cboss` (`post_walls`). Niente scale in giù, solo il boss del piano (`place_boss`, statistiche del piano) **disegnato con lo sprite del boss finale** (segnaposto del committente); grafica `GFX(2c)` (tile della sala del trono), palette rossa | `gen_io.asm`, `disk.asm`, `game.asm` |
 | Sblocco | uccidere il boss del piano del boss del capitolo *c* → `c_unl` = *c*+1 (lampo del bordo) | `chap_won` |
@@ -50,7 +50,7 @@ locale o globale: oggi il globale), boss con statistiche e IA propri (H6/M9).
 | Abisso | solo progetto (TODO): città, piani oltre il 20 | [quests](quests.md) |
 | Quest | progetto: 3 villaggi (`cur_level` 0 / 21 / 22) su un dungeon unico 1–20, tre "tratti" | [quests](quests.md) parte 3.6 |
 | Salvataggi | un file per eroe `save-0N` (11/11, Krill): eroe + 20 piani da 93 B, `c_vis` = 3 byte, un bit per piano | [salvataggi](salvataggi.md) |
-| Disco | 360 blocchi liberi su 664 (build dell'11/11) | [mappa del disco](../out/memory-map/mappa_disco.html) |
+| Disco | 360 blocchi liberi su 664 (build dell'11/11) | [mappa del disco](../out/work/memory-map/mappa_disco.html) |
 
 ## Il modello a capitoli
 

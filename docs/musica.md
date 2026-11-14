@@ -17,7 +17,7 @@ unico), `src/game/music.asm` (logica del gioco: scelta, caricamento, dissolvenze
 | Combattimento | Fight 1 (`31_fight_1`) | un motivetto a caso per piano, scelto al caricamento del piano |
 
 **Dal 12/11** (TODO M2) `PLAYLIST` ha in `town` e `level` **un brano per capitolo** (1..4, nell'ordine); un brano ripetuto è
-un solo file (`songs.game_files`), e `tools/build/gen_music.py` scrive le tabelle `snd_town_c` / `snd_lvl_c` (`out/music_tab.inc`).
+un solo file (`songs.game_files`), e `tools/build/gen_music.py` scrive le tabelle `snd_town_c` / `snd_lvl_c` (`out/work/music_tab.inc`).
 `snd_get` **non rilegge un brano già nel buffer** (`snd_cur`): fra i piani dello stesso capitolo il brano del luogo e il
 motivetto di combattimento non toccano il disco. Misura (`PERF-DISK-13`, VICE): scale nello stesso capitolo da 2,80 s a
 **2,24 s**. Il combattimento resta un elenco (uno a caso per piano; al massimo 36 file `SND0`–`SNDZ`). I candidati non scelti (`03_the_watcher`, `11_crypt_steps`,
@@ -28,10 +28,10 @@ motivetto di combattimento non toccano il disco. Misura (`PERF-DISK-13`, VICE): 
 ```mermaid
 flowchart LR
     S["tools/build/songs.py<br/>brani (testo)"] --> G["tools/build/gen_music.py"]
-    G --> F["out/snd/sndN.prg<br/>file SND0..SNDn sul disco"]
-    G --> T["out/music_tab.inc<br/>elenchi, lunghezze, banco"]
-    G --> L["out/sid_title.inc<br/>(loader)"]
-    G --> J["out/jukebox_songs.inc<br/>(jukebox)"]
+    G --> F["out/work/snd/sndN.prg<br/>file SND0..SNDn sul disco"]
+    G --> T["out/work/music_tab.inc<br/>elenchi, lunghezze, banco"]
+    G --> L["out/work/sid_title.inc<br/>(loader)"]
+    G --> J["out/work/jukebox_songs.inc<br/>(jukebox)"]
     F -->|"al caricamento del luogo,<br/>un brano alla volta"| B1["buffer del luogo $8A40<br/>buffer combattimento $8E80"]
     B1 --> P["src/common/sid_player.inc<br/>(sp_play, 1 volta per fotogramma)"]
 ```
@@ -47,7 +47,7 @@ flowchart LR
   Mentre la voce è degli effetti il filtro non la prende. I brani a 2 voci (Fear Below, Black Chant, Tavern,
   Fight 1) hanno la voce 1 muta.
 - **File su disco**: un file per brano (`SND0`…), nell'ordine villaggio, livelli, boss, combattimento
-  (`out/music_tab.inc` ha il commento con l'elenco). Si leggono **al caricamento del luogo** (`load_location` →
+  (`out/work/music_tab.inc` ha il commento con l'elenco). Si leggono **al caricamento del luogo** (`load_location` →
   `music_town` / `music_dungeon`, a schermo spento, senza schermata): **un brano alla volta**, direttamente nel suo
   buffer, e nessuna copia in RAM (decisione del 06/11 sera: la copia sotto l'I/O è stata tolta e quella RAM è libera).
   Se il brano scelto è già nel buffer non si rilegge (es. il motivetto di combattimento quando ce n'è uno solo).
@@ -108,7 +108,7 @@ Rilocabile: tutti gli indirizzi sono offset dall'inizio del brano (16 bit little
   irregolare, vedi sopra).
 - Il compilatore taglia ogni voce a fine battuta (16 tick; 6 per il 6/8 della taverna) e riusa i pattern uguali
   anche **trasposti**: i brani pesano 140–310 B (prima, a sequenza piatta, 260–450).
-- Frequenze: `out/sid_freq.inc` (generata, PAL, A4 = 440 Hz), indice 0 = pausa.
+- Frequenze: `out/work/sid_freq.inc` (generata, PAL, A4 = 440 Hz), indice 0 = pausa.
 
 ## Effetti sonori (`src/common/sfx.inc`)
 
@@ -121,4 +121,4 @@ che poi chiama `music_update`).
 `JUKEBOX` sul disco (`LOAD"JUKEBOX",8` + `RUN`; i brani sono dentro il file: non legge il disco, quindi Krill's Loader non serve): una schermata con tutti i
 brani (nome e ruolo) e gli 8 effetti, con il player e la mappatura delle voci del gioco. Tasti: cursore su/giù
 (o W/S) sceglie, RETURN suona, SPAZIO pausa, R ripetizione / singolo, X stop. Gli MP3 di ascolto si rifanno con
-`python3 tools/build/gen_music.py --render [nomi]` (jukebox con `AUTOPLAY` → VICE → `out/music/*.mp3`).
+`python3 tools/build/gen_music.py --render [nomi]` (jukebox con `AUTOPLAY` → VICE → `out/work/music/*.mp3`).

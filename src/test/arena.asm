@@ -1,7 +1,7 @@
 ; =============================================================================
-;  arena.asm - modulo ARENA (out/arena.prg, a AR_BASE = $C900) per i test di combattimento
+;  arena.asm - modulo ARENA (out/work/arena.prg, a AR_BASE = $C900) per i test di combattimento
 ;
-;  Si usa SOLO con la build arena del gioco (out/arena_game.prg, ARENA=1): stessa logica di
+;  Si usa SOLO con la build arena del gioco (out/work/arena_game.prg, ARENA=1): stessa logica di
 ;  combattimento del gioco vero, ma niente loader, menu, villaggio, disco, zaino, drop.
 ;  Comandato da tools/vice/arena.py attraverso il monitor di VICE:
 ;    1. carica arena_game.prg, arena.prg e il tema GFXn in $ED00 (RAM sotto il KERNAL)
@@ -14,7 +14,7 @@
 ;  Fase 1 (05/11): PG e mostri adiacenti; il bot non si sposta (BOT 0): si gira verso il mostro
 ;  piu' vicino e attacca. BOT 1: si avvicina al mostro piu' vicino (per le fasi successive).
 ; =============================================================================
-        .include "../../out/arena_game.lbl"
+        .include "../../out/work/arena_game.lbl"
         .enc "none"
 
 PAR      = $cf00                ; parametri (scritti da tools/vice/arena.py)

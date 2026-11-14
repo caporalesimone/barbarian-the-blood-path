@@ -1,4 +1,4 @@
-"""Analysis of the assembled code (11/11, tools/build/asm_audit.py, out/asm_audit/analisi_assembly.md): GAME has no unreachable code
+"""Analysis of the assembled code (11/11, tools/build/asm_audit.py, out/work/asm_audit/analisi_assembly.md): GAME has no unreachable code
 but the entries of the jump tables, the dead code found on 11/11 is gone, and the generated sources given to the
 assembler carry their comments (tile names, item and monster indexes). Pure Python on the listings of the build."""
 import json, os, re, subprocess, sys
@@ -16,7 +16,7 @@ def asm_reach(ctx):
     lb = open(os.path.join(OUT, "game.lbl")).read()
     for n in ("fill_rect", "chst_hold"):
         check(not re.search(r"^%s\s*=" % n, lb, re.M), "%s is back in GAME" % n)
-    check(os.path.exists(os.path.join(OUT, "asm_audit", "analisi_assembly.md")), "out/asm_audit/analisi_assembly.md missing")
+    check(os.path.exists(os.path.join(OUT, "asm_audit", "analisi_assembly.md")), "out/work/asm_audit/analisi_assembly.md missing")
 
 
 @test("ASM-11", "generated sources commented: every T_ tile constant with its description, item ids and monster types listed in db.asm")

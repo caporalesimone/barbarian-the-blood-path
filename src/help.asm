@@ -1,8 +1,8 @@
 ; =============================================================================
 ; HELP - il manuale del gioco (file HELP sul disco, solo release): voce "read the game manual" del loader BARBARIAN.
 ; Programma a se': non tocca il gioco (ne' RAM ne' tempo di CPU di GAME). Alla fine torna a BARBARIAN (trampoline).
-; Pagine a tutto schermo generate da tools/build/gen_help.py (data/help.txt) in out/help.inc: schermo e colori in RLE,
-; charset = font della UI (codici 0-63, out/gfx/uifont.bin) + i glifi dell'HUD fotografato dal gioco (codici 64..,
+; Pagine a tutto schermo generate da tools/build/gen_help.py (data/help.txt) in out/work/help.inc: schermo e colori in RLE,
+; charset = font della UI (codici 0-63, out/work/gfx/uifont.bin) + i glifi dell'HUD fotografato dal gioco (codici 64..,
 ; data/help_hud.json) per il ritaglio dell'HUD. Schermo multicolore: il testo ha colori < 8 (alta risoluzione), il
 ; ritaglio dell'HUD i suoi colori, con $D022/$D023 del tema fotografato.
 ; Tasti (09/11: ci si muove solo con joystick o WASD, niente tasti cursore): fire / spazio / RETURN / destra / D =
@@ -171,7 +171,7 @@ nm_front_n = * - nm_front
 
         .include "tramp.inc"
 
-font_d  .binary "../out/gfx/uifont.bin", 0, 512
-        .include "help.inc"     ; out/help.inc (tools/build/gen_help.py): glifi dell'HUD e pagine
+font_d  .binary "../out/work/gfx/uifont.bin", 0, 512
+        .include "help.inc"     ; out/work/help.inc (tools/build/gen_help.py): glifi dell'HUD e pagine
 help_end
         .cerror help_end > CHARS, "HELP oltre $3000 (charset)"

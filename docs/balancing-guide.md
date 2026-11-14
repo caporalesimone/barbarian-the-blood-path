@@ -17,7 +17,7 @@ progetto che valgono sempre sono in `CLAUDE.md`; i numeri correnti e le decision
    `docs/BILANCIAMENTO.md` § "Differenze fra simulatore e codice": se ne aggiungi una, scrivila lì.
 2. **Si cambiano i dati, non il codice**, finché si può: `data/rules.yaml` (regole del combattimento: PG,
    mostri, crescita per piano, pozioni, oggetti, durabilità) e `data/balance.yaml` (mondo: piazzamento dei mostri,
-   bottino, chestLevel, bauli, negozi, oro). `tools/build/gen_db.py` li trasforma in `out/db.asm` e **controlla**
+   bottino, chestLevel, bauli, negozi, oro). `tools/build/gen_db.py` li trasforma in `out/work/db.asm` e **controlla**
    limiti a 8/16 bit e coerenze (fallisce con un messaggio chiaro): leggere sempre il suo output.
 3. **Ogni cambio di bilanciamento si chiude con**: `./build.sh` verde (comprende `tests/regression/balance/test_balance.py`, che
    gira sul simulatore con soglie larghe), la pagina della wiki corrispondente aggiornata con i numeri nuovi, una
@@ -29,7 +29,7 @@ progetto che valgono sempre sono in `CLAUDE.md`; i numeri correnti e le decision
 | Strumento | Cosa fa | Tempo | Quando usarlo |
 |---|---|---|---|
 | `tools/simulators/rules.py` | modello condiviso: legge gli yaml, calcola statistiche di PG e mostri per piano (`floor_types`, `monster`, `Hero`, `ref_hero`), probabilità di colpire (`hit_chance`) | — | importato dagli altri |
-| `tools/simulators/sim_rules.py` | Monte Carlo dei combattimenti (d20, abilità, pozioni, stordimenti, boss, evocazioni) e **report HTML** `out/simulators/simulazione_regole.html` | ~2 min per il report | ogni volta che cambiano PG, mostri, abilità, pozioni, crescita |
+| `tools/simulators/sim_rules.py` | Monte Carlo dei combattimenti (d20, abilità, pozioni, stordimenti, boss, evocazioni) e **report HTML** `out/work/simulators/simulazione_regole.html` | ~2 min per il report | ogni volta che cambiano PG, mostri, abilità, pozioni, crescita |
 | `tools/simulators/sim_rules.py --fight PIANO LIVELLO MOSTRO [MOSTRO…]` | una serie singola, stampa vittorie, durata, vita finale, colpi | secondi | per rispondere a una domanda precisa |
 | `tools/simulators/fit_rules.py` | **taratura automatica** delle curve dei mostri (`growth.*`, `final_boss_hp_mult`, tabella dell'Abisso) sugli obiettivi del § 3 | 10–25 min | dopo un cambio che sposta la forza del PG (nuova arma, abilità, pozioni) |
 | `tools/simulators/cmp_rules.py` | confronto A/B di due set di regole sugli stessi combattimenti | minuti | per decidere fra due varianti |
@@ -132,7 +132,7 @@ parametri, poi arena/test per confermare che codice e simulatore coincidono.
   (1) `ac_per_floor`/`att_per_floor` per probabilità di colpire stabili (solo conti), (2) `curve_hp` e
   `curve_dmg` piano per piano, monotone, sugli obiettivi boss ~70% / gruppo ≥ 95% / durata 4–8 s, (3) il
   boss finale. Scrive `rules.yaml` e un commento con la data.
-- Poi **leggere il report** (`out/simulators/simulazione_regole.html`): la riga dei boss per piano non deve avere buchi
+- Poi **leggere il report** (`out/work/simulators/simulazione_regole.html`): la riga dei boss per piano non deve avere buchi
   (piani al 40% o al 100%); se ce ne sono, è di solito l'equipaggiamento di riferimento (`reference`) sbagliato
   per quel piano, non la curva.
 - Scheda base di un mostro nuovo: scegliere vita, CA, ATT, danno, salvezza in linea con i vicini di piano minimo
@@ -193,7 +193,7 @@ parametri, poi arena/test per confermare che codice e simulatore coincidono.
 - `void.table` (CA +, danno ×) tarata da `fit_rules.py --abyss-only` con livello = piano; obiettivo: curva di
   vittorie che scende dolcemente. Non è ancora giocabile: solo simulatore.
 
-## 6. Come leggere il report (`out/simulators/simulazione_regole.html`)
+## 6. Come leggere il report (`out/work/simulators/simulazione_regole.html`)
 
 1. **Tabelle del PG e dei mostri per piano**: controllare prima i numeri (CA, ATT, vita) per vedere a occhio
    un salto anomalo (un mostro che al piano 8 ha vita doppia del piano 7).

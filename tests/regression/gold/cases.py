@@ -1,5 +1,5 @@
 """Gold (10/11, sanity of the gold-in-tens feature, moved to regression on 11/11): inn chest gold in tens, payment with the total gold, no withdrawal, a sale
-over the purse cap does nothing. Only GAME and the module MENU (its zones, out/menu_zK.prg; 11/11) are loaded in VICE,
+over the purse cap does nothing. Only GAME and the module MENU (its zones, out/work/menu_zK.prg; 11/11) are loaded in VICE,
 without starting the game, and the real routines are called (st_gold, add_gold16, gold_need/gold_pay, shop_buy/shop_sell
 with a simulated confirmation) with the state written to memory, $01 = $35 as in the menus (zone 2 is under the
 KERNAL): one session, ~2 s."""

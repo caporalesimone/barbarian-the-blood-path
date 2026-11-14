@@ -27,9 +27,9 @@ KASMVNC_DEB="${KASMVNC_DEB:-kasmvncserver_ubuntu_noble_${KASMVNC_VERSION}_amd64.
 KASMVNC_URL="${KASMVNC_URL:-https://github.com/kasmtech/KasmVNC/releases/download/v$KASMVNC_VERSION/$KASMVNC_DEB}"
 SECRET=""; [ -n "${C64_CA_BUNDLE:-}" ] && SECRET="--secret id=ca,src=$C64_CA_BUNDLE"
 have() { docker image inspect "c64-$1" >/dev/null 2>&1; }
-vc64web_pages() {                      # pagine di vc64web in out/vc64web/: la page VirtualC64 la usa l'indice del viewer, la headless l'immagine
+vc64web_pages() {                      # pagine di vc64web in out/cache/vc64web/: la page VirtualC64 la usa l'indice del viewer, la headless l'immagine
     have builder || "$0" builder
-    (cd "$ROOT" && "$TC/run.sh" builder python3 "$REL/vc64web-custom/build.py" --no-docker --no-ffmpeg-check --out out/vc64web)
+    (cd "$ROOT" && "$TC/run.sh" builder python3 "$REL/vc64web-custom/build.py" --no-docker --no-ffmpeg-check --out out/cache/vc64web)
 }
 
 vice_tarball() {                       # scarica il tarball di VICE sull'host, se manca
@@ -69,7 +69,7 @@ for n in $NAMES; do
     emu-vc64web)
         vc64web_pages
         # shellcheck disable=SC2086
-        DOCKER_BUILDKIT=1 docker build -q $SECRET -t c64-emu-vc64web --build-context pages="$ROOT/out/vc64web" \
+        DOCKER_BUILDKIT=1 docker build -q $SECRET -t c64-emu-vc64web --build-context pages="$ROOT/out/cache/vc64web" \
             "$TC/vc64web-custom" >/dev/null ;;
     *) echo "immagine sconosciuta: $n"; exit 1 ;;
     esac
@@ -79,8 +79,8 @@ done
 # gia' dentro le immagini; per rifarle (--force) i sorgenti si riscaricano da soli (il contenuto e' lo stesso: la cache di
 # BuildKit resta valida). La pagina headless di vc64web serve solo alla build dell'immagine (c64d.js la ha nel container).
 # la pagina VirtualC64 serve all'indice del viewer anche se l'immagine di vc64web c'e' gia' (out/ puo' essere stato svuotato)
-case " $NAMES " in *" emu-viewer "*) ls "$ROOT"/out/vc64web/VirtualC64-v*.html >/dev/null 2>&1 || vc64web_pages >/dev/null ;; esac
+case " $NAMES " in *" emu-viewer "*) ls "$ROOT"/out/cache/vc64web/VirtualC64-v*.html >/dev/null 2>&1 || vc64web_pages >/dev/null ;; esac
 have emu-vice && rm -f "$TC/vice/download/"*.tar.gz
 have emu-viewer && rm -f "$TC/kasmvnc/download/"*.deb
-have emu-vc64web && rm -f "$ROOT/out/vc64web/c64-headless.html"
+have emu-vc64web && rm -f "$ROOT/out/cache/vc64web/c64-headless.html"
 true

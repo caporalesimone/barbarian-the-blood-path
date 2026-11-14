@@ -11,7 +11,7 @@ closest to the real game (everything else runs as usual)."""
 import glob, os, re, shutil, signal, socket, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "out")
+OUT = os.path.join(ROOT, "out", "work")
 ROMS = os.path.join(ROOT, "toolchain", "roms", "vice-roms", "DRIVES")   # drive ROMs (toolchain/roms/roms.md)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
 from vice_rom import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (x64sc: -default + tutte le ROM da toolchain/roms/, tools/vice/vice_rom.py)
@@ -21,7 +21,7 @@ FRAME = 19656                                     # cycles of a PAL frame
 
 
 def labels(name="game"):
-    """labels and constants of out/<name>.lbl ($hex and decimal)"""
+    """labels and constants of out/work/<name>.lbl ($hex and decimal)"""
     t = open(os.path.join(OUT, name + ".lbl")).read()
     d = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", t, re.M)}
     d.update({m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", t, re.M)})
@@ -255,7 +255,7 @@ class Game(Vice):
     # ---- menu and game
     def to_menu(self, tmax=120, fast=None):
         """to the barbarian menu, after the list is read.
-        (11/11, fast-loader branch) always the real START (out/start.prg, put in RAM by the monitor): it installs Krill's
+        (11/11, fast-loader branch) always the real START (out/work/start.prg, put in RAM by the monitor): it installs Krill's
         Loader (GAME cannot read the disk without it) and loads GAME, LOBBY and the hero list in a few emulated seconds.
         fast is ignored.
         The real boot is tested by BOOT-10/11 (tests/regression/boot)."""

@@ -30,14 +30,14 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `src/` | sorgenti del gioco (6502, un `.asm` principale per file del disco) e `src/third-party/` (librerie per il C64: Krill's Loader) | sì |
 | `data/` | dati del gioco (regole, bilanciamento, mappe, testi) | sì |
 | `tools/build/` | generatori e script della build (Python, bash) | sì |
-| `tools/atlas/`, `tools/memory-map/`, `tools/manual/`, `tools/simulators/` | generatori dei documenti riproducibili e simulatori; scrivono in `out/<nome>/` | sì |
+| `tools/atlas/`, `tools/memory-map/`, `tools/manual/`, `tools/simulators/` | generatori dei documenti riproducibili e simulatori; scrivono in `out/work/<nome>/` | sì |
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, runner `run.py` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
 | `toolchain/` | **toolchain C64 generica** (non sa nulla del gioco, [README](../toolchain/README.md)): `docker/Dockerfile` (immagini `c64-*`, multi-stage), script `run.sh`, `images.sh`, `viewer.sh`, `build.sh` (tool), `validate_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati una volta in `bin/`); `vc64web-custom/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`) | sì, senza `bin/` e `src/` |
 | `toolchain.env` | configurazione della toolchain per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer, zip di Krill | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
-| `out/` | **tutto cio' che si genera** (disco, atlante, mappe, manuale, report dei test, file temporanei in `out/tmp/`) | no (solo `.gitkeep`) |
+| `out/` | **tutto cio' che si genera**: `work/` (intermedi e uscite della build in corso), `cache/` (zx0, steps, vc64web: si riusano), `tmp/` (usa e getta), `releases/` (artefatti per versione, ultime 5) | no (solo `.gitkeep`) |
 
 ## 3. I container
 
@@ -102,8 +102,8 @@ flowchart TD
   E --> E1["versione: bump_version.py<br/>(impronta in version.yaml)"]
   E1 --> E2["generatori: grafica, font,<br/>musica, tabelle (tools/build/gen_*.py)"]
   E2 --> E3["Krill's Loader (cc65)<br/>assemblaggio (64tass), ZX0 (zx0)"]
-  E3 --> E4["disco: mkdisk.sh (cc1541)<br/>out/disk.d64"]
-  E4 --> E5["mappe RAM e disco (out/memory-map/)<br/>atlante (out/atlas/)"]
+  E3 --> E4["disco: mkdisk.sh (cc1541)<br/>out/work/disk.d64"]
+  E4 --> E5["mappe RAM e disco (out/work/memory-map/)<br/>atlante (out/work/atlas/)"]
   E5 --> F{"--no-test?"}
   F -->|si| Z["fine"]
   F -->|no| G["c64-emu-vice:<br/>tests/run_tests.sh"]
@@ -136,7 +136,7 @@ sequenceDiagram
       V->>W: HTTP: disco in base64, script, peek, screenshot
     end
   end
-  V-->>H: out/test_report.txt / .json
+  V-->>H: out/work/test_report.txt / .json
 ```
 
 - `smoke/` (veloci, happy path) + `sanity/` (feature corrente): a ogni build e prima di ogni commit. `regression/`: in release.
@@ -169,7 +169,7 @@ su localhost) e' una **pagina indice** con:
   Misure [14/11, browser headless sulla stessa macchina, 2 x 10 eventi]: immagine ~55 ms, audio ~41 ms (il riproduttore tiene
   ~30 ms di margine), audio e immagine entro ~15 ms; la prima nota dopo un silenzio puo' arrivare con 100-200 ms. Confronto con le
   alternative (Guacamole, KasmVNC di linuxserver): [lab/viewer-audio](../lab/viewer-audio/README.md).
-- **Ultima build in vc64web**: la pagina portable di vc64web (`out/vc64web/`) aperta con `?disk=/out/releases/v<V>/<disco>`: l'emulatore gira
+- **Ultima build in vc64web**: la pagina portable di vc64web (`out/cache/vc64web/`) aperta con `?disk=/out/releases/v<V>/<disco>`: l'emulatore gira
   **nel browser dell'utente**, quindi con l'audio; il disco proposto e' il piu' recente che corrisponde a `C64_VIEW_DISK`
   (`toolchain.env`, oggi `blood_path_v*_1541.d64`). Il browser lo riscarica solo se e' cambiato (`fetch` con `cache:'no-cache'`,
   il server risponde 304). Sotto, **tutte le altre versioni** di `out/releases/` (14/11): un clic su una riga avvia quel disco. Le righe vengono dall'elenco delle cartelle (`disk.d64`, il disco di lavoro, non e' elencato).
@@ -181,17 +181,24 @@ Password facoltativa: `VIEW_PASSWORD=... toolchain/viewer.sh start` (di default 
 
 ## 7. Dove finisce cosa (`out/`)
 
+`out/` ha quattro cartelle (14/11): **`work/`** gli intermedi e le uscite della build in corso (riscrivibili: si puo' cancellare tutto),
+**`cache/`** cio' che si riusa fra le build (non si cancella), **`tmp/`** usa e getta, **`releases/`** gli artefatti per versione.
+
 | Percorso | Cosa |
 |---|---|
-| `out/releases/v<V>/` | **gli artefatti di ogni versione** (14/11): `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generato per quella versione), `sources_v<V>.zip` (release), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
-| `out/disk.d64` | disco di lavoro della build in corso (da qui si pubblica) |
-| `out/atlas/` | atlante grafico (`index.html`) |
-| `out/memory-map/` | mappa della RAM e del disco (HTML) |
-| `out/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
-| `out/simulators/` | report dei simulatori |
-| `out/vc64web/` | pagine di vc64web (portable e headless) |
-| `out/test_report.txt`, `.json` | esito dei test |
-| `out/tmp/` | file usa e getta (si puo' cancellare sempre) |
+| `out/releases/v<V>/` | **gli artefatti di ogni versione**: `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generati per quella versione), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
+| `out/work/disk.d64` | disco di lavoro della build in corso (da qui si pubblica) |
+| `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
+| `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
+| `out/work/atlas/` | atlante grafico (`index.html`) |
+| `out/work/memory-map/` | mappa della RAM e del disco (HTML) |
+| `out/work/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
+| `out/work/simulators/` | report dei simulatori |
+| `out/work/test_report.txt`, `.json` | esito dei test |
+| `out/cache/zx0/` | compressioni ZX0 gia' fatte (`tools/build/pack.py`) |
+| `out/cache/steps/` | impronte dei passi lenti saltati se gli ingressi non cambiano (`tools/build/cache_run.py`) |
+| `out/cache/vc64web/` | pagine di vc64web (portable e headless): la pagina portable la usa l'indice del viewer |
+| `out/tmp/` | file usa e getta (si puo' cancellare sempre), HOME dei container |
 
 ## 8. Problemi tipici
 

@@ -9,7 +9,7 @@ GAME_ENTRY = $0400
         * = GAME_ENTRY
         jmp start
 
-        .include "krill.inc"     ; out/krill.inc: indirizzi di Krill's Loader (tools/build/krill_syms.py)
+        .include "krill.inc"     ; out/work/krill.inc: indirizzi di Krill's Loader (tools/build/krill_syms.py)
 
 ; ------------------------------------------------------------------ hardware
 SPR_X      = $d000
@@ -219,7 +219,7 @@ nmi_stub:
 ; $8F = CHRPRE (src/lobby.asm).
 LDFLAGS = $8e
 
-; build arena (tools/vice/arena.py): ARENA=1 -> out/arena_game.prg + modulo out/arena.prg a AR_BASE
+; build arena (tools/vice/arena.py): ARENA=1 -> out/work/arena_game.prg + modulo out/work/arena.prg a AR_BASE
         .weak
 ARENA = 0
         .endweak
@@ -1878,12 +1878,12 @@ mod_chap
 ;   - nessun altro punto del sorgente deve leggere gfx_data (verificato: solo copy_gfx);
 ;   - gfx_data deve restare l'ULTIMA cosa del PRG: non aggiungere codice/dati dopo gfx_end;
 ;   - se la grafica cresce, FREE_RAM_START si sposta in avanti (guardia .cerror sotto).
-;  Mappa: tools/memory-map/gen_rammap.py (out/memory-map/mappa_ram.html).
+;  Mappa: tools/memory-map/gen_rammap.py (out/work/memory-map/mappa_ram.html).
 ; ===================================================================
 gfx_data:                       ; solo la grafica fissa: tile del villaggio e dei dungeon e mostri sono su file (gfxN)
-gd_fchr .binary "../out/gfx/fixed_chr.bin"  ; caratteri fissi (glifi HUD, minimappa): 4 strisce da GFX_FSTRIP byte
-gd_core .binary "../out/gfx/spr_core.bin"   ; sprite 0..11 (eroe, fendenti) + 24..26
-gd_font .binary "../out/gfx/uifont.bin"
+gd_fchr .binary "../out/work/gfx/fixed_chr.bin"  ; caratteri fissi (glifi HUD, minimappa): 4 strisce da GFX_FSTRIP byte
+gd_core .binary "../out/work/gfx/spr_core.bin"   ; sprite 0..11 (eroe, fendenti) + 24..26
+gd_font .binary "../out/work/gfx/uifont.bin"
 gfx_end:
 
 ; generatore dei piani: nel PRG dopo la grafica (anche lui dato morto dopo l'avvio), eseguito sotto l'I/O

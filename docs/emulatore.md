@@ -24,14 +24,14 @@ Provenienza, cosa è versionato e cosa no (le ROM Commodore no: la build le pren
 flowchart LR
     T["test (Python)<br/>tests/lib/emu.py"] -->|"HTTP /call, porta 7164"| D["c64d.js<br/>(demone Node)"]
     CLI["c64 (client)<br/>c64-batch"] -->|"HTTP /call, porta 7064"| D
-    D -->|Playwright| B["Chromium headless<br/>out/c64-headless.html"]
+    D -->|Playwright| B["Chromium headless<br/>out/work/c64-headless.html"]
     B --> W["vc64.wasm<br/>(VirtualC64 + 1541-II)"]
     B --> A["c64-api.js<br/>window.c64"]
     A -->|"runLoop: il bot gira qui,<br/>senza HTTP per passo"| BOT["bots/*.js"]
-    W --- DISK["copia in memoria<br/>di out/disk.d64"]
+    W --- DISK["copia in memoria<br/>di out/work/disk.d64"]
 ```
 
-Il disco è una **copia in memoria** nel browser: il file `out/disk.d64` non viene mai scritto (gli eroi salvati vivono nella
+Il disco è una **copia in memoria** nel browser: il file `out/work/disk.d64` non viene mai scritto (gli eroi salvati vivono nella
 copia finché il demone resta acceso).
 
 ## Cosa sa fare (con i riferimenti ai file del pacchetto)
@@ -50,8 +50,8 @@ riscontrati»), `docs/scripting.md` (script di testo), `docs/getting-started.md`
 | Joystick e tastiera come un giocatore | `joy`, `keyDown/keyUp`, `sendText`, script `0 JOY2-FIRE 3` | cli §7, `scripting.md` §2 | sì |
 | **Bot in pagina** (decide ogni 2 fotogrammi leggendo la RAM) | `runLoop 'CODICE' {frames,every}` | cli §14 | `EMU-13..15` |
 | Esito ripetibile: stesso stato + stesso bot = stesso hash | `stateHash`, `retriesTotal`, `_forceRetry` | cli §14, getting-started §7 | [vedi trappole] |
-| Etichette del gioco | `loadLabels @@out/game.lbl`, poi `peek cur_level`, `runUntil {pc:"main_loop"}` | cli §8 | sì |
-| **Testo del gioco a schermo** (anche con codifica propria) | `loadEncoding hud @@out/gfx_consts.inc`, `findText 'XP' '{"enc":"hud","addr":"$8400"}'`, `wait text`/`assert text` negli script | cli §9, `scripting.md` §3 | `EMU-12` |
+| Etichette del gioco | `loadLabels @@out/work/game.lbl`, poi `peek cur_level`, `runUntil {pc:"main_loop"}` | cli §8 | sì |
+| **Testo del gioco a schermo** (anche con codifica propria) | `loadEncoding hud @@out/work/gfx_consts.inc`, `findText 'XP' '{"enc":"hud","addr":"$8400"}'`, `wait text`/`assert text` negli script | cli §9, `scripting.md` §3 | `EMU-12` |
 | Cicli esatti tra due indirizzi (min/max/media) | `measure DA A '{"n":20}'` | cli §11 | no (non sono misure del gioco) |
 | Stati salvati, esportati su file, confronto | `saveState`, `loadState @file`, `regress save/check`, `ramSnap`/`ramDiff` | cli §12 | no |
 | Screenshot, video muto deterministico | `screenshot`, `video file.js` | cli §9, §13 | screenshot nei test |
@@ -76,7 +76,7 @@ riscontrati»), `docs/scripting.md` (script di testo), `docs/getting-started.md`
 | Test di regola, cicli, tempi, prestazioni, drive, loader a basso livello, debug | **VICE** | riferimento; monitor remoto, breakpoint, `chis`, warp molto più veloce [non misurato qui] |
 | Controllare che una modifica al loader, al salvataggio, alla divisione raster o all'avvio non rompa il gioco su un altro core | **`EMU-10..16`** | il drive 1541-II e il core sono diversi: un codice sensibile ai tempi fallisce su uno solo dei due |
 | Scenario completo dal disco vero, solo joystick e tastiera (creare l'eroe, comprare, scendere, uccidere, portale) | **`EMU-11..15`** | gli smoke di VICE usano scorciatoie (memoria scritta dal monitor, teletrasporto); qui no |
-| Leggere un testo a schermo con la codifica dell'HUD | `findText` con `enc` | controlla che la codifica generata dalla build (`out/gfx_consts.inc`) sia quella disegnata |
+| Leggere un testo a schermo con la codifica dell'HUD | `findText` con `enc` | controlla che la codifica generata dalla build (`out/work/gfx_consts.inc`) sia quella disegnata |
 | Video dimostrativo con audio e comandi a schermo | `grabBrowserVideoAndAudio` | in VICE servirebbero strumenti esterni (non provato) |
 | Esplorare molte varianti di un combattimento con un bot | `c64-batch` (+ `arena.py` di VICE per confermare) | più istanze in parallelo; il bilancio si decide con simulatore e arena |
 
@@ -88,8 +88,8 @@ segnalare al team: sezione «Trappole»).
 ## Come si usa
 
 Dal 13/11 il demone gira nel container **`c64-emu-vc64web`** (immagine costruita dal `Dockerfile` del pacchetto, con le pagine
-già pronte dentro: `toolchain/images.sh emu-vc64web` le genera nel builder con `build.py --no-docker --out out/vc64web` e poi fa la
-`docker build` con il contesto `pages=out/vc64web`). Il pacchetto è autonomo e parametrizzato: `--vice-roms`, `--open-roms`, `--out`,
+già pronte dentro: `toolchain/images.sh emu-vc64web` le genera nel builder con `build.py --no-docker --out out/cache/vc64web` e poi fa la
+`docker build` con il contesto `pages=out/cache/vc64web`). Il pacchetto è autonomo e parametrizzato: `--vice-roms`, `--open-roms`, `--out`,
 `--tag` (README e `docs/INCLUSIONE.md` del pacchetto); le ROM le prende dalla sua `roms/` (`toolchain/vc64web-custom/roms/`), identica a `toolchain/roms/` del progetto.
 
 ```sh
@@ -100,7 +100,7 @@ EMU_URL=http://c64-emu-vc64web:7064 C64_DOCKER_ARGS="--network c64" toolchain/ru
 
 # a mano, dentro il container del demone (client node del pacchetto)
 docker exec -it c64-emu-vc64web node headless/c64 start
-docker cp out/disk.d64 c64-emu-vc64web:/games/disk.d64
+docker cp out/work/disk.d64 c64-emu-vc64web:/games/disk.d64
 docker exec c64-emu-vc64web node headless/c64 game disk.d64
 docker rm -f c64-emu-vc64web                        # spegnere
 ```
@@ -119,7 +119,7 @@ e.close()
 
 I bot (`tests/regression/emu/bots/`): `lib.js` (percorso a larghezza su `MAP`/`solidtab`, un passo di joystick verso il centro di
 una casella), `walk.js` (va a `(GX,GY)`), `hunt_portal.js` (caccia il mostro più vicino, tasto 5, portale). Leggono la RAM con le
-etichette di `out/game.lbl` e si muovono **solo con il joystick della porta 2**, come prevede la regola del movimento (CLAUDE.md).
+etichette di `out/work/game.lbl` e si muovono **solo con il joystick della porta 2**, come prevede la regola del movimento (CLAUDE.md).
 
 ### I test `EMU-*` (`tests/regression/emu/cases.py`, ~2 minuti, in catena)
 
@@ -137,7 +137,7 @@ flowchart LR
 |---|---|---|
 | `EMU-10` | START (con Krill), GAME e LOBBY in RAM uguali ai PRG di `out/`, bordo non rosso | ~23 s di orologio (warp per i caricamenti) |
 | `EMU-11` | creazione dal menu con joystick e tastiera, salvataggio sul 1541-II emulato, villaggio: livello 0, PV > 0, oro 100, nome in RAM = «black thorne» | ~28 s |
-| `EMU-12` | `findText` con la codifica `hud` letta da `out/gfx_consts.inc` (64 caratteri): HP, XP, LV e «25/25» nella matrice `$8400` | < 1 s |
+| `EMU-12` | `findText` con la codifica `hud` letta da `out/work/gfx_consts.inc` (64 caratteri): HP, XP, LV e «25/25» nella matrice `$8400` | < 1 s |
 | `EMU-13` | cammina alla porta dell'alchimista (tile `DALCH`, trovata nella mappa), compra la pergamena (qualunque sia l'ordine della scorta): oro −60, pergamena nello zaino | ~12 s |
 | `EMU-14` | cammina alle scale (`TSTAIRS`) ed entra: `cur_level` = 1, mostri presenti | ~25 s |
 | `EMU-15` | caccia un mostro, lo uccide, legge la pergamena (tasto 5), entra nel portale: villaggio, PV > 0 | ~18 s |
@@ -146,10 +146,10 @@ flowchart LR
 ## Trappole misurate (leggere prima di scrivere un test)
 - **Le etichette dei moduli sovrapposti vanno in insiemi separati**: LOBBY sta a `$C000` come `MAP` del gioco. Caricate nello
   stesso insieme (quello predefinito) si sovrappongono: dopo `loadLabels game.lbl`, `runUntil {pc:"menu_main"}` si è fermato a
-  un indirizzo sbagliato [MISURATO]. Si usa `loadLabels @@out/lobby.lbl '{"set":"lobby"}'` e poi `lobby:nvalid`,
+  un indirizzo sbagliato [MISURATO]. Si usa `loadLabels @@out/work/lobby.lbl '{"set":"lobby"}'` e poi `lobby:nvalid`,
   `lobby:slot_name` (cli §8; in `Emu.load_labels(name, set=...)`).
 - **`pc == $C00C` non basta per dire «sono nel menu»**: START carica codice in quella zona. `Emu.boot` aspetta che i byte di
-  `menu_main` in RAM siano quelli di `out/lobby.prg`.
+  `menu_main` in RAM siano quelli di `out/work/lobby.prg`.
 - **L'assortimento dell'alchimista cambia a ogni visita** (`enter_shop` lo estrae con `frame ^ rnd`): le due merci (pergamena
   del portale, minor healing) escono in ordine casuale [MISURATO: 9 visite, 5 con la pergamena per seconda]. `EMU-13` legge gli id
   in `l8_id`, porta il cursore sulla pergamena (`ui_lc` = 12 + indice) e rientra se manca. Un test che assume «la prima voce» è
@@ -158,7 +158,7 @@ flowchart LR
   a ogni esecuzione. Gli esiti casuali del gioco (scorta, tiri) cambiano; solo `runFrames`, `runScript` e `runLoop` esatti
   partendo dallo stesso stato sono ripetibili.
 - **`findText` con la codifica `hud`**: i numeri sono allineati a destra, quindi «LV 1» non esiste (c'è «LV  1»): cercare «LV» e
-  il numero a parte. La codifica `hud` cambia a ogni build del gioco: si rilegge sempre da `out/gfx_consts.inc`
+  il numero a parte. La codifica `hud` cambia a ogni build del gioco: si rilegge sempre da `out/work/gfx_consts.inc`
   (`loadEncoding` accetta direttamente quel file: simboli `G_*` e blocco `.enc "hud"` risolti dall'emulatore).
 - **Tempo reale**: `runLoop` e `runScript` girano a 50 fotogrammi al secondo (in modalità esatta il team misura 82 ms contro 44 ms
   per un passo di 2 fotogrammi; sul bot del boss 24 s contro 12 s per 600 fotogrammi, misura del 13/11 con la build 31). Il warp
@@ -172,7 +172,7 @@ flowchart LR
   boss: stesso hash con 0, 1 reale, forzate a ogni passo). Se si aggiorna il pacchetto, rifare quella verifica con `_forceRetry`
   (getting-started §7).
 - **Un demone per run di test**: `./build.sh` accende il container `c64-emu-vc64web` e lo spegne alla fine; i test lo usano
-  uno alla volta (il lock dei test, `out/.test.lock`, vale anche per questi). Dopo un'interruzione controllare con `docker ps` che
+  uno alla volta (il lock dei test, `out/tmp/.test.lock`, vale anche per questi). Dopo un'interruzione controllare con `docker ps` che
   non sia rimasto acceso.
 
 ## Cosa non è verificato

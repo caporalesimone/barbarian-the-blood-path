@@ -12,7 +12,7 @@ dettagli di suite e runner: `docs/test.md`.
   (`EMU_URL`); senza demone sono SKIP, non FAIL.
 
 ## Suite (11/11, regole del committente)
-- Tre suite in tre cartelle, un runner (`tests/run.py`, report con ID, esito, tempo e motivo in `out/test_report.txt` / `.json`):
+- Tre suite in tre cartelle, un runner (`tests/run.py`, report con ID, esito, tempo e motivo in `out/work/test_report.txt` / `.json`):
   - `smoke/`: pochi test **veloci** sull'**happy path** delle funzioni principali, con le scorciatoie di VICE (memoria,
     routine chiamate, teletrasporto, tasti scritti all'uscita di `read_input`).
   - `sanity/`: i test della **feature appena implementata**. **Quando si passa a una feature nuova, i test di `sanity/` si

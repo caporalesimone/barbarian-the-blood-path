@@ -29,8 +29,8 @@ Si combinano liberamente (es. `./build.sh --no-atlas --no-manual`). Senza parame
 |---|---|
 | *(nessuno)* | disco + mappe RAM/disco + atlante grafico + smoke e sanity + manuale PDF |
 | `--fast` | salta atlante, mappe e manuale (= `--no-atlas --no-maps --no-manual`): resta il disco e i test smoke e sanity |
-| `--no-atlas` | salta l'atlante grafico (`out/atlas/`) |
-| `--no-maps` | salta le mappe della RAM e del disco (`out/memory-map/`) |
+| `--no-atlas` | salta l'atlante grafico (`out/work/atlas/`) |
+| `--no-maps` | salta le mappe della RAM e del disco (`out/work/memory-map/`) |
 | `--no-manual` | salta il manuale PDF |
 | `--no-test` | salta smoke e sanity |
 | `--release` | build completa + **tutti** i test (anche regression ed `EMU-*` su vc64web) + manuale + `tools/build/release.sh` (GAME compresso in modo ottimo) |
@@ -55,12 +55,12 @@ Versione del gioco e del formato dei salvataggi: `version.yaml`.
 | `toolchain/` | toolchain C64 generica ([toolchain/README.md](toolchain/README.md)): immagini Docker `c64-*` (`docker/Dockerfile`) e script `run.sh`, `images.sh`, `viewer.sh`, `validate_env.sh`; sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in [toolchain/roms/roms.md](toolchain/roms/roms.md)) |
 | `toolchain.env` | configurazione della toolchain per il gioco |
 | `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
-| `out/` | tutto ciò che si genera (non in git): `out/releases/v<versione>/` (ultime 5: disco, atlante, mappe, manuale, report dei test) e gli intermedi della build in corso |
+| `out/` | tutto ciò che si genera (non in git): `releases/v<versione>/` (ultime 5: disco, atlante, mappe, manuale, report dei test), `work/` (intermedi della build in corso), `cache/` (riusabile), `tmp/` (usa e getta) |
 
 ## Arena di combattimento (test e bilanciamento)
 Build a parte con lo stesso codice di combattimento del gioco: niente loader, menu, villaggio, disco,
 zaino e drop; una stanza, il PG con l'equipaggiamento indossato e da 1 a 8 mostri, comandati da un bot.
-La build produce `out/arena_game.prg` (gioco con `ARENA=1`) e `out/arena.prg` (modulo `src/test/arena.asm`
+La build produce `out/work/arena_game.prg` (gioco con `ARENA=1`) e `out/work/arena.prg` (modulo `src/test/arena.asm`
 a `$C900`: bot, avvio, fine combattimento, parametri `$CF00`, risultati `$CF40`, registro `$CF80`).
 `tools/vice/arena.py` (nel container `c64-emu-vice`: `toolchain/run.sh emu-vice python3 tools/vice/arena.py ...`) avvia VICE, carica i due file e il tema grafico, scrive i parametri ed esegue la serie:
 ```
@@ -74,7 +74,7 @@ stessi risultati. Modalita' veloce (default): circa 25 volte il tempo reale in V
 
 ## Simulatore delle regole nuove
 `toolchain/run.sh builder python3 tools/simulators/sim_rules.py` simula il nuovo sistema di combattimento (docs/SISTEMA_COMBATTIMENTO.md) con i
-parametri di `data/rules.yaml` e scrive `out/simulators/simulazione_regole.html`. Un solo gruppo:
+parametri di `data/rules.yaml` e scrive `out/work/simulators/simulazione_regole.html`. Un solo gruppo:
 `python3 tools/simulators/sim_rules.py --fight 5 9 demon skeleton` (piano 5, PG di livello 9).
 `python3 tools/simulators/fit_rules.py` ritara i mostri (curve dei piani 1-10, boss finale, tabella dell'Abisso) sul PG di
 riferimento e scrive `data/rules.yaml` (`--abyss-only` solo l'Abisso, `--dry` senza scrivere); `python3 tools/simulators/cmp_rules.py`

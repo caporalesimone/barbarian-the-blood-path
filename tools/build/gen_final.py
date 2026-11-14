@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Genera out/final_map.inc: mappa fissa dell'ultimo piano (sala del trono del boss finale).
+"""Genera out/work/final_map.inc: mappa fissa dell'ultimo piano (sala del trono del boss finale).
 Corridoio da sud (arrivo dalle scale) alla sala del trono, con il pentacolo (stella + cerchio) e il boss.
 Alla morte del boss si apre il muro a nord: corridoio verso una grande stanza con 4 bauli epici e
 "a suspicious lever" (tirata, al suo posto compare il portale per The Endless Abyss).
 Le figure sono simmetriche rispetto alla colonna CX.
 
 Dal 06/11 la mappa non si costruisce piu' nel gioco: questo script scrive anche il file FMAP del disco
-(out/fmap.prg, RLE come la mappa del villaggio) con la mappa di BASE del piano 20, cioe' com'era in gen_final prima di
+(out/work/fmap.prg, RLE come la mappa del villaggio) con la mappa di BASE del piano 20, cioe' com'era in gen_final prima di
 post_walls: rettangoli di pavimento, porte chiuse, scale, leva; le caselle della stella e del cerchio sono
 "marcatori" = $80 | tile (post_walls le conta come pavimento, consuma il caso come per il pavimento e scrive il tile
 della figura): cosi' la mappa finale e il generatore casuale sono identici alla versione che disegnava le figure
 con il codice (stesso contenuto dei bauli, stessi mostri)."""
 import math, os, re
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..")
-OUT = os.path.join(ROOT, "out", "final_map.inc")
-FMAP = os.path.join(ROOT, "out", "fmap.prg")
+OUT = os.path.join(ROOT, "out", "work", "final_map.inc")
+FMAP = os.path.join(ROOT, "out", "work", "fmap.prg")
 # cache sotto il KERNAL (src/game/disk.asm, fin_load). 10/11: in fondo alla cache, dopo il posto di OVL2 / precaricamento
 # ($F500-$FCDF) e prima dei vettori ($FFFA). Prima stava dopo la mappa del villaggio (fino a $ECFF): con il villaggio
 # nuovo (v1.145) restavano 178 B e il file (~400 B) veniva troncato alla lettura.
@@ -71,8 +71,8 @@ def final_figures():
 
 
 def tile_ids():
-    """id dei tile da out/gfx_consts.inc (generato da tools/build/gen_gfx.py)"""
-    t = {m.group(1): int(m.group(2)) for m in re.finditer(r"^T_(\w+)\s*=\s*(\d+)", open(os.path.join(ROOT, "out", "gfx_consts.inc")).read(), re.M)}
+    """id dei tile da out/work/gfx_consts.inc (generato da tools/build/gen_gfx.py)"""
+    t = {m.group(1): int(m.group(2)) for m in re.finditer(r"^T_(\w+)\s*=\s*(\d+)", open(os.path.join(ROOT, "out", "work", "gfx_consts.inc")).read(), re.M)}
     t.setdefault("WALL", 0)
     return t
 

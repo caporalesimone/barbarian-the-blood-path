@@ -14,7 +14,7 @@ env = dict(os.environ, NOKEYS="1", TESTUI="28", TESTCL="19", TESTLVL="2", TESTSP
 subprocess.run(["tools/build/asm.sh", "test"], env=env, check=True, stdout=subprocess.DEVNULL)
 subprocess.run(["tools/build/mkdisk.sh"], check=True, stdout=subprocess.DEVNULL)
 L = C64.labels("game")
-G = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(G_\w+)\s*=\s*(\d+)\s*$", open("out/game.lbl").read(), re.M)}
+G = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(G_\w+)\s*=\s*(\d+)\s*$", open("out/work/game.lbl").read(), re.M)}
 fails = []
 
 
@@ -24,9 +24,9 @@ def text(codes):
     return "".join(inv.get(c, "?") for c in codes)
 
 
-v = C64.Vice(os.path.join(ROOT, "out", "disk.d64"))
+v = C64.Vice(os.path.join(ROOT, "out", "work", "disk.d64"))
 try:
-    v.load(os.path.join(ROOT, "out", "start.prg"))           # (11/11) START: installs Krill, GAME from the disk
+    v.load(os.path.join(ROOT, "out", "work", "start.prg"))           # (11/11) START: installs Krill, GAME from the disk
     v.brk(L["main_loop"]); v.pc(0x080d); v.go(60)
 
     def frames(n):

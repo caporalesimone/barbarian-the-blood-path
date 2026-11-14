@@ -7,7 +7,7 @@ e `data/chapters.yaml` (capitoli).
 | Script | Cosa fa |
 |---|---|
 | `rules.py` | modello condiviso: PG, oggetti, mostri per piano, Abisso |
-| `sim_rules.py` | combattimenti Monte Carlo e progressione; report `out/simulators/simulazione_regole.html` |
+| `sim_rules.py` | combattimenti Monte Carlo e progressione; report `out/work/simulators/simulazione_regole.html` |
 | `fit_rules.py` | taratura automatica di `growth`, `final_boss_hp_mult`, `void.table` (scrive `rules.yaml`) |
 | `cmp_rules.py` | confronti fra configurazioni |
 | `sim_durability.py` | durabilità generata e vita utile degli oggetti |

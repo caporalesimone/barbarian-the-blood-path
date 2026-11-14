@@ -14,7 +14,7 @@ def teardown(ctx):
     if "g" in ctx: ctx["g"].close()
 
 
-@test("KRILL-01", "load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/gfx/gfx1.prg")
+@test("KRILL-01", "load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/work/gfx/gfx1.prg")
 def krill_theme(ctx):
     g = ctx["g"]; L = g.L
     d = open(os.path.join(OUT, "gfx", "gfx1.prg"), "rb").read()[2:]
@@ -23,7 +23,7 @@ def krill_theme(ctx):
     check(m == list(d), "theme differs at %s" % [i for i, (a, b) in enumerate(zip(m, d)) if a != b][:6])
 
 
-@test("KRILL-02", "snd_get (Krill): the song in its buffer equals out/snd/snd0.prg")
+@test("KRILL-02", "snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg")
 def krill_song(ctx):
     g = ctx["g"]; L = g.L
     d = open(os.path.join(OUT, "snd", "snd0.prg"), "rb").read()[2:]

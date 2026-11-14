@@ -1,4 +1,4 @@
-; Lore del gioco (programma LORE, tools/build/gen_lore.py -> out/ldat.prg). Testo in inglese, minuscolo.
+; Lore del gioco (programma LORE, tools/build/gen_lore.py -> out/work/ldat.prg). Testo in inglese, minuscolo.
 ; Righe che iniziano con ';' = commenti. Un paragrafo = righe consecutive; una riga vuota lo chiude.
 ; Il testo va a capo da solo (colonne 2-37). [parole] = giallo.
 ; Comandi:

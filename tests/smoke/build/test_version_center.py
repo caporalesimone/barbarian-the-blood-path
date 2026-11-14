@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Centred version (09/11, rule of the owner: the release always checks it). Static test, no VICE:
-1. VER_X of out/version.inc = (40 - len("version " + VERSION)) // 2;
+1. VER_X of out/work/version.inc = (40 - len("version " + VERSION)) // 2;
 2. every "version ", VERSION in the sources is placed with VER_X: `#at VER_X,...` within the 5 lines before (GAME,
    LOBBY) or `.byte VER_X, ...` (text table of the loader BARBARIAN)."""
 import os, re, sys, glob
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-inc = open(os.path.join(ROOT, "out", "version.inc")).read()
+inc = open(os.path.join(ROOT, "out", "work", "version.inc")).read()
 ver = re.search(r'VERSION = "([^"]+)"', inc).group(1)
 vx = int(re.search(r"VER_X = (\d+)", inc).group(1))
 err = []

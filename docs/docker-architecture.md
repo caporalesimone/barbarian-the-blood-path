@@ -74,9 +74,9 @@ Conseguenze della struttura:
   (`C64_CA_BUNDLE`) solo per le build che usano npm.
 - Le pagine di `vc64web` si generano **nel builder** (`build.py`) e poi entrano nell'immagine come build context `pages`.
 - **File di sola costruzione** (14/11, regola del committente): a immagini fatte `toolchain/images.sh` cancella il tarball di VICE
-  (`toolchain/vice/download/`), il `.deb` di KasmVNC (`toolchain/kasmvnc/download/`) e `out/vc64web/c64-headless.html` (serve solo a
+  (`toolchain/vice/download/`), il `.deb` di KasmVNC (`toolchain/kasmvnc/download/`) e `out/cache/vc64web/c64-headless.html` (serve solo a
   costruire l'immagine). `--force` riscarica da solo; il contenuto e' lo stesso, quindi la cache di BuildKit resta valida [dal codice, non
-  provato un `--force` dopo la cancellazione: serve la rete]. La pagina `VirtualC64-v*.html` in `out/vc64web/` resta: la usa l'indice del
+  provato un `--force` dopo la cancellazione: serve la rete]. La pagina `VirtualC64-v*.html` in `out/cache/vc64web/` resta: la usa l'indice del
   viewer, e `images.sh emu-viewer` la rigenera se `out/` e' stato svuotato.
 
 ## 3. Container a runtime

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Mappa del disco di Barbarian: The Blood Path -> out/memory-map/mappa_disco.html
-Legge il d64 (default out/disk.d64, release; ./build.sh gli passa il disco della build: di debug o di release), le etichette (out/game.lbl), src/game/game.asm (blocco eroe)
-e out/gfx_consts.inc. Uso: python3 tools/memory-map/gen_diskmap.py [disco.d64] [out.html]"""
+"""Mappa del disco di Barbarian: The Blood Path -> out/work/memory-map/mappa_disco.html
+Legge il d64 (default out/work/disk.d64, release; ./build.sh gli passa il disco della build: di debug o di release), le etichette (out/work/game.lbl), src/game/game.asm (blocco eroe)
+e out/work/gfx_consts.inc. Uso: python3 tools/memory-map/gen_diskmap.py [disco.d64] [out.html]"""
 import html, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-D64 = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "out", "disk.d64")
-OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "out", "memory-map", "mappa_disco.html")
+D64 = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "out", "work", "disk.d64")
+OUT = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, "out", "work", "memory-map", "mappa_disco.html")
 img = open(D64, "rb").read()
 
 
@@ -77,7 +77,7 @@ free_blocks = sum(bam[4 + 4 * (t - 1)] for t in range(1, 36) if t != 18)
 
 # ------------------------------------------------------------------ etichette e costanti
 L = {}
-for l in open(os.path.join(ROOT, "out", "game.lbl")):
+for l in open(os.path.join(ROOT, "out", "work", "game.lbl")):
     m = re.match(r"\s*(\S+)\s*=\s*\$([0-9a-f]+)", l)
     if m:
         L[m.group(1)] = int(m.group(2), 16)
@@ -85,14 +85,14 @@ for l in open(os.path.join(ROOT, "out", "game.lbl")):
     if m:
         L[m.group(1)] = int(m.group(2))
 TILES = {}
-for l in open(os.path.join(ROOT, "out", "gfx_consts.inc")):
+for l in open(os.path.join(ROOT, "out", "work", "gfx_consts.inc")):
     m = re.match(r"(T_\w+)\s*=\s*(\d+)", l)
     if m:
         TILES[int(m.group(2))] = m.group(1)
 TSTRIP, DSTRIP, MONS, STRONG, NT = L["GFX_TSTRIP"], L["GFX_DSTRIP"], L["GFX_MONS"], L["GFX_STRONG"], L["GFX_NT"]
 FSTRIP = 160
-SAVE_VER = int(re.search(r"SAVE_VER = \$([0-9a-f]+)", open(os.path.join(ROOT, "out", "version.inc")).read()).group(1), 16)
-VERSION = open(os.path.join(ROOT, "out", "version.inc")).read().split('"')[1]
+SAVE_VER = int(re.search(r"SAVE_VER = \$([0-9a-f]+)", open(os.path.join(ROOT, "out", "work", "version.inc")).read()).group(1), 16)
+VERSION = open(os.path.join(ROOT, "out", "work", "version.inc")).read().split('"')[1]
 
 # ------------------------------------------------------------------ grafica
 def glyphs(d, strips, n):
@@ -205,11 +205,11 @@ WHAT = {"barbarian": "Loader (LOAD\"*\",8, src/barbarian.asm): release = menu (l
         "help": "HELP, il manuale (src/help.asm, compresso ZX0 con il decompressore in testa: src/help/zx0sfx.asm): 5 pagine RLE da data/help.txt, ritaglio dell'HUD (tools/build/gen_help.py, docs/help.md); solo release",
         "ldat": "Dati della storia, compressi ZX0: charset, sprite, forme delle immagini, righe (tools/build/gen_lore.py, docs/intro.md)", "hl": "Elenco eroi (salvataggi, Krill)", "save-01": "Salvataggio dell'eroe 1", "save-02": "Salvataggio dell'eroe 2", "save-03": "Salvataggio dell'eroe 3", "save-04": "Salvataggio dell'eroe 4", "save-05": "Salvataggio dell'eroe 5", "menu1": "Modulo MENU, zona 1 (ZX0)", "menu2": "Modulo MENU, zona 2 (ZX0)", "menu3": "Modulo MENU, zona 3 (ZX0)",
         "game": "Il gioco compresso ZX0 (decompresso in $0400-$%04X)" % (L["code2_end"] - 1), "lobby": "Menu iniziale LOBBY ($C000)", "title": "Schermata del titolo (bitmap multicolor)",
-        "twn1": "Villaggio del capitolo 1: tile e mappa (12/11: TWNc, oggi i 4 villaggi sono copie di out/gfx0.prg)", "twn2": "Villaggio del capitolo 2 (segnaposto: copia del villaggio 1)", "twn3": "Villaggio del capitolo 3 (segnaposto)", "twn4": "Villaggio del capitolo 4 (segnaposto)",
+        "twn1": "Villaggio del capitolo 1: tile e mappa (12/11: TWNc, oggi i 4 villaggi sono copie di out/work/gfx0.prg)", "twn2": "Villaggio del capitolo 2 (segnaposto: copia del villaggio 1)", "twn3": "Villaggio del capitolo 3 (segnaposto)", "twn4": "Villaggio del capitolo 4 (segnaposto)",
         "bossch1": "Mappa del piano del boss del capitolo 1, piano 5 (segnaposto, tools/build/gen_bossmap.py)", "bossch2": "Mappa del piano del boss del capitolo 2, piano 10 (segnaposto)", "bossch3": "Mappa del piano del boss del capitolo 3, piano 15 (segnaposto)", "menu": "Menu del villaggio (11/11, oggi la locanda): OVL2 + OVLT compressi ZX0 (tools/build/pack_menu.py). Prima apertura della locanda: tutto (OVLT a $C900, OVL2 a $F500); se manca solo OVL2 (il precaricamento l'ha sovrascritto) si legge solo la prima parte",
         "fmap": "Mappa della sala del trono, piano 20 (RLE, tools/build/gen_final.py): letta una volta nella cache sotto il KERNAL, dopo la mappa del villaggio",
         "jukebox": "Prova di brani ed effetti (solo disco di sviluppo, docs/musica.md)"}
-SNDC = re.search(r"^; (0=.*)$", open(os.path.join(ROOT, "out", "music_tab.inc")).read(), re.M)
+SNDC = re.search(r"^; (0=.*)$", open(os.path.join(ROOT, "out", "work", "music_tab.inc")).read(), re.M)
 SNDN = dict(x.split("=", 1) for x in SNDC.group(1).split(", ")) if SNDC else {}
 for i, f in enumerate(files):
     w = WHAT.get(f["name"], ("Grafica dei temi di dungeon (file %s)" % f["name"][3]) if f["name"].startswith("gfx") else "")
@@ -285,7 +285,7 @@ P.append("<p class='mut'>Tile dei temi dungeon (0-%d): %s. Nel tema 8 (sala del 
 P.append("<p class='mut'>Tile del villaggio (0-%d): %s.</p>" % (NT - 1, h(", ".join("%d %s" % (i, TILES.get(i, "?")[2:].lower()) for i in range(NT)))))
 
 # --- 4. salvataggi (11/11, ramo fast-loader: plugin di save di Krill, un file per eroe + elenco)
-lbl = {m.group(1): m.group(2) for m in re.finditer(r"^(\w+)\s*=\s*(\$?[0-9a-f]+)", open(os.path.join(ROOT, "out", "game.lbl")).read(), re.M)}
+lbl = {m.group(1): m.group(2) for m in re.finditer(r"^(\w+)\s*=\s*(\$?[0-9a-f]+)", open(os.path.join(ROOT, "out", "work", "game.lbl")).read(), re.M)}
 num = lambda v: int(v[1:], 16) if v.startswith("$") else int(v)
 NFL = num(lbl["MAXLEVEL"]); STN = num(lbl["STASH_N"]); SVL = num(lbl["SV_LEN"]); HEL = num(lbl["HERO_LEN"]); LVS = num(lbl["LV_SLOT"])
 svf = [f for f in files if f["name"].startswith("save-")]

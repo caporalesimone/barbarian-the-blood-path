@@ -84,7 +84,7 @@ flowchart TB
         GFXI["gfx_install<br/>(cache -> charset, sprite)"]
         PRNG["rand (xorshift16)"]
     end
-    DB["out/db.asm<br/>(generato: oggetti, mostri, regole)"]
+    DB["out/work/db.asm<br/>(generato: oggetti, mostri, regole)"]
     DUN["dungeon.asm<br/>seed_level, gen_call, sala del trono"]
     GENIO["gen_io.asm<br/>generatore SOTTO L'I/O ($D480)"]
     GG["game/game.asm<br/>oggetti, bottino, bauli, mostri e IA,<br/>abilita', tasti, mondo, suoni"]
@@ -149,7 +149,7 @@ flowchart TB
 
 ## 3. La memoria e il suo ciclo di vita
 
-Mappa completa e sempre aggiornata: [mappa_ram.html](../out/memory-map/mappa_ram.html). Qui le zone e **chi le possiede quando**.
+Mappa completa e sempre aggiornata: [mappa_ram.html](../out/work/memory-map/mappa_ram.html). Qui le zone e **chi le possiede quando**.
 
 ```mermaid
 flowchart TB
@@ -280,4 +280,4 @@ mappe di riferimento ([Dungeon](dungeon.md)).
 - Gameplay e ciclo per fotogramma: [Panoramica](panoramica.md).
 - Flussi del codice (sequenze e stati): [Flussi del codice](flussi.md).
 - Build, generatori, test: [Build e strumenti](build.md), [Test](test.md).
-- Byte per byte: [FORMATO_DATI](FORMATO_DATI.md), [mappa_ram.html](../out/memory-map/mappa_ram.html), [mappa_disco.html](../out/memory-map/mappa_disco.html).
+- Byte per byte: [FORMATO_DATI](FORMATO_DATI.md), [mappa_ram.html](../out/work/memory-map/mappa_ram.html), [mappa_disco.html](../out/work/memory-map/mappa_disco.html).

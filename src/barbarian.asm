@@ -5,7 +5,7 @@
 ;   hear the legend       -> LORE (titolo, musica, la storia a scorrimento; alla fine torna qui)
 ;   read the game manual  -> HELP (il manuale: tasti, schermate, HUD; alla fine torna qui)
 ;   walk the blood path   -> START (avvio del gioco: titolo, musica, PRESS SPACE, menu degli eroi)
-;   Piccolo apposta: schermo a caratteri con il font del gioco (codici 0-63 di out/gfx/uifont.bin, copiati a $2000),
+;   Piccolo apposta: schermo a caratteri con il font del gioco (codici 0-63 di out/work/gfx/uifont.bin, copiati a $2000),
 ;   niente musica, niente IRQ propri (gira con l'IRQ del KERNAL). Tasti: joystick 2 su/giu' e fire, oppure 1 2 3,
 ;   W/S o joystick (09/11: niente tasti cursore), spazio/RETURN.
 ; (11/11) Un solo disco: con POKE 1020,1 prima del RUN (POKE_SKIP) niente menu, si carica subito START (sviluppo, test).
@@ -22,7 +22,7 @@ FONT    = $3800                 ; (12/11) sopra i programmi che il trampoline ca
 GETIN   = $ffe4
 NITEM   = 3
 ROW0    = 11                    ; riga della prima voce
-LOGO_X  = (40 - LOGO_W) / 2     ; il logo della copertina (out/logo.inc, tools/build/gen_lore.py), righe 1..6
+LOGO_X  = (40 - LOGO_W) / 2     ; il logo della copertina (out/work/logo.inc, tools/build/gen_lore.py), righe 1..6
 LOGO_Y  = 1
 ICOL    = 9                     ; colonna delle voci
 IW      = 23                    ; larghezza della voce colorata
@@ -395,6 +395,6 @@ nm_hi   .byte >nm_lore, >nm_help, >nm_game
 POKE_SKIP = $03fc               ; byte libero dopo il buffer della cassetta (trampoline < $03FC), 0 all'accensione
 
 .if MENU
-font_d  .binary "../out/gfx/uifont.bin", 0, 512
-        .include "logo.inc"     ; out/logo.inc (tools/build/gen_lore.py): forme, celle e colori del logo
+font_d  .binary "../out/work/gfx/uifont.bin", 0, 512
+        .include "logo.inc"     ; out/work/logo.inc (tools/build/gen_lore.py): forme, celle e colori del logo
 .endif

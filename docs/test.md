@@ -14,7 +14,7 @@ flowchart LR
     B["./build.sh"] --> RT["tests/run_tests.sh<br/>(c64-emu-vice)"]
     RT -->|debug| S1["tests/run.py smoke sanity"]
     RT -->|"--release / --all"| S2["tests/run.py smoke sanity regression"]
-    S1 --> REP["out/test_report.txt / .json"]
+    S1 --> REP["out/work/test_report.txt / .json"]
     S2 --> REP
 ```
 
@@ -45,7 +45,7 @@ si scrivono quelli della feature nuova.
   Un `cases.py` può avere `setup`/`teardown` (una sessione di VICE per tutti i suoi test) e `CHAIN = True` (sequenza:
   dopo un fallimento i test seguenti sono SKIP con il motivo).
 - `tests/run.py [smoke|sanity|regression|all] [-k ID|prefisso] [--list]`; report a schermo e in
-  `out/test_report.txt` / `out/test_report.json`: ID, suite, esito (PASS/FAIL/SKIP), tempo, motivo.
+  `out/work/test_report.txt` / `out/work/test_report.json`: ID, suite, esito (PASS/FAIL/SKIP), tempo, motivo.
 
 ## Tetti di durata (12/11, committente)
 
@@ -59,7 +59,7 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
 - smoke + sanity (la build di debug): **32 test in ~25 s** (prima della ristrutturazione la suite di debug richiedeva
   ~5 min); 8 s sono l'avvio fino al menu dal disco, i 29 smoke del gioco ~8 s in tutto.
 - regression: **~80 test**, ~6–7 min; 3 sono solo di release (in debug SKIP; con `RELEASE=1` dopo `RELEASE=1 tools/build/asm.sh`).
-- Un solo run alla volta (`out/.test.lock`): la porta del monitor di VICE (6510) è unica, due run in parallelo si
+- Un solo run alla volta (`out/tmp/.test.lock`): la porta del monitor di VICE (6510) è unica, due run in parallelo si
   parlerebbero addosso (successo durante la ristrutturazione: fallimenti a caso).
 - Monitor a prompt invece dei tempi fissi negli script storici (`test_saves`, `test_rel`, `test_music`, `test_hudxp`,
   `tools/vice/arena.py`): `test_saves.py 1 5` da 70 s a 25 s. `test_start.py` e `test_lore.py` (avvio dal disco, release)
@@ -127,8 +127,8 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `DEATH-01` | death: screen, village, half gold, full hp |
 | `PG-SAVE-01` | game menu 'save game': back in the game; the hero on disk equals the one in RAM |
 | `PG-LOAD-01` | save game, change the gold, quit (no save): the barbarian loads back as saved |
-| `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/gfx/gfx1.prg |
-| `KRILL-02` | snd_get (Krill): the song in its buffer equals out/snd/snd0.prg |
+| `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/work/gfx/gfx1.prg |
+| `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
 ### sanity (2)
 
@@ -146,7 +146,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `BAL-10` | d20 rules in the simulator: reference hero, weak hero, curves |
 | `ARENA-10` | arena: short repeatable series, sensible results |
 | `BEST-10` | every chapter of chapters.yaml (but the Abyss) has base monsters, their strong variants and one boss = its final map boss |
-| `BEST-11` | the game = the table: monster types of out/db.asm are the rows implemented = yes, in order |
+| `BEST-11` | the game = the table: monster types of out/work/db.asm are the rows implemented = yes, in order |
 | `BEST-12` | the checker refuses a wrong bestiary: strong_of of another chapter, unknown tier, duplicate id |
 | `BOOT-10` | POKE 1020,1: BARBARIAN -> START from disk without the menu (Krill installed), GAME, LOBBY and hero list loaded |
 | `BOOT-11` | START from the monitor (wait screen, no bar) up to the game menu |
@@ -196,8 +196,8 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `SHOP-BUY-10` | buy: 3 prices x different gold x pack full/empty (gold, chest, pack) |
 | `SHOP-SELL-10` | sell: half price, GOLD_MAX cap (no sale), category not bought, empty entry |
 | `SHOP-FIX-10` | smith repair (shop_repair, confirmation simulated): sword 200, durability 10/100, 1000 gold -> 950, 99/99 |
-| `HELP-Z-10` | out/help.zx0 unpacks to out/help.prg byte by byte; the packed file is under half the blocks |
-| `HELP-Z-11` | the disk holds the packed HELP (file 'help' equals out/helpz.prg) |
+| `HELP-Z-10` | out/work/help.zx0 unpacks to out/work/help.prg byte by byte; the packed file is under half the blocks |
+| `HELP-Z-11` | the disk holds the packed HELP (file 'help' equals out/work/helpz.prg) |
 | `HUD-XP-10` | XP line: thousands from 10000 (10K ... 65K) |
 | `INV-DROP-10` | DEL on a pack item: N keeps it, Y drops it; DEL on an empty slot asks nothing |
 | `INV-2H-10` | two-handed weapon with a shield on: the shield goes back to the pack; full pack: refused |
@@ -210,7 +210,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `INN-2H-11` | inn: two-handed weapon with a shield on: equipped, the shield and the old weapon go to the pack |
 | `ITEM-10` | 255 generated items, broken weapon, HUD warnings, TOD clock (repair: SHOP-FIX-10) |
 | `BELT-10` | belt (4 potions, the fifth refused), scroll stack, portal |
-| `KRILL-10` | START installs Krill: resident code at $0200 as out/krill/loader.prg (but its variables), LDFLAGS used |
+| `KRILL-10` | START installs Krill: resident code at $0200 as out/work/krill/loader.prg (but its variables), LDFLAGS used |
 | `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (9 blocks), barbarian first |
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
 | `KRILL-13` | no KERNAL disk call left in GAME, LOBBY, MENU and START (listing scan: after the install the drive does not answer the KERNAL) |
@@ -218,7 +218,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (needs the drive ROMs, not in this environment) |
 | `KRILL-14` | Krill install fails (simulated: from the install straight to kr_fail): message, a key, BARBARIAN loaded again |
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
-| `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/lobby.prg |
+| `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
@@ -291,7 +291,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `VIL-MENU-11` | after level 1 and back (the module MENU is read again at the village entry): inn and smith without further reads |
 | `FOUNT-10` | fountain: walking on it heals to full hp |
 | `INN-GOLD-11` | inn: Fire on the chest gold row does nothing (no withdrawal since 10/11), the screen stays open |
-| `MENU-10` | out/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2 |
+| `MENU-10` | out/work/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2 |
 | `MENU-11` | ovl_town from the disk (as at the village entry): the 3 zones equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
 
@@ -315,7 +315,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
   schermate (generalizza il `jmp` di inventario e minimappa). Test: `UI-MENU-10/11`, `UI-SHOP-10` (sanity).
 - **Build di release rotta** (11/11, trovata facendo girare `BOOT-11`/`LORE-10`/`HELP-10`, mai lanciati dopo il villaggio
   nuovo): `gen_lore` non trovava codici liberi per l'immagine `crypt` (61 forme col villaggio nuovo, insieme alle 140 del
-  logo): ora al massimo 50 forme (immagine controllata, `out/lore_preview.png`); la pagina 3 dell'help era di 23 righe
+  logo): ora al massimo 50 forme (immagine controllata, `out/work/lore_preview.png`); la pagina 3 dell'help era di 23 righe
   (il massimo è 22) dopo le righe sull'oro del 10/11: accorciata. I tre test ora passano.
 - **Dalla review del codice (11/11)**: test nuovi per i casi non coperti: inventario (`INV-DROP-10`, `INV-2H-10/11`,
   `INV-UNEQ-10`), abilità (`SKILL-12..15`: selezione per livello, Whirlwind, Battle Cry, Smash), baule d'oro con la

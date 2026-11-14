@@ -4,7 +4,7 @@ Copyright © 2026 - Simone Caporale
 
 Documentazione di **come funziona il gioco nel codice** (6502, 64tass). Ogni pagina indica i sorgenti di
 riferimento; i numeri citati sono quelli generati da `data/rules.yaml` e `data/balance.yaml` (via
-`tools/build/gen_db.py` → `out/db.asm`) alla data dell'ultimo aggiornamento della pagina. Se una pagina e il codice
+`tools/build/gen_db.py` → `out/work/db.asm`) alla data dell'ultimo aggiornamento della pagina. Se una pagina e il codice
 non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.md`).
 
 ## Pagine
@@ -39,7 +39,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | [Secondo emulatore](emulatore.md) | (13/11) **vc64web** in `toolchain/vc64web-custom`: cosa sa fare (con i riferimenti ai suoi documenti), quando usarlo al posto o oltre a VICE, test `EMU-10..16`, trappole misurate |
 | [Fast loader](FastLoader.md) | (11/11, ramo `fast-loader`) **Krill's Loader r194**: architettura (chi installa, residente, caricamenti, salvataggi con il plugin, memoria), build, misure prima/dopo, compatibilità |
 | [Quest system](quests.md) | **Progetto, non nel codice** (07/11): quest, NPC, tre villaggi, trama e sottotrama, stanze fisse e dal seed, costi, open point |
-| [Analisi dell'assembly](../out/asm_audit/analisi_assembly.md) | Analisi del codice assemblato (11/11, `tools/build/asm_audit.py`): codice non raggiunto, ripetuto, spioncino, routine più grandi |
+| [Analisi dell'assembly](../out/work/asm_audit/analisi_assembly.md) | Analisi del codice assemblato (11/11, `tools/build/asm_audit.py`): codice non raggiunto, ripetuto, spioncino, routine più grandi |
 | [Bestiario](bestiario.md) | Mostri per capitolo (11/11): `data/monsters/bestiary.tsv` (sorgente dei mostri, modello `monstdat.tsv` di Diablo), boss di capitolo e concept di 3 capitoli |
 | [Capitoli](capitoli.md) | **Analisi, non nel codice** (11/11): gioco diviso in capitoli (villaggio, piani, mappa finale) e Abisso a 255 piani; `data/chapters.yaml` per atlante e simulatori |
 
@@ -48,12 +48,12 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | Documento | Contenuto |
 |---|---|
 | [FORMATO_DATI.md](FORMATO_DATI.md) | Formato byte per byte dei file su disco e dei salvataggi |
-| [mappa_ram.html](../out/memory-map/mappa_ram.html) / [mappa_disco.html](../out/memory-map/mappa_disco.html) | Mappe generate a ogni build |
-| [grafica/index.html](../out/atlas/index.html) | Atlante grafico (generato a ogni build): tutti i tile di villaggio, dungeon (8 palette) e sala del trono con id e lettere, mappe a griglia con zoom al passaggio del mouse, composizioni, titolo, charset, sprite, font; `out/atlas/tiles.json` |
+| [mappa_ram.html](../out/work/memory-map/mappa_ram.html) / [mappa_disco.html](../out/work/memory-map/mappa_disco.html) | Mappe generate a ogni build |
+| [grafica/index.html](../out/work/atlas/index.html) | Atlante grafico (generato a ogni build): tutti i tile di villaggio, dungeon (8 palette) e sala del trono con id e lettere, mappe a griglia con zoom al passaggio del mouse, composizioni, titolo, charset, sprite, font; `out/work/atlas/tiles.json` |
 | [SISTEMA_COMBATTIMENTO.md](SISTEMA_COMBATTIMENTO.md) | Progetto del sistema d20 (05/11) |
 | [BILANCIAMENTO.md](BILANCIAMENTO.md) | Proposta di bilanciamento a 20 piani (05/11) e ritarature |
 | [balancing-guide.md](balancing-guide.md) | **Guida al bilanciamento**: strumenti, obiettivi, procedura passo per passo, quante prove, errori da non ripetere |
-| [simulazione_regole.html](../out/simulators/simulazione_regole.html) | Report del simulatore (`tools/simulators/sim_rules.py`) |
+| [simulazione_regole.html](../out/work/simulators/simulazione_regole.html) | Report del simulatore (`tools/simulators/sim_rules.py`) |
 
 ## Stato (07/11/2026)
 

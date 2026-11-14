@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Schermata iniziale: converte data/title_src.png in bitmap multicolor C64 (160x200, celle 4x8:
-sfondo comune + 3 colori per cella). Uscite: out/title_preview.png, out/title.koa (formato Koala:
+sfondo comune + 3 colori per cella). Uscite: out/work/title_preview.png, out/work/title.koa (formato Koala:
 bitmap 8000 + schermo 1000 + colore 1000 + sfondo 1)."""
 import os, itertools
 import numpy as np
@@ -51,9 +51,9 @@ def koala(cells):
 def main():
     out, cells = convert(os.path.join(ROOT, "data", "title_src.png"))
     img = Image.fromarray(PAL[out].astype(np.uint8)).resize((320, 200), Image.NEAREST)
-    img.resize((960, 600), Image.NEAREST).save(os.path.join(ROOT, "out", "title_preview.png"))
+    img.resize((960, 600), Image.NEAREST).save(os.path.join(ROOT, "out", "work", "title_preview.png"))
     data = koala(cells)
-    open(os.path.join(ROOT, "out", "title.koa"), "wb").write(data)
+    open(os.path.join(ROOT, "out", "work", "title.koa"), "wb").write(data)
     bm, scr, col = data[:8000], data[8000:9000], data[9000:10000]
     # TITLE su disco: per ogni riga di caratteri r: 40 B schermo, 40 B colore, poi 8 righe di pixel
     # (40 B ciascuna). Cosi' il gioco disegna l'immagine riga per riga mentre carica.
@@ -63,7 +63,7 @@ def main():
         for l in range(8):
             t += bytes(bm[(r*40+c)*8+l] for c in range(40))
     assert len(t) == 10002
-    open(os.path.join(ROOT, "out", "title.prg"), "wb").write(t)
+    open(os.path.join(ROOT, "out", "work", "title.prg"), "wb").write(t)
     print("title: %d byte (file TITLE ordinato per righe)" % len(data))
 
 if __name__ == "__main__":

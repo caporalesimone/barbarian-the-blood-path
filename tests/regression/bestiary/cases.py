@@ -1,5 +1,5 @@
 """Bestiary (sanity moved to regression on 11/11; 11/11, data/monsters/bestiary.tsv, tools/build/bestiary.py, docs/bestiario.md): the table is the source of the
-monsters; the game takes the rows implemented = yes (today's 9 monsters, out/db.asm unchanged), every chapter has its own
+monsters; the game takes the rows implemented = yes (today's 9 monsters, out/work/db.asm unchanged), every chapter has its own
 bestiary (base, strong variants of its bases, one boss), the final boss is in the last story chapter. Pure Python."""
 import os, re, sys, tempfile
 from lib.runner import test, check
@@ -29,10 +29,10 @@ def best_chapters(ctx):
     check(lor["chapter"] == last["id"], "Lord of Ruin in chapter %d, last story chapter %d" % (lor["chapter"], last["id"]))
 
 
-@test("BEST-11", "the game = the table: monster types of out/db.asm are the rows implemented = yes, in order")
+@test("BEST-11", "the game = the table: monster types of out/work/db.asm are the rows implemented = yes, in order")
 def best_game(ctx):
     rows = B.game_rows()
-    db = open(os.path.join(ROOT, "out", "db.asm")).read()
+    db = open(os.path.join(ROOT, "out", "work", "db.asm")).read()
     n = int(re.search(r"^N_MTYPES\s*=\s*(\d+)", db, re.M).group(1))
     check(n == len(rows) == 9, "N_MTYPES %d, implemented rows %d" % (n, len(rows)))
     check(rows[-1]["id"] == "lord_of_ruin" and "final" in rows[-1]["flags"], "the last game monster is %s" % rows[-1]["id"])
@@ -52,7 +52,7 @@ def best_refuse(ctx):
     x = base1.split("\t"); x[c("tier")] = "elite"; cases.append(("tier elite", [head, "\t".join(x)]))
     cases.append(("duplicate", [head, base1, base1]))
     for what, ls in cases:
-        with tempfile.NamedTemporaryFile("w", suffix=".tsv", delete=False, dir=os.path.join(ROOT, "out")) as f:
+        with tempfile.NamedTemporaryFile("w", suffix=".tsv", delete=False, dir=os.path.join(ROOT, "out", "tmp")) as f:
             f.write("\n".join(ls) + "\n")
         try:
             B.load(f.name)

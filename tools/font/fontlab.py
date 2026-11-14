@@ -268,7 +268,7 @@ def render_screen(font, title, path, scale=2):
 
 
 def main():
-    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out", "font")   # anteprime (13/11: in out/font/)
+    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "out", "work", "font")   # anteprime (13/11: in out/work/font/)
     os.makedirs(out, exist_ok=True)
     thumbs = []
     for st in STYLES:

@@ -4,7 +4,7 @@ Numeri di gioco: `data/rules.yaml` (regole), `data/balance.yaml` (mondo, bottino
 (database degli oggetti, 11/11: [items/README.md](items/README.md)), `data/chapters.yaml` (capitoli, per gli strumenti).
 
     python3 tools/build/gen_db.py     # balance.yaml -> src/db.asm (lo fa anche ./build.sh)
-    ./build.sh                  # assembla out/game.prg
+    ./build.sh                  # assembla out/work/game.prg
 
 - `src/db.asm` e' GENERATO: non modificarlo a mano.
 - Il generatore valida i valori (byte 0..255, min<=max, percentuali, ordine mostri,

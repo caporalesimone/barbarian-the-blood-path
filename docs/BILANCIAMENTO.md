@@ -9,7 +9,7 @@ Bilanciamento del nuovo sistema di combattimento (docs/SISTEMA_COMBATTIMENTO.md)
 tetto 20 prima dell'Abisso), poi Abisso dal piano 21 al 255 (sempre livello = piano). Il numero di piani è un
 parametro (`dungeon.floors`): pozioni, riferimento e taratura seguono. Tutti i numeri sono in
 `data/rules.yaml`; i mostri sono tarati automaticamente da `tools/simulators/fit_rules.py` sul PG di riferimento di ogni
-piano; i confronti sono di `tools/simulators/cmp_rules.py`; il report completo è `out/simulators/simulazione_regole.html`
+piano; i confronti sono di `tools/simulators/cmp_rules.py`; il report completo è `out/work/simulators/simulazione_regole.html`
 (`tools/simulators/sim_rules.py`). Il gioco in assembly usa `data/rules.yaml` + `data/balance.yaml` via `tools/build/gen_db.py`.
 
 Vincoli del simulatore (uguali al gioco): bot fermo davanti ai mostri, attacco base ogni "cadenza" dell'arma, un mostro
@@ -302,7 +302,7 @@ Cosa è cambiato rispetto al progetto e come il simulatore lo segue (`tools/simu
   stessa regola (altrimenti fallen warchief).
 
 Risultato di `tools/simulators/fit_rules.py --final` (60 combattimenti per punto, 400 di verifica; i numeri esatti sono
-in `data/rules.yaml growth` e `final_boss_hp_mult`, il report in `out/simulators/simulazione_regole.html`):
+in `data/rules.yaml growth` e `final_boss_hp_mult`, il report in `out/work/simulators/simulazione_regole.html`):
 `ac_per_floor` 1,0, `att_per_floor` 0,7; `curve_hp` ×1,5 dal piano 1; `curve_dmg` ×0,5 ai piani 1–4, ×0,75
 ai piani 5–14, ×1 dal 15 (più bassa di prima: il PG di riferimento ha meno magia). **Boss finale**: con le
 evocazioni immediate e di piano 20 la vecchia scheda era imbattibile (0–25%); ora vita 45d10+90 (×0,75) e

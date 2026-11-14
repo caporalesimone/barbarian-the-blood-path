@@ -10,9 +10,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.a
 sys.path.insert(0, os.path.join(ROOT, "tests")); from lib import c64 as C64  # noqa: E402,E702  (monitor veloce, 10/11)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
 import songs  # noqa: E402
-lbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open(os.path.join(ROOT, "out", "game.lbl")).read(), re.M)}
-num = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", open(os.path.join(ROOT, "out", "game.lbl")).read(), re.M)}
-mlst = open(os.path.join(ROOT, "out", "lobby.lst")).read()
+lbl = {m.group(1): int(m.group(2), 16) for m in re.finditer(r"^(\w+)\s*=\s*\$([0-9a-f]+)", open(os.path.join(ROOT, "out", "work", "game.lbl")).read(), re.M)}
+num = {m.group(1): int(m.group(2)) for m in re.finditer(r"^(\w+)\s*=\s*(\d+)\s*$", open(os.path.join(ROOT, "out", "work", "game.lbl")).read(), re.M)}
+mlst = open(os.path.join(ROOT, "out", "work", "lobby.lst")).read()
 ui_menu = re.search(r"^\.(\w+)\s+ui_menu:", mlst, re.M).group(1)
 rts = re.search(r"^\.(\w+)\s+60\s", mlst, re.M).group(1)
 P = songs.PLAYLIST
@@ -21,9 +21,9 @@ LVL = [GAME.index(n) for n in P["level"]]                  # theme of chapter 1.
 TOWN = [GAME.index(n) for n in P["town"]]
 BOSS = GAME.index(P["boss"][0])
 FIG = [GAME.index(n) for n in P["fight"]]
-FILES = [open(os.path.join(ROOT, "out", "snd", n + ".bin"), "rb").read() for n in GAME]
+FILES = [open(os.path.join(ROOT, "out", "work", "snd", n + ".bin"), "rb").read() for n in GAME]
 err = []
-vv = C64.Vice(os.path.join(ROOT, "out", "disk.d64"))      # (11/11, G2: tests/lib/c64.py, a copy of the disk)
+vv = C64.Vice(os.path.join(ROOT, "out", "work", "disk.d64"))      # (11/11, G2: tests/lib/c64.py, a copy of the disk)
 try:
     def cmd(c, w=None): return vv.cmd(c)
     def go(lim):
@@ -58,7 +58,7 @@ try:
         got = bytes(mem(at, len(FILES[i])))
         if got != FILES[i]:
             err.append("buffer %04x differs from file SND%d (%s)" % (at, i, GAME[i]))
-    vv.load(os.path.join(ROOT, "out", "start.prg"))
+    vv.load(os.path.join(ROOT, "out", "work", "start.prg"))
     cmd("break " + ui_menu, 0.2); cmd("r pc=080d", 0.3)
     if not go(200): sys.exit("menu not reached")
     cmd("del", 0.2); cmd("r pc=" + rts, 0.2); cmd("r a=01", 0.2)     # new game (slot 0)
@@ -99,7 +99,7 @@ try:
     check_buf(st["lvl"], lbl["SND_LBUF"])
     # quit to the main menu (ui_gamemenu, entry 2: resume, save, quit): the choice must reach the question (_qask) and the
     # confirmation (_quit: game_start without saving, 11/11 evening) the barbarian menu. 06/11: "bne +" jumped to the help and back to the game menu
-    gl = open(os.path.join(ROOT, "out", "game.lst")).read()
+    gl = open(os.path.join(ROOT, "out", "work", "game.lst")).read()
     a_sel = int(re.search(r"^\.(\w+)\s+(?:ad \w\w \w\w|a5 \w\w)\s+lda \$\w+\s+lda ui_cur\n\.\w+\s+f0 \w\w\s+beq \$\w+\s+beq _back", gl, re.M).group(1), 16)
     a_ask = int(re.search(r"^\.(\w+)\s+_qask", gl, re.M).group(1), 16)
     a_quit = int(re.search(r"^\.(\w+)\s+[0-9a-f ]+\s+\w+(?: \S+)?\s+_quit\s", gl, re.M).group(1), 16)

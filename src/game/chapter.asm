@@ -61,7 +61,7 @@ chap_won:
         jmp set_flash
 _r      rts
 
-; C = 1 se il PG (ptx, pty) e' su una casella di uscita del villaggio (tx_exit, out/town_places.inc)
+; C = 1 se il PG (ptx, pty) e' su una casella di uscita del villaggio (tx_exit, out/work/town_places.inc)
 at_exit:
         lda cur_level
         bne _no

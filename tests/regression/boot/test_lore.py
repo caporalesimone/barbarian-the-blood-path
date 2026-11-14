@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Release disk in VICE (warp, emulated 1541): BARBARIAN (menu) -> HELP -> LORE -> BARBARIAN -> START.
 On tests/lib/c64.py (11/11, G2: English, no fixed delays: the waits stop on GETIN, on the LORE IRQ or on addresses).
-1. The loader BARBARIAN (out/barbarian.prg, release build) shows its three entries; key "2": the manual HELP from disk,
+1. The loader BARBARIAN (out/work/barbarian.prg, release build) shows its three entries; key "2": the manual HELP from disk,
    the 5 pages (space = next), RUN/STOP and fire from the last page go back to the menu.
 2. Key "1" (KERNAL keyboard buffer): the trampoline loads LORE from disk; LORE installs Krill's Loader (11/11), loads
-   TITLE + LDAT and unpacks LDAT in place: byte by byte against out/ldat_raw.bin (tools/build/gen_lore.py).
+   TITLE + LDAT and unpacks LDAT in place: byte by byte against out/work/ldat_raw.bin (tools/build/gen_lore.py).
 3. At PRESS SPACE jump to lore_start: after the pause the story scrolls (state 2, the stream advances, no hang);
    screenshots of the logo and of the scroll with --shot (real speed: only there the waits are timed).
 4. RUN/STOP (variable lstop): back to BARBARIAN (Krill uninstalled, BARBARIAN reloaded by the KERNAL); RUN/STOP
    while LORE loads (ld_stop): same.
 5. Key "3": the trampoline loads START and the game start runs ($A000).
-Usage: tests/regression/boot/test_lore.py [--shot prefix]   (needs an up-to-date out/disk.d64)."""
+Usage: tests/regression/boot/test_lore.py [--shot prefix]   (needs an up-to-date out/work/disk.d64)."""
 import os, re, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -19,11 +19,11 @@ from lib import c64 as C64  # noqa: E402
 
 SHOT = sys.argv[sys.argv.index("--shot") + 1] if "--shot" in sys.argv else None
 LBL = C64.labels("lore")
-lst = open(os.path.join(ROOT, "out", "lore.lst")).read()
+lst = open(os.path.join(ROOT, "out", "work", "lore.lst")).read()
 WAIT = int(re.search(r"^\.\w+\s+(\w+)\s.*_wait\s+lda", lst, re.M).group(1), 16)
 UNP = int(re.search(r"^\.\w+\s+(\w+)\s+20 \w\w \w\w\s+jsr \$\w+\s+jsr zx0_unpack", lst, re.M).group(1), 16) + 3
 AFTER_LDSTOP = int(re.search(r"^\.\w+\s+(\w+)\s+8d \w\w \w\w\s+sta \$\w+\s+sta ld_stop\s+; RUN/STOP non", lst, re.M).group(1), 16) + 3
-RAW = open(os.path.join(ROOT, "out", "ldat_raw.bin"), "rb").read()
+RAW = open(os.path.join(ROOT, "out", "work", "ldat_raw.bin"), "rb").read()
 GETIN = 0xffe4
 fails = []
 
@@ -33,7 +33,7 @@ def check(cond, msg):
     if not cond: fails.append(msg)
 
 
-v = C64.Vice(os.path.join(ROOT, "out", "disk.d64"))
+v = C64.Vice(os.path.join(ROOT, "out", "work", "disk.d64"))
 
 
 def scr_text():
@@ -88,7 +88,7 @@ def shot(name, sec):
 
 try:
     # 1. menu
-    v.load(os.path.join(ROOT, "out", "barbarian.prg"))
+    v.load(os.path.join(ROOT, "out", "work", "barbarian.prg"))
     v.pc(0x080d)
     check(wait_text("hear the legend") and all(t in scr_text() for t in ("game manual", "walk the blood path")),
           "BARBARIAN: menu with its three entries")
@@ -113,7 +113,7 @@ try:
     ok = until(UNP)
     check(ok, "BARBARIAN -> LORE: LORE loaded, LDAT read and unpacked")
     if ok:
-        dump = os.path.join(ROOT, "out", "test_ldat_dump.prg")
+        dump = os.path.join(ROOT, "out", "work", "test_ldat_dump.prg")
         if os.path.exists(dump): os.remove(dump)
         v.cmd("bank ram")
         v.cmd('s "%s" 0 %04x %04x' % (dump, LBL["LD_DST"], LBL["LD_DST"] + len(RAW) - 1))
@@ -122,7 +122,7 @@ try:
             if os.path.exists(dump) and os.path.getsize(dump) == len(RAW) + 2: break
             time.sleep(0.05)
         got = open(dump, "rb").read()[2:] if os.path.exists(dump) else b""
-        check(got == RAW, "LDAT unpacked in VICE = out/ldat_raw.bin (%d B)" % len(RAW))
+        check(got == RAW, "LDAT unpacked in VICE = out/work/ldat_raw.bin (%d B)" % len(RAW))
         if os.path.exists(dump): os.remove(dump)
     ok = until(WAIT)
     sw = re.findall(r"Stopwatch:\s*(\d+)", v.cmd("sw"))

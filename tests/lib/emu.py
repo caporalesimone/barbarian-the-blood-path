@@ -19,7 +19,7 @@ from lib.c64 import ROOT, OUT
 from lib.runner import Skip
 
 URL = os.environ.get("EMU_URL", "").rstrip("/")         # daemon of the container c64-emu-vc64web
-LOBBY_MENU = 0xC00C                                   # menu_main of out/lobby.lbl (module LOBBY at $C000)
+LOBBY_MENU = 0xC00C                                   # menu_main of out/work/lobby.lbl (module LOBBY at $C000)
 
 
 def ensure_built():
@@ -61,7 +61,7 @@ class Emu:
         try: self.call("pause", timeout=10)
         except Exception: pass
 
-    # ---- memory and screen (labels of out/game.lbl once loaded)
+    # ---- memory and screen (labels of out/work/game.lbl once loaded)
     def peek(self, a, n=1):
         v = self.call("peek", a, n)
         return v if n > 1 else (v[0] if isinstance(v, list) else v)
@@ -75,13 +75,13 @@ class Emu:
     def state_hash(self): return self.call("stateHash")["hash"]
 
     def load_labels(self, name, set=None):
-        """labels of out/NAME.lbl. The modules that share addresses (LOBBY and GAME both use $C000) must go in separate
+        """labels of out/work/NAME.lbl. The modules that share addresses (LOBBY and GAME both use $C000) must go in separate
         sets: set="lobby" -> read as "lobby:nvalid" (docs/emulatore.md); without set they replace each other."""
         with open(os.path.join(OUT, name), "r") as f:
             return self.call("loadLabels", f.read(), {"set": set, "activate": False} if set else {})
 
     def load_encoding(self, name, path):
-        """named screen encoding from a 64tass .cdef file (the HUD one: out/gfx_consts.inc, block .enc "hud")"""
+        """named screen encoding from a 64tass .cdef file (the HUD one: out/work/gfx_consts.inc, block .enc "hud")"""
         with open(path, "r") as f: return self.call("loadEncoding", name, f.read())
 
     # ---- running
@@ -105,7 +105,7 @@ class Emu:
         return r.get("reason") == "pc"
 
     def to_main_loop(self, timeout=3000):
-        """after the save of a new hero (Krill plugin) the game enters the village: main_loop of out/game.lbl"""
+        """after the save of a new hero (Krill plugin) the game enters the village: main_loop of out/work/game.lbl"""
         self.call("resume")
         ok = self.at_pc("main_loop", timeout)
         self.call("pause")

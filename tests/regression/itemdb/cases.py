@@ -1,5 +1,5 @@
 """Item database (11/11; sanity of the item database, moved to regression on 11/11): data/items/items.tsv is the source of truth of every item (tools/build/items_db.py), the game data
-(out/db.asm, labels itcat/itfl/itprice) must match it, the table checker must refuse a wrong table, and the two-handed
+(out/work/db.asm, labels itcat/itfl/itprice) must match it, the table checker must refuse a wrong table, and the two-handed
 rule (no shield with a two-handed weapon) must hold in the inn too (module OVL2, h_equip), not only in the inventory
 (INV-2H-10/11). The first tests are pure Python; the inn tests share one VICE session in the village."""
 import os, sys, tempfile
@@ -55,7 +55,7 @@ def db_refuse(ctx):
     c = shield.split("\t"); c[col("type")] = "helmet"; cases.append(("unknown type", [head, "\t".join(c)]))
     c = sword.split("\t"); c[col("hands")] = "3"; cases.append(("three hands", [head, "\t".join(c)]))
     for what, lines in cases:
-        with tempfile.NamedTemporaryFile("w", suffix=".tsv", delete=False, dir=os.path.join(ROOT, "out")) as f:
+        with tempfile.NamedTemporaryFile("w", suffix=".tsv", delete=False, dir=os.path.join(ROOT, "out", "tmp")) as f:
             f.write("\n".join(lines) + "\n")
         try:
             I.load(f.name)

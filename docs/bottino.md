@@ -3,7 +3,7 @@
 Sorgenti: `src/game/game.asm` (`roll_loot`, `mon_ll`, `defer_drop`, `drop_now`, `drop_chest`, `find_free`,
 `place_chests`, `chest_open`, `chest_gen_seed`, `ch_goldroll`, `gen_item`, `lt_scan`), `src/game/dungeon.asm`
 (`fin_chests`), `src/game/ui.asm` (`ui_chest`). Dati: `data/balance.yaml` (`drops`, `chest_level`, `chests`, `loot`,
-`boss`) → `out/db.asm`. Simulazione: `tools/simulators/sim_chest.py`, `tools/simulators/sim_gold.py`.
+`boss`) → `out/work/db.asm`. Simulazione: `tools/simulators/sim_chest.py`, `tools/simulators/sim_gold.py`.
 
 ## chestLevel
 

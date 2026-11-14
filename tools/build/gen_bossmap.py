@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mappe dei piani del boss dei capitoli (12/11, TODO M1, docs/capitoli.md): data/maps/bosschapN.txt -> out/bosschN.prg
+"""Mappe dei piani del boss dei capitoli (12/11, TODO M1, docs/capitoli.md): data/maps/bosschapN.txt -> out/work/bosschN.prg
 (file BOSSCHN sul disco, N = capitolo 1..CHAPTERS-1; il capitolo CHAPTERS ha la sala del trono, FMAP).
 Testo 48x48, una lettera per casella: '#' muro, '.' pavimento, '<' scale di arrivo, 'B' posto del boss (pavimento).
 File: indirizzo di caricamento FIN_AT (come FMAP: stesso buffer sotto il KERNAL), 4 byte di intestazione (scale x, y;
@@ -32,7 +32,7 @@ def build(n):
     rl = F.rle(m)
     data = bytes([st[0][0], st[0][1], bo[0][0], bo[0][1]]) + rl
     assert F.FIN_AT + len(data) <= F.FIN_END, "mappa del boss troppo grande per il buffer di FMAP"
-    out = os.path.join(ROOT, "out", "bossch%d.prg" % n)
+    out = os.path.join(ROOT, "out", "work", "bossch%d.prg" % n)
     open(out, "wb").write(bytes([F.FIN_AT & 255, F.FIN_AT >> 8]) + data)
     return out, len(data)
 

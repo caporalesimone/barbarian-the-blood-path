@@ -1,6 +1,6 @@
 ; ===================================================================
 ;  menu.asm - modulo MENU (file su disco, 11/11): i menu del villaggio, locanda e negozi, uno per tutti i villaggi.
-;  Assemblato con le etichette del gioco (out/game.lbl) in DUE zone di RAM (immagine piatta $A700-$FCFF, i buchi li
+;  Assemblato con le etichette del gioco (out/work/game.lbl) in DUE zone di RAM (immagine piatta $A700-$FCFF, i buchi li
 ;  scarta tools/build/pack_menu.py, che comprime le zone una per una nel file MENU):
 ;    zona 1  MR1_AT $C900 - $CFFF   RAM normale (dopo la mappa; il LOBBY la copre: ovl_cur = 0)
 ;    zona 2  MR2_AT $F4E0 - $FCFF   RAM sotto il KERNAL (dopo la cache del tema; fino all'11/11 posto del precaricamento)
@@ -10,7 +10,7 @@
 ;  si esegue solo cosi'. Escono con $01 = $36 prima di ui_exit (che riaccende l'IRQ).
 ;  Tabella dei salti fissa all'inizio della zona 1 (MENU_INN, MENU_SHOP in stash.asm).
 ; ===================================================================
-        .include "../out/game.lbl"
+        .include "../out/work/game.lbl"
         .include "macros.inc"
         .enc "screen"
 

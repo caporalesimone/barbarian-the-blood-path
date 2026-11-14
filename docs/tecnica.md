@@ -1,7 +1,7 @@
 # Tecnica: memoria, disco, build, strumenti
 
-Mappe dettagliate e sempre aggiornate (rigenerate a ogni build): [mappa_ram.html](../out/memory-map/mappa_ram.html),
-[mappa_disco.html](../out/memory-map/mappa_disco.html). Formato dei file: [FORMATO_DATI.md](FORMATO_DATI.md).
+Mappe dettagliate e sempre aggiornate (rigenerate a ogni build): [mappa_ram.html](../out/work/memory-map/mappa_ram.html),
+[mappa_disco.html](../out/work/memory-map/mappa_disco.html). Formato dei file: [FORMATO_DATI.md](FORMATO_DATI.md).
 
 ## Memoria (sintesi)
 
@@ -56,7 +56,7 @@ una zona per file (`MENU1`..`MENU3`, letti con Krill: 2,3 s).
 `GFX1` (temi 1–7), `GFX2` (tema 8), `SND0`…`SNDn` (brani, [Musica](musica.md)), `HL` e `SAVE-01`..`SAVE-05`
 (salvataggi), `KSAVE` (plugin di save di Krill). Dall'11/11 il gioco legge e scrive con **Krill's Loader**
 ([FastLoader](FastLoader.md)): disco per la 1541 (`_1541` nel nome). **Un solo disco** (11/11 sera, regola del
-committente) `out/disk.d64`; per lo sviluppo `POKE 1020,1` prima del `RUN` salta il menu del loader ([cheats](cheats.md)).
+committente) `out/work/disk.d64`; per lo sviluppo `POKE 1020,1` prima del `RUN` salta il menu del loader ([cheats](cheats.md)).
 Comporre il disco costa ~0,1 s (`cc1541` di Krill).
 
 ```mermaid
@@ -81,19 +81,19 @@ componenti (07/11). Assemblaggio con `-I src -I src/common -I src/game -I out` (
 
 | File del disco | Sorgente | Include da |
 |---|---|---|
-| `BARBARIAN` (loader) | `src/barbarian.asm` | `common/tramp.inc`, `out/version.inc` |
-| `START` | `src/start.asm` | `common/boot.asm` (titolo, musica, PRESS SPACE, caricamento), `common/zx0.inc`, `common/sid_player.inc`, `out/start_data.inc`, `common/tramp.inc` |
+| `BARBARIAN` (loader) | `src/barbarian.asm` | `common/tramp.inc`, `out/work/version.inc` |
+| `START` | `src/start.asm` | `common/boot.asm` (titolo, musica, PRESS SPACE, caricamento), `common/zx0.inc`, `common/sid_player.inc`, `out/work/start_data.inc`, `common/tramp.inc` |
 | `LORE` | `src/lore.asm` | `common/boot.asm` con `LORE=1`, `lore/scroll.asm` |
-| `HELP` | `src/help.asm` | `common/tramp.inc`, `out/help.inc` (`tools/build/gen_help.py`) |
+| `HELP` | `src/help.asm` | `common/tramp.inc`, `out/work/help.inc` (`tools/build/gen_help.py`) |
 | `HELP` (da fare) | `src/help.asm` | `help/` (vuota, `src/help/README.md`) |
 | `GAME` | `src/game.asm` | `game/*.asm` (gioco, combattimento, piani, UI, HUD, barra, musica, salvataggi, disco, generatore...), `common/` |
-| `LOBBY`, `MENU` | `src/lobby.asm`; `src/menu.asm` + `src/menu/` (compresso da `tools/build/pack_menu.py`) | `out/game.lbl` (etichette del gioco), `common/macros.inc` |
+| `LOBBY`, `MENU` | `src/lobby.asm`; `src/menu.asm` + `src/menu/` (compresso da `tools/build/pack_menu.py`) | `out/work/game.lbl` (etichette del gioco), `common/macros.inc` |
 | `JUKEBOX` | `src/jukebox.asm` | `common/sid_player.inc`, `common/sfx.inc` |
-| (nessuno: arena) | `src/test/arena.asm` | `out/arena_game.lbl` |
+| (nessuno: arena) | `src/test/arena.asm` | `out/work/arena_game.lbl` |
 
-File sorgente generati (11/11, G1: non più in `src/` né in git, li scrivono i generatori a ogni build): `out/version.inc`,
-`out/sid_freq.inc`, `out/start_data.inc`, `out/db.asm`, `out/gfx_consts.inc`, `out/final_map.inc`, `out/music_tab.inc`,
-`out/town_places.inc`; l'assemblaggio li trova con `-I out`.
+File sorgente generati (11/11, G1: non più in `src/` né in git, li scrivono i generatori a ogni build): `out/work/version.inc`,
+`out/work/sid_freq.inc`, `out/work/start_data.inc`, `out/work/db.asm`, `out/work/gfx_consts.inc`, `out/work/final_map.inc`, `out/work/music_tab.inc`,
+`out/work/town_places.inc`; l'assemblaggio li trova con `-I out`.
 
 ## Build
 
@@ -105,17 +105,17 @@ immagini; le ROM stanno in `toolchain/roms/` e VICE le riceve a mano (`-default`
 
 | Comando | Cosa fa |
 |---|---|
-| `./build.sh` | versioni → generatori (`gen_gfx`, `gen_font`, `gen_music`: brani da `tools/build/songs.py`, `gen_db`) → assemblaggio → dischi → mappe RAM/disco e atlante grafico (`gen_atlas.py` → `out/atlas/`) → test |
+| `./build.sh` | versioni → generatori (`gen_gfx`, `gen_font`, `gen_music`: brani da `tools/build/songs.py`, `gen_db`) → assemblaggio → dischi → mappe RAM/disco e atlante grafico (`gen_atlas.py` → `out/work/atlas/`) → test |
 | `./build.sh --no-test` | come sopra senza test |
 | `toolchain/run.sh <container> <comando>` | (13/11) un comando qualunque in un container (`builder`, `emu-vice` = `c64-*`; `barbarian-manual` col nome completo) |
-| `tools/build/asm_audit.py` | (11/11) analisi del codice assemblato dai listati di tutti i programmi: codice non raggiunto, ripetuto, spioncino, routine più grandi → `out/asm_audit/analisi_assembly.md` |
+| `tools/build/asm_audit.py` | (11/11) analisi del codice assemblato dai listati di tutti i programmi: codice non raggiunto, ripetuto, spioncino, routine più grandi → `out/work/asm_audit/analisi_assembly.md` |
 | `tools/vice/frame_prof.py` | (11/11) cicli di ogni routine del ciclo principale a ogni giro, su un piano e con una corsa di Frenzy scelti ([prestazioni](prestazioni.md)) |
 | `tools/vice/menu_time.py` | (11/11) cronometro del modulo MENU: caricamento dal disco e apertura di negozi e locanda |
 | `tools/build/items_db.py`, `tools/build/bestiary.py`, `tools/build/chapters_db.py` | (11/11) database di oggetti, mostri e capitoli (`data/items/`, `data/monsters/`, `data/chapters.yaml`) |
-| `tools/build/cache_run.py` | (11/11) build incrementale: un passo (storia `gen_lore`, manuale `gen_help`, atlante `gen_atlas`) gira solo se cambiano i suoi ingressi (impronta in `out/.cache/`). Tempi misurati l'11/11: `tools/build/asm.sh` 1,0–1,3 s con le cache, 2,9 s senza; `./build.sh --no-test` ~4 s |
+| `tools/build/cache_run.py` | (11/11) build incrementale: un passo (storia `gen_lore`, manuale `gen_help`, atlante `gen_atlas`) gira solo se cambiano i suoi ingressi (impronta in `out/cache/steps/`). Tempi misurati l'11/11: `tools/build/asm.sh` 1,0–1,3 s con le cache, 2,9 s senza; `./build.sh --no-test` ~4 s |
 | `tools/build/asm.sh [test]` | solo assemblaggio (anche build ARENA, moduli LOBBY e MENU (`tools/build/pack_menu.py`), compressione di GAME con `tools/build/pack.py`); `test` = varianti con le variabili d'ambiente |
-| `tools/build/release.sh` | parte finale di `./build.sh --release`: disco, mappe in `out/memory-map/`, zip dei sorgenti (con la versione corrente) |
-| `tools/build/bump_version.py` | chiamato da `build.sh`: se i sorgenti (src senza i generati, data, tools, fonts, tests, version.yaml) sono cambiati dall'ultima build (`source_hash` in `version.yaml`), versione minore + 1. La build lascia `out/blood_path_vX.Y_1541.d64` |
+| `tools/build/release.sh` | parte finale di `./build.sh --release`: disco, mappe in `out/work/memory-map/`, zip dei sorgenti (con la versione corrente) |
+| `tools/build/bump_version.py` | chiamato da `build.sh`: se i sorgenti (src senza i generati, data, tools, fonts, tests, version.yaml) sono cambiati dall'ultima build (`source_hash` in `version.yaml`), versione minore + 1. La build lascia `out/releases/latest/blood_path_vX.Y_1541.d64` |
 
 Varianti di test (`tools/build/asm.sh test` con variabili d'ambiente): `TESTLVL` (piano di partenza), `TESTCL`
 (livello dell'eroe), `TESTSP` (mostri), `TESTUI` (schermate per screenshot/test), `NOKEYS`, `TESTFIRE`, `TESTSK`,
@@ -147,4 +147,4 @@ cambio di regola (regola in `CLAUDE.md`).
 - `tools/simulators/sim_durability.py` (durabilità e usura), `tools/simulators/sim_chest.py` (chestLevel e probabilità di ogni oggetto
   per piano), `tools/simulators/sim_gold.py` (oro raccoglibile e oro dei bauli epici).
 - **Generatore del database** (`tools/build/gen_db.py`): legge `rules.yaml` + `data/items/items.tsv` (via `tools/build/items_db.py`) + `balance.yaml`, controlla limiti 8/16 bit
-  e coerenze, scrive `out/db.asm`.
+  e coerenze, scrive `out/work/db.asm`.

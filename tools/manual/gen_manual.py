@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Genera out/manual/manuale.html e out/manual/Barbarian_Blood_Path_Manuale.pdf (A5, WeasyPrint).
+"""Genera out/work/manual/manuale.html e out/work/manual/Barbarian_Blood_Path_Manuale.pdf (A5, WeasyPrint).
 
 Gira nel container barbarian-manual (tools/manual, 13/11: WeasyPrint al posto di Chrome; stesse 19 pagine, l'ombra del
 titolo in copertina non c'e' perche' WeasyPrint ignora text-shadow). Dall'host: ./build.sh --manual.
 
 Sorgente editabile: docs/manual/manuale_src.html (+ stile.css). Questo script:
-  1. ritaglia gli screenshot grezzi (docs/manual/shots/*.png) in out/manual/img/*.png (area utile 320x200 senza bordo);
+  1. ritaglia gli screenshot grezzi (docs/manual/shots/*.png) in out/work/manual/img/*.png (area utile 320x200 senza bordo);
   2. riempie i segnaposto con i dati di data/rules.yaml e data/balance.yaml:  {{MONSTER_ROWS}} {{STEP_HDR}} {{MIN_ROW}} {{MAX_ROW}};
   3. numera le pagine e scrive manuale.html;
   4. stampa il PDF con WeasyPrint.
@@ -18,7 +18,7 @@ from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
-R = os.path.join(ROOT, "out", "manual")          # (13/11) tutto cio' che genera: HTML, ritagli, PDF
+R = os.path.join(ROOT, "out", "work", "manual")          # (13/11) tutto cio' che genera: HTML, ritagli, PDF
 M = os.path.join(ROOT, "docs", "manual")         # (11/11) sorgente del manuale in docs/manual/
 sys.path.insert(0, os.path.join(ROOT, "tools", "build"))
 import bestiary  # noqa: E402
@@ -110,7 +110,7 @@ def number(m):
     n[0] += 1
     return m.group(0) if n[0] == 1 else f'<div data-n="— {n[0]-1} —" class="page'
 html = re.sub(r'<div class="page', number, html)
-# l'HTML sta in out/manual/: foglio di stile e sprite dei mostri restano nel sorgente (docs/manual/)
+# l'HTML sta in out/work/manual/: foglio di stile e sprite dei mostri restano nel sorgente (docs/manual/)
 html = html.replace('href="stile.css"', 'href="../../docs/manual/stile.css"').replace('src="mon/', 'src="../../docs/manual/mon/')
 open(os.path.join(R, OUT), "w", encoding="utf-8").write(html)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Build incrementale (11/11): esegue un passo della build solo se i suoi ingressi sono cambiati.
 Uso: tools/build/cache_run.py NOME --in file|cartella ... --out file ... -- comando ...
-Impronta SHA-1 di ingressi (contenuto dei file, ricorsivo nelle cartelle) + comando, salvata in out/.cache/NOME;
+Impronta SHA-1 di ingressi (contenuto dei file, ricorsivo nelle cartelle) + comando, salvata in out/cache/steps/NOME;
 se l'impronta e' uguale e le uscite esistono il comando non gira ("NOME: invariato"). Variabili d'ambiente che
 cambiano il risultato: aggiungerle con --env NOME."""
 import hashlib, os, subprocess, sys
@@ -38,7 +38,7 @@ def main(a):
             h.update(os.path.relpath(f, ROOT).encode())
             h.update(open(f, "rb").read())
     d = h.hexdigest()
-    st = os.path.join(ROOT, "out", ".cache", name)
+    st = os.path.join(ROOT, "out", "cache", "steps", name)
     if os.path.exists(st) and open(st).read() == d and all(os.path.exists(os.path.join(ROOT, o)) for o in outs):
         print("%s: invariato" % name)
         return 0

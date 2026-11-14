@@ -7,7 +7,7 @@ In every suite one folder per feature; its cases.py registers the tests (ID, des
 folder are scripts and data of that feature.
 Usage: tests/run.py [smoke|sanity|regression|all ...] [-k ID|prefix ...] [--list] [--md]
 Duration caps (CAPS): smoke 20 s, smoke + sanity 35 s, one smoke / sanity test 10 s (exit 1 with "TIME CAP" lines).
-Report: on screen and in out/test_report.txt / out/test_report.json (ID, suite, result, time, reason)."""
+Report: on screen and in out/work/test_report.txt / out/work/test_report.json (ID, suite, result, time, reason)."""
 import glob, importlib.util, json, os, sys, time, traceback
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -39,7 +39,8 @@ def load(suite):
 def lock():
     """one test run at a time: VICE's remote monitor port (6510) is shared, two runs would talk to each other's VICE"""
     import fcntl
-    f = open(os.path.join(os.path.dirname(HERE), "out", ".test.lock"), "w")
+    os.makedirs(os.path.join(os.path.dirname(HERE), "out", "tmp"), exist_ok=True)
+    f = open(os.path.join(os.path.dirname(HERE), "out", "tmp", ".test.lock"), "w")
     try:
         fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
     except OSError:
@@ -135,7 +136,7 @@ def main():
     summary = "%s: %d test, %d PASS, %d FAIL, %d SKIP, %.1f s" % ("+".join(suites), len(res), n["PASS"], n["FAIL"], n["SKIP"], tot)
     print(summary)
     for e in cap_err: print("TIME CAP: " + e)
-    out = os.path.join(os.path.dirname(HERE), "out")
+    out = os.path.join(os.path.dirname(HERE), "out", "work")
     os.makedirs(out, exist_ok=True)
     with open(os.path.join(out, "test_report.txt"), "w") as f:
         f.write("%-14s %-10s %-5s %8s  %s\n" % ("ID", "SUITE", "RESULT", "TIME", "DESCRIPTION / REASON"))

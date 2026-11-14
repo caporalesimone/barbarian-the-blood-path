@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Analisi del codice ASSEMBLATO (11/11, richiesta del committente: guardare il risultato finale, non i sorgenti in parte
-generati). Legge i listati di 64tass (out/<prog>.lst: indirizzo, byte, istruzione, riga del sorgente) di tutti i
+generati). Legge i listati di 64tass (out/work/<prog>.lst: indirizzo, byte, istruzione, riga del sorgente) di tutti i
 programmi del disco e cerca:
   1. finestre di istruzioni ripetute uguali (candidati a una routine) con il risparmio stimato;
   2. spioncino: jsr+rts (-> jmp), jmp alla riga dopo, lda subito dopo sta dello stesso indirizzo, cmp #0 dopo
@@ -8,11 +8,11 @@ programmi del disco e cerca:
   3. codice irraggiungibile (dopo rts/jmp/rti senza etichetta, fino alla prossima etichetta);
   4. etichette di codice mai usate in nessun sorgente, test o strumento (candidati a codice morto);
   5. le routine piu' grandi.
-Uscita: out/asm_audit/analisi_assembly.md (tabelle) e out/asm_audit.json. Uso: python3 tools/build/asm_audit.py"""
+Uscita: out/work/asm_audit/analisi_assembly.md (tabelle) e out/work/asm_audit.json. Uso: python3 tools/build/asm_audit.py"""
 import collections, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-OUT = os.path.join(ROOT, "out")
+OUT = os.path.join(ROOT, "out", "work")
 PROGS = ["game", "lobby", "menu", "start", "barbarian", "lore", "help", "jukebox"]
 # riga d'istruzione: .indirizzo [indirizzo di esecuzione (.logical)] byte  istruzione  sorgente (formati diversi per programma)
 INS = re.compile(r"^\.([0-9a-f]{4})\t(?:([0-9a-f]{4})\t|\t)?((?:[0-9a-f]{2} ?){1,3})\t+(\w{3})(?:[ \t]+([^\t]*?))?\t+(.*)$")
@@ -181,7 +181,7 @@ def reach(ins, labels, src_lines, extern):
 def used_names():
     """testo di tutti i sorgenti, inclusi generati, test e strumenti (per le etichette mai usate)"""
     txt = []
-    for top in ("src", "out", "tests", "tools", "sim"):
+    for top in ("src", "out/work", "tests", "tools", "sim"):
         for dp, dn, fn in os.walk(os.path.join(ROOT, top)):
             dn[:] = [d for d in dn if d not in ("__pycache__", "zx0cache", "gfx", "snd", "prof", ".cache")]
             for f in fn:
@@ -259,9 +259,9 @@ def write_md(R):
     o = ["# Analisi dell'assembly generato (11/11)", "", "Copyright © 2026 - Simone Caporale", "",
          "Richiesta del committente (11/11): analizzare **il codice finale** dato all'assemblatore (non i sorgenti, in parte",
          "generati) cercando sprechi, codice ripetuto da trasformare in routine, codice morto. Strumento: `tools/build/asm_audit.py`",
-         "(rifà questa pagina e `out/asm_audit.json` dai listati `out/<programma>.lst` di 64tass: indirizzo, byte, istruzione e riga",
+         "(rifà questa pagina e `out/work/asm_audit.json` dai listati `out/work/<programma>.lst` di 64tass: indirizzo, byte, istruzione e riga",
          "del sorgente di **ogni** programma del disco, file generati compresi). I file generati per l'assemblatore",
-         "(`out/db.asm`, `out/gfx_consts.inc`, ...) hanno dall'11/11 i commenti che servono a leggerli (indici delle tabelle, nome e",
+         "(`out/work/db.asm`, `out/work/gfx_consts.inc`, ...) hanno dall'11/11 i commenti che servono a leggerli (indici delle tabelle, nome e",
          "descrizione di ogni tile).", "",
          "Metodo: (1) **raggiungibilità** sul binario: dal primo byte, dalle etichette usate come indirizzo (`#<`, `#>`, `.word`,",
          "tabelle) e dalle chiamate fra programmi (LOBBY, MENU → GAME), seguendo salti, chiamate e cadute (i dati in linea",
@@ -304,7 +304,7 @@ def write_md(R):
           "  Non pesano su GAME: solo qualche decina di millisecondi di caricamento. Si possono escludere con `.if` (TODO D12).",
           "- LOBBY, MENU, BARBARIAN, HELP: niente di rilevante (qualche `jmp` alla riga dopo nelle tabelle d'ingresso,",
           "  che servono)."]
-    os.makedirs(os.path.join(ROOT, "out", "asm_audit"), exist_ok=True); open(os.path.join(ROOT, "out", "asm_audit", "analisi_assembly.md"), "w").write("\n".join(o) + "\n")
+    os.makedirs(os.path.join(ROOT, "out", "work", "asm_audit"), exist_ok=True); open(os.path.join(ROOT, "out", "work", "asm_audit", "analisi_assembly.md"), "w").write("\n".join(o) + "\n")
 
 
 if __name__ == "__main__":

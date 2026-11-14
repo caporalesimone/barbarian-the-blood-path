@@ -13,9 +13,9 @@ Ordine di una voce: $00-$7F pattern; $80-$BF trasposizione = byte - $A0 (semiton
 Pattern: $E0-$EF nuova durata = DUR[byte & 15] tick; $FF fine; altro = nota (0 pausa, 1..95, bit 7 = seconda
          forma d'onda / secondo ADSR dello strumento). Ogni pattern comincia con una durata.
 
-Uscite: out/snd/<nome>.bin (brano), out/snd/sndN.prg (file su disco SNDN), out/music_tab.inc (tabelle del gioco),
-out/sid_freq.inc (frequenze),
-out/sid_title.inc (brano del titolo per il loader), out/jukebox_songs.inc (tutti i brani per il jukebox)."""
+Uscite: out/work/snd/<nome>.bin (brano), out/work/snd/sndN.prg (file su disco SNDN), out/work/music_tab.inc (tabelle del gioco),
+out/work/sid_freq.inc (frequenze),
+out/work/sid_title.inc (brano del titolo per il loader), out/work/jukebox_songs.inc (tutti i brani per il jukebox)."""
 import os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -25,7 +25,7 @@ from vice_rom import ROM_ARGS, XRUN  # noqa: E402  (x64sc: -default + tutte le R
 sys.path.insert(0, HERE)
 import songs  # noqa: E402
 
-OUT = os.path.join(ROOT, "out", "snd")
+OUT = os.path.join(ROOT, "out", "work", "snd")
 DUR = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 13, 14, 16, 24, 32, 48]
 INS_KEYS = ["wave", "wave2", "ad", "sr", "ad2", "sr2", "pwlo", "pwhi", "pwd", "pwmin", "pwmax", "vd", "vw", "arp",
             "slo", "shi", "gcut"]
@@ -162,7 +162,7 @@ def asm_bytes(label, data):
 def main():
     os.makedirs(OUT, exist_ok=True)
     f = songs.freq_table()
-    open(os.path.join(ROOT, "out", "sid_freq.inc"), "w").write(
+    open(os.path.join(ROOT, "out", "work", "sid_freq.inc"), "w").write(
         "; generato da tools/build/gen_music.py - frequenze SID (PAL), indice 0 = pausa, 1 = C0\n"
         "sp_flo  .byte " + ", ".join("$%02x" % (x & 255) for x in f) + "\n"
         "sp_fhi  .byte " + ", ".join("$%02x" % (x >> 8) for x in f) + "\n")
@@ -198,9 +198,9 @@ def main():
          "snd_llo    .byte " + ", ".join("<%d" % len(blobs[n]) for n in game),
          "snd_lhi    .byte " + ", ".join(">%d" % len(blobs[n]) for n in game),
          "; " + ", ".join("%s=%s(%d B)" % (digits[i], n, len(blobs[n])) for i, n in enumerate(game))]
-    open(os.path.join(ROOT, "out", "music_tab.inc"), "w").write("\n".join(o) + "\n")
+    open(os.path.join(ROOT, "out", "work", "music_tab.inc"), "w").write("\n".join(o) + "\n")
     t = P["title"]
-    open(os.path.join(ROOT, "out", "sid_title.inc"), "w").write(
+    open(os.path.join(ROOT, "out", "work", "sid_title.inc"), "w").write(
         "\n".join(["; brano del titolo: %s (tools/build/songs.py)" % t] + asm_bytes("sid_title", blobs[t])) + "\n")
     # jukebox: tutti i brani del gioco (titolo compreso) con nome
     jl = [t] + game
@@ -215,7 +215,7 @@ def main():
     o.append("jb_nhi .byte " + ", ".join(">jbn_%d" % i for i in range(len(jl))))
     for i, n in enumerate(jl):
         o += asm_bytes("jbs_%d" % i, blobs[n])
-    open(os.path.join(ROOT, "out", "jukebox_songs.inc"), "w").write("\n".join(o) + "\n")
+    open(os.path.join(ROOT, "out", "work", "jukebox_songs.inc"), "w").write("\n".join(o) + "\n")
     if "-v" in sys.argv:
         for n, b in blobs.items():
             print("%-18s %4d B" % (n, len(b)))
@@ -229,13 +229,13 @@ if __name__ == "__main__" and "--render" not in sys.argv:
 
 
 def render(idx, name, seconds):
-    """jukebox con AUTOPLAY=idx -> VICE (reSID) -> WAV -> MP3 in out/music/"""
+    """jukebox con AUTOPLAY=idx -> VICE (reSID) -> WAV -> MP3 in out/work/music/"""
     import subprocess
-    od = os.path.join(ROOT, "out", "music")         # MP3 di ascolto (13/11: in out/, generati)
+    od = os.path.join(ROOT, "out", "work", "music")         # MP3 di ascolto (13/11: in out/, generati)
     os.makedirs(od, exist_ok=True)
     prg = os.path.join(od, name + ".prg")
     subprocess.run(["64tass", "-a", "-q", "-I", os.path.join(ROOT, "src"), "-I", os.path.join(ROOT, "src", "common"),
-                    "-I", os.path.join(ROOT, "src", "game"), "-I", os.path.join(ROOT, "out"),
+                    "-I", os.path.join(ROOT, "src", "game"), "-I", os.path.join(ROOT, "out", "work"),
                     "-D", "AUTOPLAY=%d" % idx, os.path.join(ROOT, "src", "jukebox.asm"), "-o", prg], check=True)
     wav = os.path.join(od, name + ".wav")
     subprocess.run(XRUN + ["x64sc", "-silent"] + ROM_ARGS + ["-sounddev", "wav",

@@ -202,7 +202,7 @@ margine attuale; si decide dopo il nuovo combattimento.
 ## 11b. Simulatore
 `tools/simulators/sim_rules.py` (motore `tools/simulators/rules.py`, parametri `data/rules.yaml`) applica queste regole con i tempi
 del gioco (fotogrammi, ricariche, stordimento a ogni colpo, evocazioni del boss) e lo stesso bot dell'arena.
-`python3 tools/simulators/sim_rules.py` produce `out/simulators/simulazione_regole.html` (circa 1 minuto).
+`python3 tools/simulators/sim_rules.py` produce `out/work/simulators/simulazione_regole.html` (circa 1 minuto).
 Iterazione 1 (05/11): crescita per piano di CA (+1) e ATT (+1,6) dei mostri; curva di vita e danno per piano
 cercata dal simulatore; vita al livello 1 = 12 + COS. Risultati e problemi nel report.
 

@@ -23,5 +23,5 @@ variant("BUILD-13", "variant: skill change (TESTSK)", {"TESTSK": "1", "TESTSP": 
 
 
 def teardown(ctx):
-    """the variants overwrite out/game.*: restore the normal build for the tests that follow"""
+    """the variants overwrite out/work/game.*: restore the normal build for the tests that follow"""
     subprocess.run([os.path.join(ROOT, "tools", "build", "asm.sh")], cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

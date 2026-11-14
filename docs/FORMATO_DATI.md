@@ -17,15 +17,15 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `LOBBY` | PRG | modulo del menu iniziale (codice, caricato a `$C000`) | build |
 | `MENU1`, `MENU2`, `MENU3` | PRG | (11/11) menu del villaggio (locanda e negozi, `src/menu.asm`): una zona di RAM compressa ZX0 per file; si leggono all'ingresso nel villaggio se il modulo non è in memoria, poi resta. Vedi «MENU» | build (`tools/build/pack_menu.py`) |
 | `TITLE` | PRG | schermata del titolo: bitmap multicolor + schermo + colore, 10000 byte | build |
-| `TWN1` … `TWN4` | PRG | (12/11) villaggio del capitolo *c* (`c_chap`): tile + mappa RLE, come il vecchio `GFX0`; oggi 4 copie di `out/gfx0.prg` | build |
+| `TWN1` … `TWN4` | PRG | (12/11) villaggio del capitolo *c* (`c_chap`): tile + mappa RLE, come il vecchio `GFX0`; oggi 4 copie di `out/work/gfx0.prg` | build |
 | `BOSSCH1` … `BOSSCH3` | PRG | (12/11) mappa del piano del boss dei capitoli 1–3 (piani 5, 10, 15): 4 byte (scale x, y; boss x, y) + RLE come `FMAP`, caricata a `FIN_AT`; segnaposto (`data/maps/bosschapN.txt`, `tools/build/gen_bossmap.py`) | build |
 | `FMAP` | PRG | mappa di base della sala del trono (piano 20), RLE come la mappa del villaggio (`b < $C0` tile, `$C0 + n` ripete il byte seguente `n + 2` volte), 48 × 48 caselle; caselle della stella e del cerchio = `$80 \| tile` (marcatori risolti da `post_walls`). Indirizzo di carico = `FIN_AT` = `$FD00` (`fin_load` la legge nella cache sotto il KERNAL, in fondo: da `PF_END` ai vettori `$FFFA`, 762 B; dal 10/11) | `tools/build/gen_final.py` |
 | `GFX1` … `GFX8` | PRG | (12/11) grafica per capitolo: tile + sprite dei mostri; per il capitolo *c*: `GFX(2c−1)` = piani del dungeon, `GFX(2c)` = piano del boss (sala del trono). Oggi i file dei capitoli 2–4 sono copie del capitolo 1 (segnaposto) | build |
-| `SND0` … `SNDn` | PRG | un brano per file (villaggio, livelli, boss finale, combattimento: ordine e nomi nel commento di `out/music_tab.inc`); indirizzo di caricamento 0 (ignorato: il gioco li legge nel buffer del luogo o del combattimento). Formato in [Musica](musica.md) | build (`tools/build/gen_music.py`) |
+| `SND0` … `SNDn` | PRG | un brano per file (villaggio, livelli, boss finale, combattimento: ordine e nomi nel commento di `out/work/music_tab.inc`); indirizzo di caricamento 0 (ignorato: il gioco li legge nel buffer del luogo o del combattimento). Formato in [Musica](musica.md) | build (`tools/build/gen_music.py`) |
 | `JUKEBOX` | PRG | prova di brani ed effetti (`src/jukebox.asm`) | build |
 | `HL` | PRG, 1 blocco | elenco eroi: versione, 5 byte "eroe presente", 5 nomi (66 B) | creato dalla build (versione attuale, nessun eroe), scritto dal gioco |
 | `SAVE-01` … `SAVE-05` | PRG, 9 blocchi | un file per eroe: blocco dell'eroe + 20 stati dei piani (2070 B) | creati vuoti dalla build, scritti dal gioco |
-| `KSAVE` | PRG | plugin di save di Krill's Loader (`out/krill/save.prg`, a `$7D00`): il gioco lo ricarica prima di ogni salvataggio | build (`tools/build/krill_build.sh`) |
+| `KSAVE` | PRG | plugin di save di Krill's Loader (`out/work/krill/save.prg`, a `$7D00`): il gioco lo ricarica prima di ogni salvataggio | build (`tools/build/krill_build.sh`) |
 
 Nomi in PETSCII maiuscolo. I file PRG hanno i 2 byte iniziali dell'indirizzo di caricamento. Il disco lo scrive il
 `cc1541` di Krill (`tools/build/mkdisk.sh`, opzione `-M 8`): Krill cerca i file per **hash del nome** (8 caratteri), e
@@ -72,7 +72,7 @@ ciascuno: id, bonus, durabilità, massimo), prima in un record a parte. Blocco d
 fino all'11/11 uscendo dalla locanda dopo una modifica si salvava l'eroe; dall'11/11 sera il baule va sul disco solo con l'eroe (save game, cambio di capitolo). Le variabili `mfar`
 passano a `$95E0` e `tp_*`/`sel_*`/`sp_*` a `$93B0` per fare posto.
 La tabella campo per campo (offset, byte, significato) è generata a ogni build da `src/game/game.asm` in
-[`out/memory-map/mappa_disco.html`](../out/memory-map/mappa_disco.html), sezione 4: è sempre allineata al codice.
+[`out/work/memory-map/mappa_disco.html`](../out/work/memory-map/mappa_disco.html), sezione 4: è sempre allineata al codice.
 
 ## 3. Stato di un piano — `SAVE-0N`, offset 210 + (piano − 1) × 93 (formato compatto)
 
@@ -167,7 +167,7 @@ Tre varianti dello stesso codice (07/11; la catena dei programmi è in [Avvio e 
 | `LORE` | `INTRO=1 LORE=1` (titolo) | titolo riga per riga, musica | PRESS SPACE, la storia |
 
 1. Lo stub BASIC copia il corpo a `$A000` (RAM sotto la ROM del BASIC) e lo esegue; con `INTRO` parte la musica
-   (IRQ raster): **Demon's Eye** (`tools/build/songs.py`, `PLAYLIST["title"]`, compilato in `out/sid_title.inc`) con il
+   (IRQ raster): **Demon's Eye** (`tools/build/songs.py`, `PLAYLIST["title"]`, compilato in `out/work/sid_title.inc`) con il
    player del gioco (`src/common/sid_player.inc`, variabili a `$BE00`). Durante il caricamento **nessuno sprite**: vedi sotto.
 2. (`START`, dall'11/11) **install di Krill** (`krill_install`, KERNAL acceso), residente a `$0200`, poi con
    `krill_loadraw`: `GAME` (compresso) → `GAME_ZX_AT`, decompresso **sul posto** in `$0400` (`zx0_unpack`,
@@ -194,28 +194,28 @@ villaggio** se `ovl_cur` = 0 (lo azzerano `game_start` e il caricamento del LOBB
 file); Krill lascia l'inizio in `krill_loadaddrlo/hi` (`ml_src`), poi ogni zona si decomprime sul posto all'inizio
 (`ml_dst`; `$01 = $35`, interruzioni spente, NMI su `nmi_stub`). Niente altro scrive nelle tre zone: il modulo resta
 fino al prossimo LOBBY. `pack_menu.py` verifica la decompressione sul posto (64 KB simulati) e che ogni zona stia nel
-suo spazio; scrive anche `out/menu_zK.prg` (le zone decompresse, per i test). Oggi: zona 1 1622 → 1378 B, zona 2
+suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi: zona 1 1622 → 1378 B, zona 2
 2071 → 1678 B, zona 3 163 → 161 B (14 blocchi in tutto). Spazio libero: zona 1 170 B, zona 2 9 B, zona 3 93 B (la
 build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
 
 ### Compressione (ZX0)
 - Compressore: **ZX0 v2** di Einar Saukas (C, `toolchain/zx0/`, licenza BSD-3 in `toolchain/zx0/LICENSE`), compilato con
   gcc da `tools/build/pack.py` (chiamato da `tools/build/asm.sh`). Modo rapido (`-q`, ~1,5 s) nei build normali, modo ottimo
-  (`ZX0_BEST=1`, ~20 s) in `tools/build/release.sh`. Cache in `out/zx0cache/`.
+  (`ZX0_BEST=1`, ~20 s) in `tools/build/release.sh`. Cache in `out/cache/zx0/`.
 - Formato del flusso: `tools/build/zx0dec.py` (decompressore Python di riferimento, = `dzx0.c` originale).
 - **Sul posto**: il file compresso si carica in modo che il suo ultimo byte stia `delta` byte sopra l'ultimo byte
   del gioco (regola di ZX0; `delta` lo stampa il compressore, 2–3 byte) e sotto `$A000` (corpo del loader).
-  `pack.py` verifica in Python la decompressione sul posto in una memoria di 64 KB e scrive `out/pack.inc`
+  `pack.py` verifica in Python la decompressione sul posto in una memoria di 64 KB e scrive `out/work/pack.inc`
   (`GAME_ZX_AT`, `GAME_ZX_DST`, `GAME_ZX_LEN`) per il loader.
 - Decompressore 6502 `src/common/zx0.inc` (~240 B, 12 byte di pagina zero: nel loader `$50`–`$5B`), senza `sei`:
   ~4,0 s per i 39 KB del gioco (misurato in VICE con il cronometro dei cicli). `tests/test_loader.py` lo verifica
-  **byte per byte** contro `out/game.prg` (fermata dopo `jsr zx0_unpack` e `save` del monitor di VICE).
-- `out/game.prg` resta non compresso: lo usano `tools/vice/shot.sh`, l'arena e i test che caricano il gioco dal
+  **byte per byte** contro `out/work/game.prg` (fermata dopo `jsr zx0_unpack` e `save` del monitor di VICE).
+- `out/work/game.prg` resta non compresso: lo usano `tools/vice/shot.sh`, l'arena e i test che caricano il gioco dal
   monitor.
 - Compresso anche `MENU` (11/11, sopra; decompressore anche in GAME, `stash.asm`, `ZX_ZP` = `$50`).
 - Non compressi, per scelta (06/11): `TITLE` (**decisione: per ora no**; si disegna riga per riga mentre carica), `LOBBY` e `GFX0` (li ricarica anche il gioco, che non ha RAM per un
   buffer: ~5 s), i temi `GFX1`/`GFX2` (letti in sottofondo dal precaricamento). Vedi `TODO.md`.
-3. Solo `LORE`: **PRESS / SPACE** (sprite a `$DD00`, RAM sotto l'I/O, lettere dal font della UI del gioco `out/gfx/uifont.bin` ingrandito ×3 in larghezza e ×2,5 in altezza, `tools/gen_loader.py`; 5 sprite riusati su due
+3. Solo `LORE`: **PRESS / SPACE** (sprite a `$DD00`, RAM sotto l'I/O, lettere dal font della UI del gioco `out/work/gfx/uifont.bin` ingrandito ×3 in larghezza e ×2,5 in altezza, `tools/gen_loader.py`; 5 sprite riusati su due
    righe con due IRQ per fotogramma; le lettere ondeggiano su una sinusoide (`ld_sin`, 64 voci, ±`SIN_A` = 7 px,
    fase +1 per fotogramma, +6 per lettera, SPACE in controfase: `sin_y`). Righe: PRESS a `ROW1_Y` = 172, SPACE a
    `ROW2_Y` = 220 (06/11 sera: più in alto e onda più ampia); l'IRQ di metà fotogramma (`IRQ_MID` = `ROW1_Y` +
@@ -279,4 +279,4 @@ Dall'11/11 (Krill) i tempi sono in [FastLoader.md](FastLoader.md), sezione 7. Ta
 | Decompressione di `GAME` (39 377 B) in `$0400` | – | 4,0 s |
 
 ## Mappa della RAM
-Mappa completa con gli spaccati delle zone multiuso: `out/memory-map/mappa_ram.html` (generata da `tools/memory-map/gen_rammap.py` dopo `./build.sh`).
+Mappa completa con gli spaccati delle zone multiuso: `out/work/memory-map/mappa_ram.html` (generata da `tools/memory-map/gen_rammap.py` dopo `./build.sh`).

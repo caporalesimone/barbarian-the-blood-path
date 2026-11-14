@@ -4,7 +4,7 @@ of Diablo / DevilutionX, assets/txtdata/items/itemdat.tsv). One row per item, ta
 an empty cell = property not used by that type. Columns and rules: data/items/README.md.
 
 Categories: `consumable` (potion, scroll) and `equipment` (weapon, armor, shield, ring). The row order is the item id in
-the game (out/db.asm I_*: weapons, armors, shields, rings, potions, scrolls; 0 = empty), rows with tier `void` are the
+the game (out/work/db.asm I_*: weapons, armors, shields, rings, potions, scrolls; 0 = empty), rows with tier `void` are the
 Abyss weapons (simulator only, not in the game).
 
 load_rules() = data/rules.yaml + the items merged back into the sections the tools always read (weapons, armors,

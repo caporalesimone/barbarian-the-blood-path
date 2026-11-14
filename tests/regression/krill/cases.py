@@ -34,7 +34,7 @@ def blocks(path):
     return out
 
 
-@test("KRILL-10", "START installs Krill: resident code at $0200 as out/krill/loader.prg (but its variables), LDFLAGS used")
+@test("KRILL-10", "START installs Krill: resident code at $0200 as out/work/krill/loader.prg (but its variables), LDFLAGS used")
 def krill_resident(ctx):
     g = ctx["g"]
     res = open(os.path.join(OUT, "krill", "loader.prg"), "rb").read()[2:]

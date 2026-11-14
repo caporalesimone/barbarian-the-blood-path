@@ -8,7 +8,7 @@ mostri, abilita' migliore pronta (Rage/Frenzy appena pronte, Smash, Whirlwind e 
 pozione sotto il 35% della vita (con ricarica). Boss finale: evocazioni al 75/50/25% della vita.
 
 Uso:
-  python3 tools/simulators/sim_rules.py                      # tutte le prove + report out/simulators/simulazione_regole.html
+  python3 tools/simulators/sim_rules.py                      # tutte le prove + report out/work/simulators/simulazione_regole.html
   python3 tools/simulators/sim_rules.py --fights 100 --out x.html
   python3 tools/simulators/sim_rules.py --fight 5 9 skeleton skeleton fallen   # un gruppo: piano 5, PG livello 9
 
@@ -282,7 +282,7 @@ def main():
     import numpy as np
     ap = argparse.ArgumentParser()
     ap.add_argument("--fights", type=int, default=150)
-    ap.add_argument("--out", default=os.path.join(RU.ROOT, "out", "simulators", "simulazione_regole.html"))
+    ap.add_argument("--out", default=os.path.join(RU.ROOT, "out", "work", "simulators", "simulazione_regole.html"))
     ap.add_argument("--fight", nargs="+", help="piano livello mostro [mostro...]")
     a = ap.parse_args()
     N = a.fights

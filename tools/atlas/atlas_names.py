@@ -76,7 +76,7 @@ TILE = {
     "CIRCLE": ("pentacle circle", "circle of the pentacle around the final boss"),
 }
 
-# ------------------------------------------------------------------ UI font (out/gfx/uifont.bin, 128 screen codes)
+# ------------------------------------------------------------------ UI font (out/work/gfx/uifont.bin, 128 screen codes)
 # codes 0..63: normal glyphs; 64..127: the inverted versions (ui_putc with inv = $40), but for the redrawn icons.
 SCREEN = "@abcdefghijklmnopqrstuvwxyz[£]↑← !\"#$%&'()*+,-./0123456789:;<=>?"
 # code -> (name, constant or key, description)

@@ -5,7 +5,7 @@ Copyright © 2026 - Simone Caporale
 Analisi generale del codice (v1.175): codice morto, procedure duplicate, generalizzazioni possibili, prestazioni,
 organizzazione. Le voci **semplici** (nessun cambiamento di comportamento, verificabili dai test) sono già state fatte;
 le altre sono **da valutare** dal committente. Le stime in byte non marcate "misurato" sono calcolate dal listato
-(`out/game.lst`) o dal sorgente, non provate.
+(`out/work/game.lst`) o dal sorgente, non provate.
 
 ## Metodo
 
@@ -72,7 +72,7 @@ Totale stimato O1–O12: **~200–260 B** di GAME (non misurato), più 19 B di L
 
 | # | Proposta | Note |
 |---|---|---|
-| G1 ✓ | I **file generati** stanno ancora in `src/` (`out/db.asm`, `out/gfx_consts.inc`, `out/final_map.inc`, `out/town_places.inc`, `out/music_tab.inc`, `out/version.inc`, `out/start_data.inc`, `out/sid_freq.inc`): spostarli in `out/` (l'assemblaggio ha già `-I out`) e toglierli da git, come la grafica dell'11/11 | servono i generatori aggiornati e `.gitignore`; i diff di git non mostrerebbero più le tabelle generate (oggi utili per vedere cosa cambia) |
+| G1 ✓ | I **file generati** stanno ancora in `src/` (`out/work/db.asm`, `out/work/gfx_consts.inc`, `out/work/final_map.inc`, `out/work/town_places.inc`, `out/work/music_tab.inc`, `out/work/version.inc`, `out/work/start_data.inc`, `out/work/sid_freq.inc`): spostarli in `out/` (l'assemblaggio ha già `-I out`) e toglierli da git, come la grafica dell'11/11 | servono i generatori aggiornati e `.gitignore`; i diff di git non mostrerebbero più le tabelle generate (oggi utili per vedere cosa cambia) |
 | G2 ✓ | Gli **script storici dei test** (`tests/regression/*/test_*.py`) hanno ciascuno una propria classe `Vice` e messaggi in italiano: portarli su `tests/lib/c64.py` / `play.py` | TODO 1.11 |
 | G3 ✓ | `tools/vice/arena.py` ha un suo client del monitor: usare `tests/lib/c64.py` | come G2 |
 | G4 | Fatto l'11/11: `lab/music` fuori dal repository e dalla storia (filter-repo), regola in CLAUDE.md | — |

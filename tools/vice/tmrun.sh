@@ -1,9 +1,9 @@
 #!/bin/bash
-# esegue out/game.prg (build TMDBG) e stampa i record di temporizzazione
+# esegue out/work/game.prg (build TMDBG) e stampa i record di temporizzazione
 source "$(dirname "${BASH_SOURCE[0]}")/vice_env.sh"
 cd "$ROOT"
 tools/build/mkdisk.sh
-($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/disk.d64 -remotemonitor >/dev/null 2>&1 &)
+($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/work/disk.d64 -remotemonitor >/dev/null 2>&1 &)
 sleep 8
 python3 - <<'PY'
 import socket,time,re
@@ -13,7 +13,7 @@ def cmd(c,w=0.5):
     try: return s.recv(65536).decode(errors='ignore')
     except Exception as e: return str(e)
 cmd("",0.5)
-cmd('l "out/start.prg" 0',3)   # (11/11) START: installa Krill e carica GAME dal disco
+cmd('l "out/work/start.prg" 0',3)   # (11/11) START: installa Krill e carica GAME dal disco
 cmd("g 080d",0.3)
 time.sleep(8)
 cmd("",0.3)
