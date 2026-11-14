@@ -163,6 +163,11 @@ misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagin
   (cc1541 4.2 scrive la stessa lista di file in modo diverso) e passa smoke, sanity e regression (Krill su 1541, 1541-II, 1570/1571,
   salvataggi, `EMU-*` su vc64web).
 - Per aggiornare un programma: versione, URL o commit e SHA-256 in `../lab64/sources.conf`, poi `../lab64/build-images.sh --force tools`.
+- **Prova da ambiente pulito** (14/11): immagini, cache di BuildKit, rete e volume cancellati; clone dei due repository affiancati;
+  `./validate_env.sh`, `./build.sh --release` (immagini ricostruite da zero, tutto ricompilato: ~8 min; 185 PASS + 1 SKIP, `EMU-*`
+  compresi), `../lab64/build-images.sh --force` (riscarica i sorgenti, la cache resta valida), progetto di esempio di `lab64 init`
+  (build e test passati). Unico intoppo esterno: Docker Hub ha risposto 429 (troppe richieste) all'immagine `node`, riuscito dopo
+  qualche minuto.
 - VICE e' installato con `--prefix=/opt/vice` e sta in `/opt/vice` anche nell'immagine finale: trova i suoi dati (keymap, risorse)
   dove li cerca. Prima (fino al passo A del 13/11) era compilato nel progetto in `../lab64/vice/bin` con i dati copiati accanto
   all'eseguibile per renderlo spostabile.

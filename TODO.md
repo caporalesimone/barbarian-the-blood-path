@@ -567,5 +567,4 @@ unico in `../lab64/sources.conf`, wiki: [docs/build.md](docs/build.md) 4b). VS C
 - **Pubblicazione generica** in Lab64: la parte generica di `tools/build/publish.py` (cartelle `out/releases/v<V>/`, manifest,
   retention) con un aggancio del progetto per le misure del gioco; `lab64 build` predefinito che pubblica anche lui. **Complessita'**: M.
 - **Tema "manuale C64" generico** per `lab64-pdf-gen` (oggi stile e tasti `<kbd>` sono in `tools/manual/gen_manual.py` del gioco).
-- **Prova da ambiente pulito**: clone dei due repository affiancati, `validate_env`, `./build.sh --release`, `build-images.sh --force`.
 - **Licenza di Lab64**: da scegliere prima di pubblicare (oggi nessuna = nessun riuso permesso).
