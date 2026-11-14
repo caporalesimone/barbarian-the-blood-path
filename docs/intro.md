@@ -64,8 +64,9 @@ vettori come all'accensione), caricano il file all'indirizzo del PRG (`$0801`) c
   versione, copyright. La riga d'aiuto dice solo **"fire to choose"** (12/11, committente).
 - Tasti: joystick 2 su/giù e fire; `1` `2` `3`; `W`/`S` o cursore; spazio o RETURN. La voce scelta è gialla con la
   freccia. Scelta una voce, una frase resta sullo schermo durante il caricamento ("the old ones begin to speak",
-  "the old scroll unrolls", "the crypt door creaks open"; dal 09/11 senza "...", centrate nelle 32 colonne). Per la
-  storia (12/11, committente) prima lo schermo diventa nero, poi la frase compare al centro (riga 12).
+  "the old scroll unrolls", "the crypt door creaks open"; dal 09/11 senza "...", centrate nelle 32 colonne). Qualunque voce
+  (12/11 la storia, 15/11 anche manuale e gioco, committente) fa diventare **subito** nero lo schermo, poi la frase compare al
+  centro (riga 12): prima manuale e gioco scrivevano la frase sulla riga 17 sopra il menu, e il nero arrivava solo col programma caricato.
 - **RUN/STOP durante il caricamento** del programma scelto (LOAD del KERNAL nel trampoline, `tramp.inc`): il LOAD
   torna con C=1, A=0 (`$F633`) e il trampoline carica di nuovo BARBARIAN (il menu). Prima del 12/11 restava il bordo
   rosso fisso (riprodotto nell'emulatore web del committente; test `BOOT-12` in VICE). Gli altri errori di disco

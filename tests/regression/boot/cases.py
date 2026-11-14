@@ -1,11 +1,11 @@
 import os, sys
-from lib.runner import script
+from c64test import script
 from lib.c64 import ROOT
 H = os.path.dirname(os.path.abspath(__file__))
 PY = sys.executable
 """Boot from the real disk (emulated 1541, one disk since 11/11): BARBARIAN with POKE 1020,1 -> START -> menu;
 START with the progress bar, LORE and HELP, HUD crop in the help."""
-from lib.runner import test, Skip, check  # noqa: E402
+from c64test import test, Skip, check  # noqa: E402
 import subprocess  # noqa: E402
 REL = os.environ.get("RELEASE") == "1"
 
@@ -49,5 +49,27 @@ def boot_stop_lore(ctx):
         check(bytes(v.mem(0x0801, 64)) == barb[2:66], "after RUN/STOP $0801 is not BARBARIAN")
         v.brk(0xffe4); v.go(60); v.delbrk()
         check(v.b(0xd020) != 2, "red border")
+    finally:
+        v.close()
+
+
+@test("BOOT-13", "BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase, centred on row 12 (15/11)")
+def menu_black(ctx):
+    """Before 15/11 only "hear the legend" cleared the screen: the manual and the game wrote their phrase on row 17 over the menu
+    and the screen went black only when the loaded program started. Checked at tramp_run (the load starts there)."""
+    from lib.c64 import Vice, OUT
+    from vicemon import labels
+    L = labels("barbarian")
+    v = Vice(os.path.join(OUT, "disk.d64"))
+    try:
+        for k in "123":
+            v.load(os.path.join(OUT, "barbarian.prg")); v.pc(0x080d)
+            v.brk(0xffe4); v.go(60); v.delbrk()                    # the menu waits for a key
+            v.poke(0x0277, ord(k)); v.poke(0xc6, 1)
+            v.brk(L["tramp_run"]); v.go(60); v.delbrk()
+            scr = v.mem(0x0400, 1000)
+            rows = [i for i in range(25) if i != 12 and any(c != 0x20 for c in scr[i * 40:i * 40 + 40])]
+            check(not rows, "choice %s: rows %s not blank when the load starts" % (k, rows))
+            check(any(c != 0x20 for c in scr[480:520]), "choice %s: no phrase on row 12" % k)
     finally:
         v.close()

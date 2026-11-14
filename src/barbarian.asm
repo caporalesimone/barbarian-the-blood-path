@@ -132,10 +132,8 @@ down    lda sel
         jsr draw_sel
         jmp loop
 
-choose:
-        lda sel                 ; (12/11, committente) la storia: prima lo schermo nero, poi la frase
-        bne _m
-        ldx #0
+choose:                         ; (15/11, committente) qualunque voce: SUBITO lo schermo nero (prima solo la storia;
+        ldx #0                  ;  manuale e gioco scrivevano la frase sul menu e il nero arrivava dopo, col programma)
         lda #$20
 _cl     sta SCR,x
         sta SCR+$100,x
@@ -364,14 +362,14 @@ texts   .byte 6, 8, COL_D
         .byte 4, 23, COL_D
         .text "copyright 2026 - simone caporale", 0
         .byte $ff
-; frasi sulla riga 17 (32 colonne, dalla 4: coprono la precedente)
-msg_lore .byte 4, 12, COL_T                 ; (12/11) a schermo nero, al centro
+; frasi a schermo nero, al centro (riga 12, 32 colonne dalla 4): 12/11 la storia, 15/11 anche manuale e gioco
+msg_lore .byte 4, 12, COL_T
         .text "  the old ones begin to speak   ", 0
         .byte $ff
-msg_man .byte 4, 17, COL_T
+msg_man .byte 4, 12, COL_T
         .text "     the old scroll unrolls     ", 0
         .byte $ff
-msg_game .byte 4, 17, COL_T
+msg_game .byte 4, 12, COL_T
         .text "   the crypt door creaks open   ", 0
         .byte $ff
 msg_lo  .byte <msg_lore, <msg_man, <msg_game
