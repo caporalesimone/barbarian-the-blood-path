@@ -123,7 +123,11 @@ rilascio con la versione.
 **♪ play**: apre `sid.html`, un player con l'elenco dei brani (jsSID 0.9.1 di Hermit, servito in locale, non da CDN; scelta
 6581/8580, volume, download), un **oscilloscopio per ogni voce del SID** (forma d'onda per inviluppo, prima del filtro) e del
 missaggio, i registri decodificati di ogni voce (forma d'onda, impulso, frequenza, gate, ADSR, sync, ring, instradamento nel filtro)
-e del filtro, **mute** per voce e **filtro del SID acceso/spento**. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID. VICE resta il riferimento: jsSID ha un filtro diverso.
+e del filtro (con il nome della nota), **mute** per voce e **filtro del SID acceso/spento**. Dopo jsSID il suono passa per una catena
+Web Audio: **tasti di filtro** (flat, warm, TV speaker, radio, bass boost, bright, loudness, hi-pass, lo-pass), **equalizzatore a 3
+bande** (100 Hz, 1 kHz, 6 kHz, ±12 dB), **analizzatore di spettro a barre** (31 bande di 1/3 d'ottava, segmenti LED, picco
+trattenuto) e **VU meter a lancetta** (balistica IEC 60268-17: 300 ms, ~1 % di sovraelongazione; 0 VU = −18 dBFS; LED di picco a
+−3 dBFS). Le misure del VU e dello spettro sono dopo i filtri scelti. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID. VICE resta il riferimento: jsSID ha un filtro diverso.
 Test: `MUSIC-11` (regression) controlla l'intestazione di ogni `.sid` e che init + 50 fotogrammi di play scrivano il SID.
 
 ## Effetti sonori (`src/common/sfx.inc`)
