@@ -126,7 +126,9 @@ fine brano CONT / NEXT (passa al successivo) / LOOP (ricomincia) dopo la durata 
 Attorno: VU meter a lancetta, spettro a 1/3 d'ottava con la curva del filtro del SID (approssimata), CPU del player (cicli della
 routine `play` per fotogramma, stima di jsSID: la misura vera e' in VICE), una striscia per voce (oscilloscopio, inviluppo con la fase,
 forma d'onda, nota, ADSR, instradamento, mute / solo) e una master (missaggio, filtro del SID acceso/spento), piano roll degli ultimi
-10 s, automazioni (larghezza degli impulsi, cutoff), spettrogramma, tasti di filtro ed equalizzatore a 3 bande dopo il SID, tabella dei
+10 s, automazioni (larghezza degli impulsi, cutoff), spettrogramma, tasti di filtro ed equalizzatore a 3 bande dopo il SID, **override del filtro del SID** (ogni parte del filtro del chip segue il
+brano oppure e' forzata: LP / BP / HP, voci instradate nel filtro, voce 3 spenta, cutoff, risonanza, volume, con preset; il brano tiene
+i suoi valori, cambiano solo per il calcolo del suono; misure, striscia master e curva mostrano quello che si sente), tabella dei
 registri `$D400-$D418` con le modifiche evidenziate. **Disposizione** (14/11): i pannelli stanno su una griglia grossa (12 colonne per unita' da 100 px); ognuno si
 sposta trascinando la maniglia ⠿, si allarga solo alle misure previste per lui (bottone `L×A` nell'intestazione: clic = misura
 successiva, Shift+clic = precedente; oppure l'angolo ◢, che scatta), si chiude alla sola intestazione; il VU ha misura fissa; gli
