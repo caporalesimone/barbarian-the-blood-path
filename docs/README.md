@@ -15,6 +15,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | [Architettura](architettura.md) | (11/11) Struttura del codice: programmi su disco, moduli di GAME e dipendenze, memoria e ciclo di vita, banchi `$01`, interruzioni, pagina zero, decisioni architetturali |
 | [Flussi del codice](flussi.md) | (11/11) Diagrammi di come gira il codice: avvio, partita, ciclo per fotogramma, IRQ, input, cambio di luogo, generazione, precaricamento, disco, salvataggi, combattimento, IA, morte e portale, schermate, menu del villaggio, musica, sala del trono |
 | [Getting started](getting-started.md) | (13/11) **Da leggere per prima**: cartelle, container Docker, come girano build e test, comandi |
+| [Architettura Docker](docker-architecture.md) | (14/11) immagini, container, reti e volumi, flusso video/audio/tasti del viewer, con diagrammi Mermaid |
 | [Build e strumenti](build.md) | (11/11) Dai sorgenti al disco: generatori, assemblaggio, compressione, dischi, mappe, test |
 | [Panoramica](panoramica.md) | Flusso del programma dal caricamento alla vittoria, ciclo di gioco per fotogramma, moduli |
 | [Dungeon](dungeon.md) | Generazione dei piani dal seed: stanze, corridoi, scale, temi grafici, sala del trono |

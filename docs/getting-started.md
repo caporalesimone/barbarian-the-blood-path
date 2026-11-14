@@ -39,6 +39,8 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 
 ## 3. I container
 
+Diagrammi e dettagli completi: [docker-architecture.md](docker-architecture.md).
+
 Immagini della **toolchain** (`c64-*`, generiche) e del **gioco** (`barbarian-*`, accanto al loro codice). Le prime vengono da un solo
 Dockerfile multi-stage (`toolchain/docker/Dockerfile`): lo stage `base` (ubuntu + CA + locale) e' il genitore comune, **non ha un
 nome di immagine** (non si avvia mai) e contiene la versione di Ubuntu in un solo punto (`ARG UBUNTU`). I suoi layer sono gli
