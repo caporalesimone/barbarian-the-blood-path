@@ -55,7 +55,7 @@ def git_info():
 
 # Etichette dei gruppi di file, per la pagina del viewer (Lab64 non sa cosa sono: le legge dal manifest)
 GROUP_LABELS = {"disk": "Disco 1541", "atlas": "Atlante grafico", "memory-map": "Mappe RAM e disco", "tests": "Report dei test",
-                "manual": "Manuale PDF"}
+                "manual": "Manuale PDF", "music": "Musiche (.sid)"}
 
 
 def metric(mid, label, value, unit="", better=None, hint=""):
@@ -158,7 +158,8 @@ def main():
     man.setdefault("built_at", now())
 
     # gruppi: nome -> lista di (sorgente, destinazione relativa alla cartella della versione)
-    groups = {"disk": [("out/work/disk.d64", "blood_path_v%s_1541.d64" % v)]}
+    groups = {"disk": [("out/work/disk.d64", "blood_path_v%s_1541.d64" % v)],
+              "music": [("out/work/sid", "music_sid_v%s" % v)]}      # (14/11) un .sid per brano (tools/build/gen_sid.py)
     if a.atlas:
         groups["atlas"] = [("out/work/atlas", "atlas")]
     if a.maps:
@@ -193,6 +194,8 @@ def main():
             man["files"][dst] = {"group": g, "type": "dir" if os.path.isdir(d) else "file", "files": len(fs),
                                  "bytes": sum(os.path.getsize(f) for f in fs),
                                  "sha256": tree_sha256(d) if os.path.isdir(d) else sha256(d), "produced": stamp}
+            if g == "music":
+                man["files"][dst]["kind"] = "sid"      # il viewer di Lab64 offre il player (sid.html)
 
     tests = man.get("tests") or {"ran": False}
     if a.tests:
@@ -215,7 +218,7 @@ def main():
         stats["test_seconds"] = tests.get("seconds")
     man.update({"schema": 1, "groups": GROUP_LABELS, "stats": stats, "version": v, "branch": branch, "save_version": ver.get("save_version"), "source_hash": ver.get("source_hash"),
                 "updated_at": stamp, "tests": tests, "release": bool(man.get("release") or a.release),
-                "missing": sorted({"disk", "atlas", "memory-map", "tests", "manual"} - {m["group"] for m in man["files"].values()})})
+                "missing": sorted({"disk", "music", "atlas", "memory-map", "tests", "manual"} - {m["group"] for m in man["files"].values()})})
     with open(mpath, "w") as f:
         json.dump(man, f, indent=1, sort_keys=True)
         f.write("\n")

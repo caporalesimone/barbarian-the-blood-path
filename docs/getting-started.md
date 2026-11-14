@@ -44,7 +44,7 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 `./lab64` e' il comando di Lab64 per questo progetto (lanciatore di `../lab64/bin/lab64`; serve solo Docker sull'host).
 `./lab64 build` = `./build.sh` (`C64_BUILD` in `lab64.env`); `./lab64 test [smoke|sanity|regression] [-k ID]` = motore dei test
 di Lab64 sulla cartella `tests/`; `./lab64 up` accende il demone vc64web (poi `./lab64 test regression -k EMU`), `./lab64 down` lo
-spegne; `./lab64 view` / `stop` il viewer; `./lab64 run <comando>` un comando in `lab64-tools`; `./lab64 images`, `doctor`,
+spegne; `./lab64 view` / `stop` il viewer (con **♪ play** sulle musiche `.sid` di ogni versione, [musica.md](musica.md)); `./lab64 run <comando>` un comando in `lab64-tools`; `./lab64 images`, `doctor`,
 `version`. Dettagli: [../lab64/README.md](../../lab64/README.md), sezione "Command line".
 
 ## 3. I container

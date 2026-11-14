@@ -24,7 +24,8 @@ PY
 CC=cc1541
 command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container lab64-tools (../lab64/run.sh tools ...)"; exit 1; }
 # (14/11) -S 4 = interleave dei settori 4 (quello dei benchmark di Krill): con cc1541 4.2 l'interleave predefinito (10) dava il MENU
-# in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s
+# in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s.
+# I file caricati dal KERNAL (BARBARIAN, START, LORE, HELP) misurati con LOAD: stessi tempi con 10 e con 4 (entro 0,1 s).
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
       -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg -f fmap -w out/work/fmap.prg)
 for c in 1 2 3 4; do ARGS+=(-f twn$c -w out/work/gfx0.prg); done     # (12/11) villaggi dei capitoli: oggi copie del villaggio 1 (segnaposto)

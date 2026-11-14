@@ -110,6 +110,20 @@ Rilocabile: tutti gli indirizzi sono offset dall'inizio del brano (16 bit little
   anche **trasposti**: i brani pesano 140–310 B (prima, a sequenza piatta, 260–450).
 - Frequenze: `out/work/sid_freq.inc` (generata, PAL, A4 = 440 Hz), indice 0 = pausa.
 
+## File .sid e player nel browser (14/11, richiesta del committente)
+
+Ogni build scrive un **file .sid per brano** (`tools/build/gen_sid.py` -> `out/work/sid/<nome>.sid`), pubblicati con la versione in
+`out/releases/v<V>/music_sid_v<V>/` (gruppo `music` del manifest, `kind: "sid"`). Ogni `.sid` (PSID v2, intestazione scritta da
+`../lab64/py/psid.py`) contiene il **player vero del gioco** (`src/common/sid_player.inc`, assemblato a `$1000`, variabili a `$C000`,
+voci come nel gioco: lead sulla 2, accordi sulla 1, basso sulla 3) e i dati del brano (`out/work/snd/<nome>.bin`): init `$1000`,
+play `$1003` una volta per fotogramma (50 Hz, PAL), SID 6581. Titolo dal nome in `songs.TITLES`, autore "Barbarian: The Blood Path",
+rilascio con la versione.
+
+**Ascolto**: nella pagina di controllo di Lab64 (`./lab64 view`, http://localhost:6080) la riga delle musiche di ogni versione ha
+**♪ play**: apre `sid.html`, un player con l'elenco dei brani (jsSID 0.9.1 di Hermit, nel browser; scelta 6581/8580, volume,
+download). I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID. VICE resta il riferimento: jsSID ha un filtro diverso.
+Test: `MUSIC-11` (regression) controlla l'intestazione di ogni `.sid` e che init + 50 fotogrammi di play scrivano il SID.
+
 ## Effetti sonori (`src/common/sfx.inc`)
 
 8 effetti sulla voce 1 (`SFX_SWING`, `HIT`, `HURT`, `PICK`, `LEVEL`, `DIE`, `PORTAL`, `LOWHP`): frequenza, forma

@@ -22,6 +22,7 @@ for g in gen_gfx gen_final gen_bossmap gen_font gen_music gen_db; do
 done
 echo "== assemblaggio =="
 tools/build/asm.sh && tools/build/mkdisk.sh || exit 1          # (11/11) un solo disco
+python3 tools/build/gen_sid.py || exit 1                       # (14/11) brani come file .sid (out/work/sid/)
 DISK=out/work/disk.d64
 # (14/11) BUILD_MAPS=0 / BUILD_ATLAS=0 (./build.sh --no-maps, --no-atlas, --fast) li saltano
 if [ "${BUILD_MAPS:-1}" = 1 ]; then

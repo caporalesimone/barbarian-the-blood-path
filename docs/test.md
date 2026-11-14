@@ -145,7 +145,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `CS-10` | no points, no respec token: no entries (no '>'), 'no points to spend.', RUN/STOP back to the game |
 | `CS-11` | no points, 1 respec token: only 'respec' (cursor on row 16); fire + yes: points back, all the entries again |
 
-### regression (153)
+### regression (154)
 
 | ID | Test |
 |---|---|
@@ -223,7 +223,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
 | `KRILL-13` | no KERNAL disk call left in GAME, LOBBY, MENU and START (listing scan: after the install the drive does not answer the KERNAL) |
 | `KRILL-17` | 1541-II (VICE 1542): START with Krill, menu, new hero (save plugin), village read |
-| `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (needs the drive ROMs, not in this environment) |
+| `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 from ../lab64/roms/) |
 | `KRILL-14` | Krill install fails (simulated: from the install straight to kr_fail): message, a key, BARBARIAN loaded again |
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
 | `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |
@@ -231,6 +231,7 @@ Generato con `python3 tests/run.py all --md` (rifarlo quando si aggiunge un test
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
 | `MUSIC-10` | songs per level, buffer = SNDn files, combat and resume, copy under I/O |
+| `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |
 | `OPT-12` | neg16 / sabs: -tmp0:1 and |tmp0:1| saturated at 255 |
 | `OPT-02` | gold_total: c_gold + 10 x c_sgold (24 bit) at the limits |

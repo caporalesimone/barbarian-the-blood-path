@@ -155,7 +155,7 @@ misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagin
 |---|---|---|---|---|
 | VICE (gtk3) | 3.10 | tarball ufficiale (SourceForge) | `lab64-tools`: `/opt/vice/bin/x64sc`, `/opt/vice/bin/c1541`, dati in `/opt/vice/share/vice` (gli altri emulatori di VICE non entrano) | GPL-2.0 |
 | 64tass | 1.60.3243 (prima 1.59 di Ubuntu) | zip dei sorgenti (SourceForge) | `lab64-tools`: `/opt/c64/bin/64tass` | GPL-2.0 |
-| cc65 (cc65, ca65, ld65) | master dell'08/11/2026 (ultimo tag V2.19 del 2020; prima 2.19 di Ubuntu) | GitHub, commit fisso | `lab64-tools`: `/opt/c64/bin`, librerie in `/opt/c64/share/cc65` | zlib |
+| cc65 (cc65, ca65, ld65) | V2.19 (30/05/2020, ultimo tag; i suoi sorgenti stampano "2.18"). Confrontato con il master dell'08/11/2026: binari di Krill identici byte per byte, le correzioni di ca65/ld65 riguardano altre CPU e casi che non usiamo: resta il tag (decisione del committente, 14/11) | GitHub, commit del tag | `lab64-tools`: `/opt/c64/bin`, librerie in `/opt/c64/share/cc65` | zlib |
 | cc1541 | 4.2 (prima 4.0, dallo zip di Krill) | tarball originale conservato da Debian (il repository Bitbucket rispondeva 404 il 14/11) | `lab64-tools`: `/opt/c64/bin/cc1541` | MIT |
 | zx0 | ultimo commit (17/12/2021, formato v2: uguale ai sorgenti di prima) | GitHub, commit fisso | `lab64-tools`: `/opt/c64/bin/zx0` | BSD-3 |
 
@@ -199,7 +199,7 @@ sh, Docker con BuildKit, git e curl (`./validate_env.sh` li controlla).
 
 | Programma | Container | A cosa serve |
 |---|---|---|
-| `64tass` 1.60, `cc65` (master 08/11/2026), `cc1541` 4.2, `zx0` (dai sorgenti); `make`, `perl`, `unzip`, `zip`, `git` | `lab64-tools` | assemblaggio, Krill's Loader, release, versione dei branch |
+| `64tass` 1.60, `cc65` 2.19, `cc1541` 4.2, `zx0` (dai sorgenti); `make`, `perl`, `unzip`, `zip`, `git` | `lab64-tools` | assemblaggio, Krill's Loader, release, versione dei branch |
 | `python3` 3.12 + Pillow, PyYAML, NumPy, Matplotlib | `lab64-tools` | generatori, atlante, mappe, simulatori |
 | VICE (`x64sc`, `c1541`) e le sue librerie (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `lab64-tools` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
 | node 22, Playwright 1.63 + Chromium, ffmpeg | `lab64-vc64web` | demone di vc64web (test `EMU-*`, video) |
