@@ -23,9 +23,10 @@ flowchart TD
 
 | Comando | Cosa fa |
 |---|---|
-| `./build.sh` | build di tutti i giorni: tutto + smoke e sanity (deve passare prima di ogni commit) |
-| `./build.sh --no-test` | build veloce senza test |
-| `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`barbarian-manual`) e `tools/build/release.sh` (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
+| `./build.sh` | **tutto**: disco, mappe, atlante, smoke e sanity (devono passare prima di ogni commit) e manuale PDF |
+| `./build.sh --fast` | solo il disco + smoke e sanity (salta atlante, mappe, manuale: `--no-atlas`, `--no-maps`, `--no-manual`, tutti separati) |
+| `./build.sh --no-test` | salta smoke e sanity (si combina con `--fast`) |
+| `./build.sh --release` | la stessa build (GAME compresso in modo ottimo, `ZX0_BEST=1`) con **tutti** i test (anche regression ed `EMU-*`), manuale PDF (`barbarian-manual`) e `tools/build/release.sh` (senza zip dei sorgenti) (disco, mappe, zip dei sorgenti in `out/`); solo quando la chiede il committente |
 | `./build.sh --manual` | solo il manuale (`out/manual/`, poi copiato in `out/releases/v<V>/`) |
 | `./build.sh --keep N` | quante versioni tenere in `out/releases/` (default 5, anche `KEEP_VERSIONS=N`) |
 | `toolchain/run.sh builder tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |

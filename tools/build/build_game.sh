@@ -5,7 +5,7 @@
 #     version.yaml), poi version.yaml -> out/version.inc
 #  2. generatori dati: grafica, font, musica, tabelle di bilanciamento (balance.yaml)
 #  3. assemblaggio (64tass) -> out/game.prg, controllo del margine di memoria, disco out/disk.d64
-#  4. mappe della RAM e del disco (out/memory-map/), atlante grafico (out/atlas/)
+#  4. mappe della RAM e del disco (out/memory-map/), atlante grafico (out/atlas/): saltabili (BUILD_MAPS=0, BUILD_ATLAS=0)
 #  (14/11) la pubblicazione degli artefatti in out/releases/v<versione>/ la fa ./build.sh con tools/build/publish.py
 set -e
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
@@ -23,9 +23,15 @@ done
 echo "== assemblaggio =="
 tools/build/asm.sh && tools/build/mkdisk.sh || exit 1          # (11/11) un solo disco
 DISK=out/disk.d64
-echo "== mappe RAM e disco ($DISK, out/memory-map/), atlante grafico (out/atlas/) =="
-python3 tools/memory-map/gen_rammap.py && python3 tools/memory-map/gen_diskmap.py $DISK || exit 1
-python3 tools/build/cache_run.py gen_atlas --in tools data out/gfx out/gfx_consts.inc out/gfx0.prg out/fmap.prg out/title.prg docs/screens \
-    --out out/atlas/index.html -- python3 tools/atlas/gen_atlas.py || exit 1        # (11/11) solo se cambiano i suoi ingressi
+# (14/11) BUILD_MAPS=0 / BUILD_ATLAS=0 (./build.sh --no-maps, --no-atlas, --fast) li saltano
+if [ "${BUILD_MAPS:-1}" = 1 ]; then
+    echo "== mappe RAM e disco ($DISK, out/memory-map/) =="
+    python3 tools/memory-map/gen_rammap.py && python3 tools/memory-map/gen_diskmap.py $DISK || exit 1
+fi
+if [ "${BUILD_ATLAS:-1}" = 1 ]; then
+    echo "== atlante grafico (out/atlas/) =="
+    python3 tools/build/cache_run.py gen_atlas --in tools data out/gfx out/gfx_consts.inc out/gfx0.prg out/fmap.prg out/title.prg docs/screens \
+        --out out/atlas/index.html -- python3 tools/atlas/gen_atlas.py || exit 1        # (11/11) solo se cambiano i suoi ingressi
+fi
 V=$(python3 tools/build/gen_version.py --print version)
 echo "== disco v$V: $DISK (poi out/releases/v$V/blood_path_v${V}_1541.d64, tools/build/publish.py) =="

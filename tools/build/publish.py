@@ -3,12 +3,14 @@
 retention delle ultime N versioni). Copyright (c) 2026 - Simone Caporale
 
 Uso (dalla radice del progetto, nel container c64-builder):
-    publish.py [--keep N] [--tests] [--manual] [--release] [--only-manual]
+    publish.py [--keep N] [--atlas] [--maps] [--tests] [--manual] [--release] [--only-manual]
 
-  sempre      il disco (out/disk.d64 -> blood_path_v<V>_1541.d64), atlante grafico (atlas/), mappe RAM e disco (memory-map/)
+  sempre      il disco (out/disk.d64 -> blood_path_v<V>_1541.d64)
+  --atlas     anche l'atlante grafico (atlas/): solo se e' stato generato in QUESTA build
+  --maps      anche le mappe RAM e disco (memory-map/): idem
   --tests     anche il report dei test (test_report.txt/.json): solo se i test sono girati in QUESTA build e sono passati
   --manual    anche il manuale PDF (Barbarian_Blood_Path_Manuale_v<V>.pdf): solo se e' stato generato in QUESTA build
-  --release   anche lo zip dei sorgenti (sources_v<V>.zip) e il marchio "release" nel manifest
+  --release   il marchio "release" nel manifest (14/11: niente zip dei sorgenti)
   --only-manual  solo il manuale (./build.sh --manual: non c'e' una build nuova, il disco in out/ potrebbe essere di un'altra versione)
   --keep N    quante versioni tenere (default 5); le piu' vecchie (per data di pubblicazione) si cancellano
 
@@ -68,6 +70,8 @@ def remove(p):
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--keep", type=int, default=5, help="versioni da tenere (default 5)")
+    ap.add_argument("--atlas", action="store_true")
+    ap.add_argument("--maps", action="store_true")
     ap.add_argument("--tests", action="store_true")
     ap.add_argument("--manual", action="store_true")
     ap.add_argument("--release", action="store_true")
@@ -90,9 +94,11 @@ def main():
     man.setdefault("built_at", now())
 
     # gruppi: nome -> lista di (sorgente, destinazione relativa alla cartella della versione)
-    groups = {"disk": [("out/disk.d64", "blood_path_v%s_1541.d64" % v)],
-              "atlas": [("out/atlas", "atlas")],
-              "memory-map": [("out/memory-map", "memory-map")]}
+    groups = {"disk": [("out/disk.d64", "blood_path_v%s_1541.d64" % v)]}
+    if a.atlas:
+        groups["atlas"] = [("out/atlas", "atlas")]
+    if a.maps:
+        groups["memory-map"] = [("out/memory-map", "memory-map")]
     if a.only_manual:
         groups = {}
         a.manual = True
@@ -100,8 +106,6 @@ def main():
         groups["tests"] = [("out/test_report.txt", "test_report.txt"), ("out/test_report.json", "test_report.json")]
     if a.manual:
         groups["manual"] = [("out/manual/Barbarian_Blood_Path_Manuale.pdf", "Barbarian_Blood_Path_Manuale_v%s.pdf" % v)]
-    if a.release:
-        groups["release"] = [("out/sources_v%s.zip" % v, "sources_v%s.zip" % v)]
 
     stamp = now()
     for g, items in groups.items():
@@ -134,7 +138,7 @@ def main():
                  "fail": res.count("FAIL"), "skip": res.count("SKIP"), "seconds": r.get("total_s"), "at": stamp}
     man.update({"version": v, "branch": branch, "save_version": ver.get("save_version"), "source_hash": ver.get("source_hash"),
                 "updated_at": stamp, "tests": tests, "release": bool(man.get("release") or a.release),
-                "missing": sorted({"disk", "tests", "manual"} - {m["group"] for m in man["files"].values()})})
+                "missing": sorted({"disk", "atlas", "memory-map", "tests", "manual"} - {m["group"] for m in man["files"].values()})})
     with open(mpath, "w") as f:
         json.dump(man, f, indent=1, sort_keys=True)
         f.write("\n")

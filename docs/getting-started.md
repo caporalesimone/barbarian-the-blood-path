@@ -10,9 +10,11 @@ come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in
 
 ```sh
 ./validate_env.sh          # una volta su un computer nuovo: controlla host, Docker, ROM, posizione del progetto (WSL/Windows)
-./build.sh                 # build + smoke e sanity (il comando di tutti i giorni)
-./build.sh --no-test       # solo la build
-./build.sh --release       # build + tutti i test (anche regression ed EMU-*) + manuale PDF + zip dei sorgenti (solo su richiesta)
+./build.sh                 # TUTTO: disco + mappe + atlante + smoke e sanity + manuale PDF
+./build.sh --fast          # solo il disco (salta atlante, mappe, manuale); smoke e sanity restano: il comando di tutti i giorni
+./build.sh --fast --no-test  # il minimo: solo il disco
+./build.sh --release       # build completa + tutti i test (anche regression ed EMU-*) + manuale PDF (solo su richiesta)
+                           # tutti i parametri (--no-atlas, --no-maps, --no-manual, --keep N, ...): tabella nel README
 ./build.sh --view          # come ./build.sh, ma VICE si vede dal vivo nel browser: http://localhost:6080
 toolchain/run.sh emu-vice python3 tests/run.py -k SAVE      # un comando qualunque in un container (qui: i test SAVE)
 ```

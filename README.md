@@ -12,12 +12,36 @@ Krill's Loader ([Fast loader](docs/FastLoader.md)).
 Tutto gira in container Docker: sull'host servono solo sh, Docker, git e curl. **Guida completa: [docs/getting-started.md](docs/getting-started.md)**
 (cartelle, container, build, test, dove finiscono i file).
 ```
-./validate_env.sh     # controllo dell'ambiente (la prima volta; su Windows: progetto dentro WSL2)
-./build.sh            # build di tutti i giorni + smoke e sanity: out/releases/latest/blood_path_vX.Y_1541.d64 (POKE 1020,1 prima del RUN = subito il gioco)
-./build.sh --release  # anche regression, test su vc64web, manuale PDF, zip dei sorgenti (solo su richiesta)
-./build.sh --view     # i test in VICE visibili dal vivo nel browser: http://localhost:6080
+./validate_env.sh        # controllo dell'ambiente (la prima volta; su Windows: progetto dentro WSL2)
+./build.sh               # TUTTO: disco + mappe RAM/disco + atlante + smoke e sanity + manuale PDF
+./build.sh --fast        # build veloce: solo il disco (salta atlante, mappe e manuale); smoke e sanity restano
+./build.sh --fast --no-test   # il minimo: solo il disco, senza test
+./build.sh --release     # build completa + tutti i test (anche regression ed EMU-*) + manuale (solo su richiesta)
+./build.sh --view        # i test in VICE visibili dal vivo nel browser: http://localhost:6080
 toolchain/run.sh builder tools/build/mkdisk.sh       # un comando qualunque in un container
 ```
+Il disco finisce in `out/releases/latest/blood_path_vX.Y_1541.d64` (POKE 1020,1 prima del RUN = subito il gioco).
+
+### Parametri di `./build.sh`
+Si combinano liberamente (es. `./build.sh --no-atlas --no-manual`). Senza parametri si costruisce **tutto**.
+
+| Parametro | Effetto |
+|---|---|
+| *(nessuno)* | disco + mappe RAM/disco + atlante grafico + smoke e sanity + manuale PDF |
+| `--fast` | salta atlante, mappe e manuale (= `--no-atlas --no-maps --no-manual`): resta il disco e i test smoke e sanity |
+| `--no-atlas` | salta l'atlante grafico (`out/atlas/`) |
+| `--no-maps` | salta le mappe della RAM e del disco (`out/memory-map/`) |
+| `--no-manual` | salta il manuale PDF |
+| `--no-test` | salta smoke e sanity |
+| `--release` | build completa + **tutti** i test (anche regression ed `EMU-*` su vc64web) + manuale + `tools/build/release.sh` (GAME compresso in modo ottimo) |
+| `--emu` | i test con il demone vc64web acceso (`EMU-*`) |
+| `--view` | i test aprono VICE sullo schermo del viewer (http://localhost:6080) |
+| `--manual` | **solo** il manuale PDF, senza rifare il disco |
+| `--images` | rifa' tutte le immagini Docker, poi la build |
+| `--keep N` | quante versioni tenere in `out/releases/` (default 5; anche `KEEP_VERSIONS=N`) |
+
+Ogni build pubblica i suoi artefatti in `out/releases/v<versione>/` (con `manifest.json`: cosa contiene, SHA-256, esito dei test, cosa manca)
+e aggiorna `out/releases/latest`. Il manuale di una versione c'e' solo se e' stato generato per quella versione.
 Versione del gioco e del formato dei salvataggi: `version.yaml`.
 
 ## Struttura
