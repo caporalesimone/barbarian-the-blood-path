@@ -119,15 +119,15 @@ voci come nel gioco: lead sulla 2, accordi sulla 1, basso sulla 3) e i dati del 
 play `$1003` una volta per fotogramma (50 Hz, PAL), SID 6581. Titolo dal nome in `songs.TITLES`, autore "Barbarian: The Blood Path",
 rilascio con la versione.
 
-**Ascolto**: nella pagina di controllo di Lab64 (`./lab64 view`, http://localhost:6080) la riga delle musiche di ogni versione ha
-**♪ play**: apre `sid.html`, un player con l'elenco dei brani (jsSID 0.9.1 di Hermit, servito in locale, non da CDN; scelta
-6581/8580, volume, download), un **oscilloscopio per ogni voce del SID** (forma d'onda per inviluppo, prima del filtro) e del
-missaggio, i registri decodificati di ogni voce (forma d'onda, impulso, frequenza, gate, ADSR, sync, ring, instradamento nel filtro)
-e del filtro (con il nome della nota), **mute** per voce e **filtro del SID acceso/spento**. Dopo jsSID il suono passa per una catena
-Web Audio: **tasti di filtro** (flat, warm, TV speaker, radio, bass boost, bright, loudness, hi-pass, lo-pass), **equalizzatore a 3
-bande** (100 Hz, 1 kHz, 6 kHz, ±12 dB), **analizzatore di spettro a barre** (31 bande di 1/3 d'ottava, segmenti LED, picco
-trattenuto) e **VU meter a lancetta** (balistica IEC 60268-17: 300 ms, ~1 % di sovraelongazione; 0 VU = −18 dBFS; LED di picco a
-−3 dBFS). Le misure del VU e dello spettro sono dopo i filtri scelti. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID. VICE resta il riferimento: jsSID ha un filtro diverso.
+**Ascolto** (14/11): nella pagina di controllo di Lab64 (`./lab64 view`, http://localhost:6080) la riga delle musiche di ogni versione
+ha **♪ play**, che apre il **SID Studio** (`sid.html`, jsSID 0.9.1 di Hermit servito in locale). Elenco dei brani sempre a sinistra,
+con i `.sid` della release e quelli che aggiungi tu (pulsante "+ SID" o trascinandoli: restano nel browser); trasporto con sottobrani,
+fine brano CONT / NEXT (passa al successivo) / LOOP (ricomincia) dopo la durata scelta, chip 6581/8580, volume, **registrazione WAV**.
+Attorno: VU meter a lancetta, spettro a 1/3 d'ottava con la curva del filtro del SID (approssimata), CPU del player (cicli della
+routine `play` per fotogramma, stima di jsSID: la misura vera e' in VICE), una striscia per voce (oscilloscopio, inviluppo con la fase,
+forma d'onda, nota, ADSR, instradamento, mute / solo) e una master (missaggio, filtro del SID acceso/spento), piano roll degli ultimi
+10 s, automazioni (larghezza degli impulsi, cutoff), spettrogramma, tasti di filtro ed equalizzatore a 3 bande dopo il SID, tabella dei
+registri `$D400-$D418` con le modifiche evidenziate. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID.
 Test: `MUSIC-11` (regression) controlla l'intestazione di ogni `.sid` e che init + 50 fotogrammi di play scrivano il SID.
 
 ## Effetti sonori (`src/common/sfx.inc`)
