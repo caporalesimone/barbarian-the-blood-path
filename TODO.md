@@ -348,6 +348,12 @@ Cambiano il blocco eroe: farle insieme (con C5 e A1 se possibile) per cambiare `
   attuale** "`out/` contiene solo la build piu' recente, niente `release/`": serve decidere dove stanno le build vecchie (es.
   `out/builds/` o una cartella fuori da `out/`), quante se ne tengono e chi le cancella. Complessità S (dopo la decisione).
 
+- **J13** (14/11) **Overlay del viewer (tastiera C64, Joy 1, Joy 2): prove che mancano e idee**. Provato solo in un browser headless sulla
+  stessa macchina (vedi getting-started §6). Da fare: (a) schermo a sfioramento reale (telefono/tablet: multitocco stick + fire, rotazione,
+  dimensioni dei tasti), (b) browser e tastiera reali, (c) **gamepad fisico**: la Gamepad API del browser vede il pad; basterebbe leggerlo in
+  `live.html` e usare gli stessi `keyDown/keyUp` dei Joy 1/2 (stima: S, da provare con un pad vero). Limiti noti: i tasti vanno alla finestra sotto
+  il puntatore (nessun window manager), quindi l'overlay riporta il puntatore al centro dello schermo (la finestra di VICE e' centrata: ipotesi,
+  non verificata con altre dimensioni di schermo); con SHIFT a scatto i tasti senza equivalente PC (grafici C64) escono senza shift.
 ---
 
 ## K — Frenzy: prove in gioco del committente (11/11)

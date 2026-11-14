@@ -151,10 +151,17 @@ su localhost) e' una **pagina indice** con:
   con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
   aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
   **VICE con il suono**, a velocita' reale, sull'ultima build: `toolchain/viewer.sh exec tools/vice/play.sh [disco]`
-  (`viewer.sh exec` = un comando in `c64-emu-vice` collegato a schermo e audio del viewer). La tastiera del browser arriva a VICE; il **joystick 2** (quello del gioco) e' sul tastierino numerico: 8 su, 2 giu', 4 sinistra, 6 destra,
-  7 9 1 3 diagonali, 0 fire. **Serve NumLock attivo** sulla tastiera di chi guarda (a NumLock spento il browser manda le frecce e VICE le ignora);
-  senza tastierino si gioca con W A S D e spazio/RETURN. Provato 14/11 con eventi tastiera sintetici nel client KasmVNC e lettura di `$DC00`
-  (7E su, 7D giu', 7B sinistra, 77 destra, 6F fire); **non** provato con un browser e una tastiera reali, ne' con un gamepad fisico.
+  (`viewer.sh exec` = un comando in `c64-emu-vice` collegato a schermo e audio del viewer). La tastiera fisica del browser arriva a VICE.
+  **Overlay** in `/live.html` (14/11): tre pulsanti nell'intestazione accendono, sopra lo schermo e semitrasparenti, la **tastiera del C64**
+  (66 tasti con la disposizione originale e i tasti funzione a destra; SHIFT, CTRL e C= restano premuti fino al tasto successivo, SHIFT LOCK
+  fino a un secondo tocco), **Joy 1** e **Joy 2** (ciascuno: un cerchio base con il pomello che segue il dito o il mouse, 8 direzioni, piu' un
+  pulsante FIRE). I comandi vanno al server del viewer (WebSocket `/input`), che li inietta in Xvnc come secondo client RFB: non dipendono
+  dal browser ne' dal NumLock. Joy 2 = porta 2 = quella che legge il gioco (tastierino numerico di VICE); Joy 1 = porta 1 (keyset 1 di VICE su
+  F13-F17, `tools/vice/play.vicerc`). Con la tastiera fisica il tastierino numerico (NumLock attivo) muove il joystick 2; senza tastierino si gioca con
+  W A S D e spazio/RETURN. Tutto serve solo con `play.sh` (VICE dal vivo); i test non usano l'overlay.
+  Provato 14/11 in un browser headless sulla stessa macchina: 18 casi su 18 (8 direzioni e fire, per i due joystick, letti dall'indicatore
+  «Joysticks» di VICE), `PRINT"HELLO"`, SHIFT+CLR/HOME, INST/DEL e SHIFT LOCK dalla tastiera a schermo, e nel gioco vero il menu cambia voce con Joy 2.
+  **Non** provato: schermo a sfioramento (telefono, tablet), browser e tastiera reali, gamepad fisico. La password del viewer protegge anche `/input` (provato: 401 senza o con password errata).
   Misure [14/11, browser headless sulla stessa macchina, 2 x 10 eventi]: immagine ~55 ms, audio ~41 ms (il riproduttore tiene
   ~30 ms di margine), audio e immagine entro ~15 ms; la prima nota dopo un silenzio puo' arrivare con 100-200 ms. Confronto con le
   alternative (Guacamole, KasmVNC di linuxserver): [lab/viewer-audio](../lab/viewer-audio/README.md).

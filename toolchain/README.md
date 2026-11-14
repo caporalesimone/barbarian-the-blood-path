@@ -16,7 +16,7 @@ Un solo Dockerfile multi-stage, `docker/Dockerfile`: una immagine per target, tu
 | (nessuna) | `tools-builder`, `vice-build`, `zx0-build`, `cc1541-build` | compilatori e librerie di sviluppo; compilano i programmi esterni. Restano nella cache di BuildKit, non diventano immagini |
 | `c64-builder` | `builder` | 64tass, cc65, make, perl, zip, git, Python 3 con Pillow, PyYAML, NumPy, Matplotlib; zx0 e cc1541 in `/opt/c64/bin` |
 | `c64-emu-vice` | `emu-vice` | builder + VICE (`x64sc`, `c1541` e i dati in `/opt/vice`), librerie gtk3, Xvfb, ffmpeg |
-| `c64-emu-viewer` | `viewer` | Xvnc di KasmVNC (pacchetto ufficiale) + PulseAudio + server Node (`docker/viewer/server.js`): indice, schermo con audio, `out/` |
+| `c64-emu-viewer` | `viewer` | Xvnc di KasmVNC (pacchetto ufficiale) + PulseAudio + server Node (`docker/viewer/server.js`): indice, schermo con audio, `out/`, overlay con tastiera C64 e joystick (`/input`) |
 | `c64-emu-vc64web` | (Dockerfile di `vc64web-custom/`) | node, Playwright + Chromium, ffmpeg, demone dell'emulatore nel browser |
 
 Cambiare Ubuntu: `ARG UBUNTU` in `docker/Dockerfile`, poi `images.sh --force` (ricompila anche VICE, zx0 e cc1541 sulla base nuova).

@@ -4,11 +4,13 @@
 //   /vnc/        client web di KasmVNC (file del pacchetto ufficiale)
 //   /websockify  WebSocket verso Xvnc (127.0.0.1:6901, non pubblicato): passaggio dei byte cosi' come sono
 //   /audio       WebSocket con l'audio dello schermo: PulseAudio (monitor della scheda "c64"), PCM s16le stereo 44100 Hz
+//   /input       WebSocket dei tasti degli overlay (tastiera C64, joystick) di live.html: testo "d <keysym>", "u <keysym>", "f"
+//                (= puntatore al centro dello schermo: senza window manager i tasti vanno alla finestra sotto il puntatore)
 //   /out/        cartella out/ del progetto, sola lettura (montata in /srv/out), con elenco delle cartelle
 // VIEW_PASSWORD (facoltativa, di default assente): autenticazione HTTP Basic su TUTTO (pagine, out/, schermo, audio).
 'use strict';
 const http = require('http'), fs = require('fs'), path = require('path'), net = require('net');
-const { WebSocketServer } = require('ws');
+const { WebSocketServer, WebSocket } = require('ws');
 const PulseAudio = require('pulseaudio2');
 
 const PORT = 6080, VNC_PORT = 6901, PASS = process.env.VIEW_PASSWORD || '';
@@ -84,9 +86,50 @@ function startRec() {
 function stopRec() { if (rec && wss.clients.size === 0) { try { rec.end(); } catch (e) { /* gia' chiuso */ } rec = null; } }
 wss.on('connection', ws => { startRec(); ws.on('close', () => setTimeout(stopRec, 100)); });
 
-// --- WebSocket: /audio qui, tutto il resto (client di KasmVNC) passa a Xvnc cosi' com'e'
+// --- /input: tasti iniettati in Xvnc come secondo client RFB (solo KeyEvent e PointerEvent; non si chiede mai l'immagine).
+// Ogni connessione /input apre il suo client RFB (cosi' la dimensione dello schermo e' quella di adesso) e al termine rilascia i tasti rimasti premuti.
+const inWss = new WebSocketServer({ noServer: true });
+inWss.on('connection', ws => {
+  const down = new Set(), pending = [];
+  let st = 0, buf = Buffer.alloc(0), w = 1280, h = 1000, ready = false;
+  const up = new WebSocket(`ws://127.0.0.1:${VNC_PORT}/websockify`, ['binary'], { headers: { Origin: `http://127.0.0.1:${VNC_PORT}` } });   // senza Origin Xvnc risponde 404
+  const key = (sym, d) => { const m = Buffer.alloc(8); m[0] = 4; m[1] = d; m.writeUInt32BE(sym >>> 0, 4); up.send(m); };
+  const ptr = (x, y) => { const m = Buffer.alloc(11); m[0] = 5; m.writeUInt16BE(x, 3); m.writeUInt16BE(y, 5); up.send(m); };   // KasmVNC: 5, maschera u16, x, y, scorrimento x e y (s16): 11 byte, non 6 come nell'RFB standard
+  const run = c => {
+    const [op, a] = c.split(' '), sym = parseInt(a, 10);
+    if (op === 'f') ptr(w >> 1, h >> 1);
+    else if ((op === 'd' || op === 'u') && Number.isInteger(sym)) {
+      if (op === 'd') down.add(sym); else down.delete(sym);
+      key(sym, op === 'd' ? 1 : 0);
+    }
+  };
+  function step() {                                            // handshake RFB 3.8 senza sicurezza
+    for (;;) {
+      if (st === 0) { if (buf.length < 12) return; buf = buf.subarray(12); up.send(Buffer.from('RFB 003.008\n')); st = 1; }
+      else if (st === 1) {
+        if (!buf.length || buf.length < 1 + buf[0]) return;
+        const types = [...buf.subarray(1, 1 + buf[0])]; buf = buf.subarray(1 + buf[0]);
+        if (!types.includes(1)) { up.close(); return; }
+        up.send(Buffer.from([1])); st = 2;
+      } else if (st === 2) { if (buf.length < 4) return; if (buf.readUInt32BE(0) !== 0) { up.close(); return; } buf = buf.subarray(4); up.send(Buffer.from([1])); st = 3; }
+      else if (st === 3) {
+        if (buf.length < 24 || buf.length < 24 + buf.readUInt32BE(20)) return;
+        w = buf.readUInt16BE(0); h = buf.readUInt16BE(2); buf = Buffer.alloc(0); st = 4;
+        ready = true; for (const c of pending.splice(0)) run(c);
+      } else { buf = Buffer.alloc(0); return; }
+    }
+  }
+  up.on('message', d => { if (st < 4) { buf = Buffer.concat([buf, d]); step(); } });
+  up.on('error', () => ws.close()); up.on('close', () => ws.close());
+  ws.on('message', m => { const c = String(m).slice(0, 40); if (ready) run(c); else if (pending.length < 100) pending.push(c); });
+  ws.on('close', () => { if (ready && up.readyState === 1) for (const s of down) key(s, 0); up.close(); });
+  ws.on('error', () => ws.close());
+});
+
+// --- WebSocket: /audio e /input qui, tutto il resto (client di KasmVNC) passa a Xvnc cosi' com'e'
 server.on('upgrade', (req, sock, head) => {
   if (!authorized(req)) { sock.end('HTTP/1.1 401 Unauthorized\r\n\r\n'); return; }
+  if (req.url.startsWith('/input')) { inWss.handleUpgrade(req, sock, head, ws => inWss.emit('connection', ws, req)); return; }
   if (req.url.startsWith('/audio')) { wss.handleUpgrade(req, sock, head, ws => wss.emit('connection', ws, req)); return; }
   const up = net.connect(VNC_PORT, '127.0.0.1', () => {
     let h = `${req.method} ${req.url} HTTP/${req.httpVersion}\r\n`;

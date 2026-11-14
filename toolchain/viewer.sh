@@ -4,7 +4,8 @@
 #   toolchain/viewer.sh exec <comando>     comando nel container c64-emu-vice collegato allo schermo e all'audio del viewer
 #                                          (es. toolchain/viewer.sh exec tools/vice/play.sh: VICE dal vivo con il suono)
 # http://localhost:6080 (solo localhost, una sola porta): indice, schermo dal vivo con audio (/live.html, KasmVNC), ultima build in
-# vc64web nel browser, cartella out/ del progetto in sola lettura.
+# vc64web nel browser, cartella out/ del progetto in sola lettura. In /live.html anche l'overlay con tastiera C64, Joy 1 e Joy 2
+# (i tasti passano da /input, vedi server.js).
 # Variabili: VIEW_PORT (6080), VIEW_PASSWORD (password di TUTTO il viewer, di default nessuna), VIEW_SIZE (1280x1000),
 #   C64_VIEW_DISK (toolchain.env: disco proposto per primo nell'indice).
 # Gli altri container usano schermo e audio montando il volume c64-x11: DISPLAY=:99, PULSE_SERVER=unix:/tmp/.X11-unix/pulse
