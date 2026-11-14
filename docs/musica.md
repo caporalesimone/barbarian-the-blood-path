@@ -127,7 +127,11 @@ Attorno: VU meter a lancetta, spettro a 1/3 d'ottava con la curva del filtro del
 routine `play` per fotogramma, stima di jsSID: la misura vera e' in VICE), una striscia per voce (oscilloscopio, inviluppo con la fase,
 forma d'onda, nota, ADSR, instradamento, mute / solo) e una master (missaggio, filtro del SID acceso/spento), piano roll degli ultimi
 10 s, automazioni (larghezza degli impulsi, cutoff), spettrogramma, tasti di filtro ed equalizzatore a 3 bande dopo il SID, tabella dei
-registri `$D400-$D418` con le modifiche evidenziate. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID.
+registri `$D400-$D418` con le modifiche evidenziate. **Disposizione** (14/11): i pannelli stanno su una griglia grossa (12 colonne per unita' da 100 px); ognuno si
+sposta trascinando la maniglia ⠿, si allarga solo alle misure previste per lui (bottone `L×A` nell'intestazione: clic = misura
+successiva, Shift+clic = precedente; oppure l'angolo ◢, che scatta), si chiude alla sola intestazione; il VU ha misura fissa; gli
+altri scendono e riempiono i buchi. La disposizione resta nel browser, **⟲ VIEW** torna a quella di partenza. Elenco e barra in alto
+restano fissi. Il piano roll mostra 10 s a 6 colonne e 20 s a 12. I `.sid` si sentono anche con VICE `vsid`, sidplayfp o DeepSID.
 Test: `MUSIC-11` (regression) controlla l'intestazione di ogni `.sid` e che init + 50 fotogrammi di play scrivano il SID.
 
 ## Effetti sonori (`src/common/sfx.inc`)
