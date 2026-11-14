@@ -95,7 +95,8 @@ implementazione: la wiki in docs/ (indice docs/README.md).
   Licenza **non verificata** (probabile GPL-3.0, vedi `../lab64/vc64web-custom/third-party/vc64web/README.md`); la build prende le ROM
   Commodore da `../lab64/roms/` (in git su richiesta, [../lab64/roms/roms.md](../lab64/roms/roms.md); da togliere prima di pubblicare). Provenienza e uso: [../lab64/vc64web-custom/docs/INCLUSION.md](../lab64/vc64web-custom/docs/INCLUSION.md),
   [docs/emulatore.md](docs/emulatore.md). TODO `I7`.
-- **ZX0** v2 di Einar Saukas (BSD-3, `../lab64/zx0/LICENSE`): compressione di `GAME`, `LDAT` e del modulo `MENU`.
-- **VICE** 3.10 (GPL-2.0, `../lab64/vice/LICENSE`): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.
-- **cc1541** (MIT, `../lab64/cc1541/LICENSE`, dal pacchetto di Krill): scrive il disco.
+- **ZX0** v2 di Einar Saukas (BSD-3): compressione di `GAME`, `LDAT` e del modulo `MENU`.
+- **VICE** 3.10 (GPL-2.0): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.
+- **cc1541** 4.2 (MIT): scrive il disco. **64tass** 1.60 (GPL-2.0) e **cc65** (zlib): assemblatori.
+- Programmi dell'host compilati dai sorgenti dentro le immagini di Lab64 (versioni e provenienza in `../lab64/sources.conf`, licenze nell'immagine in `/opt/c64/licenses/`).
 - **Open ROMs** (LGPL-3.0+, `../lab64/roms/open-roms/LICENSE`): ROM libere, ripiego di vc64web.

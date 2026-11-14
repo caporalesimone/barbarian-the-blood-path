@@ -105,7 +105,7 @@ flowchart TD
   `margine codice: N B (di cui M prima del plugin di Krill)` e `menu: zona 1 ... libera N B`.
 - **Passi lenti in cache** (`tools/build/cache_run.py`): girano solo se cambiano i loro ingressi (storia `gen_lore`, manuale
   `gen_help`, atlante `gen_atlas`); impronta SHA-1 di ingressi e uscite.
-- **Compressione** (`tools/build/pack.py`, `../lab64/zx0/`): modo rapido nelle build normali, ottimo con `ZX0_BEST=1`
+- **Compressione** (`tools/build/pack.py`, zx0 di `lab64-tools`): modo rapido nelle build normali, ottimo con `ZX0_BEST=1`
   (`tools/build/release.sh`); cache in `out/cache/zx0/`; decompressore di riferimento `tools/build/zx0dec.py`.
 
 ## 3. Il disco (`tools/build/mkdisk.sh`)
@@ -141,20 +141,28 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 | `tools/simulators/*.py` | simulatori di combattimento, progressione, economia ([Bilanciamento](balancing-guide.md)) |
 | `tests/run.py` | i test: `smoke`, `sanity`, `regression` ([Test](test.md)) |
 
-## 4b. Programmi esterni compilati dentro le immagini (13/11)
-VICE, zx0 e cc1541 non cambiano: si compilano **dentro la build delle immagini di Lab64** (`../lab64/docker/Dockerfile`,
-stage `vice-build`, `zx0-build`, `cc1541-build`, tutti da `tools-builder` = base + compilatori e librerie di sviluppo). Nelle
-immagini finali entrano **solo i binari** (`COPY --from`): i compilatori non ci sono. La cache di BuildKit tiene gli stage
+## 4b. Programmi esterni compilati dentro le immagini (13/11; 14/11 ultime versioni dai sorgenti)
+(14/11, regola del committente) i programmi esterni sono **all'ultima versione** e si compilano **dai sorgenti** dentro la build
+delle immagini di Lab64 (`../lab64/docker/Dockerfile`, stage `vice-build`, `tass64-build`, `cc65-build`, `cc1541-build`,
+`zx0-build`, tutti da `tools-builder` = base + compilatori e librerie di sviluppo). Versioni, URL e SHA-256 stanno **solo** in
+`../lab64/sources.conf`; `../lab64/build-images.sh` scarica i sorgenti sull'host (curl o git) in `../lab64/downloads/`, li
+controlla e li cancella a immagini fatte. Nelle immagini finali entrano **solo i binari e le licenze** (`/opt/c64/licenses/`).
+I compilatori non ci sono. La cache di BuildKit tiene gli stage
 compilati: si ricompila solo se cambia un sorgente o la base (`docker builder prune` svuota la cache: poi VICE si ricompila, ~5 min
 misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagini mancanti da solo (`../lab64/build-images.sh`).
 
-| Programma | Sorgente (contesto della build) | Dove finisce | Licenza |
-|---|---|---|---|
-| VICE 3.10 (gtk3) | tarball ufficiale, scaricato **sull'host** (`curl`) da `../lab64/build-images.sh` in `../lab64/vice/download/` (contesto `vicesrc`) | `lab64-tools`: `/opt/vice/bin/x64sc`, `/opt/vice/bin/c1541`, dati in `/opt/vice/share/vice` (gli altri emulatori di VICE non entrano) | GPL-2.0 (`../lab64/vice/LICENSE`) |
-| zx0 v2.2 | `../lab64/zx0/*.c` (in git, contesto `zx0src`) | `lab64-tools`: `/opt/c64/bin/zx0` | BSD-3 |
-| cc1541 | dallo zip di Krill (`C64_KRILL_ZIP` in `lab64.env`: `src/third-party/krill/loader-v194.zip`, contesto `krill`) | `lab64-tools`: `/opt/c64/bin/cc1541` | MIT |
+| Programma | Versione (14/11) | Sorgente | Dove finisce | Licenza |
+|---|---|---|---|---|
+| VICE (gtk3) | 3.10 | tarball ufficiale (SourceForge) | `lab64-tools`: `/opt/vice/bin/x64sc`, `/opt/vice/bin/c1541`, dati in `/opt/vice/share/vice` (gli altri emulatori di VICE non entrano) | GPL-2.0 |
+| 64tass | 1.60.3243 (prima 1.59 di Ubuntu) | zip dei sorgenti (SourceForge) | `lab64-tools`: `/opt/c64/bin/64tass` | GPL-2.0 |
+| cc65 (cc65, ca65, ld65) | master dell'08/11/2026 (ultimo tag V2.19 del 2020; prima 2.19 di Ubuntu) | GitHub, commit fisso | `lab64-tools`: `/opt/c64/bin`, librerie in `/opt/c64/share/cc65` | zlib |
+| cc1541 | 4.2 (prima 4.0, dallo zip di Krill) | tarball originale conservato da Debian (il repository Bitbucket rispondeva 404 il 14/11) | `lab64-tools`: `/opt/c64/bin/cc1541` | MIT |
+| zx0 | ultimo commit (17/12/2021, formato v2: uguale ai sorgenti di prima) | GitHub, commit fisso | `lab64-tools`: `/opt/c64/bin/zx0` | BSD-3 |
 
-- Versione di VICE: `VICE_VERSION` (predefinita 3.10) o `VICE_URL`, poi `../lab64/build-images.sh --force emu-vice`.
+- Effetto misurato il 14/11 del passaggio a 64tass 1.60 e cc1541 4.2: **tutti i `.prg` identici** byte per byte; il **disco cambia**
+  (cc1541 4.2 scrive la stessa lista di file in modo diverso) e passa smoke, sanity e regression (Krill su 1541, 1541-II, 1570/1571,
+  salvataggi, `EMU-*` su vc64web).
+- Per aggiornare un programma: versione, URL o commit e SHA-256 in `../lab64/sources.conf`, poi `../lab64/build-images.sh --force tools`.
 - VICE e' installato con `--prefix=/opt/vice` e sta in `/opt/vice` anche nell'immagine finale: trova i suoi dati (keymap, risorse)
   dove li cerca. Prima (fino al passo A del 13/11) era compilato nel progetto in `../lab64/vice/bin` con i dati copiati accanto
   all'eseguibile per renderlo spostabile.
@@ -186,7 +194,7 @@ sh, Docker con BuildKit, git e curl (`./validate_env.sh` li controlla).
 
 | Programma | Container | A cosa serve |
 |---|---|---|
-| `64tass` 1.59, `cc65` 2.19, `make`, `perl`, `unzip`, `zip`, `git`, `zx0`, `cc1541` | `lab64-tools` | assemblaggio, Krill's Loader, release, versione dei branch |
+| `64tass` 1.60, `cc65` (master 08/11/2026), `cc1541` 4.2, `zx0` (dai sorgenti); `make`, `perl`, `unzip`, `zip`, `git` | `lab64-tools` | assemblaggio, Krill's Loader, release, versione dei branch |
 | `python3` 3.12 + Pillow, PyYAML, NumPy, Matplotlib | `lab64-tools` | generatori, atlante, mappe, simulatori |
 | VICE (`x64sc`, `c1541`) e le sue librerie (gtk3), `xvfb-run`, `pkill`, `ffmpeg` | `lab64-tools` (= builder + questi) | test, screenshot, arena, MP3 dei brani |
 | node 22, Playwright 1.63 + Chromium, ffmpeg | `lab64-vc64web` | demone di vc64web (test `EMU-*`, video) |

@@ -32,11 +32,15 @@ flowchart TD
     BASE --> TB["stage tools-builder<br/>compilatori e librerie -dev"]
     TB --> VB["stage vice-build<br/>compila VICE 3.10"]
     TB --> ZB["stage zx0-build<br/>compila ZX0"]
-    TB --> CB["stage cc1541-build<br/>compila cc1541 (da Krill)"]
+    TB --> CB["stage cc1541-build<br/>compila cc1541 4.2"]
+    TB --> T64["stage tass64-build<br/>compila 64tass 1.60"]
+    TB --> C65["stage cc65-build<br/>compila cc65"]
 
     BASE --> BLD["stage builder<br/>64tass, cc65, make, perl, zip, git,<br/>Python + Pillow/PyYAML/NumPy/Matplotlib"]
     ZB -. "copia /opt/c64/bin/zx0" .-> BLD
     CB -. "copia /opt/c64/bin/cc1541" .-> BLD
+    T64 -. "copia /opt/c64/bin/64tass" .-> BLD
+    C65 -. "copia /opt/c64 (cc65, ca65, ld65, librerie)" .-> BLD
 
     BLD --> EVICE["lab64-tools<br/>+ VICE, gtk3, Xvfb, ffmpeg"]
     VB -. "copia /opt/vice (x64sc, c1541, share)" .-> EVICE
@@ -54,7 +58,7 @@ flowchart TD
     classDef stage fill:#f2f2f2,stroke:#999,stroke-dasharray:4 3;
     class EVICE,VW,VC gen;
     class MAN game;
-    class BASE,TB,VB,ZB,CB,VN,BLD stage;
+    class BASE,TB,VB,ZB,CB,T64,C65,VN,BLD stage;
 ```
 
 Linea tratteggiata = si copia solo il risultato: **i compilatori non finiscono mai nelle immagini finali** (restano nella cache di BuildKit).
@@ -73,13 +77,13 @@ Conseguenze della struttura:
   disco una volta sola per la parte comune. `vc64web` parte da un'altra base e non condivide nulla.
 - **Cambiare Ubuntu**: `ARG UBUNTU` in un solo punto, poi `../lab64/build-images.sh --force` ricompila tutto (VICE, zx0 e cc1541 compresi) sulla base nuova.
 - **`barbarian-manual`** eredita da `lab64-tools` (`FROM lab64-tools`): e' del gioco, per questo `build-images.sh` di Lab64 non lo costruisce, lo fa `build.sh` (funzione `manual_image`).
-- **Sorgenti scaricati sull'host, non nel build**: il tarball di VICE e il `.deb` di KasmVNC li scarica `build-images.sh` con `curl` dell'host
-  (certificati e proxy del computer) in `../lab64/vice/download/` e `../lab64/kasmvnc/download/`, e li passa al Dockerfile come *build context*
-  (`--build-context vicesrc=...`, `kasmvnc=...`; anche `zx0src` e `krill`). Un eventuale proxy che intercetta TLS entra come segreto
+- **Sorgenti scaricati sull'host, non nel build** (14/11: tutti, all'ultima versione, elencati in `../lab64/sources.conf` con SHA-256 o
+  commit): li scarica `build-images.sh` con `curl` o `git` dell'host (certificati e proxy del computer) in `../lab64/downloads/` e li passa
+  al Dockerfile come *build context* `downloads`. Un eventuale proxy che intercetta TLS entra come segreto
   (`C64_CA_BUNDLE`) solo per le build che usano npm.
 - Le pagine di `vc64web` si generano in `lab64-tools` (`build.py`, nella cartella `out/cache/vc64web/` **di Lab64**) e poi entrano nell'immagine come build context `pages`.
 - **File di sola costruzione** (14/11, regola del committente): a immagini fatte `../lab64/build-images.sh` cancella il tarball di VICE
-  (`../lab64/vice/download/`), il `.deb` di KasmVNC (`../lab64/kasmvnc/download/`) e `../lab64/out/cache/vc64web/c64-headless.html` (serve solo a
+  (`../lab64/downloads/`, con tutti gli altri sorgenti e il `.deb` di KasmVNC) e `../lab64/out/cache/vc64web/c64-headless.html` (serve solo a
   costruire l'immagine). `--force` riscarica da solo; il contenuto e' lo stesso, quindi la cache di BuildKit resta valida [dal codice, non
   provato un `--force` dopo la cancellazione: serve la rete]. La pagina `VirtualC64-v*.html` in `../lab64/out/cache/vc64web/` resta: la usa l'indice del
   viewer (`viewer.sh` la monta sopra `out/cache/vc64web/` del progetto), e `build-images.sh viewer` la rigenera se manca.

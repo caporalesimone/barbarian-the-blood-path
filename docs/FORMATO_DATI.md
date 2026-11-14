@@ -28,7 +28,7 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `KSAVE` | PRG | plugin di save di Krill's Loader (`out/work/krill/save.prg`, a `$7D00`): il gioco lo ricarica prima di ogni salvataggio | build (`tools/build/krill_build.sh`) |
 
 Nomi in PETSCII maiuscolo. I file PRG hanno i 2 byte iniziali dell'indirizzo di caricamento. Il disco lo scrive il
-`cc1541` di Krill (`tools/build/mkdisk.sh`, opzione `-M 8`): Krill cerca i file per **hash del nome** (8 caratteri), e
+`cc1541` (4.2, `tools/build/mkdisk.sh`, opzioni `-M 8` e `-S 4` = interleave 4): Krill cerca i file per **hash del nome** (8 caratteri), e
 `cc1541` rifiuta i nomi che collidono. `BARBARIAN` è il primo file (`LOAD"*",8`).
 
 **Salvataggi (dall'11/11, ramo `fast-loader`).** Il plugin di save di Krill **riscrive solo file già presenti e con
@@ -199,7 +199,7 @@ suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test
 build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
 
 ### Compressione (ZX0)
-- Compressore: **ZX0 v2** di Einar Saukas (C, `../lab64/zx0/`, licenza BSD-3 in `../lab64/zx0/LICENSE`), compilato con
+- Compressore: **ZX0 v2** di Einar Saukas (C, compilato dai sorgenti ufficiali in Lab64: `../lab64/sources.conf`, licenza BSD-3), compilato con
   gcc da `tools/build/pack.py` (chiamato da `tools/build/asm.sh`). Modo rapido (`-q`, ~1,5 s) nei build normali, modo ottimo
   (`ZX0_BEST=1`, ~20 s) in `tools/build/release.sh`. Cache in `out/cache/zx0/`.
 - Formato del flusso: `tools/build/zx0dec.py` (decompressore Python di riferimento, = `dzx0.c` originale).

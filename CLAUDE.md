@@ -31,11 +31,10 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   (es. `ubuntu:24.04`), mai il digest. Le immagini di Lab64 vengono da **un solo Dockerfile multi-stage**
   (`../lab64/docker/Dockerfile`): lo stage `base` (senza nome di immagine, non si avvia) e' il genitore comune e contiene la
   **versione di Ubuntu in un solo punto** (`ARG UBUNTU`). vc64web ha il suo Dockerfile (pacchetto autonomo, base node).
-- I programmi esterni che non cambiano (VICE, zx0, cc1541) si compilano **dentro la build delle immagini** (stage `vice-build`,
-  `zx0-build`, `cc1541-build`; la cache di BuildKit evita di ricompilarli) e nelle immagini finali entrano solo i binari: zx0 e
-  cc1541 (`/opt/c64/bin`) e VICE (`/opt/vice`) in `lab64-tools`. In Lab64 restano solo i sorgenti (tarball di
-  VICE scaricato da `../lab64/build-images.sh` in `../lab64/vice/download/`, non in git). Ogni componente esterno ha nella sua cartella
-  il file di licenza e il suo `.gitignore`.
+- (14/11, regola del committente) I programmi esterni sono **all'ultima versione** e si compilano **dai sorgenti** dove si puo'
+  (VICE, 64tass, cc65, cc1541, zx0: stage `*-build` del Dockerfile di Lab64; la cache di BuildKit evita di ricompilarli); nelle
+  immagini entrano **solo i binari e le licenze**, i sorgenti si buttano. Versioni, URL e SHA-256 **solo** in `../lab64/sources.conf`;
+  `../lab64/build-images.sh` scarica i sorgenti sull'host in `../lab64/downloads/` e li cancella a immagini fatte.
 - **Script**: shell POSIX/bash quando lo script lancia solo comandi; Python quando c'e' logica vera. Mai un Python che fa solo da
   involucro a comandi shell. Librerie Python esterne ammesse solo se sono nel container.
 - **Percorsi**: **nessun percorso assoluto** nel progetto, **solo relativi**, e **tutti i file che servono stanno nel progetto**.

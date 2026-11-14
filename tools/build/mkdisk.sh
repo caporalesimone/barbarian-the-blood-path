@@ -5,7 +5,7 @@
 # File: BARBARIAN, START, GAME (ZX0), MENU1..3, FMAP, TWN1..4 (villaggi dei capitoli), BOSSCH1..3 (piani dei boss),
 # GFX1..8 (grafica dei capitoli: dungeon e boss),
 # SND0..n (brani, tools/build/gen_music.py), TITLE, LORE, LDAT, HELP, JUKEBOX, HL e SAVE-01..05 (salvataggi, Krill).
-# (11/11, ramo fast-loader) disco scritto con il cc1541 di Krill (sorgente nel pacchetto di Krill, src/third-party/krill): nomi con hash a 8 caratteri.
+# (11/11, ramo fast-loader) disco scritto con cc1541 (14/11: 4.2 di Lab64, compilato dai sorgenti): nomi con hash a 8 caratteri.
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 OUT=${1:-out/work/disk.d64}; PRG=${2:-out/work/game.zx0}     # GAME compresso ZX0 (tools/build/pack.py)
 rm -f "$OUT"
@@ -20,10 +20,12 @@ sv, hl = g("SV_LEN"), g("HDR_LEN")
 open("out/work/hl.prg", "wb").write(bytes([0, 0, g("SAVE_VER")]) + bytes(hl - 1))     # elenco vuoto della versione attuale
 open("out/work/save.prg", "wb").write(bytes([0, 0xe0]) + bytes(sv))
 PY
-# cc1541 di Krill (nel PATH di lab64-tools: compilato nella build dell'immagine dallo zip di Krill): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
+# cc1541 (nel PATH di lab64-tools: 4.2, compilato dai sorgenti nella build dell'immagine, ../lab64/sources.conf): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
 CC=cc1541
 command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container lab64-tools (../lab64/run.sh tools ...)"; exit 1; }
-ARGS=(-M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
+# (14/11) -S 4 = interleave dei settori 4 (quello dei benchmark di Krill): con cc1541 4.2 l'interleave predefinito (10) dava il MENU
+# in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s
+ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
       -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg -f fmap -w out/work/fmap.prg)
 for c in 1 2 3 4; do ARGS+=(-f twn$c -w out/work/gfx0.prg); done     # (12/11) villaggi dei capitoli: oggi copie del villaggio 1 (segnaposto)
 for c in 1 2 3; do ARGS+=(-f bossch$c -w out/work/bossch$c.prg); done    # (12/11) piani del boss dei capitoli 1-3 (segnaposto, tools/build/gen_bossmap.py)

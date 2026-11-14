@@ -532,7 +532,8 @@ commit in inglese, ha il suo `CLAUDE.md`). Nel gioco restano sorgenti, grafica, 
 Il codice 6502 di librerie esterne (Krill, decompressore zx0) resta **nel gioco** con la sua versione; in Lab64 solo i programmi
 dell'host. Immagini: `lab64-tools` (builder e VICE uniti), `lab64-viewer`, `lab64-vc64web`; il manuale diventera' `lab64-pdf-gen`
 (separata). Windows: **solo WSL2**. Le immagini si costruiscono con `build-images.sh`; si pubblicheranno con il passaggio a GitHub.
-VS Code: niente per ora. Fatto il 14/11: separazione dei repository (cartelle `barbarian/` e `lab64/`, progetto in `/work`, Lab64 in
+(14/11 sera) programmi esterni **all'ultima versione, compilati dai sorgenti** (VICE, 64tass, cc65, cc1541 4.2, zx0; elenco
+unico in `../lab64/sources.conf`, wiki: [docs/build.md](docs/build.md) 4b). VS Code: niente per ora. Fatto il 14/11: separazione dei repository (cartelle `barbarian/` e `lab64/`, progetto in `/work`, Lab64 in
 `/lab64` in sola lettura, `lab64.env`).
 
 ### T1 Mappa della memoria automatica: aggiunte
@@ -559,10 +560,6 @@ VS Code: niente per ora. Fatto il 14/11: separazione dei repository (cartelle `b
   senza annotazioni si perderebbero le descrizioni scritte a mano.)
 
 ### T2 Lab64: cosa resta dopo la separazione
-- **cc1541 dai suoi sorgenti** in `../lab64/cc1541/` (come `zx0/`), versione fissata: prima la **4.0** (quella dello zip di Krill, disco
-  identico byte per byte, da verificare con lo SHA-256 del `.d64`), poi eventualmente la 4.2 (la usa l'immagine `c64build` di Vintage
-  Computing Carinthia, ispezionata il 14/11). Toglie `C64_KRILL_ZIP` da `lab64.env`: le immagini non dipendono piu' da un file del gioco.
-  Sorgente: repository ufficiale di cc1541 [non verificato dove sia: probabilmente Bitbucket].
 - **CLI `lab64`** (decisione del 14/11, il committente l'accetta "per ora"): la logica in Python dentro `lab64-tools`; sull'host solo
   un lanciatore minimo (`sh` + `docker`) creato nel progetto da `lab64 init`; il lanciatore sceglie il container per comando (`build`,
   `test`, `analyze` in `tools`; `pdf` in `pdf-gen`; `up`, `down`, `build-images`, `doctor`, `upgrade` sull'host), nessun container
