@@ -612,6 +612,9 @@ _t23    lda ptx
 .if TESTUI == 25
         jsr ui_gamemenu
 .endif
+.if (TESTUI == 40) && CHEATS     ; (15/11) screenshot: menu dei trucchi (tools/vice/shots_menus.sh "trucchi")
+        jsr cheat_menu
+.endif
 .if TESTUI == 39                ; (11/11) screenshot: schermata C (personaggio) con un punto in attesa su FOR
         jsr ui_charsheet
 .endif

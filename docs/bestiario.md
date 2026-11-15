@@ -45,7 +45,7 @@ nella barra mostra il **suo nome** (prima: un nome + epiteto a caso), il boss fi
 - Costo (misurato nella build del 15/11): GAME **−115 B** (margine del codice 2283 → 2398 B: i nomi e i colori non stanno più
   in GAME, il codice nuovo è ~25 B); disco **+8 blocchi** (ogni `GFXn` da 8 a 9 blocchi: 171 → 163 liberi).
 - Controlli: la build verifica che nomi e colori dei disegni coincidano con `name` (in minuscolo) e `color` del bestiario per
-  ogni file; test `MON-CHAP-11..14` e `MON-CHAP-20` (sanity, `tests/sanity/monsters`): sprite negli slot, colori e nomi a
+  ogni file; test `MON-CHAP-11..14` e `MON-CHAP-20` (regression, `tests/regression/monsters/chapters`): sprite negli slot, colori e nomi a
   `NM_AT` per un piano del dungeon e il piano del boss di ogni capitolo, il nome **disegnato** nella barra (decodificato con la
   ROM dei caratteri) per un mostro e per il boss di ogni capitolo, ritorno al capitolo 1; atlante grafico, sezione Sprite.
 - Ritocco ai disegni (15/11): Stone Gargoyle, le crepe da `g` a `b` (erano grigio chiaro 15 come il corpo: sparivano).

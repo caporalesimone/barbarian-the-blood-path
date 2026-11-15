@@ -476,7 +476,8 @@ MENUS = {"menu_iniziale": ("barbarian menu", "start menu: the heroes, create new
          "locanda": ("inn", "the inn chest (OVLT/OVL2)"), "locanda_scelta": ("inn: choice", "inn: what to wear"),
          "baule": ("chest", "a level chest"), "mappa": ("minimap", "minimap (M)"), "leva": ("lever", "the lever of the throne room"),
          "morte": ("death", "the death screen"), "io_screen": ("loading", "waiting screen while loading or saving"),
-         "io_generico": ("loading", "generic loading"), "io_livello": ("level loading", "loading of a level")}
+         "io_generico": ("loading", "generic loading"), "io_livello": ("level loading", "loading of a level"),
+         "trucchi": ("cheats", "debug and test builds only (CHEATS=1): the cheat menu, entry 'cheats' of the game menu")}
 scr_dir = os.path.join(ROOT, "docs", "screens")
 DATA["menus"] = [dict(file=f, title=MENUS.get(f[:-4], (f[:-4], ""))[0], desc=MENUS.get(f[:-4], ("", "(no description: add it in tools/atlas/gen_atlas.py MENUS)"))[1])
                  for f in sorted(os.listdir(scr_dir)) if f.endswith(".png") and f != "tutti_i_menu.png"]

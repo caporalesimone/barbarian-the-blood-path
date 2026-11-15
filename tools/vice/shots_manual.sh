@@ -8,7 +8,8 @@ one(){ # nome secondi[:live] VAR=..
   # villaggio: il PG deve stare su una casella percorribile (regola del committente, 06/11)
   local tl= tx= ty=; for a in "$@"; do case $a in TESTLVL=*) tl=${a#*=};; TESTX=*) tx=${a#*=};; TESTY=*) ty=${a#*=};; esac; done
   if [ "$tl" = "0" ] && [ -n "$tx" ]; then python3 tools/vice/check_pos.py $tx $ty || { echo "KO $n"; return; }; fi
-  env NOKEYS=1 "$@" tools/build/asm.sh test >/dev/null 2>&1 || { echo "build KO $n"; return; }
+  # (15/11) CHEATS=0: il manuale e' per i giocatori, il menu di gioco senza la voce "cheats" delle build di test
+  env NOKEYS=1 CHEATS=0 "$@" tools/build/asm.sh test >/dev/null 2>&1 || { echo "build KO $n"; return; }
   tools/vice/shot.sh $PWD/$D/$n.png $sec $mode; echo ok $n
 }
 one town 4 TESTLVL=0 TESTX=16 TESTY=31

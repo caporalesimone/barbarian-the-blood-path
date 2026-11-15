@@ -2840,10 +2840,21 @@ _p      jsr ui_putc             ; (destinazione scritta da seed_out)
 
 ; ------------------------------------------------------------------ menu di gioco (RUN/STOP)
 gm_lo   .byte <gm0, <gm1, <gm2
+.if CHEATS
+        .byte <gm3
+.endif
 gm_hi   .byte >gm0, >gm1, >gm2
+.if CHEATS
+        .byte >gm3
+.endif
+; (15/11) build con CHEATS = 1: quarta voce "cheats" (src/game/cheats.asm). Le voci si contano con .if e non con un
+; simbolo: con CHEATS = 0 il listato della release resta identico a quello di prima dei trucchi
 gm0     .text "resume", 0
 gm1     .text "save game", 0
 gm2     .text "quit game", 0
+.if CHEATS
+gm3     .text "cheats", 0
+.endif
 
 
 gm_draw:
@@ -2869,13 +2880,21 @@ _l      stx tmp3
         jsr ui_puts
         ldx tmp3
         inx
+.if CHEATS
+        cpx #4
+.else
         cpx #3
+.endif
         bne _l
         rts
 
 tt_gm   .text "game menu", 0
 ui_gamemenu:
+.if CHEATS
+        lda #4
+.else
         lda #3
+.endif
         sta ui_n
         jsr nav_init
         jsr ui_begin
@@ -2908,6 +2927,12 @@ _in     jsr ui_nav
         bne _in
         lda ui_cur
         beq _back
+.if CHEATS
+        cmp #3
+        bne +
+        jmp cheat_menu          ; 3 cheats (solo con CHEATS = 1)
++
+.endif
         cmp #1
         bne _qask               ; 0 resume, 1 save game, 2 quit to main menu
 _save   jsr gm_save             ; (08/11: niente schermata "game saved": basta la schermata di io_screen; si torna al gioco)

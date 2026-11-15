@@ -105,7 +105,9 @@ MAIN = [
         R(L["mod_bar"], L["mod_music"] - 1, "bar.asm: barra e etichette", "code"),
         R(L["mod_music"], L["mod_theme"] - 1, "music.asm + player SID (sid_player.inc) + effetti", "code", "I brani sono file SNDn su disco (docs/musica.md)"),
         R(L["mod_theme"], L["mod_rel"] - 1, "theme.asm: tema del piano, bit di visita", "code"),
-        R(L["mod_rel"], GFXD - 1, "rel.asm: salvataggi REL", "code", "File SAVES, formato compatto del piano"),
+        R(L["mod_rel"], L.get("mod_cheats", GFXD) - 1, "rel.asm: salvataggi REL", "code", "File SAVES, formato compatto del piano"),
+        *([R(L["mod_cheats"], GFXD - 1, "cheats.asm: menu dei trucchi", "code", "Solo nella build di debug (CHEATS=1): voce cheats del menu RUN/STOP")]
+          if "mod_cheats" in L else []),
         R(GFXD, 0x871F, "Margine per il codice", "free", "Fino a $8720 (righe HUD), garantito da .cerror. All'avvio qui c'e' la grafica fissa del PRG: vedi spaccato 1", multi="s1"),
         R(0x8720, 0x87E7, "Schermo HUD (righe 20-24)", "vic", "SCR_H=$8400: il VIC mostra solo le ultime 5 righe (split raster)", multi="s1"),
         R(0x87E8, 0x87F7, "Libera", "free", "", S, multi="s1"),

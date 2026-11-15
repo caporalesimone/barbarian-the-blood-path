@@ -10,7 +10,8 @@ TITLES = {"menu_iniziale": "Menu iniziale", "nuovo_barbaro": "Nuovo barbaro", "s
           "menu_gioco": "Menu di gioco", "quit": "Quit game?", "morte": "Morte", "mappa": "Mappa",
           "badsave": "Salvataggi di un'altra versione", "io_screen": "Caricamento / salvataggio",
           "io_generico": "Caricamento generico (locanda)", "io_livello": "Caricamento di un piano",
-          "leva": "Leva della sala del trono (piano 20)"}
+          "leva": "Leva della sala del trono (piano 20)",
+          "trucchi": "Trucchi (solo build di debug, CHEATS=1)"}
 ORDER = list(TITLES)
 ims = [(n, Image.open(os.path.join(D, n + ".png")).convert("RGB")) for n in ORDER if os.path.exists(os.path.join(D, n + ".png"))]
 w, h = ims[0][1].size

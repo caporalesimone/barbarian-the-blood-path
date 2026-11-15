@@ -17,7 +17,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 
 | # | Categoria | Voci (in ordine di taglia) |
 |---|---|---|
-| 1 | [Priorità massima](#1--priorità-massima) | A1 |
+| 1 | [Priorità massima](#1--priorità-massima) | A2, A1 |
 | 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B16 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C2, C3, E2, E3, E4, E5, C1, E1, M2, E6, E7, E8, E9 |
@@ -34,6 +34,22 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 ---
 
 ## 1 — Priorità massima
+
+### A2 (15/11) Il gioco si blocca entrando in un villaggio dopo certi piani: SND0 letto solo in parte — **TOP PRIO** — S-M (causa)
+- **Visto il 15/11** (lavoro sui trucchi): dal piano 6 (capitolo 2) le scale in su verso il villaggio 2 **bloccano il gioco**
+  (anche sul `HEAD` di prima dei trucchi, percorso vero: `chap_travel`, cripta, scale fino al piano 6, scale in su). Anche
+  piano 11 -> villaggio 4 con `chap_travel` (stessa sessione, dopo altri caricamenti). Piano 1 -> villaggio 1 e piano 11 ->
+  villaggio 3 (sessione nuova) vanno.
+- **Cosa succede**: `snd_get` del brano del villaggio (`SND0`, 241 B, un blocco a traccia 8 settore 18) ritorna senza errore ma
+  in `SND_LBUF` sono giusti solo i primi **119 B**; il resto e' ancora il brano di prima (quello del capitolo 2): il player
+  (`sp_next`) gira all'infinito nell'IRQ. Il file sul disco e' giusto (catena e byte uguali a `out/work/snd/snd0.prg`).
+- **Dipende dalla disposizione del disco**: con `TWN_LAYOUT=end` (SND0 fra gli altri brani) non succede; con `hub` e `hubchap`
+  (SND0 subito dopo MENU1..3, predefinito dal 15/11 sera, commit 601248e) si'. Causa nel caricamento di Krill (lettura del
+  blocco interrotta?) **non trovata**. Riprodurre: in VICE, nuovo eroe, `c_chap`/`c_unl` = 2, `change_level` 0/4, poi 6/0,
+  poi 0/0, poi qualche fotogramma (il monitor non si riferma piu').
+- **I test lo vedono gia'**: `CHAP-SEQ-14` (piano 6 -> villaggio 2) e `MUSIC-10` falliscono anche sul `HEAD` di prima dei
+  trucchi (regression del 15/11); `VIL-TWN-22` (villaggio 2 dopo i piani del boss di `VIL-BOSS-10`) e' fallito una volta su 5
+  (il brano scelto e lo stato del disco cambiano da una sessione all'altra). `CHEAT-18..19` evitano per ora quei passaggi.
 
 ### A1 Punti statistica: rifiniture e verifiche a mano — **TOP PRIO** — S (verifica) + M (spostamento nel MENU)
 - Unito a `main` l'11/11 (schermata C in `src/game/charsheet.asm`, `docs/interfaccia.md`, `docs/quests.md`).

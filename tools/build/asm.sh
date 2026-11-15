@@ -1,5 +1,5 @@
 #!/bin/bash
-# Assembla: tools/build/asm.sh [test] -> out/work/game.prg, moduli e TUTTI i programmi del disco (11/11: un solo START e un solo
+# Assembla: tools/build/asm.sh [test|release-game] -> out/work/game.prg, moduli e TUTTI i programmi del disco (11/11: un solo START e un solo
 # BARBARIAN; un solo disco dall'11/11, tools/build/mkdisk.sh). I passi lenti e
 # indipendenti dal gioco (storia, manuale) girano solo se i loro ingressi cambiano (tools/build/cache_run.py).
 # Per build completa + test usa ./build.sh [--release]
@@ -7,6 +7,19 @@ set -e
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 mkdir -p out/work                    # (11/11) anche i sorgenti generati stanno in out/
 INC="-I src -I src/common -I src/game -I out/work"          # src/: un sorgente per file del disco; sottocartelle: common, game, lore, test
+# (15/11) trucchi per i test (menu "cheats" nel menu RUN/STOP, src/game/cheats.asm): CHEATS=1 nella build di debug e in quelle di
+# test (anche durante la release), CHEATS=0 nella release (RELEASE=1: con 0 non si assembla un solo byte dei trucchi); CHEATS
+# nell'ambiente vince (es. CHEATS=0 tools/build/asm.sh test per gli screenshot del manuale).
+CH0=${CHEATS:-}
+if [ "$1" = "test" ]; then CHEATS=${CH0:-1}; elif [ "${RELEASE:-0}" = 1 ]; then CHEATS=${CH0:-0}; else CHEATS=${CH0:-1}; fi
+EXTRA="-D NOKEYS=0 -D AUTOY=0 -D TSV=0 -D TESTSELL=0 -D NOMUSIC=0 -D TMDBG=0 -D TESTBUILD=0 -D TESTLVL=${TESTLVL:-1} -D TESTCL=${TESTCL:-1} -D TESTSP=${TESTSP:-1} -D TESTX=${TESTX:-0} -D TESTY=${TESTY:-0} -D TESTUI=${TESTUI:-0} -D TESTFIRE=0 -D TESTSK=0 -D TESTFZ=0 -D TESTFZR=100 -D TESTFZS=0 -D TESTGOD=0 -D CHEATS=$CHEATS"
+if [ "$1" = "test" ]; then EXTRA="-D NOKEYS=${NOKEYS:-0} -D AUTOY=${AUTOY:-0} -D TSV=${TSV:-0} -D NOMUSIC=${NOMUSIC:-0} -D TESTSELL=${TESTSELL:-0} -D TMDBG=${TMDBG:-0} -D TESTBUILD=${TB:-1} -D TESTLVL=${TESTLVL:-1} -D TESTCL=${TESTCL:-1} -D TESTSP=${TESTSP:-1} -D TESTX=${TESTX:-0} -D TESTY=${TESTY:-0} -D TESTUI=${TESTUI:-0} -D TESTFIRE=${TESTFIRE:-0} -D TESTSK=${TESTSK:-0} -D TESTFZ=${TESTFZ:-0} -D TESTFZR=${TESTFZR:-100} -D TESTFZS=${TESTFZS:-0} -D TESTGOD=${TESTGOD:-0} -D CHEATS=$CHEATS"; fi
+if [ "$1" = "release-game" ]; then
+    # solo GAME con i flag della release (CHEATS=0) in out/tmp/release_game.*, senza generatori ne' disco (servono i sorgenti
+    # generati di una build gia' fatta): il controllo che la release non abbia i trucchi (test CHEAT-22)
+    mkdir -p out/tmp
+    exec 64tass -a ${EXTRA/-D CHEATS=$CHEATS/-D CHEATS=0} -L out/tmp/release_game.lst -l out/tmp/release_game.lbl $INC src/game.asm -o out/tmp/release_game.prg
+fi
 python3 tools/build/gen_version.py || exit 1
 tools/build/krill_build.sh > out/work/krill.log || { cat out/work/krill.log; exit 1; }   # (11/11) Krill's Loader: out/work/krill/*.prg + out/work/krill.inc
 python3 tools/build/gen_gfx.py >/dev/null
@@ -14,8 +27,6 @@ python3 tools/build/gen_font.py >/dev/null || exit 1
 python3 tools/build/gen_music.py >/dev/null || exit 1
 python3 tools/build/gen_db.py >/dev/null || exit 1
 python3 tools/build/gen_maps.py >/dev/null || exit 1   # prima dell'assemblaggio: scrive town_places.inc (porte per la minimappa)
-EXTRA="-D NOKEYS=0 -D AUTOY=0 -D TSV=0 -D TESTSELL=0 -D NOMUSIC=0 -D TMDBG=0 -D TESTBUILD=0 -D TESTLVL=${TESTLVL:-1} -D TESTCL=${TESTCL:-1} -D TESTSP=${TESTSP:-1} -D TESTX=${TESTX:-0} -D TESTY=${TESTY:-0} -D TESTUI=${TESTUI:-0} -D TESTFIRE=0 -D TESTSK=0 -D TESTFZ=0 -D TESTFZR=100 -D TESTFZS=0 -D TESTGOD=0"
-if [ "$1" = "test" ]; then EXTRA="-D NOKEYS=${NOKEYS:-0} -D AUTOY=${AUTOY:-0} -D TSV=${TSV:-0} -D NOMUSIC=${NOMUSIC:-0} -D TESTSELL=${TESTSELL:-0} -D TMDBG=${TMDBG:-0} -D TESTBUILD=${TB:-1} -D TESTLVL=${TESTLVL:-1} -D TESTCL=${TESTCL:-1} -D TESTSP=${TESTSP:-1} -D TESTX=${TESTX:-0} -D TESTY=${TESTY:-0} -D TESTUI=${TESTUI:-0} -D TESTFIRE=${TESTFIRE:-0} -D TESTSK=${TESTSK:-0} -D TESTFZ=${TESTFZ:-0} -D TESTFZR=${TESTFZR:-100} -D TESTFZS=${TESTFZS:-0} -D TESTGOD=${TESTGOD:-0}"; fi
 rm -f out/work/game.prg
 64tass -a $EXTRA -L out/work/game.lst -l out/work/game.lbl $INC src/game.asm -o out/work/game.prg > out/work/build.log 2>&1 || { grep -v '^$' out/work/build.log | head -${ERRLINES:-40}; exit 1; }
 tail -3 out/work/build.log

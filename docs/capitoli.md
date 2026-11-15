@@ -37,7 +37,7 @@ flowchart LR
 | Mostri (15/11) | **ogni capitolo ha i suoi**: i due file del tema del capitolo portano sprite, colori e nomi delle sue 4 famiglie + 4 varianti forti (capitolo 1 i mostri di sempre, 2–4 `tools/build/monsters_chap.py`); **statistiche e IA restano quelle del tipo** (tipo *t* = tipo *t* del capitolo 1, `data/balance.yaml` per profondità). Tabella e dettagli: [bestiario](bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511) | `gen_gfx.py`, `gfx_install`, `bar_name` |
 | Musica | un tema per villaggio (oggi lo stesso, tbd) e uno per capitolo per i suoi 5 piani; il piano finale ha il suo; il brano non si rilegge se non cambia (scale 2,80 → 2,24 s) | `music.asm`, [musica](musica.md) |
 
-Test: `CHAP-SEQ-10..14`, `VIL-TWN-*`, `VIL-BOSS-10` (regression), `MON-CHAP-*` (sanity, mostri dei capitoli). Aperto (TODO M1): mappe vere dei boss, effetto grafico del passaggio, ritorno ai villaggi precedenti, cosa mostra la UI (piano
+Test: `CHAP-SEQ-10..14`, `VIL-TWN-*`, `VIL-BOSS-10` (regression), `MON-CHAP-*` (regression, mostri dei capitoli). Aperto (TODO M1): mappe vere dei boss, effetto grafico del passaggio, ritorno ai villaggi precedenti, cosa mostra la UI (piano
 locale o globale: oggi il globale), boss con statistiche e IA propri (H6/M9).
 
 ## Com'era l'11/11

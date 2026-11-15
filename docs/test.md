@@ -138,17 +138,25 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (5)
+### sanity (13)
 
 | ID | Test |
 |---|---|
-| `MON-CHAP-11` | chapter 1: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
-| `MON-CHAP-12` | chapter 2: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
-| `MON-CHAP-13` | chapter 3: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
-| `MON-CHAP-14` | chapter 4: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
-| `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
+| `CHEAT-10` | game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter |
+| `CHEAT-11` | god mode on: no damage (hurt_player); god mode off: damage again |
+| `CHEAT-12` | level up: level + 1, xp = threshold of that level, stat points of pl_pts, hp max up and full; message 'level N' |
+| `CHEAT-13` | respec token: +1, message 'tokens N' |
+| `CHEAT-14` | level up at the maximum level (PL_MAXLVL): nothing changes, message 'limit reached' |
+| `CHEAT-15` | next level in the village: the first level of the chapter (as the crypt) |
+| `CHEAT-16` | next level in a level of the chapter: the next level (as the stairs down) |
+| `CHEAT-17` | next level on level 4 -> boss level 5; there: boss killed (c_unl = 2, exit open), back to village 1 at the crypt |
+| `CHEAT-18` | next chapter from a level (village 1 -> level 1 -> village 2): unlocked, saved in village 2, no portal back |
+| `CHEAT-19` | next chapter in a village (village 2 -> 3, then 4): c_unl follows, hero saved there |
+| `CHEAT-20` | next level in the throne room (level 20): as the final boss killed (c_won, c_unl 5, respec gift), village 4 |
+| `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
+| `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
 
-### regression (172)
+### regression (177)
 
 | ID | Test |
 |---|---|
@@ -236,6 +244,11 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
+| `MON-CHAP-11` | chapter 1: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-12` | chapter 2: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-13` | chapter 3: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-14` | chapter 4: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
 | `MUSIC-10` | songs per level, buffer = SNDn files, combat and resume, copy under I/O |
 | `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |

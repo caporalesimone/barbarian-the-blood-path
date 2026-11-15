@@ -1896,6 +1896,10 @@ mod_rel
         .include "rel.asm"
 mod_chap
         .include "chapter.asm"           ; (12/11) sequenza dei capitoli: TODO M1
+.if CHEATS
+mod_cheats
+        .include "cheats.asm"            ; (15/11) menu dei trucchi per i test: solo con CHEATS = 1 (debug e test, non release)
+.endif
 
 
 ; ------------------------------------------------------------------ dati grafici
