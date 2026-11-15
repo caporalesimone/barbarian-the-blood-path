@@ -28,7 +28,7 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   sta in `lab64.env`. Sull'host servono solo sh, Docker (con Compose v2), git, curl. Python gira **solo nei container**. Comandi (dalla cartella del
   gioco): `./build.sh [...]` (o `lab64 build`), `lab64 test [--view|--no-view] [--emu] [...]`, `lab64 up|down|ps|view` (stack compose: con `lab64 up` i comandi girano
   nel container `lab64-tools` sempre acceso), `lab64 run <comando>`, `lab64 manual`, `lab64 map`,
-  `lab64 check-env`. Immagini con la versione di Lab64 nel tag (`lab64-tools:1.3`); il gioco la fissa con `LAB64_VERSION` in
+  `lab64 check-env`. Immagini con la versione di Lab64 nel tag (`lab64-tools:1.4`); il gioco la fissa con `LAB64_VERSION` in
   `lab64.env`. Motore dei test, libreria VICE e generatore del manuale stanno in Lab64; `tools/vice/vice_env.sh` del gioco aggiunge
   solo `ROOT` a quello di Lab64.
 - Un cambiamento a Lab64 si committa **nel suo repository** (in inglese, con le sue regole) e deve lasciare verde la build del gioco.

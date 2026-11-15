@@ -64,7 +64,7 @@ flowchart LR
 | `GAME` | `src/game.asm` + `src/game/` | `$0400`–`$9FFF` (residente) | il gioco | sotto |
 | `LOBBY` | `src/lobby.asm` | `$C000`–`$CBFF` | menu iniziale: elenco eroi, scheda, nuovo eroe; non resta in partita | [Interfaccia](interfaccia.md) |
 | `MENU1..3` | `src/menu.asm` + `src/menu/` | zone `$C900`, `$F4E0`, `$A700` | menu del villaggio: locanda e negozi, un file per zona; caricati all'ingresso nel villaggio, poi residenti | [Tecnica](tecnica.md#moduli-su-disco) |
-| `JUKEBOX` | `src/jukebox.asm` | `$0801` | prova di brani ed effetti | [Musica](musica.md) |
+| `JUKEBOX` | `src/jukebox.asm` | `$0801` | prova di brani ed effetti (i brani sono nel programma: non legge i file `SNDn`) | [Musica](musica.md) |
 | dati | `tools/gen_*.py` | — | grafica, mappe, brani, storia, salvataggi | [Build](build.md), [FORMATO_DATI](FORMATO_DATI.md) |
 
 ## 2. GAME: i moduli e le loro dipendenze
@@ -153,7 +153,10 @@ flowchart TB
 
 ## 3. La memoria e il suo ciclo di vita
 
-Mappa completa e sempre aggiornata: [mappa_ram.html](../out/work/memory-map/mappa_ram.html). Qui le zone e **chi le possiede quando**.
+Mappa completa e sempre aggiornata: [mappa_ram.html](../out/work/memory-map/mappa_ram.html) (curata a mano, solo GAME). Mappe
+automatiche (Lab64), **una per programma** del disco (i programmi della sezione 1 si sostituiscono in memoria):
+[indice](../out/work/memory-map/index.html), [GAME](../out/work/memory-map/program-game.html); dichiarazione e confronto dei numeri
+in [Build](build.md) sezione 4a. Qui le zone di GAME e **chi le possiede quando**.
 
 ```mermaid
 flowchart TB

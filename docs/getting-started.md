@@ -241,12 +241,12 @@ Password facoltativa: `VIEW_PASSWORD=... lab64 view` (di default nessuna): auten
 
 | Percorso | Cosa |
 |---|---|
-| `out/releases/v<V>/` | **gli artefatti di ogni versione**: `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generati per quella versione), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca; dal 14/11 `stats`: commit e modifiche non committate, margini di RAM da `game.lbl` e, quando si pubblicano le mappe, le misure di `memmap.json` (`ram_free_static`, `ram_never_written`), blocchi liberi e directory del disco, dimensioni di GAME, durata di build e test). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
+| `out/releases/v<V>/` | **gli artefatti di ogni versione**: `blood_path_v<V>_1541.d64`, `atlas/`, `memory-map/`, `test_report.*`, `Barbarian_Blood_Path_Manuale_v<V>.pdf` (solo se generati per quella versione), `manifest.json` (file, SHA-256, data, esito dei test, cosa manca; dal 14/11 `stats`: commit e modifiche non committate, margini di RAM da `game.lbl` e, quando si pubblicano le mappe, le misure di `memmap.json` (una serie per programma: `ram_free_static_game`, `ram_never_written_game`, ...), blocchi liberi e directory del disco, dimensioni di GAME, durata di build e test). Si tengono le **ultime 5 versioni** (`./build.sh --keep N`, `KEEP_VERSIONS`); `out/releases/latest` e' il collegamento all'ultima |
 | `out/work/disk.d64` | disco di lavoro della build in corso (da qui si pubblica) |
 | `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
 | `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
 | `out/work/atlas/` | atlante grafico (`index.html`) |
-| `out/work/memory-map/` | mappa automatica della memoria e del disco (`index.html`, `memmap.json`, `memmap/c64map.py` di Lab64) e mappe curate a mano (`mappa_ram.html`, `mappa_disco.html`) |
+| `out/work/memory-map/` | mappa automatica della memoria e del disco (`memmap/c64map.py` di Lab64): `index.html` = indice dei programmi del disco, `program-<nome>.html` = una mappa per programma (dichiarati in `lab64.env`, [build.md](build.md) sezione 4a), `memmap.json`; mappe curate a mano (`mappa_ram.html`, `mappa_disco.html`) |
 | `out/work/memprobe/` | (14/11) dump della RAM della sonda in VICE (`./build.sh --probe`, uno per sessione VICE dei test, con scenario e impronta del disco nel `.json` accanto) |
 | `out/work/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
 | `out/work/simulators/` | report dei simulatori |

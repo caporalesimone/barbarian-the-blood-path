@@ -29,7 +29,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
-| Z | [Note urgenti](#z--note-urgenti) | Z4, Z6 |
+| Z | [Note urgenti](#z--note-urgenti) | Z4 |
 
 ---
 
@@ -441,18 +441,24 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
   da' gia' il tag). Da decidere con il passaggio a GitHub.
 
 ### T1 Mappa della memoria automatica: lavoro dalla parte del gioco — M
-- La mappa automatica e la sonda in VICE sono di Lab64 (`lab64 map`, [docs/build.md](docs/build.md) sezione 4). Prima misura della
-  sonda (14/11, 39 sessioni): **1791 B mai scritti** contro 6398 B liberi per l'analisi statica. Da guardare [non verificato, sono
-  indizi]: zone libere per l'analisi statica ma scritte durante i test (`$8E39-$8FFF` 455 B, `$B701-$BDFF` con un byte libero a
-  ogni inizio pagina = probabile tabella o buffer dietro puntatori, `$D000-$D47F` sotto l'I/O); `$B300-$B3FE` (modulo `lore`) mai
-  scritto = il modulo non e' caricato da nessun test.
-- **Annotazioni** (Lab64 le legge dal 15/11: `;@map` e `;@scenario` nei sorgenti, README di Lab64): scriverle nei sorgenti
-  del gioco (descrizioni; `free-after=start` per i dati che si liberano dopo l'avvio: oggi il margine di 2333 B sotto `$8720` di
-  `asm.sh` non si ritrova nella mappa automatica perche' `gfx_data` resta occupato; scenari villaggio / dungeon / menu) e poi
-  **togliere le mappe vecchie** (`tools/memory-map/gen_rammap.py`, `gen_diskmap.py`: curate a mano), portando le loro
-  descrizioni nelle annotazioni. Fino ad allora restano (la pagina automatica le collega).
-- Sonda anche in `--release` (oggi a mano: `C64_MEMPROBE=1 lab64 test regression`, poi `lab64 map`); seconda passata con
-  `C64_MEMPROBE=2` (altro schema: toglie i byte che sembravano mai scritti per caso).
+- La mappa automatica e la sonda in VICE sono di Lab64 (`lab64 map`, [docs/build.md](docs/build.md) sezioni 4 e 4a).
+- **Fatto il 15/11 (TODO Z6, Lab64 1.4)**: una mappa per **programma** del disco (barbarian, lore, help, start, game, jukebox,
+  dichiarati in `lab64.env` con `C64_MAP_PROGRAM_<NOME>`), indice in `out/work/memory-map/index.html`; JUKEBOX assemblato con il
+  listato; i dump della sonda vanno al programma che era in memoria alla fine della sessione. La RAM libera di GAME non e' piu'
+  sommata a quella degli altri programmi: 13323 B (analisi statica, v1.261).
+- **Resta: annotazioni** `;@map` nei sorgenti (Lab64 le legge dal 15/11, README di Lab64). Il confronto con `mappa_ram.html`
+  ([docs/build.md](docs/build.md) sezione 4a) dice quali servono perche' la RAM libera di GAME diventi quella vera (~4,2 KB):
+  usate senza che l'analisi statica lo veda il banco VIC `$A000-$BFFF` (7707 B), i buffer `$8B14-$8FFF` (slot sprite,
+  `SND_LBUF`/`SND_FBUF`, 1020 B), lo STASH `$D000-$D47F`, gli slot dei piani `LVRAM`; `free-after=start` per `gfx_data` (il margine
+  di 1580 B sotto `$8720` di `asm.sh`, oggi occupato nella mappa automatica); le descrizioni delle zone; scenari (villaggio /
+  dungeon / menu) dentro GAME. Ogni modifica a `src/` cambia la versione del gioco (impronta dei sorgenti): farle tutte insieme.
+- **Poi togliere le mappe vecchie** (`tools/memory-map/gen_rammap.py`, `gen_diskmap.py`: curate a mano), portando le loro
+  descrizioni nelle annotazioni. Fino ad allora restano (l'indice automatico le collega). Nota: `mappa_ram.html` ha una riga
+  sbagliata nella tabella delle zone libere (`$ECB3-$EC6C`, -70 B: la coda della cache del villaggio dopo la modifica del 15/11).
+- Sonda (15/11): 1838 B mai scritti in GAME (8 sessioni: smoke, sanity e alcuni `BOOT-*`, `LOBBY-*`, `DISK-12`, `MUSIC-10`); LORE, HELP, START e JUKEBOX non hanno sessioni
+  che finiscono in loro (nessun test li lascia in memoria alla fine) e BARBARIAN solo 2 (`BOOT-*`). Una sessione che passa da
+  BARBARIAN a START e GAME conta tutte le sue scritture in GAME (limite di Lab64, TODO L33 di Lab64). Sonda anche in `--release`
+  (oggi a mano: `C64_MEMPROBE=1 lab64 test regression`, poi `lab64 map`); seconda passata con `C64_MEMPROBE=2`.
 
 ---
 
@@ -472,10 +478,3 @@ dimensionate. Finita una voce: si cancella e la decisione va nella wiki o nel RE
 
 ### Z4 — Fable — Barbarian: review del gioco (altro branch)
 - Fai una review anche di barbarian. Fixa bug, ottimizza la memoria e la velocità di caricamento.
-
-### Z6 — Opus — Lab64: mappe di memoria multiple
-- La mappa di memoria è solo per il gioco o anche per intro e menù?
-- Come si può fare per avere mappe diverse? Il menù è un programma a sé, idem il jukebox.
-- Cosa bisogna specificare per farsi generare tutte le mappe?
-- Come si può fare per mostrare più mappe nella pagina web di lab64?
-- Implementa questa logica.

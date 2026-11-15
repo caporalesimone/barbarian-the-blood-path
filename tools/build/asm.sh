@@ -60,8 +60,9 @@ python3 tools/build/cache_run.py gen_help --in tools/build/gen_help.py data/help
 python3 -c "import sys; sys.path.insert(0,'tools/build'); import pack; z,_=pack.zx0(open('out/work/help.prg','rb').read()[2:],'help'); open('out/work/help.zx0','wb').write(z)" || exit 1
 64tass -a $INC src/help/zx0sfx.asm -o out/work/helpz.prg -L out/work/helpz.lst > out/work/helpz.log 2>&1 || { grep -v '^$' out/work/helpz.log | head -20; exit 1; }
 64tass -a $INC src/barbarian.asm -o out/work/barbarian.prg -L out/work/barbarian.lst -l out/work/barbarian.lbl > out/work/barbarian.log 2>&1 || { grep -v '^$' out/work/barbarian.log | head -20; exit 1; }
-# jukebox (prova di brani ed effetti con il player del gioco): sui due dischi (11/11; da rifare piu' bello, TODO E8)
-64tass -a -q $INC -D AUTOPLAY=-1 src/jukebox.asm -o out/work/jukebox.prg -l out/work/jukebox.lbl > out/work/jukebox.log 2>&1 || { grep -v '^$' out/work/jukebox.log | head -20; exit 1; }
+# jukebox (prova di brani ed effetti con il player del gioco): sui due dischi (11/11; da rifare piu' bello, TODO E8); il listato (-L,
+# 15/11) serve alla mappa della memoria del programma JUKEBOX (lab64 map)
+64tass -a -q $INC -D AUTOPLAY=-1 src/jukebox.asm -o out/work/jukebox.prg -l out/work/jukebox.lbl -L out/work/jukebox.lst > out/work/jukebox.log 2>&1 || { grep -v '^$' out/work/jukebox.log | head -20; exit 1; }
 echo "moduli: lobby $(( $(stat -c %s out/work/lobby.prg) - 2 )) B, villaggi (intestazione + mappa, max 1888 B): $(for c in 1 2 3 4 5; do printf "%s " $(stat -c %s out/work/town$c.map); done)"
 echo "$MENUMSG"
 ls -la out/work/game.prg
