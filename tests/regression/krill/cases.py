@@ -85,5 +85,8 @@ def krill_no_kernal(ctx):
             lst = lst[:i] + lst[j:] if i >= 0 and j > i else lst
             k = lst.find("tramp_run:")
             lst = lst[:k] if k >= 0 else lst
+        if f == "game":         # (16/11) the trampoline of "back to main menu" (backmenu.asm): runs only after krill_uninstall, KERNAL allowed
+            i = lst.find("tramp_run:"); j = lst.find("tramp_len = * - tramp_img", i)
+            lst = lst[:i] + lst[j:] if i >= 0 and j > i else lst
         bad = sorted({"$ff" + m.group(1) for m in pat.finditer(lst) if "ff" + m.group(1) in vec})
         check(not bad, "%s.lst calls %s" % (f, bad))
