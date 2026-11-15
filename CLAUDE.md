@@ -60,7 +60,7 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
 - Fine riga sempre LF (`.gitattributes`); il progetto su Windows sta nel filesystem di WSL2, non su `/mnt/c` (`lab64 check-env`).
 
 ## Cartelle
-`src/` (gioco e librerie per il C64, `src/third-party/`), `data/`, `tools/` (`build/`, `atlas/`, `memory-map/`, `manual/`,
+`src/` (gioco e librerie per il C64, `src/third-party/`), `data/`, `tools/` (`build/`, `atlas/`, `manual/`,
 `simulators/`, `vice/`, `font/`), `tests/` (`smoke/`, `sanity/`, `regression/`), `docs/` (solo documentazione **scritta**: cio'
 che si puo' rigenerare va in `out/`, i suoi generatori in `tools/`), `lab64.env` (configurazione di Lab64), `lab/` (studio, non usato dalla build: [lab/README.md](lab/README.md)),
 `out/`. Fuori dal repository: Lab64 (dove si vuole, usato solo con il comando `lab64`: immagini Docker, programmi esterni,
@@ -77,7 +77,7 @@ diventa un test in `tests/`, non resta in `tools/`.
 - **Architettura** (11/11, richiesta del committente): `docs/architettura.md` (struttura), `docs/flussi.md` (come gira il
   codice), `docs/build.md` (pipeline) e `docs/getting-started.md` (build e test, container) si aggiornano nello stesso lavoro quando
   cambia un modulo, un flusso, la memoria, un'interruzione, la build o i test.
-- Documenti generati (in `out/work/`, pubblicati in `out/releases/`): mappe della RAM e del disco (`tools/memory-map/`), atlante grafico (`tools/atlas/`,
+- Documenti generati (in `out/work/`, pubblicati in `out/releases/`): mappe della RAM e del disco (`lab64 map` dai listati, dal disco e dalle annotazioni `@map` / `@free` / `@scenario` nei sorgenti: [docs/build.md](docs/build.md) sezione 4a), atlante grafico (`tools/atlas/`,
   regole in `src/CLAUDE.md`), manuale (`tools/manual/`, sorgente in `docs/manual/`), report dei simulatori. Se cambia cio' che
   descrivono, si aggiornano i generatori.
 - `docs/FORMATO_DATI.md`: formato esatto dei file su disco e dei salvataggi; aggiornarlo con `SAVE_VER`.

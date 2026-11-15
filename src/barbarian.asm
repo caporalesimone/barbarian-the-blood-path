@@ -20,6 +20,8 @@ SCR     = $0400
 FONT    = $3800                 ; (12/11) sopra i programmi che il trampoline carica (LORE fino a $2B3D): durante
                                 ; il caricamento lo schermo resta leggibile (a $2000 LORE e START lo coprivano)
 GETIN   = $ffe4
+;@map $0400..$07e8 "Schermo del menu"
+;@map FONT+512 "Font del menu: codici 0-63 del font del gioco (uifont.bin), sopra i programmi che il trampoline carica"
 NITEM   = 3
 ROW0    = 11                    ; riga della prima voce
 LOGO_X  = (40 - LOGO_W) / 2     ; il logo della copertina (out/work/logo.inc, tools/build/gen_lore.py), righe 1..6

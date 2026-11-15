@@ -35,29 +35,29 @@ mo_yh     .byte ?
         .endv
 
 ; ---- stato livello (salvato su disco)
-;@map LVLBLK..LVLEND "LVLBLK: stato del piano (mostri, bauli, nebbia EXPL), salvato compatto negli slot LVRAM e copiato in STASH"
+;@map LVLBLK..LVLEND "LVLBLK: stato del piano (mostri, bauli, nebbia EXPL), salvato compatto negli slot LVRAM e copiato in STASH" layout
         .virtual $9800
 LVLBLK
-lb_lvl  .byte ?
-lb_cnt  .byte ?
+lb_lvl  .byte ?          ; piano di questo stato
+lb_cnt  .byte ?          ; mostri del piano
 lb_boss .byte ?          ; indice boss + 1 (0 = nessuno)
 lb_bn1  .byte ?          ; nome boss: nome / epiteto
-lb_bn2  .byte ?
+lb_bn2  .byte ?          ; (seconda parte del nome del boss)
 lb_bch  .byte ?          ; baule del boss: posto + 1 (0 = nessuno); si salva finche' non e' aperto
-mtype   .fill 32
-malive  .fill 32
-mix     .fill 32
-miy     .fill 32
+mtype   .fill 32         ; tipo dei 32 mostri
+malive  .fill 32         ; mostri vivi
+mix     .fill 32         ; casella X dei mostri
+miy     .fill 32         ; casella Y dei mostri
 CH_MAX  = 15            ; bauli nel piano al massimo (generati + lasciati dai mostri)
 CH_GEN_MAX = 4          ; bauli generati con il piano al massimo (posti 0..3; + il baule del boss)
-cx_x    .fill CH_MAX
-cx_y    .fill CH_MAX
+cx_x    .fill CH_MAX     ; casella X dei bauli
+cx_y    .fill CH_MAX     ; casella Y dei bauli
 ch_t    .fill CH_MAX      ; 0 vuoto, 1 normale, 2 chiave, 3 oro; bit3 = lasciato da un mostro, contenuto da
                           ; generare all'apertura (ch_i = oggetti, ch_b = livello bottino nel 1o posto);
                           ; bit4 = generato con il piano, bit5 = aperto, bit6 = epico, bit7 = contenuto generato
-ch_i    .fill CH_MAX*4
-ch_b    .fill CH_MAX*4
-EXPL    .fill 288
+ch_i    .fill CH_MAX*4   ; contenuto dei bauli: id oggetto (4 posti)
+ch_b    .fill CH_MAX*4   ; contenuto dei bauli: bonus (4 posti)
+EXPL    .fill 288        ; mappa esplorata: 1 bit per tile (48x48)
 LVLEND
         .endv
 
@@ -65,32 +65,32 @@ LVLEND
 NAME_LEN = 12                   ; caratteri del nome dell'eroe
 STASH_N  = 24                   ; oggetti nel baule di casa (07/11 sera: da 48 a 24), nel blocco dell'eroe (08/11 sera)
 PACK_N   = 8                    ; posti dello zaino (07/11 sera: da 16 a 8); l'equipaggiamento segue: indici PACK_N..PACK_N+3
-;@map CHRBLK..CHREND "CHRBLK: eroe e baule della locanda, il blocco salvato nel file save-0N (docs/FORMATO_DATI.md)"
+;@map CHRBLK..CHREND "CHRBLK: eroe e baule della locanda, il blocco salvato nel file save-0N (docs/FORMATO_DATI.md)" layout
         .virtual $9500
 CHRBLK
 c_magic .byte ?          ; versione del formato di salvataggio (SAVE_VER): primo byte del file
-c_seed  .word ?
-c_loc   .byte ?
-c_lvl   .byte ?
+c_seed  .word ?          ; seed numerico del mondo (dai 6 caratteri di c_seedt)
+c_loc   .byte ?          ; luogo attuale: 0 villaggio, 1..20 piano
+c_lvl   .byte ?          ; livello dell'eroe
 c_xp    .fill 3          ; esperienza (24 bit)
-c_gold  .word ?
+c_gold  .word ?          ; oro (16 bit)
 c_hp    .word ?          ; vita attuale (16 bit)
 c_vis   .fill 3          ; 1 bit per piano (1..24): stato salvato su SAVES
-c_retlvl .byte ?
-c_retx  .word ?
-c_rety  .word ?
-c_portal .byte ?
+c_retlvl .byte ?         ; piano a cui riporta il portale
+c_retx  .word ?          ; X di ritorno del portale (pixel)
+c_rety  .word ?          ; Y di ritorno del portale (pixel)
+c_portal .byte ?         ; 1 = portale aperto nel villaggio
 c_beltt .fill 4          ; cintura: 4 posti, una pozione ciascuno (id, 0 = vuoto). Pergamene: pila nello zaino
-c_skill .byte ?
-c_kills .word ?
-c_won   .byte ?
+c_skill .byte ?          ; abilita' selezionata
+c_kills .word ?          ; mostri uccisi (16 bit)
+c_won   .byte ?          ; 1 = boss finale sconfitto
 c_lever .byte ?          ; 1 = leva tirata: portale per The Endless Abyss nella sala del trono
-c_maxd  .byte ?
-c_name  .fill NAME_LEN
-c_px    .word ?
-c_py    .word ?
-c_pack  .fill PACK_N
-c_eq    .fill 4
+c_maxd  .byte ?          ; piano piu' profondo raggiunto
+c_name  .fill NAME_LEN   ; nome (NAME_LEN codici schermo)
+c_px    .word ?          ; X dell'eroe (pixel)
+c_py    .word ?          ; Y dell'eroe (pixel)
+c_pack  .fill PACK_N     ; zaino: id oggetto (0 = vuoto), PACK_N posti
+c_eq    .fill 4          ; equipaggiamento: arma, armatura, scudo, cintura
 c_seedt .fill 6          ; seed: 6 cifre in base 36 (0-9, A-Z = 0..35)
 c_gver  .byte ?          ; versione del generatore dungeon
 c_packb .fill PACK_N         ; bonus +N degli oggetti nello zaino (anelli: caratteristica; pergamene: quantita')
@@ -99,7 +99,7 @@ c_keys  .byte ?          ; chiavi possedute
 c_packd .fill PACK_N         ; durabilita' attuale degli oggetti nello zaino (armi, armature, scudi; 0 = non si usura)
 c_eqd   .fill 4          ; ... e dell'equipaggiamento (segue lo zaino: indice PACK_N..PACK_N+3 come c_pack/c_eq)
 c_packm .fill PACK_N         ; durabilita' massima
-c_eqm   .fill 4
+c_eqm   .fill 4          ; durabilita' massima (equipaggiamento)
 c_game  .fill 3          ; bit 0..8: numero della partita (1..511); bit 9..23: minuti giocati (0..32767)
 c_deaths .word ?         ; morti (16 bit, si ferma a 65535)
 c_sgold .word ?          ; oro nel baule di casa in DECINE (10/11; 16 bit = 655350 monete): la morte non lo tocca; totale = c_gold + 10 x c_sgold
@@ -109,10 +109,10 @@ c_chap  .byte ?          ; (12/11, SAVE_VER $C7, TODO M1) capitolo in cui si gio
 c_unl   .byte ?          ; capitolo piu' alto sbloccato (uccidere il boss del capitolo c sblocca c+1)
 ; baule di casa (08/11 sera, SAVE_VER $C3): dentro il blocco dell'eroe, un solo record per eroe e baule. Uscendo di
 ; casa dopo una modifica si salva tutto con una sola scrittura (prima: record a parte e l'eroe non si salvava, TODO 2.6)
-st_id   .fill STASH_N    ; id
-st_b    .fill STASH_N    ; bonus
-st_du   .fill STASH_N    ; durabilita'
-st_m    .fill STASH_N    ; massimo
+st_id   .fill STASH_N    ; baule della locanda: id dei 24 oggetti (0 = vuoto)
+st_b    .fill STASH_N    ; baule della locanda: bonus
+st_du   .fill STASH_N    ; baule della locanda: durabilita' attuale
+st_m    .fill STASH_N    ; baule della locanda: durabilita' massima
 CHREND
         .endv
         .cerror CHREND > mfar, "blocco personaggio sovrapposto a mfar"

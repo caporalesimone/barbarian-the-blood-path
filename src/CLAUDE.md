@@ -17,6 +17,11 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
   generati (tabelle, grafica, versione) stanno in `out/`.
 - Un file nuovo sul disco = un sorgente nuovo in `src/`; il resto nella sottocartella della sua componente.
 - **Margine di memoria**: controllato dalla build (`.cerror` e avviso sotto 1 KB). Mai chiudere un lavoro con il margine negativo.
+- **Mappa della memoria** (15/11, [docs/build.md](../docs/build.md) sezione 4a): la fa `lab64 map` dai listati e dal disco. Ogni zona
+  che il codice scrive solo con puntatori o copie (buffer, dati copiati, schermi) ha un'annotazione `;@map` vicino alla costante che la
+  definisce; la memoria libera utilizzabile un `;@free ... use=code|code-io-off|data`; cio' che sta in memoria insieme un `;@scenario`.
+  Se una modifica occupa una zona dichiarata libera, `lab64 map` lo segnala (avviso `@free ... not free`): spostare o accorciare
+  l'annotazione nello stesso lavoro. I campi dei blocchi salvati (`CHRBLK`, `LVLBLK`) hanno un commento: diventa la tabella dei campi.
 
 ## Memoria, loader, salvataggi
 - **Generatore dei piani**: gira nella RAM sotto l'I/O (`src/game/gen_io.asm`, `gen_call` con `$01=$34` e interrupt spenti):

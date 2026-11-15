@@ -6,7 +6,7 @@ from c64test import test, check
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, os.path.join(ROOT, "tools", "simulators"))
-sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 
 
 @test("CHAP-10", "chapters.yaml: local levels restart at 1, global depth = previous levels + local, the Abyss fills up to 255")

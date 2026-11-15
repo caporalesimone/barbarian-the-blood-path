@@ -50,7 +50,7 @@ locale o globale: oggi il globale), boss con statistiche e IA propri (H6/M9).
 | Abisso | solo progetto (TODO): città, piani oltre il 20 | [quests](quests.md) |
 | Quest | progetto: 3 villaggi (`cur_level` 0 / 21 / 22) su un dungeon unico 1–20, tre "tratti" | [quests](quests.md) parte 3.6 |
 | Salvataggi | un file per eroe `save-0N` (11/11, Krill): eroe + 20 piani da 93 B, `c_vis` = 3 byte, un bit per piano | [salvataggi](salvataggi.md) |
-| Disco | 360 blocchi liberi su 664 (build dell'11/11) | [mappa del disco](../out/work/memory-map/mappa_disco.html) |
+| Disco | 360 blocchi liberi su 664 (build dell'11/11) | [mappa del disco](../out/work/memory-map/index.html) (sezione "Disk") |
 
 ## Il modello a capitoli
 

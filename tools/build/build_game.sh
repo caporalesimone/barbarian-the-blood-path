@@ -27,8 +27,7 @@ DISK=out/work/disk.d64
 # (14/11) BUILD_MAPS=0 / BUILD_ATLAS=0 (./build.sh --no-maps, --no-atlas, --fast) li saltano
 if [ "${BUILD_MAPS:-1}" = 1 ]; then
     echo "== mappe RAM e disco ($DISK, out/work/memory-map/) =="
-    python3 tools/memory-map/gen_rammap.py && python3 tools/memory-map/gen_diskmap.py $DISK || exit 1
-    lab64 map --disk $DISK || exit 1          # (14/11) mappa automatica di Lab64: out/work/memory-map/index.html
+    lab64 map --strict --disk $DISK || exit 1 # (14/11) mappa automatica di Lab64; (15/11) --strict: annotazione sbagliata o @free occupata = errore
 fi
 if [ "${BUILD_ATLAS:-1}" = 1 ]; then
     echo "== atlante grafico (out/work/atlas/) =="

@@ -5,3 +5,7 @@
 ; =============================================================================
 LORE    = 1
         .include "common/boot.asm"
+;@map $cc00..$d000 "Colori del bitmap del titolo (banco VIC 3) e puntatori sprite"
+;@map SPR_AT+384 "Sprite P R E S A C di PRESS SPACE (copiati da ld_spr)"
+;@map TBUF "TBUF: il file TITLE letto qui, poi mostrato riga per riga nel bitmap a $E000"
+;@map LD_DST "LDAT decompresso sul posto: il testo della storia"

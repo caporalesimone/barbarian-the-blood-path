@@ -5,3 +5,7 @@
 ; Il codice e' in src/common/boot.asm (lo stesso di LORE, src/lore.asm).
 ; =============================================================================
         .include "common/boot.asm"
+;@map $cc00..$d000 "Schermo della schermata di attesa (banco VIC 3) e puntatori sprite"
+;@map $e000+512 "Font della schermata di attesa (txt_init: codici 0-63 del font del gioco)"
+;@map SPR_AT+384 "Sprite P R E S A C (copiati da ld_spr all'avvio)"
+;@map CHRTMP+67 "CHRTMP: stato + file hl (elenco eroi), poi copiato in CHRBUF ($D000)"

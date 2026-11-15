@@ -2,7 +2,7 @@
 """Arena (ARENA build + tools/vice/arena.py): a short series must end, be repeatable and give sensible numbers (a
 well-equipped level-5 hero against a level-1 monster: always wins)."""
 import os, sys
-sys.path[:0] = [os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 import arena as AR
 
 with AR.Arena() as a:

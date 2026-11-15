@@ -71,8 +71,9 @@ Dal formato **$C3** (08/11 sera): in fondo al blocco il **baule della locanda** 
 ciascuno: id, bonus, durabilità, massimo), prima in un record a parte. Blocco da 110 a 206 byte:
 fino all'11/11 uscendo dalla locanda dopo una modifica si salvava l'eroe; dall'11/11 sera il baule va sul disco solo con l'eroe (save game, cambio di capitolo). Le variabili `mfar`
 passano a `$95E0` e `tp_*`/`sel_*`/`sp_*` a `$93B0` per fare posto.
-La tabella campo per campo (offset, byte, significato) è generata a ogni build da `src/game/game.asm` in
-[`out/work/memory-map/mappa_disco.html`](../out/work/memory-map/mappa_disco.html), sezione 4: è sempre allineata al codice.
+La tabella campo per campo (offset, byte, significato) è generata a ogni build da `src/game/game.asm` (annotazione `@map ... layout`
+su `CHRBLK`, commenti dei campi) nella mappa automatica: [`program-game.html`](../out/work/memory-map/program-game.html#layout-CHRBLK),
+"Fields of CHRBLK"; lo stesso per `LVLBLK` (stato del piano in RAM). È sempre allineata al codice.
 
 ## 3. Stato di un piano — `SAVE-0N`, offset 210 + (piano − 1) × 93 (formato compatto)
 
@@ -294,4 +295,4 @@ Dall'11/11 (Krill) i tempi sono in [FastLoader.md](FastLoader.md), sezione 7. Ta
 | Decompressione di `GAME` (39 377 B) in `$0400` | – | 4,0 s |
 
 ## Mappa della RAM
-Mappa completa con gli spaccati delle zone multiuso: `out/work/memory-map/mappa_ram.html` (generata da `tools/memory-map/gen_rammap.py` dopo `./build.sh`).
+Mappa automatica (Lab64, a ogni build con le mappe): `out/work/memory-map/program-game.html`, con le zone annotate, la memoria libera per uso e gli scenari (villaggio, dungeon, menu iniziale, salvataggio): [build.md](build.md) sezione 4a.

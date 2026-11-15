@@ -7,7 +7,7 @@ semplificato, villaggi o livelli statici in più, trama principale e sottotrama 
 simulazione: in fondo l'elenco degli open point da verificare (sezione 6, "per Opus").
 
 Fonti lette per il contesto: `docs/villaggio.md`, `docs/dungeon.md`, `docs/mostri.md`, `docs/oggetti.md`,
-`docs/combattimento.md`, `docs/FORMATO_DATI.md`, `docs/tecnica.md`, `out/work/memory-map/mappa_ram.html` (v1.26), `src/lobby.asm`
+`docs/combattimento.md`, `docs/FORMATO_DATI.md`, `docs/tecnica.md`, `out/work/memory-map/program-game.html`, `src/lobby.asm`
 (`menu_help`), `src/ovlt.asm`, `src/game/prefetch.asm`, `tools/build/gen_gfx.py`.
 
 Regole fissate dal committente: le quest possono comportare caricamenti; **una quest attiva per volta**; un tasto

@@ -251,7 +251,7 @@ dissolvenza, `TWNc`, modulo MENU, `gfx_install`, brano), **media / massimo su 10
 | `src/game.asm` | `LDFLAGS` a `$8E`, banco VIC senza lettura di `$DD00`, `godmode` in CODE2 |
 | `src/lobby.asm` | `CHRPRE` a `$8F`, credito "loader by krill - v194" |
 | `src/game/ui.asm` | `io_screen` senza barra, `YN_SAV` a `$0340` |
-| `tools/build/mkdisk.sh`, `tools/build/pack_menu.py`, `tools/memory-map/gen_diskmap.py`, `tools/build/asm.sh` | disco con `cc1541`, `menu1..3`, mappa del disco |
+| `tools/build/mkdisk.sh`, `tools/build/pack_menu.py`, `tools/build/asm.sh` | disco con `cc1541`, `menu1..3` (mappa del disco: `lab64 map`, sezione "Disk" dell'indice) |
 | `tests/lib/c64.py` | i test entrano sempre dal `START` vero (installa Krill) |
 | strumenti VICE (`tools/vice/*.sh`, `tools/build/gen_help.py`) | partono da `START` (`g 080d`), non più da `GAME` a `$0400` |
 

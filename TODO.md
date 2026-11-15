@@ -27,7 +27,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
-| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
+| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
 | Z | [Note urgenti](#z--note-urgenti) | Z4 |
 
@@ -225,7 +225,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 
 ### D7 (ex 6.1) Spawn dei mostri nella RAM sotto l'I/O — M
 - `spawn_monsters`/`place_monster`/`place_boss`/`floor_types` (~600–800 B, da misurare) accanto al generatore
-  (`gen_io.asm`). Attenzione a `gen_rammap.py`, arena, `test_gen.py`.
+  (`gen_io.asm`). Attenzione alle annotazioni `@map` / `@free` di `src/game/rel.asm` (RAM sotto l'I/O), arena, `test_gen.py`.
 
 ### D10 (ex 6.4) Altri interventi misurati — M
 - `SCR_H` da `$8400` a `$8800` (+224 B); musica sotto il KERNAL (0,8–1,3 KB); codice solo-villaggio su file; variabili sparse (~60 B).
@@ -439,20 +439,6 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 - Oggi le versioni stanno solo in `out/releases/` (ultime 5, locale). Per GitHub: asset del tag `v<V>` (disco, manuale,
   `manifest.json` con gli SHA-256) invece di conservarle in locale; niente zip dei sorgenti (regola del committente 14/11: lo
   da' gia' il tag). Da decidere con il passaggio a GitHub.
-
-### T1 Mappe della memoria: tenere o togliere le mappe a mano — S (decisione del committente)
-- Fatto il 15/11: una mappa per programma (Lab64 1.4), annotazioni `;@map` / `;@scenario` in GAME (RAM libera 3071 B, 4667 B dopo
-  l'avvio: ora coincide con la mappa a mano a meno di zone libere davvero), sonda anche in `--release` e test `PROBE-10..14` che
-  finiscono in BARBARIAN, LORE, HELP, START e JUKEBOX ([docs/build.md](docs/build.md) sezione 4a).
-- **Da decidere**: le mappe curate a mano (`tools/memory-map/gen_rammap.py`, 608 righe; `gen_diskmap.py`, 336 righe) costano
-  manutenzione (indirizzi e testi scritti a mano, si rompono quando cambia la memoria) ma hanno cose che la mappa automatica non sa
-  esprimere: `mappa_ram.html` gli **spaccati per fase** (stessi indirizzi all'avvio, in gioco, nelle UI, nella minimappa; $C000,
-  $D000, $E000 per villaggio, dungeon e piano 20) e le **classi della memoria libera** (codice libero / codice solo con l'I/O spento
-  / solo dati); `mappa_disco.html` l'anteprima della grafica dei file e la decodifica dei salvataggi presenti sul disco (elenco file e
-  tracce/settori li ha gia' la mappa automatica; la grafica l'atlante; il formato `docs/FORMATO_DATI.md`).
-  Opzioni: (a) tenerle come sono; (b) togliere solo `mappa_disco.html`; (c) portare spaccati e classi in Lab64 (un attributo
-  `phase=` / `use=` nelle annotazioni: lavoro di Lab64) e poi togliere anche `mappa_ram.html`.
-- Limite noto (Lab64 L33): una sessione che passa da un programma all'altro conta tutte le scritture nel programma finale.
 
 ---
 

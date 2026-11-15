@@ -32,7 +32,7 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `src/` | sorgenti del gioco (6502, un `.asm` principale per file del disco) e `src/third-party/` (librerie per il C64: Krill's Loader) | sì |
 | `data/` | dati del gioco (regole, bilanciamento, mappe, testi) | sì |
 | `tools/build/` | generatori e script della build (Python, bash) | sì |
-| `tools/atlas/`, `tools/memory-map/`, `tools/manual/`, `tools/simulators/` | generatori dei documenti riproducibili e simulatori; scrivono in `out/work/<nome>/` | sì |
+| `tools/atlas/`, `tools/manual/`, `tools/simulators/` | generatori dei documenti riproducibili e simulatori; scrivono in `out/work/<nome>/` | sì |
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, `run_tests.sh` (suite della build); motore: `lab64 test` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
@@ -246,7 +246,7 @@ Password facoltativa: `VIEW_PASSWORD=... lab64 view` (di default nessuna): auten
 | `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
 | `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
 | `out/work/atlas/` | atlante grafico (`index.html`) |
-| `out/work/memory-map/` | mappa automatica della memoria e del disco (`memmap/c64map.py` di Lab64): `index.html` = indice dei programmi del disco, `program-<nome>.html` = una mappa per programma (dichiarati in `lab64.env`, [build.md](build.md) sezione 4a), `memmap.json`; mappe curate a mano (`mappa_ram.html`, `mappa_disco.html`) |
+| `out/work/memory-map/` | mappa automatica della memoria e del disco (`memmap/c64map.py` di Lab64): `index.html` = indice dei programmi del disco, `program-<nome>.html` = una mappa per programma (dichiarati in `lab64.env`, [build.md](build.md) sezione 4a), `memmap.json` (dal 15/11 niente piu' mappe curate a mano) |
 | `out/work/memprobe/` | (14/11) dump della RAM della sonda in VICE (`./build.sh --probe`, uno per sessione VICE dei test, con scenario e impronta del disco nel `.json` accanto) |
 | `out/work/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
 | `out/work/simulators/` | report dei simulatori |

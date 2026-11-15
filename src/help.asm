@@ -13,6 +13,8 @@
 SCR     = $0400
 CHARS   = $3000                 ; charset (font 512 B + glifi dell'HUD): $D018 = $1C
 GETIN   = $ffe4
+;@map $0400..$07e8 "Schermo del manuale"
+;@map CHARS..$3800 "Charset del manuale: font della UI (512 B) + glifi dell'HUD ($D018 = $1C)"
 pg      = $02                   ; pagina attuale
 jprev   = $03                   ; joystick al fotogramma precedente
 src     = $fb                   ; (2) flusso RLE

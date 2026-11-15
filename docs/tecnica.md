@@ -1,7 +1,7 @@
 # Tecnica: memoria, disco, build, strumenti
 
-Mappe dettagliate e sempre aggiornate (rigenerate a ogni build): [mappa_ram.html](../out/work/memory-map/mappa_ram.html),
-[mappa_disco.html](../out/work/memory-map/mappa_disco.html). Formato dei file: [FORMATO_DATI.md](FORMATO_DATI.md).
+Mappe dettagliate e sempre aggiornate (rigenerate a ogni build, Lab64): [indice](../out/work/memory-map/index.html),
+[GAME](../out/work/memory-map/program-game.html) ([build.md](build.md) sezione 4a). Formato dei file: [FORMATO_DATI.md](FORMATO_DATI.md).
 
 ## Memoria (sintesi)
 

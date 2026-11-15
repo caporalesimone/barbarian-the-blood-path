@@ -6,7 +6,7 @@
 - HUD warnings (low hp, weapon about to break);
 - time played from the TOD clock of CIA2: tod_start at 50 Hz, tod_tick adds minutes and hours to c_game."""
 import os, re, sys, time
-sys.path[:0] = [os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 import arena as AR
 
 G = AR.G

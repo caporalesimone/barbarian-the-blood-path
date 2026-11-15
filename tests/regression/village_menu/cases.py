@@ -55,7 +55,7 @@ def game(ctx):
 @test("MENU-10", "out/work/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2")
 def menu_file(ctx):
     import sys, importlib.util, re
-    sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+    sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
     import zx0dec
     G = {m.group(1): m.group(2) for m in re.finditer(r"^(\w+)\s*=\s*(\$?[0-9a-f]+)", open(os.path.join(OUT, "game.lbl")).read(), re.M)}
     num = lambda v: int(v[1:], 16) if v.startswith("$") else int(v)

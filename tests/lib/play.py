@@ -3,7 +3,7 @@ keys. Everything works on a lib.c64.Game stopped at an input read (frames())."""
 import os, sys
 from lib.c64 import ROOT
 
-sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 import gen_gfx as GG  # noqa: E402
 
 NAME = [2, 12, 1, 3, 11, 32, 20, 8, 15, 18, 14, 5]        # "black thorne" (project rule: 12 characters with a space)

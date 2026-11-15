@@ -5,7 +5,7 @@ import os, re, sys, tempfile
 from c64test import test, check
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 import bestiary as B  # noqa: E402
 import chapters_db as CD  # noqa: E402
 

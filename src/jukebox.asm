@@ -15,6 +15,7 @@ COL     = $d800
 ROW0    = 3                     ; prima riga dell'elenco
 ; AUTOPLAY (sempre da riga di comando): -1 jukebox normale, n = suona la voce n (rendering degli MP3)
 GETIN   = $ffe4
+;@map $0400..$07e8 "Schermo del jukebox"
 
         * = $0801
         .word _nl, 2026

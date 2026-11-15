@@ -20,7 +20,7 @@ import rules as RU            # noqa: E402
 import sim_rules as S         # noqa: E402
 import sim_chest as SC        # noqa: E402
 import sim_gold as SG         # noqa: E402
-sys.path[:0] = [os.path.join(RU.ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(RU.ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 import chapters_db as CD      # noqa: E402
 import bestiary as BE         # noqa: E402
 

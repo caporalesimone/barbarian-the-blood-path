@@ -6,7 +6,7 @@ from c64test import test, check
 from lib.c64 import OUT
 
 ROOT = os.path.dirname(OUT)
-sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 
 
 @test("HELP-Z-10", "out/work/help.zx0 unpacks to out/work/help.prg byte by byte; the packed file is under half the blocks")

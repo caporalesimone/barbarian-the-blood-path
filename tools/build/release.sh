@@ -6,7 +6,5 @@ set -e
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 V=$(python3 tools/build/gen_version.py --print version)
 tools/build/mkdisk.sh out/work/disk.d64 out/work/game.zx0
-RELEASE=1 python3 tools/memory-map/gen_rammap.py out/work/memory-map/mappa_ram.html >/dev/null
-python3 tools/memory-map/gen_diskmap.py out/work/disk.d64 out/work/memory-map/mappa_disco.html >/dev/null
-lab64 map >/dev/null                         # mappa automatica di Lab64 (out/work/memory-map/index.html)
+lab64 map --strict >/dev/null                # mappa automatica di Lab64 (out/work/memory-map/index.html); --strict: annotazioni giuste
 echo "release v$V: out/work/disk.d64  out/work/memory-map/  out/work/manual/"

@@ -41,6 +41,9 @@ mk_exit:
         .include "menu/shop_act.asm"
 mz1_top
         .cerror mz1_top > MR1_END, "modulo MENU: zona 1 oltre $CFFF di ", mz1_top - MR1_END, " B"
+;@free mz1_top..MR1_END "Coda della zona 1 del MENU: codice o dati del modulo MENU (la build stampa lo spazio libero delle zone)" use=code
+;@free mz2_top..MR2_END "Coda della zona 2 del MENU (sotto il KERNAL, gira con $01=$35): codice del modulo MENU o dati" use=code
+;@free mz3_top..MR3_END "Coda della zona 3 del MENU (banco VIC, slot sprite 28-31): codice del modulo MENU o dati" use=code
 
         * = MR2_AT
         .include "menu/inn_eq.asm"

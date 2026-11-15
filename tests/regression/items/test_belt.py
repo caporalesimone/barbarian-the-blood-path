@@ -3,7 +3,7 @@
 a stack of scrolls up to 10 (08/11; reason 2 beyond), drinking frees the slot and blocks every potion for the
 cooldown, the scroll opens the portal and uses the stack (the last one frees the pack slot)."""
 import os, sys, time
-sys.path[:0] = [os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))), "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 import arena as AR
 
 G = AR.G

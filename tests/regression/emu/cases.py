@@ -14,7 +14,7 @@ from lib.c64 import OUT, ROOT
 from lib.emu import Emu
 from lib.play import NAME, SEED
 import sys
-sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "memory-map", "simulators")]
+sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 import gen_gfx as GG  # noqa: E402
 
 CHAIN = True

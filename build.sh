@@ -83,7 +83,7 @@ if [ $PROBE = 1 ]; then rm -rf out/work/memprobe; export C64_MEMPROBE=1; fi
 lab64 run tests/run_tests.sh
 if [ $PROBE = 1 ]; then                    # mappa automatica di nuovo, con i dump della sonda (out/work/memprobe/)
     phase mappa
-    lab64 map
+    lab64 map --strict
 fi
 
 PUB="$PUB --tests"

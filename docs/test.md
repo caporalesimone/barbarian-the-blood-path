@@ -97,7 +97,7 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
   con lo schema di `memmap/probe.py` di Lab64 subito dopo il boot e `close()` la salva in `out/work/memprobe/<suite.area>_<pid>_<n>.bin`
   (lo scenario è il modulo dei test, `C64_MEMPROBE_TAG` messo da `lab64 test`). Serve alla mappa automatica ([build.md](build.md)).
   Un test che fallisce solo con la sonda sta leggendo memoria mai inizializzata (il C64 vero all'accensione non ha la RAM a zero).
-  (15/11, TODO T1) La sonda gira anche in `./build.sh --release` (tutte le suite). Un dump va al programma il cui file principale e' in
+  (15/11) La sonda gira anche in `./build.sh --release` (tutte le suite). Un dump va al programma il cui file principale e' in
   RAM alla fine della sessione: i test `PROBE-10..14` (`regression/memprobe`) finiscono apposta in BARBARIAN, LORE, HELP, START e
   JUKEBOX, che prima non avevano sessioni (GAME ne ha gia' moltissime).
 

@@ -153,8 +153,7 @@ flowchart TB
 
 ## 3. La memoria e il suo ciclo di vita
 
-Mappa completa e sempre aggiornata: [mappa_ram.html](../out/work/memory-map/mappa_ram.html) (curata a mano, solo GAME). Mappe
-automatiche (Lab64), **una per programma** del disco (i programmi della sezione 1 si sostituiscono in memoria):
+Mappe automatiche (Lab64), **una per programma** del disco (i programmi della sezione 1 si sostituiscono in memoria):
 [indice](../out/work/memory-map/index.html), [GAME](../out/work/memory-map/program-game.html); dichiarazione e confronto dei numeri
 in [Build](build.md) sezione 4a. Qui le zone di GAME e **chi le possiede quando**.
 
@@ -288,4 +287,4 @@ mappe di riferimento ([Dungeon](dungeon.md)).
 - Gameplay e ciclo per fotogramma: [Panoramica](panoramica.md).
 - Flussi del codice (sequenze e stati): [Flussi del codice](flussi.md).
 - Build, generatori, test: [Build e strumenti](build.md), [Test](test.md).
-- Byte per byte: [FORMATO_DATI](FORMATO_DATI.md), [mappa_ram.html](../out/work/memory-map/mappa_ram.html), [mappa_disco.html](../out/work/memory-map/mappa_disco.html).
+- Byte per byte: [FORMATO_DATI](FORMATO_DATI.md), [mappa di GAME](../out/work/memory-map/program-game.html) (zone, campi di `CHRBLK` e `LVLBLK`, scenari).
