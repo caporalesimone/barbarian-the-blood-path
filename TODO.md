@@ -29,7 +29,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
-| Z | [Note urgenti](#z--note-urgenti) | Z1–Z6 |
+| Z | [Note urgenti](#z--note-urgenti) | Z1, Z3–Z6 |
 
 ---
 
@@ -369,11 +369,21 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 
 ### M1 Sequenza dei capitoli: cosa resta ([capitoli](docs/capitoli.md)) — L
 - **Effetto grafico del passaggio** di capitolo (oggi: schermo nero, poi le schermate di salvataggio e caricamento): tbd.
-- **Villaggi 2–4 veri** (mappa, tile, NPC): oggi copie; le costanti del villaggio (`TOWN_*` in `levels.asm`: portale, cripta,
-  ingresso; `tx_exit`; porte per la minimappa `tp_*`) vanno trasformate in una tabella per capitolo (o in un'intestazione del
-  file `TWNc`, come per `BOSSCHc`). La mappa RLE del villaggio è a 1718 B su 1792 (`TOWN_MAX`).
-- **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri** (statistiche, sprite e IA propri: M9). Oggi il boss è
-  il boss con nome del piano con lo sprite del boss finale; nessun altro mostro, nessun bottino speciale, la sala non si chiude.
+- **Villaggi** (15/11, fatto sul branch `villaggi`, da rivedere con il committente: [villaggio](docs/villaggio.md)): i capitoli
+  2–4 e la città dell'Abisso (prototipo) hanno tile, mappa, colori e posizioni propri (file `TWNc` con intestazione). **Resta**:
+  la revisione del committente (i quattro villaggi sono prototipi; la proposta scartata è in `lab/villaggi/proposta-a-temi/`);
+  NPC; un **brano per villaggio** (oggi lo stesso, M2); la **minimappa** dei villaggi nuovi (i colori "acqua" e "strade" seguono
+  i ruoli dei posti: nel villaggio 4 il cratere esce blu); l'etichetta dell'ingresso del sotterraneo ("stairs down to level N"
+  per tutti: una per villaggio costa una stringa nell'intestazione); prova su **vc64web** e su hardware reale; il passaggio di
+  capitolo legge il file del villaggio nuovo due volte (tempo non misurato); i file `TWN2`…`TWN5` stanno in fondo al disco
+  (con `TWN1`…`TWN5` insieme sulle prime tracce `PERF-DISK-14` superava il 90% del limite: 5,22 s; così 4,87 s) e i tempi di
+  ingresso nei villaggi 2–5 non sono misurati; la **città dell'Abisso** oggi si raggiunge
+  dall'uscita del villaggio 4 dopo il boss finale e la Bocca non fa nulla (da rifare con H3; la leva della sala del trono resta).
+- **Fan art della mappa del mondo** (15/11): `tools/art/world_map.py` (`out/work/art/world_map.png`); da decidere se va nel
+  manuale, nella wiki o sulla scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene.
+- **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri**: dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
+  e il loro colore; **meccaniche decise** ([bestiario](docs/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
+  non nel codice (~550 B stimati: M9); statistiche proprie, mostri del capitolo, bottino speciale, sala che si chiude: da fare.
 - **Ritorno ai villaggi precedenti** (portale/menu): fuori da questa fase (D-CAP-2).
 - **Tile di accesso al dungeon generico**: la cripta (`T_TSTAIRS`) è già un tile da mettere dove si vuole; più ingressi con
   destinazioni diverse richiederebbero una tabella (utilità da confermare).
@@ -448,18 +458,6 @@ dimensionate. Finita una voce: si cancella e la decisione va nella wiki o nel RE
 
 ### Z1 — Sonnet — Lab64: documento dei tool e dei copyright
 - In `lab64` crea un documento nella root dove menzioni tutti i tools e i relativi copyrights.
-
-### Z2 — Fable — Barbarian: i 4 villaggi dei capitoli successivi (branch a parte di barbarian)
-- Genera i villaggi dei capitoli successivi. Sarebbero 4 altri villaggi.
-- Ambientati in modo diverso, ognuno con un tema differente. Devono esserci tutti i negozi e la inn.
-- Entrata e uscita alla morte del boss del capitolo.
-- Usa colori differenti, mantieni alto il livello di dettaglio.
-- Disegna anche una fan art in pixel art 32 bit con la mappa dell'ambientazione del mondo, con le zone dei 4 capitoli.
-- Si tratta di prototipi, ma almeno aggiungiamo contenuto non ripetuto sul disco.
-- Ogni capitolo ha i suoi mostri e il suo boss. Disegna anche il boss del capitolo uno, dato che hai usato il boss finale.
-- Decidi anche quale meccanica di gioco ha ogni boss di livello.
-- Non ti preoccupare della trama già scritta: va rivista, quindi non farti limitare dalla trama per le tue implementazioni.
-- L'ultimo capitolo è ambientato in un villaggio in rovina.
 
 ### Z3 — Fable — Lab64: review completa (branch a parte di lab64)
 - Fai una review completa di lab64 e vedi se trovi problemi; quelli che sei in grado di fixare, fixali subito in autonomia. Il resto

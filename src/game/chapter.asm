@@ -105,8 +105,12 @@ chap_travel:
         jsr music_fadeout
         jsr snd_mute
         inc c_chap
-        lda #TOWN_NX
-        ldx #TOWN_NY
+        lda #0                  ; (15/11) il villaggio nuovo si legge gia' qui: il suo ingresso (tk_nx, tk_ny) serve prima
+        jsr load_gfx            ; del salvataggio ("continue" riparte da li')
+        lda #0
+        jsr gfx_install
+        lda tk_nx
+        ldx tk_ny
         jsr put_hero
         lda #0                  ; il villaggio a $E000 non si rilegge dopo il salvataggio: si cambia luogo
         sta town_at

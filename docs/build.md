@@ -66,7 +66,7 @@ flowchart TD
     GGF --> GC["out/work/gfx_consts.inc,<br/>out/work/gfx/*.bin, gfx0/1/2.prg"]
     GFO --> UF["out/work/gfx/uifont.bin"]
     GMU --> MT["out/work/music_tab.inc,<br/>out/work/snd/sndN.prg"]
-    GMA --> TP["out/work/town.map,<br/>out/work/town_places.inc"]
+    GMA --> TP["out/work/town1..5.map (intestazione + RLE),<br/>out/work/town_places.inc"]
     GFI --> FM["out/work/final_map.inc,<br/>out/work/fmap.prg"]
     GTI --> TI["out/work/title.prg"]
     GST --> SD["out/work/start_data.inc"]

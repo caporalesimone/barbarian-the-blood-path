@@ -318,7 +318,7 @@ VARS = [
     R(0x9100, 0x91A7, "Variabili di gioco", "var", "bottino e bauli, mostri in elaborazione, aree d'attacco, effetti, suoni, generatore, disco"),
     R(0x91A8, 0x91FB, "Barra ed etichette", "var"),
     R(0x91FC, 0x91FF, "Libera", "free", "", S),
-    R(0x9200, 0x922F, "solidtab", "var", "tile solidi del luogo (copia di solid_dun / solid_town)"),
+    R(0x9200, 0x922F, "solidtab", "var", "tile solidi del luogo (copia di solid_dun, o dei tile solidi del villaggio dal file TWNc)"),
     R(0x9230, 0x923F, "Libera", "free", "", S),
     R(0x9240, 0x9317, "Percorsi dei mostri e drop", "var", "Coda BFS, tile dei mostri vivi, oggetti in attesa"),
     R(0x9318, L["cb_end"] - 1, "Combattimento (combat.asm)", "var", "vita massima 16 bit, FOR/DES/COS, ATT, CA, dadi, ricariche delle abilita', timer Rage/Frenzy/pozioni, statistiche dei mostri del piano (ft_*)"),

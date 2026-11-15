@@ -2,7 +2,7 @@
 # Crea il d64 del gioco (11/11, regola del committente: una sola build, un solo disco).
 # Uso: tools/build/mkdisk.sh [out.d64] [prg]   (default: out/work/disk.d64, out/work/game.zx0)
 #   BARBARIAN = loader con il menu (storia / manuale / gioco); POKE 1020,1 prima del RUN = subito START (docs/cheats.md).
-# File: BARBARIAN, START, GAME (ZX0), MENU1..3, FMAP, TWN1..4 (villaggi dei capitoli), BOSSCH1..3 (piani dei boss),
+# File: BARBARIAN, START, GAME (ZX0), MENU1..3, FMAP, TWN1..5 (villaggi dei capitoli), BOSSCH1..3 (piani dei boss),
 # GFX1..8 (grafica dei capitoli: dungeon e boss),
 # SND0..n (brani, tools/build/gen_music.py), TITLE, LORE, LDAT, HELP, JUKEBOX, HL e SAVE-01..05 (salvataggi, Krill).
 # (11/11, ramo fast-loader) disco scritto con cc1541 (14/11: 4.2 di Lab64, compilato dai sorgenti): nomi con hash a 8 caratteri.
@@ -28,12 +28,13 @@ command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container la
 # I file caricati dal KERNAL (BARBARIAN, START, LORE, HELP) misurati con LOAD: stessi tempi con 10 e con 4 (entro 0,1 s).
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
       -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg -f fmap -w out/work/fmap.prg)
-for c in 1 2 3 4; do ARGS+=(-f twn$c -w out/work/gfx0.prg); done     # (12/11) villaggi dei capitoli: oggi copie del villaggio 1 (segnaposto)
+for c in 1; do ARGS+=(-f twn$c -w out/work/twn$c.prg); done     # (15/11) villaggi dei capitoli, ognuno con tile, mappa e colori suoi (tools/build/villages.py): qui il capitolo 1, gli altri in fondo (5 = la citta' dell'Abisso, prototipo)
 for c in 1 2 3; do ARGS+=(-f bossch$c -w out/work/bossch$c.prg); done    # (12/11) piani del boss dei capitoli 1-3 (segnaposto, tools/build/gen_bossmap.py)
 for f in out/work/gfx/gfx[12].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done     # capitolo 1: dungeon e boss (i file dei capitoli 2-4 in fondo al disco: lasciano ai file usati spesso le tracce di prima)
 for f in out/work/snd/snd*.prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done     # brani (tools/build/gen_music.py)
 ARGS+=(-f title -w out/work/title.prg -f lore -w out/work/lore.prg -f ldat -w out/work/ldat.prg -f help -w out/work/helpz.prg -f jukebox -w out/work/jukebox.prg)
 ARGS+=(-f hl -w out/work/hl.prg -f ksave -w out/work/krill/save.prg)     # ksave: plugin di save di Krill, ricaricato a ogni save
 for s in 1 2 3 4 5; do ARGS+=(-f save-0$s -w out/work/save.prg); done
+for c in 2 3 4 5; do ARGS+=(-f twn$c -w out/work/twn$c.prg); done     # villaggi dei capitoli 2-5: in fondo, con la grafica dei loro capitoli (i file del capitolo 1 restano sulle prime tracce)
 for f in out/work/gfx/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done     # capitoli 2-4 (segnaposto)
 $CC "${ARGS[@]}" "$OUT" > out/work/mkdisk.log 2>&1 || { cat out/work/mkdisk.log; echo "mkdisk: errore cc1541"; exit 1; }

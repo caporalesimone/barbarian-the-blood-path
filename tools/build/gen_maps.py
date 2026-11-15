@@ -17,9 +17,10 @@ LEGEND = {"GRASSA": ".", "GRASSB": ",", "GRASSC": "`", "PATH": ":", "DIRT": "d",
           "WINDOW": "o", "CHIMNEY": "c", "FENCEV": "v", "SPIRE": "A"}
 assert len(set(LEGEND.values())) == len(LEGEND) and set(LEGEND) == set(G.TTID), "legenda incompleta"
 CH = {c: G.TTID[n] for n, c in LEGEND.items()}
-# (12/11, TODO M1) caselle speciali generiche: una lettera in piu' che nella mappa diventa un tile normale ma la cui
-# posizione va in out/work/town_places.inc. "=" = uscita del capitolo (sentiero): tx_exit, TX_EXIT_N.
-ALIASES = {"=": "PATH"}
+# (12/11, TODO M1; 15/11 Z2) caselle speciali generiche: una lettera in piu' che nella mappa diventa un tile normale ma la
+# cui posizione va nell'intestazione del file del villaggio (town_k, src/game/levels.asm): "=" = uscita del capitolo
+# (sentiero, 2 caselle), "E" = ingresso (sentiero), "P" = posto del portale (selciato; la casella sotto e' l'arrivo).
+ALIASES = {"=": "PATH", "E": "PATH", "P": "COBBLE"}
 EXITS = "="
 CH.update({c: G.TTID[n] for c, n in ALIASES.items()})
 def inv_legend():
@@ -27,8 +28,8 @@ def inv_legend():
     d = {c: n for n, c in LEGEND.items()}
     d.update(ALIASES)
     return d
-# luoghi (porte) per la minimappa: tools/build/gen_maps.py scrive out/work/town_places.inc
-PLACES = [("DSMITH", "tp_smith"), ("DALCH", "tp_alch"), ("DHOME", "tp_home"), ("TSTAIRS", "tp_crypt")]
+TK_NAME = 25                     # nome del luogo di cura con lo 0 finale
+TK_LEN = 20 + TK_NAME                      # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
 
 def rle(data):
     out, i = bytearray(), 0
@@ -46,11 +47,6 @@ def read_txt(path):
     assert len(rows) == H and all(len(r) == W for r in rows), f"{path}: servono {H} righe da {W} caratteri"
     return bytes(CH[c] for r in rows for c in r)
 
-def exits(path):
-    """caselle di uscita (lettera in EXITS): [(x, y)]"""
-    rows = [l.rstrip("\n") for l in open(path) if not l.startswith(";")]
-    return [(x, y) for y, r in enumerate(rows) for x, c in enumerate(r) if c in EXITS]
-
 def main():
     if len(sys.argv) == 3 and sys.argv[1] == "--from-bin":
         d = open(sys.argv[2], "rb").read()[2:2 + W * H]
@@ -63,29 +59,85 @@ def main():
             for y in range(H):
                 f.write("".join(inv[d[y * W + x]] for x in range(W)) + "\n")
         return
-    m = read_txt(os.path.join(ROOT, "data", "town_map.txt"))
-    # niente arredi (lampioni, cespugli, fiori, bancarelle, pozzo, alberi) entro 3 caselle dalle porte dei negozi e
-    # della locanda: si entra facilmente (06/11; 10/11: botti e fieno non ci sono piu')
-    dec = {G.TTID[n] for n in ("LAMP", "BUSH", "FLOWERS", "STALL", "WELL", "TREE")}
-    for n in ("DSMITH", "DALCH", "DHOME"):
-        i = m.index(G.TTID[n]); dx, dy = i % W, i // W
-        bad = [(x, y) for y in range(max(0, dy - 3), min(H, dy + 4)) for x in range(max(0, dx - 3), min(W, dx + 4))
-               if m[y * W + x] in dec]
-        assert not bad, f"arredi entro 3 caselle dalla porta {n} ({dx},{dy}): {bad}"
+    import villages as V
+    msg = []
+    for c, v in sorted(V.VILLAGES.items()):
+        r, k = build(c, v)
+        open(os.path.join(ROOT, "out", "work", "town%d.map" % c), "wb").write(k + r)
+        msg.append("%d: %d" % (c, len(k) + len(r)))
     with open(os.path.join(ROOT, "out", "work", "town_places.inc"), "w") as f:
-        f.write("; generato da tools/build/gen_maps.py: colonna e riga delle porte del villaggio (minimappa)\n")
-        for n, lab in PLACES:
-            i = m.index(G.TTID[n])
-            f.write(f"{lab:<10}.byte {i % W}, {i // W}\n")
-        ex = exits(os.path.join(ROOT, "data", "town_map.txt"))
-        assert 1 <= len(ex) <= 4, "uscite del capitolo: da 1 a 4 caselle (=)"
-        f.write("; uscita del capitolo (=): colonne e righe (12/11, TODO M1)\n")
-        f.write("tx_exit_x .byte " + ", ".join(str(x) for x, _ in ex) + "\n")
-        f.write("tx_exit_y .byte " + ", ".join(str(y) for _, y in ex) + "\n")
-        f.write(f"TX_EXIT_N = {len(ex)}\n")
+        f.write("; generato da tools/build/gen_maps.py: intestazione dei file dei villaggi (TWNc), copiata in town_k\n")
+        f.write("TK_LEN = %d\nTK_NAME = %d\nTK_SOLID = %d\nTX_EXIT_N = 2\nNVIL = %d\n" % (TK_LEN, TK_NAME, TK_SOLID, len(V.VILLAGES)))
+    print("villaggi: intestazione + RLE in byte (max %d): %s" % (TOWN_MAX, ", ".join(msg)))
+
+
+TOWN_MAX = 0x760                 # intestazione + RLE: fino a GFX_DUN_AT (src/game.asm)
+TK_SOLID = 48
+
+
+def text(t):
+    """testo in codici schermo (come .enc "screen" di 64tass: a-z = 1-26)"""
+    return bytes(ord(ch) - 96 if "a" <= ch <= "z" else ord(ch) for ch in t)
+
+
+def rows_of(path):
+    return [l.rstrip("\n") for l in open(path) if not l.startswith(";")]
+
+
+def build(c, v):
+    import villages as V
+    """mappa RLE e intestazione (TK_LEN byte) del villaggio c, con i controlli"""
+    path = os.path.join(ROOT, v["map"])
+    m = read_txt(path)
+    rows = rows_of(path)
+    where = lambda ch: [(x, y) for y, r in enumerate(rows) for x, t in enumerate(r) if t == ch]
+    one = lambda ch, what: (where(ch) if len(where(ch)) == 1 else sys.exit("%s: serve una sola casella %s (%s)" % (path, ch, what)))[0]
+    sol = V.solid(c, G.TOWN_TILES, G.SOLID)
+    walk = {i for i in range(len(G.TOWN_TILES)) if not sol[i]}
+    for n in ("DSMITH", "DALCH", "DHOME"):
+        assert m.count(G.TTID[n]) == 1, "%s: serve una sola porta %s" % (path, n)
+        i = m.index(G.TTID[n]); dx, dy = i % W, i // W
+        if not v["tiles"]:
+            # villaggio 1: niente arredi (lampioni, cespugli, fiori, bancarelle, pozzo, alberi) entro 3 caselle dalle porte
+            # dei negozi e della locanda: si entra facilmente (06/11; 10/11: botti e fieno non ci sono piu')
+            dec = {G.TTID[t] for t in ("LAMP", "BUSH", "FLOWERS", "STALL", "WELL", "TREE")}
+            bad = [(x, y) for y in range(max(0, dy - 3), min(H, dy + 4)) for x in range(max(0, dx - 3), min(W, dx + 4))
+                   if m[y * W + x] in dec]
+            assert not bad, f"{path}: arredi entro 3 caselle dalla porta {n} ({dx},{dy}): {bad}"
+        # tutti: le due caselle davanti alla porta (a sud) sono percorribili (Fire apre da 1 o 2 caselle davanti)
+        assert all(m[(dy + k) * W + dx] in walk for k in (1, 2)), "%s: davanti alla porta %s (%d,%d) servono 2 caselle libere" % (path, n, dx, dy)
+    px, py = one("P", "portale"); nx, ny = one("E", "ingresso"); sx, sy = one(">", "cripta")
+    ex = where("=")
+    assert len(ex) == 2, "%s: uscita del capitolo: 2 caselle (=)" % path
+    assert m.count(G.TTID["FOUNTAIN"]) >= 1, "%s: manca la fontana" % path
+    # (15/11) tutto raggiungibile dall'ingresso: porte (dalla casella davanti), cripta, fontana, uscita, portale e il suo arrivo
+    seen, todo = {(nx, ny)}, [(nx, ny)]
+    while todo:
+        x, y = todo.pop()
+        for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if q not in seen and 0 <= q[0] < W and 0 <= q[1] < H and m[q[1] * W + q[0]] in walk:
+                seen.add(q); todo.append(q)
+    need = {"portale": (px, py), "arrivo dal portale": (px, py + 1), "cripta": (sx, sy), "uscita": ex[0], "uscita 2": ex[1]}
+    for n in ("DSMITH", "DALCH", "DHOME"):
+        i = m.index(G.TTID[n]); need["davanti a " + n] = (i % W, i // W + 1)
+    need["fontana"] = next((i % W, i // W) for i in range(W * H) if m[i] == G.TTID["FOUNTAIN"])
+    for what, q in need.items():
+        assert q in seen, "%s: %s %s non raggiungibile dall'ingresso" % (path, what, q)
+    lost = [(i % W, i // W) for i in range(W * H) if m[i] in walk and (i % W, i // W) not in seen]
+    assert not lost, "%s: caselle percorribili isolate: %s" % (path, lost[:12])
+    pl = [m.index(G.TTID[n]) for n in ("DSMITH", "DALCH", "DHOME")]
+    bg, c1, c2, acc = v["pal"]
+    assert 0 <= acc <= 7, "accento: colore 0..7 (colore dei caratteri in multicolor)"
+    heal = v["heal"]
+    assert 0 < len(heal) < TK_NAME and heal == heal.lower() and all(ch in "abcdefghijklmnopqrstuvwxyz '" for ch in heal), heal
+    k = bytes([px, py, sx, sy, nx, ny, bg, c1, c2, 8 | acc] + [t for i in pl for t in (i % W, i // W)]
+              + [ex[0][0], ex[1][0], ex[0][1], ex[1][1]]) + text(heal).ljust(TK_NAME, b"\0")
+    assert len(k) == TK_LEN
+    k += bytes(sol + [0] * (TK_SOLID - len(sol)))          # tile solidi del villaggio (solidtab)
     r = rle(m)
-    open(os.path.join(ROOT, "out", "work", "town.map"), "wb").write(r)
-    print(f"villaggio: {len(r)} byte RLE (da {len(m)})")
+    assert len(k) + len(r) <= TOWN_MAX, "%s: mappa troppo grande: %d + %d B (max %d)" % (path, len(k), len(r), TOWN_MAX)
+    return r, k
+
 
 if __name__ == "__main__":
     main()

@@ -7,8 +7,11 @@ from lib.c64 import Game
 from lib.play import new_game, find, fire_to, U
 
 CHAIN = True
+import os
+import gen_maps as GM, villages as V
+from lib.c64 import ROOT
 EXIT = (26, 0)                       # data/town_map.txt: '=' on the north edge (columns 26-27)
-TOWN_N = (16, 46)                    # south entry (TOWN_NX, TOWN_NY)
+TOWN_N = tuple(GM.build(2, V.VILLAGES[2])[1][4:6])     # entry of village 2 (letter E of data/town_map2.txt; 15/11: every village has its own)
 
 
 def setup(ctx):
@@ -76,7 +79,7 @@ def seq_travel(ctx):
     check(label(g) == 19, "no travel label on the open exit")
     g.press_fire(1); g.wait_main(); g.frames(3)
     check(g.b(L["c_chap"]) == 2 and g.b(L["cur_level"]) == 0, "c_chap %d, level %d" % (g.b(L["c_chap"]), g.b(L["cur_level"])))
-    check(g.ptile() == TOWN_N, "hero at %s, not at the south entry" % (g.ptile(),))
+    check(g.ptile() == TOWN_N, "hero at %s, not at the entry of village 2 %s" % (g.ptile(), TOWN_N))
     g.call_keep(L["load_gfx"], tmax=60, regs="a=00")
     check(bytes(g.mem(L["cmdbuf"] + 3, 4)) == b"TWN2", "village file %r" % bytes(g.mem(L["cmdbuf"] + 3, 4)))
     g.poke(L["c_chap"], 9); g.poke(L["c_unl"], 9)

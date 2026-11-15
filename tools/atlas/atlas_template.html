@@ -95,7 +95,7 @@ function renderSet(s,chap){
   c.onmousemove=e=>{const r=c.getBoundingClientRect(),i=Math.floor((e.clientX-r.left)/(TS+G)),j=Math.floor((e.clientY-r.top)/(TS+G));
     if(j<0||j>=H||i<0||i>=48)return hide();const t=s.map[j][i];showTip(e,tileInfo(s,t,` · (${i},${j})`),s.tiles[t],s.pal)};
   c.onmouseleave=hide;
-  root.appendChild(el('h3','Map ('+(s.code==='VILLG'?'data/town_map.txt':s.code==='TRONO'?'tools/build/gen_final.py, before the death of the boss':'sample dungeon, data/atlas_dungeon.txt')+')'));
+  root.appendChild(el('h3','Map ('+(s.mapsrc?s.mapsrc:s.code==='VILLG'?'data/town_map.txt':s.code==='TRONO'?'tools/build/gen_final.py, before the death of the boss':'sample dungeon, data/atlas_dungeon.txt')+')'));
   const sc=el('div',null,{className:'scroll'});sc.appendChild(c);root.appendChild(sc);
   root.appendChild(el('p',`PNG: <a href="png/${s.code}_map.png">png/${s.code}_map.png</a>`,{className:'mut'}));
   // composizioni

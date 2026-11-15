@@ -292,7 +292,7 @@ SONGS["00_tavern"]["bar"] = 6
 # piano del boss del capitolo); il piano finale ha il suo tema. town e level: un brano per capitolo 1..4, nell'ordine.
 PLAYLIST = dict(
     title="01_demons_eye",                                              # nel loader (non e' un file a parte)
-    town=["00_tavern", "00_tavern", "00_tavern", "00_tavern"],          # villaggi dei capitoli 1..4 (temi: tbd)
+    town=["00_tavern", "00_tavern", "00_tavern", "00_tavern", "00_tavern"],   # villaggi dei capitoli 1..5 (temi: tbd; 5 = citta' dell'Abisso)
     level=["04_iron_crown", "02_blood_path", "13_fear_below", "15_black_chant"],   # piani dei capitoli 1..4
     boss=["05_abyss_gate"],                                             # piano finale (MAXLEVEL)
     fight=["31_fight_1"],                                               # uno a caso per piano, scelto al caricamento

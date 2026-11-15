@@ -17,7 +17,7 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `LOBBY` | PRG | modulo del menu iniziale (codice, caricato a `$C000`) | build |
 | `MENU1`, `MENU2`, `MENU3` | PRG | (11/11) menu del villaggio (locanda e negozi, `src/menu.asm`): una zona di RAM compressa ZX0 per file; si leggono all'ingresso nel villaggio se il modulo non è in memoria, poi resta. Vedi «MENU» | build (`tools/build/pack_menu.py`) |
 | `TITLE` | PRG | schermata del titolo: bitmap multicolor + schermo + colore, 10000 byte | build |
-| `TWN1` … `TWN4` | PRG | (12/11) villaggio del capitolo *c* (`c_chap`): tile + mappa RLE, come il vecchio `GFX0`; oggi 4 copie di `out/work/gfx0.prg` | build |
+| `TWN1` … `TWN5` | PRG | (12/11; 15/11) villaggio del capitolo *c* (`c_chap`): tile + intestazione + mappa RLE; ognuno con tile, colori e mappa suoi (`tools/build/villages.py`); `TWN5` = città dell'Abisso (prototipo) | build |
 | `BOSSCH1` … `BOSSCH3` | PRG | (12/11) mappa del piano del boss dei capitoli 1–3 (piani 5, 10, 15): 4 byte (scale x, y; boss x, y) + RLE come `FMAP`, caricata a `FIN_AT`; segnaposto (`data/maps/bosschapN.txt`, `tools/build/gen_bossmap.py`) | build |
 | `FMAP` | PRG | mappa di base della sala del trono (piano 20), RLE come la mappa del villaggio (`b < $C0` tile, `$C0 + n` ripete il byte seguente `n + 2` volte), 48 × 48 caselle; caselle della stella e del cerchio = `$80 \| tile` (marcatori risolti da `post_walls`). Indirizzo di carico = `FIN_AT` = `$FD00` (`fin_load` la legge nella cache sotto il KERNAL, in fondo: da `PF_END` ai vettori `$FFFA`, 762 B; dal 10/11) | `tools/build/gen_final.py` |
 | `GFX1` … `GFX8` | PRG | (12/11) grafica per capitolo: tile + sprite dei mostri; per il capitolo *c*: `GFX(2c−1)` = piani del dungeon, `GFX(2c)` = piano del boss (sala del trono). Oggi i file dei capitoli 2–4 sono copie del capitolo 1 (segnaposto) | build |
@@ -119,6 +119,12 @@ KERNAL** e da lì copiati dove il VIC li vede (`gfx_install`).
 | Offset | Byte | Contenuto | Destinazione |
 |---|---|---|---|
 | 0 | 4 × 360 | caratteri dei 45 tile (43 dal 09/11 al 10/11; il 10/11 tolti barile e fieno, aggiunti finestra, comignolo, steccato verticale e guglia), una striscia per quarto del tile (alto-sx, alto-dx, basso-sx, basso-dx) | charset `$A800`, `$AA00`, `$AC00`, `$AE00` |
+| 1440 | 45 (`TK_LEN`) | (15/11) **intestazione del villaggio**: portale x, y · ingresso del sotterraneo x, y · ingresso del villaggio x, y · colori (sfondo, multicolor 1, multicolor 2, color RAM = 8 + accento) · porte di fabbro, alchimista, locanda (x, y ciascuna) · uscita del capitolo (x delle 2 caselle, poi y) · nome del luogo di cura (25 byte, codici schermo, con lo 0 finale) | `town_k` (`src/game/levels.asm`); i colori anche nella voce 0 di `pal_bg`/`pal_c1`/`pal_c2`/`pal_ram` |
+| 1485 | 48 (`TK_SOLID`) | (15/11) tile solidi del villaggio (1 byte per posto: 1 = solido) | `solidtab` |
+| 1533 | fino a 1795 | mappa 48 × 48 in RLE (byte < `$C0` = tile; ≥ `$C0` = ripeti il byte dopo (b & `$3F`) + 2 volte). Intestazione + mappa ≤ 1888 B (`TOWN_MAX`: il file arriva al massimo a `$ED00`) | `MAP` |
+
+Scritto da `tools/build/gen_gfx.py` (tile), `tools/build/gen_maps.py` (intestazione e mappa, con i controlli) e
+`tools/build/asm.sh` (li unisce in `out/work/twnN.prg`). Sorgenti: `tools/build/vilN_*.py`, `data/town_mapN.txt`.
 
 ### `GFX1` … `GFXn` — temi di dungeon (2016 byte, caricati a `$ED00`)
 

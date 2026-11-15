@@ -60,6 +60,25 @@ o passano al capitolo 2 (che oggi ha tre concept propri) o si abbassa la loro pr
   colpo di scudo (stordisce); chiama 2 Ash Ghoul.
 - **Lord of Ruin** (capitolo 4): invariato (sala del trono, evocazioni a ondate, leva verso l'Abisso).
 
+### Meccaniche dei boss di capitolo (decise il 15/11)
+
+Richiesta del committente (15/11, TODO Z2): decidere quale meccanica di gioco ha ogni boss di capitolo. **Decise qui, non nel
+codice**: oggi il boss di capitolo è il boss con nome del piano (statistiche del piano, l'IA di tutti: inseguimento e mischia)
+con il **suo sprite** (15/11: `tools/build/monsters.py`, `ABBOT`, `MILLER`, `VAROK`; colori 14, 8, 7). Ogni meccanica insegna una
+cosa sola e si legge dallo schermo (un avviso prima del colpo). Le stime sono a occhio, non misurate.
+
+| Boss | Capitolo | Meccanica | Cosa insegna | Come si vede | Cosa serve nel codice (stima) |
+|---|---|---|---|---|---|
+| **The Hollow Abbot** | 1 | **Evoca i morti**: al 66% e al 33% della vita si ferma, agita il turibolo e fa alzare 2 scheletri. Finché uno scheletro evocato è vivo, l'abate **si rigenera** (1 punto vita ogni mezzo secondo) | scegliere il bersaglio: prima gli evocati | l'abate lampeggia verde per 1 s, bordo verde; gli scheletri compaiono accanto a lui | soglie di vita (2 byte), `spawn` di 2 mostri a piano avviato, rigenerazione a tempo: ~120 B |
+| **The Miller of Blackwater** | 2 | **Il giro della macina**: ogni 4 s carica il colpo (1 s fermo), poi colpisce **tutto attorno a sé** entro 2 caselle (danno doppio); dopo il colpo resta **scoperto** 1,5 s (subisce danno doppio). Al 50% chiama 2 Drowned | entrare e uscire a tempo: colpire nella finestra, scappare durante la carica | il mugnaio lampeggia bianco mentre carica; un anello (lo sprite del Whirlwind) al colpo | stato a tempo (carica / colpo / scoperto), colpo ad area riusando `fz_*` del Whirlwind: ~150 B |
+| **Varok the Oathbreaker** | 3 | **La carica**: quando è allineato con l'eroe (stessa riga o colonna) parte in linea retta a velocità doppia finché non urta; se urta **un muro** resta stordito 2 s (unico momento in cui lo scudo è giù). Fuori dallo stordimento lo **scudo** dimezza i danni | usare la sala: mettersi davanti a un muro e scansarsi | Varok lampeggia giallo e si ferma mezzo secondo prima di partire; da stordito è grigio | movimento in linea con velocità propria, urto, stato stordito, riduzione del danno: ~180 B |
+| **Lord of Ruin** | 4 | **Il pentacolo brucia** (in più a quello che fa oggi): al 75%, 50% e 25% le linee della stella sul pavimento si accendono per 3 s e chi ci sta sopra prende danno; all'ultimo quarto di vita è più veloce | leggere il pavimento, non solo il boss | le linee della stella cambiano colore (già tile propri: `T_FSTAR`) prima di bruciare | soglie, timer, danno sulla casella (il tile è già riconoscibile): ~100 B |
+
+Vincoli: il generatore e i mostri stanno in memoria stretta (margine sotto `$8720`: ~2,3 KB il 15/11); le quattro meccaniche
+insieme costano ~550 B stimati, da mettere in un modulo caricato con il piano del boss se il margine non basta (TODO M9).
+**Da decidere con il committente**: se i boss di capitolo lasciano un bottino proprio, se la sala si chiude, i numeri (vita,
+danno, tempi) dopo la taratura con i simulatori.
+
 ### Concept dei comuni (in breve)
 - Capitolo 2 (palude, mulino): **Drowned** (cadavere gonfio, lento e resistente; lascia una pozza che rallenta), **Bog
   Crawler** (scarabeo d'acqua, veloce, in branco), **Mire Witchling** (piccola strega, cugina dei Fallen; sputo a corto raggio).

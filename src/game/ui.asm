@@ -2361,7 +2361,6 @@ mg_c    .byte 1, 1, 1, 1, 7, 7, 7
         .byte 15, 15, 15, 15, 15, 15, 15
 
 ; icone dei luoghi del villaggio: sprite 0..2 sopra la porta (src/game/town_places.inc), sprite 3..6 spenti
-        .include "town_places.inc"
 MI_N    = 3                     ; fabbro, alchimista, locanda (09/11: niente armaiolo)
 mi_ic   .byte CH_ANVIL, CH_FLASK, CH_INN       ; locanda: il boccale (09/11, prima la casetta CH_HOME)
 mi_c    .byte 1, 7, 13

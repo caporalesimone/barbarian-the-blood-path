@@ -1,0 +1,64 @@
+; Mappa del villaggio del capitolo 4 (48x48): Ruin's Gate, la citta' in rovina attorno al cratere. Una lettera per casella (tools/build/gen_maps.py).
+; Le lettere sono i POSTI dei tile (gli stessi del villaggio 1); qui disegnano i tile di questo villaggio
+; (tools/build/vil4_*.py). E=ingresso  P=posto del portale  ==uscita del capitolo (2 caselle). Legenda:
+;  `=Rubble  x=Plank stair  D=Blocked door  %=Crater  (=Crater rim W  )=Crater rim E  H=dhome  t=Crater rim N
+;  Y=Crater rim S  [=Wall end W  ]=Wall end E  .=Ash  ,=Embers  :=Broken road  W=Cracked wall  R=Broken wall top
+;  S=dsmith  L=dalch  7=Alchemist's sign  ~=Candles  T=Burnt tree  >=Portcullis  /=Column (top)  @=Fallen column
+;  \=Column (base)  +=Broken paving  1=Weeping angel NW  2=Weeping angel NE  3=Weeping angel SW  4=Weeping angel SE
+;  *=Bones  o=Empty window  w=Gibbet  |=Iron railing  i=Fire basket  B=Rubble heap  s=Burnt cart  r=Burnt beams
+;  l=Broken tiles  5=Smith's sign  v=Iron railing (side)  A=Broken turret
+; Niente fiume e niente fontana: al centro un cratere (% buio con le vene di brace, orli ( ) t Y), attorno la strada ad
+; anello e quattro raggi. Nord: il corpo di guardia con le due torri e la saracinesca delle segrete (>): l'ingresso del
+; sotterraneo; mura con le brecce. Nord-ovest la fucina, nord-est la torre spezzata dell'alchimista e il colonnato
+; (/ sopra \, @ colonna caduta), sud-ovest la taverna (locanda), la forca (w) e il carro. Sud-est l'angelo che piange
+; dentro la cancellata (cura: le candele ~) e il pavimento della cappella con il portale. Ingresso del villaggio a sud;
+; l'uscita del capitolo e' la scala di tavole (x) che scende nel cratere dal lato sud.
+; Prima stesura: lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+BBTBTTTTBBTBTBTBTTTBTTTTTBTTBBTBBTTBBTBTTTTTTBTT
+TTTTTTTTBBTTBTTBTTBTAAATAAABTTTBTTBTTTTTTBTBTBTT
+TT.....`.`.....T..`.WWWWWWWBBBB........B`...*TTT
+TT.RRRR..T..RR....RRWoWRWoWRRRRR.*`...RR*..,R.TB
+TT.WWWW]..*[WW]*.[WWWWWWWWWWWWWW].```[WW]B.[W`TT
+TB.WWWW]`..[WW]*.[WWWWW>WWWWWWWW]..T,[WW].*[W.TB
+TBT......,..T...`.T....:.......`,`.,....B.`...BB
+TT......`..B...B...,.B.:......,.......,B.....*TB
+BB.W....`.*`..B.,.....*:`.,...`....AAA......,.BB
+TT.W...`r.rrl.r,.,`...:::.....@`B..WoW...@..W`BB
+TTTW..,.[oWWWo]*..`*`.:::.T........WWW....`BW.TT
+BTBW....WW5SWWW..@,B..:::,........7WLW...B``WBTT
+TTTW...iB..:...i...*.`:::...T...`...:..`...TWBTT
+TTBW......*:`...B.....:::..../../...:,B/.B/BWBTT
+TB.W....T,.:`s....,::::::::::\..\...:,.\..\BWBBT
+BT.......,`:..,...::::.`..::::....*.:......TWBTB
+TT..,l,rr`.:::::::::.......i:::::::::.T.`...WBTT
+TB.T.[oWo].....`::...........,::....i..@,...WBTT
+TTB..WWDWWT.,`.::*.*`(tttt)..i.::.,..Tllr.r...TT
+TT,.B..,,@B.`.:::`,.(%%%%%%t)..:::..T`[oWo]...BB
+TBBBTT.`...*..::.i.(%%%%%%%%%).i::,..,WWDWW.`.BT
+BT.@.,..BTT,*.::...(%%%%%%%%%)..::........T`,.BT
+TT,.`....,....:.*.(%%%%%%%%%%),..:............BB
+TT..:::::::::::..,(%%%%%%%%%%).B.:::::::::::.*BT
+TB..:::::::::::...(%%%%%%%%%%).B,:::::::::::..TT
+TT.*....`.,.`.:...(%%%%%%%%%%)...:*......,,..BBT
+TT,........,..::..(%%%%%%%%%%).*::`.T..,,.,B..TT
+TT....T...T...::..B(%%%%%%%%),..::....`.T,....BB
+TT...*........:::..(Y%%%%%%Y)`.:::..@.B..`..W,BB
+BT,......B.`...::.`..(Y==Y)T`*,::...,....,..WBTB
+TT.W..`.rllrrrr.::.....xx....,::..,..*.`,...W.TB
+BT.W..[oWWWWWo].i:::...xx...:::.||||||......W.TT
+TB.W..WWWWHWWWW..:::::.xx.::::..v+12+v..B...W.TT
+TT.W.i.T..:....i.:,::::::::::,.:v+34+v.*`*..W.TT
+TT.W......:......:..*,.::,.....:v+~~+v....,B..TT
+TB.W.BB...::::::::.....::.,..,.:v++++v........BT
+TB.W......*...,.....B,.::.,..B.:v++++v,.`.....TT
+BT.WT..,......B........::......:||::|/.*../,*,BT
+TTBW,`B.w..B.,s.T..B,..::......:..::,\....\..*TB
+TT.*,rrTrr.T@`.,.B`,..`::.B....:::`::++++++...BB
+TB...[oWo].,......T.`..::.*...,`....:++P+++`B.TT
+TT...WWDWW.T...T.*.`...::..,@........++++++..BBT
+BBT..TBBBBB.....`BT....::.B..,,,.....++++++...BB
+TT..T.RRRRRRRRR`..T*.`.::,`...RRRRRRRRRR@.....BT
+BT*...[WWWWWWW]T.,.`.B.::.T...[WWWWWWWWW]..B`.BT
+TT.*......`BBBBBB.@T.B.ET...........T@..`...B.TB
+TTBBTTTTTTTBBBTTBBBTBTBTTTTTBTBTBTBBTTBBBBBTBBTT
+TTBTBBBBBTBTBTTTTTTTTTTTTTTTBBTBTBTTTTTBTTTBTTBB

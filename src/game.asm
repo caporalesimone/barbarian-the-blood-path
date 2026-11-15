@@ -43,7 +43,7 @@ CHARSET    = $a800
 
 MAP        = $c000          ; 48x48 tile
 LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM della mappa, che nel menu non serve
-TOWN_MAX   = $0700          ; mappa del villaggio (RLE, in GFX0 dopo i tile): massimo 1792 byte
+TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile): fino a GFX_DUN_AT
 MAPW       = 48
 MAPH       = 48
 
@@ -401,7 +401,27 @@ _q      lda gi_src_lo,x         ; 4 strisce di tile -> charset
         bne _q
         lda tmp5
         bne _dn
-        lda #<MAP               ; villaggio: ptr0 prosegue sulla mappa (RLE) -> MAP
+        ldy #TK_LEN-1           ; (15/11) villaggio: dopo i tile l'intestazione (posizioni, colori, nome della cura)...
+-       lda TK_AT,y
+        sta town_k,y
+        dey
+        bpl -
+        ldy #TK_SOLID-1         ; ...e i tile solidi di questo villaggio
+-       lda TK_AT+TK_LEN,y
+        sta solidtab,y
+        dey
+        bpl -
+        ldy #3
+-       lda tk_pal,y            ; colori del villaggio: voce 0 delle tabelle (pal_bg, pal_c1, pal_c2, pal_ram)
+        ldx gi_pal,y
+        sta pal_bg,x
+        dey
+        bpl -
+        lda #<(TK_AT+TK_LEN+TK_SOLID)   ; poi la mappa (RLE) -> MAP
+        sta ptr0
+        lda #>(TK_AT+TK_LEN+TK_SOLID)
+        sta ptr0+1
+        lda #<MAP
         sta ptr1
         lda #>MAP
         sta ptr1+1
@@ -429,6 +449,8 @@ _x      lda #$36
         sta $01
         cli
         rts
+TK_AT = GFX_TOWN_AT+4*GFX_TSTRIP         ; intestazione del villaggio (TK_LEN + TK_SOLID byte), poi la mappa RLE
+gi_pal     .byte 0, pal_c1-pal_bg, pal_c2-pal_bg, pal_ram-pal_bg
 gi_src_lo  .byte <(GFX_TOWN_AT+range(4)*GFX_TSTRIP)
 gi_src_hi  .byte >(GFX_TOWN_AT+range(4)*GFX_TSTRIP)
 gi_dsrc_lo .byte <(GFX_DUN_AT+range(4)*GFX_DSTRIP)

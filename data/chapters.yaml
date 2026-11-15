@@ -17,7 +17,7 @@ chapters:
   - id: 1
     name: "Aldric's Crossing"
     implemented: false
-    village: {name: "Aldric's Crossing", gfx: GFX0, map: data/town_map.txt, pf_n: 8, atlas_set: VILLG}
+    village: {name: "Aldric's Crossing", gfx: TWN1, map: data/town_map.txt, pf_n: 8, atlas_set: VILLG}
     levels: 5
     themes: [1, 2]
     atlas_sets: [DUNGA, DUNGB]
@@ -26,7 +26,7 @@ chapters:
   - id: 2
     name: "Blackwater Mill"
     implemented: false
-    village: {name: "Blackwater Mill", gfx: null, map: null, pf_n: null, atlas_set: null}
+    village: {name: "Blackwater Mill", gfx: TWN2, map: data/town_map2.txt, pf_n: null, atlas_set: VILL2}
     levels: 5
     themes: [3, 4]
     atlas_sets: [DUNGC, DUNGD]
@@ -35,7 +35,7 @@ chapters:
   - id: 3
     name: "The Last Camp"
     implemented: false
-    village: {name: "The Last Camp", gfx: null, map: null, pf_n: null, atlas_set: null}
+    village: {name: "The Last Camp", gfx: TWN3, map: data/town_map3.txt, pf_n: null, atlas_set: VILL3}
     levels: 5
     themes: [5, 6]
     atlas_sets: [DUNGE, DUNGF]
@@ -44,7 +44,7 @@ chapters:
   - id: 4
     name: "The Throne of Ruin"
     implemented: false
-    village: {name: "Ruin's Gate", gfx: null, map: null, pf_n: null, atlas_set: null}
+    village: {name: "Ruin's Gate", gfx: TWN4, map: data/town_map4.txt, pf_n: null, atlas_set: VILL4}
     levels: 5
     themes: [7, 8]
     atlas_sets: [DUNGG, DUNGH]
@@ -53,7 +53,7 @@ chapters:
   - id: 5
     name: "The Abyss"
     implemented: false
-    village: {name: "the city of the Abyss", gfx: null, map: null, pf_n: null, atlas_set: null}
+    village: {name: "The City of the Abyss", gfx: TWN5, map: data/town_map5.txt, pf_n: null, atlas_set: VILL5}
     levels: rest
     themes: [1, 2, 3, 4, 5, 6, 7]
     atlas_sets: []

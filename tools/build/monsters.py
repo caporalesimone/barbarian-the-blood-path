@@ -264,6 +264,103 @@ LORD_L1 = [
 ]
 
 
+# ------------------------------------------------------------------ BOSS DEI CAPITOLI 1-3 (15/11, TODO Z2)
+# Stanno al posto del boss finale nel file del piano del boss del loro capitolo (GFX2, GFX4, GFX6: SETS 2, 3, 4).
+# The Hollow Abbot (capitolo 1): scheletro incappucciato in una tonaca marcia, il turibolo appeso alla catena.
+ABBOT = [
+    "....cccc....",
+    "...cccccc...",
+    "..ccggggcc..",
+    "..cggggggc..",
+    "..cgbggbgc..",
+    "..cggggggc..",
+    "..ccgbbgcc..",
+    ".ccccggcccc.",
+    "cccccccccccb",
+    "ccbccccccbcb",
+    "cc.cccccc.gb",
+    "gg.cccccc.gb",
+    "...cccccc..b",
+    "..cccccccc.b",
+    "..ccbccbcc.g",
+    "..cccccccc.g",
+    ".cccccccccgg",
+    ".ccbccccbcgg",
+    ".cccccccccc.",
+    ".cccccccccc.",
+    "cccc.cc.cccc",
+]
+ABBOT_L1 = [
+    ".cccccccccgg",
+    ".ccbccccbcgg",
+    "cccccccccccc",
+    ".cccccccccc.",
+    ".ccc.cc.ccc.",
+]
+# The Miller of Blackwater (capitolo 2): un mugnaio enorme, cappello, grembiule, la mazza con la macina.
+MILLER = [
+    "...bbbbbb...",
+    "..bbbbbbbb..",
+    "...cccccc...",
+    "..cgccccgc..",
+    "..cccccccc..",
+    "..ccbbbbcc..",
+    "...cccccc..g",
+    ".bbbggggbbbg",
+    "bbbggggggbbb",
+    "cbbggggggbbc",
+    "cc.gggggg.cc",
+    "cc.gggggg.cb",
+    "gg.gggggg.bb",
+    "...gggggg.bg",
+    "..bbbbbbbbgg",
+    "..bbb..bbbgg",
+    "..bbb..bbb..",
+    "..bbb..bbb..",
+    "..bbb..bbb..",
+    "..bbb..bbb..",
+    ".gggg..gggg.",
+]
+MILLER_L1 = [
+    "..bbb..bbb..",
+    ".bbb....bbb.",
+    ".bbb....bbb.",
+    "bbb......bbb",
+    "gggg....gggg",
+]
+# Varok the Oathbreaker (capitolo 3): il comandante caduto, elmo con le corna, spadone, lo scudo con la croce.
+VAROK = [
+    "..g......g..",
+    "..gg.cc.gg..",
+    "...gccccg...",
+    "...cccccc...",
+    "...cbccbc...",
+    "...cccccc...",
+    "g...cccc....",
+    "g.cccccccc..",
+    "gccccccccbbb",
+    "g.ccbccbbggb",
+    "g.ccccccbgbb",
+    "b.ccccccbbgb",
+    "bbccbbccbggb",
+    "..ccccccbbbb",
+    "..cccccc.bb.",
+    "..bbbbbb....",
+    "..cc..cc....",
+    "..cc..cc....",
+    "..cc..cc....",
+    "..cc..cc....",
+    ".ggg..ggg...",
+]
+VAROK_L1 = [
+    "..cc..cc....",
+    ".cc....cc...",
+    ".cc....cc...",
+    "cc......cc..",
+    "ggg....ggg..",
+]
+
+
 def frames(base, l1, extra=None):
     f0 = base if extra is None else overlay(base, extra + [""] * (21 - len(extra)))
     f1 = legs(f0, 21 - len(l1), l1)
@@ -290,5 +387,11 @@ FINAL = ("lord of ruin", frames(LORD, LORD_L1), 2)
 # grafica) + il boss finale. Gli sprite dei mostri viaggiano nel file GFXn del tema (tools/build/gen_gfx.py, THEME_SET),
 # quindi un secondo set costa solo spazio su disco (1152 B per file), non RAM. Oggi un solo set; i nomi dei tipi
 # (src/game/bar.asm) sono ancora unici: un set con nomi diversi li deve portare nel file del tema (TODO.md).
-SETS = {1: (BASE, STRONG, FINAL)}
+# (15/11) set 2-4: stessi mostri, ma nel posto del boss finale c'e' il boss del capitolo 1, 2, 3 (file del piano del boss).
+# CBOSS_COL = colore dello sprite di ogni boss di capitolo (cb_col in src/game/game.asm, colonna color del bestiario).
+SETS = {1: (BASE, STRONG, FINAL),
+        2: (BASE, STRONG, ("the hollow abbot", frames(ABBOT, ABBOT_L1), 14)),
+        3: (BASE, STRONG, ("the miller of blackwater", frames(MILLER, MILLER_L1), 8)),
+        4: (BASE, STRONG, ("varok the oathbreaker", frames(VAROK, VAROK_L1), 7))}
+CBOSS_COL = [SETS[s][2][2] for s in (2, 3, 4)]
 

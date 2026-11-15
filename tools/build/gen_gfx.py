@@ -1044,7 +1044,8 @@ def mon_bytes(mset=1):
 # per ora solo il piano 20, ma i file dei capitoli 1-3 ci sono gia', segnaposto da modificare). Nessuna deduplica: i file
 # oggi sono identici fra capitoli ma restano separati. Set di mostri per capitolo (tools/build/monsters.py SETS):
 CHAPTERS = 4
-CHAP_SET = {c: {"dun": 1, "boss": 1} for c in range(1, CHAPTERS + 1)}
+# (15/11) il file del piano del boss dei capitoli 1-3 porta lo sprite del SUO boss al posto del boss finale (set 2, 3, 4).
+CHAP_SET = {c: {"dun": 1, "boss": c + 1 if c < CHAPTERS else 1} for c in range(1, CHAPTERS + 1)}
 
 
 # ----------------------------------------------------------------- preview
@@ -1136,6 +1137,20 @@ def main():
     prg = lambda addr, data: bytes([addr & 255, addr >> 8]) + data
     ttiles = bytes(b for q in range(4) for c in range(q * 64, q * 64 + NT) for b in tcs[c])        # villaggio: TOWN_TILES
     open(os.path.join(ROOT, "out", "work", "gfx", "gfx0.prg"), "wb").write(prg(GFX_TOWN_AT, ttiles))
+    # (15/11, TODO Z2) villaggi dei capitoli 2..: stessi posti, tile PROPRI (tools/build/villages.py, un modulo
+    # vilN_*.py per villaggio); il villaggio 1 resta gfx0.prg. I loro disegni non usano il generatore casuale di questo
+    # file: gli altri file non cambiano.
+    import villages as V
+    for c, v in V.VILLAGES.items():
+        if not v["tiles"]:
+            continue
+        vcs = [list(ch) for ch in tcs]
+        for i, n in enumerate(TOWN_TILES):
+            if n in v["tiles"]:
+                for q, ch in enumerate(tile_chars(v["tiles"][n][3])):
+                    vcs[q * 64 + i] = ch
+        vt = bytes(b for q in range(4) for ch in range(q * 64, q * 64 + NT) for b in vcs[ch])
+        open(os.path.join(ROOT, "out", "work", "gfx", "twn%d.prg" % c), "wb").write(prg(GFX_TOWN_AT, vt))
     DN = DUN_NT                                             # dungeon: solo i tile 0..DN-1 (i tile del villaggio restano)
     def theme_tiles(boss):                                  # tile del dungeon (boss=True: sala del trono) senza mostri
         src = {i: i for i in range(DN)}
@@ -1177,6 +1192,8 @@ def main():
         for n, i in TTID.items():
             if n not in TID:
                 f.write(f"T_{n:<12} = {i:<3}   ; (solo villaggio) {_desc.get(n, '')}\n".rstrip(" \n") + "\n")
+        import monsters as _M
+        f.write("cb_col  .byte " + ", ".join(map(str, _M.CBOSS_COL)) + "    ; colore dei boss dei capitoli 1.. (tools/build/monsters.py)\n")
         f.write(f"GFX_NFILES = {len(files)}\n")
         f.write(f"CHAPTERS = {CHAPTERS}\n")
         for n, c in HUD_ID.items():
@@ -1191,9 +1208,6 @@ def main():
         f.write(f"GFX_MONS = {len(mons)}\nGFX_STRONG = {len(strong)}\n")
         f.write("solid_dun\n")
         row = [1 if n in SOLID else 0 for n in TILES] + [0] * (NTILE_MAX - len(TILES))
-        f.write("    .byte " + ",".join(map(str, row)) + "\n")
-        f.write("solid_town\n")
-        row = [1 if n in SOLID else 0 for n in TOWN_TILES] + [0] * (NTILE_MAX - len(TOWN_TILES))
         f.write("    .byte " + ",".join(map(str, row)) + "\n")
     preview(cs, sp)
     print("ok: %d tile, %d byte charset, %d byte sprite" % (len(TILES), 2048, 2048))

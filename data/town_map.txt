@@ -1,5 +1,6 @@
 ; Mappa del villaggio (48x48). Una lettera per casella (tools/build/gen_maps.py, LEGEND). Legenda:
 ; (12/11) ==uscita del capitolo (sentiero, ALIASES): casella da cui si va al capitolo dopo (TODO M1)
+; (15/11) E=ingresso (arrivo di una partita nuova o dal capitolo prima, sentiero)  P=posto del portale (selciato)
 ; .=grassa ,=grassb `=grassc :=path d=dirt +=cobble x=bridge W=bwall R=broof r=broofa l=broofl c=chimney o=window
 ; S=dsmith L=dalch H=dhome D=hdoor 5=signs 7=signl A=spire ~=fountain 1-4=fount0-3 O=portal T=tree
 ; >=tstairs (porta della cripta) /=crypta @=cryptb \=cryptc [=cryptl ]=cryptr t=grave Y=grave2
@@ -37,7 +38,7 @@ TT.........```.:.,WoWDWoW..,`(%)*`:,.|||:|||,`TT
 TT``lllcl,,T,T.::vB*,:`*Bv,T..(%),:,*.`,:.,,.`TT
 TT.,lllll..T.T.,:||||:||||,T,(%)`.::wi.+++.,*,TT
 TT`,WoWoW.,,.T,,:,..,:,.,,.TT(%).,,:.`+++++.,`TT
-TT.,WWDWW,`...,.:`.`.:i,T`.,T(%)..,:.+++++++,.TT
+TT.,WWDWW,`...,.:`.`.:i,T`.,T(%)..,:.+++++P+,.TT
 TT..,.::...i++++++++++,,TT.,(%).,,:::+++++++..TT
 TT..,*,::::+s+s+++s+s+..,T,.(%)..::`.+++++++,`TT
 TT,.RcRRRR,++++~~+++++.*`.,,(%),.:,.,,+++++...TT
@@ -59,5 +60,5 @@ TT.TT..,:.,::::::,(%%%%%%)T.`(%)...::WoWHWoWT.TT
 TT,T,.`.::::.,.,:.`,(%%%),T,.(%),T`i:::::...TTTT
 TT.T,,.,,..,`*,.:.,`,,.`,.T.(%).`TT,*...,.`.T,TT
 TT.`,,.`,.......:..,.`..,.,.(%)`..T`,.,....,,.TT
-TTTTTTTTTTTTTTTT:TTTTTTTTTTT(%)TTTTTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTETTTTTTTTTTT(%)TTTTTTTTTTTTTTTTT
 TTTTTTTTTTTTTTTTTTTTTTTTTTTTT(%)TTTTTTTTTTTTTTTT

@@ -1,14 +1,23 @@
 ; ===================================================================
 ;  levels.asm - citta', cambio livello, nuovo personaggio, avvio
 ; ===================================================================
-TOWN_PX = 42                    ; portale del villaggio: sul lato est della piazzetta in mattoni (a est del fiume)
-TOWN_PY = 24
-TOWN_SX = TOWN_PX               ; arrivo dal portale / risveglio: accanto al portale
-TOWN_SY = TOWN_PY+1
-TOWN_ST_X = 12                  ; arrivo dal piano 1: sulla porta della cripta (cimitero, nord-ovest)
-TOWN_ST_Y = 5
-TOWN_NX = 16                    ; nuova partita: sulla strada a sud, all'ingresso del villaggio (ovest del fiume)
-TOWN_NY = 46
+; (15/11, TODO Z2) Ogni villaggio ha le SUE posizioni, i SUOI colori, il nome del SUO luogo di cura e i SUOI tile solidi:
+; stanno nell'intestazione del file TWNc (dopo i tile, prima della mappa RLE; tools/build/gen_maps.py) e gfx_install le
+; copia qui (town_k, TK_LEN byte) e in solidtab a ogni caricamento del villaggio.
+        .include "town_places.inc"      ; TK_LEN, TK_SOLID, TX_EXIT_N, NVIL
+town_k
+tk_px   .byte 0                 ; portale del villaggio (casella P della mappa); l'arrivo e' la casella sotto
+tk_py   .byte 0
+tk_stx  .byte 0                 ; arrivo dal primo piano: sull'ingresso del sotterraneo (casella >)
+tk_sty  .byte 0
+tk_nx   .byte 0                 ; ingresso del villaggio (casella E): partita nuova, arrivo dal capitolo prima
+tk_ny   .byte 0
+tk_pal  .fill 4                 ; colori: sfondo, multicolor 1, multicolor 2, color RAM (8 + accento)
+tp_smith .fill 6                ; porte per le icone della minimappa: fabbro, alchimista, locanda (colonna, riga)
+tx_exit_x .fill TX_EXIT_N       ; uscita del capitolo (caselle =)
+tx_exit_y .fill TX_EXIT_N
+ls_fount .fill TK_NAME          ; nome del luogo di cura (etichetta della barra in alto, con lo 0 finale)
+        .cerror * - town_k != TK_LEN, "town_k: lunghezza diversa da TK_LEN (tools/build/gen_maps.py)"
 
 ; set di tile (palette) 1..8 per piano: dipende da seed e piano
 pal_for_level:
@@ -108,9 +117,9 @@ town_post:
         sta rnd+1
         lda c_portal
         beq _np
-        lda #TOWN_PX
+        lda tk_px
         sta tx
-        lda #TOWN_PY
+        lda tk_py
         sta ty
         lda #T_PORTAL
         jmp set_tile
@@ -147,19 +156,15 @@ load_location:
         sta lc_x                ; forza il ricalcolo dell'etichetta
         jsr pal_for_level
         jsr set_palette
-        ldy #47                 ; tabella dei tile solidi del luogo (villaggio: tile propri)
-        lda cur_level
+        lda cur_level           ; tile solidi del luogo: il villaggio ha i suoi (gia' copiati da gfx_install, 15/11)
         beq _st
+        ldy #47
 _sd     lda solid_dun,y
         sta solidtab,y
         dey
         bpl _sd
         bmi _dun
-_st     lda solid_town,y
-        sta solidtab,y
-        dey
-        bpl _st
-        jsr town_post           ; la mappa del villaggio e' gia' in MAP (file GFX0, data/town_map.txt)
+_st     jsr town_post           ; la mappa del villaggio e' gia' in MAP (file GFX0, data/town_map.txt)
         jsr clear_lvlblk
         jmp music_town
 _dun    ldx #63                 ; mostri: nessuno scorrimento lungo i muri in corso (mslide, mslc)
@@ -216,14 +221,15 @@ place_player:
         beq _ts
         cmp #4
         bne _tp
-        lda #TOWN_NX
-        ldx #TOWN_NY
+        lda tk_nx
+        ldx tk_ny
         jmp _put
-_tp     lda #TOWN_SX
-        ldx #TOWN_SY
+_tp     lda tk_px               ; accanto al portale: la casella sotto
+        ldx tk_py
+        inx
         jmp _put
-_ts     lda #TOWN_ST_X
-        ldx #TOWN_ST_Y
+_ts     lda tk_stx
+        ldx tk_sty
         jmp _put
 _dun    lda spawn_mode
         cmp #2

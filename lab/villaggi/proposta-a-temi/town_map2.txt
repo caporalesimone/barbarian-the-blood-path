@@ -1,0 +1,55 @@
+; Mappa del villaggio del capitolo 2 (48x48): Blackwater Mill, il villaggio nella palude. Una lettera per casella (tools/build/gen_maps.py, LEGEND e ALIASES).
+; Le lettere sono quelle del villaggio 1; i disegni dei tile sono a tema (tools/build/villages.py).
+; E=ingresso (arrivo dal capitolo prima)  P=posto del portale  ==uscita del capitolo (2 caselle)  >=porta della cripta
+; Tre strisce di terra separate da due canali di acqua nera (pontili larghi 2), stagni e canneti. Ovest: cappella
+; sprofondata con la cripta e le lapidi, alchimista. Centro: piazza con la fontana, locanda, ingresso a sud. Est: il
+; mulino a cavallo del canale (ruota = tile A), fabbro, piazzetta del portale; uscita sul bordo est.
+; Prima stesura generata da lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+TTTTTTTTTT(%%)TTTTTTTTTTTTTTT(%%%)TTTTTTTTTTTTTT
+TTTTTTTTTT(%%)TTTTTTTTTTTTTTT(%%%)TTTTTTTTTTTTTT
+TTTTTTTTTT(%%).,...,..,TB....(%%%).,,`,..,.,..TT
+TTTTTTTTTT(%%).TT,,,T.,,,.,`.(%%%)`.,.,`.`...TTT
+TT||||||||(%%),.,,,`.,,..B.`,(%%%)T,..`TT`.T..TT
+TT.`/@\...(%%)...,.(%%%).*...(%%%)T....T..,T,,TT
+TT`.[>].T,(%%).B`*(%%%%%).**(%%%),,,,`,**T,...TT
+TT,.,::..,(%%).,T(%%%%%%%),*(%%%)..,`,``(%)*TTTT
+TT,.,.:.T.`(%%)BT(%%%%%%%)..(%%%)*...,`(%%%),`TT
+TT.t`Y:t.,,(%%)..(%%%%%%%)*.(%%%),,,`..(%%%),,TT
+TT.dTd:d,,`(%%)..*(%%%%%),*.(%%%)*`..`*(%%%)..TT
+TTT..`::::.xxxx:,TT(%%%)*...(%%%)`,.T`.,(%)*.`TT
+TT.Y*`:t`,.xxxx...T,`.*,*.,.T(%%%).,,..,......TT
+TT.d..:d*,`(%%)llcllll`.T.,`.(%%%)rcrrrrr...,.TT
+TT.,.`:`,.,(%%)lllllll.RcRRR.(%%AArrrrrrrT...`TT
+TT||||:|||,(%%)WWoWWWW,RRRRR,(%%AAWWWWWWW.B.,`TT
+TT..,.:::.(%%):WoWDWoW,WWoWW,(%%AAoWoDWoW,T...TT
+TT`,....:,(%%):...:.,,.WoDoW*(%%%)WWWWWWW,.,`.TT
+TT`*TT`,:.(%%):...::::::::.T.(%%%)**i...T..`.,TT
+TT,.(%).:.(%%):.,`,.,:..`....(%%%).,,:....*`.,TT
+TT.(%%%):.(%%):.,++++++++++..(%%%),.,:.,..,,..TT
+TT,(%%%):,(%%):::+s++++++s+::xxxxx::::::::::::=T
+TTB(%%%):.(%%):.,++++++++++..xxxxx.,.,``::::::=T
+TTT(%%%):*(%%):..++++~~++++,.(%%%)`..T,.:.,...TT
+TTT(%%%):,(%%):.`+++~12~+++...(%%%)`.RRcRRRR,.TT
+TTTT(%).:,(%%):..+++~34~+++...(%%%)`,RRRRRRR..TT
+TTTTT..*:(%%)*:.,++++~~++++.`.(%%%)`BWWW5WWW,,TT
+TT.B.,,.:(%%),:.,++++++++++,.,(%%%)*,WoWSWoW..TT
+TT`..T`,:(%%)`:..i++++++++i.`*(%%%)*...,:,....TT
+TT.*,T..:(%%)`:.i++++++++++,.,(%%%)`..,.:..`.,TT
+TT,T,...:xxxx`:,,,i.*,:,,`.i.(%%%)`*T`..::::::TT
+TT..`.,.:xxxx`:...,...:.TTBT.(%%%)...T`(%),*,:TT
+TT,,...,:(%%)`.rrcrrrr:.`,...(%%%),T`(%%%%%).:TT
+TT....`.:.(%%).rrrrrrr:.lclll(%%%)`.`(%%%%%).:TT
+TT,``::::*(%%).WWoWWWW:*lllll(%%%)TT*(%%%%%).:TT
+TT.T,:..,i(%%).WoWHWoW:.WWoWW(%%%)..*.,(%).T`:TT
+TT.lclll,,(%%)...`:.,,:,WoDoW(%%%).....`..*.`:TT
+TT.lllll..(%%)``.,:::::,`,..,(%%%),.,..i.:::::TT
+TT.WW7WW.T(%%),..,(%)`:::::::xxxxx..:::..:,...TT
+TT.WoLoW`.(%%)**(%%%%%),....`xxxxx.`,,++++++`.TT
+TT,..:..,`,(%%),(%%%%%).``.`.(%%%)...T++++P+..TT
+TT``.:`,,T,(%%).(%%%%%).T......(%%%)*,++++++.`TT
+TT.`,....`,(%%)*..(%).:``,B..`*(%%%).`+w++++,BTT
+TT,.,..,..,(%%).*.,,,*:,.*,.T.,(%%%)..++++++..TT
+TT.`..`.T.T(%%),...,`,:.T,.T..`(%%%)*,,..T.`B*TT
+TT`T...T`.*(%%)TT,....:.,T..*,.(%%%)*..T``..T,TT
+TTTTTTTTTTT(%%)TTTTTTTETTTTTTTT(%%%)TTTTTTTTTTTT
+TTTTTTTTTTT(%%)TTTTTTTTTTTTTTTT(%%%)TTTTTTTTTTTT

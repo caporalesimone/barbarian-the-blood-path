@@ -534,7 +534,6 @@ ls_kchest .text "locked chest", 0
 ls_gchest .text "golden chest", 0
 ls_smith  .text "blacksmith", 0
 ls_alch   .text "alchemist", 0
-ls_fount  .text "fountain of saint aldric", 0
 ls_uptown .text "stairs up to town", 0
 ls_nokey  .text "locked: missing key!", 0
 ls_home   .text "inn", 0

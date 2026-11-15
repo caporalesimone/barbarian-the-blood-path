@@ -1,0 +1,63 @@
+; Mappa del villaggio del capitolo 2 (48x48): Blackwater Mill, palafitte su un lago nero. Una lettera per casella (tools/build/gen_maps.py).
+; Le lettere sono i POSTI dei tile (gli stessi del villaggio 1); qui disegnano i tile di questo villaggio
+; (tools/build/vil2_*.py). E=ingresso  P=posto del portale  ==uscita del capitolo (2 caselle). Legenda:
+;  `=Puddle  d=Gangway  D=Hut door  %=Black water  (=Scum  )=Reeds  H=dhome  t=Boat (bow)  Y=Boat (stern)
+;  [=Mill wheel NW  ]=Mill wheel NE  .=Mud  ,=Mud and grass  :=Walkway  W=Plank wall  R=Thatch eaves  S=dsmith
+;  L=dalch  7=Alchemist's sign  ~=Votive candles  T=Mangrove  >=Mill cellar  /=Mill wheel SW  @=Mooring post
+;  \=Mill wheel SE  +=Deck  1=Drowned bell NW  2=Drowned bell NE  3=Drowned bell SW  4=Drowned bell SE  *=Water lilies
+;  o=Lit window  w=Barrels  |=Railing  i=Marsh light  B=Reed bed  s=Drying rack  r=Thatch ridge  l=Mossy shingles
+;  5=Smith's sign  c=Smoke hole  A=Stilts
+; Niente piazza e niente fiume: il villaggio sta SULL'ACQUA. Piattaforme di assi su pali (i pali si vedono sotto il
+; bordo sud) unite da passerelle (: est-ovest, d nord-sud). Centro: la campana degli annegati (cura: i moccoli ~).
+; Nord-ovest il fabbro, ovest l'alchimista, sud-est la locanda, due capanne di pescatori. Nord-est, su un isolotto di
+; fango, il mulino con la ruota: la botola della sua cantina allagata (>) e' l'ingresso del sotterraneo. Ingresso del
+; villaggio dalla riva a sud-ovest; uscita in fondo al pontile est (il traghetto); portale sulla piattaforma a sud-est.
+; Prima stesura: lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+%%TTT%TTTTTTT%%*%T%%TT%)%TTT%%TTTT)%T(TT)%%%)T%T
+%TT%TTTTT)%*TTTTTTT%TTT%T*%%%TTT)%T%(%%%%TTTT)TT
+TT%)%%%)%%%(%%%*%%%%%%)%%*%%T%%)%(%)%%%%)%%%%%T%
+*%(T(%%%%%%%%%%%%%%(%%%%%%%%%%%(%%(%%(%%T%%%%%T*
+T%%)%%%%%%%%%%%%%%%%%%%%%%%%%%%(%%%%%%%%%%%%%*%T
+TT%%%%%%%%%%%%%%%%%T%%%%%%%%%%%(%%%%llcllllll%%T
+%%T%%%%%%%%%%%%%*%%)%%(*%%%%%%%%%%%%lllllllll%%%
+T%)T%Trcrrrrr%%%%%%%%%%%%(rcrrr%%(%%lllllllll%TT
+%)((%%RRRRRRR%T)%*%%%)%%%(RRRRR%(%[]WoWoWoWoW%)%
+T%%%*%Wo5SWoW%%%%%%%%T%%%%WoDoW%%%/\WWWWWWWWW%%%
+T%%%@w+++++++i@%%%%%*%%%%%+++++s%%%%WoWW>WWoW%%%
+%%(%@+++++++++%*(%T%%%%%%%++++++::::,B,,,..BB%T%
+%%)%%+++++++s+%%%%%)%*%*tYAAAAdA%%%%,,.`.,,,B`)*
+TT%%%AAAAAAAAd%%%%%%))(%%%%%%%d%%%%BB,BBB.....)T
+T%%%)%%%%%%(%d%%%%%**T)%%%%(%%d%%%%%..`,,B...%)T
+TT%T%(%%%(T%%d%%%|||||||||%%%%d%%%%%%`.`B.,.%%T%
+TT(%)(%%%tY%%d%%%iw++++++i%%@%d%%%%%%%T,,.d%%%%T
+%T%*%(%%%%%%%d%%%+++12++++:::::%))%%%%%(%%d%)%T%
+TT*%%%%%%%%%%d:::+++34++++@%%%%%%%T%%%)T%%d%)TT%
+%%%T%)%%%%%%%(%%%+++~~++++@%%%%%%%%%(%%%(@d%))@%
+%T%%)%%%%%%%%%%%%+++++++++%%(%%%%%(%%%%%(%::::=T
+T%%((%(%%%%%@@%%@++++++++s%%*%%%%%(%%%%%%@::::=T
+TT%(%()%T%)%:::::+++++++++%%%*(%%%%%%%%%%(%d%%%T
+%(%%*%%)%T%%d%@%(AAAAAdAAA%%(%%%%tY(%%%%%%%dtYTT
+T(*rcrrr))%%d%%%%%((%%d%%%%%%%%%%)%%%)))%%%d%%%T
+%%%RRRRR%T%%d%T%%%%%%%d%%%%%%%%%%%%%%%T%%%%d%%%%
+%%%W7LWW%)%%d%T)%%%tY%d%%T%%(%%%%(%%%%%%%%%d@%%T
+T)%+++++i%%@d%%%(%%%%%d%%%%%%%%%%%%%%%%T%%%d%%TT
+%%@++++++:::d@%%*%%(%%::::::d%%%%%%%%%%%*%(d%)%T
+TT)AAAAAA%%%d%%%%%%%%@%%%%%%drcrrrrrrr%%%%%d@%%%
+T*%%%%%%%T)%d%(%%%%%%%%%%%%%dRRRRRRRRR%%%%%d%TTT
+TT)%%%%%tY%%d%%%)%)%%%%%%*%%dWoWWHWWoW%%%%@d%)TT
+TT%%*%%%%%%(d(%)*%%%%%%%%%%@w+++++++++i%%%%d%%%%
+TT%%%%%%%%%%d%rrrrr%%%%)%%%%+++++++++++:::(d%%T)
+%T%%%%%%%%%%d%RRRRR%%%%%%%%@+i+++++++s+%%d%d%)%T
+%T%%%%%%%%%%d%WoDoW%%%%%%%%%AAAAAAAAAAA%%d(d%%TT
+%T%%%%%%%%%%d%+++++w%%%*()%%%%*(%%%%%%%||d|d|%%T
+%T%%(%*%**%%d%++++++%(%%%%%(%%T)%%%%%%%i+++++%TT
+T%%%%%*%%%%%d%AAdAAA%%%%%%%(*%T)%tY%%%%+++P++%T%
+TT%%%%%%%%)%d%%%d%%)%%%%T%%%%%%%%%%%%%%++++++%%T
+T%%%%)%(%)%%d%%.d....`)%)%%%%%%%%%%%%%%+++++w%*T
+%%%%BB.B``B%d%...`....%%)%,%T)%%)%%)T*%AAAAAA%%%
+,..B,...B...d.B,...`B.,`.,.%%%%)%T))(%%(%%%%%%%%
+,.`,.`.``..,d...`..,,..,.,`.B`..,)%%%%)%%%%%%%%%
+...BB.:::::::.`.`,.,,.B.B......,..`,.%%%%%T%%%)%
+B.,,,.E,,,.`.,B.,..B..,,,.,.......,,,%%%%)T%%%%T
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB
+BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB

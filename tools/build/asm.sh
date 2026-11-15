@@ -29,7 +29,11 @@ ARX=$(echo "$EXTRA" | sed 's/-D NOKEYS=[0-9]*/-D NOKEYS=1/')
 MENUMSG=$(python3 tools/build/pack_menu.py) || exit 1        # file MENU = locanda e negozi, due zone compresse ZX0
 python3 tools/build/gen_title.py >/dev/null || exit 1  # (anche in debug: l'atlante grafico mostra il titolo)
 python3 tools/build/gen_start.py || exit 1
-cat out/work/gfx/gfx0.prg out/work/town.map > out/work/gfx0.prg
+# (15/11, TODO Z2) file dei villaggi TWNc = tile del villaggio + intestazione (posizioni, colori, nome della cura, tile solidi)
+# + mappa RLE (tools/build/gen_maps.py, tools/build/villages.py). gfx0.prg = villaggio 1 (lo leggono START e gli strumenti).
+cat out/work/gfx/gfx0.prg out/work/town1.map > out/work/gfx0.prg
+cp out/work/gfx0.prg out/work/twn1.prg
+for c in 2 3 4 5; do cat out/work/gfx/twn$c.prg out/work/town$c.map > out/work/twn$c.prg; done
 python3 tools/build/pack.py || exit 1                 # GAME compresso ZX0 -> out/work/game.zx0 + out/work/pack.inc
 # START (avvio del gioco): deve conoscere i byte di GAME + MENU + GFX0 (per dosare il titolo)
 GODM=$(grep -E '^godmode\s*=' out/work/game.lbl | awk '{print $3}')      # (11/11) byte del god mode in GAME: START ci scrive il POKE 1021
@@ -47,7 +51,7 @@ python3 -c "import sys; sys.path.insert(0,'tools/build'); import pack; z,_=pack.
 64tass -a $INC src/barbarian.asm -o out/work/barbarian.prg -L out/work/barbarian.lst -l out/work/barbarian.lbl > out/work/barbarian.log 2>&1 || { grep -v '^$' out/work/barbarian.log | head -20; exit 1; }
 # jukebox (prova di brani ed effetti con il player del gioco): sui due dischi (11/11; da rifare piu' bello, TODO E8)
 64tass -a -q $INC -D AUTOPLAY=-1 src/jukebox.asm -o out/work/jukebox.prg -l out/work/jukebox.lbl > out/work/jukebox.log 2>&1 || { grep -v '^$' out/work/jukebox.log | head -20; exit 1; }
-echo "moduli: lobby $(( $(stat -c %s out/work/lobby.prg) - 2 )) B, mappa villaggio $(stat -c %s out/work/town.map) B (max 1792)"
+echo "moduli: lobby $(( $(stat -c %s out/work/lobby.prg) - 2 )) B, villaggi (intestazione + mappa, max 1888 B): $(for c in 1 2 3 4 5; do printf "%s " $(stat -c %s out/work/town$c.map); done)"
 echo "$MENUMSG"
 ls -la out/work/game.prg
 python3 - <<'PY'

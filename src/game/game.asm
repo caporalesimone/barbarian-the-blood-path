@@ -2139,6 +2139,8 @@ _kb
         bne _nb
         lda #1
         sta c_won
+        lda #CHAPTERS+1         ; (15/11, prototipo) l'ultimo boss apre la discesa nel cratere: la citta' dell'Abisso (TWN5)
+        sta c_unl
         ldx #RESP_FINAL         ; (11/11) il boss finale regala gettoni respec
 -       jsr resp_add
         dex
@@ -3393,11 +3395,14 @@ go_portal
 _ft     lda c_retlvl
         ldx #2
         jmp change_level
-go_tdown                        ; cripta: primo piano del capitolo (12/11)
+go_tdown                        ; ingresso del sotterraneo: primo piano del capitolo (12/11)
         lda c_chap
+        cmp #CHAPTERS+1         ; (15/11) citta' dell'Abisso: la Bocca non porta ancora da nessuna parte (i piani non ci sono)
+        bcs go_tdx
         jsr chap_first
         ldx #0
         jmp change_level
+go_tdx  rts
 
 ; azioni sul tile: Fire (appena premuto) su scale / portali / negozi / casa / bauli.
 ; Il nome del luogo e' gia' mostrato in alto (loc_check).
@@ -3713,8 +3718,9 @@ _ml     ldx bs_m
         jmp _end
 +
         lda malive,x
-        beq _nm
-        lda mxl,x
+        bne +
+        jmp _nm
++       lda mxl,x
         sta ent_x
         lda mxh,x
         sta ent_x+1
@@ -3739,9 +3745,12 @@ _ml     ldx bs_m
         adc #1
         cmp lb_boss
         bne _nob
+        ldy c_chap              ; (15/11) boss del capitolo: il suo sprite sta nel posto del boss finale (file del piano
+        lda cb_col-1,y          ; del boss, tools/build/monsters.py SETS), con il suo colore
         ldy #T_FINAL
+        bne +
 _nob    lda mon_col,y
-        sta sh_col,x
++       sta sh_col,x
         lda mon_ptr,y
         sta tmp0
         lda bs_m                ; boss del piano: colore lampeggiante
