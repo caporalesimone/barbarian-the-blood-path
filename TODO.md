@@ -23,7 +23,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
 | 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D8, D3 |
-| 7 | [Loader e disco](#7--loader-e-disco) | M8, M3, M4, M5 |
+| 7 | [Loader e disco](#7--loader-e-disco) | M8, M10, M3, M4, M5 |
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
@@ -247,6 +247,26 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - Krill's Loader è nel gioco ([docs/FastLoader.md](docs/FastLoader.md)). Cache e precaricamento sono stati tolti prima: **da
   decidere con il committente quali reintrodurre** guardando le misure (villaggio → piano 1 3,1 s, modulo MENU 2,3 s, tema ~1 s):
   oggi nessuna sembra necessaria per i caricamenti; i salvataggi sono il problema (B15). Da provare su hardware reale (I1).
+
+### M10 (16/11) Menu BARBARIAN con Krill incluso: carica LORE, HELP e START con Krill — M
+- **Richiesta del committente (16/11)**: il menu iniziale va rivisto in modo che **parta con Krill's Loader gia' incluso** (install nel file
+  `BARBARIAN`, residente a `$0200`) e lo usi per caricare **LORE, HELP e START/gioco** (`loadraw`) invece del KERNAL con il trampolino.
+  Cosi' sparisce anche il doppio caricamento che si vede oggi (BARBARIAN carica START con il KERNAL, START poi carica il resto con Krill).
+- **Cosa implica** (analisi del 16/11, da `docs/FastLoader.md`; nessuna misura fatta):
+  - Il residente occupa `$0200-$0312`, compreso il buffer tastiera del KERNAL (`$0277-$0280`): dopo l'install **l'IRQ del KERNAL non puo'
+    scandire la tastiera** (scriverebbe sul codice di Krill). Il menu (e `HELP`) non possono piu' usare `GETIN`: servono un IRQ proprio e la
+    lettura diretta della matrice (come `read_input` del gioco) per W/S, RETURN, spazio, 1-4 e le pagine dell'help.
+  - Dopo l'install nessun programma puo' usare `LOAD`: i ritorni a BARBARIAN (da LORE, HELP, `bb_menu` della lobby) passano da Krill, senza
+    `IOINIT`/`RESTOR`/pulizia delle pagine 2-3 del trampolino; START e LORE non reinstallano (oggi installano e LORE disinstalla);
+    `exit game` e `bb_quit` fanno `krill_uninstall`, azzeramento delle pagine 2-3 e reset.
+  - `BARBARIAN` passa da ~4,8 a ~8 KB (install 3225 B + residente 277 B), START si alleggerisce di 3,2 KB; piu' tempo dal `RUN` al menu
+    (install del drive), oppure install alla prima scelta (ma allora il menu resta senza Krill fino a li').
+  - Test da rivedere: BOOT-10..14, TITLEMUSIC-10/11, LORE-10/11, `POKE 1020,1`; da provare su vc64web e (I1) su hardware reale.
+  - Guadagno atteso: i tre LOAD del KERNAL (START 7,6 KB, LORE 8,9 KB, HELP 9,6 KB) diventano letture Krill; collega con E10 (con gli IRQ
+    accesi nei caricamenti la musica potrebbe continuare).
+- **Non verificato**: i tempi attuali e quelli attesi (da misurare prima: `START`, `LORE`, `HELP` con il KERNAL in VICE); il comportamento
+  dell'install di Krill dal menu su vc64web.
+- Alternativa piu' piccola (non valutata a fondo): lasciare il KERNAL al menu e ridurre solo il primo caricamento (START).
 
 ### M3 Prestazioni dei caricamenti (ex J9) — M
 - **Stato (12/11 sera, VICE, 42 file sul disco)**: scale nello stesso capitolo **2,24 s** (`PERF-DISK-13`; obiettivo del
