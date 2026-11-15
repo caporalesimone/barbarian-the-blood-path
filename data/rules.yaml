@@ -52,11 +52,16 @@ skills:
 
 # Pozioni: cura FISSA (rossa, gialla) o a formula (viola: L = livello, HP = vita massima); ricarica = nessuna pozione
 # per quel tempo dopo averla bevuta. Dove escono: i piani 1..floors sono divisi in 3 zone (zone: frazioni del numero di
-# piani); dentro la zona il peso e' 1, fuori cala per ogni piano di distanza secondo `ramp` (0 oltre). Nell'Abisso
-# solo la viola. Cosi' il piano massimo si cambia senza rifare i conti.
+# piani); dentro la zona il peso e' 1, fuori cala per ogni piano di distanza secondo `ramp` (0 oltre). Cosi' il piano
+# massimo si cambia senza rifare i conti. Nell'Abisso (piani 21..255, livello del PG = piano) la cura si calcola dal
+# LIVELLO del PG (colonna heal_abyss del database) e le pozioni che escono dipendono dal PIANO (`abyss_drop`, 15/11).
 potions:                   # the potions themselves: data/items/items.tsv (type potion); here only where they drop
   zones: [0.35, 0.7]       # fine della zona 0 e della zona 1 come frazione dei piani (20 piani: 1-7, 8-14, 15-20)
   ramp: [0.4, 0.15, 0.05]  # peso a 1, 2, 3 piani dalla propria zona (oltre: 0); es. gialla al piano 7: 0.4, al 6: 0.15, al 5: 0.05
+  # Abisso (decisione del committente, 15/11): [a, b] = peso 1 fino al piano a, poi cala in linea retta (b+1-piano)/(b+1-a)
+  # per a < piano <= b, 0 oltre b. La viola esce sempre (peso 1): dal piano b della gialla in poi solo viole.
+  # Rosse sui piani 21-40, gialle 21-70, dal 71 solo viole. Non e' ancora nel codice (TODO H3: l'Abisso non c'e'; pot_heal si').
+  abyss_drop: {red: [30, 40], yellow: [50, 70]}
   drink_below: 0.35        # il bot beve sotto il 35% della vita
 
 # ---------------------------------------------------------------- oggetti

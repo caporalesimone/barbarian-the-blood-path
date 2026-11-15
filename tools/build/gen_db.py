@@ -300,6 +300,7 @@ def main():
     o(f"REPAIR_PC   = {byte(du['repair_cost_percent'], 'repair_cost_percent')}")
     chk(du["min"] + du["floor_per_ilvl"] * max(it.get("ilvl", 0) for _, ct, it in items if it.get("loot") is not False) < du["max"], "durability: minimo pesato oltre il massimo")
     cat, price, ilvl, dn, ds, val, rate, pen, fl = ([] for _ in range(9))
+    pab = {}                                  # (15/11, TODO J4) cura nell'Abisso (livello PG > MAXLEVEL): colonna heal_abyss delle pozioni
     for k, ct, it in items:
         cat.append(0 if ct == "none" else CATS.index(ct) + 1)
         price.append(word(it.get("price", 0), f"{k}.price"))
@@ -321,6 +322,9 @@ def main():
             m = re.fullmatch(r"(?:(\d+)\*L\+)?(\d+)", str(it["heal"]).replace(" ", ""))
             chk(m is not None, f"{k}.heal: formati ammessi 'B' o 'A*L+B'")
             a, v = int(m.group(1) or 0), int(m.group(2))
+            ma = re.fullmatch(r"(?:(\d+)\*L\+)?(\d+)", str(it.get("heal_abyss", "")).replace(" ", ""))
+            chk(ma is not None, f"{k}.heal_abyss: formati ammessi 'B' o 'A*L+B'")
+            pab[k] = (byte(int(ma.group(1) or 0), f"{k}.heal_abyss A"), byte(int(ma.group(2)), f"{k}.heal_abyss B"))
             chk(it["cooldown"] % 2 == 0, f"{k}.cooldown: deve essere pari (si salva /2)")
             r = it["cooldown"] // 2
             f = it["color"]
@@ -336,6 +340,12 @@ def main():
     o.bytes("itrate", rate)              # arma: cadenza (fotogrammi); pozione: ricarica / 2
     o.bytes("itpen", pen)
     o.bytes("itfl", fl)                  # arma: bit0 due mani, bit2 senza modificatori; armatura: limite DES; pozione: colore
+    # (15/11, TODO J4) cura delle pozioni nell'Abisso (livello del PG > MAXLEVEL), indice = id - I_POTR (rossa, gialla, viola):
+    # cura = pab_val + pab_dn x livello, come itval / itdn nel dungeon (pot_heal, combat.asm)
+    chk(ids["yellow"] == ids["red"] + 1 and ids["violet"] == ids["red"] + 2, "pozioni: rossa, gialla, viola devono essere consecutive nella tabella")
+    o.bytes("pab_dn", [pab[k][0] for k in ("red", "yellow", "violet")])
+    o.bytes("pab_val", [pab[k][1] for k in ("red", "yellow", "violet")])
+    o("        .cerror I_POTY != I_POTR + 1 || I_POTV != I_POTR + 2, \"pab_dn / pab_val: pozioni consecutive (rossa, gialla, viola)\"")
     o()
 
     # ------------------------------------------------------------ bottino

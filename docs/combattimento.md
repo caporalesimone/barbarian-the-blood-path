@@ -137,14 +137,15 @@ Riparazione dal fabbro: [Villaggio](villaggio.md#negozi). Simulazione: `tools/si
 
 | Pozione | Cura | Ricarica (blocco di tutte le pozioni) | Dove esce |
 |---|---|---|---|
-| red (minor healing) | 20 | 250 fot. (5 s) | piani 1–10 |
-| yellow (healing potion) | 60 | 350 fot. (7 s) | piani 5–17 |
-| violet (greater healing) | 40 + 4 × livello | 500 fot. (10 s) | dal piano 12 |
+| red (minor healing) | 20 (Abisso 30) | 250 fot. (5 s) | piani 1–10 |
+| yellow (healing potion) | 50 (Abisso 75) | 350 fot. (7 s) | piani 5–17 |
+| violet (greater healing) | 40 + 4 × livello (Abisso 28 + 5 × livello) | 500 fot. (10 s) | dal piano 12 |
 
 - Tasti 1–4 = i 4 posti della cintura; dall'inventario con Fire.
 - Non si beve a vita piena né durante la ricarica (il posto resta pieno). La ricarica blocca **tutte** le
   pozioni; nell'HUD le icone diventano blu finché dura.
-- Cura = `itval` + `itdn` × livello, fino alla vita massima.
+- Cura = `itval` + `itdn` × livello, fino alla vita massima; oltre il livello 20 (Abisso) `pab_val` + `pab_dn` × livello
+  (colonna `heal_abyss`, [oggetti.md](oggetti.md#cura-delle-pozioni-1511-todo-j4)).
 
 ## Esperienza e livelli (`add_xp`)
 

@@ -105,7 +105,7 @@ def main():
             rows.append([f, name, cell(rb), "%.1f" % rb["pots"]])
     out.append("## Pozioni contro il boss del piano\n\n" + md(["piano", "cintura", "boss", "pozioni bevute"], rows))
     rows = []
-    for f in list(range(1, NF + 1)) + [NF + 1, NF + 20]:
+    for f in list(range(1, NF + 1)) + [NF + 1, NF + 10, NF + 20, 45, 55, 70, 71, 100]:
         w = RU.potion_weights(f)
         tot = sum(w.values()) or 1
         rows.append([f] + ["%.0f%%" % (100 * w[k] / tot) for k in ("red", "yellow", "violet")])

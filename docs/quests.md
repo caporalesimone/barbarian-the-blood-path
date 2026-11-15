@@ -968,7 +968,7 @@ page 3/9           [skills]
 
 page 4/9           [potions and the belt]
  red     heals 20       recharge 5 s
- yellow  heals 60       recharge 7 s
+ yellow  heals 50       recharge 7 s
  violet  heals 40 + 4 x level   recharge 10 s
  potions go on the belt (keys 1-4). drinking
  blocks every potion for a while: the icons

@@ -30,14 +30,58 @@ Ogni oggetto ha un id (1..17, 0 = niente) e le tabelle `itcat` (categoria), `itp
 | 10 | copper ring | anello | +1 | al modificatore di FOR, DES o COS | 7 | 700 |
 | 11 | silver ring | anello | +2 | | 12 | 2500 |
 | 12 | gold ring | anello | +3 | | 17 | 8000 |
-| 13 | minor healing (red) | pozione | cura 20 | ricarica 5 s | — | 25 |
-| 14 | healing potion (yellow) | pozione | cura 60 | ricarica 7 s | — | 90 |
-| 15 | greater healing (violet) | pozione | cura 40 + 4 × livello | ricarica 10 s | — | 250 |
+| 13 | minor healing (red) | pozione | cura 20 (Abisso 30) | ricarica 5 s | — | 25 |
+| 14 | healing potion (yellow) | pozione | cura 50 (Abisso 75) | ricarica 7 s | — | 90 |
+| 15 | greater healing (violet) | pozione | cura 40 + 4 × livello (Abisso 28 + 5 × livello) | ricarica 10 s | — | 250 |
 | 16 | portal scroll | pergamena | portale per il villaggio | pila fino a 10 (08/11, prima 4) | 1 | 60 |
 
 `itfl`: armi bit 0 = due mani, bit 1 = libero (era finesse, tolto 08/11), bit 2 = senza modificatori (non usato dal 07/11: erano i pugni); armature = limite al
 modificatore di DES (99 = nessuno); pozioni = colore (2 rosso, 7 giallo, 4 viola). `itrate` delle pozioni =
-ricarica / 2. Il livello oggetto 0 degli oggetti base li fa uscire in qualunque tesoro ([Bottino](bottino.md)).
+ricarica / 2.
+
+### Cura delle pozioni (15/11, TODO J4)
+Due colonne di `data/items/items.tsv`, formato `B` oppure `A*L+B` (L = livello del PG): `heal` nel dungeon (livello PG <= 20,
+`MAXLEVEL`) e `heal_abyss` nell'Abisso (livello > 20). `pot_heal` (`combat.asm`) usa `itval`/`itdn` fino al 20 e `pab_val`/`pab_dn`
+(emessi da `gen_db.py`, 3 byte ciascuno: rossa, gialla, viola) oltre; la cura è tagliata alla vita massima. Prezzi di negozio
+invariati.
+
+**Interpretazione**: il livello del PG decide quanto cura una pozione; il piano decide quali pozioni escono. Nell'Abisso livello = piano per
+scelta di progetto.
+
+| | rossa | gialla | viola |
+|---|---|---|---|
+| dungeon (`heal`) | 20 | 50 (era 60) | 4 × L + 40 |
+| Abisso (`heal_abyss`) | 30 | 75 | 5 × L + 28 |
+
+Percentuale della vita massima (vita da `rules.py pg_hpmax`):
+
+| livello | vita | rossa | gialla | viola |
+|---|---|---|---|---|
+| 1 | 25 | 80% | piena | piena |
+| 5 | 62 | 32% | 81% | 97% |
+| 8 | 89 | 22% | 56% | 81% |
+| 10 | 107 | 19% | 47% | 75% |
+| 14 | 144 | 14% | 35% | 67% |
+| 15 | 153 | 13% | 33% | 65% |
+| 20 | 198 | 10% | 25% | 61% |
+| 21 (Abisso) | 207 | 14% | 36% | 64% |
+| 30 (Abisso) | 318 | 9% | 24% | 56% |
+| 40 (Abisso) | 419 | 7% | 18% | 54% |
+| 60 (Abisso) | 679 | 4% | 11% | 48% |
+| 80 (Abisso) | 980 | 3% | 8% | 44% |
+| 100 (Abisso) | 1321 | 2% | 6% | 40% |
+| 150 (Abisso) | 2273 | 1% | 3% | 34% |
+| 200 (Abisso) | 3425 | 1% | 2% | 30% |
+| 255 (Abisso) | 4872 | 1% | 2% | 27% |
+
+La viola cura tutta la vita solo ai livelli 1–4 (4 × L + 40 supera la vita); `piena` = cura tagliata alla vita massima.
+
+**Pozioni che escono nell'Abisso** (non ancora implementato in asm, TODO H3; la formula è in `data/rules.yaml`
+`potions.abyss_drop: {red: [30, 40], yellow: [50, 70]}`): peso 1 fino ad `a`, poi (b + 1 − piano) / (b + 1 − a) per a < piano <= b, 0 oltre `b`;
+la viola sempre 1. Quindi le rosse escono ai piani 21–40, le gialle 21–70, dal piano 71 solo le viola. `rules.py potion_weights`
+e `abyss_weights` la calcolano; i simulatori usano `heal_abyss` oltre il livello 20.
+
+Test: `POT-10` (sanity, ogni pozione a 8 livelli contro la formula in Python), `POTION-10..12` (in gioco). Il livello oggetto 0 degli oggetti base li fa uscire in qualunque tesoro ([Bottino](bottino.md)).
 
 ### Nomi: lunghezza massima (08/11)
 Il nome si mostra in colonne da **17 caratteri** (`ui_item` riempie di spazi fino a 17): zaino e baule della locanda,

@@ -79,7 +79,7 @@ def groups(ch, d):
 def level_row(ch, local, fights):
     d = depth(ch, local)
     h = hero(d)
-    pt = ["violet"] * 4 if d > NF else None
+    pt = RU.abyss_belt(d) if d > NF else None      # (15/11, J4) Abisso: cintura attesa da potions.abyss_drop (heal_abyss)
     row = {"chapter": ch["id"], "level": local, "depth": d}
     for name, grp in groups(ch, d).items():
         r = S.series(h, grp, d, n=fights, boss_idx=(0 if name == "level boss" else None), potions=pt)
@@ -109,7 +109,7 @@ def report(ids=None, fights=100, step=16):
         print("== chapter %d: %s, local levels 1-%d, global depth %d-%d (%s)" % (
             ch["id"], ch["name"], ch["n_levels"], ch["first_depth"], ch["last_depth"],
             "in the game" if ch["implemented"] else "design: not in the game code"))
-        print("  lvl depth | win% 1 base 3 base 1 strong  boss | chestLvl  gold   (bestiary of the chapter; no potions, 4 violet in the Abyss)")
+        print("  lvl depth | win% 1 base 3 base 1 strong  boss | chestLvl  gold   (bestiary of the chapter; no potions in the dungeon, in the Abyss the belt of potions.abyss_drop)")
         for l in levels(ch, step):
             r = level_row(ch, l, fights)
             rows.append(r)

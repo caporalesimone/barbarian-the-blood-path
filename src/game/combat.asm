@@ -875,17 +875,26 @@ _r      rts
 
 ; ------------------------------------------------------------------ pozioni
 ; X = posto della cintura (0..3): beve la pozione (se la ricarica e' finita e la vita non e' piena)
-; (11/11, O5) cura di una pozione al livello del PG: Y = oggetto -> mu0/mu1 = itval + itdn x c_lvl, A = mu0
+; (11/11, O5) cura di una pozione al livello del PG: Y = oggetto -> mu0/mu1 = itval + itdn x c_lvl (livello > MAXLEVEL: pab_val + pab_dn x c_lvl), A = mu0
 ; (Y conservato: mul16x8 non lo tocca). Usata da drink e dalla scheda dell'oggetto (ui.asm)
 pot_heal:
+        lda c_lvl               ; (15/11, TODO J4) livello del PG oltre MAXLEVEL (Abisso): colonna heal_abyss del database
+        cmp #MAXLEVEL+1         ; (pab_val + pab_dn x livello, indice = pozione - I_POTR); sotto: itval + itdn x livello
+        bcs _ab
+        lda itval,y
+        pha
         lda itdn,y
-        sta mw_l
+        bcc _m                  ; (C = 0 dal confronto)
+_ab     lda pab_val-I_POTR,y
+        pha
+        lda pab_dn-I_POTR,y
+_m      sta mw_l
         lda #0
         sta mw_h
         lda c_lvl
         sta mw_k
         jsr mul16x8
-        lda itval,y
+        pla
         clc
         adc mu0
         sta mu0

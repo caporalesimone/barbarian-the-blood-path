@@ -33,7 +33,8 @@ read it through `items_db.load_rules()`, which merges the rows into the `data/ru
 | `ac` | armor, shield | armor class bonus |
 | `armor_type` | armor | `light`, `medium`, `heavy` (DEX modifier cap: `dex_cap` in `rules.yaml`) |
 | `bonus` | ring | +N to the modifier of STR, DEX or CON (chosen when the ring is created) |
-| `heal` | potion | healed HP: a number or a formula (`L` = level, e.g. `4*L+40`) |
+| `heal` | potion | healed HP in the dungeon (hero level L <= 20): a number or a formula (`L` = hero level, e.g. `4*L+40`) |
+| `heal_abyss` | potion | healed HP in the Abyss (hero level L > 20, floors 21..255, level = floor): same format as `heal` (15/11, TODO J4); `gen_db.py` emits it as `pab_dn` / `pab_val`, read by `pot_heal` when the hero level is above `MAXLEVEL` |
 | `cooldown` | potion | frames without any potion after drinking (50 = 1 s) |
 | `zone` | potion | drop zone (0, 1, 2: `potions.zones` / `ramp` in `rules.yaml`) |
 | `rarity` | potion | `common` (others: future) |

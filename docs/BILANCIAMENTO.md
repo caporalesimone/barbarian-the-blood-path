@@ -82,23 +82,36 @@ Dopo ogni azione: ricarica globale 0,2 s (come oggi).
 ## 4. Pozioni
 
 Cura **fissa** (non in percentuale): la rossa vale molto ai primi piani e nulla dopo, la gialla nei piani medi, la
-viola scala con il livello ed è l'unica dell'Abisso.
+viola scala con il livello. Dal 15/11 (TODO J4) la cura ha due colonne: dungeon (livello PG <= 20) e Abisso (`heal_abyss`);
+gialla 60 -> 50 nel dungeon. Valori, percentuali per livello e pozioni dell'Abisso: [oggetti.md](oggetti.md#cura-delle-pozioni-1511-todo-j4).
+Controllo con i simulatori (n = 1500, 20 piani): la gialla a 50 invece di 60 cambia solo i piani 4–11 e di poco (piano 11 contro il
+boss 68,3% -> 67,5%, vita finale 24,6 -> 22,7); media delle vittorie contro il boss 85,3% -> 85,2%, contro 3 base 99,8% invariato.
+Con 55: 85,3%. Nessuna finestra obiettivo rotta: resta 50.
 
 | pozione | cura | ricarica (nessuna pozione per) | esce nei piani (20 piani) |
 |---|---|---|---|
-| rossa (minor healing) | 20 | 5 s | 1–7 (poi 8: 29%, 9: 13%, 10: 5%) |
-| gialla (healing) | 60 | 7 s | 8–14 (prima 7: 29%, 6: 13%, 5: 5%; dopo 15: 29%, 16: 13%, 17: 5%) |
-| viola (greater healing) | 4 × livello + 40 | 10 s | 15–20 e tutto l'Abisso (prima 14: 29%, 13: 13%, 12: 5%) |
+| rossa (minor healing) | 20 (Abisso 30) | 5 s | 1–7 (poi 8: 29%, 9: 13%, 10: 5%) |
+| gialla (healing) | 50 (Abisso 75) | 7 s | 8–14 (prima 7: 29%, 6: 13%, 5: 5%; dopo 15: 29%, 16: 13%, 17: 5%) |
+| viola (greater healing) | 4 × livello + 40 (Abisso 5 × livello + 28) | 10 s | 15–20 e tutto l'Abisso (prima 14: 29%, 13: 13%, 12: 5%) |
 
 | livello | vita | rossa | gialla | viola |
 |---|---|---|---|---|
 | 1 | 25 | 80% | piena | piena |
-| 5 | 57 | 35% | piena | piena |
-| 9 | 93 | 22% | 65% | 82% |
-| 13 | 129 | 16% | 47% | 71% |
-| 20 | 192 | 10% | 31% | 62% |
-| 100 | 1060 | 2% | 6% | 42% |
-| 255 | 3507 | 1% | 2% | 30% |
+| 5 | 62 | 32% | 81% | 97% |
+| 8 | 89 | 22% | 56% | 81% |
+| 10 | 107 | 19% | 47% | 75% |
+| 14 | 144 | 14% | 35% | 67% |
+| 15 | 153 | 13% | 33% | 65% |
+| 20 | 198 | 10% | 25% | 61% |
+| 21 (Abisso) | 207 | 14% | 36% | 64% |
+| 30 (Abisso) | 318 | 9% | 24% | 56% |
+| 40 (Abisso) | 419 | 7% | 18% | 54% |
+| 60 (Abisso) | 679 | 4% | 11% | 48% |
+| 80 (Abisso) | 980 | 3% | 8% | 44% |
+| 100 (Abisso) | 1321 | 2% | 6% | 40% |
+| 150 (Abisso) | 2273 | 1% | 3% | 34% |
+| 200 (Abisso) | 3425 | 1% | 2% | 30% |
+| 255 (Abisso) | 4872 | 1% | 2% | 27% |
 
 Dove escono: formula, non tabella. Il dungeon è diviso in tre zone (`potions.zones`: fine della zona 0 al 35% dei
 piani, della zona 1 al 70%); dentro la propria zona una pozione ha peso 1, a 1/2/3 piani di distanza `ramp` =

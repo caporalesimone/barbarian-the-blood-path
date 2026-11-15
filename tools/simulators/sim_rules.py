@@ -54,7 +54,10 @@ def attack_roll(rng, att, ac, crit=20, adv=False):
 
 def potion_heal(p, hero):
     """cura di una pozione: 'heal' = formula con L (livello) e HP (vita massima), es. "20", "4*L+40", "HP//2";
-    altrimenti heal_percent della vita massima"""
+    altrimenti heal_percent della vita massima. (15/11, TODO J4) Livello del PG > NF (Abisso): 'heal_abyss' (come il codice:
+    pot_heal usa pab_val + pab_dn x livello oltre MAXLEVEL)"""
+    if hero.level > NF and "heal_abyss" in p:
+        return int(eval(str(p["heal_abyss"]), {}, {"L": hero.level, "HP": hero.hpmax}))
     if "heal" in p:
         return int(eval(str(p["heal"]), {}, {"L": hero.level, "HP": hero.hpmax}))
     return hero.hpmax * p["heal_percent"] // 100
@@ -385,14 +388,14 @@ img{max-width:100%;background:#fff;border-radius:6px}</style></head><body><main>
     H.append("<h2>6. Abisso: PG dal livello %d al 255</h2><p>Livello = piano: un piano dell'Abisso per livello. "
              "Mostri: scheda del piano %d + tabella dell'Abisso (data/rules.yaml, void.table: CA, ATT, vita, danno per piano, tarata da "
              "tools/simulators/fit_rules.py perche' il boss con nome cali dal 70%% al 45%% di vittorie). PG: spada vichinga dell'Abisso, piastre, "
-             "magia da +3 a +8, anello d'oro di forza, 4 pozioni viola.</p>" % (NF, NF))
+             "magia da +3 a +8, anello d'oro di forza, 4 pozioni nelle proporzioni dei pesi del piano (potions.abyss_drop: rosse fino al 40, gialle fino al 70, poi solo viola; cura heal_abyss).</p>" % (NF, NF))
     LV = sorted(set([NF, NF + 5, NF + 10, NF + 20, 50, 60, 75, 100, 125, 150, 175, 200, 225, 255]))
     VG = {"1 base": ["demon"], "3 base": ["demon", "skeleton", "zombie"], "1 forte": ["balrog"], "boss": ["balrog"]}
     rows, curves, lim = [], {g: [] for g in VG}, []
     hitc = {"PG": [], "mostri": []}
     for lv in LV:
         fl = lv
-        h = void_hero(lv, potions=["violet"] * 4)
+        h = void_hero(lv, potions=RU.abyss_belt(fl))     # (15/11, J4) cintura attesa all'Abisso (potions.abyss_drop)
         row = [lv, fl, h.hpmax, "+%d" % h.att, h.ac, "%d-%d" % h.dmg_range()]
         for g, grp in VG.items():
             r = series(h, grp, fl, n=max(40, N // 3), seed=lv, boss_idx=(0 if g == "boss" else None))
@@ -433,9 +436,9 @@ img{max-width:100%;background:#fff;border-radius:6px}</style></head><body><main>
     for k, (gname, grp, bi) in enumerate((("3 base", ["demon", "skeleton", "zombie"], None), ("boss", ["balrog"], 0))):
         M = np.zeros((len(FL), len(PL)))
         for j, lv in enumerate(PL):
-            h = void_hero(lv, potions=["violet"] * 4)
+            h = void_hero(lv)
             for i, fl in enumerate(FL):
-                M[i, j] = series(h, grp, fl, n=max(30, N // 6), seed=lv + fl, boss_idx=bi)["winp"]
+                M[i, j] = series(h, grp, fl, n=max(30, N // 6), seed=lv + fl, boss_idx=bi, potions=RU.abyss_belt(fl))["winp"]
         ax = axs[k]
         im = ax.imshow(M, origin="lower", cmap="RdYlGn", vmin=0, vmax=100, aspect="auto")
         ax.set_xticks(range(len(PL)))

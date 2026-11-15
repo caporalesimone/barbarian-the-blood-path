@@ -265,15 +265,48 @@ def hit_chance(att, ac):
 
 # ------------------------------------------------------------------ pozioni
 def potion_zone(floor):
-    """zona (0, 1, 2) del piano nel dungeon; oltre il dungeon: 2 (solo viola)"""
+    """zona (0, 1, 2) del piano nel dungeon; oltre il dungeon: 2 (la viola; le altre pozioni escono ancora fino al piano
+    dato da potions.abyss_drop: vedi abyss_weights / abyss_belt)"""
     z = R["potions"]["zones"]
     if floor > NF:
         return 2
     return 0 if floor <= round(z[0] * NF) else (1 if floor <= round(z[1] * NF) else 2)
 
 
+def abyss_weights(floor):
+    """(15/11, TODO J4) peso relativo di ogni pozione al piano dell'Abisso (floor > NF), da potions.abyss_drop:
+    [a, b] = peso 1 fino al piano a, poi (b+1-piano)/(b+1-a) per a < piano <= b, 0 oltre b; la viola sempre 1"""
+    ad = R["potions"]["abyss_drop"]
+    out = {}
+    for k, v in R["potions"].items():
+        if not isinstance(v, dict) or "zone" not in v:
+            continue
+        if k in ad:
+            a, b = ad[k]
+            out[k] = 1.0 if floor <= a else ((b + 1 - floor) / (b + 1 - a) if floor <= b else 0.0)
+        else:
+            out[k] = 1.0
+    return out
+
+
+def abyss_belt(floor, slots=4):
+    """cintura attesa all'Abisso: `slots` pozioni nelle proporzioni dei pesi di abyss_weights (resti piu' grandi), in ordine
+    di zona (rossa, gialla, viola)"""
+    w = abyss_weights(floor)
+    ks = sorted(w, key=lambda k: R["potions"][k]["zone"])
+    tot = sum(w.values())
+    q = [slots * w[k] / tot for k in ks]
+    n = [int(x) for x in q]
+    for i in sorted(range(len(ks)), key=lambda i: q[i] - n[i], reverse=True)[:slots - sum(n)]:
+        n[i] += 1
+    return [k for k, c in zip(ks, n) for _ in range(c)]
+
+
 def potion_weights(floor):
-    """peso relativo di ogni pozione al piano: 1 nella propria zona, ramp[d-1] a d piani di distanza, 0 oltre"""
+    """peso relativo di ogni pozione al piano: 1 nella propria zona, ramp[d-1] a d piani di distanza, 0 oltre
+    (Abisso, piano > NF: abyss_weights)"""
+    if floor > NF:
+        return abyss_weights(floor)
     z = R["potions"]["zones"]
     b = [1, round(z[0] * NF) + 1, round(z[1] * NF) + 1, 10 ** 6]      # primo piano di ogni zona (+ fine)
     out = {}

@@ -16,7 +16,7 @@ import rules as RU
 from rules import R, NF, VMAX, hit_chance, monster
 import sim_rules as S
 
-POTS = ["red", "red", "yellow", "violet"]      # cintura di riferimento nel dungeon (nell'Abisso: 4 viola)
+POTS = ["red", "red", "yellow", "violet"]      # cintura di riferimento nel dungeon (nell'Abisso: RU.abyss_belt, da potions.abyss_drop)
 
 
 def hit_spread(acg, attg):
@@ -130,7 +130,7 @@ def fit_abyss(n):
 
     for V in VS:
         lv = fl = NF + V
-        h = RU.void_hero(lv, potions=["violet"] * 4)
+        h = RU.void_hero(lv, potions=RU.abyss_belt(fl))       # (15/11, J4) cintura attesa all'Abisso (potions.abyss_drop)
         tgt = 70 - 25 * V / VMAX
         best = None
         for hm in [0.5 + 0.25 * i for i in range(24)]:

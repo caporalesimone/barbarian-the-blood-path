@@ -28,7 +28,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14 |
-| 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
+| 12 | [Idee per dopo](#12--idee-per-dopo) | J3, J2, J1 |
 | Z | [Note urgenti](#z--note-urgenti) | Z4 |
 
 ---
@@ -422,6 +422,7 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   riscalato, solo pozioni viola; morte −10% xp; normal / nightmare; città dell'Abisso con prezzi ribilanciati; salvataggio
   dei piani (D-CAP-3). Gettoni respec nei bauli (A1). Test: PERF-22 (cammino nei piani 21–255, oggi SKIP) e PERF-23
   (generatore su tutti i 255 piani: già oggi 0,34–0,84 s). Il generatore regge già i piani oltre il 20.
+- Pozioni nell'Abisso: pozioni per piano da `rules.yaml` `potions.abyss_drop`; `pot_heal` è già pronta (colonna `heal_abyss`, `docs/oggetti.md`).
 
 ---
 
@@ -438,7 +439,6 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 
 ## 12 — Idee per dopo
 
-- **J4** — XS. Pozioni a cura fissa o a formula: confermare col committente che vada bene com'è.
 - **J3** — S. Sprite del boss finale solo nel tema 8; da verificare con D8.
 - **J2** — S-M. Anello della velocità (ex 2.7): riuso di `fz_move`; dopo E1.
 - **J1** — M. Prefetch nuovo (salvataggio del piano in sottofondo, record N±1, brano successivo): 300–500 B + ~1 KB di buffer.

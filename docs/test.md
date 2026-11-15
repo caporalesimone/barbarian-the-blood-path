@@ -311,8 +311,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PERF-OPT-10` | mark_explored: the explored map equals the reference (9 x 7 cells around the hero) at the edges and inside |
 | `PERF-OPT-11` | HUD: a hit taken redraws only the HP panel, experience only the XP panel (hud_pend), not the whole HUD |
 | `POTION-10` | minor healing (red): +20, 5 s cooldown, red in the belt, capped at max hp |
-| `POTION-11` | healing potion (yellow): +60, 7 s cooldown, yellow in the belt, capped at max hp |
-| `POTION-12` | greater healing (violet): +40 + 4 x level at levels 1, 10, 50, 99; 10 s cooldown, violet |
+| `POTION-11` | healing potion (yellow): +50, 7 s cooldown, yellow in the belt, capped at max hp |
+| `POTION-12` | greater healing (violet): +40 + 4 x level at levels 1, 10 and +28 + 5 x level (Abyss) at 50, 99; 10 s cooldown, violet |
 | `BELT-11` | every belt slot: its key drinks only that slot; the key of an empty slot does nothing |
 | `BELT-12` | full hp: the potion is not drunk (stays in the belt, no cooldown) |
 | `SHOP-BELT-10` | alchemist: potion with a full belt refused (gold kept); one free slot: chosen, the potion goes there |

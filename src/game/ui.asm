@@ -1517,7 +1517,7 @@ it_dur  lda ui_durm             ; durabilita' " d120/200" (solo oggetti che si u
 _x      rts
 
 ; caratteristica principale dell'oggetto ui_sel (bonus tmp5), al massimo 9 caratteri:
-; "dmg 2d6+3", "ac +5", "+2 str", "heal 60", "portal"
+; "dmg 2d6+3", "ac +5", "+2 str", "heal 50", "portal"
 it_prim:
         ldx ui_sel
         lda itcat,x

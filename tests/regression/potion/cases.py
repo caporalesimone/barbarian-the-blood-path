@@ -8,7 +8,9 @@ from lib.play import new_game, key, BELT_KEYS, fire_to, find, alive, mpos, floor
 BELT_SLOTS = 4
 CHAIN = True                                                # (one session: after a failure the game state is unknown)
 HUD_BELT = 0xd800 + 22 * 40 + 29                           # colour of belt slot j: HUD_BELT + 2 j (hud_p3)
-HEAL = {13: (20, 0), 14: (60, 0), 15: (40, 4)}              # potion id -> (fixed, per level): docs/oggetti.md
+HEAL = {13: (20, 0), 14: (50, 0), 15: (40, 4)}              # potion id -> (fixed, per level): docs/oggetti.md
+HEAL_ABYSS = {13: (30, 0), 14: (75, 0), 15: (28, 5)}        # same from level 21 (the Abyss), column heal_abyss
+MAXLEVEL = 20
 COLOUR = {13: 2, 14: 7, 15: 4}                              # red, yellow, violet; 6 (blue) while cooling down
 CD = {13: 250, 14: 350, 15: 500}                            # cooldown in frames (itrate x 2): 5, 7, 10 s
 
@@ -43,7 +45,8 @@ def drink_check(g, pid, lvl):
     g.poke(L["c_lvl"], lvl)
     cool_off(g); belt(g, pid); hp_setup(g, 1)
     key(g, BELT_KEYS[0], 3)
-    want = 1 + HEAL[pid][0] + HEAL[pid][1] * lvl
+    fixed, per = (HEAL if lvl <= MAXLEVEL else HEAL_ABYSS)[pid]
+    want = 1 + fixed + per * lvl
     hp = g.w16(L["c_hp"])
     check(hp == want, "potion %d level %d: hp %d (expected %d)" % (pid, lvl, hp, want))
     check(g.b(L["c_beltt"]) == 0, "potion %d: the belt slot is not freed" % pid)
@@ -68,12 +71,12 @@ def potion_red(ctx):
     drink_check(ctx["g"], 13, 1)
 
 
-@test("POTION-11", "healing potion (yellow): +60, 7 s cooldown, yellow in the belt, capped at max hp")
+@test("POTION-11", "healing potion (yellow): +50, 7 s cooldown, yellow in the belt, capped at max hp")
 def potion_yellow(ctx):
     drink_check(ctx["g"], 14, 1)
 
 
-@test("POTION-12", "greater healing (violet): +40 + 4 x level at levels 1, 10, 50, 99; 10 s cooldown, violet")
+@test("POTION-12", "greater healing (violet): +40 + 4 x level at levels 1, 10 and +28 + 5 x level (Abyss) at 50, 99; 10 s cooldown, violet")
 def potion_violet(ctx):
     for lvl in (1, 10, 50, 99):
         drink_check(ctx["g"], 15, lvl)

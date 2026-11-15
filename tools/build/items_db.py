@@ -16,7 +16,7 @@ import yaml
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TSV = os.path.join(ROOT, "data", "items", "items.tsv")
 
-COLUMNS = ["id", "category", "type", "name", "hands", "dice", "rate", "pen", "ac", "armor_type", "bonus", "heal",
+COLUMNS = ["id", "category", "type", "name", "hands", "dice", "rate", "pen", "ac", "armor_type", "bonus", "heal", "heal_abyss",
            "cooldown", "zone", "rarity", "color", "ilvl", "price", "shop_level", "tier", "notes"]
 TYPES = {"weapon": "equipment", "armor": "equipment", "shield": "equipment", "ring": "equipment",
          "potion": "consumable", "scroll": "consumable"}
@@ -25,11 +25,12 @@ SECTION = {"weapon": "weapons", "armor": "armors", "shield": "shields", "ring": 
 # columns each type must / may fill (the others must stay empty)
 REQUIRED = {"weapon": ["hands", "dice", "rate", "pen", "ilvl"], "armor": ["ac", "armor_type", "ilvl", "name", "price"],
             "shield": ["ac", "ilvl", "name", "price"], "ring": ["bonus", "ilvl", "name", "price"],
-            "potion": ["heal", "cooldown", "zone", "rarity", "color", "name", "price", "shop_level"],
+            "potion": ["heal", "heal_abyss", "cooldown", "zone", "rarity", "color", "name", "price", "shop_level"],
             "scroll": ["ilvl", "name", "price", "shop_level"]}
 OPTIONAL = {"weapon": ["name", "price"]}
 COMMON = ["id", "category", "type", "tier", "notes"]
-STRINGS = {"dice", "heal", "rarity", "name", "armor_type"}
+STRINGS = {"dice", "heal", "heal_abyss", "rarity", "name", "armor_type"}
+KEEP_DICTS = {"abyss_drop"}               # settings of a section that are dicts but not items (potions.abyss_drop)
 RENAME = {"armor_type": "type"}           # key used in rules.yaml (armors: type light/medium/heavy)
 
 
@@ -95,7 +96,7 @@ def merge(R, rows):
     """Put the items into R (rules.yaml dict): sections in the order of the table; the settings that are not items
     (potions: zones, ramp, drink_below) stay after the items, as in the old rules.yaml."""
     for sec in list(SECTION.values()) + ["void_weapons"]:
-        extra = {k: v for k, v in (R.get(sec) or {}).items() if not isinstance(v, dict)}
+        extra = {k: v for k, v in (R.get(sec) or {}).items() if not isinstance(v, dict) or k in KEEP_DICTS}
         R[sec] = {}
         R[sec + "_extra"] = extra
     for r in rows:
