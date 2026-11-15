@@ -17,7 +17,8 @@ LIM = {
     "menu": 3.1,          # ovl_town: MENU1..3 + unpacking: 1.98 s with 30 files on the disk, 2.97 s with 36 (8 GFX files); limit = measured + 0.1 (12/11)
     "town": 1.5,          # load_gfx 0: the village (GFX0, 3 KB): 1.10-1.31 s; threshold of the owner (12/11)
     "theme": 1.5,         # load_gfx 1: a dungeon theme (GFX1, 2 KB): 0.98 s; 1.34 s on 12/11 (42 files on the disk: TWN1-4, BOSSCH1-3)
-    "song": 0.6,          # snd_get: one song (SNDn): 0.51 s
+    "song": 1.5,          # snd_get: SND0 right after the theme GFX1, a sequence the game never does (15/11: with the
+                          # layout "hubchap" SND0 sits next to MENU, far from GFX1: 1.12 s; it was 0.51 s)
     "hdr": 0.95,          # hdr_read: the hero list (hl, 1 block): 0.62 s
     "load_char": 3.4,     # load_char in the village: hero file (9 blocks) + the village read again: 2.49 s; 2.71 s on 12/11 (disk layout changed: HELP packed); 3.04 s on 12/11 evening (file sizes of the loader changed, TODO M3)
     "save_char": 9.6,     # save_char in the village: read + plugin + 9 blocks + village again: 8.7-9.1 s; 9.45 s on 12/11 (limit of the owner 9.5 + rule "measure + 0.1")
@@ -32,11 +33,12 @@ LIM = {
     # twnC = load_gfx 0 with c_chap = C (the village file alone), inC = the whole entry into village C (change_level to 0: from the
     # first level of the chapter, for 5 from the village as chap_travel does), themeC = load_gfx 2C-1, stairsC = change_level level
     # 1 -> 2 of the chapter, bossC = change_level to the boss level of the chapter (GFX 2C + BOSSCHC)
-    "twn1": 2.2, "twn2": 1.8, "twn3": 2.1, "twn4": 2.0, "twn5": 1.0,         # measured: 1.89, 1.53, 1.79, 1.73, 0.80
-    "in1": 5.0, "in2": 3.8, "in3": 4.1, "in4": 5.4, "in5": 4.4,              # 4.27, 3.29, 3.48, 4.63, 3.74
-    "theme1": 1.3, "theme2": 1.3, "theme3": 1.4, "theme4": 1.3,              # 1.11, 1.07, 1.21, 1.07
-    "stairs1": 1.8, "stairs2": 2.0, "stairs3": 2.3, "stairs4": 2.1,          # 1.53, 1.72, 1.97, 1.74
-    "boss1": 1.6, "boss2": 2.2, "boss3": 1.9,                                # 1.37, 1.83, 1.65
+    "twn1": 1.0, "twn2": 2.2, "twn3": 2.1, "twn4": 2.8, "twn5": 1.6,         # layout hubchap, measured: 0.68, 1.63, 1.56, 2.14, 1.20
+    "in1": 5.7, "in2": 5.3, "in3": 5.0, "in4": 5.0, "in5": 4.6,              # the time depends on the disk phase (rotation, head position): slowest seen on
+                                                                             # 10 phases 4.93, 3.86, 3.84, 3.84, 3.94 (means 4.17, 3.47, 3.49, 3.45, 2.96); in2 4.37 in the suite order
+    "theme1": 1.1, "theme2": 1.1, "theme3": 1.4, "theme4": 0.8,              # 0.72, 0.77, 1.04, 0.46
+    "stairs1": 3.2, "stairs2": 3.2, "stairs3": 3.2, "stairs4": 3.2,          # 1.5-1.7 s, up to 2.54 s depending on the disk phase
+    "boss1": 3.0, "boss2": 3.0, "boss3": 3.0,                                # 1.40-2.42, 2.24, 2.34 (disk phase)
 }
 T = {}
 

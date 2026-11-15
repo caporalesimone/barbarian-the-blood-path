@@ -140,6 +140,39 @@ sequenceDiagram
 - L'install costa circa 3,2 KB in più nel file `START`, letto dal KERNAL (compreso nei 34,5 s). Comprimerlo con ZX0
   dà solo il 13% (3223 → 2807 B): lasciato stare (decisione dell'11/11).
 
+### 7.1 Posizione dei villaggi sul disco e tempi per villaggio (15/11) [MISURATO, tempo emulato]
+
+Richiesta del committente: tutti i villaggi devono caricarsi in un tempo ragionevole; misurare, poi decidere. Misure di un
+agente (test `PERF-DISK-21..25`, cronometro di VICE in cicli: il carico dell'host non le sposta), su cinque disposizioni
+(`TWN_LAYOUT` in `tools/build/mkdisk.sh`). Ingresso completo nel villaggio *c* (`change_level` a 0 dal primo piano del capitolo:
+dissolvenza, `TWNc`, modulo MENU, `gfx_install`, brano), **media / massimo su 10 fasi del disco** (lo stesso ingresso cambia fino a
+1,5–2 s secondo la posizione della testina e la rotazione nel momento in cui parte):
+
+| Disposizione | Villaggio 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| `end`: `TWN1` fra i primi file, `TWN2..5` in fondo (15/11 mattina) | 4,69 / 5,37 | 3,60 / 3,72 | 3,82 / 4,10 | 4,10 / 4,24 | 3,81 / 4,16 |
+| `start`: `TWN1..5` tutti all'inizio | 4,43 / 5,54 | 4,87 / 5,33 | 4,70 / 5,14 | 5,17 / 5,53 | 2,65 / 3,73 |
+| `chapter`: ogni `TWNc` con la grafica del suo capitolo | 4,46 / 4,98 | 3,70 / 3,93 | 3,71 / 3,90 | 3,72 / 3,93 | 2,74 / 2,76 |
+| `hub`: MENU, `SND0`, `TWN1..5` insieme | 3,92 / 4,81 | 4,51 / 4,98 | 4,16 / 4,37 | 4,62 / 4,97 | 2,60 / 3,75 |
+| **`hubchap`** (scelta): MENU, `SND0`, `TWN1`, `FMAP` insieme; `TWN2..4` e `BOSSCH2/3` con la grafica dei loro capitoli; `TWN5` in fondo | **4,17 / 4,93** | **3,47 / 3,86** | **3,49 / 3,84** | **3,45 / 3,84** | **2,96 / 3,94** |
+
+- **Decisione (15/11): `hubchap`**, ora predefinita. Tenere tutti i villaggi all'inizio del disco (`start`) è la disposizione
+  **peggiore**: spinge la grafica e i brani del capitolo 1 in un altro settore di directory e su altre tracce, e ogni ingresso
+  attraversa tre settori di directory (89 tracce percorse contro 46). Conta che i file che un ingresso carica (MENU, brano,
+  villaggio) siano vicini fra loro e nello stesso settore di directory, non che i villaggi siano vicini fra loro.
+- **Perché** (dal sorgente di Krill e dal percorso della testina registrato nel drive): il drive tiene in memoria un solo settore
+  di directory (8 file); un file che non è lì costa un viaggio sulla traccia 18. Il MENU sta sempre sulla traccia 8.
+- **Soglie per villaggio** (`tests/regression/perf_disk/cases.py`, regola del 90%): ingresso 5,7 / 5,3 / 5,0 / 5,0 / 4,6 s; file
+  del villaggio da solo 1,0 / 2,2 / 2,1 / 2,8 / 1,6 s (misurati 0,68 / 1,63 / 1,56 / 2,14 / 1,20). Con `hubchap` l'ingresso nel
+  villaggio 1 nell'ordine dei test (`PERF-DISK-14`) è 3,3–3,5 s (era 4,9).
+- **Costi**: il piano del boss dei capitoli 2 e 3 sale a 2,2–2,4 s (era 1,6–1,8; causa non trovata); la misura `song` (`SND0`
+  letto subito dopo `GFX1`, sequenza che il gioco non fa) sale a 1,12 s e il suo limite è passato da 0,6 a 1,5 s.
+- **Non misurato**: hardware reale, vc64web, il passaggio di capitolo (`chap_travel`: legge `TWNc` due volte e salva), le fasi per
+  le altre misure (tema, scale, boss: una fase sola). Quando ogni villaggio avrà il suo brano (TODO M2), i file nuovi vanno
+  accanto al MENU o al loro villaggio, e si rimisura.
+- **Noto**: il setup della suite `PERF-DISK` a volte non parte ("no answer to 'load ... start.prg' in 20 s"), circa una volta
+  su due il 15/11; non dipende dalla disposizione (TODO I-test).
+
 ## 8. Compatibilità
 
 | Ambiente | Stato |

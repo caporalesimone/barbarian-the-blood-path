@@ -375,9 +375,8 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   NPC; un **brano per villaggio** (oggi lo stesso, M2); la **minimappa** dei villaggi nuovi (i colori "acqua" e "strade" seguono
   i ruoli dei posti: nel villaggio 4 il cratere esce blu); l'etichetta dell'ingresso del sotterraneo ("stairs down to level N"
   per tutti: una per villaggio costa una stringa nell'intestazione); prova su **vc64web** e su hardware reale; il passaggio di
-  capitolo legge il file del villaggio nuovo due volte (tempo non misurato); i file `TWN2`…`TWN5` stanno in fondo al disco
-  (con `TWN1`…`TWN5` insieme sulle prime tracce `PERF-DISK-14` superava il 90% del limite: 5,22 s; così 4,87 s) e i tempi di
-  ingresso nei villaggi 2–5 non sono misurati; la **città dell'Abisso** oggi si raggiunge
+  capitolo legge il file del villaggio nuovo due volte (tempo non misurato); la posizione dei villaggi sul disco è decisa e misurata
+  (15/11, disposizione `hubchap`, soglie per villaggio: [FastLoader](docs/FastLoader.md) 7.1); la **città dell'Abisso** oggi si raggiunge
   dall'uscita del villaggio 4 dopo il boss finale e la Bocca non fa nulla (da rifare con H3; la leva della sala del trono resta).
 - **Fan art della mappa del mondo** (15/11): `tools/art/world_map.py` (`out/work/art/world_map.png`); dal 16/11 sta nel
   **manuale italiano** (pagina "IL MONDO", prima del capitolo 4; la genera la build del manuale, non e' in git). Restano da decidere
