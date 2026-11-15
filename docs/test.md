@@ -148,7 +148,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MON-CHAP-14` | chapter 4: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
 | `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
 
-### regression (167)
+### regression (172)
 
 | ID | Test |
 |---|---|
@@ -263,6 +263,11 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PERF-DISK-13` | stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM) <= its limit |
 | `PERF-DISK-14` | full village entry from level 1 (change_level: fade, GFX0, MENU module, gfx_install, song) <= its limit |
 | `PERF-DISK-12` | saves with the Krill plugin (hero file in the village, hero list) <= their limits |
+| `PERF-DISK-21` | village 1: file alone, full entry (from level 1), theme, stairs, boss level <= their limits |
+| `PERF-DISK-22` | village 2: file alone, full entry (from level 6), theme, stairs, boss level <= their limits |
+| `PERF-DISK-23` | village 3: file alone, full entry (from level 11), theme, stairs, boss level <= their limits |
+| `PERF-DISK-24` | village 4: file alone, full entry (from level 16), theme, stairs <= their limits |
+| `PERF-DISK-25` | village 5: file alone, full entry <= their limits |
 | `PERF-OPT-10` | mark_explored: the explored map equals the reference (9 x 7 cells around the hero) at the edges and inside |
 | `PERF-OPT-11` | HUD: a hit taken redraws only the HP panel, experience only the XP panel (hud_pend), not the whole HUD |
 | `POTION-10` | minor healing (red): +20, 5 s cooldown, red in the belt, capped at max hp |
