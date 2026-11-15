@@ -5,8 +5,10 @@
 ;   hear the legend       -> LORE (titolo, musica, la storia a scorrimento; alla fine torna qui)
 ;   read the game manual  -> HELP (il manuale: tasti, schermate, HUD; alla fine torna qui)
 ;   walk the blood path   -> START (avvio del gioco: titolo, musica, PRESS SPACE, menu degli eroi)
-;   Piccolo apposta: schermo a caratteri con il font del gioco (codici 0-63 di out/work/gfx/uifont.bin, copiati a $2000),
-;   niente musica, niente IRQ propri (gira con l'IRQ del KERNAL). Tasti: joystick 2 su/giu' e fire, oppure 1 2 3,
+;   Piccolo apposta: schermo a caratteri con il font del gioco (codici 0-63 di out/work/gfx/uifont.bin, copiati a $3800),
+;   gira con l'IRQ del KERNAL e suona Demon's Eye (15/11, TODO E3/E4: stesso brano di START, LORE, LOBBY e HELP) con il player unico
+;   (src/common/title_music.inc): clock = CIA1 timer A a 19656 cicli (50 Hz PAL), vettore $0314 proprio; prima di ogni LOAD del
+;   KERNAL (il trampolino sovrascrive questo programma) si ferma tutto (tm_stop) e IRQ, CIA e SID tornano come prima. Tasti: joystick 2 su/giu' e fire, oppure 1 2 3,
 ;   W/S o joystick (09/11: niente tasti cursore), spazio/RETURN.
 ; (11/11) Un solo disco: con POKE 1020,1 prima del RUN (POKE_SKIP) niente menu, si carica subito START (sviluppo, test).
 ; =============================================================================
@@ -21,6 +23,10 @@ FONT    = $3800                 ; (12/11) sopra i programmi che il trampoline ca
                                 ; il caricamento lo schermo resta leggibile (a $2000 LORE e START lo coprivano)
 GETIN   = $ffe4
 ;@map $0400..$07e8 "Schermo del menu"
+.if MENU
+SP_VARS = $c000                 ; variabili del player (RAM libera: BARBARIAN sta sotto $3800)
+;@map SP_VARS..SP_VEND "Variabili del player SID (Demon's Eye, src/common/title_music.inc)"
+.endif
 ;@map FONT+512 "Font del menu: codici 0-63 del font del gioco (uifont.bin), sopra i programmi che il trampoline carica"
 NITEM   = 3
 ROW0    = 11                    ; riga della prima voce
@@ -86,6 +92,7 @@ _lc     lda ($fb),y
         jsr draw_menu
         lda #$1b
         sta $d011
+        jsr tm_start            ; Demon's Eye (clock a 50 Hz PAL, vettore IRQ proprio; torna con l'I flag acceso)
         cli
 
 loop:
@@ -135,6 +142,7 @@ down    lda sel
         jmp loop
 
 choose:                         ; (15/11, committente) qualunque voce: SUBITO lo schermo nero (prima solo la storia;
+        jsr tm_stop             ; (15/11, TODO E3/E4) silenzio e IRQ/CIA/SID come prima: il LOAD del KERNAL sovrascrive questo programma
         ldx #0                  ;  manuale e gioco scrivevano la frase sul menu e il nero arrivava dopo, col programma)
         lda #$20
 _cl     sta SCR,x
@@ -395,6 +403,11 @@ nm_hi   .byte >nm_lore, >nm_help, >nm_game
 POKE_SKIP = $03fc               ; byte libero dopo il buffer della cassetta (trampoline < $03FC), 0 all'accensione
 
 .if MENU
+        .include "title_music.inc"      ; Demon's Eye con il player unico (tm_start / tm_stop)
 font_d  .binary "../out/work/gfx/uifont.bin", 0, 512
         .include "logo.inc"     ; out/work/logo.inc (tools/build/gen_lore.py): forme, celle e colori del logo
+.endif
+.if MENU
+bar_end
+        .cerror bar_end > FONT, "BARBARIAN oltre il font ($3800)"
 .endif

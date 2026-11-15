@@ -146,7 +146,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
   play/pausa/stop, filtri. Dettagli: storico in git (`TODO.md` fino a `22388f9`, voce 2.9).
 
 ### E10 Continuita' vera della musica del titolo (START -> GAME -> LOBBY) — M
-- Fatto il 15/11 (ex E3 ed E4): Demon's Eye suona anche in `LOBBY` e nell'help (HELP, [help](docs/help.md); player e clock CIA in `src/common/title_music.inc`) ([musica](docs/musica.md), `SND_MENU`), ma **sempre da capo**: START/LORE usano
+- Fatto il 15/11 (ex E3 ed E4): Demon's Eye suona anche in `LOBBY` e nell'help (HELP, [help](docs/help.md)) e nel loader (BARBARIAN, [intro](docs/intro.md)); player e clock CIA in `src/common/title_music.inc` ([musica](docs/musica.md), `SND_MENU`), ma **sempre da capo**: START/LORE usano
   un altro player (`$BE00`) e `game_start` azzera lo stato del player del gioco, quindi fra un programma e l'altro c'e' una pausa e
   un riavvio. **Resta**: continuita' reale (stesso brano senza stacco) START -> GAME -> LOBBY e dopo ogni LOAD KERNAL, e rinunciare alla
   lettura di disco (~1,5 s) all'ingresso del menu (dati nel LOBBY non entrano: restano ~290 B liberi in `$C000-$CBFF`, il brano ne pesa 259).

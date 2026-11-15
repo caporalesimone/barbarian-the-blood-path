@@ -6,7 +6,7 @@ one PAL frame), NOT by the KERNAL's own rate, and the IRQ vector is the program'
    the SID gets written.
 2. sp_play is called once per 19656 cycles (50 passes: every gap within 60 cycles of a frame, total within 0.1%).
 3. Leaving for a KERNAL LOAD (the key that makes the program call tramp_run: stop there): vector back to $EA31, player
-   stopped, SID all 0 (volume included), CIA1 timer A reloaded with the KERNAL latch ($4025: high byte of the counter $40).
+   stopped, SID all 0 (volume included), CIA1 timer A reloaded with the KERNAL latch ($4025: the counter at the LOAD = $4025 minus the cycles since tm_stop).
 Usage: test_title_music.py help|barbarian"""
 import os, re, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
@@ -40,14 +40,19 @@ try:
     check(v.b(L["sp_on"]) == 1, "player running (sp_on)")
     check(v.b(0xd418) & 0x0f != 0, "SID volume on while playing")
     v.delbrk()
-    v.brk(L["tramp_run"])                                  # the program leaves for a KERNAL LOAD: stop before it starts
+    v.brk(C64.addr_after(C64.listing(prog), "tm_stop", r"^rts\b"))   # end of tm_stop (the force-load of the latch is just before)
     v.poke(0x0277, KEY); v.poke(0x00c6, 1)                 # key in the KERNAL buffer (GETIN)
-    v.go(60)
+    c0 = v.go(60)
+    v.delbrk()
+    v.brk(L["tramp_run"])                                  # the program leaves for a KERNAL LOAD: stop before it starts
+    c1 = v.go(60)
     vec = v.mem(0x0314, 2)
     check(vec[0] + 256 * vec[1] == 0xea31, "before the LOAD: IRQ vector back to $EA31")
     check(v.b(L["sp_on"]) == 0, "before the LOAD: player stopped")
     check(v.mem(0xd400, 0x19) == [0] * 0x19, "before the LOAD: SID all 0 (volume included)")
-    check(0x3f <= v.b(0xdc05) <= 0x40, "before the LOAD: CIA1 timer A reloaded with the KERNAL latch (counter high $%02x)" % v.b(0xdc05))
+    cnt = v.b(0xdc04) + 256 * v.b(0xdc05)                  # the counter runs down from the latch since tm_stop
+    want = 0x4025 - (c1 - c0)
+    check(0 < want and abs(cnt - want) <= 40, "before the LOAD: CIA1 timer A reloaded with the KERNAL latch $4025 (counter $%04x, expected ~$%04x after %d cycles)" % (cnt, want, c1 - c0))
     fl = re.search(r"([01]{8})\s", v.cmd("r").split("\n")[-3] if False else v.cmd("r"))
     check(fl is not None and fl.group(1)[5] == "1", "before the LOAD: interrupts disabled (I flag)")
 finally:

@@ -58,8 +58,11 @@ vettori come all'accensione), caricano il file all'indirizzo del PRG (`$0801`) c
 
 - Schermo a caratteri ad alta risoluzione, banco VIC 0, schermo `$0400`, font del gioco (codici 0–63 di
   `out/work/gfx/uifont.bin`, 512 byte) e forme del logo copiati a **`$3800`** (12/11: a `$2000` i programmi caricati dal
-  trampoline, LORE fino a `$2B3D` e START fino a `$262C`, coprivano il font e lo schermo diventava illeggibile). Niente musica, niente IRQ propri: gira con l'IRQ del KERNAL
-  (tastiera); il cursore lampeggiante è spento (`$CC`).
+  trampoline, LORE fino a `$2B3D` e START fino a `$262C`, coprivano il font e lo schermo diventava illeggibile). Gira con l'IRQ del KERNAL (tastiera) e dal 15/11 **suona Demon's Eye** (TODO E3/E4: stesso brano di START, LORE, LOBBY e HELP) con il player unico,
+  incorporato (`src/common/title_music.inc`, variabili a `$C000`; programma `$0801`-`$1A7D`, 7,5 KB sotto il font a `$3800`): clock = CIA1 timer A a
+  19656 cicli (50 Hz PAL esatti, non il passo del KERNAL), vettore `$0314` proprio. **Ogni voce** scelta ferma tutto (`tm_stop`: SID a 0, vettore
+  `$EA31`, latch del KERNAL) prima del `LOAD` del trampolino, che sovrascrive il programma; tornando da LORE o HELP il brano riparte da capo
+  ([Musica](musica.md), TODO E10). Il cursore lampeggiante è spento (`$CC`).
 - Voci: **hear the legend** (LORE), **read the game manual** (programma `HELP`, [Help](help.md)), **walk the blood path** (START). Sotto: aiuto,
   versione, copyright. La riga d'aiuto dice solo **"fire to choose"** (12/11, committente).
 - Tasti: joystick 2 su/giù e fire; `1` `2` `3`; `W`/`S` o cursore; spazio o RETURN. La voce scelta è gialla con la

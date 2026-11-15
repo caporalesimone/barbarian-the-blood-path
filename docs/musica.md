@@ -4,13 +4,13 @@ Copyright © 2026 - Simone Caporale
 
 Sorgenti: `tools/build/songs.py` (i brani, come dati), `tools/build/gen_music.py` (compilatore), `src/common/sid_player.inc` (player
 unico), `src/game/music.asm` (logica del gioco: scelta, caricamento, dissolvenze, combattimento), `src/common/sfx.inc` (effetti),
-`src/jukebox.asm` (prova di tutti i suoni), `src/barbarian.asm` (titolo). Test: `tests/regression/music/test_music.py`.
+`src/jukebox.asm` (prova di tutti i suoni), `src/barbarian.asm` (loader) e `src/help.asm` (manuale), entrambi con `src/common/title_music.inc`. Test: `tests/regression/music/test_music.py`.
 
 ## Brani del gioco (scelte del committente, 06/11)
 
 | Ruolo | Brani (`tools/build/songs.py`, `PLAYLIST`) | Quando |
 |---|---|---|
-| Titolo | Demon's Eye (`01_demons_eye`) | START, dal RUN a PRESS SPACE (dentro il file `START` della release; nella debug `START` non ha titolo né musica), la storia (`LORE`: titolo, PRESS SPACE e scorrimento, [Avvio e storia](intro.md)) e **il menu principale** (`LOBBY`, 15/11, TODO E3: file `SND7`, vedi sotto) |
+| Titolo | Demon's Eye (`01_demons_eye`) | START, dal RUN a PRESS SPACE (dentro il file `START` della release; nella debug `START` non ha titolo né musica), la storia (`LORE`: titolo, PRESS SPACE e scorrimento, [Avvio e storia](intro.md)) il **menu principale** (`LOBBY`, 15/11, TODO E3: file `SND7`, vedi sotto), il **loader** `BARBARIAN` e il manuale `HELP` (15/11, TODO E4: brano incorporato nel programma, vedi sotto) |
 | Villaggi | Tavern of Dawn (`00_tavern`, la vecchia "Taverna dell'Alba" portata nel formato nuovo) per tutti e 4 i villaggi (temi propri: **tbd**) | ogni ingresso nel villaggio del capitolo (`snd_town_c`) |
 | Livelli | un **tema per capitolo** (12/11, committente): Iron Crown (cap. 1), Blood Path (2), Fear Below (3), Black Chant (4) | tutti i 5 piani del capitolo, anche il piano del boss del capitolo (`snd_lvl_c`) |
 | Boss finale | Abyss Gate (`05_abyss_gate`) | piano `MAXLEVEL` (sala del trono): il suo tema ad hoc |
@@ -102,6 +102,17 @@ leggere il brano (1–2 blocchi) aggiunge ~1,5 s. Il brano cambia a ogni piano, 
   **Limiti**: il menu parte sempre da capo (nessuna continuita' con il titolo di START/LORE, che usa un altro player a `$BE00`, ne' con
   la musica del gioco: ci sono sempre una dissolvenza e un riavvio) e costa una lettura di disco (~1,5 s) a ogni ingresso nel menu.
   Test: `LOBBY-12`.
+- **BARBARIAN (loader) e HELP** (15/11, ex TODO E3/E4): programmi a parte che girano con l'**IRQ del KERNAL** (tastiera con `GETIN`); il
+  brano e' **incorporato** (`sid_title.inc`, come in START e LORE) e il player e' incluso da `src/common/title_music.inc` (`SP_RESUME = 0`,
+  variabili a `$C000`, voci come START: lead sulla voce 1 del SID). **Clock**: non l'IRQ del KERNAL com'e' (circa 60 Hz, non verificato a
+  50 Hz PAL) ma il **CIA1 timer A con latch 19656 - 1** (312 righe x 63 cicli = un fotogramma PAL): `tm_start` mette `$0314` su `tm_irq`
+  (`jsr sp_play` + `jmp $EA31`: tastiera e conferma del CIA come prima), azzera il SID, avvia il brano e forza il caricamento del latch;
+  nessun IRQ del VIC. **Prima di ogni LOAD del KERNAL** (voce del menu di BARBARIAN, uscita di HELP verso BARBARIAN: il trampolino
+  sovrascrive il programma) `tm_stop`: `sei`, `sp_stop`, SID tutto a 0 (volume compreso), vettore `$EA31`, latch `$4025` (PAL del
+  KERNAL), IRQ del timer in sospeso confermato; il trampolino poi rifa anche IOINIT e RESTOR. Ogni ritorno al menu riparte da capo
+  (TODO E10). Misure in VICE (`TITLEMUSIC-10/11`): una chiamata di `sp_play` ogni 19652-19660 cicli (50 passaggi = 982799 cicli su
+  982800). **Non verificato**: l'ascolto reale, la velocita' percepita rispetto a START e il comportamento su un C64 NTSC (non supportato).
+  Memoria: BARBARIAN `$0801`-`$1A7D` (era `$141C`; font a `$3800`: `.cerror`), HELP `$0801`-`$2D89` (charset a `$3000`).
 
 ## Formato dei brani (`tools/build/gen_music.py`)
 

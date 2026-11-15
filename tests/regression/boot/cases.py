@@ -77,3 +77,5 @@ def menu_black(ctx):
 
 script("TITLEMUSIC-10", "HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",
        [PY, os.path.join(H, "test_title_music.py"), "help"])
+script("TITLEMUSIC-11", "BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",
+       [PY, os.path.join(H, "test_title_music.py"), "barbarian"])
