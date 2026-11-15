@@ -8,9 +8,9 @@ dell'HUD), `tools/build/gen_help.py` (genera `out/work/help.inc` e l'anteprima `
 
 ## Dove sta e cosa costa
 
-- File **`HELP`** sul disco di **release** (29 blocchi, 7,1 KB), caricato dalla voce **read the game manual** del loader
+- File **`HELP`** sul disco di **release** (38 blocchi, 9,4 KB dal 15/11, con la musica), caricato dalla voce **read the game manual** del loader
   `BARBARIAN` con il trampoline, come `LORE`. Alla fine si torna a `BARBARIAN` (ricaricato dal disco).
-- **Sul disco è compresso** (12/11): il file `HELP` è `out/work/helpz.prg` (~15 blocchi invece di 32): un decompressore in testa
+- **Sul disco è compresso** (12/11): il file `HELP` è `out/work/helpz.prg` (20 blocchi invece di 38: il player e il brano pesano ~1,6 KB e si comprimono poco): un decompressore in testa
   (`src/help/zx0sfx.asm`) si copia a `$8000` con i dati ZX0 (`out/work/help.zx0`, `tools/build/pack.py`), decomprime `out/work/help.prg` a
   `$0801` e salta al suo `$080D`. `BARBARIAN` lo legge con il KERNAL: nell'emulatore web vc64web il manuale compare
   ~11 s dopo la scelta invece di ~20 s (misura a schermo, risoluzione 1 s). Test: `HELP-Z-10/11` (dati e disco), `LORE-10`
@@ -52,14 +52,22 @@ Riga 0: titolo della pagina in giallo e "n/5" in ciano; riga 24: "fire: next  le
 
 - Banco VIC 0, schermo `$0400`, charset a `$3000` (`$D018` = `$1C`): codici 0–63 = font della UI
   (`out/work/gfx/uifont.bin`, lo stesso del gioco), codici 64.. = i glifi dell'HUD usati nel ritaglio (29). Il programma
-  (codice + pagine) sta in `$0801`–`$23D6`; un `.cerror` controlla che non arrivi a `$3000`.
+  (codice + pagine) sta in `$0801`–`$2D89` (con il player e Demon's Eye, ~1,6 KB: restano ~630 B sotto `$3000`); un `.cerror` controlla che non arrivi a `$3000`. Variabili del player a `$C000` (170 B, `SP_VARS`).
 - Schermo in **modo testo multicolore** (`$D016` = `$18`): il testo ha colori < 8 (alta risoluzione: bianco testo,
   giallo tasti e titoli, ciano note), il ritaglio dell'HUD i suoi colori, con `$D022`/`$D023` del tema fotografato.
   È lo stesso trucco del loader con il logo.
 - Pagine: schermo (1000 byte) e colori (1000 byte) in **RLE** (coppie conteggio, valore; 0 = fine), 5 950 byte circa per
   5 pagine. Il disegno spegne lo schermo (`$D011`), decomprime in `$0400` e `$D800`, aspetta un fotogramma e lo
-  riaccende. Niente musica, niente IRQ propri: la tastiera passa dall'IRQ del KERNAL (`GETIN`), il joystick dalla
-  porta 2 (`$DC00`, solo le nuove pressioni).
+  riaccende. La tastiera passa dall'IRQ del KERNAL (`GETIN`), il joystick dalla porta 2 (`$DC00`, solo le nuove pressioni).
+- **Musica** (15/11, ex TODO E4): suona **Demon's Eye** (lo stesso brano del titolo e del menu principale, non piu' la Tavern of Dawn
+  immaginata nel TODO: decisione del committente, un solo brano ovunque) con il player unico (`src/common/sid_player.inc`, senza
+  `sp_resume` / `sp_release`) tramite `src/common/title_music.inc`, in comune con BARBARIAN. **Clock**: non l'IRQ del KERNAL com'e' (timer
+  a ~60 Hz, non verificato a 50 Hz PAL) ma il **CIA1 timer A con latch a 19656 cicli** (312 righe x 63 = un fotogramma PAL): `tm_start`
+  mette il vettore `$0314` su `tm_irq` (suona e prosegue in `$EA31`, cosi' `GETIN` funziona come prima) e ricarica il timer; nessun IRQ
+  del VIC. **Uscita** (RUN/STOP, freccia, fire dall'ultima pagina): `tm_stop` (`sei`, `sp_stop`, SID tutto a 0 volume compreso, vettore
+  `$EA31`, latch del KERNAL `$4025`, IRQ del timer in sospeso confermato) **prima** del `LOAD` del KERNAL che ricarica BARBARIAN
+  (il trampolino fa anche IOINIT e RESTOR). Test: `TITLEMUSIC-10` (vettore, 1 chiamata ogni 19656 cicli, ripristino).
+  Voci come in START (lead sulla voce 1 del SID), non come nel gioco e in LOBBY (lead sulla 2).
 
 ## Il ritaglio dell'HUD
 

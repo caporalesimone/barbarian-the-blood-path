@@ -73,3 +73,7 @@ def menu_black(ctx):
             check(any(c != 0x20 for c in scr[480:520]), "choice %s: no phrase on row 12" % k)
     finally:
         v.close()
+
+
+script("TITLEMUSIC-10", "HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",
+       [PY, os.path.join(H, "test_title_music.py"), "help"])

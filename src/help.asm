@@ -7,7 +7,9 @@
 ; ritaglio dell'HUD i suoi colori, con $D022/$D023 del tema fotografato.
 ; Tasti (09/11: ci si muove solo con joystick o WASD, niente tasti cursore): fire / spazio / RETURN / destra / D =
 ; pagina seguente (dall'ultima: si esce); sinistra / A / DEL = pagina precedente; RUN/STOP o freccia a sinistra = di nuovo il loader.
-; Gira con l'IRQ del KERNAL (tastiera con GETIN), niente musica.
+; Gira con l'IRQ del KERNAL (tastiera con GETIN) e suona Demon's Eye (15/11, TODO E4: stesso brano del titolo e del menu) con il
+; player unico (src/common/title_music.inc, variabili a SP_VARS): clock = CIA1 timer A a 19656 cicli (50 Hz PAL esatti), non il
+; passo del KERNAL; il vettore IRQ torna com'era (tm_stop) prima di tornare al loader.
 ; =============================================================================
         .cpu "6502"
 SCR     = $0400
@@ -19,6 +21,8 @@ pg      = $02                   ; pagina attuale
 jprev   = $03                   ; joystick al fotogramma precedente
 src     = $fb                   ; (2) flusso RLE
 dst     = $fd                   ; (2) destinazione
+SP_VARS = $c000                 ; variabili del player (RAM libera: l'help non usa altro sopra $3800)
+;@map SP_VARS..SP_VEND "Variabili del player SID (Demon's Eye, src/common/title_music.inc)"
 
         .include "vic_init.inc" ; (11/11, O13) #vic_text_init (solo una macro: nessun byte)
         * = $0801
@@ -57,6 +61,7 @@ _g      lda help_glyphs,x
         eor #$ff
         and #$1c
         sta jprev               ; fire gia' premuto nel loader: non conta
+        jsr tm_start            ; Demon's Eye (clock a 50 Hz PAL, vettore IRQ proprio)
         cli
 show    jsr draw_page
 
@@ -101,7 +106,7 @@ prev    ldx pg
         stx pg
         jmp show
 
-quit    sei
+quit    jsr tm_stop             ; sei, silenzio, IRQ e CIA come prima: prima del LOAD del KERNAL
         lda #$0b
         sta $d011
         lda #nm_front_n
@@ -172,6 +177,7 @@ nm_front .text "barbarian"
 nm_front_n = * - nm_front
 
         .include "tramp.inc"
+        .include "title_music.inc"      ; Demon's Eye con il player unico
 
 font_d  .binary "../out/work/gfx/uifont.bin", 0, 512
         .include "help.inc"     ; out/work/help.inc (tools/build/gen_help.py): glifi dell'HUD e pagine

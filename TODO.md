@@ -20,7 +20,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
 | 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B4, B6–B17 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
-| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E4, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
+| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
 | 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D8, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M3, M4, M5 |
@@ -112,9 +112,6 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 ### E2 (ex 2.3) Negozi: merce (dopo B1) — S
 - Assortimento in `balance.yaml` (pool e `stock`), `docs/villaggio.md`, manuale.
 
-### E4 (ex 2.5) Musica nell'help (Tavern of Dawn) — S
-- Programma HELP (release) con il brano del villaggio: player condiviso, un `SNDn` sul disco di release.
-
 ### E5 (ex 2.6) HUD: esperienza a 24 bit (per l'Abisso) — S
 - Oltre 65535 xp: 3 cifre + K, barra a 24 bit (~100–130 B). Dipende dalle soglie oltre il 20 (H3).
 
@@ -149,7 +146,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
   play/pausa/stop, filtri. Dettagli: storico in git (`TODO.md` fino a `22388f9`, voce 2.9).
 
 ### E10 Continuita' vera della musica del titolo (START -> GAME -> LOBBY) — M
-- Fatto il 15/11 (ex E3): Demon's Eye suona anche in `LOBBY` ([musica](docs/musica.md), `SND_MENU`), ma **sempre da capo**: START/LORE usano
+- Fatto il 15/11 (ex E3 ed E4): Demon's Eye suona anche in `LOBBY` e nell'help (HELP, [help](docs/help.md); player e clock CIA in `src/common/title_music.inc`) ([musica](docs/musica.md), `SND_MENU`), ma **sempre da capo**: START/LORE usano
   un altro player (`$BE00`) e `game_start` azzera lo stato del player del gioco, quindi fra un programma e l'altro c'e' una pausa e
   un riavvio. **Resta**: continuita' reale (stesso brano senza stacco) START -> GAME -> LOBBY e dopo ogni LOAD KERNAL, e rinunciare alla
   lettura di disco (~1,5 s) all'ingresso del menu (dati nel LOBBY non entrano: restano ~290 B liberi in `$C000-$CBFF`, il brano ne pesa 259).

@@ -240,8 +240,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SHOP-BUY-10` | buy: 3 prices x different gold x pack full/empty (gold, chest, pack) |
 | `SHOP-SELL-10` | sell: half price, GOLD_MAX cap (no sale), category not bought, empty entry |
 | `SHOP-FIX-10` | smith repair (shop_repair, confirmation simulated): sword 200, durability 10/100, 1000 gold -> 950, 99/99 |
-| `HELP-Z-10` | out/work/help.zx0 unpacks to out/work/help.prg byte by byte; the packed file is under half the blocks |
+| `HELP-Z-10` | out/work/help.zx0 unpacks to out/work/help.prg byte by byte; the packed file is under 55% of the blocks |
 | `HELP-Z-11` | the disk holds the packed HELP (file 'help' equals out/work/helpz.prg) |
+| `TITLEMUSIC-10` | HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
 | `HUD-XP-10` | XP line: thousands from 10000 (10K ... 65K) |
 | `INV-DROP-10` | DEL on a pack item: N keeps it, Y drops it; DEL on an empty slot asks nothing |
 | `INV-2H-10` | two-handed weapon with a shield on: the shield goes back to the pack; full pack: refused |
