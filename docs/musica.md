@@ -10,7 +10,7 @@ unico), `src/game/music.asm` (logica del gioco: scelta, caricamento, dissolvenze
 
 | Ruolo | Brani (`tools/build/songs.py`, `PLAYLIST`) | Quando |
 |---|---|---|
-| Titolo | Demon's Eye (`01_demons_eye`) | START, dal RUN a PRESS SPACE (dentro il file `START` della release; nella debug `START` non ha titolo né musica), e la storia (`LORE`: titolo, PRESS SPACE e scorrimento, [Avvio e storia](intro.md)) |
+| Titolo | Demon's Eye (`01_demons_eye`) | START, dal RUN a PRESS SPACE (dentro il file `START` della release; nella debug `START` non ha titolo né musica), la storia (`LORE`: titolo, PRESS SPACE e scorrimento, [Avvio e storia](intro.md)) e **il menu principale** (`LOBBY`, 15/11, TODO E3: file `SND7`, vedi sotto) |
 | Villaggi | Tavern of Dawn (`00_tavern`, la vecchia "Taverna dell'Alba" portata nel formato nuovo) per tutti e 4 i villaggi (temi propri: **tbd**) | ogni ingresso nel villaggio del capitolo (`snd_town_c`) |
 | Livelli | un **tema per capitolo** (12/11, committente): Iron Crown (cap. 1), Blood Path (2), Fear Below (3), Black Chant (4) | tutti i 5 piani del capitolo, anche il piano del boss del capitolo (`snd_lvl_c`) |
 | Boss finale | Abyss Gate (`05_abyss_gate`) | piano `MAXLEVEL` (sala del trono): il suo tema ad hoc |
@@ -88,7 +88,20 @@ leggere il brano (1–2 blocchi) aggiunge ~1,5 s. Il brano cambia a ogni piano, 
   gli interrupt restano accesi durante i caricamenti: la musica durante il disco è possibile (TODO M2, M5). Il volume
   torna pieno alla prima `music_update` seguente.
 - `music_fadeout` (bloccante, prima di un cambio di luogo o del menu principale) e `snd_fade` / `snd_mute`
-  (`levels.asm`, volume generale) come prima. Il menu principale resta senza musica.
+  (`levels.asm`, volume generale) come prima.
+- **Menu principale** (15/11, ex TODO E3; dal 06/11 era muto): Demon's Eye suona anche in `LOBBY` con il **player del gioco**. Il brano
+  del titolo e' anche un file sul disco, **`SND_MENU`** (`SND7`, l'ultimo di `songs.game_files`, 259 B, dentro `SND_SMAX`; nel jukebox non si
+  duplica: `songs.jukebox_files`). `ui_menu` fa `lda #SND_MENU` / `jsr mus_place` = `snd_get` (passa da `load_raw`, quindi `snd_io`, con
+  `io_quiet`: nessuna schermata) + `music_request(MUS_LVL, FADE_SLOW)`; la musica parte dal primo `music_update`, chiamato da `ui_input`
+  (schermate a tutto schermo, IRQ spento). Se il brano e' gia' nel buffer del luogo (`snd_cur`) non si rilegge. Ogni disco del menu
+  (elenco eroi, `load_char`, cancellazione) zittisce il SID con `snd_io` come nel resto del gioco; il volume torna da `music_update`.
+  **Uscite**: verso il gioco (`lb_leave`, dopo "continua" o "nuovo barbaro") `music_fadeout` bloccante **prima** che `music_town` /
+  `music_dungeon` riempiano il buffer (con il player ancora acceso `snd_get` cambierebbe i dati sotto i piedi); dal gioco al menu
+  (`_quit` in `ui.asm`) `music_fadeout` **prima** di `game_start`, che azzera `$9000-$9BFF` (variabili del player comprese): senza,
+  il brano del gioco veniva tagliato di netto e il `music_fadeout` di `menu_main` non scattava mai (`mus_trk` gia' a 0).
+  **Limiti**: il menu parte sempre da capo (nessuna continuita' con il titolo di START/LORE, che usa un altro player a `$BE00`, ne' con
+  la musica del gioco: ci sono sempre una dissolvenza e un riavvio) e costa una lettura di disco (~1,5 s) a ogni ingresso nel menu.
+  Test: `LOBBY-12`.
 
 ## Formato dei brani (`tools/build/gen_music.py`)
 

@@ -33,3 +33,34 @@ def lobby_load(ctx):
         check(g.b(L["ovl_cur"]) == 0, "ovl_cur not cleared (LOBBY covers OVLT)")
     finally:
         g.close()
+
+
+@test("LOBBY-12", "main menu plays Demon's Eye (file SND_MENU in the buffer of the place, player running); leaving it fades to silence, then music_town loads the village song")
+def lobby_music(ctx):
+    """15/11, TODO E3: the main menu starts Demon's Eye with the game's player (ui_menu -> mus_place), frames run from ui_input;
+    lb_leave (exit to the game) fades out before the village song replaces the buffer."""
+    import songs
+    from lib.c64 import Game
+    g = Game()
+    try:
+        L, M = g.L, g.M
+        game = songs.game_files(songs.PLAYLIST)
+        menu = game.index(songs.PLAYLIST["title"])
+        read = lambda n: open(os.path.join(OUT, "snd", n + ".bin"), "rb").read()
+        eye, tavern = read(songs.PLAYLIST["title"]), read(songs.PLAYLIST["town"][0])
+        g.to_menu()                                          # stopped after scan_slots in ui_menu: the song is already requested
+        check(g.b(L["snd_cur"]) == menu + 1, "buffer of the place holds song %d, not SND_MENU %d" % (g.b(L["snd_cur"]) - 1, menu))
+        check(g.mem(L["SND_LBUF"], len(eye)) == list(eye), "SND_LBUF differs from %s.bin" % songs.PLAYLIST["title"])
+        check(g.b(L["mus_want"]) == 1, "music_request(MUS_LVL) not made (mus_want %d)" % g.b(L["mus_want"]))
+        g.frames(40)                                         # the menu loop (ui_input -> sfx_update -> music_update)
+        check(g.b(L["mus_trk"]) == 1 and g.b(L["sp_on"]), "player not running in the menu (mus_trk %d, sp_on %d)" % (g.b(L["mus_trk"]), g.b(L["sp_on"])))
+        check(g.b(L["snd_cur"]) == menu + 1, "buffer changed while the menu was running")
+        g.call(M["lb_leave"], tmax=60)                       # exit to the game: blocking fade to silence
+        check(g.b(L["mus_trk"]) == 0 and g.b(L["mus_fo"]) == 0 and g.b(L["mus_want"]) == 0,
+              "after lb_leave: mus_trk %d, mus_fo %d, mus_want %d" % (g.b(L["mus_trk"]), g.b(L["mus_fo"]), g.b(L["mus_want"])))
+        g.poke(L["c_chap"], 1)                               # (no hero loaded here: chapter 1)
+        g.call(L["music_town"], tmax=60)                    # as load_location does, after the fade
+        check(g.b(L["snd_cur"]) == game.index(songs.PLAYLIST["town"][0]) + 1, "village song not in the buffer after music_town")
+        check(g.mem(L["SND_LBUF"], len(tavern)) == list(tavern), "SND_LBUF differs from the village song")
+    finally:
+        g.close()

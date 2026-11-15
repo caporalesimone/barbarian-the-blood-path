@@ -20,7 +20,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
 | 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B4, B6–B17 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
-| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E3, E4, E5, C1, E1, M2, E6, E7, E8, E9 |
+| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E4, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
 | 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D8, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M3, M4, M5 |
@@ -112,9 +112,6 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 ### E2 (ex 2.3) Negozi: merce (dopo B1) — S
 - Assortimento in `balance.yaml` (pool e `stock`), `docs/villaggio.md`, manuale.
 
-### E3 (ex 2.4) Musica nel menu principale senza glitch — S
-- Un brano del player del gioco avviato dal menu stesso (`src/lobby.asm`, un `SNDn`), `docs/musica.md`; `snd_io` prima del disco.
-
 ### E4 (ex 2.5) Musica nell'help (Tavern of Dawn) — S
 - Programma HELP (release) con il brano del villaggio: player condiviso, un `SNDn` sul disco di release.
 
@@ -150,6 +147,13 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
   diventando il music player della release. Un solo player per tutti i programmi; tabella di brani ed effetti generata in build
   (decisione del 09/11: niente lettura della directory); effetti letti una volta all'avvio; due elenchi (canzoni, effetti),
   play/pausa/stop, filtri. Dettagli: storico in git (`TODO.md` fino a `22388f9`, voce 2.9).
+
+### E10 Continuita' vera della musica del titolo (START -> GAME -> LOBBY) — M
+- Fatto il 15/11 (ex E3): Demon's Eye suona anche in `LOBBY` ([musica](docs/musica.md), `SND_MENU`), ma **sempre da capo**: START/LORE usano
+  un altro player (`$BE00`) e `game_start` azzera lo stato del player del gioco, quindi fra un programma e l'altro c'e' una pausa e
+  un riavvio. **Resta**: continuita' reale (stesso brano senza stacco) START -> GAME -> LOBBY e dopo ogni LOAD KERNAL, e rinunciare alla
+  lettura di disco (~1,5 s) all'ingresso del menu (dati nel LOBBY non entrano: restano ~290 B liberi in `$C000-$CBFF`, il brano ne pesa 259).
+  **Non verificato**: l'ascolto reale (solo VICE senza audio: byte e stato del player).
 
 ### E9 (ex 2.10) Stringhe del gioco in un file unico, traducibili (decisione dell'11/11) — M-L
 - `data/strings.yaml` → `tools/gen_strings.py` → un `.inc` per PRG; classi di UI con lunghezza massima (`screen` 38,

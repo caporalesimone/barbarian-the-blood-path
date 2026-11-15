@@ -182,7 +182,7 @@ def main():
         open(os.path.join(OUT, "snd%s.prg" % digits[i].lower()), "wb").write(b"\x00\x00" + blobs[name])
     assert [game.index(n) for n in P["fight"]] == list(range(game.index(P["fight"][0]), game.index(P["fight"][0]) + len(P["fight"]))), \
         "i motivetti di combattimento devono essere file consecutivi (SND_FIG0..)"
-    smax = max(len(blobs[n]) for n in P["town"] + P["level"] + P["boss"])
+    smax = max(len(blobs[n]) for n in P["town"] + P["level"] + P["boss"] + [P["title"]])
     fmax = max(len(blobs[n]) for n in P["fight"])
     o = ["; generato da tools/build/gen_music.py (brani in tools/build/songs.py) - non modificare",
          "; (12/11, TODO M2) un brano per villaggio e uno per capitolo (snd_town_c, snd_lvl_c: capitolo 1..), boss finale",
@@ -191,6 +191,7 @@ def main():
          "SND_NCHAP  = %d" % len(P["level"]),
          "SND_BOSS   = %d" % game.index(P["boss"][0]),
          "SND_FIG0   = %d" % game.index(P["fight"][0]), "SND_NFIG   = %d" % len(P["fight"]),
+         "SND_MENU   = %d          ; (15/11, TODO E3) Demon's Eye: brano del menu LOBBY" % game.index(P["title"]),
          "SND_N      = %d" % len(game),
          "SND_SMAX   = %d          ; brano piu' lungo (villaggio/livello/boss)" % smax,
          "SND_FMAX   = %d          ; motivetto di combattimento piu' lungo" % fmax,
@@ -203,7 +204,7 @@ def main():
     open(os.path.join(ROOT, "out", "work", "sid_title.inc"), "w").write(
         "\n".join(["; brano del titolo: %s (tools/build/songs.py)" % t] + asm_bytes("sid_title", blobs[t])) + "\n")
     # jukebox: tutti i brani del gioco (titolo compreso) con nome
-    jl = [t] + game
+    jl = songs.jukebox_files(P)             # titolo per primo, senza duplicarlo (e' anche SND_MENU)
     o = ["; generato da tools/build/gen_music.py - brani per tools/jukebox.asm", "JB_NSONG = %d" % len(jl)]
     o.append("jb_slo .byte " + ", ".join("<jbs_%d" % i for i in range(len(jl))))
     o.append("jb_shi .byte " + ", ".join(">jbs_%d" % i for i in range(len(jl))))
@@ -252,7 +253,7 @@ def render(idx, name, seconds):
 if __name__ == "__main__" and "--render" in sys.argv:
     main()
     P = songs.PLAYLIST
-    jl = [P["title"]] + songs.game_files(P)
+    jl = songs.jukebox_files(P)
     only = [a for a in sys.argv[1:] if not a.startswith("-")]
     for i, n in enumerate(jl):
         if not only or n in only:

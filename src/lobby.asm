@@ -11,8 +11,9 @@
         jmp bb_quit             ; $C009: quit the game (anche da ui_badsave, nel gioco)
         .enc "screen"
 
-; menu iniziale, senza musica (06/11: il passaggio della musica del titolo dal loader al menu dava un glitch
-; audio; da rifare). Gli interrupt restano spenti come in tutte le schermate a tutto schermo (ui_begin).
+; menu iniziale con Demon's Eye (15/11, TODO E3; dal 06/11 era muto: il passaggio della musica del titolo dal loader dava un
+; glitch). Ora il brano e' un file SND_MENU suonato dal player del gioco (ui_menu). Gli interrupt restano spenti come in tutte
+; le schermate a tutto schermo (ui_begin): la musica gira da ui_input.
 menu_main:
         lda mus_trk             ; uscita dal gioco: prima si spegne la musica del gioco (dissolvenza)
         beq +
@@ -169,9 +170,9 @@ md_arrow:
         jmp ui_putc
 
 ui_menu:
-        lda #0
-        ldx #FADE_SLOW
-        jsr music_request       ; la musica si spegne nel menu principale
+        lda #SND_MENU           ; (15/11, TODO E3) Demon's Eye (file SND_MENU) con il player del gioco: snd_get lo legge
+        jsr mus_place           ; (snd_io + io_quiet, via load_raw) e music_request(MUS_LVL, FADE_SLOW); parte da music_update
+                                ; (in ui_input). Gia' nel buffer (snd_cur): niente disco, niente riavvio.
 _scan   lda #0
         sta sv_old
         jsr scan_slots
@@ -258,7 +259,7 @@ _hero   tax
         jmp _top
 _cf
         lda #0
-        rts
+        jmp lb_leave
 _create lda nvalid
         cmp #5
         bcc _free
@@ -276,6 +277,12 @@ _got    stx cur_slot
         jmp _top
 _nf
         lda #1
+; uscita dal menu verso il gioco: la musica del menu si spegne con la dissolvenza PRIMA che music_town / music_dungeon
+; riempiano il buffer del luogo (se il player girasse ancora, snd_get gli cambierebbe i dati sotto i piedi). A preservato.
+lb_leave
+        pha
+        jsr music_fadeout
+        pla
         rts
 
 tt_menu .text "barbarian: the blood path", 0

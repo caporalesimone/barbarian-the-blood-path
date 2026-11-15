@@ -2953,7 +2953,8 @@ _qask   ; esci al menu principale (11/11 sera: senza salvare, decisione del comm
         jsr ui_yesno            ; (09/11) "y:yes  n:no" in riga 24 come tutte le domande
         bcs _quit
         jmp ui_gamemenu
-_quit   ldx #$ff                ; uscita senza salvare: vale l'ultimo "save game"
+_quit   jsr music_fadeout       ; (15/11, TODO E3) la musica del gioco si dissolve: game_start azzera le variabili del player
+        ldx #$ff                ; uscita senza salvare: vale l'ultimo "save game"
         txs
         jmp game_start
 

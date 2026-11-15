@@ -305,7 +305,15 @@ def game_files(P=None):
     out = []
     for n in P["town"] + P["level"] + P["boss"] + P["fight"]:
         if n not in out: out.append(n)
+    if P["title"] not in out:           # (15/11, TODO E3) Demon's Eye anche come file, ultimo (SND_MENU): musica del menu LOBBY
+        out.append(P["title"])
     return out
+
+
+def jukebox_files(P=None):
+    """brani del jukebox: il titolo per primo, poi i file del gioco senza ripeterlo"""
+    P = P or PLAYLIST
+    return [P["title"]] + [n for n in game_files(P) if n != P["title"]]
 TITLES = {"00_tavern": "Tavern of Dawn", "01_demons_eye": "Demon's Eye", "02_blood_path": "Blood Path",
           "03_the_watcher": "The Watcher", "04_iron_crown": "Iron Crown", "05_abyss_gate": "Abyss Gate",
           "11_crypt_steps": "Crypt Steps", "12_bone_halls": "Bone Halls", "13_fear_below": "Fear Below",

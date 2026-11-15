@@ -268,6 +268,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-24` | walk through chapters 1-4 to village 5 (levels, boss levels, villages, saves, travels, LOBBY): every load equals its file |
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
 | `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |
+| `LOBBY-12` | main menu plays Demon's Eye (file SND_MENU in the buffer of the place, player running); leaving it fades to silence, then music_town loads the village song |
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
