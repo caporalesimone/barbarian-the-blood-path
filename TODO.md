@@ -195,9 +195,11 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 [docs/ottimizzazione.md](docs/ottimizzazione.md) non ancora fatte: **suggerite da fare**.
 
 ### D12 (11/11) Dall'analisi dell'assembly generato (`out/work/asm_audit/analisi_assembly.md`) — S
-- **Suggeriti**: routine per la casella del mostro (`mxl/mxh → pix2tile` e `myl/myh`, 4 copie ciascuno: ~46 B) e per i
-  puntatori della grafica (`GFX_FSTRIP`, 4 copie: ~38 B); le altre ripetizioni sono da 8–15 B (~145 B in tutto, valutare una
-  per una); START e LORE: escludere con `.if` il codice dell'altra variante (~155 B e ~180 B: solo tempo di caricamento).
+- **Fatto il 15/11** (+210 B di margine in GAME, +25 B nel blocco `$9C00`; START −172 B, LORE −170 B): casella del mostro,
+  `GFX_FSTRIP`, 9 ripetizioni sicure, START/LORE con `.if` ([ottimizzazione](docs/ottimizzazione.md) O15–O23).
+- **Restano, lasciate apposta** (motivi in [ottimizzazione](docs/ottimizzazione.md)): `px/py → ent_x/ent_y` (giro per fotogramma,
+  9 B), prologo di `rel_put`/`rel_get` (cambio di `$01` con interrupt spenti, 9 B), ripetizioni in `gen_io.asm` (sotto l'I/O,
+  25 B), due finestre di LOBBY (25 B, nessun guadagno per GAME), 58 B di player non usati nel JUKEBOX (`SP_RESUME = 0`).
   Rifare l'analisi dopo ogni lavoro grosso: `lab64 run python3 tools/build/asm_audit.py` (test `ASM-10/11`).
 
 ### D14 (11/11) Spazio del modulo MENU — S (per ogni zona nuova)

@@ -103,6 +103,18 @@ load_gfx:
         sta ptr1+1
         jmp load_raw
 
+; (15/11, TODO D12) legge il file di nome gia' impostato in FIN_AT..FIN_END (FMAP e BOSSCHc)
+fin_rd:
+        lda #<FIN_AT
+        sta ptr0
+        lda #>FIN_AT
+        sta ptr0+1
+        lda #<FIN_END
+        sta ptr1
+        lda #>FIN_END
+        sta ptr1+1
+        jmp load_raw
+
 ; mappa di base della sala del trono (piano 20, file FMAP: tools/build/gen_final.py) -> MAP. Il file (RLE, ~400 B) si
 ; rilegge a ogni ingresso nel piano (11/11: niente cache) in FIN_AT ($FD00, sotto il KERNAL, fino ai vettori $FFFA)
 ; e si scompatta da li'.
@@ -112,15 +124,7 @@ fin_load:
         sta io_what
         lda cur_level
         sta io_lvl
-        lda #<FIN_AT
-        sta ptr0
-        lda #>FIN_AT
-        sta ptr0+1
-        lda #<FIN_END
-        sta ptr1
-        lda #>FIN_END
-        sta ptr1+1
-        jsr load_raw
+        jsr fin_rd
         lda #<FIN_AT
         ldx #>FIN_AT
 fin_unp sta ptr0                ; ptr0 = flusso RLE -> MAP
@@ -154,15 +158,7 @@ bmap_load:
         sta cmdbuf+10
         lda #7
         sta nlen
-        lda #<FIN_AT
-        sta ptr0
-        lda #>FIN_AT
-        sta ptr0+1
-        lda #<FIN_END
-        sta ptr1
-        lda #>FIN_END
-        sta ptr1+1
-        jsr load_raw
+        jsr fin_rd
         sei
         lda #$35
         sta $01

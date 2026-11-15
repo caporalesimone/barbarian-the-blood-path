@@ -199,6 +199,7 @@ _sp     lda ld_spr,x
 +       jmp start_game          ; niente PRESS SPACE: subito il menu del gioco
 .endif
 
+.if !TXT                        ; (15/11, TODO D12) START con la schermata di attesa non ha PRESS SPACE: va dritto a start_game
         sei                     ; PRESS / SPACE
         ldx #4
 _ps     lda press,x
@@ -237,7 +238,9 @@ _rs     jmp lore_exit
         and #$10
         bne _wait
 .endif
+.endif                          ; !TXT
 
+.if !LORE                       ; (15/11, TODO D12) LORE non parte mai direttamente col gioco: ha lore_start / lore_exit
 start_game
         sei                     ; partenza del gioco
         lda #0
@@ -290,9 +293,11 @@ _cb     lda CHRTMP,x
 +
 .endif
         jmp $0400               ; GAME_ENTRY (src/main.asm)
+.endif                          ; !LORE
 
 nmi     rti
 
+.if !TXT                        ; (15/11, D12) solo PRESS SPACE (START con la schermata di attesa non lo usa)
 ; A = X del primo sprite; poi +28 per ogni sprite (0-4)
 set_x   ldx #0
 _x      sta $d000,x
@@ -309,6 +314,7 @@ _y      sta $d001,x
         dex
         bpl _y
         rts
+.endif
 
 ; ------------------------------------------------------------------ caricamento
 ; (11/11, ramo fast-loader) Krill's Loader: install (KERNAL acceso), residente a $0200, poi i file con loadraw;
@@ -723,6 +729,7 @@ SP_VARS = $be00                 ; variabili del player (RAM sotto il BASIC, dopo
 SP_V0   = 0
 SP_V1   = 7
 SP_V2   = 14
+SP_RESUME = 0                   ; (15/11, TODO D12) START e LORE non riprendono ne' rilasciano il brano: fuori sp_resume e sp_release
         .include "sid_player.inc"
         .include "sid_title.inc"        ; out/work/sid_title.inc (tools/build/gen_music.py)
         .cerror SP_VARS + SP_VSIZE > $c000, "variabili del player oltre $BFFF"

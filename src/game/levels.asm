@@ -263,6 +263,17 @@ _fin    lda #$ff
         sta force_redraw
         rts
 
+; (15/11, TODO D12; prima in change_level e chap_travel) audio a zero, schermo nero, brano fermato in silenzio
+scr_black:
+        jsr snd_fade            ; audio: dissolvenza del volume a zero, prima di tutto
+        jsr irq_off             ; schermo nero: niente glitch mentre si riscrivono caratteri e mappa
+        lda #0
+        sta SPR_EN
+        sta BORDER
+        lda #$0b                ; schermo spento (nero). Effetto grafico del passaggio: da decidere (TODO M1)
+        sta VIC_CTRL1
+        jsr music_fadeout       ; (in silenzio: salva la posizione del brano)
+        jmp snd_mute
 ; A = nuovo livello, X = modalita'
 ; Salvataggi: il personaggio solo dal menu RUN/STOP (e alla creazione). Lo stato del piano si
 ; salva lasciandolo per le scale; per portale o morte resta in memoria (STASH) e si salva quando
@@ -270,15 +281,7 @@ _fin    lda #$ff
 change_level:
         sta new_lvl
         stx spawn_mode
-        jsr snd_fade            ; audio: dissolvenza del volume a zero, prima di tutto
-        jsr irq_off             ; schermo nero: niente glitch mentre si riscrivono caratteri e mappa
-        lda #0
-        sta SPR_EN
-        sta BORDER
-        lda #$0b
-        sta VIC_CTRL1
-        jsr music_fadeout       ; (in silenzio: salva la posizione del brano)
-        jsr snd_mute
+        jsr scr_black
         lda cur_level
         beq _ns
         lda spawn_mode

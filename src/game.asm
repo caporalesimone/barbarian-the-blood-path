@@ -296,21 +296,29 @@ copy_gfx:
         ldx #>(gd_core+768)
         ldy #$a6
         jsr cp_pages
-        .for q = 0, q < 4, q += 1   ; caratteri fissi: in ogni quarto del charset, dopo i tile
-        lda #<(gd_fchr+q*GFX_FSTRIP)
-        ldx #>(gd_fchr+q*GFX_FSTRIP)
-        ldy #<(CHARSET+q*$200+GFX_TSTRIP)
-        sty ptr1
-        ldy #>(CHARSET+q*$200+GFX_TSTRIP)
-        sty ptr1+1
-        sta ptr0
-        stx ptr0+1
-        lda #<GFX_FSTRIP
+        lda #<gd_fchr           ; caratteri fissi: in ogni quarto del charset, dopo i tile (15/11, D12: un ciclo, non 4 copie;
+        sta ptr0                ; cp_n lascia ptr0 sulla striscia successiva e ptr1 a fine striscia)
+        lda #>gd_fchr
+        sta ptr0+1
+        lda #<(CHARSET+GFX_TSTRIP)
+        sta ptr1
+        lda #>(CHARSET+GFX_TSTRIP)
+        sta ptr1+1
+        ldx #3
+_fq     lda #<GFX_FSTRIP
         sta tmp6
         lda #>GFX_FSTRIP
         sta tmp7
-        jsr cp_n
-        .next
+        jsr cp_n                ; (preserva X)
+        lda ptr1                ; prossimo quarto: +$200 meno la striscia appena scritta
+        clc
+        adc #<($200-GFX_FSTRIP)
+        sta ptr1
+        lda ptr1+1
+        adc #>($200-GFX_FSTRIP)
+        sta ptr1+1
+        dex
+        bpl _fq
         lda #4                  ; font UI: $B800
         sta tmp7
         lda #<gd_font

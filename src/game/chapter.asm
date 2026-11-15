@@ -95,15 +95,7 @@ _r      rts
 ; capitolo sul disco (gia' come capitolo nuovo, all'ingresso sud del villaggio: "continue" riparte da li'),
 ; (4) villaggio nuovo (change_level, arrivo dalla strada a sud come una partita nuova)
 chap_travel:
-        jsr snd_fade
-        jsr irq_off
-        lda #0
-        sta SPR_EN
-        sta BORDER
-        lda #$0b                ; schermo spento (nero). Effetto grafico del passaggio: da decidere (TODO M1)
-        sta VIC_CTRL1
-        jsr music_fadeout
-        jsr snd_mute
+        jsr scr_black
         inc c_chap
         lda #0                  ; (15/11) il villaggio nuovo si legge gia' qui: il suo ingresso (tk_nx, tk_ny) serve prima
         jsr load_gfx            ; del salvataggio ("continue" riparte da li')

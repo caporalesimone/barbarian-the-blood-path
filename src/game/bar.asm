@@ -129,17 +129,27 @@ _new    ldy lb_cnt
         ldy lb_cnt
         sta mtype,y
         ldx st_e
-        lda rcx,x
-        sta mix,y
-        lda rcy,x
-        sta miy,y
-        lda #1
-        sta malive,y
-        inc lb_cnt
+        jsr mon_new
         iny
         sty lb_boss
         jmp boss_name_idx
 _r      rts
+
+; (15/11, TODO D12) ptr0 = A x 8 + Y x 256 (indirizzo del glifo: codice x 8 + pagina base); preserva X
+x8p:    sta ptr0
+        lda #0
+        sta ptr0+1
+        asl ptr0
+        rol ptr0+1
+        asl ptr0
+        rol ptr0+1
+        asl ptr0
+        rol ptr0+1
+        tya
+        clc
+        adc ptr0+1
+        sta ptr0+1
+        rts
 
 ; stringa (A=lo, X=hi) -> nbuf[bn_i...]
 bn_put:
@@ -326,19 +336,8 @@ _gl     cmp #7
         sta bn_i                ; fine (esclusa) di questo gruppo di glifi
 _g      ldx bc_i
         lda nbuf,x
-        sta ptr0
-        lda #0
-        sta ptr0+1
-        asl ptr0
-        rol ptr0+1
-        asl ptr0
-        rol ptr0+1
-        asl ptr0
-        rol ptr0+1
-        lda ptr0+1
-        clc
-        adc #$d0
-        sta ptr0+1
+        ldy #$d0                ; ptr0 = $D000 (char ROM) + codice x 8
+        jsr x8p
         ldy #7
         sei                     ; char ROM visibile solo per 8 letture
         lda #$32

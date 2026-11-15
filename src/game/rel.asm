@@ -839,15 +839,8 @@ _gm     lsr tmp0
         lda ch_t,x
         and #$10                ; solo se nel posto c'e' davvero il baule rigenerato del piano
         beq +
-        lda #0
-        sta ch_t,x
-        lda cx_x,x              ; e la casella torna pavimento: place_chests ci aveva messo il tile del baule
-        sta tx                  ; (07/11: senza, il baule aperto restava sulla mappa e Fire non faceva nulla)
-        lda cx_y,x
-        sta ty
-        stx tmp7
-        lda #T_FLOOR
-        jsr set_tile
+        stx tmp7                ; baule tolto e la sua casella torna pavimento: place_chests ci aveva messo il tile del baule
+        jsr ch_floor            ; (07/11: senza, il baule aperto restava sulla mappa e Fire non faceva nulla)
         ldx tmp7
 +       inx
         cpx #CH_GEN_MAX

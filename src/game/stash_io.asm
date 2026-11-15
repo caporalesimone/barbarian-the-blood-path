@@ -65,13 +65,7 @@ g_mul10 asl tmp0
         rol tmp1
         asl tmp0
         rol tmp1
-        lda tmp0
-        clc
-        adc c_gold
-        sta tmp0
-        lda tmp1
-        adc c_gold+1
-        sta tmp1
+        jsr t01_addg            ; (15/11, D12) tmp0:1 += c_gold
         lda tmp0
         clc
         adc tmp6

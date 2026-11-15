@@ -244,6 +244,16 @@ exprow_hi
 ; ===================================================================
 ;  utilita'
 ; ===================================================================
+; (15/11, TODO D12) casella del mostro X: A = casella x / y; X NON preservato (i chiamanti ricaricano l'indice)
+mon_tx: lda mxl,x
+        pha
+        lda mxh,x
+        jmp mon_tp
+mon_ty: lda myl,x
+        pha
+        lda myh,x
+mon_tp  tax
+        pla
 ; A = lo, X = hi (pixel) -> A = tile
 pix2tile:
         sta tmp6
@@ -549,20 +559,10 @@ _l      cpx lb_cnt
         stx rt_i
         lda malive,x
         beq _n
-        lda mxl,x
-        pha
-        lda mxh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_tx
         ldx rt_i
         sta mix,x
-        lda myl,x
-        pha
-        lda myh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_ty
         ldx rt_i
         sta miy,x
 _n      ldx rt_i
@@ -1250,20 +1250,10 @@ _bm     cpx lb_cnt
         lda malive,x
         beq _bn
         stx bf_m
-        lda mxl,x
-        pha
-        lda mxh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_tx
         ldx bf_m
         sta bm_x,x
-        lda myl,x
-        pha
-        lda myh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_ty
         ldx bf_m
         sta bm_y,x
 _bn     inx
@@ -1869,6 +1859,11 @@ _fd     lda cur_level
         ldx st_e
         lda #T_FINAL
         sta mtype,y
+        jmp mon_new             ; (15/11, D12: comune con place_boss)
+_done   rts
+
+; X = stanza logica, Y = indice del mostro appena creato: posizione = centro della stanza, vivo, lb_cnt + 1
+mon_new:
         lda rcx,x
         sta mix,y
         lda rcy,x
@@ -1876,7 +1871,7 @@ _fd     lda cur_level
         lda #1
         sta malive,y
         inc lb_cnt
-_done   rts
+        rts
 
 ; dati runtime dei mostri dopo spawn / caricamento (floor_types gia' chiamato per il piano)
 init_monsters_rt:
@@ -2053,19 +2048,9 @@ kill_monster:
         stx km_i
         lda #0
         sta malive,x
-        lda mxl,x
-        pha
-        lda mxh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_tx
         sta loot_x
-        lda myl,x
-        pha
-        lda myh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_ty
         sta loot_y
                             ; nessun cadavere sul terreno (rimosso: creava confusione con i bauli)
 _nc     ldx km_i                ; esperienza del tipo al piano (floor_types)
@@ -3494,12 +3479,7 @@ _l      cpx lb_cnt
         lda malive,x
         beq _n
         stx cb_i
-        lda mxl,x
-        pha
-        lda mxh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_tx
         sec
         sbc ptx
         bcs _x
@@ -3509,12 +3489,7 @@ _l      cpx lb_cnt
 _x      cmp #3
         bcs _nx
         ldx cb_i
-        lda myl,x
-        pha
-        lda myh,x
-        tax
-        pla
-        jsr pix2tile
+        jsr mon_ty
         sec
         sbc pty
         bcs _y

@@ -286,6 +286,13 @@ gold_total:
         lda c_sgold
         ldx c_sgold+1
         jsr ui_x10
+        jsr t01_addg
+        bcc +
+        inc tmp2
++       rts
+
+; (15/11, TODO D12) tmp0:1 += c_gold (C = riporto); anche g_mul10 (stash_io.asm)
+t01_addg:
         lda tmp0
         clc
         adc c_gold
@@ -293,9 +300,7 @@ gold_total:
         lda tmp1
         adc c_gold+1
         sta tmp1
-        bcc +
-        inc tmp2
-+       rts
+        rts
 
 ; (10/11) numero a 24 bit tmp0..2 (al massimo 999999) in 6 caratteri allineati a destra, colori come ui_num5
 ui_num6:
@@ -445,7 +450,7 @@ _l      lda tmp0
         bne _l
 _d      tya
         jsr ui_b3l
-        lda ui_col
+ui_k:   lda ui_col              ; (15/11, D12) 'k' nel colore dei valori, ui_col conservato
         pha
         lda #UC_VALUE
         sta ui_col
@@ -873,15 +878,20 @@ _drop   jsr inv_delete
 
 tt_bp   .text "backpack", 0
 
+; (15/11, TODO D12) glifo A del riquadro in (X,Y) nel colore delle cornici (ui_bc)
+bx_g:   pha
+        jsr ui_at
+        lda ui_bc
+        sta ui_col
+        pla
+        jmp ui_putc
+
 ; riquadro: bx,by,bw,bh (bordo grigio, interno non toccato)
 ui_box:
         ldx bx
         ldy by
-        jsr ui_at
-        lda ui_bc
-        sta ui_col
         lda #BOX_TL
-        jsr ui_putc
+        jsr bx_g
         ldx bw
         dex
         dex
@@ -905,30 +915,21 @@ _side   inc br
         beq _bot
         ldx bx
         ldy br
-        jsr ui_at
-        lda ui_bc
-        sta ui_col
         lda #BOX_V
-        jsr ui_putc
+        jsr bx_g
         lda bx
         clc
         adc bw
         tax
         dex
         ldy br
-        jsr ui_at
-        lda ui_bc
-        sta ui_col
         lda #BOX_V
-        jsr ui_putc
+        jsr bx_g
         jmp _side
 _bot    ldx bx
         ldy bend
-        jsr ui_at
-        lda ui_bc
-        sta ui_col
         lda #BOX_BL
-        jsr ui_putc
+        jsr bx_g
         ldx bw
         dex
         dex
@@ -1383,9 +1384,7 @@ _sv     lda SCR_A+24*40,x
         sta YN_SAV,x
         dex
         bpl _sv
-        ldy #24
-        jsr clear_row
-        #at 1,24
+        jsr row24
         #msg "y:yes  n:no"
 .if TESTUI == 33
         jmp *                   ; screenshot della domanda "quit game?"
@@ -1975,14 +1974,7 @@ _k      lda #0                  ; migliaia: sottrazioni di 1000 (al massimo 665)
 +       lda tmp6
         ldx tmp7
         jsr ui_n5l
-        lda ui_col
-        pha
-        lda #UC_VALUE
-        sta ui_col
-        lda #'k'
-        jsr ui_putc
-        pla
-        sta ui_col
+        jsr ui_k
 _sp     lda #$20
         jsr ui_putc
         lda #$20
@@ -1998,6 +1990,13 @@ ui_coin:
         lda #CH_COIN
         ldx #7
         jmp ui_icon
+
+; (15/11, TODO D12) riga 24 pulita, cursore a colonna 1 (riga dei tasti): poi #msg
+row24:  ldy #24
+        jsr clear_row
+        ldx #1
+        ldy #24
+        jmp ui_at
 
 ; riga dei messaggi pulita, cursore all'inizio: msg23 = riga 23 (negozi), shop_msg_clear = riga 22 (baule del piano)
 msg23:  ldy #23
@@ -2039,9 +2038,7 @@ ch_item:
         beq +
         jsr ib_at1
         jsr it_val
-+       ldy #24
-        jsr clear_row
-        #at 1,24
++       jsr row24
         #msg "fire:take  run/stop:back"
         rts
 
@@ -2430,19 +2427,8 @@ _z      sta $b000,y
         bne _z
         ldx #MI_N-1
 _i      lda mi_ic,x
-        sta ptr0
-        lda #0
-        sta ptr0+1
-        asl ptr0
-        rol ptr0+1
-        asl ptr0
-        rol ptr0+1
-        asl ptr0
-        rol ptr0+1
-        lda ptr0+1
-        clc
-        adc #$b8
-        sta ptr0+1              ; ptr0 = $B800 + codice x 8
+        ldy #$b8                ; ptr0 = $B800 + codice x 8
+        jsr x8p
         txa
         lsr
         ror
@@ -3200,6 +3186,12 @@ chest_empty:
         clc
         rts
 _e      ldx ch_cur
+        jsr ch_floor
+        sec
+        rts
+
+; (15/11, TODO D12) baule X tolto: ch_t = 0 e la sua casella torna pavimento (X non preservato; anche rel.asm)
+ch_floor:
         lda #0
         sta ch_t,x
         lda cx_x,x
@@ -3207,9 +3199,7 @@ _e      ldx ch_cur
         lda cx_y,x
         sta ty
         lda #T_FLOOR
-        jsr set_tile
-        sec
-        rts
+        jmp set_tile
 
 ; messaggio di give_item fallito (gv_why), alla posizione corrente
 give_msg:

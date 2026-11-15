@@ -199,6 +199,10 @@ _r      lda $ffff,y
         iny
         rts
 
+.weak
+SP_RESUME = 1                   ; 0 = senza sp_resume e sp_release (START e LORE, src/common/boot.asm)
+.endweak
+.if SP_RESUME
 ; ripresa dalla posizione salvata (stesso brano a sp_bl/sp_bh)
 sp_resume:
         jsr sp_start
@@ -213,7 +217,9 @@ _n      lda #1
         dex
         bpl _n
         rts
+.endif
 
+.if SP_RESUME
 sp_save:
         ldx #3*10-1
 _c      lda sp_pos,x
@@ -221,6 +227,7 @@ _c      lda sp_pos,x
         dex
         bpl _c
         rts
+.endif
 
 sp_stop:
         lda #0
@@ -235,6 +242,7 @@ _v      lda sp_mute,x
         bpl _v
         rts
 
+.if SP_RESUME
 ; A = rilascio (0-15): gate spento e rilascio impostato; il brano si ferma (le note sfumano da sole)
 sp_release:
         sta sp_t
@@ -254,6 +262,7 @@ _v      lda sp_mute,x
 +       dex
         bpl _v
         rts
+.endif
 
 ; ---------------------------------------------------------------- un fotogramma
 sp_play:
