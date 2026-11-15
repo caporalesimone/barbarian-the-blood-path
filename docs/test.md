@@ -160,7 +160,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
 | `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
 
-### regression (182)
+### regression (187)
 
 | ID | Test |
 |---|---|
@@ -192,8 +192,13 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-SEQ-12` | killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2) |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
 | `CHAP-SEQ-14` | chapter 2: the crypt leads to level 6 (first of the chapter); its stairs up lead back to the village |
-| `CS-10` | no points, no respec token: no entries (no '>'), 'no points to spend.', RUN/STOP back to the game |
-| `CS-11` | no points, 1 respec token: only 'respec' (cursor on row 16); fire + yes: points back, all the entries again |
+| `CS-10` | no points, no token: nothing about respec on the screen, no entries, 'no points to spend.', next point at level 8 |
+| `CS-11` | no points, 1 token: token count shown, only 'respec' (row 17); yes: points back, full menu without respec |
+| `CS-12` | points, no token: entries str/dex/con/confirm/undo only, 'points to spend 3', no respec anywhere |
+| `CS-13` | before confirming, points move freely: D/+ add, A/- take back, between str/dex/con; undo takes all back |
+| `CS-14` | preview: con +1 shows 'hp N -> N+6' and 'mod +2 -> +3' (new values green); hint of the stat under the cursor |
+| `CS-15` | confirm asks 'spend 2 points for good?': no = keep editing, yes = spent and 'no points to spend.' if none left |
+| `CS-16` | RUN/STOP with pending points asks 'spend 1 point before leaving?': no = points given back, yes = spent |
 | `DISK-10` | the disk has every file (loader, START, game, LORE, LDAT, TITLE, HELP, JUKEBOX, saves, ...) |
 | `DISK-12` | entry of the tests (11/11, Krill): the real START from the monitor (Krill installed), new game in the village |
 | `DUNG-CHEST-10` | key chest: without a key 'it is locked' (stays closed); with a key it opens, one key used |
@@ -317,9 +322,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SKILL-15` | Smash: one attack roll on each monster within 44 px, 6 s cooldown |
 | `STAT-10` | level up: the stats stay the base ones, the points grow by pl_pts (1 every 2 levels, 2..18) |
 | `STAT-11` | HUD: glyph next to the level number (row 23, col 6) while there are points to spend, blank without |
-| `STAT-12` | C screen: D (+) on str, confirm: c_sadd str 1, str 17, no points left; RUN/STOP goes back without saving |
-| `STAT-13` | C screen: '-' takes a pending point back, reset clears them, exit without changes does not save |
-| `STAT-14` | exit with pending points: they are confirmed (dex +2); hp max follows con |
+| `STAT-12` | C screen: D (+) on str, confirm + yes: c_sadd str 1, str 17, no points left; RUN/STOP goes back without saving |
+| `STAT-13` | C screen: '-' takes a pending point back, undo clears them, exit without changes does not save |
+| `STAT-14` | exit with pending points (15/11): question, yes = confirmed (dex +2); hp max follows con |
 | `STAT-15` | respec: no entry without tokens; with 2 tokens: yes -> all the points back, 1 token left, not saved on exit |
 | `STAT-16` | respec tokens: resp_add stops at RESP_MAX; resp_roll never above ground nor in levels 1-20, ~2% in the Abyss |
 | `UI-INV-10` | inventory: RUN/STOP closes it and returns to the game (no game menu) |

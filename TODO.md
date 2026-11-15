@@ -29,7 +29,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
-| Z | [Note urgenti](#z--note-urgenti) | Z3–Z6 |
+| Z | [Note urgenti](#z--note-urgenti) | Z3, Z4, Z6 |
 
 ---
 
@@ -43,9 +43,14 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
   salti). Ostacolo: costa ~1 KB e le zone del MENU hanno liberi solo 272 B (170/9/93): serve una zona nuova o più spazio (D14).
   Nel dungeon il MENU potrebbe non essere in memoria (si carica all'ingresso nel villaggio). Finché non si decide resta in GAME.
 - **Da verificare a mano** (VICE o hardware): aprire C nel villaggio e nel dungeon (anche con mostri vicini), spendere,
-  togliere, reset, confirm, respec con e senza gettoni, uscire salvando, ricaricare la partita, CON alzata = vita massima alzata.
+  togliere, spostare fra le caratteristiche, undo, confirm (sì/no), uscita con punti in attesa (sì/no), respec con e senza gettoni,
+  ricaricare la partita, CON alzata = vita massima alzata (schermata rifatta il 15/11, Z5: `docs/interfaccia.md`).
 - **Decisioni da confermare** (B12, prese da me l'11/11): (a) **1 punto ogni 2 livelli** (9 al livello 20); (b) vita
-  **retroattiva** su COS; (c) all'uscita i punti in attesa si **confermano**; (d) Fire su una caratteristica = +1; (e) nessun tetto.
+  **retroattiva** su COS; ~~(c) all'uscita i punti in attesa si **confermano**~~ **superata il 15/11 dalla richiesta del
+  committente (Z5)**: nulla si spende senza conferma esplicita; "confirm" chiede "spend N points for good?", RUN/STOP con
+  punti in attesa chiede "spend N points before leaving?" (no = si esce e i punti tornano da spendere); (d) Fire su una
+  caratteristica = +1; (e) nessun tetto. Da confermare (15/11, mie): il "no" all'uscita esce comunque (non torna alla
+  schermata); la sola voce respec senza punti (cs_mode 1).
 - **Resta**: aggiornare il manuale (pagina dei tasti e dell'HUD) e la tabella delle caratteristiche in `docs/combattimento.md`.
 
 ---
@@ -68,7 +73,7 @@ non si possono chiudere.
 | B9 (ex D14) | **Borsello a gradini**: valori (es. 500 / 1000 / 3000 / 5000, 10 000 al boss finale) e quali tre quest. | H1 |
 | B10 (ex D12) | **Abisso**: ripopolamento, prezzi della città, tetto dell'oro oltre i 16 bit. | H3 |
 | B11 (D-CAP-1..5, 11/11) | **Capitoli** (`docs/capitoli.md`): quanti (i piani sono **5 per capitolo**: `data/chapters.yaml` 5, 5, 5, 5 + Abisso 235 = profondità 255; piano locale da 1 in ogni capitolo, profondità globale per la difficoltà, `docs/quests.md` 3.8); dove vanno Demon e Balrog (oggi da profondità 8–9: fuori dal capitolo 1 di 5 piani); ritorno ai villaggi precedenti; piani dell'Abisso salvati (anello di K record) o rigenerati; mappe fisse nell'Abisso; difficoltà oltre la profondità 32 e oltre 255. | M9, H3 |
-| B12 (11/11) | **Punti statistica**: conferma delle scelte di A1 (punti per livello, vita retroattiva, uscita che conferma). | A1 |
+| B12 (11/11) | **Punti statistica**: conferma delle scelte di A1 (punti per livello, vita retroattiva; l'uscita che confermava in silenzio è stata cambiata il 15/11 dalla richiesta del committente, Z5: ora chiede). | A1 |
 | B13 (11/11) | **Frenzy**: corsa massima +50% (≈40 fps fra i mostri) invece di +100% (≈34 fps)? Misure in `docs/prestazioni.md`. Si decide dopo le prove della categoria 8. | D3, K |
 | B15 (11/11) | **Salvataggi con Krill più lenti** ([docs/FastLoader.md](docs/FastLoader.md) sez. 7): "save game" 3,2–5,4 → 7,1–8,6 s, locanda 3,1 → 8,5 s, scale fra piani 10–11 s (il piano lasciato si salva). Causa: il plugin riscrive il file dell'eroe intero (9 blocchi) dopo averlo letto, più la ricarica del plugin (si modifica da solo) e del villaggio. Da decidere: accettare; file più piccoli (un file per piano: più file sul disco, scelta contraria del committente); immagine del file sempre in RAM (niente lettura, ~2 KB); non salvare i piani alle scale ma solo con l'eroe. | M4, M8 |
 | B16 (11/11) | **A fine gioco: build con immagini disco diverse per drive?** Oggi solo 1541 (`_1541` nel nome). Krill supporta anche 1570/71, 1581, CMD FD, 1541U; SD2IEC solo con il ripiego KERNAL. Con tutti i drive l'install passa da 3225 a 6997 B e il plugin non si costruisce senza cambiare `save.s`. | I1, M5 |
@@ -471,12 +476,6 @@ dimensionate. Finita una voce: si cancella e la decisione va nella wiki o nel RE
 
 ### Z4 — Fable — Barbarian: review del gioco (altro branch)
 - Fai una review anche di barbarian. Fixa bug, ottimizza la memoria e la velocità di caricamento.
-
-### Z5 — Fable — Barbarian: menù C del giocatore (altro branch)
-- Rivedi il menù C del giocatore, dove si assegnano i punti a ogni level up, dove si vedono i token respec e lo stato attuale.
-- Non mostrare nulla dei token respec finché non ce ne sono.
-- Gestisci meglio sia la UI, se serve, sia l'esperienza nell'assegnazione dei punti.
-- I punti si possono cambiare fino alla conferma definitiva.
 
 ### Z6 — Opus — Lab64: mappe di memoria multiple
 - La mappa di memoria è solo per il gioco o anche per intro e menù?

@@ -612,11 +612,11 @@ _t23    lda ptx
 .if TESTUI == 25
         jsr ui_gamemenu
 .endif
-.if (TESTUI == 40) && CHEATS     ; (15/11) screenshot: menu dei trucchi (tools/vice/shots_menus.sh "trucchi")
+.if (TESTUI == 41) && CHEATS     ; (15/11) screenshot: menu dei trucchi (tools/vice/shots_menus.sh "trucchi")
         jsr cheat_menu
 .endif
-.if TESTUI == 39                ; (11/11) screenshot: schermata C (personaggio) con un punto in attesa su FOR
-        jsr ui_charsheet
+.if (TESTUI == 39) || (TESTUI == 40)    ; screenshot della schermata C: 39 con punti in attesa e gettoni respec,
+        jsr ui_charsheet                ; 40 senza punti da spendere e senza gettoni (15/11)
 .endif
 .if (TESTUI == 30) || (TESTUI == 31)    ; (09/11) screenshot: menu iniziale con 2 barbari / nuovo barbaro
         jsr load_menu

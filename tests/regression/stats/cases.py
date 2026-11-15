@@ -1,6 +1,6 @@
 """Stat points and respec (11/11, branch feature/stat-points, src/game/charsheet.asm): the level-up gives stat points
 (pl_pts) instead of raising the stats, the HUD shows an arrow + C while there are points to spend, the C screen
-spends them (+/-, confirm, reset), saves on exit, and a respec token gives them all back. Respec tokens: +1 for the
+spends them (+/-, confirm with a question, undo; 15/11: nothing is spent without an explicit yes), does not save, and a respec token gives them all back. Respec tokens: +1 for the
 final boss, a low chance in the chests of the Abyss (resp_roll), at most RESP_MAX. One VICE session, the village."""
 from lib.c64 import Game
 from c64test import test, check
@@ -69,7 +69,7 @@ def stat_hud(ctx):
     g.poke(L["c_sadd"], 0); g.poke(L["hud_dirty"], 1); g.frames(2)
 
 
-@test("STAT-12", "C screen: D (+) on str, confirm: c_sadd str 1, str 17, no points left; RUN/STOP goes back without saving")
+@test("STAT-12", "C screen: D (+) on str, confirm + yes: c_sadd str 1, str 17, no points left; RUN/STOP goes back without saving")
 def stat_spend(ctx):
     g = ctx["g"]; L = g.L
     key(g, K_C, 3)
@@ -79,7 +79,9 @@ def stat_spend(ctx):
     check(g.mem(L["cs_pend"], 3) == [1, 0, 0], "pending %s" % g.mem(L["cs_pend"], 3))
     g.frames(1, joy=RT); g.frames(2)                                  # no points left: refused
     check(g.mem(L["cs_pend"], 3) == [1, 0, 0], "a second point without points: %s" % g.mem(L["cs_pend"], 3))
-    g.poke(L["ui_cur"], 3); g.frames(1); g.press_fire()               # confirm
+    g.poke(L["ui_cur"], 3); g.frames(1); g.press_fire()               # confirm: "spend 1 point for good?"
+    check(g.mem(L["c_sadd"], 3) == [0, 0, 0], "spent before the answer: %s" % g.mem(L["c_sadd"], 3))
+    key(g, K_Y, 3)
     check(g.mem(L["c_sadd"], 3) == [1, 0, 0] and g.b(L["s_str"]) == L["PL_STR0"] + 1,
           "after confirm: c_sadd %s str %d" % (g.mem(L["c_sadd"], 3), g.b(L["s_str"])))
     check(avail(g) == 0, "points left %d" % avail(g))
@@ -91,7 +93,7 @@ def stat_spend(ctx):
     check(n == 0, "the hero was saved %d times on exit (expected 0: only 'save game' saves, 11/11 evening)" % n)
 
 
-@test("STAT-13", "C screen: '-' takes a pending point back, reset clears them, exit without changes does not save")
+@test("STAT-13", "C screen: '-' takes a pending point back, undo clears them, exit without changes does not save")
 def stat_minus_reset(ctx):
     g = ctx["g"]; L = g.L
     set_level(g, 6, (1, 0, 0))                                        # 3 points, 1 spent: 2 to spend
@@ -101,9 +103,9 @@ def stat_minus_reset(ctx):
     check(g.mem(L["cs_pend"], 3) == [0, 0, 2], "pending %s (expected con 2)" % g.mem(L["cs_pend"], 3))
     key(g, K_MINUS, 1)
     check(g.mem(L["cs_pend"], 3) == [0, 0, 1], "after '-': %s" % g.mem(L["cs_pend"], 3))
-    g.poke(L["ui_cur"], 4); g.frames(1); g.press_fire()               # reset
+    g.poke(L["ui_cur"], 4); g.frames(1); g.press_fire()               # undo
     check(g.mem(L["cs_pend"], 3) == [0, 0, 0] and g.mem(L["c_sadd"], 3) == [1, 0, 0],
-          "after reset: pending %s spent %s" % (g.mem(L["cs_pend"], 3), g.mem(L["c_sadd"], 3)))
+          "after undo: pending %s spent %s" % (g.mem(L["cs_pend"], 3), g.mem(L["c_sadd"], 3)))
     g.watch(L["save_char"], L["sv_all"])
     g.run_stop(); g.frames(3)
     while not g.in_game(): g.frames(1, tmax=60)
@@ -111,13 +113,15 @@ def stat_minus_reset(ctx):
     check(n == 0, "saved %d times without changes" % n)
 
 
-@test("STAT-14", "exit with pending points: they are confirmed (dex +2); hp max follows con")
+@test("STAT-14", "exit with pending points (15/11): question, yes = confirmed (dex +2); hp max follows con")
 def stat_exit_applies(ctx):
     g = ctx["g"]; L = g.L
     key(g, K_C, 3)
     g.poke(L["ui_cur"], 1); g.frames(1)
     g.press_fire(); g.press_fire()                                    # Fire on a stat = +
-    g.run_stop(); g.frames(3)
+    g.run_stop()                                                      # "spend 2 points before leaving?"
+    check(g.mem(L["c_sadd"], 3) == [1, 0, 0], "spent before the answer: %s" % g.mem(L["c_sadd"], 3))
+    key(g, K_Y, 3)
     while not g.in_game(): g.frames(1, tmax=60)
     check(g.mem(L["c_sadd"], 3) == [1, 2, 0], "c_sadd %s (expected [1, 2, 0])" % g.mem(L["c_sadd"], 3))
     check(g.mem(L["cs_pend"], 3) == [0, 0, 0], "pending left %s" % g.mem(L["cs_pend"], 3))

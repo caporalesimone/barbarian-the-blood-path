@@ -214,6 +214,12 @@ io_lvl     .byte ?
 io_quiet   .byte ?
 wbuf       .fill 16
 cs_pend    .fill 3          ; (11/11) schermata C: punti in attesa su FOR, DES, COS (0 fuori dalla schermata: pts_avail)
+cs_mode    .byte ?          ; (15/11) schermata C: 0 tutte le voci, 1 solo respec, 2 nessuna (prima nel codice)
+cs_nv      .fill 12         ; (15/11) schermata C: hpmax..s_dk con i punti in attesa (anteprima)
+cs_sg      .byte ?          ; (15/11) schermata C: bit 7 = valore con '+' (cs_pv)
+cs_nw      .byte ?
+cs_cu      .byte ?
+cs_k       .byte ?
 cs_end
         .endv
 GVER       = 5

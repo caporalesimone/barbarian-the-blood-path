@@ -92,7 +92,7 @@ UI = {
     36: ("flask", "CH_FLASK", "icon of the alchemist: shop title and minimap (yellow); instead of $"),
     91: ("key", "CH_KEY", "keys next to the gold (purse) and in the item box"),
     92: ("coin", "CH_COIN", "gold: values and prices (\"600o\"), title of the golden chest (08/11: a coin with an engraved C)"),
-    93: ("free", "-", "free slot (08/11: it was the second half of the coin pile): inverse of ]"),
+    93: ("arrow", "CH_ARROW", "right arrow: C screen, current value -> value with the pending points (15/11; free since 08/11)"),
     94: ("potion", "CH_POT", "potions in the belt and in the shops, in the colour of the potion (red, yellow, violet)"),
     95: ("scroll", "CH_SCR", "portal scrolls (s N) and icon of the category"),
     97: ("sword", "CH_SWORD", "icon of the weapon category (equipped, inventory, chest, shop) and title of the barbarian menu"),

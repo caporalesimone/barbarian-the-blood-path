@@ -163,6 +163,7 @@ CH_ARMOR = 98                   ; (lo scudo e' CH_SHLD)
 CH_RING  = 99
 CH_SKULL = 100                  ; teschio (09/11: titolo della schermata di morte)
 CH_INN   = 101                  ; boccale (09/11: titolo della locanda)
+CH_ARROW = 93                   ; freccia a destra (15/11: schermata C, "valore -> nuovo" dei punti in attesa)
 
 ui_at:
         lda #UC_LABEL
@@ -1572,8 +1573,10 @@ ui_dice:
         tay
         lda ui_col
         pha
+        lda ui_fc               ; (15/11) colore forzato (schermata C: valore nuovo in verde) anche per 'd' e '+'
+        bne +
         lda #UC_VALUE
-        sta ui_col
++       sta ui_col
         tya
         jsr ui_b3l
         lda #4                  ; 'd'
