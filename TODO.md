@@ -29,7 +29,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
-| Z | [Note urgenti](#z--note-urgenti) | Z3, Z4, Z6 |
+| Z | [Note urgenti](#z--note-urgenti) | Z4, Z6 |
 
 ---
 
@@ -469,10 +469,6 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 
 Richieste del committente del 15/11, da lanciare così come sono (ogni voce dice a quale modello e in quale branch). Non sono ancora
 dimensionate. Finita una voce: si cancella e la decisione va nella wiki o nel README interessato.
-
-### Z3 — Fable — Lab64: review completa (branch a parte di lab64)
-- Fai una review completa di lab64 e vedi se trovi problemi; quelli che sei in grado di fixare, fixali subito in autonomia. Il resto
-  mettilo nel TODO di lab64.
 
 ### Z4 — Fable — Barbarian: review del gioco (altro branch)
 - Fai una review anche di barbarian. Fixa bug, ottimizza la memoria e la velocità di caricamento.

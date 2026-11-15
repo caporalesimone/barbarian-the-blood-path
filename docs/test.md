@@ -48,6 +48,11 @@ si scrivono quelli della feature nuova.
   dopo un fallimento i test seguenti sono SKIP con il motivo).
 - `lab64 test [smoke|sanity|regression|all] [-k ID|prefisso] [--list]` (o `lab64 test ...`, che con `lab64 up` passa anche il demone vc64web); report a schermo e in
   `out/work/test_report.txt` / `out/work/test_report.json`: ID, suite, esito (PASS/FAIL/SKIP), tempo, motivo.
+  (15/11, Lab64 1.3) Le suite girano sempre nell'ordine smoke, sanity, regression; `-k` senza suite cerca in **tutte** le suite;
+  un argomento sconosciuto o una selezione senza test (es. `-k` che non trova nulla, o `sanity/` vuota) esce con **2** senza toccare
+  i report (con la 1.2 era un giro verde): `tests/run_tests.sh` lo tratta come un fallimento, quindi `sanity/` non deve restare vuota.
+  Motivo dei FAIL degli `script()`: le righe con FAIL/rror/ERROR, altrimenti le ultime 3 righe (le parole in piu' starebbero in
+  `C64_TEST_REASON_WORDS`; il gioco non ne ha bisogno: nessuno script stampa "ATTENZ" come esito).
   Stato dal vivo (14/11): `out/tmp/tests.json`, riscritto dopo ogni test (stato, test in corso, esiti fin qui): lo legge il centro di
   controllo del viewer ([getting-started](getting-started.md) sezione 6).
 
