@@ -22,7 +22,7 @@ caricano `START` dal monitor (`Game.to_menu()`, [test](test.md)).
 ## `LORE` con Krill's Loader (11/11 sera)
 
 `LORE` (lo stesso `boot.asm` di `START`, `LORE=1`) installa Krill come `START`, poi legge con `loadraw` `TITLE` (10000 B)
-in un buffer a `$5600` e `LDAT` al suo indirizzo (decompresso sul posto in `$2000`). Il titolo compare poi **riga per riga
+in un buffer a `$6000` (`TBUF`; fino al 15/11 `$5600`) e `LDAT` al suo indirizzo (decompresso sul posto in `$2000`). Il titolo compare poi **riga per riga
 dal buffer**, un blocco di 40 byte per fotogramma (~5 s, `title_unit`), con la musica; prima compariva mentre il KERNAL
 leggeva i due file (~60 s). Uscita verso `BARBARIAN` (fine della storia o RUN/STOP, anche durante i caricamenti):
 `lore_exit` disinstalla Krill (il drive torna alla sua ROM), azzera le pagine 2-3 (il residente le ha sporcate: con le
@@ -35,7 +35,7 @@ restano sul KERNAL: il jukebox ha i brani dentro il suo file e non legge il disc
 flowchart TD
     A["LOAD&quot;BARBARIAN&quot;,8 / RUN<br/>il loader (6 blocchi)"] --> M{"menu a caratteri<br/>1 hear the legend<br/>2 read the game manual<br/>3 walk the blood path"}
     M -->|"1"| L["LORE (23 blocchi): titolo riga per riga + LDAT (26 blocchi)<br/>con la musica, PRESS SPACE"]
-    L --> S["la storia a scorrimento<br/>(fire non fa nulla fino alla fine)"]
+    L --> S["la storia a scorrimento<br/>(fire del joystick 2 tenuto = velocità doppia; a fine storia fire esce)"]
     S -->|"fine + fire, o RUN/STOP"| M
     M -->|"2"| N["HELP (29 blocchi): il manuale, 5 pagine<br/>con il ritaglio dell'HUD (docs/help.md)"]
     N -->|"fire dall'ultima pagina, o RUN/STOP"| M
@@ -95,12 +95,39 @@ sul posto di `LDAT` (stesso decompressore del gioco), PRESS SPACE con le lettere
    fotogrammi); la **fontana** di Saint Aldric (mappa del villaggio); due **torce** ai lati del titolo *the red hand*
    (copertina, una specchiata); il **barbaro** (copertina); una sala del **dungeon rosso** con il barbaro di spalle
    (sprite del PG raddoppiato) davanti al baule d'oro e alle scale.
-4. Fine: *walk the path* / *press fire* si ferma a metà schermo; fire torna al menu di `BARBARIAN` (07/11: prima
-   della fine fire e spazio non fanno nulla). RUN/STOP torna al menu in
-   qualunque momento.
+4. Fine: *walk the path* / *press fire* si ferma a metà schermo; fire o spazio (nuova pressione) tornano al menu di
+   `BARBARIAN` (07/11: prima della fine fire e spazio non fanno nulla). RUN/STOP torna al menu in qualunque momento.
 
-Velocità (07/11, era 2): un pixel ogni 6 fotogrammi (`LR_SPEED`, ~8 pixel al secondo, una riga al secondo), sempre
-la stessa. 220 righe: circa 3 minuti e mezzo.
+Velocità (07/11, era 2): un pixel ogni 6 fotogrammi (`LR_SPEED`, ~8 pixel al secondo, una riga ogni 48 fotogrammi,
+~1 s). **Fire del joystick 2 tenuto = velocità doppia** (15/11, committente): un pixel ogni 3 fotogrammi (`LR_FAST`, una
+riga ogni 24 fotogrammi); al rilascio torna normale. Vale solo durante lo scorrimento (state 2), non nella pausa
+iniziale (`LR_HOLD`, 250 fotogrammi: il tempo non cambia) e non fa mai saltare o uscire dalla fine: l'uscita resta la
+**nuova pressione** (`lfedge`) di fire **o spazio** a storia ferma (state 3), quindi un fire già tenuto non esce.
+Lo **spazio non accelera** (solo il fire del joystick 2: seconda lettura di `$DC00` nell'IRQ, variabile `lfast`); un fire già
+premuto a PRESS SPACE conta solo dopo un primo rilascio (`ljarm`). Gli eventi della storia restano in righe e passi
+(un passo = 8 pixel) e la RAM colore, gli sprite (salgono di un pixel per pixel) e i cambi di colore del raster seguono
+il pixel; solo l'animazione degli sprite (ogni 16 fotogrammi) resta in fotogrammi. A velocità doppia il ciclo
+principale ha 24 fotogrammi per preparare lo schermo nascosto (ne servono ~3; `lready` comunque fa aspettare il passo).
+Durata (calcolata da 292 righe: 264 passi di 48 o 24 fotogrammi, PAL 50,12 Hz; in VICE il tratto di storia a velocità
+doppia è stato misurato dal test `LORE-10`): pausa 5 s + **4 min 13 s** a velocità normale (circa 4 min 18 s in tutto),
+**2 min 6 s** con il fire sempre tenuto (circa 2 min 11 s). Prima dell'interlinea: 220 righe, 192 passi, 3 min 4 s + 5 s.
+
+### Interlinea (15/11, committente)
+
+Per leggere meglio, il generatore (`tools/build/gen_lore.py`, funzione `build`) mette **`LINE_GAP` = 1 riga vuota fra le righe
+di testo di un paragrafo** (le righe che escono dall'a capo automatico, colonne 2–37) e **`PARA_GAP` = 2 righe vuote fra
+due paragrafi** (una riga vuota in `data/lore.txt`; era 1). Titoli (`@title`), `@center`, `@img`, `@spr` e `@gap n` non
+hanno interlinea e restano com'erano; il vuoto prima e dopo le immagini è quello del paragrafo (2 righe, dove il file ha
+una riga vuota; il titolo sopra un'immagine ha 1 riga di `@gap`). L'unica riga vuota prima del logo resta di 1 riga: il
+logo non si sposta. `data/lore.txt` non è cambiato. Effetto: da 220 a 292 righe (+72: 49 interlinee di paragrafo + 1 riga in
+più per ogni stacco tra paragrafi). Verificato da `LORE-11` (`tests/regression/boot/test_lore_stream.py`) sul flusso
+generato.
+
+Limiti con la storia più lunga: il flusso si legge con il puntatore a 16 bit `lp` e **nessun contatore di righe a 8 bit**
+in `scroll.asm` (`LR_NROWS` non è usato dal C64): 292 righe vanno bene; i contatori a 8 bit sono per passo (`lstopc` =
+24 − riga dello schermo di STOP, 10; `lcnt` 25 del riempimento). Il vincolo vero è la memoria: LDAT decompresso arriva a
+`$57E3` e il compresso a `$57E6`, sopra il vecchio `TBUF` (`$5600`): **`TBUF` è passato a `$6000`** (`src/common/boot.asm`,
+TITLE `$6000`–`$870F`, sotto il corpo a `$A000`); margine per la storia 2074 B (il generatore e `LORE-11` lo controllano).
 RUN/STOP torna al menu anche mentre `LORE` carica (l'IRQ della musica legge il tasto, il ciclo del caricamento
 chiude i file e chiama il trampoline) e a PRESS SPACE.
 
@@ -144,13 +171,14 @@ generatore: in VICE (palette di default) il rosso appare più rosato.
 | `$0C00`–`$0C4F` | riga decodificata (40 caratteri + 40 colori) |
 | `$2000`–`$27FF` | charset (font + forme) |
 | `$2800`–`$2BFF` | sprite (fino a 16; oggi 10: 5 figure × 2 fotogrammi) |
-| `$2C00`–… | forme delle immagini, poi le righe (`LR_ROWS`); fine dei dati ~`$5570` |
+| `$2C00`–… | forme delle immagini, poi le righe (`LR_ROWS`); fine dei dati `$57E3` (15/11; margine 2074 B fino a `TBUF`) |
+| `$6000`–`$870F` | `TBUF`: il file TITLE letto qui e mostrato riga per riga (solo prima di PRESS SPACE) |
 | `$A000`–`$B5FF` | corpo di START + LORE + musica (`body_end` nel listato `out/work/lore.lst`) |
 | `$BE00` | variabili del player SID |
 | `$CC00`, `$D800`, `$E000` | schermo, colori e bitmap del titolo (banco VIC 3, prima di PRESS SPACE) |
 
 Durante il caricamento `LDAT` compresso sta alla fine della propria zona decompressa (`LD_AT` in `out/work/lore.inc`,
-~`$3C3E`) e si decomprime sul posto in `$2000` (verifica in Python in `tools/build/gen_lore.py`, in VICE in
+`$3E1F` oggi) e si decomprime sul posto in `$2000` (verifica in Python in `tools/build/gen_lore.py`, in VICE in
 `tests/regression/boot/test_lore.py`).
 
 ### Formato di `LDAT`
@@ -179,7 +207,7 @@ proprio della cella 0–7).
 ### Il generatore (`tools/build/gen_lore.py`) e lo script (`data/lore.txt`)
 
 Comandi dello script: `@img nome [testo]`, `@title testo`, `@center testo`, `@spr nomi…`, `@gap n`, `@hold`,
-`@stop riga`; paragrafi separati da una riga vuota. Le immagini sono definite in `IMAGES` del generatore:
+`@stop riga`; paragrafi separati da una riga vuota (che diventa `PARA_GAP` righe, [interlinea](#interlinea-1511-committente)). Le immagini sono definite in `IMAGES` del generatore:
 
 | Nome | Sorgente | Dimensioni (caratteri) |
 |---|---|---|
@@ -196,7 +224,7 @@ coppie, distanza "redmean" come `tools/build/gen_title.py`) e per ogni cella il 
 diverse superano il massimo dell'immagine si fondono quelle che costano meno in resa. Il generatore si ferma con un
 errore se due immagini troppo vicine non trovano codici liberi, o se più di 8 sprite sono sullo schermo insieme.
 
-Dimensioni oggi (stampate a ogni build): 220 righe, 13,7 KB di dati, 6,5 KB compressi = **26 blocchi**; con
+Dimensioni oggi (stampate a ogni build, 15/11): 292 righe, 14307 B di dati (14,0 KB), 6599 B compressi = **26 blocchi** (prima 220 righe, 13803 B, 6565 B); con
 `LORE` (23 blocchi, quasi tutto START, PRESS SPACE e musica) sono 49 blocchi, più `TITLE` (40, lo stesso file del gioco).
 
 ## Test

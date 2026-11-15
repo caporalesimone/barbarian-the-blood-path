@@ -25,7 +25,8 @@ def rel_script(tid, desc, argv, pre=True):
 
 
 rel_script("BOOT-11", "START from the monitor (wait screen, no bar) up to the game menu", [PY, os.path.join(H, "test_start.py")])
-rel_script("LORE-10", "release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), return, START", [PY, os.path.join(H, "test_lore.py")])
+rel_script("LORE-10", "release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), joystick fire held = double scroll speed (released: normal; held at the end: no exit), return, START", [PY, os.path.join(H, "test_lore.py")])
+rel_script("LORE-11", "LORE story stream: one blank row between the text rows of a paragraph, two between paragraphs, size limits (15/11)", [PY, os.path.join(H, "test_lore_stream.py")], pre=False)
 rel_script("HELP-10", "release: the HUD crop in the help equals the game HUD", [PY, os.path.join(ROOT, "tools", "build", "gen_help.py"), "--check"], pre=False)
 
 

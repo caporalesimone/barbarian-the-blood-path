@@ -1,6 +1,8 @@
 ; Lore del gioco (programma LORE, tools/build/gen_lore.py -> out/work/ldat.prg). Testo in inglese, minuscolo.
 ; Righe che iniziano con ';' = commenti. Un paragrafo = righe consecutive; una riga vuota lo chiude.
 ; Il testo va a capo da solo (colonne 2-37). [parole] = giallo.
+; Interlinea (15/11): la mette il generatore (LINE_GAP righe vuote fra le righe di un paragrafo, PARA_GAP fra i paragrafi): qui
+; non si scrivono righe vuote in piu'.
 ; Comandi:
 ;   @img nome           immagine (tools/build/gen_lore.py, IMAGES), centrata; le righe vuote prima e dopo le mette il tool
 ;   @title testo        titolo di capitolo, centrato, giallo

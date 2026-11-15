@@ -14,6 +14,7 @@ Formato completo: docs/intro.md. In breve, l'immagine decompressa e':
 Immagini: (1) ritagli della copertina (data/title_src.png) convertiti con i due colori multicolore comuni scelti per
 immagine (registri $D022/$D023 cambiati da un raster IRQ alla riga in cui l'immagine comincia: evento SPLIT);
 (2) scene vere del gioco (mappa del villaggio, sala del trono) dai tile; (3) sprite dei mostri raddoppiati.
+Interlinea (15/11): LINE_GAP righe vuote fra le righe di testo di un paragrafo, PARA_GAP fra i paragrafi (build).
 I caratteri uguali si riusano; le immagini che non sono mai sullo schermo insieme riusano gli stessi codici.
 Uscite: out/work/ldat.prg, out/work/ldat_raw.bin (immagine decompressa, per il test), out/work/lore.inc, out/work/lore_preview.png,
 out/work/atlas/lore.png (atlante grafico)."""
@@ -38,12 +39,16 @@ CHARSET = 0x2000
 SPR_AT = 0x2800
 SPR_MAX = 16
 DATA_AT = 0x2C00
-LD_END = 0xA000                    # corpo di START/LORE (src/start.asm)
+LD_END = 0x6000                    # TBUF di src/common/boot.asm: da li' il buffer del file TITLE (15/11: era $5600; il corpo di LORE e' a $A000)
 FIRST_SLOT, LAST_SLOT = 64, 254    # codici per le forme; 255 = escape RLE
 SPR_MC = (9, 15)                   # $D025/$D026 come nel gioco (marrone, grigio chiaro)
 WIDTH, MARGIN = 36, 2              # testo: colonne 2..37
 TXT_COL, HI_COL = 1, 7             # bianco, giallo (< 8: caratteri in alta risoluzione)
 HOLD_FRAMES = 250                  # @hold: 5 s fermo (fire salta)
+LINE_GAP = 1                       # (15/11) righe vuote fra due righe di testo dello stesso paragrafo (interlinea: 1 = una riga vuota)
+PARA_GAP = 2                       # (15/11) righe vuote fra due paragrafi (una riga vuota nel file lore.txt); era 1. Titoli, @center, @img,
+                                   # @spr e @gap non hanno interlinea: restano com'erano
+NSPL = 4                           # coda dei cambi di colore (come src/lore/scroll.asm)
 SPR_BUSY = 31                      # righe per cui uno sprite raddoppiato resta acceso (247+dy -> sotto 12, piu' margine)
 
 
@@ -345,7 +350,9 @@ def build():
 
     def flush():
         if para:
-            for ln in wrap(" ".join(para)):
+            for i, ln in enumerate(wrap(" ".join(para))):
+                if i:                                   # interlinea: LINE_GAP righe vuote fra le righe del paragrafo
+                    rows.extend(Row() for _ in range(LINE_GAP))
                 rows.append(text_row(styled(ln), MARGIN))
             para.clear()
 
@@ -361,9 +368,10 @@ def build():
             flush()
             if rows and not (rows[-1].ev or any(c != 32 for c in rows[-1].ch)) and getattr(rows[-1], "para_gap", False):
                 continue
-            r = Row()
-            r.para_gap = True
-            rows.append(r)
+            for _ in range(PARA_GAP if rows else 1):   # (prima di tutto una riga sola, come prima: il logo non si sposta)
+                r = Row()
+                r.para_gap = True
+                rows.append(r)
             continue
         if not ln.startswith("@"):
             para.append(ln.strip())
@@ -467,6 +475,17 @@ def alloc_sprites(rows):
             else:
                 evs.append(e)
         r.ev = evs
+
+
+def check_splits(images):
+    """coda dei cambi di colore (NSPL in scroll.asm): la testa e' l'immagine in vigore in alto, gli altri sono le immagini che
+    cominciano nelle 24 righe visibili: al massimo NSPL - 1 inizi in una finestra di 25 righe (stima prudente)"""
+    starts = sorted(im["r0"] for im in images)
+    for a in starts:
+        n = sum(1 for b in starts if a <= b < a + 25)
+        if n > NSPL - 1:
+            raise SystemExit("gen_lore: %d immagini cominciano in 25 righe dalla riga %d: la coda dei colori ne tiene %d"
+                             % (n, a, NSPL - 1))
 
 
 # ------------------------------------------------------------------ codifica
@@ -619,6 +638,7 @@ def main():
     write_logo(next(i for i in images if i["name"] == "logo"))
     allocate(rows, images)
     alloc_sprites(rows)
+    check_splits(images)
     raw, rows_at = encode(rows, images, sprites_used)
     assert LD_DST + len(raw) <= LD_END
     comp, delta = pack.zx0(raw, "ldat")

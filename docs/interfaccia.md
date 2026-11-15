@@ -152,7 +152,7 @@ due lati. Screenshot di **tutte** le schermate (09/11): `docs/screens/` (un PNG 
 Primo programma del disco (`BARBARIAN`, `src/barbarian.asm`): il logo della copertina e tre voci, **hear the legend**
 (la storia, programma `LORE`), **read the game manual** (il programma `HELP`: [Help](help.md)) e
 **walk the blood path** (`START`: schermata di attesa, poi il menu del gioco). Joystick 2 su/giù e fire, `1` `2` `3`,
-`W`/`S` o joystick (niente tasti cursore, 09/11), spazio, RETURN. Nella storia fire e spazio non fanno nulla fino alla fine (fire: di nuovo il menu);
+`W`/`S` o joystick (niente tasti cursore, 09/11), spazio, RETURN. Nella storia lo spazio non fa nulla fino alla fine; **fire del joystick 2 tenuto = scorrimento a velocità doppia** (15/11); a fine storia fire o spazio: di nuovo il menu;
 RUN/STOP torna al menu in qualunque momento, anche durante il caricamento. Dettagli in [Avvio e storia](intro.md).
 
 ## Menu iniziale (modulo `LOBBY`)

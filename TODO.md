@@ -367,6 +367,9 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   Nota tecnica (non verificata): `LR_SPEED` = 6 fotogrammi per pixel, intero; il 4% si ottiene a schema, p.es. 6-6-6-5
   fotogrammi ogni 4 pixel (−4,2%). Si tocca `src/lore/scroll.asm` e `data/lore.txt` (`tools/build/gen_lore.py`), poi test
   `LORE` e `docs/intro.md`.
+  (15/11, committente) **Fatto**: interlinea fra le righe di testo (una riga vuota; due fra i paragrafi: `LINE_GAP`/`PARA_GAP` in
+  `gen_lore.py`) e **fire del joystick 2 tenuto = velocità doppia** ([intro](docs/intro.md)). La storia passa da 220 a 292 righe
+  (4 min 13 s a velocità normale): **il 4% di accelerazione di sopra non è stato fatto** (non richiesto): resta da decidere.
 
 ### M1 Sequenza dei capitoli: cosa resta ([capitoli](docs/capitoli.md)) — L
 - **Effetto grafico del passaggio** di capitolo (oggi: schermo nero, poi le schermate di salvataggio e caricamento): tbd.

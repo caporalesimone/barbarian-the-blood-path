@@ -5,7 +5,8 @@
 ;   $2000 charset (font 0-63 + forme 64-254 caricate durante lo scorrimento), $2800 sprite, LR_ROWS righe.
 ; Video: banco VIC 0, modo testo multicolore a 24 righe, due schermi ($0400 / $0800) che si alternano.
 ;   - scroll fine con $D011 (s = 7..0, un pixel ogni LR_SPEED fotogrammi; fire e spazio non fanno nulla fino
-;     alla fine della storia, 07/11);
+;     alla fine della storia, 07/11; 15/11: con il FIRE DEL JOYSTICK 2 tenuto (non lo spazio) un pixel ogni LR_FAST
+;     fotogrammi, cioe' velocita' doppia; al rilascio torna normale. Pausa iniziale e fine storia non cambiano);
 ;   - a ogni passo di 8 pixel (IRQ nel bordo basso): si mostra l'altro schermo, gia' preparato (righe 1-24 del
 ;     precedente + la riga nuova in fondo) e il ciclo principale sposta la RAM colore in "gara" con il pennello
 ;     (riga per riga dall'alto, parte nel bordo basso: arriva prima del pennello su ogni riga);
@@ -19,6 +20,7 @@ LSCR_B  = $0800                 ; schermo B ($0BF8)
 ROWBUF  = $0c00                 ; riga decodificata: 40 caratteri + 40 colori (NEWCOL)
 NEWCOL  = ROWBUF + 40
 LR_SPEED = 6                    ; fotogrammi per pixel (07/11: era 2, troppo veloce): ~8 pixel, una riga al secondo
+LR_FAST = 3                     ; (15/11) fotogrammi per pixel con il fire del joystick 2 tenuto: velocita' doppia
 IRQ_LB  = 251                   ; IRQ del bordo basso (sotto l'ultima riga: 24 righe, $D011 bit 3 = 0)
 SPLIT_UP = 3                    ; il cambio dei colori comincia 3 righe raster prima dell'immagine
 NSPL    = 4                     ; coda dei cambi di colore (la testa e' quello in vigore in alto)
@@ -82,7 +84,7 @@ _cv     sta lvar,x
         lda #7
         sta ls
         lda #$10                ; spazio ancora premuto da PRESS SPACE: serve una nuova pressione
-        sta lfire
+        sta lfire               ; (e il fire del joystick: accelera solo dopo un primo rilascio, ljarm = 0)
         lda #<LR_ROWS
         sta lp
         lda #>LR_ROWS
@@ -554,7 +556,17 @@ _bot    jsr sp_play             ; musica
         txa
 +       sta lfedge              ; nuova pressione
         stx lfire
-        lda lstate
+        lda $dc00               ; (15/11) fire del joystick 2 da solo (bit 4 a 0 = premuto): velocita' doppia, non lo spazio.
+        and #$10                ; Se era gia' premuto da PRESS SPACE non vale finche' non e' stato rilasciato (ljarm).
+        bne _jr
+        lda ljarm
+        sta lfast
+        jmp _jd
+_jr     lda #1
+        sta ljarm
+        lda #0
+        sta lfast
+_jd     lda lstate
         cmp #1
         bne _run
         lda lhold               ; pausa: finisce solo con il tempo
@@ -571,7 +583,8 @@ _run    cmp #2
         bne _vic
         inc ltick
         lda ltick
-        cmp #LR_SPEED
+        ldx lfast               ; 0 normale, 1 fire tenuto: soglia LR_SPEED o LR_FAST (ltick riparte da 0 a ogni pixel)
+        cmp lspd,x
         bcc _vic
 _mv     lda #0
         sta ltick
@@ -669,6 +682,7 @@ set_split:
         inc lsi
         jmp next_split
 
+lspd    .byte LR_SPEED, LR_FAST
 d018_t  .byte $18, $28          ; schermo A ($0400) / B ($0800), charset $2000
 bit_8   .byte 1, 2, 4, 8, 16, 32, 64, 128
 
@@ -687,7 +701,9 @@ lready  .byte 0                 ; schermo nascosto pronto
 lstep   .byte 0                 ; passo fatto: il ciclo principale sposta i colori e prepara
 lstop   .byte 0                 ; RUN/STOP premuto
 lfire   .byte 0                 ; fire / spazio tenuto ($10)
-lfedge  .byte 0                 ; nuova pressione
+lfedge  .byte 0                 ; nuova pressione (fire o spazio: a fine storia esce)
+lfast   .byte 0                 ; 1 = fire del joystick 2 tenuto (e rilasciato almeno una volta): velocita' doppia
+ljarm   .byte 0                 ; 1 dopo il primo rilascio del fire del joystick
 lanim   .byte 0
 lcnt    .byte 0
 lnev    .byte 0

@@ -181,7 +181,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BEST-12` | the checker refuses a wrong bestiary: strong_of of another chapter, unknown tier, duplicate id |
 | `BOOT-10` | POKE 1020,1: BARBARIAN -> START from disk without the menu (Krill installed), GAME, LOBBY and hero list loaded |
 | `BOOT-11` | START from the monitor (wait screen, no bar) up to the game menu |
-| `LORE-10` | release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), return, START |
+| `LORE-10` | release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), joystick fire held = double scroll speed (released: normal; held at the end: no exit), return, START |
+| `LORE-11` | LORE story stream: one blank row between the text rows of a paragraph, two between paragraphs, size limits (15/11) |
 | `HELP-10` | release: the HUD crop in the help equals the game HUD |
 | `BOOT-12` | RUN/STOP while the KERNAL loads LORE (from the BARBARIAN menu): back to the menu, no red border (12/11) |
 | `PROBE-10` | BARBARIAN: the loader menu with its three entries; the session ends in BARBARIAN (memory probe) |

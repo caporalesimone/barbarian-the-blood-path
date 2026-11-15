@@ -38,8 +38,9 @@ Un'informazione non verificata al 100% è marcata **(da verificare)**.
 
 ### 001 · AVV · Storia a scorrimento (solo release)
 1. Scegliere **hear the legend** e guardarla fino in fondo; a metà premere `RUN/STOP`, poi rifarla.
+2. Interlinea (15/11): una riga vuota fra le righe di testo, due fra i paragrafi, nessuna immagine sul testo. Tenere premuto **fire (joystick 2)** durante lo scorrimento: velocità doppia, al rilascio normale; tenuto fino alla fine non salta e non esce (si esce con una nuova pressione); lo spazio non accelera.
 
-**Atteso**: immagini e colori corretti, testo leggibile, ritmo di lettura adeguato, nessun glitch; `RUN/STOP` torna al menu.
+**Atteso**: immagini e colori corretti, testo leggibile, ritmo di lettura adeguato, nessun glitch (anche a velocità doppia: sprite, colori delle immagini); `RUN/STOP` torna al menu.
 
 ### 002 · AVV · Manuale HELP: leggibilità (solo release)
 1. **read the game manual**, sfogliare le 5 pagine avanti e indietro.

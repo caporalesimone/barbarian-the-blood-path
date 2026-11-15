@@ -9,6 +9,10 @@ On tests/lib/c64.py (11/11, G2: English, no fixed delays: the waits stop on GETI
    screenshots of the logo and of the scroll with --shot (real speed: only there the waits are timed).
 4. RUN/STOP (variable lstop): back to BARBARIAN (Krill uninstalled, BARBARIAN reloaded by the KERNAL); RUN/STOP
    while LORE loads (ld_stop): same.
+   (15/11) Joystick 2 fire HELD doubles the scroll speed (LR_FAST frames per pixel instead of LR_SPEED), released it goes
+   back; not before a first release if it was held since PRESS SPACE; space does not accelerate; held to the end of the
+   story it neither skips nor exits. VICE has no joystick in the monitor: at every frame the test stops on the two reads
+   of $DC00 of the IRQ (fire OR space for the exit edge, fire alone for the speed) and writes the bit in register A.
 5. Key "3": the trampoline loads START and the game start runs ($A000).
 Usage: tests/regression/boot/test_lore.py [--shot prefix]   (needs an up-to-date out/work/disk.d64)."""
 import os, re, sys, time
@@ -25,6 +29,12 @@ UNP = int(re.search(r"^\.\w+\s+(\w+)\s+20 \w\w \w\w\s+jsr \$\w+\s+jsr zx0_unpack
 AFTER_LDSTOP = int(re.search(r"^\.\w+\s+(\w+)\s+8d \w\w \w\w\s+sta \$\w+\s+sta ld_stop\s+; RUN/STOP non", lst, re.M).group(1), 16) + 3
 RAW = open(os.path.join(ROOT, "out", "work", "ldat_raw.bin"), "rb").read()
 GETIN = 0xffe4
+SPEED, FAST = (int(re.search(r"^LR_%s\s*=\s*(\d+)" % n, open(os.path.join(ROOT, "src", "lore", "scroll.asm")).read(), re.M).group(1))
+               for n in ("SPEED", "FAST"))
+# the two reads of $DC00 in the bottom IRQ (lirq): "and $dc00" (fire OR space: lfire/lfedge, exit edge) and the one marked 15/11
+# (fire of joystick 2 alone: lfast); the test writes the fire bit (0 = pressed) in register A just before the AND
+P_EDGE = int(re.search(r"^\.\w+\s+(\w+)\s+2d 00 dc\s+and \$dc00", lst, re.M).group(1), 16)
+P_JOY = int(re.search(r"^\.\w+\s+(\w+)\s+ad 00 dc\s+lda \$dc00\s+lda \$dc00\s+; \(15/11\)", lst, re.M).group(1), 16) + 3
 fails = []
 
 
@@ -75,6 +85,34 @@ def wait_text(txt, polls=400, every=40):
         if not stops(GETIN, every): return False
         if txt in scr_text(): return True
     return False
+
+
+def drive(fire, commits=None, frames=None, until_state=None, tmax=60):
+    """run the story frame by frame with the joystick 2 fire held (fire() -> True) or not, until 'commits' steps (one row of 8
+    pixels each: breakpoint on commit) or 'frames' frames or lstate == until_state. Returns (frames, [frame number of each step])."""
+    for a in (P_EDGE, P_JOY, LBL["commit"]): v.brk(a)
+    n, steps = 0, []
+    try:
+        while True:
+            v.go(tmax)
+            pc = v.regs()["pc"]
+            if pc == P_EDGE:
+                v.cmd("r a=%02x" % (0xef if fire() else 0xff))
+            elif pc == P_JOY:
+                v.cmd("r a=%02x" % (0xef if fire() else 0xff))
+                n += 1
+                if (frames is not None and n >= frames) or (until_state is not None and n % 16 == 0 and v.b(LBL["lstate"]) == until_state):
+                    break
+            else:
+                steps.append(n)
+                if commits is not None and len(steps) >= commits: break
+    finally:
+        v.delbrk()
+    return n, steps
+
+
+def gaps(steps):
+    return [b - a for a, b in zip(steps, steps[1:])]
 
 
 def shot(name, sec):
@@ -144,6 +182,55 @@ try:
     st1 = v.b(LBL["lstate"]); p1 = v.mem(0x60, 2)
     check(st0 in (1, 2) and st1 in (2, 3), "LORE: pause on the logo, then scrolling (state %d -> %d)" % (st0, st1))
     check(p1 != p0, "LORE: the line stream advances ($%02x%02x -> $%02x%02x)" % (p0[1], p0[0], p1[1], p1[0]))
+    if not SHOT:
+        # 3b. (15/11) fire of joystick 2 held = double speed. A row = 8 pixels = 8 * LR_SPEED frames (48) or 8 * LR_FAST (24).
+        # (the stream is at row 2xx: all rows are alike for the scroll; the first gap after a change is not counted)
+        n, st = drive(lambda: False, commits=4)
+        g0 = gaps(st)
+        check(all(g == 8 * SPEED for g in g0), "scroll without fire: %s frames per row (LR_SPEED %d x 8 = %d)" % (g0, SPEED, 8 * SPEED))
+        n, st = drive(lambda: True, commits=4)
+        g1 = gaps(st)[1:]
+        check(all(g == 8 * FAST for g in g1), "fire held: %s frames per row, half of the normal (LR_FAST %d x 8 = %d)" % (g1, FAST, 8 * FAST))
+        check(v.b(LBL["lfast"]) == 1 and v.b(LBL["lstate"]) == 2, "fire held: lfast = 1, still scrolling (state 2)")
+        n, st = drive(lambda: False, commits=4)
+        g2 = gaps(st)[1:]
+        check(all(g == 8 * SPEED for g in g2), "fire released: %s frames per row, normal again" % g2)
+        v.poke(LBL["ljarm"], 0)                                 # as if the fire was already down at PRESS SPACE: it counts after a release
+        n, st = drive(lambda: True, commits=3)
+        g3 = gaps(st)
+        check(all(g == 8 * SPEED for g in g3), "fire held since before (no release yet): normal speed %s" % g3)
+        k = [0]
+        def blip():                                             # 3 frames released, then held
+            k[0] += 1
+            return k[0] > 3
+        n, st = drive(blip, commits=4)
+        g4 = gaps(st)[1:]
+        check(all(g == 8 * FAST for g in g4), "after the release the fire accelerates: %s" % g4)
+        # space does not accelerate: key row 7 (space) pressed in the keyboard matrix: the IRQ writes $7F in $DC00 and reads $DC01
+        # (bit 4 = space); the test lowers bit 4 of the $DC01 value at the edge read only: lfast must stay 0
+        for a in (P_EDGE, P_JOY, LBL["commit"]): v.brk(a)
+        n, steps, pressed = 0, [], 0
+        try:
+            while len(steps) < 3:
+                v.go(60)
+                pc = v.regs()["pc"]
+                if pc == P_EDGE: v.cmd("r a=ef")                # space down (fire OR space reads it)
+                elif pc == P_JOY:
+                    n += 1
+                    if n > 1: pressed += v.b(LBL["lfast"])      # lfast must stay 0 (the first read is still the old value)
+                else: steps.append(n)
+        finally:
+            v.delbrk()
+        check(pressed == 0 and all(g == 8 * SPEED for g in gaps(steps)),
+              "space held: no acceleration (lfast = 0, %s frames per row)" % gaps(steps))
+        # to the end of the story holding the fire (fast); at the end the held fire neither skips nor exits
+        n, _ = drive(lambda: True, until_state=3, tmax=120)
+        print("     (story from the pause to the end at double speed: %d frames more, %.0f s at 50 Hz)" % (n, n / 50.12))
+        try:                                                    # an exit would turn the IRQ off: no more stops
+            n, _ = drive(lambda: True, frames=150, tmax=10)
+        except C64.MonitorError:
+            n = -1
+        check(v.b(LBL["lstate"]) == 3 and n == 150, "end of the story, fire still held (150 frames): state 3, no exit")
     for _ in range(200):                                        # to the end of the story (state 3)
         if v.b(LBL["lstate"]) == 3: break
         stops(LBL["lirq"], 100)

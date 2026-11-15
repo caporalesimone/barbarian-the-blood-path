@@ -439,7 +439,8 @@ _x      rts
 .else
 ; (11/11) LORE con Krill: TITLE (10000 B) in un buffer, LDAT al suo indirizzo e decompresso, poi il titolo compare
 ; riga per riga dal buffer (un blocco di 40 byte per fotogramma: ~5 s), con la musica. RUN/STOP: di nuovo BARBARIAN.
-TBUF    = $5600                 ; TITLE (dopo LDAT decompresso, $2000-$55EB; sotto il corpo a $A000)
+TBUF    = $6000                 ; TITLE (dopo LDAT decompresso, $2000-$57E2; sotto il corpo a $A000). 15/11: era $5600, ma con l'interlinea
+                                ; della storia (292 righe) LDAT decompresso arriva a $57E3; $6000 lascia ~2 KB alla storia (TITLE finisce a $8710)
 TBUF_end = TBUF + TITLE_U * 40  ; (15/11) coppie di etichette per la mappa automatica (src/lore.asm)
 LD_DST_end = LD_DST + LD_RAW
         .cerror TBUF < LD_DST + LD_RAW || TBUF < LD_AT + LD_LEN, "buffer del titolo sopra LDAT"
