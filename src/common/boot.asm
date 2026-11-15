@@ -726,6 +726,9 @@ UNP_DST = GAME_ZX_DST
 .endif
 
 ; ------------------------------------------------------------------ musica: brano del titolo (tools/build/songs.py)
+; (16/11, committente) START NON suona: la musica del menu si spegne alla scelta del gioco e riparte solo a caricamento finito, con
+; la pagina della lobby pronta (prima ripartiva durante il caricamento). Solo LORE (la storia) ha il brano.
+.if LORE
 SP_VARS = $be00                 ; variabili del player (RAM sotto il BASIC, dopo il corpo)
 SP_V0   = 0
 SP_V1   = 7
@@ -750,6 +753,17 @@ _c      sta $d400,x
         sta sp_bh
         jmp sp_start
 lm_play = sp_play
+.else
+lm_init:
+        ldx #$18                ; solo SID muto
+        lda #0
+_c      sta $d400,x
+        dex
+        bpl _c
+        rts
+lm_play:
+        rts
+.endif
 
         .enc "none"
 nm_title .text "title"          ; minuscolo in "none" = PETSCII maiuscolo; 0 finale per Krill

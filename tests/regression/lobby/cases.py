@@ -37,7 +37,7 @@ def lobby_load(ctx):
 
 @test("LOBBY-12", "main menu plays Demon's Eye (file SND_MENU in the buffer of the place, player running); leaving it fades to silence, then music_town loads the village song")
 def lobby_music(ctx):
-    """15/11, TODO E3: the main menu starts Demon's Eye with the game's player (ui_menu -> mus_place), frames run from ui_input;
+    """15/11, TODO E3: the main menu starts Demon's Eye with the game's player (ui_menu, after menu_draw -> mus_place, 16/11), frames run from ui_input;
     lb_leave (exit to the game) fades out before the village song replaces the buffer."""
     import songs
     from lib.c64 import Game
@@ -48,7 +48,10 @@ def lobby_music(ctx):
         menu = game.index(songs.PLAYLIST["title"])
         read = lambda n: open(os.path.join(OUT, "snd", n + ".bin"), "rb").read()
         eye, tavern = read(songs.PLAYLIST["title"]), read(songs.PLAYLIST["town"][0])
-        g.to_menu()                                          # stopped after scan_slots in ui_menu: the song is already requested
+        g.to_menu()                                          # stopped after scan_slots in ui_menu: the page is not drawn yet
+        check(g.b(L["mus_want"]) == 0 and g.b(L["snd_cur"]) != menu + 1,
+              "music already requested before the page is drawn (16/11: it starts when the list is on screen)")
+        g.frames(1, tmax=60)                                 # runs to the first input read: page drawn, then the song is requested
         check(g.b(L["snd_cur"]) == menu + 1, "buffer of the place holds song %d, not SND_MENU %d" % (g.b(L["snd_cur"]) - 1, menu))
         check(g.mem(L["SND_LBUF"], len(eye)) == list(eye), "SND_LBUF differs from %s.bin" % songs.PLAYLIST["title"])
         check(g.b(L["mus_want"]) == 1, "music_request(MUS_LVL) not made (mus_want %d)" % g.b(L["mus_want"]))

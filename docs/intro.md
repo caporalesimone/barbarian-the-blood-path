@@ -35,11 +35,11 @@ restano sul KERNAL: il jukebox ha i brani dentro il suo file e non legge il disc
 flowchart TD
     A["LOAD&quot;BARBARIAN&quot;,8 / RUN<br/>il loader (6 blocchi)"] --> M{"menu a caratteri<br/>1 hear the legend<br/>2 read the game manual<br/>3 walk the blood path"}
     M -->|"1"| L["LORE (23 blocchi): titolo riga per riga + LDAT (26 blocchi)<br/>con la musica, PRESS SPACE"]
-    L --> S["la storia a scorrimento<br/>(fire del joystick 2 tenuto = velocità doppia; a fine storia fire esce)"]
+    L --> S["la storia a scorrimento<br/>(fire del joystick 2 tenuto = velocità x6; a fine storia fire esce)"]
     S -->|"fine + fire, o RUN/STOP"| M
     M -->|"2"| N["HELP (29 blocchi): il manuale, 5 pagine<br/>con il ritaglio dell'HUD (docs/help.md)"]
     N -->|"fire dall'ultima pagina, o RUN/STOP"| M
-    M -->|"3"| G["START: install di Krill, attesa e musica<br/>(GAME, LOBBY, hl), poi il menu del gioco"]
+    M -->|"3"| G["START: install di Krill, attesa (senza musica dal 16/11)<br/>(GAME, LOBBY, hl), poi il menu del gioco"]
     L -->|"RUN/STOP anche durante il caricamento"| M
 ```
 
@@ -99,18 +99,18 @@ sul posto di `LDAT` (stesso decompressore del gioco), PRESS SPACE con le lettere
    `BARBARIAN` (07/11: prima della fine fire e spazio non fanno nulla). RUN/STOP torna al menu in qualunque momento.
 
 Velocità (07/11, era 2): un pixel ogni 6 fotogrammi (`LR_SPEED`, ~8 pixel al secondo, una riga ogni 48 fotogrammi,
-~1 s). **Fire del joystick 2 tenuto = velocità doppia** (15/11, committente): un pixel ogni 3 fotogrammi (`LR_FAST`, una
-riga ogni 24 fotogrammi); al rilascio torna normale. Vale solo durante lo scorrimento (state 2), non nella pausa
+~1 s). **Fire del joystick 2 tenuto = velocità x6** (15/11 doppia, 3 fotogrammi per pixel; 16/11 su richiesta del committente "almeno il doppio di adesso": `LR_FAST` = 1, un pixel per fotogramma, una
+riga ogni 8 fotogrammi); al rilascio torna normale. Vale solo durante lo scorrimento (state 2), non nella pausa
 iniziale (`LR_HOLD`, 250 fotogrammi: il tempo non cambia) e non fa mai saltare o uscire dalla fine: l'uscita resta la
 **nuova pressione** (`lfedge`) di fire **o spazio** a storia ferma (state 3), quindi un fire già tenuto non esce.
 Lo **spazio non accelera** (solo il fire del joystick 2: seconda lettura di `$DC00` nell'IRQ, variabile `lfast`); un fire già
 premuto a PRESS SPACE conta solo dopo un primo rilascio (`ljarm`). Gli eventi della storia restano in righe e passi
 (un passo = 8 pixel) e la RAM colore, gli sprite (salgono di un pixel per pixel) e i cambi di colore del raster seguono
-il pixel; solo l'animazione degli sprite (ogni 16 fotogrammi) resta in fotogrammi. A velocità doppia il ciclo
-principale ha 24 fotogrammi per preparare lo schermo nascosto (ne servono ~3; `lready` comunque fa aspettare il passo).
+il pixel; solo l'animazione degli sprite (ogni 16 fotogrammi) resta in fotogrammi. Con il fire il ciclo
+principale ha 8 fotogrammi per preparare lo schermo nascosto (con 24 ne bastavano ~3, stima: `lready` comunque fa aspettare il passo e `LORE-10` misura 8 fotogrammi per riga).
 Durata (calcolata da 292 righe: 264 passi di 48 o 24 fotogrammi, PAL 50,12 Hz; in VICE il tratto di storia a velocità
 doppia è stato misurato dal test `LORE-10`): pausa 5 s + **4 min 13 s** a velocità normale (circa 4 min 18 s in tutto),
-**2 min 6 s** con il fire sempre tenuto (circa 2 min 11 s). Prima dell'interlinea: 220 righe, 192 passi, 3 min 4 s + 5 s.
+**circa 42 s** con il fire sempre tenuto (264 passi x 8 fotogrammi, calcolato). Prima dell'interlinea: 220 righe, 192 passi, 3 min 4 s + 5 s.
 
 ### Interlinea (15/11, committente)
 

@@ -16,7 +16,16 @@ if not isinstance(s, int) or not 1 <= s <= 255:
 if len(sys.argv) == 3 and sys.argv[1] == "--print":
     print({"version": v, "save_version": s}[sys.argv[2]])
     sys.exit(0)
+import glob  # noqa: E402
+_kz = glob.glob(os.path.join(ROOT, "src", "third-party", "krill", "loader-v*.zip"))
+if len(_kz) != 1:
+    sys.exit("src/third-party/krill: serve un solo loader-vNNN.zip (versione di Krill's Loader)")
+kv = re.fullmatch(r".*loader-(v\d+)\.zip", _kz[0]).group(1)       # (16/11) "v194": dal nome dell'archivio ufficiale
+vline = "version " + v + " - loader by krill " + kv
 open(os.path.join(ROOT, "out", "work", "version.inc"), "w").write(
     f'; generato da tools/build/gen_version.py da version.yaml - non modificare\nVERSION = "{v}"\nSAVE_VER = ${s:02x}\n'
     f'; colonna di "version x.y" centrata su 40 colonne (09/11; tests/smoke/build/test_version_center.py)\n'
-    f'VER_X = {(40 - len("version " + v)) // 2}\n')
+    f'VER_X = {(40 - len("version " + v)) // 2}\n'
+    f'; (16/11) riga del menu iniziale: "version x.y - loader by krill vNNN" centrata (unica riga con la versione, oltre al menu di gioco)\n'
+    f'KRILL_VER = "{kv}"\n'
+    f'VER_LX = {(40 - len(vline)) // 2}\n')

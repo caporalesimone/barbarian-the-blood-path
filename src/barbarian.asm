@@ -369,7 +369,7 @@ jprev   .byte 0
 
         .enc "screen"
 texts   .byte 6, 8, COL_D
-        .text "----------------------------", 0
+        .text "---------------------------", 0       ; (16/11) 27 trattini: la larghezza del logo (LOGO_W)
         .byte ICOL, ROW0, COL_N
         .text "1  hear the legend", 0
         .byte ICOL, ROW0 + 2, COL_N
@@ -380,8 +380,8 @@ texts   .byte 6, 8, COL_D
         .text "4  exit game", 0
         .byte 13, 19, COL_D
         .text "fire to choose", 0         ; (12/11, committente: solo questo)
-        .byte VER_X, 22 - 1, COL_D
-        .text "version ", VERSION, 0
+        .byte VER_LX, 22 - 1, COL_D
+        .text "version ", VERSION, " - loader by krill ", KRILL_VER, 0
         .byte 4, 23, COL_D
         .text "copyright 2026 - simone caporale", 0
         .byte $ff

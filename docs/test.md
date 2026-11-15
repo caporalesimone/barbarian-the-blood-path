@@ -120,7 +120,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 |---|---|
 | `BUILD-01` | memory margin positive (code below $8720 >= 128 B, total >= 256 B) |
 | `BUILD-02` | SAVE_VER in the PRG = save_version in version.yaml |
-| `BUILD-03` | "version x.y" centred in the loader, start menu and game menu |
+| `BUILD-03` | "version x.y" centred in the loader (full line with "loader by krill vNNN", VER_LX) and in the game menu |
 | `BUILD-04` | manual: images and placeholders of the source |
 | `BUILD-05` | graphics atlas: names, ids, sample dungeon, groups |
 | `PG-NEW-01` | new barbarian: name, seed, game starts in the village |

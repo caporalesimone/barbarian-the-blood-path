@@ -98,6 +98,15 @@ def menu_exit(ctx):
         v.close()
 
 
+@test("BOOT-15", "START is silent (no SID player): the menu music stops when the game is chosen and restarts only in the lobby (16/11)")
+def start_silent(ctx):
+    from vicemon import labels
+    L = labels("start")
+    check("sp_play" not in L and "sid_title" not in L, "START still contains the SID player or the title song")
+    Lg = labels("lore")
+    check("sp_play" in Lg, "LORE lost its player (the intro has the music)")
+
+
 script("TITLEMUSIC-10", "HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",
        [PY, os.path.join(H, "test_title_music.py"), "help"])
 script("TITLEMUSIC-11", "BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",

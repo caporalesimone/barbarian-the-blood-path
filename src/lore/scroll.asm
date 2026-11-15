@@ -20,7 +20,7 @@ LSCR_B  = $0800                 ; schermo B ($0BF8)
 ROWBUF  = $0c00                 ; riga decodificata: 40 caratteri + 40 colori (NEWCOL)
 NEWCOL  = ROWBUF + 40
 LR_SPEED = 6                    ; fotogrammi per pixel (07/11: era 2, troppo veloce): ~8 pixel, una riga al secondo
-LR_FAST = 3                     ; (15/11) fotogrammi per pixel con il fire del joystick 2 tenuto: velocita' doppia
+LR_FAST = 1                     ; (16/11, committente: "almeno il doppio di adesso", era 3) fotogrammi per pixel con il fire del joystick 2 tenuto: 6 volte la normale
 IRQ_LB  = 251                   ; IRQ del bordo basso (sotto l'ultima riga: 24 righe, $D011 bit 3 = 0)
 SPLIT_UP = 3                    ; il cambio dei colori comincia 3 righe raster prima dell'immagine
 NSPL    = 4                     ; coda dei cambi di colore (la testa e' quello in vigore in alto)

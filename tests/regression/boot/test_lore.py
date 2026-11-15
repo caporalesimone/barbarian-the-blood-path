@@ -2,7 +2,7 @@
 """Release disk in VICE (warp, emulated 1541): BARBARIAN (menu) -> HELP -> LORE -> BARBARIAN -> START.
 On tests/lib/c64.py (11/11, G2: English, no fixed delays: the waits stop on GETIN, on the LORE IRQ or on addresses).
 1. The loader BARBARIAN (out/work/barbarian.prg, release build) shows its three entries; key "2": the manual HELP from disk,
-   the 5 pages (space = next), RUN/STOP and fire from the last page go back to the menu.
+   the 5 pages (space = next), RUN/STOP goes back to the menu; (16/11) next from the last page goes back to page 1.
 2. Key "1" (KERNAL keyboard buffer): the trampoline loads LORE from disk; LORE installs Krill's Loader (11/11), loads
    TITLE + LDAT and unpacks LDAT in place: byte by byte against out/work/ldat_raw.bin (tools/build/gen_lore.py).
 3. At PRESS SPACE jump to lore_start: after the pause the story scrolls (state 2, the stream advances, no hang);
@@ -144,7 +144,9 @@ try:
     wait_text("moving and fighting")
     for _ in range(5):
         key(" "); stops(GETIN, 40)
-    check(wait_text("hear the legend"), "HELP: fire on the last page goes back to the menu")
+    check(wait_text("moving and fighting"), "HELP: next from the last page goes back to the first page (16/11)")
+    key(chr(3))                                                 # only RUN/STOP leaves the manual
+    check(wait_text("hear the legend"), "HELP: RUN/STOP from page 1 goes back to the menu")
     # 2. key 1 -> LORE: loading, LDAT unpacked
     v.cmd("sw reset")
     key("1")
@@ -183,14 +185,14 @@ try:
     check(st0 in (1, 2) and st1 in (2, 3), "LORE: pause on the logo, then scrolling (state %d -> %d)" % (st0, st1))
     check(p1 != p0, "LORE: the line stream advances ($%02x%02x -> $%02x%02x)" % (p0[1], p0[0], p1[1], p1[0]))
     if not SHOT:
-        # 3b. (15/11) fire of joystick 2 held = double speed. A row = 8 pixels = 8 * LR_SPEED frames (48) or 8 * LR_FAST (24).
+        # 3b. (15/11; 16/11 LR_FAST 3 -> 1) fire of joystick 2 held = fast scroll. A row = 8 pixels = 8 * LR_SPEED frames (48) or 8 * LR_FAST (8).
         # (the stream is at row 2xx: all rows are alike for the scroll; the first gap after a change is not counted)
         n, st = drive(lambda: False, commits=4)
         g0 = gaps(st)
         check(all(g == 8 * SPEED for g in g0), "scroll without fire: %s frames per row (LR_SPEED %d x 8 = %d)" % (g0, SPEED, 8 * SPEED))
         n, st = drive(lambda: True, commits=4)
         g1 = gaps(st)[1:]
-        check(all(g == 8 * FAST for g in g1), "fire held: %s frames per row, half of the normal (LR_FAST %d x 8 = %d)" % (g1, FAST, 8 * FAST))
+        check(all(g == 8 * FAST for g in g1), "fire held: %s frames per row, LR_FAST %d x 8 = %d (6x the normal speed)" % (g1, FAST, 8 * FAST))
         check(v.b(LBL["lfast"]) == 1 and v.b(LBL["lstate"]) == 2, "fire held: lfast = 1, still scrolling (state 2)")
         n, st = drive(lambda: False, commits=4)
         g2 = gaps(st)[1:]

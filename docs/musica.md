@@ -10,7 +10,7 @@ unico), `src/game/music.asm` (logica del gioco: scelta, caricamento, dissolvenze
 
 | Ruolo | Brani (`tools/build/songs.py`, `PLAYLIST`) | Quando |
 |---|---|---|
-| Titolo | Demon's Eye (`01_demons_eye`) | START, dal RUN a PRESS SPACE (dentro il file `START` della release; nella debug `START` non ha titolo né musica), la storia (`LORE`: titolo, PRESS SPACE e scorrimento, [Avvio e storia](intro.md)) il **menu principale** (`LOBBY`, 15/11, TODO E3: file `SND7`, vedi sotto), il **loader** `BARBARIAN` e il manuale `HELP` (15/11, TODO E4: brano incorporato nel programma, vedi sotto) |
+| Titolo | Demon's Eye (`01_demons_eye`) | la storia (`LORE`: titolo, PRESS SPACE e scorrimento, [Avvio e storia](intro.md)) il **menu principale** (`LOBBY`, 15/11, TODO E3: file `SND7`, vedi sotto; dal 16/11 parte **solo a caricamento finito**, con l'elenco dei barbari già disegnato: **`START` è muto**, la musica del menu si spegne alla scelta del gioco e non riparte durante i caricamenti), il **loader** `BARBARIAN` e il manuale `HELP` (15/11, TODO E4: brano incorporato nel programma, vedi sotto) |
 | Villaggi | Tavern of Dawn (`00_tavern`, la vecchia "Taverna dell'Alba" portata nel formato nuovo) per tutti e 4 i villaggi (temi propri: **tbd**) | ogni ingresso nel villaggio del capitolo (`snd_town_c`) |
 | Livelli | un **tema per capitolo** (12/11, committente): Iron Crown (cap. 1), Blood Path (2), Fear Below (3), Black Chant (4) | tutti i 5 piani del capitolo, anche il piano del boss del capitolo (`snd_lvl_c`) |
 | Boss finale | Abyss Gate (`05_abyss_gate`) | piano `MAXLEVEL` (sala del trono): il suo tema ad hoc |

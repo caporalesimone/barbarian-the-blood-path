@@ -6,7 +6,7 @@
 ; data/help_hud.json) per il ritaglio dell'HUD. Schermo multicolore: il testo ha colori < 8 (alta risoluzione), il
 ; ritaglio dell'HUD i suoi colori, con $D022/$D023 del tema fotografato.
 ; Tasti (09/11: ci si muove solo con joystick o WASD, niente tasti cursore): fire / spazio / RETURN / destra / D =
-; pagina seguente (dall'ultima: si esce); sinistra / A / DEL = pagina precedente; RUN/STOP o freccia a sinistra = di nuovo il loader.
+; pagina seguente (dall'ultima: la prima, 16/11; prima si usciva); sinistra / A / DEL = pagina precedente; RUN/STOP o freccia a sinistra = di nuovo il loader.
 ; Gira con l'IRQ del KERNAL (tastiera con GETIN) e suona Demon's Eye (15/11, TODO E4: stesso brano del titolo e del menu) con il
 ; player unico (src/common/title_music.inc, variabili a SP_VARS): clock = CIA1 timer A a 19656 cicli (50 Hz PAL esatti), non il
 ; passo del KERNAL; il vettore IRQ torna com'era (tm_stop) prima di tornare al loader.
@@ -97,8 +97,9 @@ _joy    lda $dc00               ; joystick 2: sinistra (bit 2), destra (bit 3), 
 next    ldx pg
         inx
         cpx #HELP_NP
-        bcs quit                ; dall'ultima pagina: di nuovo il loader
-        stx pg
+        bcc +
+        ldx #0                  ; (16/11, committente) dall'ultima pagina si torna alla prima; si esce solo con RUN/STOP
++       stx pg
         jmp show
 prev    ldx pg
         beq loop

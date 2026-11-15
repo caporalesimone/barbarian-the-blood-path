@@ -170,9 +170,8 @@ md_arrow:
         jmp ui_putc
 
 ui_menu:
-        lda #SND_MENU           ; (15/11, TODO E3) Demon's Eye (file SND_MENU) con il player del gioco: snd_get lo legge
-        jsr mus_place           ; (snd_io + io_quiet, via load_raw) e music_request(MUS_LVL, FADE_SLOW); parte da music_update
-                                ; (in ui_input). Gia' nel buffer (snd_cur): niente disco, niente riavvio.
+        lda #0                  ; (16/11, committente) la musica parte solo a caricamento finito e pagina pronta: vedi _dr
+        sta mp_done
 _scan   lda #0
         sta sv_old
         jsr scan_slots
@@ -198,14 +197,7 @@ _red    sta COLRAM+18,x
         .byte 9,2
         .text " barbarians "
         .byte 0,$ff
-        #at VER_X,16
-        lda #UC_HELP
-        sta ui_col
-        jsr ui_pi
-        .text "version ", VERSION
-        .byte 0
-        #at 9,18                ; (11/11) credito del loader (licenza di Krill's Loader: docs/FastLoader.md)
-        #msg "loader by krill - v194"
+        ; (16/11, committente) niente "version" ne' "loader by krill": stanno solo nel menu iniziale (BARBARIAN)
         #at 4,21
         lda #UC_HELP
         sta ui_col
@@ -219,6 +211,12 @@ _red    sta COLRAM+18,x
         lda #0
         sta ui_cur
 _dr     jsr menu_draw
+        lda mp_done             ; (15/11, TODO E3; 16/11 dopo la pagina) Demon's Eye (file SND_MENU) con il player del gioco: snd_get
+        bne _mp                 ; lo legge (snd_io + io_quiet, via load_raw) e music_request(MUS_LVL, FADE_SLOW); parte da
+        inc mp_done             ; music_update (in ui_input). START e' muto: la musica del menu si spegne alla scelta del gioco
+        lda #SND_MENU           ; e riparte qui, con l'elenco gia' disegnato (una sola volta per apertura del menu).
+        jsr mus_place
+_mp
 .if TESTUI == 30
 _hg     jmp _hg                 ; screenshot: la schermata resta com'e' (tasti fantasma in VICE)
 .endif
@@ -979,6 +977,21 @@ bb_quit:
 ; Come lore_exit (src/lore/scroll.asm): Krill disinstallato (il drive torna alla sua ROM), pagine 2-3 azzerate (il residente
 ; le ha sporcate: con le variabili RS-232 sporche il KERNAL si blocca), poi il trampoline ricarica BARBARIAN con il KERNAL.
 bb_menu:
+        jsr ui_begin            ; (16/11, committente) la stessa pagina di attesa del passaggio menu -> gioco (BARBARIAN/START: frase
+        .enc "screen"           ; in riga 10, gialla, e "please wait" in riga 13, bianco), prima di disinstallare Krill e ricaricare
+        #at 7,10
+        lda #UC_TITLE
+        sta ui_col
+        jsr ui_pi
+        .text "the crypt door creaks open"
+        .byte 0
+        #at 14,13
+        lda #UC_ITEM
+        sta ui_col
+        jsr ui_pi
+        .text "please wait"
+        .byte 0
+        .enc "none"
         sei
         lda #0
         sta $d01a               ; niente raster IRQ ne' sprite
@@ -1004,6 +1017,7 @@ _bz     sta $0200,x
         ldy #>bm_name
         lda #bm_name_n
         jmp tramp_run
+mp_done .byte 0                 ; la musica del menu e' gia' partita in questa apertura
 bm_name .text "barbarian"
 bm_name_n = * - bm_name
         .include "tramp.inc"

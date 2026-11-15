@@ -23,7 +23,7 @@ dell'HUD), `tools/build/gen_help.py` (genera `out/work/help.inc` e l'anteprima `
 ```mermaid
 flowchart LR
     B["BARBARIAN<br/>voce 2"] -->|trampoline| H["HELP<br/>pagina 1..5"]
-    H -->|"fire dall'ultima pagina<br/>o RUN/STOP / freccia a sinistra"| B
+    H -->|"RUN/STOP / freccia a sinistra<br/>(fire dall'ultima pagina: di nuovo la prima)"| B
 ```
 
 ## Pagine
@@ -44,7 +44,7 @@ Anteprima delle 5 pagine (generata dalla build di release): ![help](../out/work/
 |---|---|
 | fire, spazio, RETURN, joystick destra, D | pagina seguente; dall'ultima si torna al loader |
 | joystick sinistra, A, DEL | pagina precedente |
-| RUN/STOP, freccia a sinistra | di nuovo il loader |
+| RUN/STOP, freccia a sinistra | di nuovo il loader (unico modo di uscire: dal 16/11 fire, spazio, RETURN, D e destra dall'ultima pagina tornano alla prima) |
 
 Riga 0: titolo della pagina in giallo e "n/5" in ciano; riga 24: "fire: next  left: back  run/stop: menu".
 
@@ -64,7 +64,7 @@ Riga 0: titolo della pagina in giallo e "n/5" in ciano; riga 24: "fire: next  le
   `sp_resume` / `sp_release`) tramite `src/common/title_music.inc`, in comune con BARBARIAN. **Clock**: non l'IRQ del KERNAL com'e' (timer
   a ~60 Hz, non verificato a 50 Hz PAL) ma il **CIA1 timer A con latch a 19656 cicli** (312 righe x 63 = un fotogramma PAL): `tm_start`
   mette il vettore `$0314` su `tm_irq` (suona e prosegue in `$EA31`, cosi' `GETIN` funziona come prima) e ricarica il timer; nessun IRQ
-  del VIC. **Uscita** (RUN/STOP, freccia, fire dall'ultima pagina): `tm_stop` (`sei`, `sp_stop`, SID tutto a 0 volume compreso, vettore
+  del VIC. **Uscita** (RUN/STOP o freccia a sinistra; dal 16/11 non più fire dall'ultima pagina, che torna alla prima): `tm_stop` (`sei`, `sp_stop`, SID tutto a 0 volume compreso, vettore
   `$EA31`, latch del KERNAL `$4025`, IRQ del timer in sospeso confermato) **prima** del `LOAD` del KERNAL che ricarica BARBARIAN
   (il trampolino fa anche IOINIT e RESTOR). Test: `TITLEMUSIC-10` (vettore, 1 chiamata ogni 19656 cicli, ripristino).
   Voci come in START (lead sulla voce 1 del SID), non come nel gioco e in LOBBY (lead sulla 2).

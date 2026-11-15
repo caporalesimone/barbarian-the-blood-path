@@ -72,7 +72,7 @@ flowchart TD
     GO --> ML["main_loop"]
 ```
 
-Dal gioco si torna a `game_start` dal menu di gioco (*quit*: dissolvenza della musica, poi di nuovo LOBBY). Musica (15/11): `ui_menu` avvia Demon's Eye (`mus_place` con `SND_MENU`), l'uscita verso il gioco (`lb_leave`) la dissolve prima di `music_town` ([Musica](musica.md)).
+Dal gioco si torna a `game_start` dal menu di gioco (*quit*: dissolvenza della musica, poi di nuovo LOBBY). Musica (15/11; 16/11: dopo aver disegnato l'elenco, `mp_done`; `START` non suona): `ui_menu` avvia Demon's Eye (`mus_place` con `SND_MENU`), l'uscita verso il gioco (`lb_leave`) la dissolve prima di `music_town` ([Musica](musica.md)).
 
 ## 3. Ciclo principale: un fotogramma
 

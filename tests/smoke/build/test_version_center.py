@@ -12,6 +12,11 @@ err = []
 want = (40 - len("version " + ver)) // 2
 if vx != want:
     err.append(f"version.inc: VER_X = {vx}, expected {want} for 'version {ver}'")
+lx = int(re.search(r"VER_LX = (\d+)", inc).group(1))
+kv = re.search(r'KRILL_VER = "([^"]+)"', inc).group(1)
+want_l = (40 - len("version " + ver + " - loader by krill " + kv)) // 2
+if lx != want_l:
+    err.append(f"version.inc: VER_LX = {lx}, expected {want_l} for the loader line")
 n = 0
 for f in sorted(glob.glob(os.path.join(ROOT, "src/**/*.asm"), recursive=True)):
     L = open(f).read().split("\n")
@@ -19,7 +24,7 @@ for f in sorted(glob.glob(os.path.join(ROOT, "src/**/*.asm"), recursive=True)):
         if re.search(r'"version ",\s*VERSION', l) and not l.lstrip().startswith(";"):
             n += 1
             prev = "\n".join(L[max(0, i - 5):i])
-            if not re.search(r"#at\s+VER_X\s*,|\.byte\s+VER_X\s*,", prev):
+            if not re.search(r"#at\s+VER_X\s*,|\.byte\s+VER_X\s*,|\.byte\s+VER_LX\s*,", prev):
                 err.append(f"{os.path.relpath(f, ROOT)}:{i + 1}: 'version' not placed with VER_X")
 if n == 0:
     err.append("nessuna stringa 'version' trovata nei sorgenti")
