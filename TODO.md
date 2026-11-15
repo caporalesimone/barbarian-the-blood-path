@@ -29,6 +29,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
+| Z | [Note urgenti](#z--note-urgenti) | Z1–Z6 |
 
 ---
 
@@ -437,3 +438,45 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 - **J3** — S. Sprite del boss finale solo nel tema 8; da verificare con D8.
 - **J2** — S-M. Anello della velocità (ex 2.7): riuso di `fz_move`; dopo E1.
 - **J1** — M. Prefetch nuovo (salvataggio del piano in sottofondo, record N±1, brano successivo): 300–500 B + ~1 KB di buffer.
+
+---
+
+## Z — Note urgenti
+
+Richieste del committente del 15/11, da lanciare così come sono (ogni voce dice a quale modello e in quale branch). Non sono ancora
+dimensionate. Finita una voce: si cancella e la decisione va nella wiki o nel README interessato.
+
+### Z1 — Sonnet — Lab64: documento dei tool e dei copyright
+- In `lab64` crea un documento nella root dove menzioni tutti i tools e i relativi copyrights.
+
+### Z2 — Fable — Barbarian: i 4 villaggi dei capitoli successivi (branch a parte di barbarian)
+- Genera i villaggi dei capitoli successivi. Sarebbero 4 altri villaggi.
+- Ambientati in modo diverso, ognuno con un tema differente. Devono esserci tutti i negozi e la inn.
+- Entrata e uscita alla morte del boss del capitolo.
+- Usa colori differenti, mantieni alto il livello di dettaglio.
+- Disegna anche una fan art in pixel art 32 bit con la mappa dell'ambientazione del mondo, con le zone dei 4 capitoli.
+- Si tratta di prototipi, ma almeno aggiungiamo contenuto non ripetuto sul disco.
+- Ogni capitolo ha i suoi mostri e il suo boss. Disegna anche il boss del capitolo uno, dato che hai usato il boss finale.
+- Decidi anche quale meccanica di gioco ha ogni boss di livello.
+- Non ti preoccupare della trama già scritta: va rivista, quindi non farti limitare dalla trama per le tue implementazioni.
+- L'ultimo capitolo è ambientato in un villaggio in rovina.
+
+### Z3 — Fable — Lab64: review completa (branch a parte di lab64)
+- Fai una review completa di lab64 e vedi se trovi problemi; quelli che sei in grado di fixare, fixali subito in autonomia. Il resto
+  mettilo nel TODO di lab64.
+
+### Z4 — Fable — Barbarian: review del gioco (altro branch)
+- Fai una review anche di barbarian. Fixa bug, ottimizza la memoria e la velocità di caricamento.
+
+### Z5 — Fable — Barbarian: menù C del giocatore (altro branch)
+- Rivedi il menù C del giocatore, dove si assegnano i punti a ogni level up, dove si vedono i token respec e lo stato attuale.
+- Non mostrare nulla dei token respec finché non ce ne sono.
+- Gestisci meglio sia la UI, se serve, sia l'esperienza nell'assegnazione dei punti.
+- I punti si possono cambiare fino alla conferma definitiva.
+
+### Z6 — Opus — Lab64: mappe di memoria multiple
+- La mappa di memoria è solo per il gioco o anche per intro e menù?
+- Come si può fare per avere mappe diverse? Il menù è un programma a sé, idem il jukebox.
+- Cosa bisogna specificare per farsi generare tutte le mappe?
+- Come si può fare per mostrare più mappe nella pagina web di lab64?
+- Implementa questa logica.
