@@ -596,7 +596,11 @@ loc_id:
         lda #19
         rts
 +       lda li_t
-        ldy #1
+        cmp #T_BPORTAL          ; sala del trono: il portale nero della leva (Abisso): "the endless abyss"
+        bne +
+        lda #16
+        rts
++       ldy #1
         cmp #T_STAIRSD
         bne +
         tya

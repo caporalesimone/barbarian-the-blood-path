@@ -123,8 +123,14 @@ flowchart BT
   evocazioni ([Mostri](mostri.md)).
 - I 4 **bauli epici** (`fin_chests`, `ch_t` = $53: grafica d'oro, epico, del piano) si aprono senza chiave e
   danno `EPIC_ITEMS` (3) oggetti al livello bottino massimo.
-- La **leva** (`ui_lever`): tirata, `c_lever` = 1 e al suo posto compare il portale per *The Endless Abyss*, che
-  per ora non porta da nessuna parte (`go_down` si ferma al piano 20).
+- La **leva** (`ui_lever`): tirata, `c_lever` = 1 e al suo posto compare il **portale nero** (15/11, `T_BPORTAL` = posto
+  libero 8 dei file del tema della sala del trono, `black_portal_tile` in `gen_gfx.py`) per *The Endless Abyss*, che
+  per ora non porta da nessuna parte (`go_down` si ferma al piano 20). Perche' un tile a parte e non una nuova palette:
+  i colori (`BGCOL1/2`, color RAM) sono **uno solo per tutto lo schermo** (palette 4: nero, rosso, rosa, giallo), quindi il
+  "nero" si ottiene solo con i pixel: pietra rosso scuro, bordo rosa, vano e ovale **neri** con un vortice rosso (niente
+  giallo, che e' il colore del portale normale). Il portale normale (`T_PORTAL`, ritorno al villaggio) resta com'e'.
+  Il posto 8 e' calpestabile in `solid_dun` (nei dungeon non ha altri usi). Un salvataggio vecchio con il portale normale
+  sulla leva funziona ancora (`at_lever` nel ramo `T_PORTAL`). Etichetta: "the endless abyss" come prima.
 - Il generatore resta deterministico (`seed_level`, chiamato dopo `fin_load`) per il contenuto dei bauli.
 
 ## Nebbia (mappa esplorata)

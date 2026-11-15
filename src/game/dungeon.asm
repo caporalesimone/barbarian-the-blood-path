@@ -108,6 +108,7 @@ _j      jsr GEN_AT
 T_FSTAR = T_GRASSA              ; linee della stella (nel tema 8 lo slot contiene la grafica della stella)
 T_FCIRC = T_GRASSB              ; cerchio
 ; apre le stanze laterali (muri -> pavimento; ridisegna se lo schermo e' attivo)
+T_BPORTAL = T_FREE8              ; (15/11, C2) sala del trono: portale NERO della leva (posto libero 8 del file del tema 8, calpestabile)
 T_LEVER = T_DHOME                ; nella sala del trono lo slot della porta di casa e' la leva (file del tema 8)
 fin_doors:
         ldx #0

@@ -30,7 +30,7 @@ TILES = [
     "CHIMNEY",                            # 10/11: comignolo (al posto del fieno)
     "FENCEV", "SPIRE",                    # 10/11: steccato verticale a linea sola, guglia con la croce (chiesa)
 ]
-SOLID = {"FREE8", "FREE9", "FREE10", "FREE11", "FREE25", "FREE26", "WALL", "WALLFACE", "BWALL", "BROOF", "TREE",
+SOLID = {"FREE9", "FREE10", "FREE11", "FREE25", "FREE26", "WALL", "WALLFACE", "BWALL", "BROOF", "TREE",
          "FOUNT0", "FOUNT1", "FOUNT2", "FOUNT3", "WINDOW", "WELL", "FENCE", "LAMP", "BUSH", "STALL", "BROOFA", "BROOFL", "SIGNS", "SIGNL",
          "CHIMNEY", "FENCEV", "SPIRE",
          "WATER", "WATERL", "WATERR", "GRAVE", "GRAVE2", "CRYPTL", "CRYPTR", "CRYPTA", "CRYPTB", "CRYPTC", "HDOOR"}
@@ -55,8 +55,9 @@ DUN_LEGEND = {"WALL": "#", "WALLFACE": "=", "FLOOR": ".", "FLOORB": ",", "FLOORC
 DUN_USED = {"WALL", "WALLFACE", "FLOOR", "FLOORB", "FLOORC", "STAIRSD", "STAIRSU",
             "PORTAL", "CHEST"}
 # sala del trono (file GFX2, tema 8): stessi posti, ma 7 = leva, 12 = linee della stella, 13 = cerchio del pentacolo
-TRONO_NAMES = {"DHOME": "LEVER", "GRASSA": "STAR", "GRASSB": "CIRCLE"}
-TRONO_USED = DUN_USED - {"STAIRSD"} | {"DHOME", "GRASSA", "GRASSB"}
+# (15/11, TODO C2) 8 = portale nero della leva (posto libero nei dungeon; l'unico dei posti liberi che si puo' calpestare)
+TRONO_NAMES = {"DHOME": "LEVER", "GRASSA": "STAR", "GRASSB": "CIRCLE", "FREE8": "BLACKP"}
+TRONO_USED = DUN_USED - {"STAIRSD"} | {"DHOME", "GRASSA", "GRASSB", "FREE8"}
 for _n in ("DHOME", "GRASSA", "GRASSB", "PATH", "BWALL", "BROOF", "DSMITH", "DALCH", "SIGNL", "FOUNTAIN", "PORTAL",
            "TREE", "TSTAIRS", "COBBLE", "FLOWERS"):
     assert TTID[_n] == TID[_n], _n
@@ -564,6 +565,28 @@ def lever_tile():
     for i in range(8):                                # asta inclinata
         put(g, 2 + i // 2, 11 - i, 2)
     ellipse(g, 6, 3, 1.4, 1.6, 3)                     # pomello
+    return g
+
+
+def black_portal_tile():
+    """Portale nero della leva (sala del trono, palette 4: 0 nero, 1 rosso, 2 rosa, 3 giallo; colori condivisi dallo schermo,
+    quindi niente blu o grigio): stesso arco del portale normale, ma pietra rossa scura con il bordo rosa in alto e
+    all'esterno, vano e ovale NERI (pixel 0) con un vortice rosso. Niente giallo: il portale normale e' giallo."""
+    g = grid(0)
+    for y in range(16):
+        for x in range(8):
+            if y >= 3 or abs(x - 3.5) <= (1.5, 2.5, 3.5)[y]:
+                g[y][x] = 1                       # pietra rossa
+    for y in range(16):
+        for x in range(8):
+            if g[y][x] == 1 and (y in (0, 1, 2) or x in (0, 7) or y == 15):
+                g[y][x] = 2                       # bordo rosa, sul nero del pavimento
+    for y in range(3, 15):
+        for x in range(2, 6):
+            if y >= 4 or x in (3, 4):
+                g[y][x] = 0                       # vano nero
+    for (x, y) in ((3, 6), (4, 7), (3, 8), (4, 9), (3, 10), (4, 11), (2, 12), (5, 5), (2, 7), (5, 10)):
+        put(g, x, y, 1)                           # vortice rosso scuro nel nero
     return g
 
 
@@ -1234,6 +1257,11 @@ def main():
             for q in range(4):
                 o = (q * DN + TID["DHOME"]) * 8
                 dt[o:o + 8] = bytes(lv[q])
+            bp = tile_chars(black_portal_tile())          # portale nero nel posto libero 8 (T_BPORTAL)
+            dt = bytearray(dt)
+            for q in range(4):
+                o = (q * DN + TID["FREE8"]) * 8
+                dt[o:o + 8] = bytes(bp[q])
             dt = bytes(dt)
         return dt
     files = []

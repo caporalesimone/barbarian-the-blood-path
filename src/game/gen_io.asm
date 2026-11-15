@@ -76,7 +76,7 @@ gen_final:
         sta ty
         lda c_lever
         beq +
-        lda #T_PORTAL           ; leva tirata: portale per The Endless Abyss
+        lda #T_BPORTAL          ; leva tirata: portale per The Endless Abyss
         jsr set_tile
 +       ldx #15                 ; stanze logiche: 0 = corridoio (arrivo), 1 = sala del trono (boss)
         lda #0

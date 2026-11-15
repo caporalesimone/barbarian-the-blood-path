@@ -396,5 +396,5 @@ def throne(ctx):
         if g.in_game(): break
         g.frames(3)
     check(g.b(L["c_lever"]) == 1, "c_lever %d (expected 1)" % g.b(L["c_lever"]))
-    check(g.tile(L["FIN_AX"], L["FIN_AY"]) == L["T_PORTAL"], "no portal at the lever (tile %d)" % g.tile(L["FIN_AX"], L["FIN_AY"]))
+    check(g.tile(L["FIN_AX"], L["FIN_AY"]) == L["T_BPORTAL"], "no black portal at the lever (tile %d)" % g.tile(L["FIN_AX"], L["FIN_AY"]))
     g.poke(L["godmode"], 0)

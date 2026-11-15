@@ -72,6 +72,7 @@ TILE = {
     "CRYPTC": ("crypt, right roof", "right slope of the stone roof of the crypt (solid)"),
     # throne room (file GFX2)
     "LEVER": ("lever", "suspicious lever of the throne room (plate, rod, knob): opens the portal to The Endless Abyss"),
+    "BLACKP": ("black portal", "black portal of the throne room (T_BPORTAL, free slot 8): replaces the lever when it is pulled and leads to The Endless Abyss; dark red stone with a pink rim, black oval (the screen shares one palette, so it is black on black with a red swirl)"),
     "STAR": ("pentacle star", "lines of the star around the final boss"),
     "CIRCLE": ("pentacle circle", "circle of the pentacle around the final boss"),
 }

@@ -20,7 +20,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
 | 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B4, B6–B17 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
-| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C2, C3, E2, E3, E4, E5, C1, E1, M2, E6, E7, E8, E9 |
+| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E3, E4, E5, C1, E1, M2, E6, E7, E8, E9 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
 | 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D2, D12, D14, D1, D5, D7, D10, D11, D8, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M3, M4, M5 |
@@ -105,9 +105,6 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 ---
 
 ## 4 — Interfaccia, grafica, audio, testi, manuale
-
-### C2 (ex 1.3) Portale della leva "nero" — S
-- Il portale per l'Abisso (sala del trono) ha i colori del portale normale: palette scura. `gen_gfx.py` + atlante.
 
 ### C3 (ex 1.4) Piccole scelte estetiche e audio — S
 - `SFX_LOWHP` provvisorio da riascoltare nel JUKEBOX; tile del trono dietro il boss.

@@ -203,7 +203,7 @@ for s in SETS:
     if len(set(ids)) != len(ids):
         errors.append("%s: duplicate ids" % s["code"])
     present = {t for r in s["map"] for t in r}
-    miss = s["used"] - present - {G.TID["PORTAL"]}      # il portale compare solo aperto (villaggio, dopo la leva)
+    miss = s["used"] - present - {G.TID["PORTAL"], G.TID["FREE8"]}      # il portale compare solo aperto (villaggio; sala del trono: portale nero dopo la leva)
     if miss and s["code"] in ("VILLG", "DUNGA", "TRONO"):
         (errors if s["code"] == "DUNGA" else warns).append(
             "%s: tiles never on the map: %s" % (s["code"], ", ".join(s["names"][i] for i in sorted(miss))))

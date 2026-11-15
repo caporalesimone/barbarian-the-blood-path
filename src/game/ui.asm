@@ -2751,7 +2751,7 @@ _in     jsr ui_nav
         sta tx
         lda #FIN_AY
         sta ty
-        lda #T_PORTAL
+        lda #T_BPORTAL
         jsr set_tile
         lda #SFX_PORTAL
         jsr sfx_play
