@@ -135,17 +135,20 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `DEATH-01` | death: screen, village, half gold, full hp |
 | `PG-SAVE-01` | game menu 'save game': back in the game; the hero on disk equals the one in RAM |
 | `PG-LOAD-01` | save game, change the gold, quit (no save): the barbarian loads back as saved |
-| `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/work/gfx/gfx1.prg |
+| `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (2)
+### sanity (5)
 
 | ID | Test |
 |---|---|
-| `CS-10` | no points, no respec token: no entries (no '>'), 'no points to spend.', RUN/STOP back to the game |
-| `CS-11` | no points, 1 respec token: only 'respec' (cursor on row 16); fire + yes: points back, all the entries again |
+| `MON-CHAP-11` | chapter 1: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-12` | chapter 2: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-13` | chapter 3: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-14` | chapter 4: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
 
-### regression (154)
+### regression (167)
 
 | ID | Test |
 |---|---|
@@ -161,6 +164,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LORE-10` | release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), return, START |
 | `HELP-10` | release: the HUD crop in the help equals the game HUD |
 | `BOOT-12` | RUN/STOP while the KERNAL loads LORE (from the BARBARIAN menu): back to the menu, no red border (12/11) |
+| `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase, centred on row 12 (15/11) |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |
 | `BUILD-12` | variant: Fire on stairs (TESTFIRE) |
@@ -176,6 +180,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-SEQ-12` | killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2) |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
 | `CHAP-SEQ-14` | chapter 2: the crypt leads to level 6 (first of the chapter); its stairs up lead back to the village |
+| `CS-10` | no points, no respec token: no entries (no '>'), 'no points to spend.', RUN/STOP back to the game |
+| `CS-11` | no points, 1 respec token: only 'respec' (cursor on row 16); fire + yes: points back, all the entries again |
 | `DISK-10` | the disk has every file (loader, START, game, LORE, LDAT, TITLE, HELP, JUKEBOX, saves, ...) |
 | `DISK-12` | entry of the tests (11/11, Krill): the real START from the monitor (Krill installed), new game in the village |
 | `DUNG-CHEST-10` | key chest: without a key 'it is locked' (stays closed); with a key it opens, one key used |
@@ -303,6 +309,16 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MENU-10` | out/work/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2 |
 | `MENU-11` | ovl_town from the disk (as at the village entry): the 3 zones equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
+| `VIL-TWN-11` | village 1 (Aldric's Crossing): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-12` | village 2 (Blackwater Mill): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-13` | village 3 (The Last Camp): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-14` | village 4 (Ruin's Gate): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-15` | village 5 (The City of the Abyss): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-20` | village 3: the healing place heals and has its own name; portal arrival below the portal tile; the way down leads to level 11 and back onto it |
+| `VIL-TWN-21` | village 5 (City of the Abyss, prototype): the Maw does not lead anywhere yet |
+| `VIL-BOSS-10` | boss levels of chapters 1-3: the boss is drawn with its own sprite colour (set of the chapter), in the slot of the final boss |
+| `VIL-TWN-22` | villages 2-5: fire one tile below the doors opens smith, alchemist and inn; RUN/STOP closes them |
+| `VIL-TWN-23` | village 4 with chapter 5 unlocked (final boss killed): the exit in the crater leads to the City of the Abyss, hero saved at its entry |
 
 ## Bug trovati dalla ristrutturazione
 

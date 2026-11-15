@@ -43,7 +43,8 @@ CHARSET    = $a800
 
 MAP        = $c000          ; 48x48 tile
 LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM della mappa, che nel menu non serve
-TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile): fino a GFX_DUN_AT
+TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile): fino a $ED00
+                            ; (il file del tema comincia GFX_INFO byte prima: villaggio e dungeon non sono mai in RAM insieme)
 MAPW       = 48
 MAPH       = 48
 
@@ -360,7 +361,9 @@ _adv    inc ptr0                ; un byte di sorgente (preserva A)
         rts
 
 ; ---- grafica dei luoghi: cache nella RAM sotto il KERNAL ($E000 villaggio, $E600 tema del dungeon)
-; installa la grafica in cache: A = 0 villaggio, altro = dungeon (tile + sprite dei mostri)
+; installa la grafica in cache: A = 0 villaggio, altro = dungeon (tile + sprite, colori e nomi dei mostri del capitolo)
+        .cerror GFX_INFO > 256 || >NM_AT != >(NM_AT+GFX_INFO-1), "blocco info dei mostri (NM_AT) a cavallo di una pagina"
+        .cerror SND_FBUF + SND_FMAX > NM_AT || NM_AT + GFX_INFO > $9000, "NM_AT sovrapposto al motivetto di combattimento o oltre $8FFF"
 gfx_install:
         sta tmp5
         sei
@@ -443,6 +446,15 @@ _dn     lda #<SPR_DATA+12*64    ; ptr0 prosegue: mostri base -> slot 12..19
         lda #<GFX_STRONG
         sta tmp6
         lda #>GFX_STRONG
+        sta tmp7
+        jsr cp_n
+        lda #<NM_AT             ; (15/11) blocco info del set (colori e nomi dei 9 tipi, tools/build/gen_gfx.py) -> NM_AT
+        sta ptr1
+        lda #>NM_AT
+        sta ptr1+1
+        lda #GFX_INFO
+        sta tmp6
+        lda #0
         sta tmp7
         jsr cp_n
 _x      lda #$36

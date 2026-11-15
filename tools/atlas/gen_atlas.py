@@ -322,6 +322,50 @@ import shutil
 shutil.copy(os.path.join(ROOT, "out", "work", "gfx", "sprites.png"), os.path.join(OUT, "png", "sprites.png"))
 
 
+# ------------------------------------------------------------------ mostri per capitolo (15/11): dai file GFXn che legge il C64
+def _consts():
+    t = open(os.path.join(ROOT, "out", "work", "gfx_consts.inc")).read()
+    return {k: int(v.replace("$", "0x"), 0) for k, v in re.findall(r"^(GFX_\w+|NM_AT)\s*=\s*(\$?[0-9a-fA-F]+)", t, re.M)}
+
+
+def _spr_png(d, col, path, sc=4):
+    """sprite multicolor 24x21 (63 byte): 01 = MC0 marrone 9, 10 = colore dello sprite, 11 = MC1 grigio chiaro 15"""
+    im = Image.new("RGB", (24 * sc, 21 * sc), (24, 24, 28))
+    pal = [None, PAL[9], PAL[col], PAL[15]]
+    for y in range(21):
+        for bx in range(3):
+            b = d[y * 3 + bx]
+            for p in range(4):
+                v = (b >> (6 - 2 * p)) & 3
+                if v:
+                    for xx in range(2 * sc):
+                        for yy in range(sc):
+                            im.putpixel(((bx * 4 + p) * 2 * sc + xx, y * sc + yy), pal[v])
+    im.save(path, optimize=True)
+
+
+def monster_sets():
+    K = _consts()
+    off_m = 4 * K["GFX_DSTRIP"]
+    off_s, off_i = off_m + K["GFX_MONS"], off_m + K["GFX_MONS"] + K["GFX_STRONG"]
+    tiers = ["base"] * 4 + ["strong"] * 4 + ["boss"]
+    out = []
+    for f in range(1, 2 * G.CHAPTERS + 1):
+        d = rd("out/work/gfx/gfx%d.prg" % f)[2:]
+        info = d[off_i:off_i + K["GFX_INFO"]]
+        mons = []
+        for t in range(9):
+            spr = d[off_m + t * 128:off_m + t * 128 + 63] if t < 4 else d[off_s + (t - 4) * 128:off_s + (t - 4) * 128 + 63]
+            a = info[9 + t] - (K["NM_AT"] & 255)
+            name = "".join(chr(c + 96) if 1 <= c <= 26 else chr(c) for c in info[a:info.index(0, a)])
+            png = "mon_f%d_%d.png" % (f, t + 1)
+            if not CHECK:
+                _spr_png(spr, info[t], os.path.join(OUT, "png", png))
+            mons.append(dict(t=t + 1, name=name, col=info[t], tier=tiers[t], png=png))
+        out.append(dict(file="GFX%d" % f, chapter=(f + 1) // 2, boss=f % 2 == 0, mons=mons))
+    return out
+
+
 def spans(xs):
     out, i = [], 0
     while i < len(xs):
@@ -436,6 +480,7 @@ MENUS = {"menu_iniziale": ("barbarian menu", "start menu: the heroes, create new
 scr_dir = os.path.join(ROOT, "docs", "screens")
 DATA["menus"] = [dict(file=f, title=MENUS.get(f[:-4], (f[:-4], ""))[0], desc=MENUS.get(f[:-4], ("", "(no description: add it in tools/atlas/gen_atlas.py MENUS)"))[1])
                  for f in sorted(os.listdir(scr_dir)) if f.endswith(".png") and f != "tutti_i_menu.png"]
+DATA["monsters"] = monster_sets()
 html = html.replace("/*DATA*/null", json.dumps(DATA, separators=(",", ":")))
 html = html.replace("/*TITLE*/null", json.dumps(title_info))
 open(os.path.join(OUT, "index.html"), "w").write(html)

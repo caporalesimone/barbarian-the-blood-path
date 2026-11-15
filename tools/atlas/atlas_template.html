@@ -168,6 +168,12 @@ root.appendChild(glyphTable(D.hud,'<th>code</th><th>hex</th><th>glyph</th><th>na
 section('sprite','Sprite');
 root.appendChild(el('p','Preview of <code>tools/build/gen_gfx.py</code> (out/work/gfx/sprites.png). Free slots (RAM map): 20–23 and 27–31 ($A500, $A6C0), 41–47 ($8A40), 58–63 ($8E80).',{className:'mut'}));
 root.appendChild(el('img',null,{src:'png/sprites.png',style:'image-rendering:pixelated;max-width:100%'}));
+root.appendChild(el('h3','Monsters of every chapter (from the theme files GFXn, as the C64 reads them)'));
+root.appendChild(el('p','Each chapter has two theme files: GFX(2c−1) for its dungeon levels, GFX(2c) for its boss level. Both carry the 8 monsters of the chapter (types 1–4 base families, 5–8 strong variants: the <b>statistics are those of the type</b>, data/balance.yaml by depth) and the boss slot (type 9). Sprite, colour and name come from the file (sprite slots and the info block copied to <code>NM_AT</code> by <code>gfx_install</code>). Drawings: <code>tools/build/monsters.py</code> (chapter 1, chapter bosses, Lord of Ruin) and <code>tools/build/monsters_chap.py</code> (chapters 2–4).',{className:'mut'}));
+{const tb=el('table');tb.appendChild(el('tr','<th>file</th><th>chapter</th>'+[1,2,3,4,5,6,7,8,9].map(t=>'<th>type '+t+'</th>').join('')));
+ D.monsters.forEach(f=>{const tr=el('tr','<td><code>'+f.file+'</code><br><span class="mut">'+(f.boss?'boss level':'dungeon')+'</span></td><td>'+f.chapter+'</td>');
+  f.mons.forEach(m=>tr.appendChild(el('td','<img src="png/'+m.png+'" style="image-rendering:pixelated;width:72px" alt="'+esc(m.name)+'"><br><b>'+esc(m.name)+'</b><br><span class="mut">'+m.tier+' · '+esc(D.CNAME[m.col])+' ('+m.col+')</span>')));
+  tb.appendChild(tr)});root.appendChild(tb)}
 section('font','UI font (uifont.bin, $B800)');
 const fc=el('canvas');const FS=26,NF=D.uif.length/8;fc.width=16*FS;fc.height=Math.ceil(NF/16)*FS;const fx=fc.getContext('2d');fx.fillStyle='#000';fx.fillRect(0,0,fc.width,fc.height);
 for(let c=0;c<NF;c++){const X=(c%16)*FS,Y=Math.floor(c/16)*FS;fx.fillStyle='#1c1c1c';fx.fillRect(X+1,Y+1,FS-2,FS-2);fx.fillStyle='#ddd';

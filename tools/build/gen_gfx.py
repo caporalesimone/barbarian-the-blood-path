@@ -1008,7 +1008,7 @@ def build_sprites():
         sp[i] = d
     for d in range(4):
         sp[8 + d] = slash_sprite(d)
-    for t, (_, fr, _) in enumerate(M.SETS[1][0]):    # slot 12..19 (bank $A000): set 1 (out/work/gfx/sprites.png, anteprima)
+    for t, (_, fr, _) in enumerate(M.BASE):          # slot 12..19 (bank $A000): capitolo 1 (out/work/gfx/sprites.png, anteprima)
         sp[12 + t * 2] = mc_bytes(fr[0])
         sp[13 + t * 2] = mc_bytes(fr[1])
     sp[24] = hud_blank()
@@ -1017,10 +1017,10 @@ def build_sprites():
     return sp
 
 
-def build_sprites2(mset=1):
-    """16 slot a $8C00 (puntatori 48..63): varianti forti + boss finale del set mset (tools/build/monsters.py SETS)"""
+def build_sprites2(mset=None):
+    """16 slot a $8C00 (puntatori 48..63): varianti forti + posto del boss del set (tools/build/monsters.py chapter_set)"""
     import monsters as M
-    base, strong, final = M.SETS[mset]
+    base, strong, final = mset or M.chapter_set(1)
     sp = [[0] * 64 for _ in range(16)]
     for t, (_, fr, _) in enumerate(strong):
         sp[t * 2] = mc_bytes(fr[0])
@@ -1030,22 +1030,89 @@ def build_sprites2(mset=1):
     return sp
 
 
-def mon_bytes(mset=1):
+def mon_bytes(mset):
     """sprite dei mostri base del set (slot 12..19 del banco $A000) e forti + boss ($8C00): vanno nel file del tema"""
-    import monsters as M
-    base = M.SETS[mset][0]
+    base = mset[0]
     mons = bytes(b for (_, fr, _) in base for f in range(2) for b in mc_bytes(fr[f]))
     strong = bytes(b for s in build_sprites2(mset)[0:10] for b in s)
     return mons, strong
 
 
-# (12/11, committente) UN FILE DI GRAFICA PER CAPITOLO e tipo di piano: tile + sprite dei mostri di quel capitolo.
-# Per ogni capitolo c (1..CHAPTERS) due file: GFX(2c-1) = piani del dungeon, GFX(2c) = piano del boss (sala del trono:
-# per ora solo il piano 20, ma i file dei capitoli 1-3 ci sono gia', segnaposto da modificare). Nessuna deduplica: i file
-# oggi sono identici fra capitoli ma restano separati. Set di mostri per capitolo (tools/build/monsters.py SETS):
+# (15/11) blocco "info" in coda al file del tema: colori e nomi dei 9 tipi del set. gfx_install lo copia a NM_AT
+# (fine degli slot sprite 58-63, $8Fxx: dopo il motivetto di combattimento SND_FBUF, persistente fino al tema dopo).
+#   +0  9 byte  colore dello sprite dei tipi 1..9 (9 = posto del boss)           -> NM_AT-1+tipo (game.asm, build_sprites)
+#   +9  9 byte  byte basso dell'indirizzo del nome del tipo 1..9 (tutto in una pagina: byte alto = >NM_AT)
+#   +18 nomi    codici schermo, 0 finale (bar_name, bar.asm)
+# Lunghezza fissa INFO_LEN (il blocco piu' lungo fra i file, gli altri riempiti con 0).
+NM_TOP = 0x9000                      # NM_AT = NM_TOP - INFO_LEN
+
+
+def scr_text(t):
+    """testo -> codici schermo (ROM dei caratteri, maiuscole: la barra disegna i glifi della ROM)"""
+    out = []
+    for ch in t:
+        if "a" <= ch <= "z":
+            out.append(ord(ch) - 96)
+        elif ch in " '-.":
+            out.append(ord(ch))
+        else:
+            raise SystemExit("gen_gfx: carattere non ammesso nel nome di un mostro: %r (%s)" % (ch, t))
+    return out
+
+
+def info_raw(mset):
+    """(colori, nomi in codici schermo) del set"""
+    import monsters as M
+    names = M.set_names(mset)
+    cols = M.set_colors(mset)
+    assert len(names) == 9 and all(0 < len(n) <= 24 for n in names), names   # 24 = larghezza della barra (nbuf)
+    assert all(0 <= c <= 15 for c in cols)
+    return cols, [scr_text(n) + [0] for n in names]
+
+
+def info_len(raw):
+    return 18 + sum(len(n) for n in raw[1])
+
+
+def info_bytes(raw, n_len):
+    cols, names = raw
+    nm_at = NM_TOP - n_len
+    lo, o = [], nm_at + 18
+    for n in names:
+        lo.append(o & 255)
+        o += len(n)
+    assert nm_at >> 8 == (o - 1) >> 8, "nomi dei mostri a cavallo di una pagina"
+    d = bytes(cols) + bytes(lo) + bytes(b for n in names for b in n)
+    return d + bytes(n_len - len(d))
+
+
+# (12/11, committente) UN FILE DI GRAFICA PER CAPITOLO e tipo di piano: tile + mostri di quel capitolo.
+# Per ogni capitolo c (1..CHAPTERS) due file: GFX(2c-1) = piani del dungeon, GFX(2c) = piano del boss (tile della sala
+# del trono). Nessuna deduplica. (15/11) Ogni file porta il set di mostri del SUO capitolo (tools/build/monsters.py
+# chapter_set: sprite, colori, nomi); il posto del boss: Lord of Ruin nei file del dungeon e nel piano del boss del
+# capitolo 4, il boss del capitolo nei file del piano del boss dei capitoli 1-3.
 CHAPTERS = 4
-# (15/11) il file del piano del boss dei capitoli 1-3 porta lo sprite del SUO boss al posto del boss finale (set 2, 3, 4).
-CHAP_SET = {c: {"dun": 1, "boss": c + 1 if c < CHAPTERS else 1} for c in range(1, CHAPTERS + 1)}
+
+
+def M_names(m):
+    import monsters as M
+    return M.set_names(m)
+
+
+def M_cols(m):
+    import monsters as M
+    return M.set_colors(m)
+
+
+def chapter_sets():
+    """[(numero del file, capitolo, boss?, set)] nell'ordine dei file GFX1..GFX(2*CHAPTERS)"""
+    import monsters as M
+    assert M.CHAPTERS == CHAPTERS
+    out = []
+    for c in range(1, CHAPTERS + 1):
+        out.append((2 * c - 1, c, False, M.chapter_set(c, False)))
+        out.append((2 * c, c, True, M.chapter_set(c, True)))
+    return out
 
 
 # ----------------------------------------------------------------- preview
@@ -1106,7 +1173,10 @@ def preview(cs, sp):
 
 
 GFX_TOWN_AT = 0xE000                 # cache: tile del villaggio (RAM sotto il KERNAL)
-GFX_DUN_AT = 0xED00                  # cache: tema del dungeon attuale (tile + mostri)
+GFX_DUN_END = 0xF4E0                 # fine del buffer del tema (inizio della zona 2 del MENU, src/game/stash.asm MR2_AT)
+# (15/11) il buffer del tema finisce sempre a GFX_DUN_END e comincia GFX_INFO byte prima di $ED00 (blocco info): quei byte
+# sono la coda del buffer del villaggio ($E000), libera nel dungeon (il villaggio si rilegge a ogni ingresso).
+GFX_DUN_AT = None                    # calcolato in main(): GFX_DUN_END - lunghezza del file
 DUN_NT = 27                          # tile dei dungeon: 0..26 (muri, pavimenti, scale, portale, bauli; 8-11 liberi)
 
 def main():
@@ -1131,7 +1201,7 @@ def main():
     fixed = bytes(b for q in range(4) for c in range(q * 64 + NT, q * 64 + 64) for b in cs[c])     # glifi HUD, minimappa...
     core = bytes(b for s in sp[0:12] for b in s)            # eroe + fendenti (slot 0..11)
     misc = bytes(b for s in sp[24:27] for b in s)           # slot 24..26
-    mons, strong = mon_bytes(1)                             # mostri base (slot 12..19), forti + boss ($8C00): set 1
+    mons, strong = mon_bytes(chapter_sets()[0][3])           # mostri base (slot 12..19), forti + boss ($8C00): misure
     open(os.path.join(ROOT, "out", "work", "gfx", "fixed_chr.bin"), "wb").write(fixed)
     open(os.path.join(ROOT, "out", "work", "gfx", "spr_core.bin"), "wb").write(core + misc)
     prg = lambda addr, data: bytes([addr & 255, addr >> 8]) + data
@@ -1168,9 +1238,26 @@ def main():
         return dt
     files = []
     dun_t, boss_t = theme_tiles(False), theme_tiles(True)   # una volta sola: lever_tile() usa il PRNG (byte diversi a ogni chiamata)
-    for c in range(1, CHAPTERS + 1):                        # GFX(2c-1) dungeon, GFX(2c) boss del capitolo c
-        files.append(dun_t + b"".join(mon_bytes(CHAP_SET[c]["dun"])))
-        files.append(boss_t + b"".join(mon_bytes(CHAP_SET[c]["boss"])))
+    sets = chapter_sets()                                   # GFX(2c-1) dungeon, GFX(2c) boss del capitolo c
+    raws = [info_raw(m) for _, _, _, m in sets]
+    INFO = max(info_len(r) for r in raws)
+    assert NM_TOP - INFO >= 0x8F00, "blocco info oltre la pagina $8F"
+    import bestiary as BE                                   # (15/11) i nomi e i colori del gioco = quelli del bestiario
+    best = BE.load()
+    g = BE.game_rows(best)                                  # capitolo 1: le righe del gioco (il nome e' l'id con gli spazi)
+    assert [r["id"].replace("_", " ") for r in g] == M_names(sets[0][3]), "capitolo 1: nomi diversi dal bestiario"
+    for n, c, boss, m in sets:                              # ogni file: famiglie del capitolo (ordine del file) + posto del boss
+        rs = [r for r in best if r["chapter"] == c]
+        exp = [r for r in rs if r["tier"] == "base"] + [r for r in rs if r["tier"] == "strong"]
+        exp.append(next(r for r in best if r["tier"] == ("boss" if boss and c < CHAPTERS else "final") and
+                        (r["chapter"] == c or r["tier"] == "final")))
+        assert [r["name"].lower() for r in exp] == M_names(m), "GFX%d: nomi %s, bestiario %s" % (n, M_names(m), [r["name"] for r in exp])
+        assert [r["color"] for r in exp] == M_cols(m), "GFX%d: colori %s, bestiario %s" % (n, M_cols(m), [r["color"] for r in exp])
+    for (n, c, boss, m), r in zip(sets, raws):
+        files.append((dun_t, boss_t)[boss] + b"".join(mon_bytes(m)) + info_bytes(r, INFO))
+    global GFX_DUN_AT
+    GFX_DUN_AT = GFX_DUN_END - len(files[0])
+    assert all(len(f) == len(files[0]) for f in files)
     assert len(files) <= 9                                  # nome "GFX" + una cifra
     for f, d in enumerate(files, 1):
         open(os.path.join(ROOT, "out", "work", "gfx", f"gfx{f}.prg"), "wb").write(prg(GFX_DUN_AT, d))
@@ -1192,8 +1279,6 @@ def main():
         for n, i in TTID.items():
             if n not in TID:
                 f.write(f"T_{n:<12} = {i:<3}   ; (solo villaggio) {_desc.get(n, '')}\n".rstrip(" \n") + "\n")
-        import monsters as _M
-        f.write("cb_col  .byte " + ", ".join(map(str, _M.CBOSS_COL)) + "    ; colore dei boss dei capitoli 1.. (tools/build/monsters.py)\n")
         f.write(f"GFX_NFILES = {len(files)}\n")
         f.write(f"CHAPTERS = {CHAPTERS}\n")
         for n, c in HUD_ID.items():
@@ -1205,7 +1290,8 @@ def main():
         f.write('        .enc "none"\n')
         f.write(f"GFX_NT = {NT}\nGFX_TSTRIP = {NT * 8}\nGFX_FSTRIP = {(64 - NT) * 8}\nGFX_DSTRIP = {DUN_NT * 8}\n")
         f.write(f"GFX_TOWN_AT = ${GFX_TOWN_AT:04x}\nGFX_DUN_AT = ${GFX_DUN_AT:04x}\n")
-        f.write(f"GFX_MONS = {len(mons)}\nGFX_STRONG = {len(strong)}\n")
+        f.write(f"GFX_MONS = {len(mons)}\nGFX_STRONG = {len(strong)}\nGFX_INFO = {INFO}\nGFX_DUN_END = ${GFX_DUN_END:04x}\n")
+        f.write(f"NM_AT = ${NM_TOP - INFO:04x}            ; colori (9), indirizzi dei nomi (9), nomi dei mostri del set (blocco info)\n")
         f.write("solid_dun\n")
         row = [1 if n in SOLID else 0 for n in TILES] + [0] * (NTILE_MAX - len(TILES))
         f.write("    .byte " + ",".join(map(str, row)) + "\n")

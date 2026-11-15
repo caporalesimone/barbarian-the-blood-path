@@ -1,4 +1,4 @@
-"""Villages of the chapters (15/11, TODO Z2, docs/villaggio.md): every chapter has its own village file TWNc with its own tiles,
+"""Villages of the chapters (15/11, TODO Z2; sanity moved to regression on 15/11, docs/villaggio.md): every chapter has its own village file TWNc with its own tiles,
 map, colours, solid tiles, name of the healing place and positions (portal, way down, entry, exit, doors). The game copies
 the header of the file into town_k / solidtab (gfx_install) and reads everything from there. One VICE session (CHAIN).
 The expected values come from the same sources as the build (data/town_map*.txt, tools/build/villages.py)."""
@@ -95,7 +95,7 @@ def maw(ctx):
     check(g.b(L["cur_level"]) == 0 and g.in_game(), "the Maw changed level: %d" % g.b(L["cur_level"]))
 
 
-@test("VIL-BOSS-10", "boss levels of chapters 1-3: the boss is drawn with its own sprite colour (cb_col), in the slot of the final boss")
+@test("VIL-BOSS-10", "boss levels of chapters 1-3: the boss is drawn with its own sprite colour (set of the chapter), in the slot of the final boss")
 def cboss(ctx):
     g = ctx["g"]; L = g.L
     import monsters as MO
@@ -107,7 +107,7 @@ def cboss(ctx):
         g.poke(L["godmode"], 1)
         g.teleport(bx, by + 2); g.frames(4)
         cols = [g.b(0xd027 + i) & 15 for i in range(1, 8)]
-        check(MO.CBOSS_COL[c - 1] in cols, "chapter %d: sprite colours %s, expected %d" % (c, cols, MO.CBOSS_COL[c - 1]))
+        check(MO.CBOSS[c][2] in cols, "chapter %d: sprite colours %s, expected %d" % (c, cols, MO.CBOSS[c][2]))
         g.screenshot(os.path.join(SHOTS, "boss%d.png" % c))
     g.poke(L["godmode"], 0)
 

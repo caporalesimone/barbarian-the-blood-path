@@ -159,7 +159,7 @@ flowchart TB
     end
     subgraph R1["$0400-$9FFF: GAME residente"]
         CODE["codice e dati $0400-$7972<br/>(margine 3501 B fino a $8720)"]
-        HUDS["$8400 schermo HUD, sprite della barra,<br/>brani SND_LBUF $8A40 / SND_FBUF $8E80,<br/>sprite forti $8C00"]
+        HUDS["$8400 schermo HUD, sprite della barra,<br/>brani SND_LBUF $8A40 / SND_FBUF $8E80,<br/>sprite forti $8C00, nomi dei mostri NM_AT $8F6D"]
         VARS["$9000-$9BFF variabili: gioco, combattimento,<br/>eroe CHRBLK $9500, mostri MRT $9600,<br/>stato del piano LVLBLK $9800, player SID"]
         C2["$9C00-$9FFF CODE2: disco"]
     end
@@ -178,7 +178,7 @@ flowchart TB
     end
     subgraph R5["$E000-$FFFF RAM sotto il KERNAL"]
         CT["$E000 cache del villaggio (GFX0)"]
-        CD["$ED00-$F4DF buffer del tema<br/>(GFXn letto a ogni ingresso)"]
+        CD["$EC6D-$F4DF buffer del tema<br/>(GFXn letto a ogni ingresso; 15/11: comincia<br/>nella coda del villaggio)"]
         Z2["$F4E0-$FCFF MENU zona 2"]
         FM["$FD00-$FFF9 FMAP, $FFFA vettori"]
     end
@@ -194,7 +194,8 @@ flowchart TB
 | generatore `$D480`– | avvio (`gen_install`) | sempre | eseguito con `$01 = $34` |
 | buffer del villaggio `$E000` | `load_gfx 0` | ingresso successivo; un salvataggio nel villaggio (`sv_end` lo rilegge) | (11/11) nessuna cache: si rilegge a ogni ingresso |
 | immagine del salvataggio `$E000`, buffer del plugin `$ECA0` | `sv_read` / plugin di save | fine del salvataggio | solo durante un salvataggio (`$01 = $35`) |
-| buffer del tema `$ED00` | `load_gfx n` | ingresso successivo | idem |
+| buffer del tema `GFX_DUN_AT` (`$EC6D`)–`$F4DF` | `load_gfx n` | `gfx_install` (poi dato morto: un salvataggio lo copre) | (15/11) i primi 147 B sono la coda del buffer del villaggio: villaggio e dungeon non sono mai in RAM insieme |
+| colori e nomi dei mostri `NM_AT` (`$8F6D`–`$8FFF`) | `gfx_install` (blocco info del tema) | tema successivo | (15/11) `build_sprites` (colore), `bar_name` (nome) |
 | FMAP `$FD00` | `fin_load` | ingresso successivo | mappa di base del piano 20, riletta a ogni ingresso |
 | slot dei piani `$D8DA`–`$DAAA` (`LVRAM`) | `save_level` / `pend_save` (scale, rientro dopo un portale), `chap_ensure` (dal file) | cambio di capitolo | stato compatto dei 5 piani del capitolo (11/11 sera): sul disco solo con save game e al cambio di capitolo |
 | `hl`, `save-0N` (disco) | `sv_all` (save game, cambio di capitolo), `save_char` (nuovo eroe), `hdr_write` | — | file riscritti interi dal plugin di Krill, la directory non cambia mai |

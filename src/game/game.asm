@@ -3738,19 +3738,16 @@ _ml     ldx bs_m
         ldy bs_m
         lda mtype,y
         tay
-        lda lv_cboss            ; (12/11) boss del capitolo: grafica del boss finale (segnaposto del committente)
-        beq _nob
+        lda lv_cboss            ; (12/11) boss del capitolo: il suo sprite sta nel posto del boss (tipo T_FINAL) del file
+        beq _nob                ; del piano del boss (15/11, tools/build/monsters.py chapter_set), con il suo colore
         lda bs_m
         clc
         adc #1
         cmp lb_boss
         bne _nob
-        ldy c_chap              ; (15/11) boss del capitolo: il suo sprite sta nel posto del boss finale (file del piano
-        lda cb_col-1,y          ; del boss, tools/build/monsters.py SETS), con il suo colore
         ldy #T_FINAL
-        bne +
-_nob    lda mon_col,y
-+       sta sh_col,x
+_nob    lda NM_AT-1,y           ; (15/11) colore del tipo nel set del capitolo (blocco info del file del tema)
+        sta sh_col,x
         lda mon_ptr,y
         sta tmp0
         lda bs_m                ; boss del piano: colore lampeggiante

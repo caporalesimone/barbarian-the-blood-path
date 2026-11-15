@@ -8,7 +8,9 @@ Sorgenti: `src/game/game.asm` (`spawn_monsters`, `place_monster`, `init_monsters
 
 ## Tipi
 
-Quattro famiglie (base → variante forte, stessa grafica e altro colore) più il boss finale. Numero del tipo
+Quattro famiglie (base → variante forte, stessa grafica con un'aggiunta e altro colore) più il boss finale. **Dal 15/11 ogni
+capitolo ha le sue famiglie** (grafica, colore e nome dal file del tema del capitolo, [bestiario](bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)):
+la tabella sotto vale per il **tipo**, in ogni capitolo (statistiche uguali). Numero del tipo
 (`mtype`): 1–4 base, 5–8 forti (`base + N_BASE`), 9 = `T_FINAL`.
 
 | # | Tipo | Famiglia | Piano min. | Vita (scheda) | CA | ATT | Danno | Salv. | XP | Velocità (px/fot.) | +liv. bottino |

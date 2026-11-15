@@ -40,7 +40,7 @@ non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview
   del villaggio (`TOWN_*`, `solid_town` e le tabelle di `town_places.inc` non ci sono più). Costo nel gioco, misurato: il margine sotto `$8720` è sceso di 50 B in tutto (villaggi, colori dei boss, capitolo 5).
 - **Passaggio di capitolo**: `chap_travel` legge subito il file del villaggio nuovo (serve il suo ingresso prima di salvare:
   "continue" riparte da lì), poi salva e lo rilegge: una lettura in più (non misurata).
-- Test: `VIL-TWN-11..23`, `VIL-BOSS-10` (sanity).
+- Test: `VIL-TWN-11..23`, `VIL-BOSS-10` (regression dal 15/11, `tests/regression/villages`).
 
 **Proposta scartata** (15/11): la prima stesura dei villaggi 2–5 riusava la struttura del villaggio 1 con altri tile e colori
 (il committente: "devono essere diversi, non lo stesso villaggio con temi diversi"). È conservata in

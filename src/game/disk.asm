@@ -97,9 +97,9 @@ load_gfx:
         sta ptr0
         lda #>GFX_DUN_AT
         sta ptr0+1
-        lda #<(GFX_DUN_AT+4*GFX_DSTRIP+GFX_MONS+GFX_STRONG)
+        lda #<GFX_DUN_END
         sta ptr1
-        lda #>(GFX_DUN_AT+4*GFX_DSTRIP+GFX_MONS+GFX_STRONG)
+        lda #>GFX_DUN_END
         sta ptr1+1
         jmp load_raw
 

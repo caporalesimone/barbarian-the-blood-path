@@ -173,8 +173,8 @@ flowchart TD
     V -->|"0 villaggio"| LG0["load_gfx 0 (GFX0 -> $E000), town_at = 1"] --> MN
     MN["ovl_cur = 0, ovl_town: il modulo MENU<br/>si rilegge a ogni ingresso (sezione 15)"]
     MN --> GI0["gfx_install 0: tile + mappa RLE -> MAP"]
-    V -->|"1..20 dungeon"| LGN["load_gfx n (GFXn -> $ED00),<br/>sempre dal disco"]
-    LGN --> GI1["gfx_install 1: tile, sprite dei mostri,<br/>varianti forti e boss"]
+    V -->|"1..20 dungeon"| LGN["load_gfx n (GFXn -> GFX_DUN_AT $EC6D),<br/>sempre dal disco"]
+    LGN --> GI1["gfx_install 1: tile, sprite dei mostri del capitolo,<br/>varianti forti e boss, colori e nomi -> NM_AT"]
     GI0 --> PAL["palette, tabella dei tile solidi"]
     GI1 --> PAL
     PAL --> W2{"villaggio?"}

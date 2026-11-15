@@ -383,7 +383,8 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   manuale, nella wiki o sulla scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene.
 - **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri**: dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
   e il loro colore; **meccaniche decise** ([bestiario](docs/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
-  non nel codice (~550 B stimati: M9); statistiche proprie, mostri del capitolo, bottino speciale, sala che si chiude: da fare.
+  non nel codice (~550 B stimati: M9); dal 15/11 hanno anche il **loro nome** nella barra e i **mostri del capitolo** intorno
+  (solo grafica, colore e nome: M9); statistiche proprie, bottino speciale, sala che si chiude: da fare.
 - **Ritorno ai villaggi precedenti** (portale/menu): fuori da questa fase (D-CAP-2).
 - **Tile di accesso al dungeon generico**: la cripta (`T_TSTAIRS`) è già un tile da mettere dove si vuole; più ingressi con
   destinazioni diverse richiederebbero una tabella (utilità da confermare).
@@ -395,12 +396,18 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 ### M9 Capitoli nel codice e bestiari (ex H2, H6) — L
 - Analisi: [docs/capitoli.md](docs/capitoli.md). Già divisi per capitoli: `data/chapters.yaml` (piano locale 1..n, profondità
   globale 1..255 per la difficoltà), atlante, `tools/simulators/chapters.py`, bestiari per capitolo (`data/monsters/bestiary.tsv`).
-  **Da fare nel codice**: bestiario del capitolo caricato col villaggio (stesso numero di tipi, così la RAM non cresce; oggi i 4
-  capitoli usano gli stessi tipi, con la difficoltà del piano globale); nomi dei tipi per set (`src/game/bar.asm`); boss veri.
-- **Bestiari dei capitoli 1–4** (concept in [docs/bestiario.md](docs/bestiario.md)): boss nuovo del capitolo 1 (The Hollow
-  Abbot), mostri e boss dei capitoli 2–4, Lord of Ruin nel capitolo 4. **Serve**: taratura (prima simulazione: Abbot 13%,
-  Miller 97%, Varok 100%: da rifare con `fit_rules.py`), sprite (3 comuni + 1 boss per capitolo), IA nuove (distanza, carica,
-  teletrasporto, evocazione: da scegliere).
+  **Fatto (15/11, branch `villaggi`)**: ogni capitolo ha nel gioco i **suoi mostri** (4 famiglie + 4 varianti forti, boss di
+  capitolo nel piano del boss): sprite, colori e nomi nei file del tema del capitolo, nomi e colori copiati a `NM_AT`
+  ([bestiario](docs/bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)). **Statistiche e IA non sono cambiate**: il tipo *t* di
+  ogni capitolo ha quelle del tipo *t* del capitolo 1 (per profondità).
+  **Da fare nel codice**: **statistiche proprie** per capitolo (le tabelle `mt_*`/`mon_spd`/`mon_llb` da caricare col tema,
+  come i nomi: ~120 B per file; oggi le righe dei capitoli 2–4 nel bestiario sono concept); **IA nuove** (distanza per Bone
+  Archer e Cultist, carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per Drowned e
+  Frost Wight: da scegliere); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97%,
+  Varok 100%: da rifare con `fit_rules.py` e `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).
+- **Da decidere con il committente** (15/11): i colori dei disegni (Hellhound e Blood Knight sono rossi, 2, come il Lord of Ruin:
+  nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema
+  grigio del capitolo 3 si legge poco sui muri chiari: screenshot `out/work/villages/monsters3.png` dei test `MON-CHAP-*`); se i boss con nome dei piani normali devono avere nomi per capitolo (oggi `first_names`/`epithets` comuni).
 
 ### H1 (ex 5.1) Quest system (dopo B8) — XL
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11). **Ogni villaggio nuovo**: locanda con lo stesso baule,

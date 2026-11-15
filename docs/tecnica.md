@@ -13,13 +13,14 @@ Mappe dettagliate e sempre aggiornate (rigenerate a ogni build): [mappa_ram.html
 | `$8A40`– | brano del luogo (`SND_LBUF`, grande quanto il brano più lungo, [Musica](musica.md)) |
 | `$8C00` | sprite delle varianti forti e del boss finale |
 | `$8E80`– | motivetto di combattimento (`SND_FBUF`) |
+| `NM_AT`–`$8FFF` | (15/11) colori e nomi dei mostri del capitolo (blocco info del file del tema, `GFX_INFO` = 147 B da `$8F6D`) |
 | `$9000`–`$9BFF` | variabili (il VIC qui vede la ROM dei caratteri): generatore e stanze `$9000`, gioco `$9100`, barra `$91A8`, `solidtab` `$9200`, coda dei tesori `$9240`, **combattimento `$9318`**, musica `$93A0`, eroe `CHRBLK` `$9500` (206 B, con il baule della locanda), tabelle dei mostri `MRT` `$9600` (12 × 32), stato del piano `LVLBLK` `$9800`–`$9AFF`, salvataggi `$9B00`, player SID `$9B4E`–`$9BF7` |
 | `$9C00`–`$9FFF` | `CODE2`: disco, caricamenti, salvataggio del piano, caricamento dei moduli |
 | `$A000`–`$BFFF` | VIC banco 2: sprite, charset del gioco `$A800`, schermi A `$B400` e B `$BC00`, font della UI `$B800`; negli slot sprite 28–31 (`$A700`–`$A7FF`) la **zona 3 del modulo MENU** |
 | `$C000`–`$C8FF` | `MAP` 48 × 48 (nel menu: modulo `LOBBY`, fino a `$CBFF`) |
 | `$C900`–`$CFFF` | **modulo MENU, zona 1** (locanda e negozi, caricato all'ingresso nel villaggio, resta fino al LOBBY); arena: modulo a `$C900` |
 | `$D000`–`$DFFF` | sotto l'I/O: STASH del piano lasciato (portale/morte) `$D000`–`$D47F`; **generatore dei piani** `$D480`– (`src/game/gen_io.asm`, ~1,1 KB, copiato all'avvio, eseguito con `$01=$34` da `gen_call`: [Dungeon](dungeon.md)); il resto libero |
-| `$E000`–`$FFFF` | sotto il KERNAL: cache della grafica (villaggio `$E000`, tema `$ED00`, dove scrive anche il precaricamento), **modulo MENU, zona 2** `$F4E0`–`$FCFF`, mappa della sala del trono `FMAP` in fondo (`$FD00`, dal 10/11) |
+| `$E000`–`$FFFF` | sotto il KERNAL: cache della grafica (villaggio `$E000`, tema da `GFX_DUN_AT` = `$EC6D` a `$F4DF`: 15/11, comincia nella coda del villaggio), **modulo MENU, zona 2** `$F4E0`–`$FCFF`, mappa della sala del trono `FMAP` in fondo (`$FD00`, dal 10/11) |
 
 Margine del codice: controllato a ogni build (`.cerror`, avviso sotto 1 KB sotto `$8720`). Al 07/11: **~1,9 KB** sotto
 `$8720` (da 509 B: sala del trono pregenerata su file +300 B, generatore sotto l'I/O +1,1 KB, codice di debug tolto,

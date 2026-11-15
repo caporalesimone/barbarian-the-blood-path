@@ -124,10 +124,11 @@ for f in files:
                 kind = "Capitolo %d: dungeon (piani %d-%d)" % (ch, 5 * ch - 4, 5 * ch)
             else:
                 kind = "Capitolo %d: boss, tile della sala del trono (piano %d)" % (ch, 5 * ch)
-            GFX.append(dict(f=f, n=n, kind=kind, load=0xED00, size=len(d),
+            GFX.append(dict(f=f, n=n, kind=kind, load=f["data"][0] | f["data"][1] << 8, size=len(d),
                             tiles=DSTRIP // 8, chars=tot, used=used, uniq=uniq,
                             parts=[("Tile: 4 strisce x %d B (%d tile)" % (DSTRIP, DSTRIP // 8), 4 * DSTRIP),
-                                   ("Sprite mostri base (8)", MONS), ("Sprite forti + boss (10)", STRONG)],
+                                   ("Sprite mostri base del capitolo (8)", MONS), ("Sprite forti + boss (10)", STRONG),
+                                   ("Colori e nomi dei 9 tipi (blocco info -> NM_AT, 15/11)", len(d) - 4 * DSTRIP - MONS - STRONG)],
                             spr=(m1, m2)))
 
 # ------------------------------------------------------------------ blocco eroe (da src/game/game.asm)

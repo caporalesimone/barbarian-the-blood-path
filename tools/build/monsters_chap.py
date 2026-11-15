@@ -4,7 +4,8 @@ Solo DISEGNI, nello stesso formato di tools/build/monsters.py: 12x21 multicolor,
 'c' colore dello sprite, 'g' MC1 (grigio chiaro 15). Per ogni mostro: figura, le ultime 5 righe del secondo fotogramma
 (le gambe), la variante forte (righe sovrapposte dall'alto: ' ' = lascia la base), nome, colore.
 Un capitolo = 4 famiglie base + 4 varianti forti, come il capitolo 1 (stessi mtype 1..8: la RAM non cresce).
-Come entrano nel gioco: tools/build/monsters.py (SETS) e docs/bestiario.md."""
+Come entrano nel gioco (15/11): tools/build/monsters.py chapter_set -> tools/build/gen_gfx.py (file GFXn del capitolo:
+sprite + blocco info con colori e nomi) e docs/bestiario.md. Statistiche e IA restano quelle del tipo 1..8."""
 
 # ============================================================== CAPITOLO 2: la palude di Blackwater
 # Drowned: un annegato gonfio, le alghe che pendono, le braccia in avanti
@@ -480,7 +481,8 @@ GARGOYLE_L1 = [
     ".gc......cg.",
     "ggg......ggg",
 ]
-# Stone Gargoyle: corna grandi, il muschio nelle crepe
+# Stone Gargoyle: corna grandi, le crepe nella pietra (15/11, ritocco: le crepe erano 'g' = grigio chiaro 15, lo stesso
+# colore del corpo (15): nel gioco sparivano; ora 'b', scure)
 STONE_X = [
     " gg      gg ",
     "  g      g  ",
@@ -492,9 +494,9 @@ STONE_X = [
     "            ",
     "            ",
     "            ",
-    "   g    g   ",
+    "   b    b   ",
     "            ",
-    "    g  g    ",
+    "    b  b    ",
 ]
 # Cultist: un uomo incappucciato, il pugnale
 CULTIST = [

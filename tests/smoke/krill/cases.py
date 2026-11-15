@@ -14,7 +14,7 @@ def teardown(ctx):
     if "g" in ctx: ctx["g"].close()
 
 
-@test("KRILL-01", "load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/work/gfx/gfx1.prg")
+@test("KRILL-01", "load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg")
 def krill_theme(ctx):
     g = ctx["g"]; L = g.L
     d = open(os.path.join(OUT, "gfx", "gfx1.prg"), "rb").read()[2:]

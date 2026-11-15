@@ -29,7 +29,8 @@ sd_st   .byte STASH_N
 ;  della zona (ml_dst): pack_menu.py verifica che la scrittura non raggiunga i dati non ancora letti.
 MR1_AT  = $c900                 ; zona 1: $C900-$CFFF (la mappa finisce a $C8FF; il LOBBY arriva a $CBFF)
 MR1_END = $d000
-MR2_AT  = GFX_DUN_AT+4*GFX_DSTRIP+GFX_MONS+GFX_STRONG   ; zona 2: dopo la cache del tema ($F4E0), sotto il KERNAL
+MR2_AT  = GFX_DUN_END           ; zona 2: dopo la cache del tema ($F4E0), sotto il KERNAL
+        .cerror GFX_DUN_AT+4*GFX_DSTRIP+GFX_MONS+GFX_STRONG+GFX_INFO != GFX_DUN_END, "file del tema: lunghezza diversa da GFX_DUN_END-GFX_DUN_AT"
 MR2_END = PF_END                ; ($FD00: FMAP)
 MR3_AT  = $a700                 ; zona 3: slot sprite 28-31 del banco VIC 2, liberi nel gioco (out/work/memory-map/mappa_ram.html)
 MR3_END = $a800                 ; (charset del gioco)
