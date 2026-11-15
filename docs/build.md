@@ -135,7 +135,7 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 | `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build: mappe **curate a mano** con scenari e verifiche in VICE (se cambia la memoria o il disco vanno aggiornate); restano finche' la mappa automatica non le sostituisce (TODO T1) |
 | `tools/atlas/gen_atlas.py` (+ `atlas_names.py`, `atlas_template.html`) | atlante grafico `out/work/atlas/` ([regole in CLAUDE.md](../CLAUDE.md)) |
 | `tools/build/asm_audit.py` | analisi del codice assemblato (`out/work/asm_audit/analisi_assembly.md`, test `ASM-10`) |
-| `tools/manual/gen_manual.py` | manuale per la release (`lab64 manual`): ritagli e dati del gioco, poi `c64manual` di Lab64 con il tema base "c64" + `docs/manual/tema.css` |
+| `tools/manual/gen_manual.py` | manuale per la release (`lab64 manual`): ritagli, mappa del mondo (esegue `tools/art/world_map.py`, Pillow, in `out/work/art/` e `out/work/manual/img/`) e dati del gioco, poi `c64manual` di Lab64 con il tema base "c64" + `docs/manual/tema.css` |
 | `tools/vice/arena.py` + `src/test/arena.asm` | combattimenti veri in VICE per controllare i simulatori |
 | `tools/vice/*` | screenshot (`shots_menus.sh`, `shots_manual.sh`), profilo per fotogramma (`frame_prof.py`), cronometro del MENU (`menu_time.py`) |
 | `tools/simulators/*.py` | simulatori di combattimento, progressione, economia ([Bilanciamento](balancing-guide.md)) |

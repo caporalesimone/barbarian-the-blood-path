@@ -379,8 +379,10 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   (con `TWN1`…`TWN5` insieme sulle prime tracce `PERF-DISK-14` superava il 90% del limite: 5,22 s; così 4,87 s) e i tempi di
   ingresso nei villaggi 2–5 non sono misurati; la **città dell'Abisso** oggi si raggiunge
   dall'uscita del villaggio 4 dopo il boss finale e la Bocca non fa nulla (da rifare con H3; la leva della sala del trono resta).
-- **Fan art della mappa del mondo** (15/11): `tools/art/world_map.py` (`out/work/art/world_map.png`); da decidere se va nel
-  manuale, nella wiki o sulla scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene.
+- **Fan art della mappa del mondo** (15/11): `tools/art/world_map.py` (`out/work/art/world_map.png`); dal 16/11 sta nel
+  **manuale italiano** (pagina "IL MONDO", prima del capitolo 4; la genera la build del manuale, non e' in git). Restano da decidere
+  la wiki e la scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene; il testo del manuale non racconta la trama
+  (in revisione): da rivedere con E6, e da tradurre con E7.
 - **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri**: dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
   e il loro colore; **meccaniche decise** ([bestiario](docs/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
   non nel codice (~550 B stimati: M9); dal 15/11 hanno anche il **loro nome** nella barra e i **mostri del capitolo** intorno

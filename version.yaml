@@ -6,7 +6,7 @@
 version: "1.258"
 
 # Impronta dei sorgenti dell'ultima build (tools/build/bump_version.py): non si modifica a mano.
-source_hash: "4ee155255dd1833f92d015ece9de7ccdde7a6bac"
+source_hash: "dc7085d61042da916556a560d91422ceae0e1866"
 
 # Versione del formato dei salvataggi (un byte, 1..255; in esadecimale 0x01..0xff).
 # Da cambiare a mano ogni volta che cambia il formato del personaggio o del livello salvato:
@@ -15,5 +15,5 @@ save_version: 0xc7
 
 # Versioni delle build dei branch (tools/build/verinfo.py): tag.n, non bruciano i numeri di main.
 branch_versions:
-  villaggi: "villaggi.9"
+  villaggi: "villaggi.11"
   capitoli: "capitoli.9"
