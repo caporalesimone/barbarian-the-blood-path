@@ -237,7 +237,7 @@ build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
    `ROW2_Y` = 220 (06/11 sera: più in alto e onda più ampia); l'IRQ di metà fotogramma (`IRQ_MID` = `ROW1_Y` +
    `SIN_A` + 22) cade almeno 8 righe sopra il punto più alto di SPACE (`.cerror`): con 1–2 righe di margine una
    lettera già iniziata veniva riposizionata e "tracciava una linea" (la A). Colori: tavolozza scelta con
-   `-D LDCOL=0/1/2` (`tools/build/asm.sh`, variabile `LDCOL`): 0 sangue (predefinita), 1 oro antico, 2 acciaio
+   `-D LDCOL=0/1/2` (`tools/build/asm.sh`, variabile `LDCOL`): 0 sangue (predefinita), 1 oro antico, 2 acciaio (15/11, committente: si resta sulla 0, decisione B5 chiusa; le varianti 1 e 2 restano nel codice)
    (`ld_col0..2`, `tools/gen_loader.py`; in attesa della scelta del committente). A fine caricamento (`START`) o con SPAZIO (`LORE`, che poi passa alla storia): segnale in pagina zero `$8E` (`LDFLAGS`: `LOBBY` già a `$C000`; 11/11, la
    pagina 2 è del residente di Krill), elenco eroi `CHRTMP` → `$D000` con `$8F` (`CHRPRE`) = 1 (il menu lo legge da lì
    senza schermata di caricamento, solo al primo ingresso), `POKE 1021` → `godmode`, musica spenta (il menu

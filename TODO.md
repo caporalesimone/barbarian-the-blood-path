@@ -7,7 +7,7 @@ I lavori della toolchain stanno nel TODO di Lab64 (`TODO.md` del suo repository)
 
 **Riordino del 15/11** (richiesta del committente): voci raggruppate per **categoria** e, dentro ogni categoria, ordinate per
 **taglia**. Gli **ID** restano quelli dell'11/11 (`<lettera><numero>`, citati nella wiki e nei commit): la lettera non dice più la
-categoria. Tolte le voci fatte o superate: T2 e T3 (passate a Lab64 e fatte il 15/11: tema del manuale, pubblicazione generica), M7 (1570/1571 in VICE:
+categoria. Tolte le voci fatte o superate: B5 (15/11, committente: resta la tavolozza A, sangue), T2 e T3 (passate a Lab64 e fatte il 15/11: tema del manuale, pubblicazione generica), M7 (1570/1571 in VICE:
 `KRILL-18` passa), la parte risolta di I11, I9/I10/J10/J13 (sono lavori di Lab64).
 
 **Taglie**: **XS** = minuti o una decisione; **S** = ore; **M** = 1–2 giorni; **L** = più giorni; **XL** = settimane.
@@ -18,7 +18,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | # | Categoria | Voci (in ordine di taglia) |
 |---|---|---|
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
-| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B17 (XS ciascuna) |
+| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B4, B6–B17 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C2, C3, E2, E3, E4, E5, C1, E1, M2, E6, E7, E8, E9 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
@@ -66,7 +66,6 @@ non si possono chiudere.
 | B2 (ex D4) | **Cintura a 8 posti**: quale quest la sblocca (da scegliere col simulatore). | F1 |
 | B3 (ex D5) | **Pergamene fuori dallo zaino**: contatore 0..10 addosso (tasto 5), pile da 10 nel baule della locanda, opzione "riga dell'oro nella locanda con `s N`". Cooldown della pergamena ≥ 5 s (08/11). | F2 |
 | B4 (ex D6) | **Anelli e nomi**: formato `ring +N <stat>` e quali nomi accorciare (candidati: leather armor, greater healing, healing potion, minor healing, portal scroll, tower shield, viking sword). | E1 |
-| B5 (ex D8) | **Tavolozza di PRESS SPACE**: A sangue (oggi) / B oro antico / C acciaio. | C3 |
 | B6 (ex D9) | **Una pergamena garantita per piano?** | G1 |
 | B7 (ex D10) | **Prezzi proporzionali al guadagno** (`docs/BILANCIAMENTO.md` sez. 12). | G2 |
 | B8 (ex D11) | **Quest system** (`docs/quests.md` sez. 5 e 11): villaggi, numero delle quest, pergamena, Torvald, generatori, lore, manuale su disco. | H1 |
@@ -111,7 +110,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 - Il portale per l'Abisso (sala del trono) ha i colori del portale normale: palette scura. `gen_gfx.py` + atlante.
 
 ### C3 (ex 1.4) Piccole scelte estetiche e audio — S
-- Tavolozza di PRESS SPACE (B5); `SFX_LOWHP` provvisorio da riascoltare nel JUKEBOX; tile del trono dietro il boss.
+- `SFX_LOWHP` provvisorio da riascoltare nel JUKEBOX; tile del trono dietro il boss.
 
 ### E2 (ex 2.3) Negozi: merce (dopo B1) — S
 - Assortimento in `balance.yaml` (pool e `stock`), `docs/villaggio.md`, manuale.
