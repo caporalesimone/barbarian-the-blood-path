@@ -7,7 +7,7 @@ sfumature, ombreggiature, interpolazioni di colore, trasparenze, antialias (anch
 Geografia: l'angolo sud-ovest di un continente. Il mare sta a ovest e a sud, la terra esce dal quadro in alto e a destra.
 Zone: 1 Aldric's Crossing (valle verde e fiume, sud-ovest), 2 Blackwater Mill (lago nero e palude, nord-ovest), 3 The Last
 Camp (montagne innevate, centro-est), 4 Ruin's Gate (terra di cenere, mura, cratere dell'Abisso, cittadella, nord-est).
-La strada segue il gioco: dal villaggio 1 a nord fino alla palude, traghetto sul lago, a est fino al campo, a nord dal passo,
+La strada segue il gioco: dal villaggio 1 a nord fino alla palude, lungo la riva sud del lago, a est fino al campo, a nord dal passo,
 nel 4 si scende nel cratere.
 Tutta la geografia e' data esplicita (punti, poligoni, linee) in cima al file; il caso (seme fisso, sempre la stessa
 immagine) serve solo a spargere segni e alberi dentro le aree definite.
@@ -77,7 +77,9 @@ ASH = [(290, -4), (484, -4), (484, 146), (452, 142), (430, 130), (410, 118), (39
        (336, 88), (318, 78), (300, 66), (284, 52), (282, 30)]
 WOOD = [(178, 210), (200, 202), (226, 192), (252, 198), (258, 222), (250, 246), (214, 252), (186, 242), (176, 226)]
 
-RIVER = [(252, 168), (236, 176), (220, 186), (200, 196), (184, 202), (174, 207), (169, 216), (167, 230),
+# (15/11) il fiume nasce ai piedi di una cima a sud del campo, nella neve, e scende a sud-ovest verso la valle
+RIVER = [(357, 171), (352, 174), (340, 180), (326, 186), (310, 190), (294, 190), (278, 186), (264, 178),
+         (252, 172), (236, 176), (220, 186), (200, 196), (184, 202), (174, 207), (169, 216), (167, 230),
          (160, 242), (146, 249), (132, 251)]
 DELTA = [[(132, 251), (126, 255), (119, 263), (116, 268)], [(132, 251), (135, 257), (137, 268)]]
 
@@ -91,8 +93,8 @@ SQUARE = (150, 224)
 FIELDS = [(102, 232), (118, 232), (102, 242), (118, 242)]   # 14x8, angolo in alto a sinistra
 FENCE = ((100, 229), (134, 229))
 BRIDGE = (171, 209)
-HILLS = [(262, 198, 22, 10), (282, 206, 26, 12), (274, 186, 18, 8), (300, 214, 20, 9), (252, 214, 16, 7),
-         (322, 226, 22, 10), (346, 238, 18, 8), (296, 230, 16, 7),
+HILLS = [(262, 200, 22, 10), (284, 208, 26, 12), (300, 214, 20, 9), (252, 214, 16, 7),
+         (296, 230, 16, 7),
          (228, 160, 18, 8), (246, 150, 16, 7), (212, 40, 18, 8), (232, 50, 20, 9), (196, 26, 14, 6),
          (250, 24, 16, 7), (110, 26, 16, 7)]
 # zona 2
@@ -121,8 +123,7 @@ CITADEL = (446, 22)
 GATEHOUSE = (410, 50)
 
 ROAD = [(152, 221), (156, 214), (158, 200), (154, 186), (148, 172), (143, 160), (140, 148), (139, 138),
-        (138, 131)]
-FERRY = [(138, 125), (140, 120), (146, 116), (160, 114), (176, 112), (186, 110)]
+        (146, 136), (160, 134), (176, 130), (188, 122), (194, 114), (197, 110)]   # (15/11) lungo la riva sud del lago
 ROAD2 = [(197, 110), (214, 116), (234, 124), (254, 133), (274, 141), (294, 148), (312, 152), (322, 152),
          (330, 147), (334, 138), (343, 130), (348, 118), (352, 108), (356, 100), (364, 98), (374, 102),
          (386, 106), (392, 108), (392, 98), (392, 90)]
@@ -133,12 +134,12 @@ SERPENT = (360, 286)
 COMPASS = (40, 256)
 
 # targhe: (x, y in alto a sinistra, numero o None, testo)
-LABELS = [(66, 276, 1, "ALDRIC'S CROSSING"), (84, 36, 2, "BLACKWATER MILL"), (246, 180, 3, "THE LAST CAMP"),
+LABELS = [(66, 276, 1, "ALDRIC'S CROSSING"), (84, 36, 2, "BLACKWATER MILL"), (300, 222, 3, "THE LAST CAMP"),
           (264, 30, 4, "RUIN'S GATE")]
 ABYSS_LABEL = (404, 104)
 ABYSS_POINT = ((410, 104), (402, 87))
 NUMBERS = [(1, 114, 205), (2, 178, 78), (3, 300, 136), (4, 348, 60)]      # quadratini rossi accanto ai luoghi
-LEGEND = (390, 236)
+LEGEND = (408, 244)
 
 # ============================================================================ tela
 C = [["SEA"] * W for _ in range(H)]          # colore (nome della tavolozza) di ogni pixel
@@ -563,12 +564,11 @@ for x, y in riv_px:
 for i, (x, y) in enumerate(spline(RIVER)):
     if i % 6 == 3 and (x, y) in riv_px:
         C[y][x] = "WHITE"
-# sorgente: una pozza fra le colline
-stamp(250, 166, [".cc.", "cRRc", ".cc."], {"c": "RIVB", "R": "RIV"})
+# sorgente: una pozza di disgelo ai piedi della cima (364, 162), nella neve
+stamp(356, 169, [".cccc.", "cRRRRc", ".cRRc."], {"c": "RIVB", "R": "RIV"})
 
 road = polyline(ROAD) + polyline(ROAD2)
-ferry = polyline(FERRY)
-for x, y in road + ferry:
+for x, y in road:
     block_rect(x - 1, y - 1, x + 1, y + 1)
 
 # ============================================================================ 3. trame (segni ripetuti)
@@ -976,9 +976,6 @@ for x, y in gold:
 for x, y in gold:
     if (x, y + 1) not in gold:
         put(x, y + 1, "DBRN")
-for i, (x, y) in enumerate(ferry):
-    if i % 3 == 0:
-        put(x, y, "FOAM")
 
 # mare: navi e serpente
 for sx, sy in SHIPS:
@@ -1056,19 +1053,12 @@ label(ABYSS_LABEL[0], ABYSS_LABEL[1], None, "THE ABYSS", "PVIO")
 
 # legenda
 lx, ly = LEGEND
-plaque(lx, ly, lx + 78, ly + 26)
+plaque(lx, ly, lx + 60, ly + 16)
 for i in range(12):
     if i % 4 in (0, 1):
         put(lx + 6 + i, ly + 8, "GOLD"); put(lx + 6 + i, ly + 9, "DBRN")
-    if i % 3 == 0:
-        put(lx + 6 + i, ly + 18, "FOAM")
-for x in range(lx + 4, lx + 21):
-    for y in range(ly + 15, ly + 22):
-        if C[y][x] != "FOAM":
-            C[y][x] = "BLK"
 text(lx + 24, ly + 5, "ROAD", "PARCH")
-text(lx + 24, ly + 15, "FERRY", "PARCH")
-placed.append(("LEGEND", lx, ly, lx + 78, ly + 26, lx + 24, lx + 24 + text_w("FERRY") - 1))
+placed.append(("LEGEND", lx, ly, lx + 60, ly + 16, lx + 24, lx + 24 + text_w("ROAD") - 1))
 
 # titolo
 title = "BARBARIAN  -  THE BLOOD PATH"
