@@ -43,6 +43,8 @@ rpt     = $4a                   ; puntatore del flusso rel_put / rel_get (pagina
 ; piani del capitolo in RAM (11/11 sera): CH_LV slot da LV_SLOT byte nella RAM sotto l'I/O, dopo il generatore
 CH_LV    = 5                    ; piani per capitolo (regola del committente, docs/quests.md 3.8)
 LVRAM    = gen_io_end           ; slot del piano (L-1) mod CH_LV
+LVRAM_end = LVRAM + CH_LV*LV_SLOT   ; (15/11) coppia di etichette per la mappa automatica (TODO T1)
+;@map LVRAM "Piani del capitolo: CH_LV slot da LV_SLOT byte (stato compatto), sul disco solo con save game o cambio di capitolo"
         .cerror LVRAM + CH_LV*LV_SLOT > $e000, "slot dei piani del capitolo oltre $DFFF"
 
         .virtual $9b00

@@ -333,6 +333,8 @@ STASH  = $d000                  ; libera dopo il primo menu (salvataggi letti da
 MRT    = $9600                  ; mxl .. mdmg (game.asm): 12 tabelle x 32 mostri
 MRT_N  = 12*32
 STASHM = STASH + $300           ; copia di MRT
+;@map STASH..STASHM "STASH: copia di LVLBLK (piano lasciato per portale o morte); prima del primo menu CHRBUF (elenco eroi)"
+;@map STASHM..GEN_AT "STASHM: copia dei mostri in gioco (MRT, 384 B)"
         .cerror mxl != MRT || mhmh + 32 != MRT + MRT_N, "tabelle dei mostri in gioco non contigue a $9600"
         .cerror STASHM < STASH + (LVLEND-LVLBLK), "STASHM sovrapposto a LVLBLK in STASH"
 

@@ -4,7 +4,7 @@
 #   ./build.sh --fast        solo il disco (salta atlante, mappe e manuale); smoke e sanity restano
 #   ./build.sh --no-atlas    salta l'atlante grafico         --no-maps    salta le mappe della RAM e del disco
 #   ./build.sh --no-manual   salta il manuale PDF            --no-test    salta smoke e sanity
-#   ./build.sh --release     build completa + tutti i test (anche regression ed EMU-*) + manuale + tools/build/release.sh
+#   ./build.sh --release     build completa + tutti i test (anche regression ed EMU-*, con la sonda: --probe) + manuale + tools/build/release.sh
 #   ./build.sh --emu         i test con il demone vc64web acceso (test EMU-*: lab64 test regression -k EMU)
 #   ./build.sh --view        i test aprono VICE sullo schermo del viewer: http://localhost:6080 (lab64-viewer); se il viewer e'
 #                            gia' acceso lo fanno da soli (14/11), salvo --no-view
@@ -26,7 +26,7 @@ set -eu
 cd "$(dirname "$0")"
 FLAGS="$*"; PROBE=0; REL=0; NOTEST=0; EMU=0; VIEW=0; NOVIEW=0; MANUAL=0; IMAGES=0; KEEP=${KEEP_VERSIONS:-5}; ATLAS=1; MAPS=1; MANUALDEF=1
 while [ $# -gt 0 ]; do
-    case "$1" in --release) REL=1; EMU=1 ;; --no-test) NOTEST=1 ;; --emu) EMU=1 ;; --view) VIEW=1 ;; --no-view) NOVIEW=1 ;; --manual) MANUAL=1 ;; --probe) PROBE=1 ;;
+    case "$1" in --release) REL=1; EMU=1; PROBE=1 ;; --no-test) NOTEST=1 ;; --emu) EMU=1 ;; --view) VIEW=1 ;; --no-view) NOVIEW=1 ;; --manual) MANUAL=1 ;; --probe) PROBE=1 ;;
                  --images) IMAGES=1 ;; --fast) ATLAS=0; MAPS=0; MANUALDEF=0 ;; --no-atlas) ATLAS=0 ;; --no-maps) MAPS=0 ;;
                  --no-manual) MANUALDEF=0 ;; --keep) shift; KEEP=${1:-}; case "$KEEP" in ''|*[!0-9]*|0) echo "--keep N: intero >= 1"; exit 1 ;; esac ;;
                  *) sed -n 2,24p "$0"; exit 1 ;; esac

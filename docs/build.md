@@ -151,7 +151,7 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 | Strumento | Uso |
 |---|---|
 | `memmap/c64map.py` di Lab64 (14/11, generico) | (15/11, Lab64 1.4) **una mappa per programma**: il disco ha programmi che si sostituiscono in memoria (BARBARIAN, LORE, HELP, START, GAME, JUKEBOX), dichiarati in `lab64.env` con `C64_MAP_PROGRAM_<NOME>="file principale, poi i file che carica"` (sezione 4a). `out/work/memory-map/index.html` = **indice** dei programmi, `program-<nome>.html` = mappa di un programma, `memmap.json` (`schema` 2) a ogni build: mappa **automatica**, dai listati di 64tass (`-L`), dalle etichette (`-l`) e dal disco. Moduli = listati il cui file e' sul disco (stesso contenuto o stesso nome: `game` compresso, `menu` diviso in `menu1..3`); per ogni byte: indirizzo nel file, indirizzo di esecuzione (`.logical`) e file sorgente; variabili di `.virtual`; indirizzi usati dalle istruzioni (pagina zero, I/O, KERNAL). Mostra: panoramica per pagine, strati per modulo, spazio libero per banco, moduli nella stessa memoria (overlay), disco completo. **Analisi statica**: non vede dati copiati o decompressi all'avvio, buffer dietro puntatori, dati che diventano liberi (es. `gfx_data` dopo `copy_gfx`). Verifica: il libero `$9E7B-$9FFF` = 389 B coincide con il margine del blocco `$9C00` di `asm.sh`. **Sonda in VICE** (14/11, `./build.sh --probe`, `memmap/probe.py` di Lab64): con `C64_MEMPROBE=1` ogni sessione VICE dei test (`tests/lib/c64.py`) riempie la RAM (`$033C-$03FB`, `$0400-$07FF`, `$0803-$FFFF`, anche sotto ROM e I/O) con uno schema noto subito dopo il boot e la salva alla fine in `out/work/memprobe/` (scenario = modulo dei test, impronta del disco); `c64map.py` usa solo i dump fatti con lo stesso disco e aggiunge la sezione "Measured in VICE" (byte mai scritti per banco e per pagina, confronto con l'analisi statica, scenari) e la misura `ram_never_written`. Misurato [14/11]: smoke + sanity con la sonda 28,6 s contro 29,8 s senza (una misura per parte: costo trascurabile); mai scritti 1862 B in 3 sessioni, fra cui `$9E7D-$9FFF` (387 B: il libero statico del blocco `$9C00` meno 2 byte). Limiti: vede solo cio' che i test eseguono; le scorciatoie del monitor contano come scritture; un byte scritto con lo stesso valore dello schema sembra intatto (schema senza `$00`/`$FF`/`$20`). `memmap.json` porta anche `metrics`, una serie per programma (`ram_free_static_game`, `ram_never_written_game`, ...: fino al 15/11 `ram_free_static` era la somma di tutti i programmi), che `publish.py` mette nel manifest quando pubblica le mappe. I dump della sonda vanno al programma il cui file principale e' in RAM alla fine della sessione. Aggiunte: TODO T1 |
-| `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build: mappe **curate a mano** con scenari e verifiche in VICE (se cambia la memoria o il disco vanno aggiornate); restano finche' la mappa automatica non le sostituisce (TODO T1) |
+| `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build: mappe **curate a mano** con scenari e verifiche in VICE (se cambia la memoria o il disco vanno aggiornate). Cosa danno in piu' della mappa automatica: sezione 4a; se tenerle: TODO T1 |
 | `tools/atlas/gen_atlas.py` (+ `atlas_names.py`, `atlas_template.html`) | atlante grafico `out/work/atlas/` ([regole in CLAUDE.md](../CLAUDE.md)) |
 | `tools/build/asm_audit.py` | analisi del codice assemblato (`out/work/asm_audit/analisi_assembly.md`, test `ASM-10`) |
 | `tools/manual/gen_manual.py` | manuale per la release (`lab64 manual`): ritagli, mappa del mondo (esegue `tools/art/world_map.py`, Pillow, in `out/work/art/` e `out/work/manual/img/`) e dati del gioco, poi `c64manual` di Lab64 con il tema base "c64" + `docs/manual/tema.css` |
@@ -183,18 +183,25 @@ modulo e a quale programma va ogni dump della sonda (quello il cui file principa
 non sta in nessun programma compare nell'indice ("Files in no program") e come avviso di `lab64 map`. Dal 15/11 anche JUKEBOX si
 assembla con il listato (`-L` in `tools/build/asm.sh`): senza, la sua mappa conosceva solo dove si carica il file.
 
-**Numeri del 15/11 (v1.261, analisi statica)**: RAM libera `$0400-$FFFF` per programma: barbarian 61503 B, lore 40656 B, help
-52988 B, start 17897 B, **game 13323 B**, jukebox 59686 B. Per GAME la mappa automatica **non** coincide ancora con il margine della
-build (`margine codice: 1580 B fino a $8720, 389 B nel blocco $9C00-$9FFF`) ne' con la mappa a mano (`mappa_ram.html`: 4213 B
-liberi in `$0400-$FFFF`). Confronto byte per byte: in comune 2584 B (fra cui `$9E7B-$9FFF` 389 B = il margine di CODE2 e
-`$FE96-$FFF9` 356 B, identici). La mappa automatica conta libere in piu' 10739 B che il gioco usa senza che l'analisi statica lo
-veda, perche' ci scrive solo con puntatori o copie e nessuna annotazione lo dichiara: il banco VIC `$A000-$BFFF` (sprite, charset,
-schermi, font: 7707 B), i buffer `$8B14-$8FFF` (slot sprite, `SND_LBUF`/`SND_FBUF`: i file `SNDn` non hanno indirizzo di
-caricamento, Krill li mette li', 1020 B), lo STASH `$D000-$D47F` e la coda della zona 1 del MENU (`$CF43-$CFFF`, 189 B: questa e'
-libera davvero, `pack_menu.py` dice lo stesso) 1341 B, gli slot dei piani `$D926-$DAF6` (465 B), buchi fra le variabili `$9Axx`
-(151 B). Conta invece occupati 1629 B che la mappa a mano dice liberi: il margine `$80F4-$871F` (1580 B, occupato all'avvio da
-`gfx_data`, copiata altrove da `copy_gfx`: serve `free-after=start`) e due pezzi piccoli. Le annotazioni `;@map` che chiudono
-questa differenza sono il lavoro del TODO T1.
+**Annotazioni `;@map` (15/11, TODO T1)**: le zone che GAME scrive solo con puntatori o copie stanno nei sorgenti come commenti
+`;@map` (sintassi nel README di Lab64), vicino alle costanti che le definiscono: righe dell'HUD, puntatori e sprite di `$8720-$8FFF`,
+il banco VIC `$A000-$BFFF` e `MAP` (`src/game.asm`), `SND_LBUF`/`SND_FBUF` (`src/game/music.asm`, coppie `..._end`), `STASH`/`STASHM`
+(`src/game/levels.asm`), gli slot dei piani `LVRAM` (`src/game/rel.asm`, coppia `LVRAM_end`), `MRT`, `LVLBLK`, `CHRBLK`
+(`src/game/game.asm`, solo descrizioni: le variabili l'analisi le vede gia'). `gfx_data..$8720` e `$87E8-$87F7` hanno
+`free-after=start` (grafica fissa del PRG, dato morto dopo `copy_gfx`). Due scenari `;@scenario`: `menu-iniziale` (game + lobby) e
+`in-gioco` (game + menu; villaggio e dungeon differiscono solo per i file nella cache sotto il KERNAL, che gli scenari di Lab64,
+fatti di moduli, non distinguono). Le annotazioni sono commenti: il binario non cambia (confrontato byte per byte con la build
+precedente: unico byte diverso la cifra della versione).
+
+**Numeri del 15/11 (analisi statica + annotazioni)**: RAM libera `$0400-$FFFF` per programma: barbarian 61503 B, lore 40656 B,
+help 52988 B, start 11587 B, **game 3071 B, 4667 B dopo l'avvio** (con le zone `free-after`), jukebox 59686 B. La mappa a mano
+(`mappa_ram.html`) dice 4213 B per GAME: le due ora coincidono a meno di zone che la mappa a mano non conta come libere e che lo
+sono davvero (code delle zone 1 e 3 del MENU `$CF43-$CFFF` e `$A7A3-$A7FF`, 282 B; buchi fra le variabili; `$FCED-$FCFF`) e di
+`$F4E0-$F4FF` (32 B), che la mappa a mano conta libera e quella automatica vede usata da un file. **Sonda** (regression completa +
+`PROBE-10..14`, 15/11): ogni programma ha almeno una sessione; GAME 1802 B mai scritti in 38 sessioni.
+Le mappe a mano restano: i loro spaccati per fase (stessi indirizzi usati in modo diverso all'avvio, in gioco, nelle UI, nella
+minimappa), le classi della memoria libera (codice libero, codice solo con l'I/O spento, solo dati) e l'anteprima della grafica
+del disco non si esprimono con le annotazioni (TODO T1).
 
 ## 4b. Programmi esterni compilati dentro le immagini (13/11; 14/11 ultime versioni dai sorgenti)
 (14/11, regola del committente) i programmi esterni sono **all'ultima versione** e si compilano **dai sorgenti** dentro la build

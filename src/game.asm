@@ -43,6 +43,25 @@ CHARSET    = $a800
 
 MAP        = $c000          ; 48x48 tile
 LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM della mappa, che nel menu non serve
+
+; ---- (15/11, TODO T1) annotazioni per la mappa automatica della memoria (lab64 map, docs/build.md sezione 4a): zone che il
+; gioco scrive solo con puntatori o copie, invisibili all'analisi statica. Contano come usate; i buchi lasciati fuori
+; (slot sprite 20-23 e 27, $87E8-$87F7) sono liberi davvero, solo per dati.
+;@map $8720..$87e8 "Schermo HUD: righe 20-24 di SCR_H (il VIC mostra solo queste, split raster)"
+;@map $87e8..$87f8 "Fra schermo HUD e puntatori sprite: libera dopo l'avvio (solo dati, nel banco VIC)" free-after=start
+;@map $87f8..$8800 "Puntatori sprite della fascia HUD"
+;@map $8800..$8a40 "Sprite della barra, set A (doppio buffer con $B000) e segnaposto della minimappa"
+;@map $8c00..$8e80 "Sprite forti + boss del tema (640 B dal file GFXn, gfx_install)"
+;@map SPR_DATA..$a500 "Sprite 0-19: eroe e fendenti (copy_gfx), mostri del tema (file GFXn)"
+;@map $a600..$a6c0 "Sprite 24-26: HUD, segnaposto, anello (copy_gfx)"
+;@map CHARSET..$b000 "Charset del gioco: tile del luogo (file TWNc / GFXn) + caratteri fissi (copy_gfx)"
+;@map $b000..SCR_A "Sprite della barra, set B; nella minimappa del villaggio i nomi delle case (mm_names)"
+;@map SCR_A..$b800 "Schermo A del gioco / schermo delle UI e della minimappa"
+;@map $b800..SCR_B "Font della UI (copy_gfx)"
+;@map SCR_B..$c000 "Schermo B del gioco (doppio buffer con lo schermo A)"
+;@map MAP..$c900 "MAP: mappa 48x48 del luogo (villaggio dalla cache, dungeon dal generatore); nel menu iniziale c'e' il LOBBY"
+;@scenario menu-iniziale: game lobby ; elenco eroi e creazione: LOBBY a $C000 sopra MAP, MENU non ancora caricato
+;@scenario in-gioco: game menu ; villaggio e dungeon: MENU nelle sue tre zone ($C900, $A700, sotto il KERNAL), MAP del luogo; cambiano solo i file nella cache sotto il KERNAL (TWNc o GFXn)
 TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile): fino a $ED00
                             ; (il file del tema comincia GFX_INFO byte prima: villaggio e dungeon non sono mai in RAM insieme)
 MAPW       = 48
@@ -363,6 +382,7 @@ _adv    inc ptr0                ; un byte di sorgente (preserva A)
 ; ---- grafica dei luoghi: cache nella RAM sotto il KERNAL ($E000 villaggio, $E600 tema del dungeon)
 ; installa la grafica in cache: A = 0 villaggio, altro = dungeon (tile + sprite, colori e nomi dei mostri del capitolo)
         .cerror GFX_INFO > 256 || >NM_AT != >(NM_AT+GFX_INFO-1), "blocco info dei mostri (NM_AT) a cavallo di una pagina"
+;@map NM_AT..$9000 "Colori e nomi dei mostri del capitolo: blocco info del file GFXn copiato da gfx_install"
         .cerror SND_FBUF + SND_FMAX > NM_AT || NM_AT + GFX_INFO > $9000, "NM_AT sovrapposto al motivetto di combattimento o oltre $8FFF"
 gfx_install:
         sta tmp5
@@ -1918,6 +1938,7 @@ mod_cheats
 ;   - se la grafica cresce, FREE_RAM_START si sposta in avanti (guardia .cerror sotto).
 ;  Mappa: tools/memory-map/gen_rammap.py (out/work/memory-map/mappa_ram.html).
 ; ===================================================================
+;@map gfx_data..$8720 "Margine per il codice: all'avvio grafica fissa del PRG, dato morto dopo copy_gfx (guardia .cerror a $8720)" free-after=start
 gfx_data:                       ; solo la grafica fissa: tile del villaggio e dei dungeon e mostri sono su file (gfxN)
 gd_fchr .binary "../out/work/gfx/fixed_chr.bin"  ; caratteri fissi (glifi HUD, minimappa): 4 strisce da GFX_FSTRIP byte
 gd_core .binary "../out/work/gfx/spr_core.bin"   ; sprite 0..11 (eroe, fendenti) + 24..26

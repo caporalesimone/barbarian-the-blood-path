@@ -27,6 +27,10 @@ MUS_FIGHT  = 2
 SND_LBUF   = $8a40              ; brano del luogo (slot sprite 41-47 liberi, fino a $8BFF)
 SND_FBUF   = $8e80              ; motivetto di combattimento (slot sprite 58-63 liberi, fino a $8FFF)
         .include "music_tab.inc"
+SND_LBUF_end = SND_LBUF + SND_SMAX  ; (15/11) fine dei buffer: coppie di etichette per la mappa automatica (TODO T1)
+SND_FBUF_end = SND_FBUF + SND_FMAX
+;@map SND_LBUF "Brano del luogo (SND_LBUF): file SNDn senza indirizzo, letto qui dal disco; grande quanto il brano piu' lungo"
+;@map SND_FBUF "Motivetto di combattimento (SND_FBUF): file SNDn, grande quanto il motivetto piu' lungo"
         .cerror SND_SMAX > $8c00 - SND_LBUF, "brano troppo lungo per SND_LBUF"
         .cerror SND_FMAX > $9000 - SND_FBUF, "motivetto troppo lungo per SND_FBUF"
 

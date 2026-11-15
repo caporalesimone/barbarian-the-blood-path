@@ -440,25 +440,19 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
   `manifest.json` con gli SHA-256) invece di conservarle in locale; niente zip dei sorgenti (regola del committente 14/11: lo
   da' gia' il tag). Da decidere con il passaggio a GitHub.
 
-### T1 Mappa della memoria automatica: lavoro dalla parte del gioco — M
-- La mappa automatica e la sonda in VICE sono di Lab64 (`lab64 map`, [docs/build.md](docs/build.md) sezioni 4 e 4a).
-- **Fatto il 15/11 (TODO Z6, Lab64 1.4)**: una mappa per **programma** del disco (barbarian, lore, help, start, game, jukebox,
-  dichiarati in `lab64.env` con `C64_MAP_PROGRAM_<NOME>`), indice in `out/work/memory-map/index.html`; JUKEBOX assemblato con il
-  listato; i dump della sonda vanno al programma che era in memoria alla fine della sessione. La RAM libera di GAME non e' piu'
-  sommata a quella degli altri programmi: 13323 B (analisi statica, v1.261).
-- **Resta: annotazioni** `;@map` nei sorgenti (Lab64 le legge dal 15/11, README di Lab64). Il confronto con `mappa_ram.html`
-  ([docs/build.md](docs/build.md) sezione 4a) dice quali servono perche' la RAM libera di GAME diventi quella vera (~4,2 KB):
-  usate senza che l'analisi statica lo veda il banco VIC `$A000-$BFFF` (7707 B), i buffer `$8B14-$8FFF` (slot sprite,
-  `SND_LBUF`/`SND_FBUF`, 1020 B), lo STASH `$D000-$D47F`, gli slot dei piani `LVRAM`; `free-after=start` per `gfx_data` (il margine
-  di 1580 B sotto `$8720` di `asm.sh`, oggi occupato nella mappa automatica); le descrizioni delle zone; scenari (villaggio /
-  dungeon / menu) dentro GAME. Ogni modifica a `src/` cambia la versione del gioco (impronta dei sorgenti): farle tutte insieme.
-- **Poi togliere le mappe vecchie** (`tools/memory-map/gen_rammap.py`, `gen_diskmap.py`: curate a mano), portando le loro
-  descrizioni nelle annotazioni. Fino ad allora restano (l'indice automatico le collega). Nota: `mappa_ram.html` ha una riga
-  sbagliata nella tabella delle zone libere (`$ECB3-$EC6C`, -70 B: la coda della cache del villaggio dopo la modifica del 15/11).
-- Sonda (15/11): 1838 B mai scritti in GAME (8 sessioni: smoke, sanity e alcuni `BOOT-*`, `LOBBY-*`, `DISK-12`, `MUSIC-10`); LORE, HELP, START e JUKEBOX non hanno sessioni
-  che finiscono in loro (nessun test li lascia in memoria alla fine) e BARBARIAN solo 2 (`BOOT-*`). Una sessione che passa da
-  BARBARIAN a START e GAME conta tutte le sue scritture in GAME (limite di Lab64, TODO L33 di Lab64). Sonda anche in `--release`
-  (oggi a mano: `C64_MEMPROBE=1 lab64 test regression`, poi `lab64 map`); seconda passata con `C64_MEMPROBE=2`.
+### T1 Mappe della memoria: tenere o togliere le mappe a mano — S (decisione del committente)
+- Fatto il 15/11: una mappa per programma (Lab64 1.4), annotazioni `;@map` / `;@scenario` in GAME (RAM libera 3071 B, 4667 B dopo
+  l'avvio: ora coincide con la mappa a mano a meno di zone libere davvero), sonda anche in `--release` e test `PROBE-10..14` che
+  finiscono in BARBARIAN, LORE, HELP, START e JUKEBOX ([docs/build.md](docs/build.md) sezione 4a).
+- **Da decidere**: le mappe curate a mano (`tools/memory-map/gen_rammap.py`, 608 righe; `gen_diskmap.py`, 336 righe) costano
+  manutenzione (indirizzi e testi scritti a mano, si rompono quando cambia la memoria) ma hanno cose che la mappa automatica non sa
+  esprimere: `mappa_ram.html` gli **spaccati per fase** (stessi indirizzi all'avvio, in gioco, nelle UI, nella minimappa; $C000,
+  $D000, $E000 per villaggio, dungeon e piano 20) e le **classi della memoria libera** (codice libero / codice solo con l'I/O spento
+  / solo dati); `mappa_disco.html` l'anteprima della grafica dei file e la decodifica dei salvataggi presenti sul disco (elenco file e
+  tracce/settori li ha gia' la mappa automatica; la grafica l'atlante; il formato `docs/FORMATO_DATI.md`).
+  Opzioni: (a) tenerle come sono; (b) togliere solo `mappa_disco.html`; (c) portare spaccati e classi in Lab64 (un attributo
+  `phase=` / `use=` nelle annotazioni: lavoro di Lab64) e poi togliere anche `mappa_ram.html`.
+- Limite noto (Lab64 L33): una sessione che passa da un programma all'altro conta tutte le scritture nel programma finale.
 
 ---
 

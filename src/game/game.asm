@@ -3,6 +3,7 @@
 ; ===================================================================
 
 ; ---- runtime mostri (non salvato)
+;@map $9600+384 "MRT: mostri in gioco (12 tabelle x 32: posizione fine, vita, ricarica, stordimento...), copiati in STASHM"
         .virtual $9600
 mxl     .fill 32
 mxh     .fill 32
@@ -34,6 +35,7 @@ mo_yh     .byte ?
         .endv
 
 ; ---- stato livello (salvato su disco)
+;@map LVLBLK..LVLEND "LVLBLK: stato del piano (mostri, bauli, nebbia EXPL), salvato compatto negli slot LVRAM e copiato in STASH"
         .virtual $9800
 LVLBLK
 lb_lvl  .byte ?
@@ -63,6 +65,7 @@ LVLEND
 NAME_LEN = 12                   ; caratteri del nome dell'eroe
 STASH_N  = 24                   ; oggetti nel baule di casa (07/11 sera: da 48 a 24), nel blocco dell'eroe (08/11 sera)
 PACK_N   = 8                    ; posti dello zaino (07/11 sera: da 16 a 8); l'equipaggiamento segue: indici PACK_N..PACK_N+3
+;@map CHRBLK..CHREND "CHRBLK: eroe e baule della locanda, il blocco salvato nel file save-0N (docs/FORMATO_DATI.md)"
         .virtual $9500
 CHRBLK
 c_magic .byte ?          ; versione del formato di salvataggio (SAVE_VER): primo byte del file

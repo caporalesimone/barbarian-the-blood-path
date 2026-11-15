@@ -97,6 +97,9 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
   con lo schema di `memmap/probe.py` di Lab64 subito dopo il boot e `close()` la salva in `out/work/memprobe/<suite.area>_<pid>_<n>.bin`
   (lo scenario è il modulo dei test, `C64_MEMPROBE_TAG` messo da `lab64 test`). Serve alla mappa automatica ([build.md](build.md)).
   Un test che fallisce solo con la sonda sta leggendo memoria mai inizializzata (il C64 vero all'accensione non ha la RAM a zero).
+  (15/11, TODO T1) La sonda gira anche in `./build.sh --release` (tutte le suite). Un dump va al programma il cui file principale e' in
+  RAM alla fine della sessione: i test `PROBE-10..14` (`regression/memprobe`) finiscono apposta in BARBARIAN, LORE, HELP, START e
+  JUKEBOX, che prima non avevano sessioni (GAME ne ha gia' moltissime).
 
 ## Il secondo emulatore (13/11)
 
@@ -181,6 +184,11 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LORE-10` | release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), return, START |
 | `HELP-10` | release: the HUD crop in the help equals the game HUD |
 | `BOOT-12` | RUN/STOP while the KERNAL loads LORE (from the BARBARIAN menu): back to the menu, no red border (12/11) |
+| `PROBE-10` | BARBARIAN: the loader menu with its three entries; the session ends in BARBARIAN (memory probe) |
+| `PROBE-11` | LORE from the BARBARIAN menu: title, PRESS SPACE, the story scrolls; the session ends in LORE (memory probe) |
+| `PROBE-12` | HELP from the BARBARIAN menu: the five pages; the session ends in HELP on the last page (memory probe) |
+| `PROBE-13` | START: Krill installed, GAME loaded; the session ends in START just before GAME is unpacked (memory probe) |
+| `PROBE-14` | JUKEBOX: two tunes played and stopped; the session ends in JUKEBOX (memory probe) |
 | `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase, centred on row 12 (15/11) |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |

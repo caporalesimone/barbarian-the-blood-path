@@ -34,8 +34,10 @@ MZ = [(L["MR%d_AT" % k], MN["mz%d_top" % k], L["MR%d_END" % k]) for k in (1, 2, 
 LVLE, CHRE, RELE = L["LVLEND"], L["CHREND"], L["rel_end"]
 _MT = open(os.path.join(ROOT, "out", "work", "music_tab.inc")).read()
 SMAX = int(re.search(r"SND_SMAX\s*=\s*(\d+)", _MT).group(1)); FMAX = int(re.search(r"SND_FMAX\s*=\s*(\d+)", _MT).group(1))
-TOWNE = 0xE000 + os.path.getsize(os.path.join(ROOT, "out", "work", "gfx0.prg")) - 2
+import glob as _glob
+TOWNE = 0xE000 + max(os.path.getsize(f) for f in _glob.glob(os.path.join(ROOT, "out", "work", "twn[0-9].prg"))) - 2   # (15/11) il villaggio piu' lungo
 DUNA, NMA, NMI = L["GFX_DUN_AT"], L["NM_AT"], L["GFX_INFO"]   # (15/11) tema del dungeon da $EC6D; blocco info dei mostri a NM_AT
+TOWND = min(TOWNE, DUNA)                            # (15/11) nel dungeon il tema copre la coda del villaggio piu' lungo
 ARE = labels("arena.lbl")["ar_end_"] if os.path.exists(os.path.join(ROOT, "out", "work", "arena.lbl")) else 0xCD66
 LDE = None                                          # fine del corpo di START (indirizzo logico a $A000)
 _SL = "start.lst"                       # (11/11) un solo START per i due dischi
@@ -44,6 +46,7 @@ for l in open(os.path.join(ROOT, "out", "work", _SL)):
     if m:
         LDE = int(m.group(1), 16)
 assert LDE, "body_end non trovato in out/" + _SL
+CHRT = labels("start.lbl")["CHRTMP"]                # (15/11) $B800 in START (schermata di attesa), dopo il corpo
 
 # ------------------------------------------------------------------ categorie
 CAT = {
@@ -191,9 +194,9 @@ spaccato("s2", "Spaccato 2 - $A000-$BFFF: banco VIC del gioco", 0xA000, 0xBFFF,
          "All'avvio START (avvio del gioco, caricato dal loader BARBARIAN) gira qui (RAM sotto la ROM del BASIC, esclusa). In gioco e' il banco VIC 2: tutto cio' che il VIC mostra deve stare in $8000-$BFFF (esclusa $9000-$9FFF, dove vede la ROM dei caratteri).",
          [("Avvio: START", [
              R(0xA000, LDE - 1, "Codice di START", "boot", ("Titolo, musica, PRESS SPACE, lettura dei file" if _SL == "start.lst" else "Build di debug: solo la lettura dei file (la release con il titolo e' piu' lunga)")),
-             R(LDE, 0xAFFF, "Libera", "free"),
-             R(0xB000, 0xB042, "CHRTMP: elenco eroi", "boot", "Stato + ultimo record di SAVES (elenco eroi)"),
-             R(0xB043, 0xBFFF, "Libera", "free"),
+             R(LDE, CHRT - 1, "Libera", "free"),
+             R(CHRT, CHRT + 0x42, "CHRTMP: elenco eroi", "boot", "Stato + file hl (elenco eroi)"),
+             R(CHRT + 0x43, 0xBFFF, "Libera", "free"),
          ]), ("Gioco: villaggio e dungeon", [
              R(0xA000, 0xA2FF, "Sprite eroe + fendenti", "vic"),
              R(0xA300, 0xA4FF, "Sprite mostri del tema", "vic"),
@@ -295,8 +298,8 @@ spaccato("s5", "Spaccato 5 - $E000-$FFFF: RAM sotto il KERNAL", 0xE000, 0xFFFF,
              R(0xFFFA, 0xFFFF, "Vettori", "sys"),
          ]), ("Dungeon (piani 1-9)", [
              R(0xE000, 0xE59F, "Tile del villaggio", "cache", "Dato morto: il villaggio si rilegge a ogni ingresso (11/11)"),
-             R(0xE5A0, TOWNE - 1, "Mappa del villaggio (RLE)", "cache"),
-             R(TOWNE, DUNA - 1, "Libera", "free"),
+             R(0xE5A0, TOWND - 1, "Mappa del villaggio (RLE)", "cache"),
+             *([R(TOWND, DUNA - 1, "Libera", "free")] if TOWND < DUNA else []),
              R(DUNA, DUNA + 863, "Tema: tile (4 x 216)", "cache", "(15/11) Il file comincia GFX_INFO byte prima di $ED00, nella coda del villaggio (che si rilegge a ogni ingresso)"),
              R(DUNA + 864, DUNA + 1375, "Tema: mostri base", "cache"),
              R(DUNA + 1376, DUNA + 2015, "Tema: forti + boss", "cache"),
@@ -307,8 +310,8 @@ spaccato("s5", "Spaccato 5 - $E000-$FFFF: RAM sotto il KERNAL", 0xE000, 0xFFFF,
              R(FINE, 0xFFF9, "Libera", "free"),
              R(0xFFFA, 0xFFFF, "Vettori", "sys"),
          ]), ("Piano 20 (sala del trono)", [
-             R(0xE000, TOWNE - 1, "Villaggio (tile + mappa)", "cache"),
-             R(TOWNE, DUNA - 1, "Libera", "free"),
+             R(0xE000, TOWND - 1, "Villaggio (tile + mappa)", "cache"),
+             *([R(TOWND, DUNA - 1, "Libera", "free")] if TOWND < DUNA else []),
              R(DUNA, 0xF4DF, "Tema 8", "cache", "Pentacolo e leva negli slot dei tile; mostri del capitolo 4"),
              R(MZ[1][0], MZ[1][1] - 1, "Modulo MENU, zona 2", "code", "Resta dal villaggio"),
              R(MZ[1][1], FINAT - 1, "Libera (zona 2 del MENU)", "free"),
@@ -442,7 +445,7 @@ ZONES = [
     (0x02B2, 0x02FF, "freec", "Pagina 2 libera", "Come sopra."),
     (0x0334, 0x03FF, "freec", "Pagina 3: buffer del registratore", "Come sopra (le build di debug usano $03F0-$03F3)."),
     (GENE + L["CH_LV"] * L["LV_SLOT"], 0xDFFF, "freeio", "RAM sotto l'I/O dopo il generatore e gli slot dei piani", "Codice che non tocca VIC, SID, CIA, colori, KERNAL, disco e gira con $01=$34 e interrupt spenti (come gen_io.asm, chiamato da gen_call); oppure dati."),
-    (TOWNE, DUNA - 1, "freed", "Coda libera della cache del villaggio", "Dati (cache di grafica o tabelle): si leggono con $01=$35 e interrupt spenti (dal 15/11 fino all'inizio del tema del dungeon, GFX_DUN_AT)."),
+    *([(TOWNE, DUNA - 1, "freed", "Coda libera della cache del villaggio", "Dati (cache di grafica o tabelle): si leggono con $01=$35 e interrupt spenti (dal 15/11 fino all'inizio del tema del dungeon, GFX_DUN_AT).")] if TOWNE < DUNA else []),
     (0xF4E0, 0xF4FF, "freed", "Cache sotto il KERNAL: pezzo piccolo", "Dati."),
     (FINE, 0xFFF9, "freed", "Fondo della cache sotto il KERNAL", "Dati (dopo FMAP)."),
     (0x87E8, 0x87F7, "freed", "Tra schermo HUD e puntatori sprite", "Dati (nel banco VIC, fuori da sprite e schermi)."),
