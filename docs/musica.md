@@ -51,6 +51,11 @@ flowchart LR
   `music_town` / `music_dungeon`, a schermo spento, senza schermata): **un brano alla volta**, direttamente nel suo
   buffer, e nessuna copia in RAM (decisione del 06/11 sera: la copia sotto l'I/O è stata tolta e quella RAM è libera).
   Se il brano scelto è già nel buffer non si rilegge (es. il motivetto di combattimento quando ce n'è uno solo).
+- **Lettura controllata** (15/11, ex TODO A2): `snd_get` confronta la fine del file data da Krill (`krill_endaddrlo/hi`) con
+  buffer + lunghezza del brano (`snd_llo/hi`, `music_tab.inc`); se non torna (lettura corta o lunga: Krill non dà errore) rilegge,
+  fino a 3 volte, poi lascia il buffer vuoto (`snd_cur` = 0: niente musica in quel luogo). Il player **non parte mai** su un buffer
+  letto a metà: con un brano mezzo nuovo e mezzo vecchio `sp_next` girava per sempre nell'IRQ e il gioco si bloccava (era il
+  difetto A2: `SND0` letto per 118 B su 241 dopo `MENU3`, causa nel loader, [FastLoader](FastLoader.md) 4.1). Test `KRILL-21`.
 - **Buffer** grandi quanto il brano più lungo: brano del luogo a `$8A40` (`SND_SMAX`, oggi 312 B, negli slot sprite
   41-47) e motivetto di combattimento a `$8E80` (`SND_FMAX`, oggi 142 B, slot 58-63); il resto degli slot è libero.
   Servono due buffer perché il motivetto interrompe il brano del luogo, che poi riprende dal punto in cui era.

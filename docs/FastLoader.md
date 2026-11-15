@@ -38,7 +38,7 @@ flowchart LR
 
 | Passo | Dove | Cosa |
 |---|---|---|
-| 1 | `tools/build/krill_build.sh` (chiamato da `tools/build/asm.sh`) | scompatta `src/third-party/krill/loader-v194.zip` in `out/work/krill/pkg` (usa e getta) e costruisce con `ca65`/`ld65` (pacchetto `cc65`) e la nostra configurazione `src/common/krill/loaderconfig.inc`: `out/work/krill/install.prg`, `loader.prg` (residente), `save.prg` (plugin) |
+| 1 | `tools/build/krill_build.sh` (chiamato da `tools/build/asm.sh`) | scompatta `src/third-party/krill/loader-v194.zip` in `out/work/krill/pkg` (usa e getta) e costruisce con `ca65`/`ld65` (pacchetto `cc65`) e la nostra configurazione `src/common/krill/loaderconfig.inc`, dopo **una correzione del codice del drive 1541** (15/11, sezione 4.1: due byte, applicata con `sed` alla copia scompattata, la build si ferma se il sorgente non è quello atteso): `out/work/krill/install.prg`, `loader.prg` (residente), `save.prg` (plugin) |
 | 2 | `tools/build/krill_syms.py` | `out/work/krill.inc` per 64tass: `krill_install`, `krill_loadraw`, `krill_save`, `krill_uninstall`, `krill_loadaddrlo/hi`, `krill_endaddrlo/hi`, lunghezze |
 | 3 | `src/start.asm` / `src/common/boot.asm` | include l'install (a `INSTALL = $0840`, dopo lo stub BASIC) e il residente (copiato a `$0200`) |
 | 4 | `src/game/rel.asm` | plugin a `TRANSIENT = $E820` (`krill_save`), fra l'immagine del file dell'eroe e il buffer del plugin, sotto il KERNAL (`.cerror` sulle tre aree) |
@@ -93,6 +93,56 @@ sequenceDiagram
 - **Modulo MENU**: tre file `menu1..3` (`tools/build/pack_menu.py`): l'indirizzo di ogni file è la fine della sua zona meno
   la lunghezza compressa; Krill lo carica lì e lascia l'inizio in `krill_loadaddrlo/hi`, poi il ZX0 decomprime sul posto.
 - Pagina zero: `$41-$47` sono di Krill durante un caricamento (il gioco usa fino a `$40`); `$41-$57` durante un save.
+
+### 4.1 File di un blocco e cache del file seguente nel drive (15/11, ex TODO A2) [MISURATO]
+
+**Sintomo**: entrando nel villaggio 2 dal piano 6 (e in altri ingressi) il gioco si bloccava. `SND0` (241 B, un blocco) arrivava
+in `SND_LBUF` solo per i primi 118 B, **senza errore** (C = 0, `krill_endaddr` = `$8AB6` invece di `$8B31`); il resto del buffer era
+ancora il brano di prima e `sp_next` girava per sempre nell'IRQ (fermato: PC in `sp_next`, nello stack `sp_play` ← `sfx_update` ←
+`irq_h`, il programma principale in `wait_vblank`: il caricamento era **finito**, corto, non interrotto).
+
+**Causa** (codice del drive 1541 di Krill r194, `drivecode1541.s` + `drivecode-common.inc`): dopo un caricamento riuscito il drive
+prepara il file **seguente nella directory** e ne tiene in memoria il primo blocco (`setnextfile` → `prpdnxtfil`). Se il C64 chiede
+proprio quel file, il blocco si serve dalla cache (`servecache`) senza rileggerlo. Se quel blocco è anche l'**ultimo** del file
+(file di un solo blocco), la sua lunghezza si calcola al momento dell'invio da `LINKSECTOR41` (`sbc LINKSECTOR41`, drive `$0695`),
+che è lo **stesso byte** (`$7F`) di `TEMP`, il temporaneo dell'**hash del nome** (`gethashval`, `hashloop: sta TEMP`, drive
+`$04B6`): l'hash del nome appena ricevuto lo sovrascrive. La lunghezza diventa una funzione del **nome chiesto**, sempre la
+stessa: più corta o più lunga, e il loader non lo sa. Visto nel drive in VICE (punti di fermata nella memoria del drive):
+dopo `MENU3` il drive mette in cache il primo blocco di `SND0` con `LINKSECTOR41` = `$F4` (244: 241 B + 2 di indirizzo),
+l'hash di "SND0" lo porta a `$79` e il blocco parte con 118 B. Il 1571 non ha il difetto perché lì Krill spegne la cache
+(`inc prpnxtfjmp` in `GET_FILENAME`).
+
+**Chi colpiva**: **ogni file di un solo blocco caricato subito dopo il file che lo precede nella directory**, con qualunque
+disposizione del disco; i file di più blocchi no (il loro primo blocco non è l'ultimo). Sul disco del 15/11 (`hubchap`), misurato
+caricando ogni file dopo il suo predecessore (`KRILL-23` prima della correzione): `menu3` +39 B, `snd0` −123 B, `snd3` −61,
+`snd4` −120, `snd5` −74, `snd6` −6, `bossch1` +48, `bossch2` +54, `bossch3` +60, `hl` +12; tutti gli altri 32 file giusti.
+Nel gioco: `MENU3` dopo `MENU2` a **ogni** lettura del modulo MENU (tutte le disposizioni, dall'11/11): 39 B scritti oltre
+`$A800`, dentro il charset, che `gfx_install` riscrive subito dopo (per questo non si vedeva; dedotto dal codice, non misurato a
+schermo); `SND0` dopo `MENU3` solo con `hub` e `hubchap` (`SND0` subito dopo `MENU3`): il blocco. Con `end` `SND0` non segue `MENU3`,
+per questo "non succedeva". I brani in fila (`snd3..6`) si sarebbero rotti con una sequenza di letture che oggi il gioco non fa.
+
+**Correzione** (`tools/build/krill_build.sh`): nel codice del drive 1541 l'hash usa come temporaneo `PREVBLOCKINDEXPLUS1` (`$29`)
+invece di `LINKSECTOR41`; `BLOCKSIZE` resta `LINKSECTOR41`. `$29` non serve fra la fine di un caricamento e `loadfile41`, che lo
+azzera dopo l'hash, e il codice di salvataggio (`save.s`, che chiama `findfile41`) non lo usa. Cambiano **due byte** dell'install
+(`$7F` → `$29` a `$04B9` e `$04BF` del file), stesse dimensioni e posizioni; la cache resta (i tempi non cambiano: `PERF-DISK-*`
+invariati). Prima prova scartata: `NUMCONTIGUOUSBLOCKS` (`$74`) è `NUMBLOCKS` del codice di salvataggio, azzerato prima di
+`findfile41`: i salvataggi scrivevano un eroe vuoto (`PG-SAVE-01`).
+
+**Difesa nel gioco** (anche con un loader che sbagliasse ancora): dove il gioco conosce la fine esatta del file la confronta con
+`krill_endaddrlo/hi` e rilegge, fino a 3 volte: `snd_get` (buffer + lunghezza del brano; poi niente musica, il player non parte su
+un buffer letto a metà) e `ovl_town` (ogni parte del MENU deve finire alla fine della sua zona; poi C = 1). Provato con il loader
+**senza** correzione: `CHAP-SEQ-14`, `MUSIC-10`, `VIL-TWN-22` passano (la seconda lettura non viene dalla cache). Costo: 37 B di
+GAME (margine 2002 → 1965 B, build di debug). Gli altri caricamenti (villaggio, temi, `FMAP`, `BOSSCHc`, salvataggi) non hanno
+una lunghezza attesa nel codice: li copre la correzione del loader e il test `KRILL-24`.
+
+**Cosa garantisce ora** [MISURATO in VICE, 1541]: ogni file del disco, letto da solo o subito dopo il suo predecessore nella
+directory, arriva intero e con l'indirizzo di fine giusto (`KRILL-23`); in un giro di tutti i capitoli (piani, piani dei boss, sala
+del trono, villaggi 1-5, salvataggi, viaggi, LOBBY: 131 letture, fra cui 12 volte `MENU3` dopo `MENU2` e 8 volte `SND0` dopo `MENU3`) ogni lettura è uguale al suo file (`KRILL-24`). **Non verificato**:
+1541 vera, 1541-II e 1570/71 vere (i test `KRILL-17/18` in VICE passano), vc64web (test `EMU-*` non rifatti: servono il demone).
+Versioni di Krill più recenti della r194: non controllate (potrebbero avere già la correzione).
+
+Test: `KRILL-20` (l'ingresso nel villaggio: MENU1..3 e poi SND0, ogni file giusto alla prima lettura), `KRILL-21` e `KRILL-22`
+(controlli del gioco), `KRILL-23`, `KRILL-24` (`tests/regression/krill_cache`, `tests/regression/krill_walk`, `tests/lib/loads.py`).
 
 ## 5. Salvataggi (`src/game/rel.asm`, [salvataggi.md](salvataggi.md))
 
@@ -156,7 +206,9 @@ dissolvenza, `TWNc`, modulo MENU, `gfx_install`, brano), **media / massimo su 10
 | `hub`: MENU, `SND0`, `TWN1..5` insieme | 3,92 / 4,81 | 4,51 / 4,98 | 4,16 / 4,37 | 4,62 / 4,97 | 2,60 / 3,75 |
 | **`hubchap`** (scelta): MENU, `SND0`, `TWN1`, `FMAP` insieme; `TWN2..4` e `BOSSCH2/3` con la grafica dei loro capitoli; `TWN5` in fondo | **4,17 / 4,93** | **3,47 / 3,86** | **3,49 / 3,84** | **3,45 / 3,84** | **2,96 / 3,94** |
 
-- **Decisione (15/11): `hubchap`**, ora predefinita. Tenere tutti i villaggi all'inizio del disco (`start`) è la disposizione
+- **Decisione (15/11): `hubchap`**, ora predefinita. (15/11 sera) Il blocco entrando nei villaggi con `hub`/`hubchap` (ex TODO A2)
+  era un difetto del loader, corretto (sezione 4.1): `hubchap` resta la predefinita, tempi invariati (`PERF-DISK-21..25` passano
+  con le stesse soglie). Tenere tutti i villaggi all'inizio del disco (`start`) è la disposizione
   **peggiore**: spinge la grafica e i brani del capitolo 1 in un altro settore di directory e su altre tracce, e ogni ingresso
   attraversa tre settori di directory (89 tracce percorse contro 46). Conta che i file che un ingresso carica (MENU, brano,
   villaggio) siano vicini fra loro e nello stesso settore di directory, non che i villaggi siano vicini fra loro.
@@ -193,7 +245,8 @@ dissolvenza, `TWNc`, modulo MENU, `gfx_install`, brano), **media / massimo su 10
 | `src/common/boot.asm` (START e LORE) | install, residente, caricamenti con `loadraw`, POKE 1021 → `godmode`; `LORE`: titolo da un buffer riga per riga; motore KERNAL tolto |
 | `src/lore/scroll.asm` | `lore_exit`: disinstallazione, pagine 2-3 azzerate, trampoline |
 | `src/barbarian.asm` | `POKE 1020` = avvio diretto di `START` |
-| `src/game/disk.asm`, `src/game/stash.asm`, `src/game/music.asm`, `src/game/levels.asm` | caricamenti con Krill, niente cache del villaggio |
+| `src/game/disk.asm`, `src/game/stash.asm`, `src/game/music.asm`, `src/game/levels.asm` | caricamenti con Krill, niente cache del villaggio; (15/11) fine del file controllata in `snd_get` e `ovl_town` |
+| `tools/build/krill_build.sh` (15/11) | correzione del codice del drive 1541 (hash del nome e lunghezza dei file di un blocco, sezione 4.1) |
 | `src/game/rel.asm` | salvataggi con il plugin (file per eroe + `hl`) |
 | `src/game.asm` | `LDFLAGS` a `$8E`, banco VIC senza lettura di `$DD00`, `godmode` in CODE2 |
 | `src/lobby.asm` | `CHRPRE` a `$8F`, credito "loader by krill - v194" |

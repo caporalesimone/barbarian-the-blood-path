@@ -45,6 +45,7 @@ mus_sv  .byte ?                 ; 1 = posizione del brano del luogo salvata (rip
 snd_cur .fill 2                 ; brano nel buffer del luogo / del combattimento (+1; 0 = nessuno)
 snd_id  .byte ?
 snd_b   .byte ?
+snd_try .byte ?                 ; (15/11) letture rimaste del brano (snd_get, ex TODO A2)
 mus_end
         .endv
         .cerror mus_end > $93b0, "variabili musicali sovrapposte"
@@ -215,10 +216,6 @@ snd_get:
         rts
 +       sta snd_cur,x
         ldy snd_id
-        lda snd_llo,y
-        sta tmp6
-        lda snd_lhi,y
-        sta tmp7
 _disk   lda #$53                ; "SND" + cifra
         sta cmdbuf+3
         lda #$4e
@@ -234,22 +231,29 @@ _disk   lda #$53                ; "SND" + cifra
         lda #1
         sta io_dir
         sta io_quiet
-        jsr _buf0
-        lda ptr0
-        clc
-        adc tmp6
-        sta ptr1
-        lda ptr0+1
-        adc tmp7
-        sta ptr1+1
+        lda #3                  ; (15/11, ex TODO A2) fino a 3 letture
+        sta snd_try
+_ld     jsr _buf0
         jsr load_raw
-        lda #0
-        sta io_quiet
-        bcs _err
-_r      rts
-_err    ldx snd_b               ; file mancante: niente musica in questo buffer
+        bcs _bad
+        ldy snd_id              ; (15/11, ex TODO A2) fine del file = buffer + lunghezza del brano (snd_llo/hi): una lettura piu'
+        ldx snd_b               ; corta o piu' lunga (Krill non da' errore) si rifa'; il player non parte mai su un buffer
+        lda snb_lo,x            ; letto a meta' (sp_next ci girerebbe all'infinito nell'IRQ)
+        clc
+        adc snd_llo,y
+        eor krill_endaddrlo     ; (eor: il riporto resta per il byte alto)
+        bne _bad
+        lda snb_hi,x
+        adc snd_lhi,y
+        eor krill_endaddrhi
+        beq _ok
+_bad    dec snd_try
+        bne _ld
+        ldx snd_b               ; file mancante o incompleto: niente musica in questo buffer
         lda #0
         sta snd_cur,x
+_ok     lda #0
+        sta io_quiet
         rts
 _buf0   ldx snd_b               ; ptr0 = buffer
         lda snb_lo,x

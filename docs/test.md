@@ -82,6 +82,10 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
 - `tests/lib/emu.py` (13/11): il secondo emulatore (vc64web), vedi sopra e [emulatore.md](emulatore.md).
 - `Game.call_keep(addr)`: chiama una routine del gioco fra due letture dell'input e torna dov'era (registri
   ripristinati); `regs()` legge pc/a/x/y/sp.
+- `tests/lib/loads.py` (15/11, ex TODO A2, [FastLoader.md](FastLoader.md) 4.1): `directory(d64)` (file nell'ordine della directory,
+  con i byte), `ram()` (RAM anche sotto le ROM), `load_to()` (un `krill_loadraw` diretto) e **`LoadCheck`**: come `call_keep`, ma
+  ferma ogni `krill_loadraw` della routine e, al ritorno, confronta byte e indirizzo di fine con il file sul disco (`KRILL-24`).
+  Per controllare che un percorso nuovo del gioco legga i file giusti basta chiamarlo con `LoadCheck.call`.
 - Prestazioni (`regression/perf`): durata di ogni fotogramma = cicli fra due letture dell'input; perso = più di 1,5
   fotogrammi PAL. Le soglie sono le misure dell'11/11 più un margine ([prestazioni](prestazioni.md)).
 - **Sonda della memoria** (14/11, `C64_MEMPROBE=1`, `./build.sh --probe`): ogni `Vice()` avviato senza `-autostart` riempie la RAM
@@ -156,7 +160,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
 | `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
 
-### regression (177)
+### regression (182)
 
 | ID | Test |
 |---|---|
@@ -236,9 +240,14 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (9 blocks), barbarian first |
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
 | `KRILL-13` | no KERNAL disk call left in GAME, LOBBY, MENU and START (listing scan: after the install the drive does not answer the KERNAL) |
+| `KRILL-20` | village entry order: MENU1, MENU2, MENU3 (load_file) then SND0 (load_raw): each one read whole at the first read (end address and bytes) |
+| `KRILL-21` | snd_get checks the end address: every song read once into both buffers; with a wrong expected length 3 reads, then no music in that buffer (snd_cur = 0) |
+| `KRILL-22` | ovl_town checks the end of every MENU part (= end of its zone): a part that does not end there is read 3 times, then C = 1 |
+| `KRILL-23` | every file of the disk loaded right after its predecessor in the directory (served from the drive's next-file cache) equals its file: bytes and end address |
 | `KRILL-17` | 1541-II (VICE 1542): START with Krill, menu, new hero (save plugin), village read |
 | `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 of Lab64) |
 | `KRILL-14` | Krill install fails (simulated: from the install straight to kr_fail): message, a key, BARBARIAN loaded again |
+| `KRILL-24` | walk through chapters 1-4 to village 5 (levels, boss levels, villages, saves, travels, LOBBY): every load equals its file |
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
 | `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |

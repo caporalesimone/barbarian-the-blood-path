@@ -15,6 +15,13 @@ Copyright © 2026 - Simone Caporale (note); il loader è © 2022 Gunnar Ruthenbe
 Lo zip sta qui **compresso** e **non si scompatta nel repository**: la build lo scompatta nella cartella usa e getta
 `out/krill/` e da lì costruisce loader, plugin di salvataggio e `cc1541` (vedi `docs/FastLoader.md`).
 
+## Correzione applicata dalla build (15/11, ex TODO A2)
+
+Lo zip resta **com'è**; `tools/build/krill_build.sh` cambia due righe di `loader/src/drives/drivecode1541.s` nella copia scompattata
+(`TEMP = PREVBLOCKINDEXPLUS1` invece di `LINKSECTOR41`, `BLOCKSIZE = LINKSECTOR41`) e si ferma se il sorgente non è quello atteso.
+Motivo: nel 1541 un file di un solo blocco caricato subito dopo il suo predecessore nella directory arrivava dalla cache del drive
+con una lunghezza sbagliata (l'hash del nome sovrascrive il byte della lunghezza), senza errore. Dettagli: `docs/FastLoader.md` 4.1.
+
 ## Commenti dal sito (CSDb), conservati come informazione
 
 - **alwyz, 6/10/2026**: bug su 1581: un file il cui primo blocco è sulla traccia 80 non si carica; corretto cambiando un byte

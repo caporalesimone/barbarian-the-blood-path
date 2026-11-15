@@ -253,8 +253,15 @@ sequenceDiagram
     L->>K: krill_loadraw (C = 1: LOAD_TO krill_loadaddrlo/hi)
     K->>D: hash del nome, blocchi (IRQ accesi)
     D-->>K: dati 2 bit + ATN
-    K-->>C: C = 0 ok / C = 1 errore (A = stato)
+    K-->>C: C = 0 ok / C = 1 errore (A = stato), fine del file in krill_endaddrlo/hi
+    opt brani (snd_get) e parti del MENU (ovl_town), dal 15/11
+        C->>C: fine = attesa (buffer + lunghezza / fine della zona)? altrimenti si rilegge (3 letture al massimo)
+    end
 ```
+
+(15/11, ex TODO A2) Krill non segnala una lettura di lunghezza sbagliata: dove il gioco conosce la fine esatta del file la controlla
+(`snd_get`: buffer + `snd_llo/hi`; `ovl_town`: `ml_end`) e rilegge; dopo 3 letture sbagliate il brano manca (`snd_cur` = 0,
+niente musica) o `ovl_town` esce con C = 1. Causa e correzione del difetto che lo rendeva possibile: [FastLoader](FastLoader.md) 4.1.
 
 Velocità: il modulo MENU (3,3 KB in 3 file) 2,3 s, un tema (2 KB) ~1 s (VICE, 1541 emulata; misure in
 [FastLoader](FastLoader.md)). Con il KERNAL erano ~333–390 B/s.
@@ -412,6 +419,7 @@ sequenceDiagram
     V->>O: ingresso nel villaggio
     alt ovl_cur = 0 (dopo l'avvio o il LOBBY)
         O->>D: load_file menu1, menu2, menu3 - ogni zona compressa<br/>in fondo alla sua zona ($D000, $FD00, $A800)
+        O->>O: fine del file = fine della zona? altrimenti la parte si rilegge (3 volte, poi C = 1, dal 15/11)
         O->>O: sei, $01 = $35, zx0_unpack x 3, $01 = $36
         Note over O: ovl_cur = 1 (2,3 s con Krill, 10,5 s con il KERNAL)
     end
