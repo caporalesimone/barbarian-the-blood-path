@@ -11,9 +11,11 @@ docs/manual/tema.css (solo le regole del gioco). Questo script fa le parti del g
   3. il resto lo fa c64manual.build di Lab64: segnaposto, tema, tasti <kbd> disegnati, numeri di pagina, manuale.html, PDF
      (WeasyPrint) e avviso per le pagine che traboccano.
 Screenshot: tools/vice/shots_manual.sh (la schermata del nuovo barbaro: variante TESTUI 31); sprite mostri: docs/manual/mon.
-Lingua (11/11): python3 tools/manual/gen_manual.py [--lang it|en]. it (default): manuale_src.html -> manuale.html +
-Barbarian_Blood_Path_Manuale.pdf; en: manual_src_en.html -> manual_en.html + Barbarian_Blood_Path_Manual_EN.pdf (il
-sorgente inglese non e' ancora scritto: TODO). Le parti generate (tabella dei mostri) hanno le parole nelle due lingue."""
+Lingue (11/11; 15/11 tutte nella stessa build): senza --lang fa TUTTI i manuali che hanno il sorgente; --lang it|en uno solo.
+it: manuale_src.html -> manuale.html + Barbarian_Blood_Path_Manuale.pdf; en: manual_src_en.html -> manual_en.html +
+Barbarian_Blood_Path_Manual_EN.pdf (il sorgente inglese non e' ancora scritto: TODO E7). Le parti generate (tabella dei mostri)
+hanno le parole nelle due lingue. Una lingua nuova: una voce in SOURCES e in W. --strict (release): una pagina che trabocca
+o un segnaposto senza valore fermano la build."""
 import os, re, subprocess, sys, yaml
 from PIL import Image
 
@@ -26,10 +28,14 @@ import bestiary  # noqa: E402
 Y = bestiary.load_balance()       # balance.yaml + mostri (data/monsters/bestiary.tsv, 11/11)
 import items_db  # noqa: E402
 RL = items_db.load_rules()        # rules.yaml + data/items/items.tsv (11/11)
-LANG = sys.argv[sys.argv.index("--lang") + 1] if "--lang" in sys.argv else "it"
+SOURCES = {"it": ("manuale_src.html", "manuale.html", "Barbarian_Blood_Path_Manuale.pdf"),
+           "en": ("manual_src_en.html", "manual_en.html", "Barbarian_Blood_Path_Manual_EN.pdf")}
+if "--lang" not in sys.argv:                      # (15/11) tutti i manuali che hanno il sorgente, nella stessa build
+    langs = [l for l, (src, _, _) in SOURCES.items() if os.path.exists(os.path.join(M, src))]
+    sys.exit(max(subprocess.run([sys.executable, __file__, "--lang", l] + sys.argv[1:]).returncode for l in langs))
+LANG = sys.argv[sys.argv.index("--lang") + 1]
 assert LANG in ("it", "en"), "--lang it|en"
-SRC, OUT, PDF = {"it": ("manuale_src.html", "manuale.html", "Barbarian_Blood_Path_Manuale.pdf"),
-                 "en": ("manual_src_en.html", "manual_en.html", "Barbarian_Blood_Path_Manual_EN.pdf")}[LANG]
+SRC, OUT, PDF = SOURCES[LANG]
 if not os.path.exists(os.path.join(M, SRC)):
     sys.exit("manual source docs/manual/%s missing (the English manual is a TODO)" % SRC)
 W = {"it": {"base": "base", "strong": "forte", "final": "boss finale", "dpf": "dadi/piano", 5: "lenta", 7: "media",
@@ -84,5 +90,5 @@ for g in range(1, nst + 1):
 from c64manual import build  # noqa: E402  (Lab64, container lab64-pdf-gen; tema base "c64" + docs/manual/tema.css)
 hp, pdf, n = build(os.path.join(M, SRC), out_dir=R, pdf_name=PDF, html_name=OUT, theme=os.path.join(M, "tema.css"),
                    values={"MONSTER_ROWS": rows, "STEP_HDR": hdr, "MIN_ROW": cells(mn), "MAX_ROW": cells(mx)},
-                   html_only="--html" in sys.argv)
+                   html_only="--html" in sys.argv, strict="--strict" in sys.argv)
 print(pdf or hp, n, "pagine numerate")
