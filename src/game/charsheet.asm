@@ -1,116 +1,149 @@
 ; ===================================================================
-;  charsheet.asm - schermata del personaggio (tasto C), 11/11, branch feature/stat-points
+;  charsheet.asm - schermata del personaggio (tasto C), 11/11; rifatta il 15/11 (TODO Z5, richiesta del committente)
 ;  Il passaggio di livello non alza piu' le caratteristiche: da' punti statistica (pl_pts, rules.yaml
 ;  player.stat_points) da spendere qui su FOR, DES, COS (+1 al valore per punto; c_sadd). Voci: le tre
-;  caratteristiche (A/D o -/+ o Fire: un punto in meno / in piu', in attesa in cs_pend), confirm (i punti in
-;  attesa diventano spesi), reset (azzera quelli in attesa), respec (consuma un gettone c_resp: tutti i punti
-;  spesi tornano da spendere). All'uscita (RUN/STOP) i punti in attesa si confermano e, se e' cambiato qualcosa,
-;  si salva (gm_save: piano + eroe). Statistiche derivate (vita, ATT, CA, danno) mostrate con i punti in attesa.
+;  caratteristiche (A/D o -/+ o Fire: un punto in meno / in piu', in attesa in cs_pend), confirm (domanda "spend N
+;  points for good?": si' = i punti in attesa diventano spesi), undo (toglie tutti quelli in attesa), respec (solo con
+;  gettoni c_resp: uno consumato, tutti i punti spesi tornano da spendere). I punti in attesa si spostano liberamente
+;  fino alla conferma; RUN/STOP con punti in attesa chiede "spend N points before leaving?" (si' = spesi, no = si esce
+;  e tornano da spendere). Nessun salvataggio (lo fa "save game"). Statistiche derivate (vita massima, ATT, CA, danno)
+;  e caratteristiche: valore attuale e, se i punti in attesa lo cambiano, "-> nuovo" in verde. Senza gettoni respec
+;  la schermata non dice nulla del respec.
 ; ===================================================================
         .enc "screen"
-CS_N     = 6                    ; voci: 0..2 FOR DES COS, 3 confirm, 4 reset, 5 respec
-UC_PEND  = 5                    ; punti in attesa: verdi
+CS_N     = 6                    ; voci: 0..2 FOR DES COS, 3 confirm, 4 undo, 5 respec (solo con gettoni)
+UC_PEND  = 5                    ; punti in attesa e valori nuovi: verdi
+        .cerror s_dk - hpmax != 11 || s_str - hpmax != 2, "cs_nv: blocco hpmax..s_dk cambiato"
 
 tt_cs   .text "character", 0
 ; (12/11, committente) senza punti da spendere niente voci: si legge e si esce con RUN/STOP ("no points to spend").
 ; Eccezione mia (da confermare): con un gettone respec resta la sola voce "respec" (cs_mode 1), altrimenti il respec
 ; non si potrebbe mai usare quando i punti sono tutti spesi. cs_mode: 0 tutte le voci, 1 solo respec, 2 nessuna.
 ui_charsheet:
-        lda #0
-        ldx #2
--       sta cs_pend,x
+        jsr cs_zero
+        sta cs_mode             ; (A = 0)
+.if TESTUI == 39                ; (screenshot, TESTCL=9: 4 punti) nessun punto speso, 2 in attesa su FOR e 1 su COS,
+        ldx #2                  ; 2 gettoni respec
+-       sta c_sadd,x
         dex
         bpl -
-        sta cs_mode
-        lda #CS_N
-        sta ui_n
+        lda #2
+        sta cs_pend
+        sta c_resp
+        inc cs_pend+2
+.endif
+.if TESTUI == 40                ; (screenshot, TESTCL=7: punti tutti spesi) nessun gettone respec
+        sta c_resp
+.endif
+        ldx #CS_N-1             ; respec solo con gettoni
+        lda c_resp
+        beq +
+        inx
++       stx ui_n
         jsr pts_avail
         bne _ni
-        lda #0                  ; nessuna voce...
-        sta ui_n
+        sta ui_n                ; (A = 0) nessuna voce...
         lda #2
         sta cs_mode
         lda c_resp              ; ...o solo respec
         beq _ni
-        lda #1
-        sta cs_mode
-        sta ui_n
+        dec cs_mode
+        inc ui_n
 _ni     jsr nav_init
-_scr    jsr ui_begin
+        jsr ui_begin
         lda #<tt_cs
         ldx #>tt_cs
         ldy #0
         jsr ui_title
-        #ubox 0,1,40,6
-        #ubox 0,7,40,8
-        #ubox 0,15,40,6
+        #ubox 0,1,40,7
+        #ubox 0,8,40,8
         jsr ui_labels
-        .byte 2,7
+        .byte 2,8
         .text " stats "
-        .byte 0,2,15
-        .text " actions "
         .byte 0,2,2
         .text "lvl"
-        .byte 0,15,2
-        .text "respec tokens"
         .byte 0,2,3
         .text "hp"
-        .byte 0,15,3
-        .text "att +"
-        .byte 0,29,3
-        .text "ac"
         .byte 0,2,4
+        .text "att"
+        .byte 0,2,5
+        .text "ac"
+        .byte 0,2,6
         .text "dmg"
-        .byte 0,4,12
-        .text "points to spend"
         .byte 0,$ff
-        lda cs_mode
-        bne _lm
-        jsr ui_labels
-        .byte 4,16
-        .text "confirm"
-        .byte 0,4,17
-        .text "reset"
-        .byte 0,4,18
-        .text "respec"
-        .byte 0,1,24
-        .text "a/d -/+:points fire:ok run/stop:back"
-        .byte 0,$ff
-        jmp _lx
-_lm     jsr ui_labels
-        .byte 4,18
-        .text "no points to spend."
-        .byte 0,$ff
-        lda cs_mode
-        cmp #1
-        bne _lv
-        jsr ui_labels
-        .byte 4,16
-        .text "respec"
-        .byte 0,1,24
-        .text "fire:ok run/stop:back"
-        .byte 0,$ff
-        jmp _lx
-_lv     jsr ui_labels
-        .byte 1,24
-        .text "run/stop:back"
-        .byte 0,$ff
-_lx
         #at 2,1                 ; nome sulla cornice (come l'inventario)
         lda #$20
         jsr ui_putc
         jsr ui_cname
         lda #$20
         jsr ui_putc
-.if TESTUI == 39                ; (screenshot) punti tutti da spendere, uno in attesa su FOR, 2 gettoni respec
-        lda #0
-        sta c_sadd
-        sta c_sadd+1
-        sta c_sadd+2
-        inc cs_pend
-        lda #2
-        sta c_resp
-.endif
+        #at 7,2
+        lda c_lvl
+        jsr ui_b3l
+        lda c_resp              ; gettoni respec: solo se ce ne sono (Z5)
+        beq _nr
+        jsr ui_labels
+        .byte 22,2
+        .text "respec tokens"
+        .byte 0,$ff
+        #at 36,2
+        lda c_resp
+        jsr ui_b3
+_nr     lda cs_mode
+        cmp #2
+        beq _nb
+        #ubox 0,16,40,5
+        jsr ui_labels
+        .byte 2,16
+        .text " actions "
+        .byte 0,$ff
+        lda c_resp
+        beq _nb
+        ldy #19                 ; "respec": terza azione, o la sola (riga 17) senza punti
+        lda cs_mode
+        beq +
+        ldy #17
++       ldx #4
+        jsr ui_at
+        #msg "respec"
+_nb     lda cs_mode
+        bne _lm
+        jsr ui_labels
+        .byte 4,17
+        .text "confirm"
+        .byte 0,4,18
+        .text "undo"
+        .byte 0,3,13
+        .text "points to spend"
+        .byte 0,$ff
+        #at 1,24
+        #msg "a/d -/+:points "
+        jmp _kf
+_lm     jsr ui_labels
+        .byte 3,13
+        .text "no points to spend."
+        .byte 0,$ff
+        ldx c_lvl               ; prossimo punto: primo livello con pl_pts piu' alto (niente oltre PL_MAXLVL)
+        cpx #PL_MAXLVL
+        bcs _kk
+        lda pl_pts,x
+-       inx
+        cmp pl_pts,x
+        bne +
+        cpx #PL_MAXLVL
+        bcc -
+        bcs _kk
++       stx tmp3
+        #at 3,14
+        #msg "next point at level "
+        lda tmp3
+        jsr ui_b3l
+_kk     #at 1,24
+        lda cs_mode
+        cmp #2
+        beq _kb
+_kf     #msg "fire:ok "
+_kb     #msg "run/stop:back"
 _dr     jsr cs_draw
 .if NOKEYS
 _hg     jmp _hg
@@ -144,7 +177,7 @@ _in     jsr ui_nav
         lda keynew+5
         and #$08                ; '-'
         beq _in
-_minus  lda cs_pend,x
+_minus  lda cs_pend,x           ; si toglie solo un punto in attesa: quelli spesi restano (si cambiano col respec)
         beq _no
         dec cs_pend,x
         jmp _ok
@@ -157,8 +190,7 @@ _ok     jsr msg23
         lda #SFX_PICK
         jsr sfx_play
         jmp _dr
-_no     jsr msg23
-        #at 1,23
+_no     jsr msg23           ; (msg23 lascia la scrittura in riga 23, colonna 1)
         #msg "no points."
         jmp _in
 _fire   lda cs_mode
@@ -166,77 +198,103 @@ _fire   lda cs_mode
         ldx ui_cur
         cpx #3
         bcc _plus
-        bne +
-        jmp _conf
-+       cpx #4
+        beq _conf
+        cpx #4
         bne _rsp
-        jmp _reset
-_rsp    lda c_resp              ; respec: un gettone, tutti i punti spesi tornano da spendere
-        bne +
-        jsr msg23
-        #at 1,23
-        #msg "no respec tokens."
-        jmp _in
-+       jsr msg23
-        #at 1,23
+        jsr cs_zero             ; undo: tutti i punti in attesa tornano da spendere
+        jmp _ok
+_rsp    jsr msg23               ; respec (voce presente solo con gettoni): uno consumato, tutti i punti spesi tornano
         #msg "use a respec token?"
         jsr ui_yesno
         php
         jsr msg23
         plp
         bcs +
-        jmp _dr
+_jdr    jmp _dr
 +       dec c_resp
         lda #0
         ldx #2
 -       sta c_sadd,x
-        sta cs_pend,x
         dex
         bpl -
-        jsr cs_upd
-        lda #SFX_PICK
+        jsr recalc_stats        ; (la vita attuale resta entro il massimo: hp_cap)
+        jmp _done               ; di nuovo da capo: ora ci sono punti, tutte le voci
+_conf   jsr cs_psum             ; (15/11, Z5) confirm: domanda, no = si continua a cambiare
+        beq _no
+        clc
+        jsr cs_ask
+        bcc _jdr
+        jsr cs_apply
+_done   lda #SFX_PICK
         jsr sfx_play
-        jmp ui_charsheet        ; (12/11) di nuovo da capo: ora ci sono punti, tutte le voci
-_reset  lda #0
+        jmp ui_charsheet        ; da capo: senza punti la schermata passa a "no points to spend"
+_back   jsr cs_psum             ; (15/11, Z5) uscita con punti in attesa: si' = spesi, no = tornano da spendere
+        beq +
+        sec
+        jsr cs_ask
+        bcc +
+        jsr cs_apply
++       jsr cs_zero             ; fuori dalla schermata cs_pend = 0 (pts_avail, HUD)
+        jmp ui_exit
+
+; C = 0: "spend N point(s) for good?", C = 1: "... before leaving?" (riga 23); risposta in C (ui_yesno)
+cs_ask:
+        php
+        jsr msg23
+        #msg "spend "
+        jsr cs_psum
+        pha
+        jsr ui_b3l
+        #msg " point"
+        pla
+        cmp #2
+        bcc +
+        lda #'s'
+        jsr ui_putc
++       plp
+        bcs +
+        #msg " for good?"
+        jmp ++
++       #msg " before leaving?"
++       jsr ui_yesno
+        php
+        jsr msg23
+        plp
+        rts
+
+; somma dei punti in attesa -> A (Z = nessuno)
+cs_psum:
+        lda #0
+        clc
+        adc cs_pend
+        adc cs_pend+1
+        adc cs_pend+2
+        rts
+
+; nessun punto in attesa (A = 0 all'uscita)
+cs_zero:
+        lda #0
         ldx #2
 -       sta cs_pend,x
         dex
         bpl -
-        jmp _ok
-_conf   jsr cs_apply
-        jmp _ok
-_back  jsr cs_apply            ; uscita: i punti in attesa si confermano (11/11 sera: niente salvataggio, lo fa "save game")
-        jmp ui_exit
+        rts
 
 ; punti in attesa -> spesi (c_sadd)
 cs_apply:
-        lda #0
-        sta tmp4
         ldx #2
 -       lda cs_pend,x
-        beq +
         clc
         adc c_sadd,x
         sta c_sadd,x
-        lda #0
-        sta cs_pend,x
-        inc tmp4
-+       dex
+        dex
         bpl -
-        lda tmp4
-        bne cs_upd
-        rts
-; statistiche ricalcolate, vita attuale al massimo nuovo se lo supera
-cs_upd: jsr recalc_stats
-        lda hpmax
-        cmp c_hp
-        lda hpmax+1
-        sbc c_hp+1
-        bcs +
-        jmp hp_full
-+       rts
+        jsr cs_zero
+        jmp recalc_stats        ; statistiche ricalcolate (hp_cap: vita attuale entro il nuovo massimo)
 
-; valori della schermata (con i punti in attesa: statistiche derivate calcolate come se fossero gia' spesi)
+
+; valori della schermata: prima le statistiche come se i punti in attesa fossero spesi (copia di hpmax..s_dk in
+; cs_nv), poi quelle vere; ogni valore e' "attuale" e, se i punti in attesa lo cambiano, "-> nuovo" in verde
 cs_draw:
         ldx #2
 -       lda c_sadd,x            ; anteprima: c_sadd += cs_pend
@@ -246,6 +304,11 @@ cs_draw:
         dex
         bpl -
         jsr recalc_stats
+        ldx #11
+-       lda hpmax,x
+        sta cs_nv,x
+        dex
+        bpl -
         ldx #2
 -       lda c_sadd,x
         sec
@@ -253,31 +316,48 @@ cs_draw:
         sta c_sadd,x
         dex
         bpl -
-        #at 6,2
-        lda c_lvl
-        jsr ui_b3
-        #at 29,2
-        lda c_resp
-        jsr ui_b3
-        #at 5,3
+        jsr recalc_stats        ; statistiche vere (senza i punti in attesa)
+        #at 7,3                 ; vita massima (16 bit)
         lda hpmax
         ldx hpmax+1
         jsr ui_n5l
-        jsr cs_sp2
-        #at 20,3
+        lda hpmax
+        cmp cs_nv
+        bne +
+        lda hpmax+1
+        cmp cs_nv+1
+        beq ++
++       jsr cs_arw
+        lda cs_nv
+        ldx cs_nv+1
+        jsr ui_n5l
++       jsr cs_eol
+        #at 7,4                 ; ATT (con '+')
         lda s_att
-        jsr ui_b3l
-        lda #$20
-        jsr ui_putc
-        #at 32,3
+        ldy cs_nv+s_att-hpmax
+        sec
+        jsr cs_pv
+        jsr cs_eol
+        #at 7,5                 ; CA
         lda s_ac
-        jsr ui_b3
-        #at 6,4
+        ldy cs_nv+s_ac-hpmax
+        clc
+        jsr cs_pv
+        jsr cs_eol
+        #at 7,6                 ; danno: i punti cambiano solo il fisso (s_dk)
         lda s_dn
         ldx s_ds
         ldy s_dk
         jsr ui_dice
-        jsr cs_sp2
+        lda s_dk
+        cmp cs_nv+s_dk-hpmax
+        beq +
+        jsr cs_arw
+        lda s_dn
+        ldx s_ds
+        ldy cs_nv+s_dk-hpmax
+        jsr ui_dice
++       jsr cs_eol
         ldx #0                  ; caratteristiche: righe 9..11
 _s      stx tmp3
         txa
@@ -286,70 +366,79 @@ _s      stx tmp3
         tay
         ldx #2
         jsr ui_at
-        lda #$20                ; (12/11) cursore sulle caratteristiche solo con tutte le voci
-        ldx cs_mode
-        bne +
+        ldx tmp3                ; (12/11) cursore sulle caratteristiche solo con tutte le voci
+        lda cs_mode
+        beq +
+        ldx #$ff                ; (nessuna voce $ff: spazio)
++       jsr ui_mark
         ldx tmp3
-        jsr ui_mark
-        jmp ++
-+       jsr ui_putc
-+       ldx tmp3
-        lda cs_nm_lo,x          ; "str" / "dex" / "con"
-        pha
-        lda cs_nm_hi,x
-        tax
-        pla
-        jsr ui_puts
-        jsr cs_sp2
+        jsr cs_text             ; "str" / "dex" / "con"
+        lda #5                  ; valore dalla colonna 7
+        jsr cs_pad
         ldx tmp3
-        lda s_str,x             ; valore (anello compreso, punti in attesa compresi)
-        jsr ui_b3
-        jsr cs_sp2
+        lda s_str,x             ; valore (anello compreso) -> con i punti in attesa
+        ldy cs_nv+s_str-hpmax,x
+        clc
+        jsr cs_pv
+        lda #16                 ; modificatore dalla colonna 18
+        jsr cs_pad
+        #msg "mod "
         ldx tmp3
-        lda cs_pend,x           ; punti in attesa: "+N" verde
-        beq _np
-        pha
-        lda #$2b
-        jsr ui_putc
-        lda #UC_PEND
-        sta ui_fc
-        pla
-        jsr ui_b3l
-        lda #0
-        sta ui_fc
-_np     lda #$20                ; spazi fino alla colonna del modificatore (cidx 16 dalla colonna 2)
-        jsr ui_putc
-        lda cidx
-        cmp #16
-        bcc _np
-_md     #msg "mod +"
-        ldx tmp3
+        lda cs_nv+s_str-hpmax,x
+        jsr modv
+        tay
         lda s_str,x
         jsr modv
-        jsr ui_b3l
-        lda #$20
-        jsr ui_putc
+        sec
+        jsr cs_pv
+        lda #36
+        jsr cs_pad
         ldx tmp3
         inx
         cpx #3
-        beq +
-        jmp _s
-+       #at 20,12               ; punti da spendere
-        jsr pts_avail
-        jsr ui_b3
-        lda cs_mode             ; (12/11) solo respec: cursore (voce 0) nella riga 16
+        bne _s
+        lda cs_mode             ; (12/11) solo respec: cursore (voce 0) nella riga 17
         beq _a0
         cmp #1
         bne _ax
-        #at 2,16
+        #at 2,17
         ldx #0
-        jsr ui_mark
-_ax     jmp recalc_stats
-_a0     ldx #3                  ; azioni: cursore nelle righe 16..18
+        jmp ui_mark
+_ax     rts
+_a0     #at 19,13               ; punti da spendere e, se ce ne sono, quelli in attesa (numero verde)
+        jsr pts_avail
+        jsr ui_b3l
+        lda #4
+        jsr cs_pad
+        jsr cs_psum
+        beq +
+        pha
+        #msg "pending "
+        pla
+        ldy #UC_PEND
+        sty ui_fc
+        jsr ui_b3l
+        jsr cs_col
++       lda #19
+        jsr cs_pad
+        #at 3,14                ; a che cosa serve la caratteristica sotto il cursore (recalc_stats)
+        ldx ui_cur
+        cpx #3
+        bcs +
+        lda #UC_HELP
+        sta ui_col
+        inx
+        inx
+        inx
+        jsr cs_text
+        jsr cs_col
++       lda #35
+        jsr cs_pad
+        ldx #3                  ; azioni: cursore nelle righe 17..19
 _a      stx tmp3
         txa
         clc
-        adc #13
+        adc #14
         tay
         ldx #2
         jsr ui_at
@@ -357,19 +446,74 @@ _a      stx tmp3
         jsr ui_mark
         ldx tmp3
         inx
-        cpx #CS_N
+        cpx ui_n
         bne _a
-        jmp recalc_stats        ; statistiche vere (senza i punti in attesa)
+        rts
 
-cs_mode .byte 0
-cs_sp2  lda #$20                ; due spazi (ui_putc non conserva A)
+; A = valore attuale, Y = nuovo, C = 1: con '+' davanti. "attuale" e, se diverso, " -> nuovo" in verde
+cs_pv:  ror cs_sg
+        sty cs_nw
+        sta cs_cu
+        jsr cs_p1
+        lda cs_cu
+        cmp cs_nw
+        beq cs_col
+        jsr cs_arw
+        lda cs_nw
+        jsr cs_p1
+cs_col: lda #0                  ; colori normali
+        sta ui_fc
+        lda #UC_LABEL
+        sta ui_col
+        rts
+cs_p1   pha
+        bit cs_sg
+        bpl +
+        lda #$2b
+        jsr ui_putc
++       pla
+        jmp ui_b3l
+
+; " -> ", poi valori in verde
+cs_arw: lda #$20
+        jsr ui_putc
+        lda #CH_ARROW
         jsr ui_putc
         lda #$20
-        jmp ui_putc
+        jsr ui_putc
+        lda #UC_PEND
+        sta ui_fc
+        sta ui_col
+        rts
 
-cs_nm_lo .byte <cs_str, <cs_dex, <cs_con
-cs_nm_hi .byte >cs_str, >cs_dex, >cs_con
+; fine di una riga delle statistiche derivate (dalla colonna 7): colori normali, spazi fino alla colonna 38
+cs_eol: jsr cs_col
+        lda #31
+; spazi fino a cidx = A (cancella cio' che restava del disegno precedente)
+cs_pad: sta cs_k
+-       lda cidx
+        cmp cs_k
+        bcs +
+        lda #$20
+        jsr ui_putc
+        jmp -
++       rts
+
+; testo X della tabella: 0..2 nomi delle caratteristiche, 3..5 a che cosa servono (combattimento.md, recalc_stats)
+cs_text:
+        lda cs_tl,x
+        pha
+        lda cs_th,x
+        tax
+        pla
+        jmp ui_puts
+
+cs_tl   .byte <cs_str, <cs_dex, <cs_con, <cs_hs, <cs_hd, <cs_hc
+cs_th   .byte >cs_str, >cs_dex, >cs_con, >cs_hs, >cs_hd, >cs_hc
 cs_str  .text "str", 0
 cs_dex  .text "dex", 0
 cs_con  .text "con", 0
+cs_hs   .text "attack, damage, battle cry", 0
+cs_hd   .text "armor class (armor may cap it)", 0
+cs_hc   .text "hit points, for every level", 0
         .enc "none"

@@ -2,7 +2,7 @@
 """Genera out/work/gfx/uifont.bin (1024 byte): charset UI 'Reliquia 05 cero', codici schermo 0..127.
   0..63   glifi normali (lettere/cifre dal font Reliquia, punteggiatura mancante dalla ROM)
   28,30,31,59,60,0 = cornici (H,V,TL,TR,BL,BR)
-  91..95 = icone chiave/oro (una moneta, 08/11; il 93 e' libero)/pozione/pergamena
+  91..95 = icone chiave/oro (una moneta, 08/11)/freccia (93, 15/11)/pozione/pergamena
   64..127 versioni invertite (inv = $40 in ui_putc); 124..126 = barre di avanzamento
 Caricato a $B800 da copy_gfx (VIC bank 2, D018=$DE con schermo a $B400)."""
 import os, sys
@@ -58,6 +58,7 @@ ICON.update({
     99: [0x18, 0x3C, 0x42, 0x81, 0x81, 0x81, 0x42, 0x3C],   # anello
     100: [0x3C, 0x7E, 0xDB, 0xDB, 0x7E, 0x3C, 0x3C, 0x24],  # teschio (09/11, schermata di morte)
     101: [0x6C, 0xFC, 0x87, 0xA5, 0xA5, 0xA7, 0x84, 0xFC],  # boccale (09/11, titolo della locanda)
+    93: [0x00, 0x08, 0x0C, 0x7E, 0x0C, 0x08, 0x00, 0x00],   # freccia a destra (15/11, schermata C: "73 -> 81")
 })
 for c, g in ICON.items():
     full[c] = g

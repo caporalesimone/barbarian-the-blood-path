@@ -138,12 +138,17 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (2)
+### sanity (7)
 
 | ID | Test |
 |---|---|
-| `CS-10` | no points, no respec token: no entries (no '>'), 'no points to spend.', RUN/STOP back to the game |
-| `CS-11` | no points, 1 respec token: only 'respec' (cursor on row 16); fire + yes: points back, all the entries again |
+| `CS-10` | no points, no token: nothing about respec on the screen, no entries, 'no points to spend.', next point at level 8 |
+| `CS-11` | no points, 1 token: token count shown, only 'respec' (row 17); yes: points back, full menu without respec |
+| `CS-12` | points, no token: entries str/dex/con/confirm/undo only, 'points to spend 3', no respec anywhere |
+| `CS-13` | before confirming, points move freely: D/+ add, A/- take back, between str/dex/con; undo takes all back |
+| `CS-14` | preview: con +1 shows 'hp N -> N+6' and 'mod +2 -> +3' (new values green); hint of the stat under the cursor |
+| `CS-15` | confirm asks 'spend 2 points for good?': no = keep editing, yes = spent and 'no points to spend.' if none left |
+| `CS-16` | RUN/STOP with pending points asks 'spend 1 point before leaving?': no = points given back, yes = spent |
 
 ### regression (154)
 
@@ -284,9 +289,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SKILL-15` | Smash: one attack roll on each monster within 44 px, 6 s cooldown |
 | `STAT-10` | level up: the stats stay the base ones, the points grow by pl_pts (1 every 2 levels, 2..18) |
 | `STAT-11` | HUD: glyph next to the level number (row 23, col 6) while there are points to spend, blank without |
-| `STAT-12` | C screen: D (+) on str, confirm: c_sadd str 1, str 17, no points left; RUN/STOP goes back without saving |
-| `STAT-13` | C screen: '-' takes a pending point back, reset clears them, exit without changes does not save |
-| `STAT-14` | exit with pending points: they are confirmed (dex +2); hp max follows con |
+| `STAT-12` | C screen: D (+) on str, confirm + yes: c_sadd str 1, str 17, no points left; RUN/STOP goes back without saving |
+| `STAT-13` | C screen: '-' takes a pending point back, undo clears them, exit without changes does not save |
+| `STAT-14` | exit with pending points (15/11): question, yes = confirmed (dex +2); hp max follows con |
 | `STAT-15` | respec: no entry without tokens; with 2 tokens: yes -> all the points back, 1 token left, not saved on exit |
 | `STAT-16` | respec tokens: resp_add stops at RESP_MAX; resp_roll never above ground nor in levels 1-20, ~2% in the Abyss |
 | `UI-INV-10` | inventory: RUN/STOP closes it and returns to the game (no game menu) |
