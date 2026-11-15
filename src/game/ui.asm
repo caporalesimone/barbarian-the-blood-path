@@ -4,8 +4,6 @@
         .enc "screen"
 
         .virtual $9460
-mm_tx    .byte ?
-mm_ty    .byte ?
 mm_bits  .byte ?
 mm_st    .byte ?
 mm_wat   .byte ?              ; villaggio: bit 0 = acqua nel quadrante, bit 1 = strada (cella blu se solo acqua)
@@ -2048,32 +2046,17 @@ ch_item:
         rts
 
 ; ------------------------------------------------------------------ minimappa
-; (mm_tx,mm_ty) -> A: 0 nulla, 1 pavimento, 2 scale giu', 3 scale su
-mm_tile:
-        lda cur_level
-        bne _dun
-        jmp mm_town             ; citta': tutta visibile, solo strade e piazza
-_dun    ldx mm_ty
-        lda exprow_lo,x
-        sta ptr2
-        lda exprow_hi,x
-        sta ptr2+1
-        lda mm_tx
-        lsr
-        lsr
-        lsr
-        tay
-        lda mm_tx
-        and #7
-        tax
-        lda (ptr2),y
-        and bitmask,x
-        beq _no
-        lda mm_tx
-        sta tx
-        lda mm_ty
-        sta ty
-        jsr get_tile
+; (15/11, TODO D2) 0,64 s -> piu' veloce: prima ogni cella 24x24 chiamava 4 volte mm_tile (get_tile + catena di confronti).
+; Ora all'ingresso si costruisce UNA volta la tabella mm_cls (48 byte, un byte per codice di tile) e poi ogni cella legge
+; i 4 tile della mappa con due puntatori di riga (MAP + 2 mmy * 48, +48), i bit "esplorato" (dungeon) con uno scorrimento.
+; Classe di un tile (mm_cls): bit 0 pavimento/strada (quadrante disegnato), bit 1 scale giu', bit 2 scale su,
+; bit 3 acqua, bit 4 strada (villaggio: cella blu se nel quadrante c'e' solo acqua). Risultato identico a prima.
+; Zona di lavoro: coda dello slot sprite 27 ($A6C0..$A6FB: byte senza uso, annotazione @map in game.asm).
+mm_cls  = $a6c0                 ; 48 byte
+mm_ex   = $a6f0                 ; 12 byte: bit "esplorato" delle due righe di tile della riga di celle (villaggio: $FF)
+
+; A = codice del tile -> A = classe (dungeon: esplorato o no lo decide il chiamante; solido = nulla)
+mm_cdun:
         cmp #T_STAIRSD
         beq _sd
         cmp #T_TSTAIRS
@@ -2088,18 +2071,13 @@ _dun    ldx mm_ty
         rts
 _sd     lda #2
         rts
-_su     lda #3
+_su     lda #4
         rts
 _no     lda #0
         rts
 
 ; citta': 1 = strada/piazza/porte, 2 = scale per il dungeon, 0 = resto (erba, case, alberi)
-mm_town:
-        lda mm_tx
-        sta tx
-        lda mm_ty
-        sta ty
-        jsr get_tile
+mm_ctown:
         cmp #T_TSTAIRS
         beq _sd
         cmp #T_PATH
@@ -2124,55 +2102,55 @@ _n      cmp #T_WATER            ; fiume (acqua e sponde): nella minimappa in blu
         bcc _0
         cmp #T_WATERR+1
         bcs _0
-        lda mm_wat
-        ora #1
-        sta mm_wat
-        lda #1
+        lda #1+8
         rts
 _0      lda #0
         rts
-_y      lda mm_wat
-        ora #2
-        sta mm_wat
-        lda #1
+_y      lda #1+16
         rts
 _sd     lda #2
         rts
 
-mm_acc:                         ; A = risultato, X = maschera
-        cmp #1
-        bne _s
-        txa
-        ora mm_bits
-        sta mm_bits
-        rts
-_s      cmp #2
-        bcc _r
-        sta mm_st
+; tabella mm_cls dei codici 0..47 del luogo attuale (village: costanti T_* come prima; dungeon: solidtab)
+mm_build:
+        ldx #47
+_t      txa
+        ldy cur_level
+        bne _d
+        jsr mm_ctown
+        jmp _s
+_d      jsr mm_cdun
+_s      sta mm_cls,x
+        dex
+        bpl _t
+        lda cur_level
+        bne _r
+        lda #$ff                ; citta': tutta visibile
+        ldx #11
+_f      sta mm_ex,x
+        dex
+        bpl _f
 _r      rts
 
-mm_quad .macro dx, dy, mask
-        lda mm_tx
-        clc
-        adc #\dx
-        pha
-        lda mm_ty
-        clc
-        adc #\dy
-        sta mm_ty
-        pla
-        sta mm_tx
-        jsr mm_tile
-        ldx #\mask
-        jsr mm_acc
-        lda mm_tx
-        sec
-        sbc #\dx
-        sta mm_tx
-        lda mm_ty
-        sec
-        sbc #\dy
-        sta mm_ty
+; un quadrante: classe del tile (\ptr),y se esplorato (bit basso di \ev, che scorre), poi accumula in
+; mm_wat (OR delle classi), mm_st (ultime scale: 2 giu', 4 su; l'ultimo quadrante vince come prima) e mm_bits (bit 0 -> ror)
+mm_q    .macro ptr, ev
+        lda #0
+        lsr \ev
+        bcc +
+        lda (\ptr),y
+        tax
+        lda mm_cls,x
++       tax
+        ora mm_wat
+        sta mm_wat
+        txa
+        and #6
+        beq +
+        sta mm_st
++       txa
+        lsr
+        ror mm_bits
         .endm
 
 ui_minimap:
@@ -2202,24 +2180,63 @@ _c      lda #63
         sta SCR_A+$300,y
         iny
         bne _c
+        jsr mm_build
         lda #0
         sta mmy
-_row    lda #0
+_row    lda mmy                 ; puntatori delle due righe di tile (MAP + 2 mmy * 48 e la successiva)
+        asl
+        tax
+        lda maprow_lo,x
+        sta ptr0
+        lda maprow_hi,x
+        sta ptr0+1
+        lda maprow_lo+1,x
+        sta ptr1
+        lda maprow_hi+1,x
+        sta ptr1+1
+        lda cur_level
+        beq _nex                ; citta': mm_ex gia' a $FF
+        lda exprow_lo,x         ; dungeon: 12 byte "esplorato" delle due righe (contigue, 6 byte ciascuna)
+        sta ptr2
+        lda exprow_hi,x
+        sta ptr2+1
+        ldy #11
+_ec     lda (ptr2),y
+        sta mm_ex,y
+        dey
+        bpl _ec
+_nex    lda #0
         sta mmx
 _col    lda mmx
+        and #3
+        bne _ne                 ; ogni 4 celle (8 tile) i prossimi byte "esplorato" delle due righe
+        lda mmx
+        lsr
+        lsr
+        tax
+        lda mm_ex,x
+        sta tmp0
+        lda mm_ex+6,x
+        sta tmp1
+_ne     lda mmx
         asl
-        sta mm_tx
-        lda mmy
-        asl
-        sta mm_ty
+        tay                     ; Y = colonna di tile
         lda #0
-        sta mm_bits
         sta mm_st
         sta mm_wat
-        #mm_quad 0,0,1
-        #mm_quad 1,0,2
-        #mm_quad 0,1,4
-        #mm_quad 1,1,8
+        #mm_q ptr0, tmp0        ; in alto a sinistra  (maschera 1)
+        iny
+        #mm_q ptr0, tmp0        ; in alto a destra    (2)
+        dey
+        #mm_q ptr1, tmp1        ; in basso a sinistra (4)
+        iny
+        #mm_q ptr1, tmp1        ; in basso a destra   (8)
+        lda mm_bits
+        lsr
+        lsr
+        lsr
+        lsr
+        sta mm_bits
         lda mm_st
         beq _nst
         cmp #2
@@ -2247,7 +2264,8 @@ _w      pha
         pla
         sta (ptr3),y
         lda mm_wat              ; solo acqua nel quadrante: cella blu (color RAM = schermo + $2400)
-        cmp #1
+        and #8+16               ; (OR delle classi: bit 3 acqua, bit 4 strada)
+        cmp #8
         bne _nw
         lda ptr3+1
         clc

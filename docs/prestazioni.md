@@ -160,7 +160,7 @@ fallisce se il gioco diventa più lento di oggi. Eroe in godmode (non deve morir
 | Test | Situazione | Misura | Soglia |
 |---|---|---|---|
 | PERF-10 | villaggio, cammino in 8 direzioni (320 fot.) | 0% persi, peggiore 1,05 | 2%, 2 |
-| PERF-11 | apertura inventario / minimappa (villaggio), ritorno al gioco | 0,10 s / **0,64 s**, 0,06–0,08 s | 0,3 s / 1 s, 0,3 s |
+| PERF-11 | apertura inventario / minimappa (villaggio), ritorno al gioco | 0,10 s / **0,26 s** (15/11: era 0,64 s), 0,06–0,08 s | 0,3 s / 0,5 s, 0,3 s |
 | PERF-12 | cambio di piano con le scale: villaggio → 1, 1 → 2, 2 → 1 | con Krill (11/11, ramo `fast-loader`): **3,1 s**, 10,2 s, 11,4 s (il piano lasciato si salva: file intero); prima, KERNAL con cache: 12,1–12,5 s, 5,6–5,8 s, 6,8–7,3 s; KERNAL senza cache: 11,1, 13,8, 15,8 s | 5, 13, 13 s |
 | PERF-13 | piano 1, cammino | 1,9–2,2%, peggiore 2,00 | 6%, 2,5 |
 | PERF-14 | piano 1, cammino fra i mostri (svegli) | 4,4–5,0%, 2,07 | 10%, 2,5 |
@@ -175,7 +175,7 @@ fallisce se il gioco diventa più lento di oggi. Eroe in godmode (non deve morir
 | PERF-23 | **generatore** su ogni piano 1–19 e su **ogni piano dell'Abisso 21–255** (`gen_dungeon` chiamata fra due letture dell'input; il piano 20 è la mappa fissa) | 1–19: 0,38–0,73 s (media 0,58); 21–255: 0,34–0,84 s (media 0,58); una sola scala in salita ovunque | 1,5 s |
 
 Osservazioni (da valutare, non verificate a fondo): il primo ingresso nel piano 1 dal villaggio è il passaggio più lento
-(tema, brano e piano: ~12 s in VICE); la minimappa del villaggio impiega 0,64 s a disegnarsi; la Frenzy perde ~1/4 dei
+(tema, brano e piano: ~12 s in VICE); la minimappa del villaggio impiegava 0,64 s a disegnarsi (dal 15/11, TODO D2: 0,26 s); la Frenzy perde ~1/4 dei
 fotogrammi (TODO D3). Dall'11/11 (PERF-19..23): la **prima** apertura della locanda costava ~9 s (caricamento di OVLT e
 OVL2 dal disco; dalla v1.223 il modulo MENU si carica all'ingresso nel villaggio, sezione sotto), le successive 0,14 s; il piano 14 è il più pesante nel cammino (14,5% di persi); il generatore regge
 tutti i 255 piani (oltre il 20 senza scala in discesa, come vuole `gen_stairs` con `cur_level` ≥ `MAXLEVEL`): l'unica parte

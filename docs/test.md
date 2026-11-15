@@ -285,7 +285,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `OPT-03` | set_name4 / set_name: every name of nm_tab in cmdbuf+3.., nlen = length, io_dir = 1, A = 1, X kept |
 | `OPT-12B` | put_hero: the hero on tile (A, X) -> px/py = tile x 16 + 8 (centre) |
 | `PERF-10` | village: walking in 8 directions, lost frames <= 2%, worst frame <= 2 |
-| `PERF-11` | inventory open within 0.3 s, minimap within 1 s; back in the game within 0.3 s |
+| `PERF-11` | inventory open within 0.3 s, minimap within 0.5 s; back in the game within 0.3 s |
 | `PERF-19` | village screens with the module MENU in memory (loaded at the village entry, 11/11): smith, inn, inn again <= 0.5 s, back <= 0.5 s |
 | `PERF-12` | change of level (stairs, Krill): village -> 1 <= 5 s, 1 -> 2 <= 13 s, 2 -> 1 <= 13 s (the level left is saved: whole hero file) |
 | `PERF-13` | dungeon level 1: walking (corridors, rooms), lost frames <= 6%, worst frame <= 2.5 |

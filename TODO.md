@@ -22,7 +22,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E3, E4, E5, C1, E1, M2, E6, E7, E8, E9 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
-| 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D2, D12, D14, D1, D5, D7, D10, D11, D8, D3 |
+| 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D8, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M3, M4, M5 |
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
@@ -193,10 +193,6 @@ Le voci che cambiano il blocco eroe (C5, F1–F3, G4) vanno fatte insieme per ca
 Misure e soglie: `tests/regression/perf` (PERF-10..23), [docs/prestazioni.md](docs/prestazioni.md). Ogni intervento si
 misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osservazioni P1–P5 di
 [docs/ottimizzazione.md](docs/ottimizzazione.md) non ancora fatte: **suggerite da fare**.
-
-### D2 (ex P2) Minimappa del villaggio 0,64 s — S
-- Disegno a quadranti 2×2 (`mm_quad`) per tutte le 48×48 caselle: tabella dei caratteri o solo le righe cambiate.
-  **Stima**: 0,3–0,5 s in meno (non misurata).
 
 ### D12 (11/11) Dall'analisi dell'assembly generato (`out/work/asm_audit/analisi_assembly.md`) — S
 - **Suggeriti**: routine per la casella del mostro (`mxl/mxh → pix2tile` e `myl/myh`, 4 copie ciascuno: ~46 B) e per i

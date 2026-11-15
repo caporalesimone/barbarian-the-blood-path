@@ -70,7 +70,7 @@ def perf_village(ctx):
     check_walk(ctx, "village", walk(g, 320), 0.02, 2.0)
 
 
-@test("PERF-11", "inventory open within 0.3 s, minimap within 1 s; back in the game within 0.3 s")
+@test("PERF-11", "inventory open within 0.3 s, minimap within 0.5 s; back in the game within 0.3 s")
 def perf_ui(ctx):
     g, L = ctx["g"], ctx["g"].L
     def settle(d):
@@ -82,7 +82,7 @@ def perf_ui(ctx):
             tot += x
         return tot
 
-    for name, k, mx in (("inventory", K_I, 0.3), ("minimap", (4, 0x10), 1.0)):     # 11/11: 0.10 s, 0.64 s
+    for name, k, mx in (("inventory", K_I, 0.3), ("minimap", (4, 0x10), 0.5)):     # 11/11: 0.10 s, 0.64 s; 15/11 (TODO D2, class table + row pointers): minimap 0.26 s, limit ~2x
         t_open = settle(g.frames(1, keys={k[0]: k[1]})) / CPS
         t_back = settle(g.frames(1, keys={K_RUNSTOP[0]: K_RUNSTOP[1]})) / CPS
         print("      %s: open %.2f s, back %.2f s" % (name, t_open, t_back))

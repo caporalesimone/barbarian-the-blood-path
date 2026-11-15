@@ -68,7 +68,8 @@ LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM de
 ;@free $87e8..$87f8 "Fra schermo HUD e puntatori sprite (banco VIC)" use=data
 ;@free $a500..$a600 "Slot sprite 20-23" use=data
 ;@free $fe96..$fffa "Fondo della cache sotto il KERNAL, dopo FMAP (si accorcia se FMAP cresce: lo dice questa verifica)" use=data
-;@free $a6c0..$a700 "Slot sprite 27 (riceve la coda della copia di copy_gfx: byte senza uso)" use=data
+;@map $a6c0..$a6fc "Minimappa: tabella delle classi dei tile (mm_cls, 48 B) e byte esplorati della riga di celle (mm_ex, 12 B), solo mentre la minimappa e' aperta (ui.asm); il resto dello slot 27 riceve la coda della copia di copy_gfx (byte senza uso)"
+;@free $a6fc..$a700 "Fine dello slot sprite 27" use=data
 TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile): fino a $ED00
                             ; (il file del tema comincia GFX_INFO byte prima: villaggio e dungeon non sono mai in RAM insieme)
 MAPW       = 48
