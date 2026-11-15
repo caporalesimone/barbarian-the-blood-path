@@ -29,7 +29,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
-| Z | [Note urgenti](#z--note-urgenti) | Z1–Z6 |
+| Z | [Note urgenti](#z--note-urgenti) | Z2–Z6 |
 
 ---
 
@@ -445,9 +445,6 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 
 Richieste del committente del 15/11, da lanciare così come sono (ogni voce dice a quale modello e in quale branch). Non sono ancora
 dimensionate. Finita una voce: si cancella e la decisione va nella wiki o nel README interessato.
-
-### Z1 — Sonnet — Lab64: documento dei tool e dei copyright
-- In `lab64` crea un documento nella root dove menzioni tutti i tools e i relativi copyrights.
 
 ### Z2 — Fable — Barbarian: i 4 villaggi dei capitoli successivi (branch a parte di barbarian)
 - Genera i villaggi dei capitoli successivi. Sarebbero 4 altri villaggi.
