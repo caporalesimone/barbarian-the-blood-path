@@ -614,7 +614,12 @@ _l      stx tmp3
 ne_box  .byte 4,2,32,4, 4,6,32,4, 4,10,32,3
 
 name_draw:
+        lda nfield              ; (16/11) cornici e titoli solo se cambia il campo attivo (primo disegno: ne_last = $ff): ridisegnarli
+        cmp ne_last             ; a ogni tasto li cancellava per un fotogramma intero (ne_boxes dura ~16000 cicli: i titoli tornano
+        beq _nb                 ; quando il raggio ha gia' passato la riga 2 e 6)
+        sta ne_last
         jsr ne_boxes
+_nb
         lda #0
         sta ui_fc
         #at 6,3
@@ -744,9 +749,12 @@ _ap     pla
 _r      rts
 
 NE_ERR  = 14                    ; riga del messaggio "name already in use."
+ne_last .byte $ff               ; campo di cui ne_boxes ha disegnato la cornice verde ($ff = nessuno: ridisegno)
 nedit   .byte 0                 ; 1 = si scrive il campo nfield, 0 = scelta con joystick/W-S (dopo il seed)
 tt_new  .text "new barbarian", 0
 name_entry:
+        lda #$ff
+        sta ne_last
         lda #0
         sta nlen2
         ldx #15

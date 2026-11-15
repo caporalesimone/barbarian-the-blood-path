@@ -170,6 +170,9 @@ cursore passa solo su barbari, create e quit. Niente help (è nel menu del loade
 (`ne_boxes`, `UC_CURSOR`), gli altri grigi; freccia a x=6, testo a x=8 (nome in 12 celle, `NAME_LEN`); "a-z 1-9" in grigio
 nel riquadro seed; righe 23-24 "f1:random seed" e "enter:confirm  run/stop:exit". F1 seed casuale (sempre),
 RUN/STOP esce.
+(16/11) Cornici e titoli (`ne_boxes`, circa 16000 cicli) si ridisegnano **solo quando cambia il campo attivo** (`ne_last`), non a
+ogni tasto: prima ogni ridisegno cancellava i titoli " name " e " seed " per un fotogramma intero (le cornici si rifanno per prime,
+i titoli tornano quando il raggio ha gia' passato le righe 2 e 6), e con un tasto tenuto sparivano. Test: SAVE-8 (`PG-NEW-10`).
 **Flusso (09/11, decisione del committente)**: all'ingresso si **scrive il nome** (cursore a blocco nel campo);
 ENTER lo valida (non vuoto né di soli spazi, non già usato da un altro barbaro: altrimenti "name already in use." in
 riga 14 e si resta sul nome) e passa al **seed**, che si può riscrivere (il primo tasto lo fa ripartire, le altre

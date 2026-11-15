@@ -343,6 +343,22 @@ def c8():
             got = {"nf": v.mem(mlb["nfield"], 1)[0], "nl": v.mem(mlb["nlen2"], 1)[0], "sl": v.mem(mlb["slen"], 1)[0],
                    "ne": v.mem(mlb["nedit"], 1)[0]}
             if got[key] != want: err.append("new barbarian: %s: %s = %d (expected %d)" % (what, key, got[key], want)); return
+        # (16/11) frames and titles are redrawn only when the active field changes: redrawing them at every key erased the titles
+        # for a whole frame (ne_boxes takes ~16000 cycles). The title of the name box is wiped by hand: a letter or F1 must not
+        # restore it (no redraw), a change of field (up) must.
+        def step(row, mask, joy):
+            for r in range(8): v.cmd("> %04x 00" % (kn + r))
+            v.cmd("> %04x %02x" % (kn + row, mask)); v.cmd("> %04x %02x" % (jn, joy))
+            return v.go(10)
+        lab = 0xb400 + 40 * 2 + 7
+        for _ in range(3): step(0, 0x00, 0x01)              # the steps above end on start: up x3 = the name field
+        step(0, 0x00, 0x10)                                 # fire: the name is written again
+        v.cmd("> %04x 20 20 20 20" % lab)
+        step(1, 0x04, 0)                                    # a letter
+        step(0, 0x10, 0)                                    # F1 (new seed)
+        if v.mem(lab, 4) != [0x20] * 4: err.append("new barbarian: the titles are redrawn at every key")
+        step(0, 0x02, 0)                                    # ENTER: name -> seed, the field changes: frames and titles again
+        if v.mem(lab, 4) != [0x0e, 0x01, 0x0d, 0x05]: err.append("new barbarian: titles not redrawn on a change of field")
         print("8 new barbarian: name, seed, joystick choice, fire reopens the field, F1, DEL ok")
     finally:
         v.close()
