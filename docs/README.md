@@ -28,7 +28,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | [Help](help.md) | Il manuale nel loader (programma `HELP`): pagine, ritaglio dell'HUD, come si aggiorna |
 | [Refactor dei tasti](refactor-tasti.md) | **Progetto, non nel codice** (07/11 sera): analisi di tasti e menu di ogni schermata, sistema standard a voci e linguette, piano per schermata |
 | [Storico del TODO](storico-todo.md) | **Archivio** (08/11): il vecchio `TODO.md` con i lavori fatti, le decisioni datate e le analisi (memoria, salvataggi, Abisso); i lavori aperti stanno in `TODO.md` |
-| [Cheat](cheats.md) | God mode (`$9105`, `TESTGOD=1`) e variabili comode dal monitor di VICE, per test e screenshot |
+| [Cheat](cheats.md) | (15/11) Menu dei trucchi nel gioco (RUN/STOP, voce "cheats": god mode, level up, respec token, next level, next chapter; solo build con `CHEATS=1`, ricette, costo), poi God mode (`POKE 1021`, `TESTGOD=1`), avvio diretto (`POKE 1020`) e variabili comode dal monitor di VICE, per test e screenshot |
 | [Test manuali](manual-tests.md) | 29 test da fare a mano (000–028), solo quelli non automatizzabili: avvio, comandi, gioco, hardware reale |
 | [Salvataggi](salvataggi.md) | Cosa si salva, quando, STASH in memoria; formato esatto in [FORMATO_DATI](FORMATO_DATI.md) |
 | [Musica](musica.md) | Brani (titolo, villaggio, livelli, boss, combattimento), player unico, file `SNDn`, effetti sonori, jukebox |
