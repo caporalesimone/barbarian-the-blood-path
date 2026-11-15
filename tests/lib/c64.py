@@ -23,6 +23,15 @@ class Game(Vice):
 
     def __init__(self, disk=os.path.join(OUT, "disk.d64"), extra=()):
         super().__init__(disk, extra=extra)          # extra: more x64sc options (12/11: drive type, KRILL-17)
+        # (15/11) Vice() leaves the C64 RUNNING (wait_boot ends with "x"). The first command sent to a running machine is
+        # answered with the prompt of the monitor entry FIRST, then its own output and prompt: cmd() can return at that first
+        # prompt, and every later answer comes one command late (a "sw" read the answer of "sw reset", the "load" of to_menu
+        # read the answer of a "sw"). The next command can then reach VICE in the same read as the one before, and VICE runs
+        # only the first line of a read: the "load" was lost (PERF-DISK setup, "no answer to 'load ...'", 1 run in 2).
+        # One command whose answer is recognised by its content (">C:" of "m") stops the machine in the monitor and reads
+        # everything up to its own prompt: from here on commands and answers are in step.
+        self.mem(0x0314, 2)
+        self.quiet(0.05)
         self.L = labels("game")
         self.M = labels("lobby")
         self.MN = labels("menu")                        # (11/11) modulo MENU: locanda e negozi (src/menu.asm)

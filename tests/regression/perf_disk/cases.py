@@ -44,16 +44,22 @@ T = {}
 
 
 def sw(g):
-    """VICE stopwatch (cycles). (12/11) Right after the start the monitor sometimes answers "sw" without the
-    "Stopwatch:" line (setup failed with 'list index out of range' about 1 run in 3): ask again."""
-    for _ in range(5):
-        m = re.findall(r"Stopwatch:\s*(\d+)", g.cmd("sw"))
-        if m: return int(m[0])
-    raise AssertionError("no answer from the VICE stopwatch")
+    """VICE stopwatch (cycles). (15/11) The answer is recognised by its content ("Stopwatch: <n>" then the prompt), not by
+    the first prompt, and the command is never sent twice: a second "sw" sent because an answer was late put the
+    following commands one answer out of step (the setup failed 1 run in 2 with "no answer to 'load ...'", see
+    Game.__init__ in tests/lib/c64.py for the cause)."""
+    g.s.sendall(b"sw\n")
+    b = g._read(lambda b: re.search(r"Stopwatch:\s*\d+\s*\n(?:.*\n)*?\(C:\$[0-9a-f]{4}\) $", b), 20, "sw")
+    return int(re.findall(r"Stopwatch:\s*(\d+)", b)[-1])
+
+
+def sw_reset(g):
+    g.s.sendall(b"sw reset\n")
+    g._read(lambda b: re.search(r"reset[^\n]*\n(?:.*\n)*?\(C:\$[0-9a-f]{4}\) $", b), 20, "sw reset")
 
 
 def timed(g, a, regs=""):
-    g.cmd("sw reset")
+    sw_reset(g)
     s0 = sw(g)
     g.call(a, tmax=120, regs=regs)
     return (sw(g) - s0) / CPS
@@ -61,7 +67,7 @@ def timed(g, a, regs=""):
 
 def setup(ctx):
     g = ctx["g"] = Game()
-    g.cmd("sw reset")
+    sw_reset(g)
     s0 = sw(g)
     g.to_menu()
     T["boot"] = (sw(g) - s0) / CPS
