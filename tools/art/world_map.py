@@ -139,7 +139,6 @@ LABELS = [(66, 276, 1, "ALDRIC'S CROSSING"), (84, 36, 2, "BLACKWATER MILL"), (30
 ABYSS_LABEL = (404, 104)
 ABYSS_POINT = ((410, 104), (402, 87))
 NUMBERS = [(1, 114, 205), (2, 178, 78), (3, 300, 136), (4, 348, 60)]      # quadratini rossi accanto ai luoghi
-LEGEND = (408, 244)
 
 # ============================================================================ tela
 C = [["SEA"] * W for _ in range(H)]          # colore (nome della tavolozza) di ogni pixel
@@ -1050,15 +1049,6 @@ for x, y, n, s in LABELS:
 for x, y in line(a, b):
     put(x, y, "VIO")
 label(ABYSS_LABEL[0], ABYSS_LABEL[1], None, "THE ABYSS", "PVIO")
-
-# legenda
-lx, ly = LEGEND
-plaque(lx, ly, lx + 60, ly + 16)
-for i in range(12):
-    if i % 4 in (0, 1):
-        put(lx + 6 + i, ly + 8, "GOLD"); put(lx + 6 + i, ly + 9, "DBRN")
-text(lx + 24, ly + 5, "ROAD", "PARCH")
-placed.append(("LEGEND", lx, ly, lx + 60, ly + 16, lx + 24, lx + 24 + text_w("ROAD") - 1))
 
 # titolo
 title = "BARBARIAN  -  THE BLOOD PATH"
