@@ -54,10 +54,12 @@ def boot_stop_lore(ctx):
         v.close()
 
 
-@test("BOOT-13", "BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase, centred on row 12 (15/11)")
+@test("BOOT-13", "BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase (row 10, yellow) and 'please wait' (row 13), as the START wait screen (16/11)")
 def menu_black(ctx):
     """Before 15/11 only "hear the legend" cleared the screen: the manual and the game wrote their phrase on row 17 over the menu
-    and the screen went black only when the loaded program started. Checked at tramp_run (the load starts there)."""
+    and the screen went black only when the loaded program started. Since 16/11 the three phrases are centred on row 10 with
+    "please wait" on row 13, the same as START's wait screen (txt_init), so the switch BARBARIAN -> START does not change the
+    screen. Checked at tramp_run (the load starts there)."""
     from lib.c64 import Vice, OUT
     from vicemon import labels
     L = labels("barbarian")
@@ -69,9 +71,29 @@ def menu_black(ctx):
             v.poke(0x0277, ord(k)); v.poke(0xc6, 1)
             v.brk(L["tramp_run"]); v.go(60); v.delbrk()
             scr = v.mem(0x0400, 1000)
-            rows = [i for i in range(25) if i != 12 and any(c != 0x20 for c in scr[i * 40:i * 40 + 40])]
+            rows = [i for i in range(25) if i not in (10, 13) and any(c != 0x20 for c in scr[i * 40:i * 40 + 40])]
             check(not rows, "choice %s: rows %s not blank when the load starts" % (k, rows))
-            check(any(c != 0x20 for c in scr[480:520]), "choice %s: no phrase on row 12" % k)
+            check(any(c != 0x20 for c in scr[400:440]), "choice %s: no phrase on row 10" % k)
+            wait = [0x10, 0x0c, 0x05, 0x01, 0x13, 0x05, 0x20, 0x17, 0x01, 0x09, 0x14]       # "please wait" (screen codes)
+            check(list(scr[13 * 40 + 14:13 * 40 + 25]) == wait, "choice %s: no 'please wait' on row 13" % k)
+    finally:
+        v.close()
+
+
+@test("BOOT-14", "BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), keyboard and screen as at power-on (16/11)")
+def menu_exit(ctx):
+    from lib.c64 import Vice, OUT
+    v = Vice(os.path.join(OUT, "disk.d64"))
+    try:
+        v.load(os.path.join(OUT, "barbarian.prg")); v.pc(0x080d)
+        v.brk(0xffe4); v.go(60); v.delbrk()
+        v.poke(0x0277, ord("4")); v.poke(0xc6, 1)
+        v.brk(0xa483); ok = v.go(60); v.delbrk()                   # BASIC main loop (READY.)
+        check(ok, "exit game: BASIC prompt not reached")
+        scr = v.mem(0x0400, 1000)
+        text = "".join(chr(c + 64) if 1 <= c <= 26 else " " for c in scr[:400])
+        check("READY" in text, "exit game: READY. not on screen")
+        check(v.mem(0xd018, 1)[0] == 0x15, "exit game: $D018 is not the power-on value (charset/screen)")
     finally:
         v.close()
 

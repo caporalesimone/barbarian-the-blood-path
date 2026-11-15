@@ -11,6 +11,7 @@ for tid, n, d in [("SAVE-10", 1, "new disk: menu without error, no heroes"),
                   ("SAVE-14", 5, "cycles new game -> level -> quit -> continue: the hero stays"),
                   ("SAVE-15", 6, "quit the game -> BASIC (READY.), no re-entry; Krill uninstalled: KERNAL LOAD from the disk works again"),
                   ("SAVE-16", 7, "details screen: delete the barbarian (cancel, confirm, new session)"),
+                  ("SAVE-17", 9, "lobby: back to main menu -> Krill uninstalled, BARBARIAN reloaded (menu items 1-4)"),
                   ("PG-NEW-10", 8, "new barbarian through the UI: name, seed, joystick, F1, DEL")]:
     script(tid, d, [PY, os.path.join(H, "test_saves.py"), str(n)])
 script("SAVE-REL-10", "saved level state (REL): monsters, chests, fog, return, repopulation", [PY, os.path.join(H, "test_rel.py")])

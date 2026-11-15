@@ -141,7 +141,7 @@ come faceva il vecchio disco di sviluppo (tolto l'11/11 sera: c'è un solo disco
 
 ## Quit the game
 
-**quit the game** (menu dei barbari) fa il reset del KERNAL e riporta al BASIC (`READY.`). **Non c'è rientro**: `SYS 49158`,
+**quit the game** (oggi solo la schermata dei salvataggi di un'altra versione; il menu dei barbari ha **back to main menu**, 16/11, che ricarica il menu iniziale, mentre **exit game** del menu iniziale torna al BASIC) fa il reset del KERNAL e riporta al BASIC (`READY.`). **Non c'è rientro**: `SYS 49158`,
 `bb_entry`, `game_warm`, la copia di `$0400-$07FF` in `$CC00` e i POKE dal BASIC sono stati tolti l'11/11 (ramo
 `fast-loader`: dopo l'install di Krill il drive non risponde più al KERNAL e il residente occupa le pagine 2-3).
 

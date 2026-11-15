@@ -118,7 +118,7 @@ _n      inx
 mm_n12  .byte 0, 12, 24, 36, 48
 
 ; elenco (09/11, standard dei menu): righe 3-7 i barbari salvati (riquadro " barbarians ") e "-" per i posti vuoti,
-; riga 10 "create new barbarian", riga 11 "quit the game" (secondo riquadro). Voci del cursore: 0..nvalid-1 eroi,
+; riga 10 "create new barbarian", riga 11 "back to main menu" (secondo riquadro; fino al 15/11 "quit the game"). Voci del cursore: 0..nvalid-1 eroi,
 ; nvalid create, nvalid+1 quit.
 MR_HERO = 3
 MR_NEW  = 10
@@ -161,7 +161,7 @@ _n      ldx tmp3
         ldx nvalid
         inx
         jsr md_arrow
-        #msg "quit the game"
+        #msg "back to main menu"
         rts
 ; X = voce: "> " se e' quella del cursore, altrimenti due spazi
 md_arrow:
@@ -247,7 +247,7 @@ _b      jsr ui_fire
         cmp nvalid
         beq _create
         bcc _hero
-        jmp bb_quit             ; quit the game: reset, torna al BASIC (READY.)
+        jmp bb_menu             ; back to main menu: si ricarica il loader BARBARIAN (16/11, committente; prima "quit the game" -> BASIC)
 _hero   tax
         lda slot_idx,x
         sta cur_slot
@@ -974,6 +974,39 @@ bb_quit:
         lda #$37
         sta $01
         jmp ($fffc)
+
+; ------------------------------------------------------------------ back to main menu (16/11, committente)
+; Come lore_exit (src/lore/scroll.asm): Krill disinstallato (il drive torna alla sua ROM), pagine 2-3 azzerate (il residente
+; le ha sporcate: con le variabili RS-232 sporche il KERNAL si blocca), poi il trampoline ricarica BARBARIAN con il KERNAL.
+bb_menu:
+        sei
+        lda #0
+        sta $d01a               ; niente raster IRQ ne' sprite
+        sta $d015
+        sta $d418               ; SID muto (la musica del menu e' del player del gioco)
+        lda #$ff
+        sta $d019
+        lda #$0b
+        sta $d011
+        jsr krill_uninstall
+        sei
+        lda #0
+        tax
+_bz     sta $0200,x
+        sta $0300,x
+        inx
+        bne _bz
+        lda #4                  ; pagina dello schermo del KERNAL
+        sta $0288
+        lda #$37
+        sta $01
+        ldx #<bm_name
+        ldy #>bm_name
+        lda #bm_name_n
+        jmp tramp_run
+bm_name .text "barbarian"
+bm_name_n = * - bm_name
+        .include "tramp.inc"
 menu_end
         .cerror menu_end > MAP + $1000, "modulo menu oltre $CFFF"
         .cerror menu_end > $cc00, "LOBBY oltre $CBFF: copre lo schermo del titolo durante il caricamento (src/barbarian.asm)"

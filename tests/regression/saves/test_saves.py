@@ -194,6 +194,28 @@ def c6():
         v.close()
 
 
+def c9():
+    """"back to main menu" (bb_menu, 16/11): Krill uninstalled, the trampoline reloads BARBARIAN with the KERNAL, whose menu
+    (items 1-4) waits for a key"""
+    fresh()
+    v = Vice()
+    try:
+        if not v.menu(): err.append("menu: not reached"); return
+        v.cmd("break %04x" % lbl["ui_input"])
+        if not v.go(30): err.append("menu: does not reach the key wait"); return
+        v.cmd("del")
+        v.cmd("break ffe4"); v.cmd("r pc=%04x" % mlbl["bb_menu"])          # GETIN: the loader menu waits for a key
+        if not v.go(150): err.append("back to main menu: the loader menu does not come back"); return
+        v.cmd("del")
+        scr = v.mem(0x0400, 1000)
+        rows = {r: scr[r * 40 + 9] for r in (11, 13, 15, 17)}
+        print("9 back to main menu: first characters of the items %s" % {r: "%02x" % c for r, c in rows.items()})
+        if [rows[r] for r in (11, 13, 15, 17)] != [0x31, 0x32, 0x33, 0x34]:
+            err.append("back to main menu: BARBARIAN menu not on screen (items 1-4)")
+    finally:
+        v.close()
+
+
 def c7():
     """deleting a barbarian from the details screen (menu): simulated keys, down on delete, N with RUN/STOP, then fire
     (= yes, 07/11); persistence on disk"""
@@ -333,9 +355,9 @@ def c5(n=4):
 
 
 if __name__ == "__main__":
-    cases = sys.argv[1:] or ["1", "2", "3", "4", "5", "6", "7", "8"]
+    cases = sys.argv[1:] or ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     for c in cases:
-        {"1": c1, "2": c2, "3": c3, "4": c4, "5": c5, "6": c6, "7": c7, "8": c8}[c]()
+        {"1": c1, "2": c2, "3": c3, "4": c4, "5": c5, "6": c6, "7": c7, "8": c8, "9": c9}[c]()
     if err:
         print("\n".join(err)); sys.exit(1)
     print("saves ok")

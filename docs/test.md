@@ -190,7 +190,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PROBE-12` | HELP from the BARBARIAN menu: the five pages; the session ends in HELP on the last page (memory probe) |
 | `PROBE-13` | START: Krill installed, GAME loaded; the session ends in START just before GAME is unpacked (memory probe) |
 | `PROBE-14` | JUKEBOX: two tunes played and stopped; the session ends in JUKEBOX (memory probe) |
-| `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase, centred on row 12 (15/11) |
+| `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase (row 10) and 'please wait' (row 13), as START's wait screen (16/11) |
+| `BOOT-14` | BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), `$D018` as at power-on (16/11) |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |
 | `BUILD-12` | variant: Fire on stairs (TESTFIRE) |
@@ -328,6 +329,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SAVE-12` | hero list zeroed / random / never written: no error, no heroes |
 | `SAVE-13` | list from another version: offer to delete |
 | `SAVE-14` | cycles new game -> level -> quit -> continue: the hero stays |
+| `SAVE-17` | back to main menu (lobby): Krill uninstalled, BARBARIAN reloaded, menu items 1-4 on screen (16/11) |
 | `SAVE-15` | quit the game -> BASIC (READY.), no re-entry; Krill uninstalled: KERNAL LOAD from the disk works again |
 | `SAVE-16` | details screen: delete the barbarian (cancel, confirm, new session) |
 | `PG-NEW-10` | new barbarian through the UI: name, seed, joystick, F1, DEL |

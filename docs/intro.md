@@ -63,13 +63,13 @@ vettori come all'accensione), caricano il file all'indirizzo del PRG (`$0801`) c
   19656 cicli (50 Hz PAL esatti, non il passo del KERNAL), vettore `$0314` proprio. **Ogni voce** scelta ferma tutto (`tm_stop`: SID a 0, vettore
   `$EA31`, latch del KERNAL) prima del `LOAD` del trampolino, che sovrascrive il programma; tornando da LORE o HELP il brano riparte da capo
   ([Musica](musica.md), TODO E10). Il cursore lampeggiante è spento (`$CC`).
-- Voci: **hear the legend** (LORE), **read the game manual** (programma `HELP`, [Help](help.md)), **walk the blood path** (START). Sotto: aiuto,
+- Voci: **hear the legend** (LORE), **read the game manual** (programma `HELP`, [Help](help.md)), **walk the blood path** (START) e (16/11, committente) **4 exit game**: `tm_stop`, poi IOINIT/RESTOR/CINT e `jmp ($a002)` (avvio a caldo del BASIC, `READY.`); test `BOOT-14`. Sotto: aiuto,
   versione, copyright. La riga d'aiuto dice solo **"fire to choose"** (12/11, committente).
 - Tasti: joystick 2 su/giù e fire; `1` `2` `3`; `W`/`S` o cursore; spazio o RETURN. La voce scelta è gialla con la
   freccia. Scelta una voce, una frase resta sullo schermo durante il caricamento ("the old ones begin to speak",
   "the old scroll unrolls", "the crypt door creaks open"; dal 09/11 senza "...", centrate nelle 32 colonne). Qualunque voce
   (12/11 la storia, 15/11 anche manuale e gioco, committente) fa diventare **subito** nero lo schermo, poi la frase compare al
-  centro (riga 12): prima manuale e gioco scrivevano la frase sulla riga 17 sopra il menu, e il nero arrivava solo col programma caricato.
+  centro (dal 16/11 riga 10, gialla, con **"please wait"** in riga 13, come la schermata di attesa di START: `BARBARIAN` carica `START` con il KERNAL e `START` carica il resto con Krill, due caricamenti in sequenza che ora hanno lo stesso aspetto; prima la frase era in riga 12): prima manuale e gioco scrivevano la frase sulla riga 17 sopra il menu, e il nero arrivava solo col programma caricato.
 - **RUN/STOP durante il caricamento** del programma scelto (LOAD del KERNAL nel trampoline, `tramp.inc`): il LOAD
   torna con C=1, A=0 (`$F633`) e il trampoline carica di nuovo BARBARIAN (il menu). Prima del 12/11 restava il bordo
   rosso fisso (riprodotto nell'emulatore web del committente; test `BOOT-12` in VICE). Gli altri errori di disco

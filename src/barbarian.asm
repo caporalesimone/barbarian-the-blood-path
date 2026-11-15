@@ -28,12 +28,13 @@ SP_VARS = $c000                 ; variabili del player (RAM libera: BARBARIAN st
 ;@map SP_VARS..SP_VEND "Variabili del player SID (Demon's Eye, src/common/title_music.inc)"
 .endif
 ;@map FONT+512 "Font del menu: codici 0-63 del font del gioco (uifont.bin), sopra i programmi che il trampoline carica"
-NITEM   = 3
+NITEM   = 4                     ; (16/11) la quarta voce, exit game, torna al BASIC
 ROW0    = 11                    ; riga della prima voce
 LOGO_X  = (40 - LOGO_W) / 2     ; il logo della copertina (out/work/logo.inc, tools/build/gen_lore.py), righe 1..6
 LOGO_Y  = 1
 ICOL    = 9                     ; colonna delle voci
 IW      = 23                    ; larghezza della voce colorata
+TXT_ROW = 10                    ; riga della frase di attesa (come START, boot.asm)
 COL_T   = 7                     ; giallo: titoli e voce scelta
 COL_N   = 1                     ; bianco: voci (colori < 8: lo schermo e' multicolore per il logo)
 COL_D   = 3                     ; ciano: righe di aiuto
@@ -143,6 +144,16 @@ down    lda sel
 
 choose:                         ; (15/11, committente) qualunque voce: SUBITO lo schermo nero (prima solo la storia;
         jsr tm_stop             ; (15/11, TODO E3/E4) silenzio e IRQ/CIA/SID come prima: il LOAD del KERNAL sovrascrive questo programma
+        ldx sel                 ; (16/11, committente) 4 exit game: si torna al BASIC (il "commodore")
+        cpx #3
+        bne _go
+        sei                     ; stato della macchina come all'accensione (CIA, vettori, schermo), poi avvio a caldo del BASIC
+        jsr $ff84               ; IOINIT
+        jsr $ff8a               ; RESTOR
+        jsr $ff81               ; CINT (VIC, schermo, colori)
+        cli
+        jmp ($a002)             ; vettore di avvio a caldo del BASIC: "READY."
+_go
         ldx #0                  ;  manuale e gioco scrivevano la frase sul menu e il nero arrivava dopo, col programma)
         lda #$20
 _cl     sta SCR,x
@@ -365,6 +376,8 @@ texts   .byte 6, 8, COL_D
         .text "2  read the game manual", 0
         .byte ICOL, ROW0 + 4, COL_N
         .text "3  walk the blood path", 0
+        .byte ICOL, ROW0 + 6, COL_N
+        .text "4  exit game", 0
         .byte 13, 19, COL_D
         .text "fire to choose", 0         ; (12/11, committente: solo questo)
         .byte VER_X, 22 - 1, COL_D
@@ -372,15 +385,23 @@ texts   .byte 6, 8, COL_D
         .byte 4, 23, COL_D
         .text "copyright 2026 - simone caporale", 0
         .byte $ff
-; frasi a schermo nero, al centro (riga 12, 32 colonne dalla 4): 12/11 la storia, 15/11 anche manuale e gioco
-msg_lore .byte 4, 12, COL_T
-        .text "  the old ones begin to speak   ", 0
+; frasi a schermo nero (16/11, committente): identiche alla schermata di attesa di START (txt_init in boot.asm: frase centrata
+; in riga 10, gialla; "please wait" in riga 13, bianco), cosi' il passaggio da BARBARIAN a START non cambia lo schermo.
+; Anche per storia e manuale. Colonna = (40 - lunghezza) / 2.
+msg_lore .byte 6, TXT_ROW, COL_T
+        .text "the old ones begin to speak", 0
+        .byte 14, TXT_ROW + 3, COL_N
+        .text "please wait", 0
         .byte $ff
-msg_man .byte 4, 12, COL_T
-        .text "     the old scroll unrolls     ", 0
+msg_man .byte 9, TXT_ROW, COL_T
+        .text "the old scroll unrolls", 0
+        .byte 14, TXT_ROW + 3, COL_N
+        .text "please wait", 0
         .byte $ff
-msg_game .byte 4, 12, COL_T
-        .text "   the crypt door creaks open   ", 0
+msg_game .byte 7, TXT_ROW, COL_T
+        .text "the crypt door creaks open", 0
+        .byte 14, TXT_ROW + 3, COL_N
+        .text "please wait", 0
         .byte $ff
 msg_lo  .byte <msg_lore, <msg_man, <msg_game
 msg_hi  .byte >msg_lore, >msg_man, >msg_game

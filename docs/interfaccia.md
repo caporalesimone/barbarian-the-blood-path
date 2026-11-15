@@ -149,11 +149,11 @@ due lati. Screenshot di **tutte** le schermate (09/11): `docs/screens/` (un PNG 
 
 ## Menu d'avvio (loader `BARBARIAN`, solo build di release)
 
-Primo programma del disco (`BARBARIAN`, `src/barbarian.asm`): il logo della copertina e tre voci, **hear the legend**
+Primo programma del disco (`BARBARIAN`, `src/barbarian.asm`): il logo della copertina e quattro voci, **hear the legend**
 (la storia, programma `LORE`), **read the game manual** (il programma `HELP`: [Help](help.md)) e
-**walk the blood path** (`START`: schermata di attesa, poi il menu del gioco). Joystick 2 su/giù e fire, `1` `2` `3`,
+**walk the blood path** (`START`: schermata di attesa, poi il menu del gioco) e (16/11, committente) **exit game** (voce 4: torna al BASIC: IOINIT, RESTOR, CINT e avvio a caldo `jmp ($a002)`, `READY.`). Joystick 2 su/giù e fire, `1` `2` `3` `4`,
 `W`/`S` o joystick (niente tasti cursore, 09/11), spazio, RETURN. Nella storia lo spazio non fa nulla fino alla fine; **fire del joystick 2 tenuto = scorrimento a velocità doppia** (15/11); a fine storia fire o spazio: di nuovo il menu;
-RUN/STOP torna al menu in qualunque momento, anche durante il caricamento. Dettagli in [Avvio e storia](intro.md).
+RUN/STOP torna al menu in qualunque momento, anche durante il caricamento. **Durante il caricamento** (16/11, committente) lo schermo nero porta la frase della voce (storia, manuale, gioco) centrata in **riga 10**, gialla, e **"please wait"** in riga 13, bianco: identico alla schermata di attesa di `START` (`txt_init`), così il passaggio BARBARIAN → START non cambia lo schermo (prima la frase stava in riga 12 e "please wait" compariva solo con START: sembravano due caricamenti diversi; sono due programmi caricati uno dopo l'altro, `BARBARIAN` carica `START` con il KERNAL e `START` poi carica il resto con Krill). Test `BOOT-13`, `BOOT-14`. Dettagli in [Avvio e storia](intro.md).
 
 ## Menu iniziale (modulo `LOBBY`)
 
@@ -162,8 +162,8 @@ Testi del gioco in inglese con "barbarian" al posto di "hero" (06/11 sera): "cre
 Impaginazione (09/11, standard dei menu): titolo `ui_title` "barbarian: the blood path" con le spade (`CH_SWORD`) in
 riga 0, "the blood path" **rosso** (colonne 18-31, colore 2); riquadro (7,2,26,7) con etichetta " barbarians " e i
 barbari salvati nelle righe 3–7 a x=9 (un "-" per ogni posto vuoto); secondo riquadro (7,9,26,4) con "create new
-barbarian" in riga 10 e "quit the game" in riga 11 (`MR_HERO`/`MR_NEW`/`MR_QUIT`/`MR_X`); "version x.y" (riga 16) e
-copyright (riga 21) centrati in grigio; "fire:select" in riga 24; "all 5 slots are used." in riga 14. "quit the game" torna al BASIC con il reset del KERNAL; prima `bb_quit` copia `$0400-$07FF` in `$CC00` e `$0800-$0802` in LOBBY, quindi **`SYS 49158`** rientra nel gioco: [Cheat](cheats.md#ritorno-al-basic-e-rientro-sys-49158)). Il
+barbarian" in riga 10 e "back to main menu" in riga 11 (`MR_HERO`/`MR_NEW`/`MR_QUIT`/`MR_X`; fino al 15/11 "quit the game"); "version x.y" (riga 16) e
+copyright (riga 21) centrati in grigio; "fire:select" in riga 24; "all 5 slots are used." in riga 14. "back to main menu" (16/11, committente; `bb_menu` in `src/lobby.asm`) disinstalla Krill, azzera le pagine 2-3 e con il trampoline (`tramp.inc`, incluso in LOBBY) ricarica `BARBARIAN` con il KERNAL: riappare il menu iniziale (test `SAVE-17`); **"quit the game"** esiste ancora solo per i salvataggi di un'altra versione (`ui_badsave` → `bb_quit`, `$C009`: reset del KERNAL, BASIC). Fino all'11/11 `bb_quit` copiava `$0400-$07FF` in `$CC00` e `$0800-$0802` in LOBBY, quindi **`SYS 49158`** rientra nel gioco: [Cheat](cheats.md#ritorno-al-basic-e-rientro-sys-49158)). Il
 cursore passa solo su barbari, create e quit. Niente help (è nel menu del loader).
 **Nuovo barbaro** (`name_entry`, 09/11): titolo "new barbarian" con le spade; tre riquadri name (4,2,32,4), seed
 (4,6,32,4) e start (4,10,32,3) con etichette " name " e " seed "; il riquadro del campo attivo ha la cornice **verde**

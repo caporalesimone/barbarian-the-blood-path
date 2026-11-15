@@ -63,7 +63,7 @@ flowchart TD
     LJ --> LB["LOBBY: elenco eroi, scheda,<br/>nuovo barbaro (nome, seed)"]
     LB -->|"A = 1 nuovo"| NC["new_character<br/>cur_level = 0"]
     LB -->|"A = 0 continua"| CG["c_game + 1 (ripopola i piani)<br/>cur_level = c_loc"]
-    LB -->|"quit the game"| BAS["BASIC (reset, nessun rientro)"]
+    LB -->|"back to main menu"| BM["BARBARIAN: menu iniziale<br/>(Krill disinstallato, ricarica con il KERNAL)"]
     NC --> LL1["load_location (villaggio)"] --> PP["place_player (ingresso sud)"]
     PP --> SV["save_char + elenco eroi<br/>(rel_hold: una sola apertura)"]
     CG --> LL2["load_location (luogo salvato)"] --> POS["posizione salvata c_px, c_py"]
