@@ -59,12 +59,14 @@ def gold_total(ctx):
     g.poke16(L["c_gold"], 100); g.poke16(L["c_sgold"], 0)
 
 
-@test("OPT-05", "pot_heal: itval + itdn x level for the three potions at levels 1 and 99")
+@test("OPT-05", "pot_heal: itval + itdn x level for the three potions at levels 1 and 20, Abyss values (pab_*) at level 99")
 def pot_heal(ctx):
+    """(15/11, TODO J4) dungeon: red 20, yellow 50, violet 4L+40; Abyss (level > 20): 30, 75, 5L+28 (POT-10 reads items.tsv)"""
     g, L = ctx["g"], ctx["g"].L
     lv0 = g.b(L["c_lvl"])
-    for pid, (k, per) in ((13, (20, 0)), (14, (60, 0)), (15, (40, 4))):
-        for lv in (1, 99):
+    for pid, dun, aby in ((13, (20, 0), (30, 0)), (14, (50, 0), (75, 0)), (15, (40, 4), (28, 5))):
+        for lv in (1, 20, 99):
+            k, per = dun if lv <= 20 else aby
             g.poke(L["c_lvl"], lv)
             g.call_keep(L["pot_heal"], regs="y=%02x" % pid)
             got = g.b(L["mu0"]) + 256 * g.b(L["mu1"])

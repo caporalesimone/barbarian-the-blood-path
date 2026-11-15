@@ -202,15 +202,16 @@ costanti che definiscono le zone (sintassi ed esempi: README di Lab64, "Memory m
 
 Le annotazioni sono commenti e coppie di etichette: il binario non cambia (confrontato byte per byte: unico byte diverso la versione).
 
-**Numeri del 15/11**: RAM libera `$0400-$FFFF` per programma (statica, con le annotazioni): barbarian 59997 B, lore 22009 B, help
-49943 B, start 7628 B, **game 3071 B, 4667 B dopo l'avvio**, jukebox 58696 B. GAME per uso (`;@free`): 2270 B per codice, 1289 B per
-codice con l'I/O spento, 922 B solo dati. **Sonda** (regression completa + `PROBE-10..14`): ogni programma ha almeno una sessione.
+**Numeri del 15/11** (dopo D2, D12, J4): RAM libera `$0400-$FFFF` per programma (statica, con le annotazioni): barbarian 59997 B,
+lore 22179 B, help 49943 B, start 7653 B (9469 dopo l'avvio), **game 3036 B, 4852 B dopo l'avvio**, jukebox 58696 B. GAME per uso
+(`;@free`): 2515 B per codice, 1289 B per codice con l'I/O spento, 862 B solo dati. **Sonda** (regression completa + `PROBE-10..14`): ogni programma ha almeno una sessione.
 
 **Mappe a mano tolte (15/11)**: `tools/memory-map/gen_rammap.py` e `gen_diskmap.py` (`mappa_ram.html`, `mappa_disco.html`). Il loro
 contenuto ora e' nelle annotazioni (zone, memoria libera per uso, scenari, campi dei salvataggi), nell'indice di `lab64 map` (file,
-tracce e settori del disco) e nell'atlante (grafica e spazio libero del charset). Due cose non sono state portate: le pagine
-`$0000-$03FF` (Lab64 mappa da `$0400`; la mappa a mano dava liberi `$0200-$02FF` e `$8D-$8F`, ma li usano il residente di Krill
-e `LDFLAGS`/`CHRPRE`: era gia' sbagliata) e le descrizioni dei singoli blocchi di variabili `$9000-$9BFF` (la mappa automatica mostra
+tracce e settori del disco) e nell'atlante (grafica e spazio libero del charset). Le pagine `$0000-$03FF` le
+mappa Lab64 dalla 1.6 (sezione "Pages 0-3" di ogni programma: chi usa ogni byte dai listati, piu' la sonda; i `;@free` li' sono
+controllati; la mappa a mano dava liberi `$0200-$02FF` e `$8D-$8F`, ma li usano il residente di Krill e `LDFLAGS`/`CHRPRE`: era gia'
+sbagliata). Non e' stato portato solo il testo delle descrizioni dei singoli blocchi di variabili `$9000-$9BFF` (la mappa automatica mostra
 le variabili con i loro nomi).
 
 ## 4b. Programmi esterni compilati dentro le immagini (13/11; 14/11 ultime versioni dai sorgenti)
