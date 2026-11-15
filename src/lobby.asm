@@ -977,30 +977,20 @@ bb_quit:
 ; Come lore_exit (src/lore/scroll.asm): Krill disinstallato (il drive torna alla sua ROM), pagine 2-3 azzerate (il residente
 ; le ha sporcate: con le variabili RS-232 sporche il KERNAL si blocca), poi il trampoline ricarica BARBARIAN con il KERNAL.
 bb_menu:
-        jsr ui_begin            ; (16/11, committente) la stessa pagina di attesa del passaggio menu -> gioco (BARBARIAN/START: frase
-        .enc "screen"           ; in riga 10, gialla, e "please wait" in riga 13, bianco), prima di disinstallare Krill e ricaricare
-        #at 7,10
-        lda #UC_TITLE
-        sta ui_col
-        jsr ui_pi
-        .text "the crypt door creaks open"
-        .byte 0
-        #at 14,13
-        lda #UC_ITEM
-        sta ui_col
-        jsr ui_pi
-        .text "please wait"
-        .byte 0
-        .enc "none"
-        sei
-        lda #0
-        sta $d01a               ; niente raster IRQ ne' sprite
-        sta $d015
+        sei                     ; (16/11, committente) pagina di attesa "the crypt door closes / please wait" (waitmsg.inc, banco VIC 0:
+        lda #0                  ; la pagina del gioco, in banco 2, sparirebbe con IOINIT del trampolino), poi si disinstalla Krill
         sta $d418               ; SID muto (la musica del menu e' del player del gioco)
         lda #$ff
         sta $d019
-        lda #$0b
-        sta $d011
+        lda #<wm_msg
+        sta $fb
+        lda #>wm_msg
+        sta $fc
+        lda #<$b800             ; font della UI del gioco (codici 0-63)
+        sta $fd
+        lda #>$b800
+        sta $fe
+        jsr wm_show
         jsr krill_uninstall
         sei
         lda #0
@@ -1018,9 +1008,17 @@ _bz     sta $0200,x
         lda #bm_name_n
         jmp tramp_run
 mp_done .byte 0                 ; la musica del menu e' gia' partita in questa apertura
+        .enc "screen"
+wm_msg  .word $0400 + 10 * 40 + 9      ; frase (21 colonne) in riga 10, gialla; "please wait" in riga 13, bianco (come START)
+        .byte 7
+        .text "the crypt door closes", 0
+        .word $0400 + 13 * 40 + 14
+        .byte 1
+        .text "please wait", 0
+        .word 0
+        .enc "none"
 bm_name .text "barbarian"
 bm_name_n = * - bm_name
-        .include "tramp.inc"
 menu_end
         .cerror menu_end > MAP + $1000, "modulo menu oltre $CFFF"
         .cerror menu_end > $cc00, "LOBBY oltre $CBFF: copre lo schermo del titolo durante il caricamento (src/barbarian.asm)"

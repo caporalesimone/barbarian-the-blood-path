@@ -70,6 +70,7 @@ vettori come all'accensione), caricano il file all'indirizzo del PRG (`$0801`) c
   "the old scroll unrolls", "the crypt door creaks open"; dal 09/11 senza "...", centrate nelle 32 colonne). Qualunque voce
   (12/11 la storia, 15/11 anche manuale e gioco, committente) fa diventare **subito** nero lo schermo, poi la frase compare al
   centro (dal 16/11 riga 10, gialla, con **"please wait"** in riga 13, come la schermata di attesa di START: `BARBARIAN` carica `START` con il KERNAL e `START` carica il resto con Krill, due caricamenti in sequenza che ora hanno lo stesso aspetto; prima la frase era in riga 12): prima manuale e gioco scrivevano la frase sulla riga 17 sopra il menu, e il nero arrivava solo col programma caricato.
+- **Tornando al menu** (16/11, committente): LORE ("the legend falls silent"), HELP ("the old scroll rolls up") e la lobby ("the crypt door closes") mostrano una pagina di attesa (frase in riga 10, gialla, "please wait" in riga 13, bianco) prima del trampolino: `wm_show` in `src/common/waitmsg.inc` (banco VIC 0, schermo `$0400`, charset `$3800` copiato dal font della UI; la lobby usa il codice in GAME, `src/game/backmenu.asm`); prima lo schermo restava nero. Test `BOOT-16`, `SAVE-17`.
 - **RUN/STOP durante il caricamento** del programma scelto (LOAD del KERNAL nel trampoline, `tramp.inc`): il LOAD
   torna con C=1, A=0 (`$F633`) e il trampoline carica di nuovo BARBARIAN (il menu). Prima del 12/11 restava il bordo
   rosso fisso (riprodotto nell'emulatore web del committente; test `BOOT-12` in VICE). Gli altri errori di disco

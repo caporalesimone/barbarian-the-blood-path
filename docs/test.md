@@ -191,6 +191,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PROBE-13` | START: Krill installed, GAME loaded; the session ends in START just before GAME is unpacked (memory probe) |
 | `PROBE-14` | JUKEBOX: two tunes played and stopped; the session ends in JUKEBOX (memory probe) |
 | `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase (row 10) and 'please wait' (row 13), as START's wait screen (16/11) |
+| `BOOT-15` | START is silent (no SID player); LORE keeps its player (16/11) |
+| `BOOT-16` | HELP and LORE exits: wait page (phrase row 10, 'please wait' row 13, VIC bank 0 / `$0400` / `$3800`) before the reload of BARBARIAN (16/11) |
 | `BOOT-14` | BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), `$D018` as at power-on (16/11) |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |

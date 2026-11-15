@@ -144,8 +144,15 @@ lore_exit:
         sta $d418
         lda #$ff
         sta $d019
-        lda #$0b
-        sta $d011
+        lda #<wm_msg            ; (16/11, committente) pagina di attesa "the legend falls silent / please wait" (waitmsg.inc)
+        sta $fb
+        lda #>wm_msg
+        sta $fc
+        lda #<lore_font
+        sta $fd
+        lda #>lore_font
+        sta $fe
+        jsr wm_show
         jsr krill_uninstall     ; (11/11) il drive torna alla sua ROM: BARBARIAN si carica con il KERNAL
         sei
         lda #0                  ; pagine 2-3 azzerate come all'accensione (il residente di Krill le ha sporcate:

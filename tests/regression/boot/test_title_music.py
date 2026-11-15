@@ -51,8 +51,8 @@ try:
     check(v.b(L["sp_on"]) == 0, "before the LOAD: player stopped")
     check(v.mem(0xd400, 0x19) == [0] * 0x19, "before the LOAD: SID all 0 (volume included)")
     cnt = v.b(0xdc04) + 256 * v.b(0xdc05)                  # the counter runs down from the latch since tm_stop
-    want = 0x4025 - (c1 - c0)
-    check(0 < want and abs(cnt - want) <= 40, "before the LOAD: CIA1 timer A reloaded with the KERNAL latch $4025 (counter $%04x, expected ~$%04x after %d cycles)" % (cnt, want, c1 - c0))
+    want = (0x4025 - (c1 - c0)) % 0x4026     # (16/11) continuous mode: the wait page of the exit (wm_show) takes more than one KERNAL period
+    check(abs(cnt - want) <= 40 or abs(abs(cnt - want) - 0x4026) <= 40, "before the LOAD: CIA1 timer A reloaded with the KERNAL latch $4025 (counter $%04x, expected ~$%04x after %d cycles)" % (cnt, want, c1 - c0))
     fl = re.search(r"([01]{8})\s", v.cmd("r").split("\n")[-3] if False else v.cmd("r"))
     check(fl is not None and fl.group(1)[5] == "1", "before the LOAD: interrupts disabled (I flag)")
 finally:

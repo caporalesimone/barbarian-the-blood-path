@@ -719,6 +719,17 @@ UNP_AT  = LD_AT
 UNP_DST = LD_DST
         .include "lore/scroll.asm"
         .include "tramp.inc"
+        .include "waitmsg.inc"
+        .enc "screen"
+wm_msg  .word $0400 + 10 * 40 + 8     ; (16/11) frase in riga 10, gialla; "please wait" in riga 13, bianco (come START)
+        .byte 7
+        .text "the legend falls silent", 0
+        .word $0400 + 13 * 40 + 14
+        .byte 1
+        .text "please wait", 0
+        .word 0
+        .enc "none"
+lore_font .binary "../../out/work/gfx/uifont.bin", 0, 512   ; font della pagina di attesa (anche se si esce durante il caricamento)
 .else
         .include "pack.inc"         ; out/work/pack.inc: GAME_ZX_AT, GAME_ZX_DST (tools/build/pack.py)
 UNP_AT  = GAME_ZX_AT

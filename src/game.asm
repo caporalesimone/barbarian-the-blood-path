@@ -1932,6 +1932,7 @@ mod_theme
 mod_rel
         .include "rel.asm"
 mod_chap
+        .include "backmenu.asm"          ; (16/11) trampoline e pagina di attesa per "back to main menu" (LOBBY)
         .include "chapter.asm"           ; (12/11) sequenza dei capitoli: TODO M1
 .if CHEATS
 mod_cheats

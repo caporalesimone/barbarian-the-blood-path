@@ -204,7 +204,17 @@ def c9():
         v.cmd("break %04x" % lbl["ui_input"])
         if not v.go(30): err.append("menu: does not reach the key wait"); return
         v.cmd("del")
-        v.cmd("break ffe4"); v.cmd("r pc=%04x" % mlbl["bb_menu"])          # GETIN: the loader menu waits for a key
+        v.cmd("break %04x" % lbl["tramp_run"]); v.cmd("r pc=%04x" % mlbl["bb_menu"])      # the wait page, before the reload
+        if not v.go(30): err.append("back to main menu: tramp_run not reached"); return
+        v.cmd("del")
+        scr = v.mem(0x0400, 1000)
+        txt = lambda r: "".join(chr(c + 96) if 1 <= c <= 26 else (chr(c) if c == 32 else "?") for c in scr[r * 40:r * 40 + 40]).strip()
+        print("9 wait page: row 10 %r, row 13 %r, $D018 %02x, $D011 %02x, $DD00 %02x" % (txt(10), txt(13), v.b(0xd018), v.b(0xd011), v.b(0xdd00) & 3))
+        if txt(10) != "the crypt door closes" or txt(13) != "please wait":
+            err.append("back to main menu: wait page wrong (row 10 %r, row 13 %r)" % (txt(10), txt(13)))
+        if (v.b(0xd018) & 0xfe) != 0x1e or not v.b(0xd011) & 0x10 or (v.b(0xdd00) & 3) != 3:
+            err.append("back to main menu: VIC not on bank 0 / screen $0400 / charset $3800 / screen on")
+        v.cmd("break ffe4")                                                  # go on: the trampoline reloads the loader menu
         if not v.go(150): err.append("back to main menu: the loader menu does not come back"); return
         v.cmd("del")
         scr = v.mem(0x0400, 1000)

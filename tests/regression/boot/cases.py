@@ -107,6 +107,35 @@ def start_silent(ctx):
     check("sp_play" in Lg, "LORE lost its player (the intro has the music)")
 
 
+@test("BOOT-16", "HELP and LORE exits: wait page (phrase on row 10, 'please wait' on row 13, VIC bank 0, screen on) before the reload of BARBARIAN (16/11)")
+def exit_pages(ctx):
+    from lib.c64 import Vice, OUT
+    from vicemon import labels
+    def page(v):
+        scr = v.mem(0x0400, 1000)
+        t = lambda r: "".join(chr(c + 96) if 1 <= c <= 26 else (chr(c) if c == 32 else "?") for c in scr[r * 40:r * 40 + 40]).strip()
+        return t(10), t(13)
+    for name, entry, stop, want in (("help", None, "tramp_run", "the old scroll rolls up"),
+                                    ("lore", "lore_exit", "krill_uninstall", "the legend falls silent")):   # (no Krill resident here)
+        L = labels(name)
+        v = Vice(os.path.join(OUT, "disk.d64"))
+        try:
+            v.load(os.path.join(OUT, name + ".prg")); v.pc(0x080d)
+            if entry is None:                                       # HELP: RUN/STOP at its key read
+                v.brk(0xffe4); v.go(60); v.delbrk()
+                v.poke(0x0277, 3); v.poke(0xc6, 1)
+            else:                                                   # LORE: the exit routine called directly, once the stub has
+                v.brk(L["lm_init"]); v.go(60); v.delbrk()           # copied the body to $A000
+                v.pc(L[entry])
+            v.brk(L[stop]); ok = v.go(60); v.delbrk()
+            check(ok, "%s: %s not reached" % (name, stop))
+            p10, p13 = page(v)
+            check(p10 == want and p13 == "please wait", "%s: wait page wrong (row 10 %r, row 13 %r)" % (name, p10, p13))
+            check((v.b(0xdd00) & 3) == 3 and (v.b(0xd018) & 0xfe) == 0x1e and v.b(0xd011) & 0x10, "%s: VIC not on bank 0 / $0400 / $3800 / screen on" % name)
+        finally:
+            v.close()
+
+
 script("TITLEMUSIC-10", "HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",
        [PY, os.path.join(H, "test_title_music.py"), "help"])
 script("TITLEMUSIC-11", "BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",

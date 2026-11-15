@@ -108,8 +108,15 @@ prev    ldx pg
         jmp show
 
 quit    jsr tm_stop             ; sei, silenzio, IRQ e CIA come prima: prima del LOAD del KERNAL
-        lda #$0b
-        sta $d011
+        lda #<wm_msg            ; (16/11, committente) pagina di attesa "the old scroll rolls up / please wait" (waitmsg.inc)
+        sta $fb
+        lda #>wm_msg
+        sta $fc
+        lda #<font_d
+        sta $fd
+        lda #>font_d
+        sta $fe
+        jsr wm_show
         lda #nm_front_n
         ldx #<nm_front
         ldy #>nm_front
@@ -181,6 +188,16 @@ nm_front_n = * - nm_front
         .include "title_music.inc"      ; Demon's Eye con il player unico
 
 font_d  .binary "../out/work/gfx/uifont.bin", 0, 512
+        .include "waitmsg.inc"
+        .enc "screen"
+wm_msg  .word $0400 + 10 * 40 + 8     ; frase centrata (23 colonne) in riga 10, gialla; "please wait" in riga 13, bianco (come START)
+        .byte 7
+        .text "the old scroll rolls up", 0
+        .word $0400 + 13 * 40 + 14
+        .byte 1
+        .text "please wait", 0
+        .word 0
+        .enc "none"
         .include "help.inc"     ; out/work/help.inc (tools/build/gen_help.py): glifi dell'HUD e pagine
 help_end
         .cerror help_end > CHARS, "HELP oltre $3000 (charset)"
