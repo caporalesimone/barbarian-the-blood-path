@@ -1,0 +1,55 @@
+; Mappa del villaggio del capitolo 3 (48x48): The Last Camp, il campo nella neve. Una lettera per casella (tools/build/gen_maps.py, LEGEND e ALIASES).
+; Le lettere sono quelle del villaggio 1; i disegni dei tile sono a tema (tools/build/villages.py).
+; E=ingresso (arrivo dal capitolo prima)  P=posto del portale  ==uscita del capitolo (2 caselle)  >=porta della cripta
+; Un campo dentro una palizzata ovale in un bosco di abeti e massi. Dentro: sorgente calda (fontana) sul tavolato,
+; tenda del comando con gli stendardi (A), fabbro, alchimista, locanda, cerchio del portale. Fuori: torrente gelato a est
+; con il ponte verso la miniera (cripta), tumuli a sud-est. Ingresso a ovest, uscita sul bordo nord.
+; Prima stesura generata da lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+TTTTTTTTTTTTTTTTTTTTT==TTTTTTTTTTTTTTTT(%%)TTTTT
+TTTTTTTTTTTTTTTTTTTTT::TTTTTTTTTTTTTTTT(%%)TTTTT
+TTTTTBTTTTTTTTTTTTTTT::BTTBTTTTTTTTTTTT(%%)TTTTT
+TTTTTTTTBTTBTTTTTTTTT::TTTTTTTTTTTTTTTT(%%)TBBTT
+TTTTBTTTTTTBTTTTBBTTT::TTTTTTTTTTTTTTTT(%%)TTTTT
+TTTTTTTTTTBTTTTTTTTTT::TTTTTBTTTTTTTTTT(%%)TTTTT
+TTTTTTTTTTTTTTTTBTTTT::TTTTTTTTTTTTTTTT(%%)TBTTT
+TTTTTTTTTTTTBTTTTTTTT::TTTTTTTTTTTTTTTT(%%)BTTTT
+TTTTTTBTBTTTTTTTTTTTT::TTBTTTTTTTTTTTBT(%%)TTTTT
+TTTTTTTTTTTTTTTTBTTTB::TTTTTBTTTBTTTTTT(%%)TTTTT
+TTTTBTTTTTTTTTTTTTTTT::BTBTTTTBTTTTTBTT(%%)TTTTT
+TTTTTTTTTTTTTTTT|||||::||||TTTTTTTTTTTT(%%)TTTTT
+TTTTTTTTTTTTTT||TTBT.::.,T.||TTTTTTTTTT(%%)TBTTT
+TTTTTTTTTTTTA|TTBTA,.::.,..TT||TTTTTTTB(%%)TTTTT
+TTTTBTTTTTT|rrcrrrrB.::..RRcRRRRTTBTTTTT(%%)TTTT
+TTTTTTTTTT|Trrrrrrr.`::..RRRRRRR|BTTTTTT(%%)TTTT
+TTTTTTTTT|TTWWoWWWW..::.BWWW5WWW.|BTTBTT(%%)TTTT
+TTTTTTTT|TTTWoWDWoW*,::,.WoWSWoW,`|TTTTT(%%)TTTT
+TTTTTTT|vTTBTT*:.,...::.....:,..``v|TTTT(%%)TTTT
+TTTBTTTv.rcrrr.::::::::::::::.`....vTTBT(%%)TTTT
+TTTTTT|.,rrrrr..,..`,::....,`.,.,..,|TTB(%%BBBTT
+TTTTBTv..WW7WW.*i++++++++++i....*...vTTT(%%BBBTT
+TTTTTTvB.WoLoW...++++++++++,,,*,`*,TvTT(%%)/@\TT
+TTTTTTv*`..:..,..++++++++++.TsT`....vTT(%%)[>]TT
+TTTTTTv..`.:..``.++++~~++++.....,.*.vTB(%%),:`TT
+TTE::::::::::::::+++~12~+++::::::::::::xxxx::.TT
+TTTTTTv..:..`..,.+++~34~+++::::::::::::xxxx::.TT
+TTTTTTv+++,T*ss..++++~~++++,,....*,.vTT(%%)...TT
+TTTTBTv+P++.*,,.`++++++++++.*s*.T...vTB(%%)..,TT
+TTTTTTv++++,..*..++++++++++....`,...vTT(%%).*.TT
+TTTTTT|,+++.,,.`i++++++++++i......`*|T(%%)TTTTTT
+TTTTTTTv`.**T*.,T*....:,.T.....*.,.vTT(%%)TTTTTT
+TTBTTTB|v..`.RRRRR....:,,llcllll.*v|TT(%%)BTTTTT
+TTTTTTTT|,.T`RRRRR..,,:,.lllllll,B|TTT(%%)TTTTTT
+TTTTTTTTT|,..WWoWW`,,`:`.WWoWWWW*|TTTT(%%)TTTTTT
+TTTTBTTTTT|..WoDoW`..`:..WoWHWoW|TTTTT(%%)TTTTTT
+TTTTTTTTTTT|`..::::::::::::::..|TTTBTT(%%)TTTTTT
+TTTTTTTTTTTT||T...:.`.,,*.,..|||TTTTBT(%%)TTTTTT
+TTTTTTTTTTTTTT||t,t.t..,B,.|||||TTTTTTB(%%)TTTTT
+TTTBTTTTTTTTBTTTT|T|d.|||||TBTTTTTTTBTT(%%)TTTTT
+TTTTBTTTTTTTTTTTTTTBT|TTBBTTTTTTBTTTTTT(%%)TTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTBTTTTTTTTTTTT(%%)TTTTT
+TTTTTTTTTTTTTTTBBTBTTTTTTTTTTBTTBTTTTTT(%%)TTTTT
+TTTTTTTTBTTTTTTTTTTTTTTBTTBTTBTTTTTTTTT(%%)TTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTBTTTTTTT(%%)TTTTT
+TTTTTBTTTTTTTBTTTTBTTTTBBTTTTTTTTTTTTTB(%%)TTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT(%%)TTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT(%%)TTTTT

@@ -1,0 +1,64 @@
+; Mappa del villaggio del capitolo 3 (48x48): The Last Camp, un campo di guerra su tre terrazze nella neve. Una lettera per casella (tools/build/gen_maps.py).
+; Le lettere sono i POSTI dei tile (gli stessi del villaggio 1); qui disegnano i tile di questo villaggio
+; (tools/build/vil3_*.py). E=ingresso  P=posto del portale  ==uscita del capitolo (2 caselle). Legenda:
+;  `=Dry tufts  d=Wooden stairs  D=Laced flap  (=Gate post  )=Skull post  H=Mess tent  t=Watchtower legs
+;  Y=Watchtower top  [=Tent NW  ]=Tent NE  .=Snow  ,=Footprints  :=Trodden snow  W=Rock wall  R=Cliff edge
+;  S=Smith's tent  L=Healer's tent  7=Healer's post  ~=By the fire  T=Fir  >=Cave mouth  /=Tent SW  @=Tent top
+;  \=Tent SE  +=Log floor  1=Bonfire NW  2=Bonfire NE  3=Bonfire SW  4=Bonfire SE  *=Snow drift  o=Cairn  w=Supplies
+;  i=Brazier  B=Boulder  s=Weapon rack  r=Cliff foot  l=Mountain  5=Smith's post  c=Sled  v=Palisade (side)
+;  A=War banner
+; Niente acqua e niente case: tre terrazze nella montagna, separate da pareti di roccia (R orlo, W parete, r piede) e
+; unite da scale di legno (d). Bassa (sud): cancello nella palizzata a ovest con le torri (Y sopra t), la tenda della
+; mensa (locanda), slitte e provviste; scale a est. Media: il grande falo' (cura: i tronchi ~ attorno), fabbro e
+; alchimista (tende 3x2: [@] sopra, / porta \ sotto), tavolato del portale fra quattro massi; scale a ovest. Alta: tende
+; del comando con gli stendardi (A), tumuli dei caduti (o), la bocca della grotta (>) nella parete nord: l'ingresso del
+; sotterraneo. Ingresso del villaggio a ovest (terrazza bassa); uscita dal passo a nord-ovest (terrazza alta).
+; Prima stesura: lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+lllll==llllllllllTllllTlllllllllllllllllllTlllTl
+llTll::lllllllllllTlllllTlllllllllTlTlTlllllllll
+lllll::llTlllllTllllllllllllllllllllTlTTlllTlTll
+lllWl::WWWWWWWWWWWWWWWWWWWWWWWWWW>WWWWWWWWWWWlll
+lllrl::rrrrrrrrrrrrrrrrrrrrrrrrrr:rrrrrrrrrrrlll
+lllBB::T.*.`......*....T..`....i,:.i.......BTlll
+lllBB::T`....*.........B*.Y...*..:........T.Tlll
+lllBB::T.....*.[@].[@]..T.t`...*.:*..o.o.o..BllT
+TllBB::T......A/D\*/D\A.`B`......:.........T.llT
+TllBB::T.......,:,`.:,.*........,:,..o.o.o...lll
+TTTT.::,*,..,..,:,,.:..``.*.*,..`:,.`.......BllT
+TllBB:::::::::::::::::::::::::::::,.*....*.TBTll
+llTT.,..:..,.,,...,.,.,...,.,,....,..o.o.o..Tlll
+lllTB..`:............B....T.......*...*...`..lll
+lllBB.T*dd...................BRRRRRR..`....TTlTl
+lllRRR..dd*..B...`RRRRRRRRRRRRWWWWWWRRRRRR.BTlll
+lTlWWWRRddRRRRRRRRWWWWWWWWWWWWWWWWWWWWWWWWRRRlll
+lTTWWWWWddWWWWWWWWWWWWWWWWWWWWrrrrrrWWWWWWWWWlll
+TllrrrWWddWWWWWWWWrrrrrrrrrrrrB.T...rrrrrrWWWlll
+lllBTBrrddrArrrrrr..............*.........rrrTll
+lllBTTY.dd`..........T.T.........T.....B...TTTlT
+lll.*.t.dd**[@]..T.`...,,.,...[@].........*.TTll
+lll.B*.*.:.7/L\....i::::::i.T./S\5.....B`..BTlll
+lll.T`T..:,*.:,...`::::::::....:,.*...T.+++*Blll
+lllTB...*:...::::::::~12~:::::::..*wwB..+P+.Blll
+lllB.T..`::::::s:::::~34~:::,.,,..B.....+++TBlll
+TllT......,.,...,.,:::~~:::,...*..`T....+++TBlll
+lllTB.........*.`[@]::::::.[@].........B.:.BTlll
+lllT...*........./D\,`.:.,./D\,..,......*:,.Tlll
+lTlBB..B..............*:.:::::::::::::::::*.BTll
+lllT..`.............T..*,,.RRRRRRRRRddR.,`.BTlll
+lllRRRRRR.......B....RRRRRRWWWWWWWWWddWRRRRRRlll
+lllWWWWWWRRRRRRRRRRRRWWWWWWWWWWWWWWWddWWWWWWWTll
+lllWWWWWWWWWWWWWWWWWWWWWWWWrrrrrrrrrddrWWWWWWlTl
+lllrrrrrrWWWWWWWWWWWWrrrrrr.........dd`rrrrrrlll
+lllTBB.v.rrrrrrrrrrrr..............*dd...*...lll
+lTlBBT*v.....`[@]TT.*`[@]..[@]..*...dd.....`Tlll
+TlTT.*.vY...../H\....T/D\../D\.T.T..dd.wws`.Tlll
+lllT...vt.T*Ti.:*i.......T..*...*...dd.cBT`TTlll
+lTl,T`.(,.,.,..:..,,,,.,.....,.,,...dd..T.`TTlll
+llE:::::::::::::::::::::::::::::::::::..**..Blll
+lTlB...),...,,.......,.`,,..,...*,..,,.T....Tlll
+lllT*..vY`.......Bcc.w.T.......s.s....B*.i.TBlll
+lTlT*..vt.*ww*..T..*.*.......`*.T....B......Tlll
+TTlBT.Bv.......B..`B.B`...........`.........Tlll
+lllTTTBBTTTTTBTTTTBTTTBTBBBBBBTTTTBTTTTTTTTTTlll
+lTllTlTllTTTlllTllllllllllllllllllllllllllllllll
+lllllllllllllllllllllllllllllllllllllTlllllTTlll

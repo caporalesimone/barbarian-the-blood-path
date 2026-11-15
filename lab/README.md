@@ -12,5 +12,6 @@ nulla qui deve servire per costruire il gioco (se serve, va spostato in `src/`, 
 | `concepts/` | immagini di concept del gioco | sì |
 | `fonts/out_reliquia/` | anteprime delle varianti "reliquia" del font della UI, conservate come riferimento della scelta (le anteprime nuove le scrivono `tools/font/*.py` in `out/font/`) | sì |
 | `krill-proto/` | prototipo di prova di Krill's Loader (prima dell'integrazione nel gioco, `docs/FastLoader.md`) | sì |
+| `villaggi/` | (15/11) concept delle mappe dei villaggi dei capitoli 2–5 (`concept_maps.py`, `mapkit.py`: prima stesura dei testi in `data/`) e `proposta-a-temi/`, la proposta scartata (stessa struttura del villaggio 1 con altri tile), da valutare | sì |
 | `viewer-audio/` | prototipo (13/11): audio degli emulatori nel browser, Guacamole contro KasmVNC, con le misure (`README.md`) | sì |
 | `music/` | brani MP3 di riferimento e candidati (~13 MB) | **no** (`.gitignore`): includerli a mano quando si scarica il progetto |

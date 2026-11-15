@@ -175,8 +175,10 @@ _nl
         lda mtype-1,x
         cmp #T_FINAL
         beq _type
-        lda bar_m
-        cmp lb_boss
+        cpx lb_boss
+        bne _type
+        lda #T_FINAL            ; (15/11) boss del capitolo: il nome del posto del boss del file del tema ("the hollow abbot")
+        ldy lv_cboss
         bne _type
         ldx lb_bn1
         lda fn_lo,x
@@ -193,15 +195,9 @@ _nl
         tax
         pla
         jmp bn_put
-_type   ldx bar_m
-        dex
-        lda mtype,x
-        tax
-        lda tn_lo,x
-        pha
-        lda tn_hi,x
-        tax
-        pla
+_type   tax                     ; (15/11) A = tipo 1..9: nome del set del capitolo (blocco info del file del tema a NM_AT,
+        lda NM_AT+8,x           ; tools/build/gen_gfx.py: 9 colori, 9 byte bassi degli indirizzi, nomi; una sola pagina)
+        ldx #>NM_AT
         jmp bn_put
 
 ; ricostruisce i dati sprite per il bersaglio corrente
@@ -534,7 +530,6 @@ ls_kchest .text "locked chest", 0
 ls_gchest .text "golden chest", 0
 ls_smith  .text "blacksmith", 0
 ls_alch   .text "alchemist", 0
-ls_fount  .text "fountain of saint aldric", 0
 ls_uptown .text "stairs up to town", 0
 ls_nokey  .text "locked: missing key!", 0
 ls_home   .text "inn", 0

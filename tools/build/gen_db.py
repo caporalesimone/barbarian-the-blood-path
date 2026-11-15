@@ -407,6 +407,8 @@ def main():
         t["llb"].append(byte(b.get("loot_level_bonus", 0), k))
         t["ptr"].append(PTR_BASE + 2 * i if i < nb else PTR_STRONG + 2 * (i - nb))
     for f, v in t.items():
+        if f == "col":          # (15/11) colori e nomi dei tipi: dal file del tema del capitolo (gen_gfx.py, blocco info a NM_AT)
+            continue
         o.bytes(("mon_" if f in ("spd", "col", "llb", "ptr") else "mt_") + f, v)
     o.bytes("gr_ac", [int(p * G["ac_per_floor"]) for p in range(maxl)])
     o.bytes("gr_att", [int(p * G["att_per_floor"]) for p in range(maxl)])
@@ -541,7 +543,7 @@ def main():
     # ------------------------------------------------------------ nomi (codici schermo)
     o('        .enc "screen"')
     o.strings("itnm", [asm_str(it["name"], f"nome {k}") for k, _, it in items])
-    o.strings("tn", ["-"] + [asm_str(k.replace("_", " "), "nome mostro") for k, _ in mons_r])
+    # (15/11) niente piu' tn_*: i nomi dei tipi stanno nel file del tema del capitolo (tools/build/gen_gfx.py, NM_AT)
     o.strings("fn", [asm_str(n, "boss") for n in bw["first_names"]])
     o.strings("ep", [asm_str(n, "boss") for n in bw["epithets"]])
     o('        .enc "none"')

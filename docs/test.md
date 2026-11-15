@@ -82,6 +82,10 @@ del 12/11: smoke + sanity 35 test in ~21 s (tetto 35 s); il test più lento `CHA
 - `tests/lib/emu.py` (13/11): il secondo emulatore (vc64web), vedi sopra e [emulatore.md](emulatore.md).
 - `Game.call_keep(addr)`: chiama una routine del gioco fra due letture dell'input e torna dov'era (registri
   ripristinati); `regs()` legge pc/a/x/y/sp.
+- `tests/lib/loads.py` (15/11, ex TODO A2, [FastLoader.md](FastLoader.md) 4.1): `directory(d64)` (file nell'ordine della directory,
+  con i byte), `ram()` (RAM anche sotto le ROM), `load_to()` (un `krill_loadraw` diretto) e **`LoadCheck`**: come `call_keep`, ma
+  ferma ogni `krill_loadraw` della routine e, al ritorno, confronta byte e indirizzo di fine con il file sul disco (`KRILL-24`).
+  Per controllare che un percorso nuovo del gioco legga i file giusti basta chiamarlo con `LoadCheck.call`.
 - Prestazioni (`regression/perf`): durata di ogni fotogramma = cicli fra due letture dell'input; perso = più di 1,5
   fotogrammi PAL. Le soglie sono le misure dell'11/11 più un margine ([prestazioni](prestazioni.md)).
 - **Sonda della memoria** (14/11, `C64_MEMPROBE=1`, `./build.sh --probe`): ogni `Vice()` avviato senza `-autostart` riempie la RAM
@@ -135,17 +139,28 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `DEATH-01` | death: screen, village, half gold, full hp |
 | `PG-SAVE-01` | game menu 'save game': back in the game; the hero on disk equals the one in RAM |
 | `PG-LOAD-01` | save game, change the gold, quit (no save): the barbarian loads back as saved |
-| `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT ($ED00, under the KERNAL) equals out/work/gfx/gfx1.prg |
+| `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (2)
+### sanity (13)
 
 | ID | Test |
 |---|---|
-| `CS-10` | no points, no respec token: no entries (no '>'), 'no points to spend.', RUN/STOP back to the game |
-| `CS-11` | no points, 1 respec token: only 'respec' (cursor on row 16); fire + yes: points back, all the entries again |
+| `CHEAT-10` | game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter |
+| `CHEAT-11` | god mode on: no damage (hurt_player); god mode off: damage again |
+| `CHEAT-12` | level up: level + 1, xp = threshold of that level, stat points of pl_pts, hp max up and full; message 'level N' |
+| `CHEAT-13` | respec token: +1, message 'tokens N' |
+| `CHEAT-14` | level up at the maximum level (PL_MAXLVL): nothing changes, message 'limit reached' |
+| `CHEAT-15` | next level in the village: the first level of the chapter (as the crypt) |
+| `CHEAT-16` | next level in a level of the chapter: the next level (as the stairs down) |
+| `CHEAT-17` | next level on level 4 -> boss level 5; there: boss killed (c_unl = 2, exit open), back to village 1 at the crypt |
+| `CHEAT-18` | next chapter from a level (village 1 -> level 1 -> village 2): unlocked, saved in village 2, no portal back |
+| `CHEAT-19` | next chapter in a village (village 2 -> 3, then 4): c_unl follows, hero saved there |
+| `CHEAT-20` | next level in the throne room (level 20): as the final boss killed (c_won, c_unl 5, respec gift), village 4 |
+| `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
+| `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
 
-### regression (154)
+### regression (182)
 
 | ID | Test |
 |---|---|
@@ -161,6 +176,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LORE-10` | release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), return, START |
 | `HELP-10` | release: the HUD crop in the help equals the game HUD |
 | `BOOT-12` | RUN/STOP while the KERNAL loads LORE (from the BARBARIAN menu): back to the menu, no red border (12/11) |
+| `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase, centred on row 12 (15/11) |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |
 | `BUILD-12` | variant: Fire on stairs (TESTFIRE) |
@@ -176,6 +192,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-SEQ-12` | killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2) |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
 | `CHAP-SEQ-14` | chapter 2: the crypt leads to level 6 (first of the chapter); its stairs up lead back to the village |
+| `CS-10` | no points, no respec token: no entries (no '>'), 'no points to spend.', RUN/STOP back to the game |
+| `CS-11` | no points, 1 respec token: only 'respec' (cursor on row 16); fire + yes: points back, all the entries again |
 | `DISK-10` | the disk has every file (loader, START, game, LORE, LDAT, TITLE, HELP, JUKEBOX, saves, ...) |
 | `DISK-12` | entry of the tests (11/11, Krill): the real START from the monitor (Krill installed), new game in the village |
 | `DUNG-CHEST-10` | key chest: without a key 'it is locked' (stays closed); with a key it opens, one key used |
@@ -222,14 +240,24 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (9 blocks), barbarian first |
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
 | `KRILL-13` | no KERNAL disk call left in GAME, LOBBY, MENU and START (listing scan: after the install the drive does not answer the KERNAL) |
+| `KRILL-20` | village entry order: MENU1, MENU2, MENU3 (load_file) then SND0 (load_raw): each one read whole at the first read (end address and bytes) |
+| `KRILL-21` | snd_get checks the end address: every song read once into both buffers; with a wrong expected length 3 reads, then no music in that buffer (snd_cur = 0) |
+| `KRILL-22` | ovl_town checks the end of every MENU part (= end of its zone): a part that does not end there is read 3 times, then C = 1 |
+| `KRILL-23` | every file of the disk loaded right after its predecessor in the directory (served from the drive's next-file cache) equals its file: bytes and end address |
 | `KRILL-17` | 1541-II (VICE 1542): START with Krill, menu, new hero (save plugin), village read |
 | `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 of Lab64) |
 | `KRILL-14` | Krill install fails (simulated: from the install straight to kr_fail): message, a key, BARBARIAN loaded again |
+| `KRILL-24` | walk through chapters 1-4 to village 5 (levels, boss levels, villages, saves, travels, LOBBY): every load equals its file |
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
 | `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
+| `MON-CHAP-11` | chapter 1: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-12` | chapter 2: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-13` | chapter 3: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-14` | chapter 4: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
+| `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
 | `MUSIC-10` | songs per level, buffer = SNDn files, combat and resume, copy under I/O |
 | `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |
@@ -257,6 +285,11 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PERF-DISK-13` | stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM) <= its limit |
 | `PERF-DISK-14` | full village entry from level 1 (change_level: fade, GFX0, MENU module, gfx_install, song) <= its limit |
 | `PERF-DISK-12` | saves with the Krill plugin (hero file in the village, hero list) <= their limits |
+| `PERF-DISK-21` | village 1: file alone, full entry (from level 1), theme, stairs, boss level <= their limits |
+| `PERF-DISK-22` | village 2: file alone, full entry (from level 6), theme, stairs, boss level <= their limits |
+| `PERF-DISK-23` | village 3: file alone, full entry (from level 11), theme, stairs, boss level <= their limits |
+| `PERF-DISK-24` | village 4: file alone, full entry (from level 16), theme, stairs <= their limits |
+| `PERF-DISK-25` | village 5: file alone, full entry <= their limits |
 | `PERF-OPT-10` | mark_explored: the explored map equals the reference (9 x 7 cells around the hero) at the edges and inside |
 | `PERF-OPT-11` | HUD: a hit taken redraws only the HP panel, experience only the XP panel (hud_pend), not the whole HUD |
 | `POTION-10` | minor healing (red): +20, 5 s cooldown, red in the belt, capped at max hp |
@@ -303,6 +336,16 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MENU-10` | out/work/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2 |
 | `MENU-11` | ovl_town from the disk (as at the village entry): the 3 zones equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
+| `VIL-TWN-11` | village 1 (Aldric's Crossing): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-12` | village 2 (Blackwater Mill): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-13` | village 3 (The Last Camp): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-14` | village 4 (Ruin's Gate): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-15` | village 5 (The City of the Abyss): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-20` | village 3: the healing place heals and has its own name; portal arrival below the portal tile; the way down leads to level 11 and back onto it |
+| `VIL-TWN-21` | village 5 (City of the Abyss, prototype): the Maw does not lead anywhere yet |
+| `VIL-BOSS-10` | boss levels of chapters 1-3: the boss is drawn with its own sprite colour (set of the chapter), in the slot of the final boss |
+| `VIL-TWN-22` | villages 2-5: fire one tile below the doors opens smith, alchemist and inn; RUN/STOP closes them |
+| `VIL-TWN-23` | village 4 with chapter 5 unlocked (final boss killed): the exit in the crater leads to the City of the Abyss, hero saved at its entry |
 
 ## Bug trovati dalla ristrutturazione
 

@@ -143,13 +143,36 @@ def roles(slot, town):
 SETS = []
 
 
-def add_set(code, title, tiles, names, letters, pal_i, mp, used, solid_names, town):
-    SETS.append(dict(code=code, title=title, tiles=tiles, names=names, letters=letters, pal=palette(pal_i), pal_i=pal_i,
+def add_set(code, title, tiles, names, letters, pal_i, mp, used, solid_names, town, pal=None, solid_list=None, mapsrc=None):
+    """pal = colori propri (villaggi dei capitoli 2..: stanno nel file TWNc, non nelle tabelle di src/game.asm);
+    solid_list = posti solidi propri; mapsrc = da dove viene la mappa (testo per la pagina)"""
+    if solid_list is None:
+        nm = G.TOWN_TILES if town else G.TILES
+        solid_list = [i for i in range(len(tiles)) if nm[i] in solid_names]
+    SETS.append(dict(code=code, title=title, tiles=tiles, names=names, letters=letters, pal=pal or palette(pal_i), pal_i=pal_i,
+                     solid_list=solid_list, mapsrc=mapsrc,
                      map=mp, used=used, solid=solid_names, town=town))
 
 
 add_set("VILLG", "Village (GFX0, palette 0)", town_t, {i: n for i, n in enumerate(G.TOWN_TILES)}, TOWN_LET, 0,
         town_map, set(range(NT)), G.SOLID, True)
+# (15/11, TODO Z2) villaggi dei capitoli 2..5: file TWNc, tile, colori, mappa e tile solidi propri (tools/build/villages.py).
+# I nomi dei tile ridisegnati stanno nel modulo del villaggio (vilN_*.py) e si aggiungono qui ad AN.TILE.
+import villages as VIL
+for _c, _v in sorted(VIL.VILLAGES.items()):
+    if not _v["tiles"]:
+        continue
+    _names = {}
+    for _i, _n in enumerate(G.TOWN_TILES):
+        _t = VIL.tile_name(_c, _n)
+        if _t:
+            AN.TILE["V%d:%s" % (_c, _n)] = _t
+        _names[_i] = "V%d:%s" % (_c, _n) if _t else _n
+    _map = read_map(_v["map"], {c: G.TTID[n] for c, n in M.inv_legend().items()})
+    _sol = VIL.solid(_c, G.TOWN_TILES, G.SOLID)
+    add_set("VILL%d" % _c, "%s (TWN%d, its own colours)" % (_v["name"], _c), tiles_from(rd("out/work/gfx/twn%d.prg" % _c)[2:], NT),
+            _names, TOWN_LET, 0, _map, {t for r in _map for t in r} | {G.TTID["PORTAL"]}, G.SOLID, True,
+            pal=list(_v["pal"]), solid_list=[i for i in range(NT) if _sol[i]], mapsrc=_v["map"])
 for k in range(1, 9):
     add_set("DUNG" + "ABCDEFGH"[k - 1], "Dungeon, palette %d (GFX1)" % k, dun_t, {i: G.TILES[i] for i in range(DN)}, DUN_LET,
             k, dmap, {G.TID[n] for n in G.DUN_USED}, G.SOLID, False)
@@ -264,7 +287,7 @@ for s in SETS:
         name = s["names"][i]
         records.append(dict(id=tid, set=s["code"], tile=i, letter=s["letters"][i], name=name.lower(),
                             nome=AN.TILE[name][0], desc=AN.TILE[name][1],
-                            solid=G.TOWN_TILES[i] in G.SOLID if s["town"] else G.TILES[i] in G.SOLID,
+                            solid=i in s["solid_list"],
                             used=i in s["used"], role=roles(i, s["town"]), palette=s["pal_i"],
                             chars=[i, 64 + i, 128 + i, 192 + i], png=png, count=counts.get(i, 0),
                             group=[g["name"] for g in groups if g["set"] == s["code"] and s["letters"][i] in "".join(g["rows"])]))
@@ -297,6 +320,50 @@ tim.resize((640, 400), Image.NEAREST).save(os.path.join(OUT, "png", "title.png")
 title_size = len(rd("out/work/title.prg")) - 2
 import shutil
 shutil.copy(os.path.join(ROOT, "out", "work", "gfx", "sprites.png"), os.path.join(OUT, "png", "sprites.png"))
+
+
+# ------------------------------------------------------------------ mostri per capitolo (15/11): dai file GFXn che legge il C64
+def _consts():
+    t = open(os.path.join(ROOT, "out", "work", "gfx_consts.inc")).read()
+    return {k: int(v.replace("$", "0x"), 0) for k, v in re.findall(r"^(GFX_\w+|NM_AT)\s*=\s*(\$?[0-9a-fA-F]+)", t, re.M)}
+
+
+def _spr_png(d, col, path, sc=4):
+    """sprite multicolor 24x21 (63 byte): 01 = MC0 marrone 9, 10 = colore dello sprite, 11 = MC1 grigio chiaro 15"""
+    im = Image.new("RGB", (24 * sc, 21 * sc), (24, 24, 28))
+    pal = [None, PAL[9], PAL[col], PAL[15]]
+    for y in range(21):
+        for bx in range(3):
+            b = d[y * 3 + bx]
+            for p in range(4):
+                v = (b >> (6 - 2 * p)) & 3
+                if v:
+                    for xx in range(2 * sc):
+                        for yy in range(sc):
+                            im.putpixel(((bx * 4 + p) * 2 * sc + xx, y * sc + yy), pal[v])
+    im.save(path, optimize=True)
+
+
+def monster_sets():
+    K = _consts()
+    off_m = 4 * K["GFX_DSTRIP"]
+    off_s, off_i = off_m + K["GFX_MONS"], off_m + K["GFX_MONS"] + K["GFX_STRONG"]
+    tiers = ["base"] * 4 + ["strong"] * 4 + ["boss"]
+    out = []
+    for f in range(1, 2 * G.CHAPTERS + 1):
+        d = rd("out/work/gfx/gfx%d.prg" % f)[2:]
+        info = d[off_i:off_i + K["GFX_INFO"]]
+        mons = []
+        for t in range(9):
+            spr = d[off_m + t * 128:off_m + t * 128 + 63] if t < 4 else d[off_s + (t - 4) * 128:off_s + (t - 4) * 128 + 63]
+            a = info[9 + t] - (K["NM_AT"] & 255)
+            name = "".join(chr(c + 96) if 1 <= c <= 26 else chr(c) for c in info[a:info.index(0, a)])
+            png = "mon_f%d_%d.png" % (f, t + 1)
+            if not CHECK:
+                _spr_png(spr, info[t], os.path.join(OUT, "png", png))
+            mons.append(dict(t=t + 1, name=name, col=info[t], tier=tiers[t], png=png))
+        out.append(dict(file="GFX%d" % f, chapter=(f + 1) // 2, boss=f % 2 == 0, mons=mons))
+    return out
 
 
 def spans(xs):
@@ -344,7 +411,7 @@ for s in SETS:
                              descs={str(i): AN.TILE[n][1] for i, n in s["names"].items()},
                              letters={str(i): c for i, c in s["letters"].items()}, map=s["map"],
                              used=sorted(s["used"]), counts={str(k): v for k, v in s["counts"].items()},
-                             solid=[i for i in range(len(s["tiles"])) if (G.TOWN_TILES[i] if s["town"] else G.TILES[i]) in G.SOLID],
+                             solid=s["solid_list"], mapsrc=s["mapsrc"],
                              roles={str(i): roles(i, s["town"]) for i in range(len(s["tiles"]))},
                              free_letters="".join(chr(c) for c in range(33, 127)
                                                   if chr(c) not in s["letters"].values() and chr(c) != ";")))
@@ -356,7 +423,7 @@ for g in groups:
 # ------------------------------------------------------------------ spazio: posti liberi utilizzabili e % di utilizzo
 space = []
 for s in SETS:
-    if s["code"].startswith("DUNG") and s["code"] != "DUNGA":
+    if (s["code"].startswith("DUNG") and s["code"] != "DUNGA") or (s["code"].startswith("VILL") and s["code"] != "VILLG"):
         continue
     cap = len(s["tiles"])
     free = [i for i in range(cap) if i not in s["used"]]
@@ -409,10 +476,12 @@ MENUS = {"menu_iniziale": ("barbarian menu", "start menu: the heroes, create new
          "locanda": ("inn", "the inn chest (OVLT/OVL2)"), "locanda_scelta": ("inn: choice", "inn: what to wear"),
          "baule": ("chest", "a level chest"), "mappa": ("minimap", "minimap (M)"), "leva": ("lever", "the lever of the throne room"),
          "morte": ("death", "the death screen"), "io_screen": ("loading", "waiting screen while loading or saving"),
-         "io_generico": ("loading", "generic loading"), "io_livello": ("level loading", "loading of a level")}
+         "io_generico": ("loading", "generic loading"), "io_livello": ("level loading", "loading of a level"),
+         "trucchi": ("cheats", "debug and test builds only (CHEATS=1): the cheat menu, entry 'cheats' of the game menu")}
 scr_dir = os.path.join(ROOT, "docs", "screens")
 DATA["menus"] = [dict(file=f, title=MENUS.get(f[:-4], (f[:-4], ""))[0], desc=MENUS.get(f[:-4], ("", "(no description: add it in tools/atlas/gen_atlas.py MENUS)"))[1])
                  for f in sorted(os.listdir(scr_dir)) if f.endswith(".png") and f != "tutti_i_menu.png"]
+DATA["monsters"] = monster_sets()
 html = html.replace("/*DATA*/null", json.dumps(DATA, separators=(",", ":")))
 html = html.replace("/*TITLE*/null", json.dumps(title_info))
 open(os.path.join(OUT, "index.html"), "w").write(html)

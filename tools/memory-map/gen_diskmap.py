@@ -124,10 +124,11 @@ for f in files:
                 kind = "Capitolo %d: dungeon (piani %d-%d)" % (ch, 5 * ch - 4, 5 * ch)
             else:
                 kind = "Capitolo %d: boss, tile della sala del trono (piano %d)" % (ch, 5 * ch)
-            GFX.append(dict(f=f, n=n, kind=kind, load=0xED00, size=len(d),
+            GFX.append(dict(f=f, n=n, kind=kind, load=f["data"][0] | f["data"][1] << 8, size=len(d),
                             tiles=DSTRIP // 8, chars=tot, used=used, uniq=uniq,
                             parts=[("Tile: 4 strisce x %d B (%d tile)" % (DSTRIP, DSTRIP // 8), 4 * DSTRIP),
-                                   ("Sprite mostri base (8)", MONS), ("Sprite forti + boss (10)", STRONG)],
+                                   ("Sprite mostri base del capitolo (8)", MONS), ("Sprite forti + boss (10)", STRONG),
+                                   ("Colori e nomi dei 9 tipi (blocco info -> NM_AT, 15/11)", len(d) - 4 * DSTRIP - MONS - STRONG)],
                             spr=(m1, m2)))
 
 # ------------------------------------------------------------------ blocco eroe (da src/game/game.asm)
@@ -205,7 +206,7 @@ WHAT = {"barbarian": "Loader (LOAD\"*\",8, src/barbarian.asm): release = menu (l
         "help": "HELP, il manuale (src/help.asm, compresso ZX0 con il decompressore in testa: src/help/zx0sfx.asm): 5 pagine RLE da data/help.txt, ritaglio dell'HUD (tools/build/gen_help.py, docs/help.md); solo release",
         "ldat": "Dati della storia, compressi ZX0: charset, sprite, forme delle immagini, righe (tools/build/gen_lore.py, docs/intro.md)", "hl": "Elenco eroi (salvataggi, Krill)", "save-01": "Salvataggio dell'eroe 1", "save-02": "Salvataggio dell'eroe 2", "save-03": "Salvataggio dell'eroe 3", "save-04": "Salvataggio dell'eroe 4", "save-05": "Salvataggio dell'eroe 5", "menu1": "Modulo MENU, zona 1 (ZX0)", "menu2": "Modulo MENU, zona 2 (ZX0)", "menu3": "Modulo MENU, zona 3 (ZX0)",
         "game": "Il gioco compresso ZX0 (decompresso in $0400-$%04X)" % (L["code2_end"] - 1), "lobby": "Menu iniziale LOBBY ($C000)", "title": "Schermata del titolo (bitmap multicolor)",
-        "twn1": "Villaggio del capitolo 1: tile e mappa (12/11: TWNc, oggi i 4 villaggi sono copie di out/work/gfx0.prg)", "twn2": "Villaggio del capitolo 2 (segnaposto: copia del villaggio 1)", "twn3": "Villaggio del capitolo 3 (segnaposto)", "twn4": "Villaggio del capitolo 4 (segnaposto)",
+        "twn1": "Villaggio del capitolo 1, Aldric's Crossing: tile, intestazione (posizioni, colori, nome della cura, tile solidi) e mappa RLE (15/11: ogni villaggio ha i suoi, tools/build/villages.py)", "twn2": "Villaggio del capitolo 2, Blackwater Mill (palafitte sul lago nero)", "twn3": "Villaggio del capitolo 3, The Last Camp (campo a terrazze nella neve)", "twn4": "Villaggio del capitolo 4, Ruin's Gate (citta' in rovina attorno al cratere)", "twn5": "Villaggio 5, The City of the Abyss (isole nel vuoto; prototipo: ci si arriva dopo il boss finale)",
         "bossch1": "Mappa del piano del boss del capitolo 1, piano 5 (segnaposto, tools/build/gen_bossmap.py)", "bossch2": "Mappa del piano del boss del capitolo 2, piano 10 (segnaposto)", "bossch3": "Mappa del piano del boss del capitolo 3, piano 15 (segnaposto)", "menu": "Menu del villaggio (11/11, oggi la locanda): OVL2 + OVLT compressi ZX0 (tools/build/pack_menu.py). Prima apertura della locanda: tutto (OVLT a $C900, OVL2 a $F500); se manca solo OVL2 (il precaricamento l'ha sovrascritto) si legge solo la prima parte",
         "fmap": "Mappa della sala del trono, piano 20 (RLE, tools/build/gen_final.py): letta una volta nella cache sotto il KERNAL, dopo la mappa del villaggio",
         "jukebox": "Prova di brani ed effetti (solo disco di sviluppo, docs/musica.md)"}

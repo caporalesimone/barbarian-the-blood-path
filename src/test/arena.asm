@@ -4,7 +4,7 @@
 ;  Si usa SOLO con la build arena del gioco (out/work/arena_game.prg, ARENA=1): stessa logica di
 ;  combattimento del gioco vero, ma niente loader, menu, villaggio, disco, zaino, drop.
 ;  Comandato da tools/vice/arena.py attraverso il monitor di VICE:
-;    1. carica arena_game.prg, arena.prg e il tema GFXn in $ED00 (RAM sotto il KERNAL)
+;    1. carica arena_game.prg, arena.prg e il tema GFXn a GFX_DUN_AT (RAM sotto il KERNAL, indirizzo del file)
 ;    2. scrive il blocco parametri (PAR) e fa partire game_start
 ;    3. il modulo esegue PAR_FIGHTS combattimenti uno dopo l'altro e si ferma su ar_halt
 ;    4. lo script legge il blocco risultati (RES) e il registro dei combattimenti (LOG)
@@ -94,7 +94,7 @@ _z      sta RES,x
         sta c_loc
         jsr floor_types         ; statistiche dei mostri del piano
         jsr irq_off
-        lda cur_level           ; tema gia' in $ED00 (caricato da tools/vice/arena.py)
+        lda cur_level           ; tema gia' a GFX_DUN_AT (caricato da tools/vice/arena.py)
         jsr lvl_theme
         lda #1
         jsr gfx_install

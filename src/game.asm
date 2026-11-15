@@ -43,7 +43,8 @@ CHARSET    = $a800
 
 MAP        = $c000          ; 48x48 tile
 LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM della mappa, che nel menu non serve
-TOWN_MAX   = $0700          ; mappa del villaggio (RLE, in GFX0 dopo i tile): massimo 1792 byte
+TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile): fino a $ED00
+                            ; (il file del tema comincia GFX_INFO byte prima: villaggio e dungeon non sono mai in RAM insieme)
 MAPW       = 48
 MAPH       = 48
 
@@ -360,7 +361,9 @@ _adv    inc ptr0                ; un byte di sorgente (preserva A)
         rts
 
 ; ---- grafica dei luoghi: cache nella RAM sotto il KERNAL ($E000 villaggio, $E600 tema del dungeon)
-; installa la grafica in cache: A = 0 villaggio, altro = dungeon (tile + sprite dei mostri)
+; installa la grafica in cache: A = 0 villaggio, altro = dungeon (tile + sprite, colori e nomi dei mostri del capitolo)
+        .cerror GFX_INFO > 256 || >NM_AT != >(NM_AT+GFX_INFO-1), "blocco info dei mostri (NM_AT) a cavallo di una pagina"
+        .cerror SND_FBUF + SND_FMAX > NM_AT || NM_AT + GFX_INFO > $9000, "NM_AT sovrapposto al motivetto di combattimento o oltre $8FFF"
 gfx_install:
         sta tmp5
         sei
@@ -401,7 +404,27 @@ _q      lda gi_src_lo,x         ; 4 strisce di tile -> charset
         bne _q
         lda tmp5
         bne _dn
-        lda #<MAP               ; villaggio: ptr0 prosegue sulla mappa (RLE) -> MAP
+        ldy #TK_LEN-1           ; (15/11) villaggio: dopo i tile l'intestazione (posizioni, colori, nome della cura)...
+-       lda TK_AT,y
+        sta town_k,y
+        dey
+        bpl -
+        ldy #TK_SOLID-1         ; ...e i tile solidi di questo villaggio
+-       lda TK_AT+TK_LEN,y
+        sta solidtab,y
+        dey
+        bpl -
+        ldy #3
+-       lda tk_pal,y            ; colori del villaggio: voce 0 delle tabelle (pal_bg, pal_c1, pal_c2, pal_ram)
+        ldx gi_pal,y
+        sta pal_bg,x
+        dey
+        bpl -
+        lda #<(TK_AT+TK_LEN+TK_SOLID)   ; poi la mappa (RLE) -> MAP
+        sta ptr0
+        lda #>(TK_AT+TK_LEN+TK_SOLID)
+        sta ptr0+1
+        lda #<MAP
         sta ptr1
         lda #>MAP
         sta ptr1+1
@@ -425,10 +448,21 @@ _dn     lda #<SPR_DATA+12*64    ; ptr0 prosegue: mostri base -> slot 12..19
         lda #>GFX_STRONG
         sta tmp7
         jsr cp_n
+        lda #<NM_AT             ; (15/11) blocco info del set (colori e nomi dei 9 tipi, tools/build/gen_gfx.py) -> NM_AT
+        sta ptr1
+        lda #>NM_AT
+        sta ptr1+1
+        lda #GFX_INFO
+        sta tmp6
+        lda #0
+        sta tmp7
+        jsr cp_n
 _x      lda #$36
         sta $01
         cli
         rts
+TK_AT = GFX_TOWN_AT+4*GFX_TSTRIP         ; intestazione del villaggio (TK_LEN + TK_SOLID byte), poi la mappa RLE
+gi_pal     .byte 0, pal_c1-pal_bg, pal_c2-pal_bg, pal_ram-pal_bg
 gi_src_lo  .byte <(GFX_TOWN_AT+range(4)*GFX_TSTRIP)
 gi_src_hi  .byte >(GFX_TOWN_AT+range(4)*GFX_TSTRIP)
 gi_dsrc_lo .byte <(GFX_DUN_AT+range(4)*GFX_DSTRIP)
@@ -1862,6 +1896,10 @@ mod_rel
         .include "rel.asm"
 mod_chap
         .include "chapter.asm"           ; (12/11) sequenza dei capitoli: TODO M1
+.if CHEATS
+mod_cheats
+        .include "cheats.asm"            ; (15/11) menu dei trucchi per i test: solo con CHEATS = 1 (debug e test, non release)
+.endif
 
 
 ; ------------------------------------------------------------------ dati grafici

@@ -30,6 +30,25 @@ flowchart TD
 | `./build.sh --manual` | solo il manuale (`out/work/manual/`, poi copiato in `out/releases/v<V>/`) |
 | `./build.sh --keep N` | quante versioni tenere in `out/releases/` (default 5, anche `KEEP_VERSIONS=N`) |
 | `lab64 run tools/build/asm.sh [test]` | solo generatori del gioco + assemblaggio (con `test`: varianti `TESTUI`, `NOKEYS`... per screenshot e prove) |
+| `lab64 run tools/build/asm.sh release-game` | (15/11) solo GAME con i flag della release (`CHEATS=0`) in `out/tmp/release_game.prg/.lst/.lbl`, senza generatori ne' disco (serve una build gia' fatta): il controllo che la release non abbia i trucchi (`CHEAT-22`) |
+
+### Debug e release: che cosa cambia (15/11)
+
+`tools/build/build_game.sh` stampa `build debug` o `build release + debug`: la release e' la build di debug **piu'** ZX0 ottimo
+(`ZX0_BEST=1`), regression ed `EMU-*`, manuale `--strict` e `tools/build/release.sh`. Il codice del gioco cambia in **un solo
+punto**, il flag dell'assemblatore **`CHEATS`** (`-D CHEATS=...`, scelto da `tools/build/asm.sh` con `RELEASE`, che `./build.sh
+--release` esporta e `lab64.env` passa ai container):
+
+| Build | `CHEATS` | Effetto |
+|---|---|---|
+| debug (`./build.sh`, `--fast`, `tools/build/asm.sh`) | 1 | voce **cheats** nel menu di gioco (RUN/STOP), `src/game/cheats.asm` |
+| test (`tools/build/asm.sh test`, anche durante la release) | 1 | come la debug (i test `CHEAT-*` e lo screenshot `trucchi`) |
+| release (`RELEASE=1`: GAME assemblato da `build_game.sh` e rifatto da `tests/run_tests.sh` alla fine dei test) | 0 | **nessun byte** dei trucchi: GAME e listato identici a quelli di prima dei trucchi (a parte la versione e la riga del `-D`) |
+
+A mano: `CHEATS=0 ./build.sh --fast` (debug senza trucchi; i test `CHEAT-10..21` diventano SKIP), `CHEATS=1 RELEASE=1 ...` (release
+con i trucchi, solo per prove), `CHEATS=0 lab64 run tools/build/asm.sh test` (varianti di test senza trucchi: lo fa
+`tools/vice/shots_manual.sh`, il manuale e' per i giocatori). Durante `./build.sh --release` i test girano sulla GAME della
+release: `CHEAT-10..21` sono SKIP e `CHEAT-22` controlla che non ci siano trucchi.
 
 ## 2. Assemblaggio (`tools/build/asm.sh`)
 
@@ -66,7 +85,7 @@ flowchart TD
     GGF --> GC["out/work/gfx_consts.inc,<br/>out/work/gfx/*.bin, gfx0/1/2.prg"]
     GFO --> UF["out/work/gfx/uifont.bin"]
     GMU --> MT["out/work/music_tab.inc,<br/>out/work/snd/sndN.prg"]
-    GMA --> TP["out/work/town.map,<br/>out/work/town_places.inc"]
+    GMA --> TP["out/work/town1..5.map (intestazione + RLE),<br/>out/work/town_places.inc"]
     GFI --> FM["out/work/final_map.inc,<br/>out/work/fmap.prg"]
     GTI --> TI["out/work/title.prg"]
     GST --> SD["out/work/start_data.inc"]
@@ -135,7 +154,7 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 | `tools/memory-map/gen_rammap.py`, `tools/memory-map/gen_diskmap.py` | `out/work/memory-map/mappa_ram.html`, `out/work/memory-map/mappa_disco.html` a ogni build: mappe **curate a mano** con scenari e verifiche in VICE (se cambia la memoria o il disco vanno aggiornate); restano finche' la mappa automatica non le sostituisce (TODO T1) |
 | `tools/atlas/gen_atlas.py` (+ `atlas_names.py`, `atlas_template.html`) | atlante grafico `out/work/atlas/` ([regole in CLAUDE.md](../CLAUDE.md)) |
 | `tools/build/asm_audit.py` | analisi del codice assemblato (`out/work/asm_audit/analisi_assembly.md`, test `ASM-10`) |
-| `tools/manual/gen_manual.py` | manuale per la release (`lab64 manual`): ritagli e dati del gioco, poi `c64manual` di Lab64 con il tema base "c64" + `docs/manual/tema.css` |
+| `tools/manual/gen_manual.py` | manuale per la release (`lab64 manual`): ritagli, mappa del mondo (esegue `tools/art/world_map.py`, Pillow, in `out/work/art/` e `out/work/manual/img/`) e dati del gioco, poi `c64manual` di Lab64 con il tema base "c64" + `docs/manual/tema.css` |
 | `tools/vice/arena.py` + `src/test/arena.asm` | combattimenti veri in VICE per controllare i simulatori |
 | `tools/vice/*` | screenshot (`shots_menus.sh`, `shots_manual.sh`), profilo per fotogramma (`frame_prof.py`), cronometro del MENU (`menu_time.py`) |
 | `tools/simulators/*.py` | simulatori di combattimento, progressione, economia ([Bilanciamento](balancing-guide.md)) |

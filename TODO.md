@@ -18,7 +18,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | # | Categoria | Voci (in ordine di taglia) |
 |---|---|---|
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
-| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B16 (XS ciascuna) |
+| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B17 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C2, C3, E2, E3, E4, E5, C1, E1, M2, E6, E7, E8, E9 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
@@ -29,7 +29,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
-| Z | [Note urgenti](#z--note-urgenti) | Z2–Z6 |
+| Z | [Note urgenti](#z--note-urgenti) | Z3–Z6 |
 
 ---
 
@@ -72,6 +72,7 @@ non si possono chiudere.
 | B13 (11/11) | **Frenzy**: corsa massima +50% (≈40 fps fra i mostri) invece di +100% (≈34 fps)? Misure in `docs/prestazioni.md`. Si decide dopo le prove della categoria 8. | D3, K |
 | B15 (11/11) | **Salvataggi con Krill più lenti** ([docs/FastLoader.md](docs/FastLoader.md) sez. 7): "save game" 3,2–5,4 → 7,1–8,6 s, locanda 3,1 → 8,5 s, scale fra piani 10–11 s (il piano lasciato si salva). Causa: il plugin riscrive il file dell'eroe intero (9 blocchi) dopo averlo letto, più la ricarica del plugin (si modifica da solo) e del villaggio. Da decidere: accettare; file più piccoli (un file per piano: più file sul disco, scelta contraria del committente); immagine del file sempre in RAM (niente lettura, ~2 KB); non salvare i piani alle scale ma solo con l'eroe. | M4, M8 |
 | B16 (11/11) | **A fine gioco: build con immagini disco diverse per drive?** Oggi solo 1541 (`_1541` nel nome). Krill supporta anche 1570/71, 1581, CMD FD, 1541U; SD2IEC solo con il ripiego KERNAL. Con tutti i drive l'install passa da 3225 a 6997 B e il plugin non si costruisce senza cambiare `save.s`. | I1, M5 |
+| B17 (15/11) | **A fine sviluppo: trucchi nella release? quali e come?** Oggi il menu **cheats** (RUN/STOP, `src/game/cheats.asm`, [docs/cheats.md](docs/cheats.md)) c'e' nelle build di debug e di test (`CHEATS=1`) e **non** nella release (`CHEATS=0`, 0 B). **Da decidere a fine sviluppo** (non prima: dipende da quanto serve provare il gioco e dalla memoria libera). **Opzioni**: **(a) nessuno** (oggi): release identica a prima dei trucchi, nessuna sorpresa; si perde la comodita' per chi prova la release e per i giocatori in difficolta'. **(b) menu nascosto dietro un codice** digitato al titolo o una sequenza di tasti/joystick (stile Konami): chi lo sa lo accende, gli altri non lo vedono; costa codice in piu' (lettura del codice) oltre ai 395 B del menu e serve decidere se il codice e' per sessione o si ricorda (byte da salvare, **SAVE_VER**). **(c) solo alcuni** (es. god mode e salto di capitolo, senza level up e gettoni): meno byte e meno modi di rovinare il bilanciamento, ma `cheats.asm` va diviso con `.if` per voce (oggi solo `CHEATS` 0/1). **(d) oggetti o oggetti speciali** (anello, pergamena, uscita dal gioco con un bottino particolare) invece del menu: dentro il mondo di gioco, ma toccano formato oggetti e bilanciamento. **(e) segno "barato"** sull'eroe o nella sala della fama (bit nel blocco dell'eroe, **SAVE_VER** nuovo, `docs/FORMATO_DATI.md`): onesto verso i punteggi, serve in qualunque opzione con trucchi in release; con l'opzione (a) non serve. **Cavilli**: (1) **memoria in release**: 395 B di GAME (nella build di debug il margine del codice scende da 2397 a 2002 B); la release ha oggi lo stesso margine di prima, da rimisurare (`lab64 run tools/build/asm.sh release-game`, test `CHEAT-22`, che oggi **vieta** i trucchi nella release e va cambiato se si decide di tenerli); (2) il flag **`CHEATS`** (`tools/build/asm.sh`, `lab64.env`): con trucchi in release va scelta la variante (`CHEATS=1 RELEASE=1` o un flag nuovo), con il manuale e gli screenshot sempre a `CHEATS=0`; (3) **i salvataggi fatti con i trucchi** oggi sono eroi normali **senza segno**: se si adotta (e) quelli vecchi restano senza; (4) i trucchi aggirano la progressione (capitoli, boss, `c_unl`): vanno provati con **`next chapter` dai piani 2-3** (non verificato; il blocco entrando nei villaggi, ex A2, era un difetto del loader, corretto il 15/11: [FastLoader](docs/FastLoader.md) 4.1); (5) il manuale e l'help non parlano di trucchi: se restano in release vanno scritti o taciuti apposta. | H1, E6 |
 
 ---
 
@@ -369,11 +370,23 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 
 ### M1 Sequenza dei capitoli: cosa resta ([capitoli](docs/capitoli.md)) — L
 - **Effetto grafico del passaggio** di capitolo (oggi: schermo nero, poi le schermate di salvataggio e caricamento): tbd.
-- **Villaggi 2–4 veri** (mappa, tile, NPC): oggi copie; le costanti del villaggio (`TOWN_*` in `levels.asm`: portale, cripta,
-  ingresso; `tx_exit`; porte per la minimappa `tp_*`) vanno trasformate in una tabella per capitolo (o in un'intestazione del
-  file `TWNc`, come per `BOSSCHc`). La mappa RLE del villaggio è a 1718 B su 1792 (`TOWN_MAX`).
-- **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri** (statistiche, sprite e IA propri: M9). Oggi il boss è
-  il boss con nome del piano con lo sprite del boss finale; nessun altro mostro, nessun bottino speciale, la sala non si chiude.
+- **Villaggi** (15/11, fatto sul branch `villaggi`, da rivedere con il committente: [villaggio](docs/villaggio.md)): i capitoli
+  2–4 e la città dell'Abisso (prototipo) hanno tile, mappa, colori e posizioni propri (file `TWNc` con intestazione). **Resta**:
+  la revisione del committente (i quattro villaggi sono prototipi; la proposta scartata è in `lab/villaggi/proposta-a-temi/`);
+  NPC; un **brano per villaggio** (oggi lo stesso, M2); la **minimappa** dei villaggi nuovi (i colori "acqua" e "strade" seguono
+  i ruoli dei posti: nel villaggio 4 il cratere esce blu); l'etichetta dell'ingresso del sotterraneo ("stairs down to level N"
+  per tutti: una per villaggio costa una stringa nell'intestazione); prova su **vc64web** e su hardware reale; il passaggio di
+  capitolo legge il file del villaggio nuovo due volte (tempo non misurato); la posizione dei villaggi sul disco è decisa e misurata
+  (15/11, disposizione `hubchap`, soglie per villaggio: [FastLoader](docs/FastLoader.md) 7.1); la **città dell'Abisso** oggi si raggiunge
+  dall'uscita del villaggio 4 dopo il boss finale e la Bocca non fa nulla (da rifare con H3; la leva della sala del trono resta).
+- **Fan art della mappa del mondo** (15/11): `tools/art/world_map.py` (`out/work/art/world_map.png`); dal 16/11 sta nel
+  **manuale italiano** (pagina "IL MONDO", prima del capitolo 4; la genera la build del manuale, non e' in git). Restano da decidere
+  la wiki e la scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene; il testo del manuale non racconta la trama
+  (in revisione): da rivedere con E6, e da tradurre con E7.
+- **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri**: dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
+  e il loro colore; **meccaniche decise** ([bestiario](docs/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
+  non nel codice (~550 B stimati: M9); dal 15/11 hanno anche il **loro nome** nella barra e i **mostri del capitolo** intorno
+  (solo grafica, colore e nome: M9); statistiche proprie, bottino speciale, sala che si chiude: da fare.
 - **Ritorno ai villaggi precedenti** (portale/menu): fuori da questa fase (D-CAP-2).
 - **Tile di accesso al dungeon generico**: la cripta (`T_TSTAIRS`) è già un tile da mettere dove si vuole; più ingressi con
   destinazioni diverse richiederebbero una tabella (utilità da confermare).
@@ -385,12 +398,18 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 ### M9 Capitoli nel codice e bestiari (ex H2, H6) — L
 - Analisi: [docs/capitoli.md](docs/capitoli.md). Già divisi per capitoli: `data/chapters.yaml` (piano locale 1..n, profondità
   globale 1..255 per la difficoltà), atlante, `tools/simulators/chapters.py`, bestiari per capitolo (`data/monsters/bestiary.tsv`).
-  **Da fare nel codice**: bestiario del capitolo caricato col villaggio (stesso numero di tipi, così la RAM non cresce; oggi i 4
-  capitoli usano gli stessi tipi, con la difficoltà del piano globale); nomi dei tipi per set (`src/game/bar.asm`); boss veri.
-- **Bestiari dei capitoli 1–4** (concept in [docs/bestiario.md](docs/bestiario.md)): boss nuovo del capitolo 1 (The Hollow
-  Abbot), mostri e boss dei capitoli 2–4, Lord of Ruin nel capitolo 4. **Serve**: taratura (prima simulazione: Abbot 13%,
-  Miller 97%, Varok 100%: da rifare con `fit_rules.py`), sprite (3 comuni + 1 boss per capitolo), IA nuove (distanza, carica,
-  teletrasporto, evocazione: da scegliere).
+  **Fatto (15/11, branch `villaggi`)**: ogni capitolo ha nel gioco i **suoi mostri** (4 famiglie + 4 varianti forti, boss di
+  capitolo nel piano del boss): sprite, colori e nomi nei file del tema del capitolo, nomi e colori copiati a `NM_AT`
+  ([bestiario](docs/bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)). **Statistiche e IA non sono cambiate**: il tipo *t* di
+  ogni capitolo ha quelle del tipo *t* del capitolo 1 (per profondità).
+  **Da fare nel codice**: **statistiche proprie** per capitolo (le tabelle `mt_*`/`mon_spd`/`mon_llb` da caricare col tema,
+  come i nomi: ~120 B per file; oggi le righe dei capitoli 2–4 nel bestiario sono concept); **IA nuove** (distanza per Bone
+  Archer e Cultist, carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per Drowned e
+  Frost Wight: da scegliere); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97%,
+  Varok 100%: da rifare con `fit_rules.py` e `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).
+- **Da decidere con il committente** (15/11): i colori dei disegni (Hellhound e Blood Knight sono rossi, 2, come il Lord of Ruin:
+  nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema
+  grigio del capitolo 3 si legge poco sui muri chiari: screenshot `out/work/villages/monsters3.png` dei test `MON-CHAP-*`); se i boss con nome dei piani normali devono avere nomi per capitolo (oggi `first_names`/`epithets` comuni).
 
 ### H1 (ex 5.1) Quest system (dopo B8) — XL
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11). **Ogni villaggio nuovo**: locanda con lo stesso baule,
@@ -445,18 +464,6 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 
 Richieste del committente del 15/11, da lanciare così come sono (ogni voce dice a quale modello e in quale branch). Non sono ancora
 dimensionate. Finita una voce: si cancella e la decisione va nella wiki o nel README interessato.
-
-### Z2 — Fable — Barbarian: i 4 villaggi dei capitoli successivi (branch a parte di barbarian)
-- Genera i villaggi dei capitoli successivi. Sarebbero 4 altri villaggi.
-- Ambientati in modo diverso, ognuno con un tema differente. Devono esserci tutti i negozi e la inn.
-- Entrata e uscita alla morte del boss del capitolo.
-- Usa colori differenti, mantieni alto il livello di dettaglio.
-- Disegna anche una fan art in pixel art 32 bit con la mappa dell'ambientazione del mondo, con le zone dei 4 capitoli.
-- Si tratta di prototipi, ma almeno aggiungiamo contenuto non ripetuto sul disco.
-- Ogni capitolo ha i suoi mostri e il suo boss. Disegna anche il boss del capitolo uno, dato che hai usato il boss finale.
-- Decidi anche quale meccanica di gioco ha ogni boss di livello.
-- Non ti preoccupare della trama già scritta: va rivista, quindi non farti limitare dalla trama per le tue implementazioni.
-- L'ultimo capitolo è ambientato in un villaggio in rovina.
 
 ### Z3 — Fable — Lab64: review completa (branch a parte di lab64)
 - Fai una review completa di lab64 e vedi se trovi problemi; quelli che sei in grado di fixare, fixali subito in autonomia. Il resto

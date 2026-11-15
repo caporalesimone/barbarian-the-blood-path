@@ -1,0 +1,64 @@
+; Mappa del villaggio del capitolo 5 (48x48): The City of the Abyss, isole sospese nel vuoto (prototipo). Una lettera per casella (tools/build/gen_maps.py).
+; Le lettere sono i POSTI dei tile (gli stessi del villaggio 1); qui disegnano i tile di questo villaggio
+; (tools/build/vil5_*.py). E=ingresso  P=posto del portale  ==uscita del capitolo (2 caselle). Legenda:
+;  `=Shards  x=Stepping stone  d=Light bridge N-S  D=Sealed door  %=Void  (=Stars  )=Nebula  H=Inn door  t=Underside
+;  Y=Underside with roots  [=Edge W  ]=Edge E  .=Blue stone  ,=Rune  :=Light bridge  W=Dome SW  R=Dome SE
+;  S=Smith's door  L=Alchemist's door  7=Alchemist's stone  ~=Rune ring  T=Crystal spire  >=The Maw  /=Dome NW
+;  @=Dome top  \=Dome NE  +=Mosaic  1=Heart NW  2=Heart NE  3=Heart SW  4=Heart SE  *=Glow caps  o=Obelisk (base)
+;  w=Faceless statue  |=Island rim  i=Flame orb  B=Crystals  s=Altar  r=Jaw W  l=Jaw E  5=Smith's stone
+;  c=Drifting rock  v=Hanging chain  A=Obelisk (top)
+; Niente terreno continuo: isole di pietra nel vuoto (% ( ) = vuoto, stelle, nebulose), con gli orli (| sopra, [ ] ai
+; lati, t Y sotto) e unite da ponti di luce (: est-ovest, d nord-sud, x disco di pietra). Sud: l'isola dell'arrivo (si
+; arriva da un ponte che viene dal nulla). Centro: il cuore dell'Abisso sul mosaico (cura: le rune ~). Ovest il fabbro,
+; nord-ovest la locanda, est l'alchimista (case a cupola 3x2: /@\ sopra, W porta R sotto). Nord: la Bocca (r > l) fra
+; gli obelischi (A sopra o): l'ingresso del sotterraneo. Sud-est il portale. Nord-est l'isola dell'uscita: le due
+; caselle = ci sono (formato del file) ma non si aprono mai. Nel vuoto, pezzi di citta' alla deriva (c).
+; Prima stesura: lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+c%%%%%%%%%(%%%%%%%%%%(%(%%%%%%(%%((%%%%%%%%c%%c%
+(%%%%%%%%(((%%%%%%%%%%%%%(%%%(%%)%%%%%%%(%%%%%%%
+%%%c%%%%%%%%%%%%%(%%%%%%(%%%%%(%%%%%)((%(%%%%%%%
+%%%%%%%%%%%%%%%%cc(%%%(||||||%%%%%%%%%%(%%%%%%%)
+%(%%%%%%%%%%%%%%c%%%(|[.....*]|%%%%%%%%%%%(%%%%%
+%(%%%%%|||||%(%%%%%|[.A.r>l.A.,](%(%(%|||||%%%%%
+%(%%%%[..,..]|%%%%[B`.o..`.,o.*.]%%%%[.....]%%%%
+(%%%|[.....B..]%%%[`A..,.B....A..]%([.A.*.A.]%%%
+(%%[.,`./@\.B.,]%[T.o,T..T....o..:::.`o...o..]%%
+%%%[....WHR*.,.]%[.`.,.....`.....]%[.*...,...==%
+%%%[/@\,....i.*::::.Bw..*s`..w..Y%%[.........](%
+%%%[WDR.B..,B..](%%Y.......B*`tY%%%[.,.,s....]%%
+%)([`.`..*...,t%%%(%tYB...B`.t%%%%%%Yt`...Btt%%%
+%%%(t.....`B*T]%%%(%%%tYdtYtt%%%%%%%%%YtdYt%%%%c
+(%%%%tt..*.*tY%%%%%%(%%vd%v%%%%(%%(%%%v%dv%%%%%%
+%%((c%%ttdtt%%%%%%%%%%%%d(%c(%%%%%%%%%c%d%%%%%%%
+%(%%(%%v%dv%%%%c%%%%)(%(x%%%%%%%cc%%%%(%x%%%%%%%
+%%%%%(%%%x%%(%%%%%%%%%%%d%c%%%%%c%%%%%%%d%%%%%%%
+%%(%%%%%%d%%c%%%%%%%%%%%d%%%%%%(%%%%%%%%d%%%%%(%
+%%)%%%%%(d%%%%%%%))(%%%%d||%%%%%%%%(%|||d|%%%%%%
+%%%%%%|||d||%%%(%%(%||||d`.]%(%%%%c|[.....]|%(%%
+%)%%%[..`...]|%%%%%[.....*..]|%%%%[B.,*.....]%%%
+%%%%[.......T.](%%[*i++++++i..]%%[BT../@\B`.]%%(
+%%%c[.T./@\....]%([..++~~++*...]%[...7WLR.T,.]%%
+%(%[....WSR5..,]%[.B.++12++....]%[........B,,]%c
+%%%[.*.......,.:::...++34++,...:::........s.,](%
+(%%[..wT.....*`]%[.,.++~~++....]([..T.....*.t%%%
+%%%%t.......TBt%%%YBi++++++i.`Y(%(t....`.*.T]%%%
+%%%([`.....T,.]%%%[...,..,.*.,](%(%Y......tt%%%(
+%%%%ct......*Y(%%%%Yt......`.t%%%%%%tYtdYt%%%%%%
+%%%%%%YttYttY%%%%%%c%Ytt..tYt%%%%%((%v%dv%%%%%%%
+%%%(%%%v%%v%(%%%%(%%%%%%dt%%%%%%(%%%%%%d%%(%%cc%
+%%%%%%%%%%%()%%)%%%%%%((dv%%(%%%%%%%%%%x%c%%%c%%
+(%c(%%%%(%%%%%%%cc%%%%%%d%%%%%%%%%%(%((d%%%%%%%%
+%%%%%%%%%%%%%%%%c%%%%%%%d(%%%%)(%%%%%%%d%%%(%%%%
+%%%%%%%%%%%%%%%(%%%%%%%%d%%%c%%%%%%%c||d||%(%%%%
+(%%%%%%%%%%%%%%(%%%%%%%%d(%%%%(%%%%|[.....]|%%%%
+%%c(%%%%%%%%%%%%%%%%%%||d|%%%%%%%%[....*....]%(%
+%%%%%cc%%%%%%c%%%%%%%[.``.]|(%%%%[`.T.+P+....]%%
+%)%%%c((%%c(%%%%%%%%[.....,.]%%%%[.Bi.+++.i,.]%%
+%%%%%%(%%%%%%%%%%%%[.,.B*....]%%%[..,.+++.*..](%
+%%(%%%%%%%%%%%%cE:::..T......,]%%%Y..T....B.t(%%
+%%%%%%%%%%%%%%%%%%[..w.....w*t%%%%%tY..T,.`t(%%%
+%%(%%((%%%%(%%%%%%%t....T...tc(%%(%%%tYttYt%%%)%
+%%%%%%%%%%(%%%%%%%%%ttY....t%(%cc%%%%v%%v(%%)%%%
+%(%%%%%%%%((%%%%%(%(%%(tYtt%%(%c(%%%%%%%%%%%(%%%
+%%%%(%%%%%(%%%%(%%%%%%(%%v%%%((%%%(%%(%%%%%%(%)%
+%(%%%(%(%%(%(%%%%%%%%%%%%%%%%%%%%%(%%%%c%%%%(%%%

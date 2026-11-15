@@ -264,13 +264,110 @@ LORD_L1 = [
 ]
 
 
+# ------------------------------------------------------------------ BOSS DEI CAPITOLI 1-3 (15/11, TODO Z2)
+# Stanno al posto del boss finale nel file del piano del boss del loro capitolo (GFX2, GFX4, GFX6: CBOSS, chapter_set).
+# The Hollow Abbot (capitolo 1): scheletro incappucciato in una tonaca marcia, il turibolo appeso alla catena.
+ABBOT = [
+    "....cccc....",
+    "...cccccc...",
+    "..ccggggcc..",
+    "..cggggggc..",
+    "..cgbggbgc..",
+    "..cggggggc..",
+    "..ccgbbgcc..",
+    ".ccccggcccc.",
+    "cccccccccccb",
+    "ccbccccccbcb",
+    "cc.cccccc.gb",
+    "gg.cccccc.gb",
+    "...cccccc..b",
+    "..cccccccc.b",
+    "..ccbccbcc.g",
+    "..cccccccc.g",
+    ".cccccccccgg",
+    ".ccbccccbcgg",
+    ".cccccccccc.",
+    ".cccccccccc.",
+    "cccc.cc.cccc",
+]
+ABBOT_L1 = [
+    ".cccccccccgg",
+    ".ccbccccbcgg",
+    "cccccccccccc",
+    ".cccccccccc.",
+    ".ccc.cc.ccc.",
+]
+# The Miller of Blackwater (capitolo 2): un mugnaio enorme, cappello, grembiule, la mazza con la macina.
+MILLER = [
+    "...bbbbbb...",
+    "..bbbbbbbb..",
+    "...cccccc...",
+    "..cgccccgc..",
+    "..cccccccc..",
+    "..ccbbbbcc..",
+    "...cccccc..g",
+    ".bbbggggbbbg",
+    "bbbggggggbbb",
+    "cbbggggggbbc",
+    "cc.gggggg.cc",
+    "cc.gggggg.cb",
+    "gg.gggggg.bb",
+    "...gggggg.bg",
+    "..bbbbbbbbgg",
+    "..bbb..bbbgg",
+    "..bbb..bbb..",
+    "..bbb..bbb..",
+    "..bbb..bbb..",
+    "..bbb..bbb..",
+    ".gggg..gggg.",
+]
+MILLER_L1 = [
+    "..bbb..bbb..",
+    ".bbb....bbb.",
+    ".bbb....bbb.",
+    "bbb......bbb",
+    "gggg....gggg",
+]
+# Varok the Oathbreaker (capitolo 3): il comandante caduto, elmo con le corna, spadone, lo scudo con la croce.
+VAROK = [
+    "..g......g..",
+    "..gg.cc.gg..",
+    "...gccccg...",
+    "...cccccc...",
+    "...cbccbc...",
+    "...cccccc...",
+    "g...cccc....",
+    "g.cccccccc..",
+    "gccccccccbbb",
+    "g.ccbccbbggb",
+    "g.ccccccbgbb",
+    "b.ccccccbbgb",
+    "bbccbbccbggb",
+    "..ccccccbbbb",
+    "..cccccc.bb.",
+    "..bbbbbb....",
+    "..cc..cc....",
+    "..cc..cc....",
+    "..cc..cc....",
+    "..cc..cc....",
+    ".ggg..ggg...",
+]
+VAROK_L1 = [
+    "..cc..cc....",
+    ".cc....cc...",
+    ".cc....cc...",
+    "cc......cc..",
+    "ggg....ggg..",
+]
+
+
 def frames(base, l1, extra=None):
     f0 = base if extra is None else overlay(base, extra + [""] * (21 - len(extra)))
     f1 = legs(f0, 21 - len(l1), l1)
     return [grid(f0), grid(f1)]
 
 
-# (nome, frame0, frame1, colore)
+# (nome nel gioco, [frame0, frame1], colore): il nome e' quello mostrato nella barra (id del bestiario con gli spazi)
 BASE = [
     ("fallen", frames(FALLEN, FALLEN_L1), 10),
     ("skeleton", frames(SKELETON, SKELETON_L1), 1),
@@ -278,17 +375,52 @@ BASE = [
     ("demon", frames(DEMON, DEMON_L1), 4),
 ]
 STRONG = [
-    ("warchief", frames(FALLEN, FALLEN_L1, WARCHIEF_X), 3),
+    ("fallen warchief", frames(FALLEN, FALLEN_L1, WARCHIEF_X), 3),
     ("skeleton king", frames(SKELETON, SKELETON_L1, KING_X), 7),
     ("lich", frames(ZOMBIE, ZOMBIE_L1, LICH_X), 14),
     ("balrog", frames(DEMON, DEMON_L1, BALROG_X), 8),
 ]
 FINAL = ("lord of ruin", frames(LORD, LORD_L1), 2)
+# boss dei capitoli 1-3 (15/11): nel posto del boss finale del file del piano del boss del loro capitolo
+CBOSS = {1: ("the hollow abbot", frames(ABBOT, ABBOT_L1), 14),
+         2: ("the miller of blackwater", frames(MILLER, MILLER_L1), 8),
+         3: ("varok the oathbreaker", frames(VAROK, VAROK_L1), 7)}
 
-# ------------------------------------------------------------------ set di mostri (07/11 sera)
-# Un set = 4 famiglie base + 4 varianti forti (stessi mtype 1..8: stesse statistiche di data/balance.yaml, altra
-# grafica) + il boss finale. Gli sprite dei mostri viaggiano nel file GFXn del tema (tools/build/gen_gfx.py, THEME_SET),
-# quindi un secondo set costa solo spazio su disco (1152 B per file), non RAM. Oggi un solo set; i nomi dei tipi
-# (src/game/bar.asm) sono ancora unici: un set con nomi diversi li deve portare nel file del tema (TODO.md).
-SETS = {1: (BASE, STRONG, FINAL)}
+# ------------------------------------------------------------------ set di mostri per capitolo (07/11 sera, 15/11)
+# Un set = 4 famiglie base + 4 varianti forti (stessi mtype 1..8: stesse statistiche di data/balance.yaml per profondita',
+# altra grafica, altro nome, altro colore) + il posto del boss (tipo 9). Viaggia nel file GFXn del capitolo
+# (tools/build/gen_gfx.py): sprite, colori e nomi (blocco "info" in coda al file, copiato da gfx_install a NM_AT).
+# Capitolo 1: i mostri di sempre; capitoli 2-4: tools/build/monsters_chap.py (CHAPTER_MONSTERS, 15/11).
+# Posto del boss: file del dungeon = Lord of Ruin (boss finale), file del piano del boss = boss del capitolo (1-3) o
+# Lord of Ruin (capitolo 4, sala del trono).
+CHAPTERS = 4
 
+
+def chapter_monsters(c):
+    """(base, strong) del capitolo c: 4 + 4 tuple (nome, [frame0, frame1], colore)"""
+    if c == 1:
+        return BASE, STRONG
+    import monsters_chap as MC
+    fam = MC.CHAPTER_MONSTERS[c]
+    assert len(fam) == 4, "capitolo %d: servono 4 famiglie" % c
+    base = [(n, frames(fig, l1), col) for (n, fig, l1, col, sn, x, scol) in fam]
+    strong = [(sn, frames(fig, l1, x), scol) for (n, fig, l1, col, sn, x, scol) in fam]
+    return base, strong
+
+
+def chapter_set(c, boss=False):
+    """set del file del capitolo c: (base, strong, posto del boss); boss=True: file del piano del boss GFX(2c)"""
+    base, strong = chapter_monsters(c)
+    slot = CBOSS[c] if boss and c in CBOSS else FINAL
+    return base, strong, slot
+
+
+def set_names(mset):
+    """i 9 nomi del set (tipi 1..9) come li mostra la barra"""
+    base, strong, slot = mset
+    return [m[0] for m in base + strong + [slot]]
+
+
+def set_colors(mset):
+    base, strong, slot = mset
+    return [m[2] for m in base + strong + [slot]]

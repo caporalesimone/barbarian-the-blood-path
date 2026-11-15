@@ -1,7 +1,59 @@
 # Villaggio
 
-Sorgenti: `data/town_map.txt` (mappa 48 × 48, una lettera per casella), `tools/build/gen_maps.py` (RLE nel file
-`GFX0`), `src/game/levels.asm` (`town_post`, `place_player`), `src/game/game.asm` (`act_tick`, `tile_trigger`),
+**Dal 15/11 ogni capitolo ha il SUO villaggio** (TODO Z2, richiesta del committente: villaggi diversi, non lo stesso con altri
+colori). Questa pagina descrive prima [i villaggi dei capitoli](#i-villaggi-dei-capitoli-1511) e il formato comune, poi il
+villaggio 1 (Aldric's Crossing) in dettaglio; negozi, locanda e modulo MENU sono uguali in tutti.
+
+## I villaggi dei capitoli (15/11)
+
+| # | Villaggio | Struttura | Cura (`~`) | Ingresso del sotterraneo (`>`) | Entrata → uscita | Colori (sfondo, 1, 2, accento) |
+|---|---|---|---|---|---|---|
+| 1 | **Aldric's Crossing** | due rive di un torrente con due ponti, piazza, chiesa, cimitero | fountain of saint aldric | la **cripta** nel cimitero | strada a sud → sentiero a nord | verde, marrone, grigio chiaro, ciano |
+| 2 | **Blackwater Mill** | **palafitte su un lago nero**: piattaforme di assi su pali unite da passerelle; barche, mangrovie, ninfee | the drowned bell (una campana di bronzo verde; si guarisce sui moccoli) | la **botola della cantina allagata del mulino** (isolotto a nord-est, con la ruota) | riva a sud-ovest → fondo del pontile est (il traghetto) | nero, marrone, arancio, verde |
+| 3 | **The Last Camp** | **campo di guerra su tre terrazze** di una montagna innevata: pareti di roccia, scale di legno, tende, palizzata e torri | the great bonfire (ci si siede sui tronchi attorno) | la **bocca di una grotta** nella parete nord | cancello a ovest (terrazza bassa) → passo a nord-ovest (terrazza alta) | bianco, grigio scuro, marrone, rosso |
+| 4 | **Ruin's Gate** | **città in rovina attorno a un cratere**: strada ad anello, quattro raggi, mura con le brecce, colonne, case sventrate | the weeping angel (una statua; le candele ai suoi piedi) | la **saracinesca delle segrete** nel corpo di guardia a nord | strada a sud → **scala di tavole che scende nel cratere** | grigio scuro, nero, grigio chiaro, rosso |
+| 5 | **The City of the Abyss** (prototipo) | **isole di pietra sospese nel vuoto** unite da ponti di luce; case a cupola, cristalli, obelischi | the heart of the abyss (un cristallo che galleggia; le rune attorno) | **la Bocca**, sull'isola a nord (oggi non porta da nessuna parte) | ponte dal nulla a sud → isola a nord-est (le caselle ci sono ma non si aprono) | nero, blu, azzurro, viola |
+
+Ogni villaggio ha fabbro, alchimista, locanda (con lo stesso baule), luogo di cura, posto del portale, ingresso e uscita. Il
+villaggio 5 è un **prototipo**: ci si arriva dall'uscita del villaggio 4 dopo il boss finale (`c_unl` = 5), i piani dell'Abisso
+non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview.py` (`out/work/villages/twnN_map.png`,
+`twnN_tiles.png`); atlante: set `VILLG`, `VILL2`…`VILL5`. Mappa del mondo (fan art): `tools/art/world_map.py`; dal 16/11 è nel manuale (pagina "Il mondo"), generata dalla build del manuale (`tools/manual/gen_manual.py`, nessun file in git).
+
+### Come è fatto un villaggio
+
+- **Tile**: 45 posti (`TOWN_TILES` in `tools/build/gen_gfx.py`), gli stessi numeri per tutti; ogni villaggio li **ridisegna e
+  decide quali sono solidi** nel suo modulo `tools/build/vilN_*.py` (`PAL`, `NAME`, `HEAL`, `TILES` = posto → nome, descrizione,
+  solido, griglia 8×16; attrezzi di disegno in `tools/build/tileart.py`). I posti non elencati restano quelli del villaggio 1.
+  Il codice conosce solo questi **ruoli**: `DSMITH`, `DALCH`, `DHOME` (porte), `TSTAIRS` (ingresso del sotterraneo), `FOUNTAIN`
+  (cura), `PORTAL`; `PATH`, `DIRT`, `BRIDGE`, `COBBLE` sono "strade" nella minimappa e `WATER`, `WATERL`, `WATERR` "acqua"; i
+  posti 5, 6, 8–11, 24–26 devono essere solidi (`tools/build/villages.py`, che lo controlla).
+- **Mappa**: testo 48 × 48 in `data/town_mapN.txt` con le lettere di `LEGEND` (una per posto: in ogni villaggio la stessa lettera
+  disegna il tile di quel villaggio; la legenda con i nomi è in testa al file). Lettere speciali: `E` ingresso, `P` posto del
+  portale (la casella sotto è l'arrivo), `=` uscita del capitolo (2 caselle). Le prime stesure vengono da
+  `lab/villaggi/concept_maps.py`; da lì in poi la fonte è il testo.
+- **Controlli della build** (`tools/build/gen_maps.py`): una sola porta per negozio e locanda con **2 caselle libere davanti**;
+  porte, cura, ingresso del sotterraneo, uscita, portale e il suo arrivo **raggiungibili dall'ingresso**; **nessuna casella
+  percorribile isolata**; intestazione + mappa entro 1888 B.
+- **File `TWNc`** ([formato](FORMATO_DATI.md)): tile, poi un'**intestazione** (posizioni, colori, porte per le icone della
+  minimappa, uscita, nome del luogo di cura, tile solidi), poi la mappa RLE. `gfx_install` copia l'intestazione in `town_k`
+  (`src/game/levels.asm`) e in `solidtab`, e i colori nella voce 0 delle tabelle delle palette: il gioco non ha più costanti
+  del villaggio (`TOWN_*`, `solid_town` e le tabelle di `town_places.inc` non ci sono più). Costo nel gioco, misurato: il margine sotto `$8720` è sceso di 50 B in tutto (villaggi, colori dei boss, capitolo 5).
+- **Passaggio di capitolo**: `chap_travel` legge subito il file del villaggio nuovo (serve il suo ingresso prima di salvare:
+  "continue" riparte da lì), poi salva e lo rilegge: una lettura in più (non misurata).
+- Test: `VIL-TWN-11..23`, `VIL-BOSS-10` (regression dal 15/11, `tests/regression/villages`).
+
+**Proposta scartata** (15/11): la prima stesura dei villaggi 2–5 riusava la struttura del villaggio 1 con altri tile e colori
+(il committente: "devono essere diversi, non lo stesso villaggio con temi diversi"). È conservata in
+`lab/villaggi/proposta-a-temi/` (script, mappe, anteprime), fuori dalla build.
+
+**Aperto** (TODO M1): musica propria per villaggio; minimappa (i colori di "acqua" e "strade" valgono per i ruoli, non per il
+disegno: nel villaggio 4 il cratere esce blu); l'etichetta dell'ingresso dice sempre "stairs down to level N"; nel villaggio 5
+la Bocca non fa nulla; hardware reale e vc64web non provati con i villaggi nuovi.
+
+# Villaggio 1: Aldric's Crossing
+
+Sorgenti: `data/town_map.txt` (mappa 48 × 48, una lettera per casella), `tools/build/gen_maps.py` (intestazione e RLE nel file
+`TWN1`), `src/game/levels.asm` (`town_post`, `place_player`), `src/game/game.asm` (`act_tick`, `tile_trigger`),
 `src/game/ui.asm` (negozi, baule della locanda), `src/game/bar.asm` (nomi dei luoghi).
 
 Il villaggio è il luogo 0 (`cur_level` = 0): mappa fissa, nessun mostro, musica propria. La mappa sta compressa
@@ -19,10 +71,10 @@ dalle porte di negozi e locanda (`tools/build/gen_maps.py` lo controlla a ogni b
 **Sentiero di uscita** (12/11, committente, TODO M1): dalla porta della chiesa un sentiero largo 2 (colonne 26–27) sale fino
 al bordo nord, dalla parte opposta all'ingresso (strada a sud, colonna 16). Le due caselle sul bordo sono scritte `=` nel
 testo della mappa: è la **casella generica di uscita del capitolo** (`ALIASES` in `tools/build/gen_maps.py`: diventa un sentiero, la
-posizione va in `out/work/town_places.inc`, `tx_exit_x/y`, da 1 a 4 caselle). Fuori dalla mappa è solido, quindi lì il PG si
+posizione va nell'intestazione del file `TWNc`, `tx_exit_x/y`, 2 caselle dal 15/11). Fuori dalla mappa è solido, quindi lì il PG si
 ferma: finché il capitolo dopo è chiuso la strada "continua" ma non succede nulla; dopo l'uccisione del boss del capitolo
-compare `travel to next chapter` e Fire porta al villaggio dopo ([capitoli](capitoli.md)). La mappa RLE è di 1718 B su
-1792 (`TOWN_MAX`).
+compare `travel to next chapter` e Fire porta al villaggio dopo ([capitoli](capitoli.md)). Intestazione + mappa RLE: 1811 B su
+1888 (`TOWN_MAX`, 15/11).
 
 ```mermaid
 flowchart LR
@@ -63,7 +115,7 @@ flowchart LR
 - **Botti e fieno tolti** (non si capivano, richiesta del committente): i loro tile sono diventati finestra e comignolo; il
   recinto del fieno è un **orto** (terra e fiori).
 - **Piazzetta del portale tonda** (7 caselle di diametro, bordo a gradini): il portale e l'arrivo restano a (42,24) e (42,25),
-  quindi `TOWN_PX/PY` in `src/game/levels.asm` non cambiano.
+  (dal 15/11 la posizione è la lettera `P` della mappa).
 - **Pozzi**: due, accanto a un sentiero (12,17) e (36,22). **Boschetti**, cespugli e fiori nelle zone vuote (alberi interni:
   da 23 a ~110; erba libera dal 54% al 46%).
 - Mappa compressa: **1710 B** su 1792 (era 1289 B): restano 82 B per altri dettagli.
@@ -81,7 +133,7 @@ dungeon) e bauli ospitano i tile solo del villaggio (erba con pietra, ponte, ter
 lapide, croce, fianchi, tetto e fronte della cripta). I tile con un ruolo nel codice (porte, fontana, portale, cripta =
 `T_TSTAIRS`, erba, strade) hanno lo stesso numero nei due set; i tile nei posti "speciali" (5, 6, 8–11, 24–26) sono tutti
 solidi, così il codice di scale, raccolta e bauli non li incontra mai sotto il PG. La tabella dei tile solidi è in RAM
-(`solidtab`, copiata da `solid_town` o `solid_dun` a ogni `load_location`). 10/11: tolti `BARREL` e `HAY`, aggiunti `WINDOW`
+(`solidtab`: nei dungeon copiata da `solid_dun`, nel villaggio dall'intestazione del file `TWNc`, 15/11). 10/11: tolti `BARREL` e `HAY`, aggiunti `WINDOW`
 (posto 33), `CHIMNEY` (42), `FENCEV` (43) e `SPIRE` (44), tutti solidi. Nomi e descrizioni di ogni tile: atlante grafico
 (`out/work/atlas/`, `tools/atlas/atlas_names.py`).
 
@@ -227,9 +279,10 @@ distanze `tools/village_audit.py`) per non sovrascriverlo; ogni ingresso nella l
 2. La mappa del villaggio (`MAP`, `$C000`–`$C8FF`) non deve usare `$C900`–`$CFFF` (zona 1 del modulo MENU).
 3. `lab64 test regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
 4. Aggiornare `docs/quests.md` (sez. 3.6, villaggi multipli) e il `TODO.md` se resta qualcosa.
-5. (12/11) Il file del villaggio del capitolo *c* è `TWNc` (`tools/build/mkdisk.sh`; oggi `TWN1`…`TWN4` sono copie di `out/work/gfx0.prg`).
-   Un villaggio con una mappa diversa richiede le sue costanti (portale, cripta, ingresso `TOWN_*` in `levels.asm`; uscita
-   `tx_exit`; porte per la minimappa): oggi valgono per tutti, da trasformare in una tabella per capitolo.
+5. (15/11) Un modulo `tools/build/vilN_*.py` (tile, colori, nome della cura), la voce in `tools/build/villages.py`, la mappa
+   `data/town_mapN.txt` (lettere `E`, `P`, `=`), il file `twnN` in `tools/build/asm.sh` e `tools/build/mkdisk.sh`, il brano in
+   `PLAYLIST["town"]` (`tools/build/songs.py`), `data/chapters.yaml`; poi `lab64 test sanity -k VIL-TWN` (i test leggono
+   l'elenco dei villaggi da `villages.py`). Vedi [Come è fatto un villaggio](#come-è-fatto-un-villaggio).
 
 ## Leva della sala del trono
 

@@ -45,6 +45,10 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
   ingresso nel villaggio). **Per ogni villaggio nuovo**: la mappa non deve usare `$C900-$CFFF` (zona 1 del MENU), il tile `DHOME`
   della locanda c'è; poi `lab64 test regression -k VIL-MENU`. Lo spazio libero delle zone lo stampa
   la build (`menu: zona 1 ... libera N B`): ogni modifica a locanda e negozi deve starci (`.cerror`).
+- **Villaggi dei capitoli** (15/11): **ogni villaggio è diverso dagli altri** (regola del committente: non lo stesso villaggio
+  con altri colori; niente fontana, fiume o cripta ripetuti: struttura, luogo di cura e ingresso del sotterraneo propri). Tile,
+  colori, tile solidi e nome della cura in `tools/build/vilN_*.py`, mappa in `data/town_mapN.txt`; il gioco legge tutto
+  dall'intestazione del file `TWNc` (`town_k`): **niente costanti di un villaggio nel codice**. Passi e controlli: `docs/villaggio.md`.
 - **Help**: se cambia un tasto o una schermata, `data/help.txt` nello stesso lavoro (vedi `CLAUDE.md` della radice).
 - **Musica** ([docs/musica.md](../docs/musica.md)): i brani sono dati in `tools/build/songs.py` (elenchi del gioco in `PLAYLIST`),
   compilati da `tools/build/gen_music.py` in file `SNDn` sul disco; un solo player (`src/common/sid_player.inc`) per loader, gioco

@@ -1,0 +1,55 @@
+; Mappa del villaggio del capitolo 4 (48x48): Ruin's Gate, il villaggio in rovina. Una lettera per casella (tools/build/gen_maps.py, LEGEND e ALIASES).
+; Le lettere sono quelle del villaggio 1; i disegni dei tile sono a tema (tools/build/villages.py).
+; E=ingresso (arrivo dal capitolo prima)  P=posto del portale  ==uscita del capitolo (2 caselle)  >=porta della cripta
+; Strada maestra da sud alla Porta (due torri spezzate e il muro di cinta con le brecce), crepa di lava da nord a sud
+; con due ponti di lastre. Ovest: piazza con la fontana, case bruciate, alchimista, locanda (sud). Est: fucina,
+; cattedrale crollata con la cripta e le tombe, piazzetta del portale. Ingresso a sud, uscita sul bordo nord (la Porta).
+; Prima stesura generata da lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+TTTTTTTTTTTTTTTTTTTTTTT==TTTTTT(%%)TTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTATT::TTATTT(%%)TTTTTTTTTTTTT
+TT`...,,,.,.T,.`,..WWW.::.WWWBB(%%)TB*TB*.,.,.TT
+TT,d.,`......,,d..BWoW,::.WoWBT(%%),,.``B....,TT
+TTWWWW,T.WWWW*TWWWWWWW.::.WWWWW(%%).`.,.*.,T*.TT
+TTWWWW.,TWWWWWWWWWWWWW,::,WWWWW(%%).,T``.,..TdTT
+TT*,,..T...d.,,,.B,.`.`::....``(%%)B,,,,.`.,,,TT
+TT..TdT,...*.`,,.,,T,B.::....B.(%%)B..,,`d..`,TT
+TT`.,.`,.,.,BT*`,.....*::,,B.,..(%%).RRcRRRR..TT
+TT.`RRcRRRR,*..T.T.,.*,::..`.B..(%%)dRRRRRRR.,TT
+TT.`RRRRRRR,`rcrrr.,,B.::,.,B.,.(%%),WWW5WWW,,TT
+TT`BWWoWWWW..rrrrrT.,.,::..B.,``(%%).WoWSWoW.`TT
+TT`.WoWDWoW`dWWoWW.`,,.::,Bd.,`T(%%)....:...,`TT
+TT`d*,.:`.,,BWoDoWBT.,d::.,`.`..(%%)..,.:.,,d,TT
+TT..`.,:WW.W``..d`,.`,.::.`.`.,,,(%%),..:...`TTT
+TTT.,..:W::::::::::::::::,,.,,.,.(%%).,,:d*.ddTT
+TT...T,.W..W,,.W:WW,..,::::::::::xxxx::::,..,.TT
+TT.,lllll`....T,:.W,d..::::::::::xxxx::::,.`,`TT
+TT`.lllll,T`*..d:....T,::`.,.,.,,(%%),.,:``.`dTT
+TT.`WWoWWBT..,..:,T..,,::.,,`.`.`(%%)`,`:.T,,.TT
+TTT.WoDoW``++++++++++i.::.,`B,T,.(%%)T.,:.....TT
+TT.*d.:,,`,+s+++++++++.::....`,`.(%%)TT,:,,BB.TT
+TT,,,,:::d.+++++++++++.::.,,d.`.(%%)`..d:d,,..TT
+TT``.i*,:,.++++~~+++++,::.,.....(%%)`.Ai,.A.`.TT
+TT`,.`,,:::+++~12~++++:::.,,,.,.(%%).WBWWW.W,dTT
+TT...,.,:,,+++~34~++++:::,d..,..(%%),W,..,`W.,TT
+TT`llclllld++++~~+++++.::`,.,``.(%%).`,/@\,`.*TT
+TT.lllllll,+++++++++++.::..`,dB,(%%).W.[>].W,,TT
+TT.WWW7WWW`i++++++++s+.::`,..`T(%%)...,.:..T.,TT
+TT,WoWLWoW,+++++++++++.::..,T..(%%).,,.,:`....TT
+TTd.`.:`:.di,*`,,,.,...::..,BT,(%%)`..,.::::::TT
+TT`...:::::,.`..`..,T..::....,,(%%)`Tt,Y,t,Y.:TT
+TT*,,.....:.,`T,,TB.,B,::,`d..`(%%)*,d.dBd.d,:TT
+TT,,,`..,,:..`.TTB,.,,,::,`T*.`(%%),`..B,.`d.:TT
+TT,...d..`:.rrcrrrr,.B.::,`..`.(%%)...`,.i...:TT
+TT.`,.,.,.:.rrrrrrr,...:::::::,xxxx::::::....:TT
+TT,`T,..`.:,WWoWWWW....:::::::,xxxx:::::::::::TT
+TT`RRRRR,.:,WoWHWoW,.`.::,,,.`.(%%).....:...`.TT
+TT.RRRRR.,:,.,.:,,`.d,`::d.,..(%%)`.,.++++++B`TT
+TT,WWoWW..:::::::::::::::,.B``(%%),*,.++P+++*.TT
+TT.WoDoW.`:.`.`.,..,.`,::.TB..(%%),.*.++++++T,TT
+TT,`.:..,.:,,`d.B.,*B.,::,BT,.(%%).`.B++++w+,BTT
+TT..`::::::.TBT.B`.`,,.::.*.d.(%%)`.,.++++++,.TT
+TT,T`...`d.B.B.,,.`....::..TT.(%%),,`.,....`,,TT
+TT`..`,..,,....,.,..T..::`,..,(%%)..,,`d,`T.d,TT
+TTB.....,....,*...,*T.`::...,.(%%)..*..,TTBT,.TT
+TTTTTTTTTTTTTTTTTTTTTTTE:TTTTT(%%)TTTTTTTTTTTTTT
+TTTTTTTTTTTTTTTTTTTTTTTTTTTTTT(%%)TTTTTTTTTTTTTT

@@ -29,7 +29,8 @@ sd_st   .byte STASH_N
 ;  della zona (ml_dst): pack_menu.py verifica che la scrittura non raggiunga i dati non ancora letti.
 MR1_AT  = $c900                 ; zona 1: $C900-$CFFF (la mappa finisce a $C8FF; il LOBBY arriva a $CBFF)
 MR1_END = $d000
-MR2_AT  = GFX_DUN_AT+4*GFX_DSTRIP+GFX_MONS+GFX_STRONG   ; zona 2: dopo la cache del tema ($F4E0), sotto il KERNAL
+MR2_AT  = GFX_DUN_END           ; zona 2: dopo la cache del tema ($F4E0), sotto il KERNAL
+        .cerror GFX_DUN_AT+4*GFX_DSTRIP+GFX_MONS+GFX_STRONG+GFX_INFO != GFX_DUN_END, "file del tema: lunghezza diversa da GFX_DUN_END-GFX_DUN_AT"
 MR2_END = PF_END                ; ($FD00: FMAP)
 MR3_AT  = $a700                 ; zona 3: slot sprite 28-31 del banco VIC 2, liberi nel gioco (out/work/memory-map/mappa_ram.html)
 MR3_END = $a800                 ; (charset del gioco)
@@ -39,6 +40,7 @@ MENU_INN  = OVL_AT              ; locanda
 MENU_SHOP = OVL_AT+3            ; negozio A (0 fabbro, 1 alchimista) (jsr mk_off + jmp enter_shop: 6 B)
 ml_src  = $5c                   ; (pagina zero libera dopo ZX_ZP) inizio dei dati compressi di ogni parte
 ml_i    = ml_src+2*MPARTS
+ml_try  = ml_i+1                ; (15/11) letture rimaste della parte (ex TODO A2)
 
 ; carica il modulo se non c'e' (ovl_cur = 0). C=1 se non si puo' caricare (il chiamante non salta nel modulo)
 ovl_town:
@@ -55,15 +57,26 @@ ml_read:                        ; (lettura dei file MENU1..3: la contano i test)
         sta cmdbuf+8
         ldx #0
 _p      stx ml_i
-        txa
+        lda #3                  ; (15/11, ex TODO A2) fino a 3 letture per parte
+        sta ml_try
+_t      txa
         lsr
         clc
         adc #$31                ; "1".."3"
         sta cmdbuf+7
         jsr load_file           ; all'indirizzo del file (fondo della zona)
-        bcs _r
         ldx ml_i
-        lda krill_loadaddrlo
+        bcs _bad
+        lda krill_endaddrlo     ; (15/11, ex TODO A2) il file deve finire esattamente alla fine della zona: una lettura piu'
+        cmp ml_end,x            ; corta o piu' lunga (Krill non da' errore) si rifa'; dopo 3 volte C=1
+        bne _bad
+        lda krill_endaddrhi
+        cmp ml_end+1,x
+        beq _ok
+_bad    dec ml_try
+        bne _t
+        beq _r
+_ok     lda krill_loadaddrlo
         sta ml_src,x
         lda krill_loadaddrhi
         sta ml_src+1,x

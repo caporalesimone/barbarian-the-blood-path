@@ -17,7 +17,8 @@ LIM = {
     "menu": 3.1,          # ovl_town: MENU1..3 + unpacking: 1.98 s with 30 files on the disk, 2.97 s with 36 (8 GFX files); limit = measured + 0.1 (12/11)
     "town": 1.5,          # load_gfx 0: the village (GFX0, 3 KB): 1.10-1.31 s; threshold of the owner (12/11)
     "theme": 1.5,         # load_gfx 1: a dungeon theme (GFX1, 2 KB): 0.98 s; 1.34 s on 12/11 (42 files on the disk: TWN1-4, BOSSCH1-3)
-    "song": 0.6,          # snd_get: one song (SNDn): 0.51 s
+    "song": 1.5,          # snd_get: SND0 right after the theme GFX1, a sequence the game never does (15/11: with the
+                          # layout "hubchap" SND0 sits next to MENU, far from GFX1: 1.12 s; it was 0.51 s)
     "hdr": 0.95,          # hdr_read: the hero list (hl, 1 block): 0.62 s
     "load_char": 3.4,     # load_char in the village: hero file (9 blocks) + the village read again: 2.49 s; 2.71 s on 12/11 (disk layout changed: HELP packed); 3.04 s on 12/11 evening (file sizes of the loader changed, TODO M3)
     "save_char": 9.6,     # save_char in the village: read + plugin + 9 blocks + village again: 8.7-9.1 s; 9.45 s on 12/11 (limit of the owner 9.5 + rule "measure + 0.1")
@@ -25,21 +26,40 @@ LIM = {
     "stairs": 4.0,        # change_level to the next level of the same chapter (theme + generation, no disk write): 2.64 s with 30 files, 3.44-3.89 s with 36 files (varies from run to run); limit = max measured + 0.1 (12/11); target of the owner < 2 s (TODO J9)
     "save_dng": 9.4,      # save_char in a dungeon (no village to read again): the "save game": 7.6-8.1 s; 8.26-9.26 s on 12/11 (varies with the head position left by the previous test; limit of the owner 8.5 + rule "measure + 0.1")
     "hdr_write": 6.8,     # hdr_write: plugin + hl (1 block) + village again: 5.20 s; 5.0-5.8 s on 12/11 (varies from run to run)
+    # (15/11) one set per chapter c (PERF-DISK-21..25, TODO M1), limits for the layout "end" (TWN2..5 at the end of the disk, the
+    # default of TWN_LAYOUT in tools/build/mkdisk.sh): 1.15 x the slowest of 3 runs (emulated time: the runs differ by <= 0.2 s),
+    # rounded up to 0.1 s, so that the measure is at ~87% of its limit (rule: <= 90%). Each of them depends on the head position left by
+    # the step before, so a change in the order of the steps or in the files around them moves them (see chapter_measures).
+    # twnC = load_gfx 0 with c_chap = C (the village file alone), inC = the whole entry into village C (change_level to 0: from the
+    # first level of the chapter, for 5 from the village as chap_travel does), themeC = load_gfx 2C-1, stairsC = change_level level
+    # 1 -> 2 of the chapter, bossC = change_level to the boss level of the chapter (GFX 2C + BOSSCHC)
+    "twn1": 1.0, "twn2": 2.2, "twn3": 2.1, "twn4": 2.8, "twn5": 1.6,         # layout hubchap, measured: 0.68, 1.63, 1.56, 2.14, 1.20
+    "in1": 5.7, "in2": 5.3, "in3": 5.0, "in4": 5.0, "in5": 4.6,              # the time depends on the disk phase (rotation, head position): slowest seen on
+                                                                             # 10 phases 4.93, 3.86, 3.84, 3.84, 3.94 (means 4.17, 3.47, 3.49, 3.45, 2.96); in2 4.37 in the suite order
+    "theme1": 1.1, "theme2": 1.1, "theme3": 1.4, "theme4": 0.8,              # 0.72, 0.77, 1.04, 0.46
+    "stairs1": 3.2, "stairs2": 3.2, "stairs3": 3.2, "stairs4": 3.2,          # 1.5-1.7 s, up to 2.54 s depending on the disk phase
+    "boss1": 3.0, "boss2": 3.0, "boss3": 3.0,                                # 1.40-2.42, 2.24, 2.34 (disk phase)
 }
 T = {}
 
 
 def sw(g):
-    """VICE stopwatch (cycles). (12/11) Right after the start the monitor sometimes answers "sw" without the
-    "Stopwatch:" line (setup failed with 'list index out of range' about 1 run in 3): ask again."""
-    for _ in range(5):
-        m = re.findall(r"Stopwatch:\s*(\d+)", g.cmd("sw"))
-        if m: return int(m[0])
-    raise AssertionError("no answer from the VICE stopwatch")
+    """VICE stopwatch (cycles). (15/11) The answer is recognised by its content ("Stopwatch: <n>" then the prompt), not by
+    the first prompt, and the command is never sent twice: a second "sw" sent because an answer was late put the
+    following commands one answer out of step (the setup failed 1 run in 2 with "no answer to 'load ...'", see
+    Game.__init__ in tests/lib/c64.py for the cause)."""
+    g.s.sendall(b"sw\n")
+    b = g._read(lambda b: re.search(r"Stopwatch:\s*\d+\s*\n(?:.*\n)*?\(C:\$[0-9a-f]{4}\) $", b), 20, "sw")
+    return int(re.findall(r"Stopwatch:\s*(\d+)", b)[-1])
+
+
+def sw_reset(g):
+    g.s.sendall(b"sw reset\n")
+    g._read(lambda b: re.search(r"reset[^\n]*\n(?:.*\n)*?\(C:\$[0-9a-f]{4}\) $", b), 20, "sw reset")
 
 
 def timed(g, a, regs=""):
-    g.cmd("sw reset")
+    sw_reset(g)
     s0 = sw(g)
     g.call(a, tmax=120, regs=regs)
     return (sw(g) - s0) / CPS
@@ -47,7 +67,7 @@ def timed(g, a, regs=""):
 
 def setup(ctx):
     g = ctx["g"] = Game()
-    g.cmd("sw reset")
+    sw_reset(g)
     s0 = sw(g)
     g.to_menu()
     T["boot"] = (sw(g) - s0) / CPS
@@ -106,3 +126,38 @@ def perf_saves(ctx):
     g.poke(L["town_at"], 1)
     limit("save_char", timed(g, L["save_char"]))
     limit("hdr_write", timed(g, L["hdr_write"]))
+
+
+def chapter_measures(g, c):
+    """The loads of chapter c, in an order that leaves the head where the player leaves it: the village file alone right after
+    the theme (as the village is read after a dungeon), the stairs inside the chapter, the boss level (chapters 1-3), and the whole
+    entry into the village from the first level. Village 5 has no dungeon: its entry is the arrival from the village before
+    (change_level spawn mode 4, as chap_travel and tests/regression/villages do)."""
+    L = g.L
+    base = 5 * (c - 1)
+    g.poke(L["c_chap"], c); g.poke(L["c_unl"], max(c, g.b(L["c_unl"])))
+    g.call(L["load_gfx"], tmax=60, regs="a=00")                # head on the village file (not measured)
+    if c < 5:
+        limit("theme%d" % c, timed(g, L["load_gfx"], "a=%02x" % (2 * c - 1)))
+    limit("twn%d" % c, timed(g, L["load_gfx"], "a=00"))
+    if c == 5:
+        g.call(L["change_level"], tmax=150, regs="a=00,x=04")  # in the village of chapter 5 (not measured)
+        limit("in5", timed(g, L["change_level"], "a=00,x=04"))
+        return
+    g.call(L["change_level"], tmax=150, regs="a=%02x,x=00" % (base + 1))      # first level of the chapter (not measured)
+    limit("stairs%d" % c, timed(g, L["change_level"], "a=%02x,x=00" % (base + 2)))
+    if c < 4:
+        limit("boss%d" % c, timed(g, L["change_level"], "a=%02x,x=00" % (base + 5)))
+    g.call(L["change_level"], tmax=150, regs="a=%02x,x=00" % (base + 1))      # back to level 1 (not measured)
+    limit("in%d" % c, timed(g, L["change_level"], "a=00,x=01"))
+
+
+for _c in (1, 2, 3, 4, 5):
+    def _mk(c):
+        what = "file alone, full entry" if c == 5 else "file alone, full entry (from level %d), theme, stairs%s" % (
+            5 * (c - 1) + 1, ", boss level" if c < 4 else "")
+        @test("PERF-DISK-2%d" % c, "village %d: %s <= their limits" % (c, what))
+        def t(ctx):
+            chapter_measures(ctx["g"], c)
+        return t
+    _mk(_c)

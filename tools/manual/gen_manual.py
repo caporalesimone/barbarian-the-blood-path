@@ -7,6 +7,8 @@ text-shadow). Dall'host: ./build.sh --manual (o lab64 manual, C64_MANUAL in lab6
 Sorgente editabile: docs/manual/manuale_src.html. Stile (15/11): il tema base "c64" di Lab64 (manual/themes/c64.css) +
 docs/manual/tema.css (solo le regole del gioco). Questo script fa le parti del gioco:
   1. ritaglia gli screenshot grezzi (docs/manual/shots/*.png) in out/work/manual/img/*.png (area utile 320x200 senza bordo);
+  1b. la mappa del mondo (fan art, tools/art/world_map.py, Pillow, deterministica) si genera qui, nello stesso container:
+     out/work/art/world_map*.png poi out/work/manual/img/world_map.png (480x300, ingrandita a scatti dal CSS: pixel nitidi); non e' in git;
   2. prepara i dati di data/rules.yaml e data/balance.yaml per i segnaposto {{MONSTER_ROWS}} {{STEP_HDR}} {{MIN_ROW}} {{MAX_ROW}};
   3. il resto lo fa c64manual.build di Lab64: segnaposto, tema, tasti <kbd> disegnati, numeri di pagina, manuale.html, PDF
      (WeasyPrint) e avviso per le pagine che traboccano.
@@ -52,6 +54,11 @@ for f in sorted(os.listdir(os.path.join(M, "shots"))):
     if f == "chest.png":
         im = im.crop((0, 0, 320, 120))
     im.save(os.path.join(R, "img", f))
+
+# (16/11) mappa del mondo: generata dal manuale stesso (Pillow c'e' in lab64-pdf-gen), mai salvata in git
+import runpy  # noqa: E402
+runpy.run_path(os.path.join(ROOT, "tools", "art", "world_map.py"), run_name="world_map")
+Image.open(os.path.join(ROOT, "out", "work", "art", "world_map_1x.png")).convert("RGB").save(os.path.join(R, "img", "world_map.png"))
 
 # ------------------------------------------------------------------ 2. dati dinamici
 names = {"fallen": "Fallen", "skeleton": "Skeleton", "zombie": "Zombie", "demon": "Demon",

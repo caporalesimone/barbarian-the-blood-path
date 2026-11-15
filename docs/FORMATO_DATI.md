@@ -17,7 +17,7 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `LOBBY` | PRG | modulo del menu iniziale (codice, caricato a `$C000`) | build |
 | `MENU1`, `MENU2`, `MENU3` | PRG | (11/11) menu del villaggio (locanda e negozi, `src/menu.asm`): una zona di RAM compressa ZX0 per file; si leggono all'ingresso nel villaggio se il modulo non è in memoria, poi resta. Vedi «MENU» | build (`tools/build/pack_menu.py`) |
 | `TITLE` | PRG | schermata del titolo: bitmap multicolor + schermo + colore, 10000 byte | build |
-| `TWN1` … `TWN4` | PRG | (12/11) villaggio del capitolo *c* (`c_chap`): tile + mappa RLE, come il vecchio `GFX0`; oggi 4 copie di `out/work/gfx0.prg` | build |
+| `TWN1` … `TWN5` | PRG | (12/11; 15/11) villaggio del capitolo *c* (`c_chap`): tile + intestazione + mappa RLE; ognuno con tile, colori e mappa suoi (`tools/build/villages.py`); `TWN5` = città dell'Abisso (prototipo) | build |
 | `BOSSCH1` … `BOSSCH3` | PRG | (12/11) mappa del piano del boss dei capitoli 1–3 (piani 5, 10, 15): 4 byte (scale x, y; boss x, y) + RLE come `FMAP`, caricata a `FIN_AT`; segnaposto (`data/maps/bosschapN.txt`, `tools/build/gen_bossmap.py`) | build |
 | `FMAP` | PRG | mappa di base della sala del trono (piano 20), RLE come la mappa del villaggio (`b < $C0` tile, `$C0 + n` ripete il byte seguente `n + 2` volte), 48 × 48 caselle; caselle della stella e del cerchio = `$80 \| tile` (marcatori risolti da `post_walls`). Indirizzo di carico = `FIN_AT` = `$FD00` (`fin_load` la legge nella cache sotto il KERNAL, in fondo: da `PF_END` ai vettori `$FFFA`, 762 B; dal 10/11) | `tools/build/gen_final.py` |
 | `GFX1` … `GFX8` | PRG | (12/11) grafica per capitolo: tile + sprite dei mostri; per il capitolo *c*: `GFX(2c−1)` = piani del dungeon, `GFX(2c)` = piano del boss (sala del trono). Oggi i file dei capitoli 2–4 sono copie del capitolo 1 (segnaposto) | build |
@@ -119,27 +119,42 @@ KERNAL** e da lì copiati dove il VIC li vede (`gfx_install`).
 | Offset | Byte | Contenuto | Destinazione |
 |---|---|---|---|
 | 0 | 4 × 360 | caratteri dei 45 tile (43 dal 09/11 al 10/11; il 10/11 tolti barile e fieno, aggiunti finestra, comignolo, steccato verticale e guglia), una striscia per quarto del tile (alto-sx, alto-dx, basso-sx, basso-dx) | charset `$A800`, `$AA00`, `$AC00`, `$AE00` |
+| 1440 | 45 (`TK_LEN`) | (15/11) **intestazione del villaggio**: portale x, y · ingresso del sotterraneo x, y · ingresso del villaggio x, y · colori (sfondo, multicolor 1, multicolor 2, color RAM = 8 + accento) · porte di fabbro, alchimista, locanda (x, y ciascuna) · uscita del capitolo (x delle 2 caselle, poi y) · nome del luogo di cura (25 byte, codici schermo, con lo 0 finale) | `town_k` (`src/game/levels.asm`); i colori anche nella voce 0 di `pal_bg`/`pal_c1`/`pal_c2`/`pal_ram` |
+| 1485 | 48 (`TK_SOLID`) | (15/11) tile solidi del villaggio (1 byte per posto: 1 = solido) | `solidtab` |
+| 1533 | fino a 1795 | mappa 48 × 48 in RLE (byte < `$C0` = tile; ≥ `$C0` = ripeti il byte dopo (b & `$3F`) + 2 volte). Intestazione + mappa ≤ 1888 B (`TOWN_MAX`: il file arriva al massimo a `$ED00`; dal 15/11 il tema del dungeon comincia prima, a `$EC6D`: villaggio e dungeon non sono mai in RAM insieme) | `MAP` |
 
-### `GFX1` … `GFXn` — temi di dungeon (2016 byte, caricati a `$ED00`)
+Scritto da `tools/build/gen_gfx.py` (tile), `tools/build/gen_maps.py` (intestazione e mappa, con i controlli) e
+`tools/build/asm.sh` (li unisce in `out/work/twnN.prg`). Sorgenti: `tools/build/vilN_*.py`, `data/town_mapN.txt`.
 
-Il file del piano (12/11: due per capitolo, `GFX(2c−1)` dungeon e `GFX(2c)` boss; capitolo da `lv_grp`) lo sceglie `lvl_theme` (`src/game/theme.asm`; `tools/build/gen_gfx.py`, `CHAP_SET` = set di mostri per capitolo); i file non si deduplicano più, quelli dei capitoli 2–4 sono copie segnaposto (dall'11/11, ramo `fast-loader`, la grafica si rilegge comunque a ogni ingresso: niente cache).
+### `GFX1` … `GFXn` — temi di dungeon (2016 + `GFX_INFO` byte = 2163 byte, 9 blocchi; caricati a `GFX_DUN_AT` = `$EC6D`)
+
+Il file del piano (12/11: due per capitolo, `GFX(2c−1)` dungeon e `GFX(2c)` boss; capitolo da `lv_grp`) lo sceglie `lvl_theme` (`src/game/theme.asm`; `tools/build/gen_gfx.py`, `chapter_sets`); i file non si deduplicano (dall'11/11, ramo `fast-loader`, la grafica si rilegge a ogni ingresso: niente cache).
+**Dal 15/11** ogni file porta i **mostri del suo capitolo** (`tools/build/monsters.py` `chapter_set`: capitolo 1 i mostri di sempre, capitoli 2–4 `tools/build/monsters_chap.py`): sprite, colori e nomi dei tipi 1…8 e del posto del boss (tipo 9: Lord of Ruin nei file del dungeon e in `GFX8`, il boss del capitolo in `GFX2`, `GFX4`, `GFX6`).
+Il file **finisce sempre a `$F4E0`** (`GFX_DUN_END`, inizio della zona 2 del MENU) e comincia `GFX_INFO` byte prima di `$ED00`: quei byte sono la coda del buffer del villaggio (`TOWN_MAX`), libera nel dungeon perché il villaggio si rilegge a ogni ingresso.
 
 | Offset | Byte | Contenuto | Destinazione |
 |---|---|---|---|
 | 0 | 4 × 216 | caratteri dei tile 0…26 (muri, pavimenti, scale, portale, baule; 10/11: un solo tile per i bauli, i posti 25–26 sono liberi); i tile del villaggio non si toccano | charset, come sopra |
-| 864 | 512 | sprite dei 4 mostri base (2 fotogrammi ciascuno, slot 12…19) | `$A300` |
-| 1376 | 640 | sprite delle varianti forti e del boss finale (10 sprite) | `$8C00` |
+| 864 | 512 | sprite dei 4 mostri base del capitolo (tipi 1…4, 2 fotogrammi ciascuno, slot 12…19) | `$A300` |
+| 1376 | 640 | sprite delle 4 varianti forti (tipi 5…8) e del posto del boss (tipo 9), 10 sprite | `$8C00` |
+| 2016 | 9 | (15/11) **blocco info**: colore dello sprite dei tipi 1…9 | `NM_AT` … `NM_AT+8` (`build_sprites`, `src/game/game.asm`) |
+| 2025 | 9 | byte basso dell'indirizzo del nome dei tipi 1…9 (blocco tutto in una pagina: byte alto = `>NM_AT`) | `NM_AT+9` … (`bar_name`, `src/game/bar.asm`) |
+| 2034 | fino a `GFX_INFO` − 18 | nomi dei tipi 1…9, codici schermo (lettere 1–26, spazio, `'`, `-`), 0 finale, al massimo 24 caratteri (larghezza della barra); poi zeri fino a `GFX_INFO` (147 B: il blocco più lungo, quello di `GFX4`) | `NM_AT` = `$9000` − `GFX_INFO` (`$8F6D`, fine degli slot sprite 58–63, dopo il motivetto `SND_FBUF`) |
 
-Il tema del piano `n` è `((n − 1) mod 7) + 1` per i piani 1…19; il piano 20 (sala del trono) usa il tema 8 (`lvl_theme`, `src/game/prefetch.asm`). Nel tema 8 gli slot dei tile 12 e 13 contengono la
-grafica del pentacolo (stella e cerchio) della sala del trono.
+`gfx_install` copia tile e sprite e poi il blocco info intero a `NM_AT`: il buffer del tema sotto il KERNAL non serve più dopo
+l'installazione (un salvataggio lo sovrascrive: buffer del plugin `SV_SCR`).
+
+File del piano: `GFX(2c−1)` per i piani 1–4 del capitolo *c*, `GFX(2c)` per il suo piano del boss (5, 10, 15, 20) (`lvl_theme`,
+`src/game/theme.asm`). Nei file `GFX(2c)` gli slot dei tile 12 e 13 contengono la grafica del pentacolo (stella e cerchio) della
+sala del trono e lo slot della porta della locanda la leva.
 
 ### Mappa della cache (RAM sotto il KERNAL)
 
 | Area | Contenuto |
 |---|---|
 | `$E000`–`$E57F` | villaggio (`GFX0`), riletto a ogni ingresso (11/11; il primo lo carica START) |
-| `$ED00`–`$F4DF` | tema del piano attuale (`GFXn`), riletto a ogni ingresso (11/11: precaricamento e cache tolti) |
-| `$F4E0`–`$FCFF` | (11/11) zona 2 del modulo MENU (fino all'11/11: tema precaricato in background, ora scritto direttamente in `$ED00`) |
+| `$EC6D`–`$F4DF` | tema del piano attuale (`GFXn`), riletto a ogni ingresso (11/11: precaricamento e cache tolti; 15/11: comincia `GFX_INFO` byte prima di `$ED00`, nella coda del villaggio) |
+| `$F4E0`–`$FCFF` | (11/11) zona 2 del modulo MENU (fino all'11/11: tema precaricato in background, ora scritto direttamente nel buffer del tema) |
 | `$D000`–`$DFFF` | sotto l'I/O: all'avvio villaggio e sprite del loader, poi i salvataggi letti dal loader (fino al primo menu); in gioco `STASH` `$D000`–`$D47F` e il generatore dei piani da `$D480` (copiato dal PRG `GAME` all'avvio) |
 
 ### Precaricamento in background (tolto)

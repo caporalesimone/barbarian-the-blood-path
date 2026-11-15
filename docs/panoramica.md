@@ -91,6 +91,6 @@ Il ciclo dura al massimo un fotogramma PAL (19 656 cicli): i mostri lontani sono
 | `LOBBY` | `$C000` (RAM della mappa) | menu iniziale, scheda dell'eroe |
 | `MENU` | zone `$C900`, `$F4E0`, `$A700` (11/11) | locanda e negozi: all'ingresso nel villaggio se manca (dopo l'avvio o il LOBBY), poi resta ([Tecnica](tecnica.md#moduli-su-disco)) |
 | `GFX0` | cache `$E000` | grafica del villaggio |
-| `GFX1`…`GFX2` | cache `$ED00` (anche il precaricamento, dall'11/11) | temi dei piani (1–7 a rotazione: un file; sala del trono: un file) |
+| `GFX1`…`GFX8` | cache da `GFX_DUN_AT` (`$EC6D`) a `$F4DF` | temi dei piani: due per capitolo (dungeon, piano del boss), con sprite, colori e nomi dei mostri del capitolo (15/11) |
 | `FMAP` | cache `$FD00` (fondo della cache sotto il KERNAL, dal 10/11) | mappa della sala del trono (piano 20), letta una volta per sessione |
 | `HL`, `SAVE-01..05` | file preallocati (plugin di save di Krill) | elenco eroi; un file per eroe con i suoi piani ([Salvataggi](salvataggi.md)) |

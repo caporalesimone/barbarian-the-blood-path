@@ -1,0 +1,55 @@
+; Mappa del villaggio del capitolo 5 (48x48): la citta' dell'Abisso. Una lettera per casella (tools/build/gen_maps.py, LEGEND e ALIASES).
+; Le lettere sono quelle del villaggio 1; i disegni dei tile sono a tema (tools/build/villages.py).
+; E=ingresso (arrivo dal capitolo prima)  P=posto del portale  ==uscita del capitolo (2 caselle)  >=porta della cripta
+; Tre isole di pietra sospese nel vuoto (il bordo della mappa e' vuoto), separate da due crepe con ponti di luce.
+; Centro: viale, piazza del mosaico con la fontana, discesa nell'Abisso a nord (cripta), locanda a sud. Ovest: fabbro.
+; Est: alchimista e piazzetta del portale. Ingresso a sud; le caselle di uscita ci sono (formato) ma non si aprono.
+; Prima stesura generata da lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%==%%%%%%%%%%%%%%%%%%%%%%%
+%%)....,..B...(%%),.`TT::T.T..(%%)`T`.,......(%%
+%%)`**.,...`*.(%%).`..T::T.T..(%%)....`.``.,*(%%
+%%),.,...,,..,(%%),..,T::T**..(%%)`.B`.,...T.(%%
+%%)...`.*,,,T.(%%)T.*`T::T.,.B(%%).`....`T.,.(%%
+%%),.T.,**...T(%%).B.,T::T.,.B(%%)..,`..B...*(%%
+%%)...*.,.....(%%),`..T::T..T.(%%),,TB.......(%%
+%%).,RRcRRRRT,(%%),/@\.::...T.(%%).,.rrcrrrr.(%%
+%%)BBRRRRRRR,.(%%).[>].::,`..,(%%)`.,rrrrrrr.(%%
+%%)..WWW5WWWT.(%%).::t:::`t.T.(%%)`TBWWW7WWW`(%%
+%%),`WoWSWoWT.(%%).,,..::.`,T.(%%)`T.WoWLWoW.(%%
+%%),...,:,`.`.(%%)...T.::.B..,(%%).`....:`..,(%%
+%%)T.,..:.,.`.(%%).`.t`::.t*.,(%%)`.``.,:`...(%%
+%%)`::::::::::xxxx::::::::::::xxxx::::::::::.(%%
+%%)`::::::::::xxxx)::::::::::(xxxx::::::::::.(%%
+%%).:,.`...,`,`(%%)...,::....(%%)...,......:,(%%
+%%).:*,...`,.,.(%%)..,.::..,.(%%).`,`.,.BT,:.(%%
+%%).:.B,...,...(%%)++++++++++(%%)T...B,,..`:.(%%
+%%),:rrcrrrr..B(%%)+i++++++i+(%%)...,,.,.B.:,(%%
+%%).:rrrrrrr...(%%)++++++++++(%%)...,RRcRRRR.(%%
+%%).:WWoWWWW.,.(%%)++++~~++++(%%)..,.RRRRRRR*(%%
+%%).:WoWDWoW::.xxxx+++~12~+++xxxx,:::WWoWWWW.(%%
+%%)`::::::::::,xxxx+++~34~+++xxxx`:::WoWDWoW*(%%
+%%).:.*`:.,,...(%%)++++~~++++(%%)`...T..:..:.(%%
+%%)`:,..,......(%%)++++++++++(%%)....,..:..:,(%%
+%%).:`.``...,*.(%%)+i++++++i+(%%),,,+++++++:.(%%
+%%).:..`s,T...`(%%)++++++++++(%%)...+++P+++:,(%%
+%%).:...,`.*T.,(%%).,.,::,,,.(%%)..`+++++++:.(%%
+%%).:`...`,..T(%%)..B``::,..*.(%%)`.+Y+++Y+:.(%%
+%%),:,,...,..,(%%)T.*,*::.*.,.(%%),.+++++++:.(%%
+%%),:..*.,...T(%%).,Bt,::.t..,(%%),.`.B,B.`:.(%%
+%%).:lllll..,,(%%)..BB.::..B.`(%%)``.,,`B.`:*(%%
+%%).:lllll...,(%%).,..`::.....(%%),.T,lllll:,(%%
+%%).:WWoWW`.T.(%%).lclll:RRRRR(%%)`.,*lllll:.(%%
+%%)*:WoDoW...,(%%),lllll:RRRRR(%%)....WWoWW:`(%%
+%%).:`,:,`.*..(%%),WWoWW:WWoWW(%%),...WoDoW:.(%%
+%%).:..:`.,.,.(%%),WoHoW:WoDoW(%%).,,...:`.:`(%%
+%%).::::::::::xxxx::::::::::::xxxx::::::::::,(%%
+%%),:Y:::::Y::xxxx:::t::::t:::xxxx::::::::::.(%%
+%%)...........(%%)..`..::.,.,,(%%)...,`......(%%
+%%)..T.T..T...(%%),..*.::.`..`(%%),,.,B.,,,,.(%%
+%%).*....`...`(%%)..B..::...`,(%%)TB,.`..B``,(%%
+%%)...BT.B.`..(%%),,...::.T..`(%%)BT,`.T.,..,(%%
+%%%%%%%%%%%%%%%%%%%%%%%E:%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
