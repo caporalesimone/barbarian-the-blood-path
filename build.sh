@@ -18,7 +18,7 @@
 # test, manuale) finiscono in out/releases/v<versione>/ con manifest.json (tools/build/publish.py); out/releases/latest e' l'ultima.
 # Toolchain: Lab64 (repository a parte), usato SOLO con il suo comando "lab64" (nel PATH: lab64 install, docs/getting-started.md);
 # il gioco non sa dove sta Lab64. Le immagini mancanti si costruiscono da sole; i programmi esterni (VICE, zx0, cc1541) si
-# compilano dentro le immagini. Prima volta su un computer nuovo: lab64 doctor. Configurazione di Lab64 per il gioco: lab64.env.
+# compilano dentro le immagini. Prima volta su un computer nuovo: lab64 check-env. Configurazione di Lab64 per il gioco: lab64.env.
 # Si lancia anche come "lab64 build [flag]" (C64_BUILD in lab64.env).
 # Stato dal vivo (14/11, per la pagina del viewer): out/tmp/build.json (fase, esito), out/tmp/tests.json (lab64 test).
 # Copyright (c) 2026 - Simone Caporale
@@ -47,8 +47,8 @@ trap on_exit EXIT
 trap 'exit 130' INT TERM
 phase avvio
 command -v lab64 >/dev/null || { echo "comando lab64 non trovato: installare Lab64 (<cartella di lab64>/bin/lab64 install)"; exit 1; }
-command -v docker >/dev/null || { echo "Docker non trovato: lab64 doctor"; exit 1; }
-docker info >/dev/null 2>&1 || { echo "il demone Docker non risponde: lab64 doctor"; exit 1; }
+command -v docker >/dev/null || { echo "Docker non trovato: lab64 check-env"; exit 1; }
+docker info >/dev/null 2>&1 || { echo "il demone Docker non risponde: lab64 check-env"; exit 1; }
 phase immagini
 if [ $IMAGES = 1 ]; then lab64 images --force; fi
 lab64 images tools
@@ -75,7 +75,7 @@ fi
 
 # --- servizi per i test: demone vc64web (lab64 up: "lab64 run" lo raggiunge da solo), schermo del viewer (C64_VIEW=1)
 phase test
-[ $EMU = 1 ] && lab64 up
+[ $EMU = 1 ] && lab64 up vc64web
 # viewer gia' acceso: i test si vedono sullo schermo dal vivo senza chiederlo (salvo --no-view)
 [ $NOVIEW = 0 ] && [ -n "$(docker ps -q -f name=^lab64-viewer$)" ] && VIEW=1
 if [ $VIEW = 1 ] && [ $NOVIEW = 0 ]; then export C64_VIEW=1; else export C64_VIEW=0; fi
@@ -89,7 +89,7 @@ fi
 PUB="$PUB --tests"
 if [ $REL = 1 ] || [ $MANUALDEF = 1 ]; then
     phase manuale
-    lab64 manual
+    if [ $REL = 1 ]; then lab64 manual --strict; else lab64 manual; fi   # release: pagina che trabocca = errore
     PUB="$PUB --manual"
 fi
 if [ $REL = 1 ]; then

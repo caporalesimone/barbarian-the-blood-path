@@ -25,9 +25,10 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   (build **e** test e strumenti in VICE: builder e VICE uniti il 14/11), `lab64-vc64web` emulatore secondario, `lab64-viewer` vista
   dal vivo con l'audio (KasmVNC). Le immagini proprie del gioco si chiamano **`barbarian-<nome>`** e stanno accanto al loro codice
   (oggi nessuna: dal 14/11 il manuale si fa con `lab64-pdf-gen` di Lab64). La configurazione di Lab64 per il gioco
-  sta in `lab64.env`. Sull'host servono solo sh, Docker, git, curl. Python gira **solo nei container**. Comandi (dalla cartella del
-  gioco): `./build.sh [...]` (o `lab64 build`), `lab64 test [...]`, `lab64 up|down|view`, `lab64 run <comando>`,
-  `lab64 doctor`. Immagini con la versione di Lab64 nel tag (`lab64-tools:1.1`); il gioco la fissa con `LAB64_VERSION` in
+  sta in `lab64.env`. Sull'host servono solo sh, Docker (con Compose v2), git, curl. Python gira **solo nei container**. Comandi (dalla cartella del
+  gioco): `./build.sh [...]` (o `lab64 build`), `lab64 test [--view|--no-view] [--emu] [...]`, `lab64 up|down|ps|view` (stack compose: con `lab64 up` i comandi girano
+  nel container `lab64-tools` sempre acceso), `lab64 run <comando>`, `lab64 manual`, `lab64 map`,
+  `lab64 check-env`. Immagini con la versione di Lab64 nel tag (`lab64-tools:1.2`); il gioco la fissa con `LAB64_VERSION` in
   `lab64.env`. Motore dei test, libreria VICE e generatore del manuale stanno in Lab64; `tools/vice/vice_env.sh` del gioco aggiunge
   solo `ROOT` a quello di Lab64.
 - Un cambiamento a Lab64 si committa **nel suo repository** (in inglese, con le sue regole) e deve lasciare verde la build del gioco.
@@ -53,10 +54,10 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   cancellare); `out/cache/` = cio' che si riusa fra le build e non si cancella (`zx0/`, `steps/`, `vc64web/`); `out/tmp/` = usa e getta
   (si puo' cancellare sempre; **mai** `/tmp`); `out/releases/` = **artefatti per versione**: ogni build pubblica in
   `out/releases/v<versione>/` (disco; atlante, mappe, report dei test e manuale solo se generati in quella build; **niente zip dei
-  sorgenti**) con `manifest.json` (`tools/build/publish.py`); `out/releases/latest` punta all'ultima; si tengono le ultime **5** versioni
+  sorgenti**) con `manifest.json` (`tools/build/publish.py`: scelte del gioco sopra `c64publish` di Lab64); `out/releases/latest` punta all'ultima; si tengono le ultime **5** versioni
   (`./build.sh --keep N`, `KEEP_VERSIONS`). Nel codice i percorsi sono `out/work/...`: **mai** scrivere in `out/` direttamente.
   La pubblicazione fuori dal computer (GitHub) verra' dopo.
-- Fine riga sempre LF (`.gitattributes`); il progetto su Windows sta nel filesystem di WSL2, non su `/mnt/c` (`lab64 doctor`).
+- Fine riga sempre LF (`.gitattributes`); il progetto su Windows sta nel filesystem di WSL2, non su `/mnt/c` (`lab64 check-env`).
 
 ## Cartelle
 `src/` (gioco e librerie per il C64, `src/third-party/`), `data/`, `tools/` (`build/`, `atlas/`, `memory-map/`, `manual/`,
@@ -84,7 +85,9 @@ diventa un test in `tests/`, non resta in `tools/`.
   mosaico `tutti_i_menu.png`; 13/11: restano versionati). Si rifanno solo quelli cambiati:
   `lab64 run tools/vice/shots_menus.sh inventario locanda ...` (senza nomi: tutti), il mosaico si rigenera da solo.
 - **Manuale**: PDF con WeasyPrint nel container `lab64-pdf-gen` (`./build.sh --manual` o `lab64 manual`, `tools/manual/gen_manual.py`):
-  (15/11) tema base "c64" di Lab64 (pagina, colori, tasti, numeri di pagina) + `docs/manual/tema.css` (solo le regole del gioco).
+  (15/11) tema base "c64" di Lab64 (pagina, colori, tasti, numeri di pagina) + `docs/manual/tema.css` (solo le regole del gioco);
+  la build fa **tutti i manuali che hanno il sorgente** (oggi italiano; inglese quando ci sara' `manual_src_en.html`), una pagina
+  che trabocca e' un avviso, in `--release` un errore.
   **Copertina** sempre con il **tema rosso** dei dungeon (palette 4): screenshot `dungeon` in `tools/vice/shots_manual.sh` (piano 8
   con il seed di prova). **Screenshot del manuale**: il PG sta sempre in una posizione valida (casella percorribile); per il
   villaggio lo controlla `tools/vice/check_pos.py`, nei dungeon guardare lo screenshot prima di consegnare.

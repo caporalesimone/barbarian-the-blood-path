@@ -164,7 +164,7 @@ misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagin
   salvataggi, `EMU-*` su vc64web).
 - Per aggiornare un programma: versione, URL o commit e SHA-256 in `sources.conf` di Lab64, poi `lab64 images --force tools`.
 - **Prova da ambiente pulito** (14/11): immagini, cache di BuildKit, rete e volume cancellati; clone dei due repository affiancati;
-  `lab64 doctor`, `./build.sh --release` (immagini ricostruite da zero, tutto ricompilato: ~8 min; 185 PASS + 1 SKIP, `EMU-*`
+  `lab64 check-env`, `./build.sh --release` (immagini ricostruite da zero, tutto ricompilato: ~8 min; 185 PASS + 1 SKIP, `EMU-*`
   compresi), `lab64 images --force` (riscarica i sorgenti, la cache resta valida), progetto di esempio di `lab64 init`
   (build e test passati). Unico intoppo esterno: Docker Hub ha risposto 429 (troppe richieste) all'immagine `node`, riuscito dopo
   qualche minuto.
@@ -195,7 +195,7 @@ flowchart LR
 Nel progetto stanno **tutti i file** (sorgenti, dati, ROM in `roms/` di Lab64, sorgenti di VICE, zx0 e cc1541). I
 **programmi** stanno nei container (`docker/Dockerfile` di Lab64, `tools/manual/Dockerfile`, tabella in
 [Getting started](getting-started.md) sezione 3); sull'host servono solo
-sh, Docker con BuildKit, git e curl (`lab64 doctor` li controlla).
+sh, Docker con BuildKit, git e curl (`lab64 check-env` li controlla).
 
 | Programma | Container | A cosa serve |
 |---|---|---|
@@ -214,7 +214,7 @@ lab64-tools e lab64-viewer [MISURATO 13/11: stessi id dei layer]. **Costo di Doc
 prove): nessuna perdita misurabile. **Non misurato** su Docker Desktop / WSL2.
 
 **Windows**: si lavora **dentro WSL2** con il progetto nel filesystem di WSL (`~/...`), non in `/mnt/c` (accessi lenti, permessi e fine
-riga). `lab64 doctor` lo riconosce dal tipo di filesystem del punto di montaggio che contiene il progetto (`/proc/self/mountinfo`:
+riga). `lab64 check-env` lo riconosce dal tipo di filesystem del punto di montaggio che contiene il progetto (`/proc/self/mountinfo`:
 `9p`/`drvfs`/`virtiofs` = disco Windows o condiviso, `ext4` & simili = filesystem Linux) e dai segni di WSL (`microsoft` nel kernel,
 `WSL_DISTRO_NAME`). **Non provato su Windows** (solo la logica, con un `mountinfo` di prova). Fine riga: `.gitattributes` forza LF.
 Windows nativo (senza WSL) non è supportato: gli script sono shell Unix.

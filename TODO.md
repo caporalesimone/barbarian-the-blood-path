@@ -7,7 +7,7 @@ I lavori della toolchain stanno nel TODO di Lab64 (`TODO.md` del suo repository)
 
 **Riordino del 15/11** (richiesta del committente): voci raggruppate per **categoria** e, dentro ogni categoria, ordinate per
 **taglia**. Gli **ID** restano quelli dell'11/11 (`<lettera><numero>`, citati nella wiki e nei commit): la lettera non dice più la
-categoria. Tolte le voci fatte o superate: T2 (passata a Lab64; tema del manuale fatto il 15/11), M7 (1570/1571 in VICE:
+categoria. Tolte le voci fatte o superate: T2 e T3 (passate a Lab64 e fatte il 15/11: tema del manuale, pubblicazione generica), M7 (1570/1571 in VICE:
 `KRILL-18` passa), la parte risolta di I11, I9/I10/J10/J13 (sono lavori di Lab64).
 
 **Taglie**: **XS** = minuti o una decisione; **S** = ore; **M** = 1–2 giorni; **L** = più giorni; **XL** = settimane.
@@ -27,7 +27,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
-| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T3, T1 |
+| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, T1 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J4, J3, J2, J1 |
 
 ---
@@ -133,13 +133,12 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 ### E6 (ex 2.8) Revisione completa del manuale e dell'help prima della prossima release — M
 - Rilettura di `docs/manual/manuale_src.html`, `data/help.txt` (`gen_help.py --snap` se cambia l'HUD), screenshot
   (`tools/vice/shots_manual.sh`); impaginazione (pagine mezze vuote dopo il 09/11); figura della morte in pagina 7.
-- (15/11) Il PDF dal 13/11 usciva **senza stile** (il foglio di stile non si trovava dopo lo spostamento in `out/work/manual/`):
-  corretto con il tema di Lab64. Ora il generatore segnala le pagine che traboccano: **pagina 17 del PDF (capitolo 13,
-  salvataggio) trabocca di ~2 mm**: accorciare il testo o spostare la nota.
+- (15/11) Il generatore (Lab64) segnala le pagine che traboccano; in `--release` e' un errore (`lab64 manual --strict`).
 
 ### E7 (11/11) Manuale in inglese, oltre all'italiano — M
 - `tools/manual/gen_manual.py --lang en` è pronto (sorgente `docs/manual/manual_src_en.html`, PDF
-  `Barbarian_Blood_Path_Manual_EN.pdf`; le parti generate hanno già le parole nelle due lingue): **manca il sorgente
+  `Barbarian_Blood_Path_Manual_EN.pdf`; le parti generate hanno già le parole nelle due lingue; dal 15/11 la build fa da sola tutti
+  i manuali che hanno il sorgente e li pubblica): **manca il sorgente
   inglese** (traduzione di `manuale_src.html`, stesso impaginato e stessi segnaposto). Prima di una release pubblica; poi
   `tools/build/release.sh` produce i due PDF e il test `BUILD-04` controlla anche quello inglese. Legato a H5.
 
@@ -416,21 +415,19 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
   `manifest.json` con gli SHA-256) invece di conservarle in locale; niente zip dei sorgenti (regola del committente 14/11: lo
   da' gia' il tag). Da decidere con il passaggio a GitHub.
 
-### T3 (15/11) Passare alla pubblicazione generica di Lab64 quando c'e' — S
-- Quando Lab64 avra' la pubblicazione generica (`out/releases/v<V>/`, manifest, retention: TODO di Lab64), `tools/build/publish.py`
-  si riduce all'aggancio con le misure del gioco (spazio di GAME, tempi dei test, ...).
-
 ### T1 Mappa della memoria automatica: lavoro dalla parte del gioco — M
 - La mappa automatica e la sonda in VICE sono di Lab64 (`lab64 map`, [docs/build.md](docs/build.md) sezione 4). Prima misura della
   sonda (14/11, 39 sessioni): **1791 B mai scritti** contro 6398 B liberi per l'analisi statica. Da guardare [non verificato, sono
   indizi]: zone libere per l'analisi statica ma scritte durante i test (`$8E39-$8FFF` 455 B, `$B701-$BDFF` con un byte libero a
   ogni inizio pagina = probabile tabella o buffer dietro puntatori, `$D000-$D47F` sotto l'I/O); `$B300-$B3FE` (modulo `lore`) mai
   scritto = il modulo non e' caricato da nessun test.
-- **Quando Lab64 avra' le annotazioni** (TODO di Lab64): scriverle nei sorgenti (descrizioni, dati che si liberano dopo l'avvio:
-  oggi il margine di 2333 B sotto `$8720` di `asm.sh` non si ritrova nella mappa automatica perche' `gfx_data` resta occupato) e
-  **togliere le mappe vecchie** (`tools/memory-map/gen_rammap.py`, `gen_diskmap.py`: curate a mano, con scenari), portando le loro
+- **Annotazioni** (Lab64 le legge dal 15/11: `;@map` e `;@scenario` nei sorgenti, README di Lab64): scriverle nei sorgenti
+  del gioco (descrizioni; `free-after=start` per i dati che si liberano dopo l'avvio: oggi il margine di 2333 B sotto `$8720` di
+  `asm.sh` non si ritrova nella mappa automatica perche' `gfx_data` resta occupato; scenari villaggio / dungeon / menu) e poi
+  **togliere le mappe vecchie** (`tools/memory-map/gen_rammap.py`, `gen_diskmap.py`: curate a mano), portando le loro
   descrizioni nelle annotazioni. Fino ad allora restano (la pagina automatica le collega).
-- Sonda anche in `--release` (oggi a mano: `C64_MEMPROBE=1 lab64 test regression`, poi `lab64 map`).
+- Sonda anche in `--release` (oggi a mano: `C64_MEMPROBE=1 lab64 test regression`, poi `lab64 map`); seconda passata con
+  `C64_MEMPROBE=2` (altro schema: toglie i byte che sembravano mai scritti per caso).
 
 ---
 

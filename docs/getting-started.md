@@ -10,7 +10,7 @@ come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in
 
 ```sh
 git clone <Lab64> ~/lab64 && ~/lab64/bin/lab64 install   # una volta: Lab64 dove si vuole, il comando lab64 nel PATH
-lab64 doctor               # una volta su un computer nuovo: controlla host, Docker, ROM, posizione del progetto (WSL/Windows)
+lab64 check-env               # una volta su un computer nuovo: controlla host, Docker, ROM, posizione del progetto (WSL/Windows)
 ./build.sh                 # TUTTO: disco + mappe + atlante + smoke e sanity + manuale PDF
 ./build.sh --fast          # solo il disco (salta atlante, mappe, manuale); smoke e sanity restano: il comando di tutti i giorni
 ./build.sh --fast --no-test  # il minimo: solo il disco
@@ -23,7 +23,7 @@ lab64 run tools/build/mkdisk.sh   # un comando qualunque nel container lab64-too
 
 Sull'host servono **solo** `sh`, Docker (con BuildKit), `git` e `curl`. Python, 64tass, cc65, VICE, node, Chromium, WeasyPrint:
 tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, con il progetto nel filesystem di WSL (non in `/mnt/c`):
-`lab64 doctor` lo controlla dal tipo di filesystem del punto di montaggio (`/proc/self/mountinfo`).
+`lab64 check-env` lo controlla dal tipo di filesystem del punto di montaggio (`/proc/self/mountinfo`).
 
 ## 2. Cartelle
 
@@ -36,7 +36,7 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, `run_tests.sh` (suite della build); motore: `lab64 test` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
-| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-images.sh`, `viewer.sh`, `validate_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `vc64web-custom/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
+| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-images.sh`, `viewer.sh`, `check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `vc64web-custom/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
 | `lab64.env` | configurazione di Lab64 per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
 | `out/` | **tutto cio' che si genera**: `work/` (intermedi e uscite della build in corso), `cache/` (zx0, steps, vc64web: si riusano), `tmp/` (usa e getta), `releases/` (artefatti per versione, ultime 5) | no (solo `.gitkeep`) |
@@ -46,8 +46,10 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 `lab64` e' il comando di Lab64 (una volta: `<cartella di Lab64>/bin/lab64 install`, poi e' nel PATH; serve solo Docker sull'host).
 Il gioco non sa dove sta Lab64: lo usa solo con questo comando.
 `lab64 build` = `./build.sh` (`C64_BUILD` in `lab64.env`); `lab64 test [smoke|sanity|regression] [-k ID]` = motore dei test
-di Lab64 sulla cartella `tests/`; `lab64 up` accende il demone vc64web (poi `lab64 test regression -k EMU`), `lab64 down` lo
-spegne; `lab64 view` / `stop` il viewer (con **♪ play** sulle musiche `.sid` di ogni versione, [musica.md](musica.md)); `lab64 run <comando>` un comando in `lab64-tools`; `lab64 images`, `doctor`,
+di Lab64 sulla cartella `tests/` (`--emu` accende vc64web per quel giro, `--view` / `--no-view` lo schermo del viewer);
+(15/11) `lab64 up` accende lo **stack compose** del progetto: `tools` sempre acceso (i comandi ci girano dentro con `docker exec`,
+senza un container nuovo ogni volta), vc64web, viewer e lettore; `lab64 up vc64web` solo l'emulatore; `lab64 down [servizio]`
+spegne, `lab64 ps` elenca; `lab64 view` / `stop` il viewer (con **♪ play** sulle musiche `.sid` di ogni versione, [musica.md](musica.md)); `lab64 run <comando>` un comando in `lab64-tools`; `lab64 manual`, `lab64 map`, `lab64 images`, `check-env`,
 `version`. Dettagli: README di Lab64, sezione "Command line".
 
 ## 3. I container
@@ -78,7 +80,7 @@ Le dimensioni sono quelle di `docker image inspect` (layer comuni contati in ogn
 flowchart LR
   subgraph host["Host (Linux o WSL2): sh, Docker, git, curl"]
     B["./build.sh"]
-    V["lab64 doctor"]
+    V["lab64 check-env"]
   end
   subgraph img["build delle immagini (lab64 images)"]
     TB["stage *-build<br/>compilano VICE, zx0, cc1541"]
@@ -123,7 +125,7 @@ flowchart TD
   F -->|si| Z["fine"]
   F -->|no| G["lab64-tools:<br/>tests/run_tests.sh"]
   G --> H{"--release?"}
-  H -->|no| Y["out/releases/vX.Y/ (publish.py)"]
+  H -->|no| Y["out/releases/vX.Y/ (publish.py + c64publish di Lab64)"]
   H -->|si| I["lab64-pdf-gen: PDF<br/>lab64-tools: release.sh<br/>(disco ottimo, mappe, zip)"] --> Y
 ```
 
@@ -180,7 +182,7 @@ scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagin
   (tetto 35 s).
 - **Una scheda per versione** di `out/releases/` (da `manifest.json`): esito dei test, commit, release/branch, modifiche non
   committate; pulsanti **vc64web**, **VICE live**, **.d64** (download); le misure del progetto (`stats.metrics`: per questo gioco
-  margini di RAM e GAME compresso, da `tools/build/publish.py`), blocchi liberi del disco, durate; tabella degli artefatti (dimensione, data, SHA-256) con quelli **non generati**; directory
+  margini di RAM e GAME compresso, da `tools/build/publish.py`; cartelle, manifest e retention sono di `c64publish` di Lab64, 15/11), blocchi liberi del disco, durate; tabella degli artefatti (dimensione, data, SHA-256) con quelli **non generati**; directory
   del disco; elenco dei test (o solo i FAIL, con il motivo).
 - **Andamento** fra le versioni tenute (le misure del progetto, blocchi liberi, durata di build e dei test con le stesse suite) e
   **confronto** fra due versioni (misure, file del disco cambiati, test con esito o tempo diverso).
@@ -254,7 +256,7 @@ Password facoltativa: `VIEW_PASSWORD=... lab64 view` (di default nessuna): auten
 
 | Sintomo | Causa e rimedio |
 |---|---|
-| `lab64 doctor`: "disco Windows" | il progetto sta in `/mnt/c/...`: clonarlo nel filesystem di WSL (`~/...`) |
+| `lab64 check-env`: "disco Windows" | il progetto sta in `/mnt/c/...`: clonarlo nel filesystem di WSL (`~/...`) |
 | `pack: manca zx0` / `mkdisk: manca cc1541` | lo script e' stato lanciato fuori da `lab64-tools`: `lab64 run ...` |
 | download di un sorgente fallito (`lab64 images`) | rete o proxy dell'host: scaricare il file indicato da `sources.conf` di Lab64 a mano in `downloads/` di Lab64 con il nome che stampa lo script (lo SHA-256 viene controllato) |
 | pip/npm: `SELF_SIGNED_CERT_IN_CHAIN` nella build di un'immagine | proxy che intercetta TLS: `C64_CA_BUNDLE=/percorso/ca.crt lab64 images --force vc64web` e `./build.sh --images` (manuale) |

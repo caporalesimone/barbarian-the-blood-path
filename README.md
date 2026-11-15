@@ -12,7 +12,7 @@ Krill's Loader ([Fast loader](docs/FastLoader.md)).
 Tutto gira in container Docker: sull'host servono solo sh, Docker, git e curl. **Guida completa: [docs/getting-started.md](docs/getting-started.md)**
 (cartelle, container, build, test, dove finiscono i file).
 ```
-lab64 doctor        # controllo dell'ambiente (la prima volta; su Windows: progetto dentro WSL2)
+lab64 check-env        # controllo dell'ambiente (la prima volta; su Windows: progetto dentro WSL2)
 ./build.sh               # TUTTO: disco + mappe RAM/disco + atlante + smoke e sanity + manuale PDF
 ./build.sh --fast        # build veloce: solo il disco (salta atlante, mappe e manuale); smoke e sanity restano
 ./build.sh --fast --no-test   # il minimo: solo il disco, senza test
@@ -54,7 +54,7 @@ Versione del gioco e del formato dei salvataggi: `version.yaml`.
 | `tools/` | `build/` generatori e build, `atlas/` atlante grafico, `memory-map/` mappe RAM e disco, `manual/` manuale, `simulators/` simulatori, `vice/` strumenti in VICE (screenshot, misure, arena), `font/` font della UI |
 | `tests/` | test automatici: `smoke/`, `sanity/`, `regression/`, libreria in `lib/` ([docs/test.md](docs/test.md)) |
 | `docs/` | wiki del gioco ([indice](docs/README.md)), sorgente del manuale (`docs/manual/`), schermate dei menu (`docs/screens/`) |
-| Lab64 (fuori dal progetto) | **Lab64**, la toolchain C64 generica: dal 14/11 **repository a parte**, usato solo con il comando `lab64` (nel PATH: `<cartella di Lab64>/bin/lab64 install`) (README.md di Lab64, in inglese): immagini Docker `lab64-*` (`docker/Dockerfile`) e script `run.sh`, `build-images.sh`, `viewer.sh`, `validate_env.sh`; sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in roms/roms.md di Lab64); mappa automatica `memmap/` |
+| Lab64 (fuori dal progetto) | **Lab64**, la toolchain C64 generica: dal 14/11 **repository a parte**, usato solo con il comando `lab64` (nel PATH: `<cartella di Lab64>/bin/lab64 install`) (README.md di Lab64, in inglese): immagini Docker `lab64-*` (`docker/Dockerfile`) e script `run.sh`, `build-images.sh`, `viewer.sh`, `check_env.sh`; sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in roms/roms.md di Lab64); mappa automatica `memmap/` |
 | `lab64.env` | configurazione di Lab64 per il gioco |
 | `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
 | `out/` | tutto ciò che si genera (non in git): `releases/v<versione>/` (ultime 5: disco, atlante, mappe, manuale, report dei test), `work/` (intermedi della build in corso), `cache/` (riusabile), `tmp/` (usa e getta) |
