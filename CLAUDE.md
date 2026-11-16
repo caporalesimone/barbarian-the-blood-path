@@ -106,8 +106,9 @@ diventa un test in `tests/`, non resta in `tools/`.
   TODO aggiornati nello stesso lavoro. Messaggio in italiano: titolo breve + corpo con cosa e perché, più le righe di attribuzione
   della sessione (`Co-Authored-By` compreso). Autore dei commit: **Simone Caporale `<caporalesimone@gmail.com>`** (configurazione
   locale del repository; storia ricreata in un solo commit il 13/11 su richiesta del committente).
-- Fuori da git: `out/` (tranne `.gitkeep`), cache, log. Le ROM Commodore **non sono piu' in git ne' nelle immagini di Lab64** (dal 1.10, 16/11: volume esterno,
-  le aggiunge l'utente in `roms/vice-roms/` di Lab64 o in `LAB64_ROMS`; restano nella vecchia storia di Lab64).
+- Fuori da git: `out/` (tranne `.gitkeep`), cache, log. Le ROM Commodore **non sono in git** (16/11, regola del committente: nomi esatti in `.gitignore` di Lab64, cartelle
+  vuote nel repository): le aggiunge l'utente in Lab64 **prima** di costruire le immagini (che le contengono e non si distribuiscono);
+  `lab64 images` si ferma se mancano (nomi e SHA-256 in `roms/roms.md` di Lab64).
 - (14/11) **Quando il committente chiede di scaricare il repository, consegnare anche Lab64** (il gioco non si costruisce senza).
 - Prima di consegnare `git status` pulito; non si riscrive la storia senza che il committente lo chieda.
 - **MP3 fuori dal repository** (11/11, regola del committente): `lab/music/` (~13 MB) **non è in git e non c'è mai stato**.
