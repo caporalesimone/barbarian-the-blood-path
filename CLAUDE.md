@@ -103,13 +103,14 @@ becomes a test in `tests/`, it does not stay in `tools/`.
 ## Git
 - (10/11, owner's rule) Git repository, branch `main`. **One commit per completed activity**, normally **before
   starting a new topic** (no endless commits). "Completed" = green build, **smoke + sanity passed** (`./build.sh`), wiki and
-  TODO updated in the same work. Message in Italian: short title + body with what and why, plus the session's attribution lines
-  (`Co-Authored-By` included). Commit author: **Simone Caporale `<caporalesimone@gmail.com>`** (repository's local
+  TODO updated in the same work. Message in Italian: short title + body with what and why, plus the `Co-Authored-By` line
+  (never the `Claude-Session` link: owner's rule, 16/11). Commit author: **Simone Caporale `<caporalesimone@gmail.com>`** (repository's local
   configuration; history recreated as a single commit on 13/11 at the owner's request).
 - Outside git: `out/` (except `.gitkeep`), caches, logs. Commodore ROMs are **not in git** (16/11, owner's rule: exact names in Lab64's `roms/.gitignore`, empty
   folders in the repository): the user adds them in Lab64 **before** building the images (which contain them and are not distributed);
   `lab64 images` stops if they are missing (names and SHA-256 in Lab64's `roms/roms.md`).
-- (14/11) **When the owner asks to download the repository, also deliver Lab64** (the game cannot be built without it).
+- (17/11, owner's rule) **Export**: when the owner asks for an export, fetch `origin` of **both** repositories (game and Lab64), compare it
+  with the local commits and produce **two patch files**, one per repository (only commits not yet on `origin`), delivered as files.
 - Before delivering, `git status` clean; history is not rewritten unless the owner asks.
 - **MP3 outside the repository** (11/11, owner's rule): `lab/music/` (~13 MB) **is not in git and never was**.
   **When the owner asks to download the repository, also include `lab/music/`** (separate zip or together with the git bundle).
