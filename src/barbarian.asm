@@ -46,7 +46,7 @@ COL_D   = 3                     ; ciano: righe di aiuto
         .byte 0
 _nl     .word 0
         ; $080D (anche il ritorno da LORE e HELP, tramp.inc)
-        lda POKE_SKIP           ; (11/11) POKE 1020,1 prima del RUN: subito START, senza il menu (docs/cheats.md)
+        lda POKE_SKIP           ; (11/11) POKE 1020,1 prima del RUN: subito START, senza il menu (docs/wiki/cheats.md)
         beq +
         lda #nm_game_n          ; POKE 1020: subito START
         ldx #<nm_game

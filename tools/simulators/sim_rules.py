@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Simulatore delle regole NUOVE (docs/SISTEMA_COMBATTIMENTO.md, parametri data/rules.yaml) + report HTML.
+"""Simulatore delle regole NUOVE (docs/wiki/SISTEMA_COMBATTIMENTO.md, parametri data/rules.yaml) + report HTML.
 
 Combattimento a eventi in fotogrammi PAL, come il gioco: il PG agisce dopo la ricarica globale (10) quando
 un'abilita' e' pronta; ogni mostro attacca al contatto e poi ogni 45 fotogrammi; lo stordimento ferma la
@@ -307,7 +307,7 @@ h1{font-size:24px}h2{font-size:18px;margin-top:36px;border-top:1px solid var(--l
 table{border-collapse:collapse;margin:8px 0}td,th{border-bottom:1px solid var(--line);padding:4px 8px;font-size:13px;text-align:right}th:first-child,td:first-child{text-align:left}
 img{max-width:100%;background:#fff;border-radius:6px}</style></head><body><main>
 <h1>Simulazione delle regole nuove</h1>"""]
-    H.append("<p class='mut'>Parametri: <code>data/rules.yaml</code> (bilanciamento del 05/11, docs/BILANCIAMENTO.md). %d combattimenti per caso. "
+    H.append("<p class='mut'>Parametri: <code>data/rules.yaml</code> (bilanciamento del 05/11, docs/wiki/BILANCIAMENTO.md). %d combattimenti per caso. "
              "Bot fermo come nell'arena (fase 1). Equipaggiamento di riferimento per piano (sezione 1).</p>" % N)
     # 1. riferimento
     rows = []

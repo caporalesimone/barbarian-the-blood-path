@@ -1,4 +1,4 @@
-"""Monsters of the chapters (15/11, TODO M9, docs/bestiario.md): every chapter has its own 4 families + 4 strong variants
+"""Monsters of the chapters (15/11, TODO M9, docs/wiki/bestiario.md): every chapter has its own 4 families + 4 strong variants
 (same monster types 1..8: the statistics do not change, data/balance.yaml by depth). The theme file GFXn of the chapter
 carries their sprites and, in an "info" block at its end, their sprite colours and names (tools/build/gen_gfx.py);
 gfx_install copies the sprites to the sprite slots and the info block to NM_AT. The expected values come from the drawings

@@ -1,7 +1,7 @@
 """Performance (11/11): the game must keep its frame rate in every situation. Frame = cycles between two reads of the
 input in the main loop (lib.c64.Game.frames, cycle counter of the C64: warp mode does not change it); a frame is
 "lost" when it lasts more than 1.5 PAL frames (19656 cycles). Thresholds = the values measured on 11/11 (v1.164,
-docs/prestazioni.md) plus a margin: a test fails when the game gets slower than today, not when it is not perfect.
+docs/wiki/prestazioni.md) plus a margin: a test fails when the game gets slower than today, not when it is not perfect.
 Also: time to change level, to open the inventory, the shops and the inn, to save (emulated seconds, 985248 cycles per
 second); every level 1..19 and the throne room boss fight; the level generator on every level 1..255 (the Abyss levels
 21..255 too: the generator is the only part of the Abyss that exists in the code today)."""
@@ -185,7 +185,7 @@ def perf_save(ctx):
     while not g.in_game(): g.frames(1, tmax=60)
     t = (g.last - c0) / CPS
     print("      save: %.2f s" % t)
-    check(t <= 10.0, "save game: %.2f s (max 10 s)" % t)            # 11/11: REL 3.2 s; Krill 8.6 s (provisional, docs/FastLoader.md)
+    check(t <= 10.0, "save game: %.2f s (max 10 s)" % t)            # 11/11: REL 3.2 s; Krill 8.6 s (provisional, docs/wiki/FastLoader.md)
 
 
 def to_level(g, lv):

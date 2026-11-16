@@ -3,7 +3,7 @@
 Copyright © 2026 - Simone Caporale
 
 La build **non usa** questa cartella. I villaggi del gioco stanno in `tools/build/vilN_*.py` (tile, colori) e in
-`data/town_mapN.txt` (mappe); come sono fatti: `docs/villaggio.md`.
+`data/town_mapN.txt` (mappe); come sono fatti: `docs/wiki/villaggio.md`.
 
 | File | Contenuto |
 |---|---|

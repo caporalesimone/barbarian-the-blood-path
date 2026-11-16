@@ -1,4 +1,4 @@
-"""(moved from sanity to regression on 12/11) Chapter sequence (12/11, TODO M1, docs/capitoli.md): every chapter c has its village (file TWNc) and CH_LV levels; the
+"""(moved from sanity to regression on 12/11) Chapter sequence (12/11, TODO M1, docs/wiki/capitoli.md): every chapter c has its village (file TWNc) and CH_LV levels; the
 last one of chapters 1-3 is the boss level (fixed map BOSSCHc, placeholder; boss drawn with the final boss graphics);
 killing that boss unlocks chapter c+1 (c_unl) and the exit of the village (tiles '=' of data/town_map.txt) takes the
 hero to the next village (save of hero + levels, then TWNc+1). One VICE session, tests in order (CHAIN)."""

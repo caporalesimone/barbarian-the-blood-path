@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Confronti per il bilanciamento (docs/BILANCIAMENTO.md): valore di ogni oggetto, abilita' e pozione misurato con
+"""Confronti per il bilanciamento (docs/wiki/BILANCIAMENTO.md): valore di ogni oggetto, abilita' e pozione misurato con
 il simulatore (tools/simulators/sim_rules.py). Stampa tabelle in Markdown.
 
 Uso: python3 tools/simulators/cmp_rules.py [--fights 400]"""

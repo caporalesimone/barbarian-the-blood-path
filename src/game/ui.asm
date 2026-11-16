@@ -21,7 +21,7 @@ st_col   .byte ?                ; baule di casa: colonna selezionata (0 zaino, 1
         .endv
         .cerror st_col >= $9480, "variabili UI oltre $947F"
 
-        .virtual $93e0          ; motore dei menu (ui_nav, 07/11 sera: docs/refactor-tasti.md)
+        .virtual $93e0          ; motore dei menu (ui_nav, 07/11 sera: docs/wiki/refactor-tasti.md)
 tb_n     .byte ?                ; contatore di ui_boxes (11/11: le linguette non ci sono piu')
 tb_i     .byte ?
 ui_bc    .byte ?                ; colore delle cornici di ui_box (ui_begin: UC_BOX; la casa colora equipped in scelta)
@@ -1390,7 +1390,7 @@ _sv     lda SCR_A+24*40,x
         jmp *                   ; screenshot della domanda "quit game?"
 .endif
 yn_wait jsr ui_input            ; (etichetta globale: la usa tests/test_saves.py)
-        jsr ui_fire             ; fire = si' (07/11 sera, docs/refactor-tasti.md)
+        jsr ui_fire             ; fire = si' (07/11 sera, docs/wiki/refactor-tasti.md)
         bne _y
         lda keynew+3
         and #$02                ; Y

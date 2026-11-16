@@ -1,7 +1,7 @@
-# Regole del sistema di combattimento (05-06/11, docs/BILANCIAMENTO.md, docs/combattimento.md).
+# Regole del sistema di combattimento (05-06/11, docs/wiki/BILANCIAMENTO.md, docs/wiki/combattimento.md).
 # Fonte unica dei numeri del combattimento: la usano il gioco (tools/build/gen_db.py -> src/db.asm) e il simulatore
 # (tools/simulators/sim_rules.py, tools/simulators/rules.py). Il resto del mondo (generazione dei mostri, bauli, bottino, negozi, nomi,
-# colori) e' in data/balance.yaml. Taratura: tools/simulators/fit_rules.py, risultati in docs/BILANCIAMENTO.md.
+# colori) e' in data/balance.yaml. Taratura: tools/simulators/fit_rules.py, risultati in docs/wiki/BILANCIAMENTO.md.
 #
 # Notazione dei dadi: "NdS+K" (es. "1d8+2", "2d6", "3"). Tempi in fotogrammi PAL (50 al secondo).
 

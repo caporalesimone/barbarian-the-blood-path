@@ -2,101 +2,95 @@
 
 ![Barbarian: The Blood Path](docs/title.png)
 
-Action RPG per Commodore 64 scritto in assembly 6502 (64tass). Copyright © 2026 - Simone Caporale.
+Action RPG for the Commodore 64 written in 6502 assembly (64tass).  
+Copyright © 2026 - Simone Caporale.
 
-Avvio sul C64: `LOAD"BARBARIAN",8` e `RUN`: un menu con tre voci, la storia (lore), il manuale, il gioco
-([Avvio e storia](docs/intro.md)). Il disco è per la **1541** (e compatibili): il gioco carica e salva con
-Krill's Loader ([Fast loader](docs/FastLoader.md)).
+Starting on the C64: `LOAD"BARBARIAN",8` and `RUN`: a menu with three entries, the story (lore), the manual, the game
+([Start and story](docs/wiki/intro.md)). The disk is for the **1541** (and compatibles): the game loads and saves with
+Krill's Loader ([Fast loader](docs/wiki/FastLoader.md)).
 
-## Per iniziare
-Tutto gira in container Docker: sull'host servono solo sh, Docker, git e curl. **Guida completa: [docs/getting-started.md](docs/getting-started.md)**
-(cartelle, container, build, test, dove finiscono i file).
+## Getting started
+Everything runs in Docker containers: the host only needs sh, Docker, git and curl. **Full guide: [docs/getting-started.md](docs/getting-started.md)**
+(folders, containers, build, tests, where the files end up).
 ```
-lab64 check-env        # controllo dell'ambiente (la prima volta; su Windows: progetto dentro WSL2)
-./build.sh               # TUTTO: disco + mappe RAM/disco + atlante + smoke e sanity + manuale PDF
-./build.sh --fast        # build veloce: solo il disco (salta atlante, mappe e manuale); smoke e sanity restano
-./build.sh --fast --no-test   # il minimo: solo il disco, senza test
-./build.sh --release     # build completa + tutti i test (anche regression ed EMU-*) + manuale (solo su richiesta)
-./build.sh --view        # i test in VICE visibili dal vivo nel browser: http://localhost:6080
-lab64 run tools/build/mkdisk.sh       # un comando qualunque in un container
+lab64 check-env        # environment check (the first time; on Windows: project inside WSL2)
+./build.sh               # EVERYTHING: disk + RAM/disk maps + atlas + smoke and sanity + PDF manual
+./build.sh --fast        # fast build: disk only (skips atlas, maps and manual); smoke and sanity still run
+./build.sh --fast --no-test   # the bare minimum: disk only, no tests
+./build.sh --release     # full build + all tests (also regression and EMU-*) + manual (on request only)
+./build.sh --view        # tests in VICE shown live in the browser: http://localhost:6080
+lab64 run tools/build/mkdisk.sh       # any command in a container
 ```
-Il disco finisce in `out/releases/latest/blood_path_vX.Y_1541.d64` (POKE 1020,1 prima del RUN = subito il gioco).
+The disk ends up in `out/releases/latest/blood_path_vX.Y_1541.d64` (POKE 1020,1 before RUN = straight into the game).
 
-### Parametri di `./build.sh`
-Si combinano liberamente (es. `./build.sh --no-atlas --no-manual`). Senza parametri si costruisce **tutto**.
+### `./build.sh` parameters
+They combine freely (e.g. `./build.sh --no-atlas --no-manual`). With no parameters **everything** is built.
 
-| Parametro | Effetto |
+| Parameter | Effect |
 |---|---|
-| *(nessuno)* | disco + mappe RAM/disco + atlante grafico + smoke e sanity + manuale PDF |
-| `--fast` | salta atlante, mappe e manuale (= `--no-atlas --no-maps --no-manual`): resta il disco e i test smoke e sanity |
-| `--no-atlas` | salta l'atlante grafico (`out/work/atlas/`) |
-| `--no-maps` | salta le mappe della RAM e del disco (`out/work/memory-map/`) |
-| `--no-manual` | salta il manuale PDF |
-| `--no-test` | salta smoke e sanity |
-| `--release` | build completa + **tutti** i test (anche regression ed `EMU-*` su vc64web) con la sonda della memoria (`--probe`, 15/11) + manuale + `tools/build/release.sh` (GAME compresso in modo ottimo) |
-| `--emu` | i test con il demone vc64web acceso (`EMU-*`) |
-| `--view` | i test aprono VICE sullo schermo del viewer (http://localhost:6080); se il viewer e' gia' acceso lo fanno da soli |
-| `--no-view` | i test sui display virtuali anche con il viewer acceso |
-| `--probe` | (14/11) sonda della memoria in VICE durante i test: la mappa automatica (`out/work/memory-map/index.html`) aggiunge la RAM scritta davvero ([docs/build.md](docs/build.md)) |
-| `--manual` | **solo** il manuale PDF, senza rifare il disco |
-| `--images` | rifa' tutte le immagini Docker, poi la build |
-| `--keep N` | quante versioni tenere in `out/releases/` (default 5; anche `KEEP_VERSIONS=N`) |
+| *(none)* | disk + RAM/disk maps + graphics atlas + smoke and sanity + PDF manual |
+| `--fast` | skips atlas, maps and manual (= `--no-atlas --no-maps --no-manual`): the disk and the smoke and sanity tests remain |
+| `--no-atlas` | skips the graphics atlas (`out/work/atlas/`) |
+| `--no-maps` | skips the RAM and disk maps (`out/work/memory-map/`) |
+| `--no-manual` | skips the PDF manual |
+| `--no-test` | skips smoke and sanity |
+| `--release` | full build + **all** tests (also regression and `EMU-*` on vc64web) with the memory probe (`--probe`, 15/11) + manual + `tools/build/release.sh` (GAME optimally compressed) |
+| `--emu` | tests with the vc64web daemon running (`EMU-*`) |
+| `--view` | tests open VICE on the viewer's screen (http://localhost:6080); if the viewer is already running they do it on their own |
+| `--no-view` | tests on virtual displays even with the viewer running |
+| `--probe` | (14/11) memory probe in VICE during the tests: the automatic map (`out/work/memory-map/index.html`) adds the RAM actually written ([docs/wiki/build.md](docs/wiki/build.md)) |
+| `--manual` | **only** the PDF manual, without rebuilding the disk |
+| `--images` | rebuilds all the Docker images, then the build |
+| `--keep N` | how many versions to keep in `out/releases/` (default 5; also `KEEP_VERSIONS=N`) |
 
-Ogni build pubblica i suoi artefatti in `out/releases/v<versione>/` (con `manifest.json`: cosa contiene, SHA-256, esito dei test, cosa manca)
-e aggiorna `out/releases/latest`. Il manuale di una versione c'e' solo se e' stato generato per quella versione.
-Versione del gioco e del formato dei salvataggi: `version.yaml`.
+Every build publishes its artifacts in `out/releases/v<version>/` (with `manifest.json`: what it contains, SHA-256, test results, what is missing)
+and updates `out/releases/latest`. A version's manual is there only if it was generated for that version.
+Game version and save format version: `version.yaml`.
 
-## Struttura
-| Cartella | Contenuto |
+## Structure
+| Folder | Contents |
 |---|---|
-| `src/` | sorgenti assembly del gioco: uno per file del disco (`barbarian.asm` loader, `start.asm` avvio, `game.asm`, `lobby.asm`, `menu.asm`, `lore.asm`, `help.asm`, `jukebox.asm`), parti incluse in `common/`, `game/`, `menu/`, `lore/`, `test/`; librerie esterne per il C64 in `third-party/` (Krill's Loader) |
-| `data/` | dati sorgente (regole e bilanciamento, mappa del villaggio, testi, immagine del titolo, gruppi dell'atlante) |
-| `tools/` | `build/` generatori e build, `atlas/` atlante grafico, `memory-map/` mappe RAM e disco, `manual/` manuale, `simulators/` simulatori, `vice/` strumenti in VICE (screenshot, misure, arena), `font/` font della UI |
-| `tests/` | test automatici: `smoke/`, `sanity/`, `regression/`, libreria in `lib/` ([docs/test.md](docs/test.md)) |
-| `docs/` | wiki del gioco ([indice](docs/README.md)), sorgente del manuale (`docs/manual/`), schermate dei menu (`docs/screens/`) |
-| Lab64 (fuori dal progetto) | **Lab64**, la toolchain C64 generica: dal 14/11 **repository a parte**, usato solo con il comando `lab64` (nel PATH: `<cartella di Lab64>/cli/lab64 install`) (README.md di Lab64, in inglese): immagini Docker `lab64-*` (`docker/Dockerfile`) e script in `cli/` e `build-scripts/` (`run.sh`, `build-scripts/build-images.sh`, `check_env.sh`); sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `containers/vc64web/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in roms/roms.md di Lab64); mappa automatica `containers/tools/memmap/` |
-| `lab64.env` | configurazione di Lab64 per il gioco |
-| `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
-| `out/` | tutto ciò che si genera (non in git): `releases/v<versione>/` (ultime 5: disco, atlante, mappe, manuale, report dei test), `work/` (intermedi della build in corso), `cache/` (riusabile), `tmp/` (usa e getta) |
+| `data/` | source data (rules and balancing, village map, texts, title image, atlas groups) |
+| `docs/` | `getting-started.md` and `index.md` (the game's wiki index), `wiki/` the wiki pages, `manual/` manual source, `screens/` menu screenshots |
+| `lab/` | study material, not used by the build ([lab/README.md](lab/README.md)) |
+| `lab64.env` | Lab64 configuration for the game |
+| `out/` | everything that is generated (not in git): `releases/v<version>/` (last 5: disk, atlas, maps, manual, test reports), `work/` (intermediates of the current build), `cache/` (reusable), `tmp/` (throwaway) |
+| `src/` | the game's assembly sources: one per disk file (`barbarian.asm` loader, `start.asm` startup, `game.asm`, `lobby.asm`, `menu.asm`, `lore.asm`, `help.asm`, `jukebox.asm`), included parts in `common/`, `game/`, `menu/`, `lore/`, `test/`; external C64 libraries in `third-party/` (Krill's Loader) |
+| `tests/` | automated tests: `smoke/`, `sanity/`, `regression/`, library in `lib/` ([docs/wiki/test.md](docs/wiki/test.md)) |
+| `tools/` | `build/` generators and build, `atlas/` graphics atlas, `memory-map/` RAM and disk maps, `manual/` manual, `simulators/` simulators, `vice/` VICE tools (screenshots, measurements, arena), `font/` UI font |
+| Lab64 (outside the project) | **Lab64**, the generic C64 toolchain: since 14/11 a **separate repository**, used only through the `lab64` command (in the PATH: `<Lab64 folder>/cli/lab64 install`) (documentation in English: Lab64's `README.md` and `docs/`): `lab64-*` Docker images (`docker/Dockerfile`) and scripts in `cli/` and `build-scripts/` (`cli/run.sh`, `build-scripts/build-images.sh`, `cli/check_env.sh`); sources of VICE, zx0, cc1541 (compiled inside the images); `containers/vc64web/` (second emulator); C64 ROMs in `roms/` (list with SHA-256 and licenses in Lab64's roms/roms.md); automatic map `containers/tools/memmap/` |
 
-## Arena di combattimento (test e bilanciamento)
-Build a parte con lo stesso codice di combattimento del gioco: niente loader, menu, villaggio, disco,
-zaino e drop; una stanza, il PG con l'equipaggiamento indossato e da 1 a 8 mostri, comandati da un bot.
-La build produce `out/work/arena_game.prg` (gioco con `ARENA=1`) e `out/work/arena.prg` (modulo `src/test/arena.asm`
-a `$C900`: bot, avvio, fine combattimento, parametri `$CF00`, risultati `$CF40`, registro `$CF80`).
-`tools/vice/arena.py` (nel container `lab64-tools`: `lab64 run python3 tools/vice/arena.py ...`) avvia VICE, carica i due file e il tema grafico, scrive i parametri ed esegue la serie:
+## Combat arena (testing and balancing)
+A separate build with the same combat code as the game: no loader, menu, village, disk,
+backpack or drops; one room, the character with the equipment worn and 1 to 8 monsters, driven by a bot.
+The build produces `out/work/arena_game.prg` (game with `ARENA=1`) and `out/work/arena.prg` (module `src/test/arena.asm`
+at `$C900`: bot, startup, end of combat, parameters `$CF00`, results `$CF40`, log `$CF80`).
+`tools/vice/arena.py` (in the `lab64-tools` container: `lab64 run python3 tools/vice/arena.py ...`) starts VICE, loads the two files and the graphics theme, writes the parameters and runs the series:
 ```
 lab64 run python3 tools/vice/arena.py --lvl 5 --plvl 5 --weapon sword+1 --armor leather_armor --monster zombie --fights 20 --potions red:3
-lab64 run python3 tools/vice/arena.py --help         # tutti i parametri (piano, livello, equipaggiamento, mostri, boss, abilita', pozioni...)
+lab64 run python3 tools/vice/arena.py --help         # all parameters (floor, level, equipment, monsters, boss, abilities, potions...)
 ```
-Da Python, piu' scenari nella stessa sessione: `from arena import Arena` (vedi `tools/vice/arena.py`).
-Fase 1: PG e mostri adiacenti, il bot non si sposta (`--bot stand`): si gira verso il mostro piu' vicino e
-attacca (Rage e Frenzy appena pronte, poi l'abilita' migliore pronta, pozione sotto la soglia `--pot`). Nessun seed: stessi parametri,
-stessi risultati. Modalita' veloce (default): circa 25 volte il tempo reale in VICE warp.
+From Python, several scenarios in the same session: `from arena import Arena` (see `tools/vice/arena.py`).
+Phase 1: character and monsters adjacent, the bot does not move (`--bot stand`): it turns towards the nearest monster and
+attacks (Rage and Frenzy as soon as ready, then the best ability that is ready, potion below the `--pot` threshold). No seed: same parameters,
+same results. Fast mode (default): about 25 times real time in VICE warp.
 
-## Simulatore delle regole nuove
-`lab64 run python3 tools/simulators/sim_rules.py` simula il nuovo sistema di combattimento (docs/SISTEMA_COMBATTIMENTO.md) con i
-parametri di `data/rules.yaml` e scrive `out/work/simulators/simulazione_regole.html`. Un solo gruppo:
-`python3 tools/simulators/sim_rules.py --fight 5 9 demon skeleton` (piano 5, PG di livello 9).
-`python3 tools/simulators/fit_rules.py` ritara i mostri (curve dei piani 1-10, boss finale, tabella dell'Abisso) sul PG di
-riferimento e scrive `data/rules.yaml` (`--abyss-only` solo l'Abisso, `--dry` senza scrivere); `python3 tools/simulators/cmp_rules.py`
-stampa i confronti di oggetti, abilita' e pozioni (Markdown). Bilanciamento: docs/BILANCIAMENTO.md; piano di
-implementazione: la wiki in docs/ (indice docs/README.md).
+## Simulator of the new rules
+`lab64 run python3 tools/simulators/sim_rules.py` simulates the new combat system (docs/wiki/SISTEMA_COMBATTIMENTO.md) with the
+parameters of `data/rules.yaml` and writes `out/work/simulators/simulazione_regole.html`. A single group:
+`python3 tools/simulators/sim_rules.py --fight 5 9 demon skeleton` (floor 5, level 9 character).
+`python3 tools/simulators/fit_rules.py` retunes the monsters (floor 1-10 curves, final boss, Abyss table) on the
+reference character and writes `data/rules.yaml` (`--abyss-only` only the Abyss, `--dry` without writing); `python3 tools/simulators/cmp_rules.py`
+prints comparisons of items, abilities and potions (Markdown). Balancing: docs/wiki/BILANCIAMENTO.md; implementation
+plan: the wiki in docs/ (index docs/index.md).
 
-## Software di terzi
+## Third-party libraries
 
-- **Loader by Krill** — Krill's Loader, Repository Version 194 (© 2022 Gunnar Ruthenberg, licenza BSD a 3 clausole
-  con attribuzione obbligatoria), https://csdb.dk/release/?id=226124: caricamenti e salvataggi del gioco, e `cc1541`
-  (incluso nell'archivio) per scrivere il disco. Archivio, licenza e note in
-  [src/third-party/krill/](src/third-party/krill/README.md); come lo usiamo in [docs/FastLoader.md](docs/FastLoader.md).
-  Nel gioco il credito è nel menu dei barbari: "loader by krill - v194".
-- **vc64web / c64-tools** (13/11, `containers/vc64web/` di Lab64): VirtualC64 di Dirk W. Hoffmann in WebAssembly (porting vc64web) con il
-  controllo da riga di comando, usato come **secondo emulatore** per i test `EMU-*` e per i video (VICE resta il riferimento).
-  Licenza **non verificata** (probabile GPL-3.0, vedi `containers/vc64web/third-party/vc64web/README.md` di Lab64); la build prende le ROM
-  Commodore da `roms/` di Lab64 (non sono in git: le aggiunge l'utente prima di costruire le immagini, `roms/roms.md` di Lab64). Provenienza e uso: containers/vc64web/docs/INCLUSION.md di Lab64,
-  [docs/emulatore.md](docs/emulatore.md). TODO `I7`.
-- **ZX0** v2 di Einar Saukas (BSD-3): compressione di `GAME`, `LDAT` e del modulo `MENU`.
-- **VICE** 3.10 (GPL-2.0): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.
-- **cc1541** 4.2 (MIT): scrive il disco. **64tass** 1.60 (GPL-2.0) e **cc65** (zlib): assemblatori.
-- Programmi dell'host compilati dai sorgenti dentro le immagini di Lab64 (versioni e provenienza in `build-scripts/sources.conf` di Lab64, licenze nell'immagine in `/opt/c64/licenses/`).
-- **Open ROMs** (LGPL-3.0+, `roms/open-roms/LICENSE` di Lab64): ROM libere, ripiego di vc64web.
+External tools, emulators and ROMs are credited in Lab64's documentation.
+
+- **Loader by Krill** — Krill's Loader, Repository Version 194 (© 2022 Gunnar Ruthenberg, BSD 3-clause license
+  with mandatory attribution), https://csdb.dk/release/?id=226124: the game's loads and saves, and `cc1541`
+  (included in the archive) to write the disk. Archive, license and notes in
+  [src/third-party/krill/](src/third-party/krill/README.md); how we use it in [docs/wiki/FastLoader.md](docs/wiki/FastLoader.md).
+  In the game the credit is in the barbarians' menu: "loader by krill - v194".
+- **ZX0** v2 by Einar Saukas (BSD-3): compression of `GAME`, `LDAT` and the `MENU` module.

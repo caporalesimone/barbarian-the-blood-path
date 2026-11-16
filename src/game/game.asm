@@ -65,7 +65,7 @@ LVLEND
 NAME_LEN = 12                   ; caratteri del nome dell'eroe
 STASH_N  = 24                   ; oggetti nel baule di casa (07/11 sera: da 48 a 24), nel blocco dell'eroe (08/11 sera)
 PACK_N   = 8                    ; posti dello zaino (07/11 sera: da 16 a 8); l'equipaggiamento segue: indici PACK_N..PACK_N+3
-;@map CHRBLK..CHREND "CHRBLK: eroe e baule della locanda, il blocco salvato nel file save-0N (docs/FORMATO_DATI.md)" layout
+;@map CHRBLK..CHREND "CHRBLK: eroe e baule della locanda, il blocco salvato nel file save-0N (docs/wiki/FORMATO_DATI.md)" layout
         .virtual $9500
 CHRBLK
 c_magic .byte ?          ; versione del formato di salvataggio (SAVE_VER): primo byte del file
@@ -3248,7 +3248,7 @@ _same   jsr act_tick
 .else
         jmp player_die
 .endif
-_alive  rts                     ; (08/11: nessun menu di vittoria; tornera' con il quest system, docs/quests.md 6ter)
+_alive  rts                     ; (08/11: nessun menu di vittoria; tornera' con il quest system, docs/wiki/quests.md 6ter)
 
 mark_explored:
         lda ptx

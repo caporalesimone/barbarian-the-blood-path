@@ -1,4 +1,4 @@
-"""(moved from sanity to regression on 12/11) Level states of the chapter in RAM (11/11 evening, docs/salvataggi.md): the levels of the current chapter (groups of
+"""(moved from sanity to regression on 12/11) Level states of the chapter in RAM (11/11 evening, docs/wiki/salvataggi.md): the levels of the current chapter (groups of
 CH_LV = 5 levels) keep their compact state in RAM slots (LVRAM, under the I/O); the disk is written only by "save game",
 by the creation of the hero and when a level of another chapter is entered (hero + levels of the chapter). Quit, stairs,
 inn and character sheet do not write the disk. One VICE session, the tests run in order (CHAIN)."""

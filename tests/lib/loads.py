@@ -1,4 +1,4 @@
-"""Load checks for Krill's Loader (15/11, ex TODO A2, docs/FastLoader.md 4.1): directory and files of the mounted d64, a direct
+"""Load checks for Krill's Loader (15/11, ex TODO A2, docs/wiki/FastLoader.md 4.1): directory and files of the mounted d64, a direct
 krill_loadraw call, and LoadCheck, which runs game routines while every load they do is compared with its file on the disk
 (bytes in RAM and end address returned by the loader). Used by tests/regression/krill_cache and krill_walk.
 

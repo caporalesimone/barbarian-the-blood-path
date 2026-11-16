@@ -116,7 +116,7 @@ def load_rules(root=ROOT):
 
 
 def can_equip_with(weapon, other_type):
-    """Rule of the two-handed weapons (game code: itfl bit 0, docs/oggetti.md): with a two-handed weapon no shield."""
+    """Rule of the two-handed weapons (game code: itfl bit 0, docs/wiki/oggetti.md): with a two-handed weapon no shield."""
     return not (weapon.get("hands") == 2 and other_type == "shield")
 
 

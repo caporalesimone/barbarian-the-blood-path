@@ -3,8 +3,8 @@
 Copyright © 2026 - Simone Caporale
 
 Pagina da leggere **la prima volta** (persone e modelli): spiega dove sta ogni cosa, quali container esistono, come gira la build,
-come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in [build.md](build.md) (pipeline) e [test.md](test.md)
-(suite e runner); l'emulatore secondario in [emulatore.md](emulatore.md).
+come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in [build.md](wiki/build.md) (pipeline) e [test.md](wiki/test.md)
+(suite e runner); l'emulatore secondario in [emulatore.md](wiki/emulatore.md).
 
 ## 1. In breve
 
@@ -38,7 +38,7 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, `run_tests.sh` (suite della build); motore: `lab64 test` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
-| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-scripts/build-images.sh`, `viewer.sh`, `check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `containers/vc64web/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
+| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco; documentazione in inglese: `README.md` e `docs/` di Lab64): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `cli/run.sh`, `build-scripts/build-images.sh`, `cli/check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `containers/vc64web/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `containers/tools/memmap/` (mappa automatica) | nel **suo** repository |
 | `lab64.env` | configurazione di Lab64 per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
 | `out/` | **tutto cio' che si genera**: `work/` (intermedi e uscite della build in corso), `cache/` (zx0, steps, vc64web: si riusano), `tmp/` (usa e getta), `releases/` (artefatti per versione, ultime 5) | no (solo `.gitkeep`) |
@@ -51,12 +51,12 @@ Il gioco non sa dove sta Lab64: lo usa solo con questo comando.
 di Lab64 sulla cartella `tests/` (`--emu` accende vc64web per quel giro, `--view` / `--no-view` lo schermo del viewer);
 (15/11) `lab64 up` accende lo **stack compose** del progetto: `tools` sempre acceso (i comandi ci girano dentro con `docker exec`,
 senza un container nuovo ogni volta), vc64web, viewer e lettore; `lab64 up vc64web` solo l'emulatore; `lab64 down [servizio]`
-spegne, `lab64 ps` elenca; `lab64 view` / `stop` il viewer (con **♪ play** sulle musiche `.sid` di ogni versione, [musica.md](musica.md)); `lab64 run <comando>` un comando in `lab64-tools`; `lab64 manual`, `lab64 map`, `lab64 images`, `check-env`,
-`version`. Dettagli: README di Lab64, sezione "Command line".
+spegne, `lab64 ps` elenca; `lab64 view` / `stop` il viewer (con **♪ play** sulle musiche `.sid` di ogni versione, [musica.md](wiki/musica.md)); `lab64 run <comando>` un comando in `lab64-tools`; `lab64 manual`, `lab64 map`, `lab64 images`, `check-env`,
+`version`. Dettagli: `docs/command-line.md` di Lab64.
 
 ## 3. I container
 
-Diagrammi e dettagli completi: [docker-architecture.md](docker-architecture.md).
+Diagrammi e dettagli completi: [docker-architecture.md](wiki/docker-architecture.md).
 
 Immagini di **Lab64** (`lab64-*`, generiche, repository Lab64) e del **gioco** (`barbarian-*`, accanto al loro codice). Le prime
 vengono da un solo Dockerfile multi-stage (`docker/Dockerfile` di Lab64): lo stage `base` (ubuntu + CA + locale) e' il genitore
@@ -137,7 +137,7 @@ flowchart TD
 - **Debug e release** (15/11): GAME cambia solo per il flag `CHEATS` (`-D CHEATS`, `tools/build/asm.sh`): 1 nella build di debug e in
   quelle di test (voce **cheats** nel menu RUN/STOP, `src/game/cheats.asm`), 0 nella release (`RELEASE=1`: nessun byte dei
   trucchi). A mano: `CHEATS=0 ./build.sh --fast`; solo GAME con i flag della release: `lab64 run tools/build/asm.sh release-game`.
-  Dettagli: [build.md](build.md) "Debug e release".
+  Dettagli: [build.md](wiki/build.md) "Debug e release".
 
 ## 5. I test
 
@@ -167,14 +167,14 @@ sequenceDiagram
   (i test sul suo schermo sono piu' lenti: 28,3 s contro 17,9 s, una misura del 14/11; `./build.sh --no-view` li tiene sui display virtuali).
 - Test singoli: `lab64 test -k INN`, `lab64 test all --list`.
 - Test su vc64web: `./build.sh --emu` (poi i `EMU-*` sono in regression: `-k EMU`). Senza demone sono SKIP, non FAIL.
-- Regole dei test (ID, lingua, eroe di prova, dove va un test nuovo): [tests/CLAUDE.md](../tests/CLAUDE.md) e [test.md](test.md).
+- Regole dei test (ID, lingua, eroe di prova, dove va un test nuovo): [tests/CLAUDE.md](../tests/CLAUDE.md) e [test.md](wiki/test.md).
 
 ## 6. Vedere l'emulatore dal vivo
 
 `./build.sh --view` (o `lab64 view`) avvia `lab64-viewer`; **http://localhost:6080** (una sola porta, aperta solo
 su localhost) e' il **centro di controllo** del progetto (14/11, richiesta del committente). E' di Lab64, quindi **generico**:
 vale per qualunque progetto C64 che pubblichi le versioni in `out/releases/v<V>/` con un `manifest.json` nel formato descritto in
-README di Lab64 ("Manifest per il viewer"); cio' che e' del gioco (misure, etichette dei file, nome del
+`docs/manifest.md` di Lab64; cio' che e' del gioco (misure, etichette dei file, nome del
 progetto) arriva dal manifest e da `lab64.env` (`C64_VIEW_TITLE`, `C64_VIEW_PLAYER`). Tema: moderno ma che ricorda il C64 e il
 manuale del gioco (carta beige, inchiostro marrone, rosso scuro, barra arcobaleno, pulsanti ed etichette a forma di tasto; chiaro o
 scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagina in inglese, come tutto Lab64):
@@ -197,7 +197,7 @@ scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagin
   monta qualunque file del progetto (`/work`).
 
 **Come la pagina comanda VICE** (14/11, scelta piu' sicura confermata dal committente): il viewer **non** ha il socket di Docker (chi
-lo ha e' root sull'host). `viewer.sh start` avvia anche **`lab64-player`** (immagine `lab64-tools`, `viewer_player.py` di Lab64) se
+lo ha e' root sull'host). `lab64 up viewer` (o `lab64 view`) avvia anche **`lab64-player`** (immagine `lab64-tools`, `viewer_player.py` di Lab64) se
 `lab64.env` definisce `C64_VIEW_PLAYER` (qui `tools/vice/play.sh`): la pagina manda `POST /control` al server del viewer, che lo
 passa al lettore da un socket Unix nel volume `lab64-x11` (`c64-player.sock`). Comandi: `status`, `play` (percorso sotto `out/`, solo
 `.d64 .g64 .prg .t64 .crt`, niente `..`, il file deve esistere), `basic`, `stop`. Protezioni del server: Host solo `localhost`,
@@ -213,7 +213,7 @@ Dettagli dello schermo dal vivo:
   con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
   aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
   **VICE con il suono**, a velocita' reale, sull'ultima build: `lab64 play tools/vice/play.sh [disco.d64|versione]` (senza argomento `out/releases/latest`, con `1.239` quella versione)
-  (`viewer.sh exec` = un comando in `lab64-tools` collegato a schermo e audio del viewer). La tastiera fisica del browser arriva a VICE.
+  (`lab64 play <comando>` = un comando in `lab64-tools` collegato a schermo e audio del viewer). La tastiera fisica del browser arriva a VICE.
   **Overlay** in `/live.html` (14/11): tre pulsanti nell'intestazione accendono, sopra lo schermo e semitrasparenti, la **tastiera del C64**
   (66 tasti con la disposizione originale e i tasti funzione a destra; SHIFT, CTRL e C= restano premuti fino al tasto successivo, SHIFT LOCK
   fino a un secondo tocco), **Joy 1** e **Joy 2** (ciascuno: un cerchio base con il pomello che segue il dito o il mouse, 8 direzioni, piu' un
@@ -226,7 +226,7 @@ Dettagli dello schermo dal vivo:
   **Non** provato: schermo a sfioramento (telefono, tablet), browser e tastiera reali, gamepad fisico. La password del viewer protegge anche `/input` (provato: 401 senza o con password errata).
   Misure [14/11, browser headless sulla stessa macchina, 2 x 10 eventi]: immagine ~55 ms, audio ~41 ms (il riproduttore tiene
   ~30 ms di margine), audio e immagine entro ~15 ms; la prima nota dopo un silenzio puo' arrivare con 100-200 ms. Confronto con le
-  alternative (Guacamole, KasmVNC di linuxserver): [lab/viewer-audio](../lab/viewer-audio/README.md).
+  alternative (Guacamole, KasmVNC di linuxserver): scartate, prototipo rimosso da `lab/` (visibile nella cronologia di git).
 - **vc64web**: la pagina portable di vc64web (`out/cache/vc64web/`) aperta con `?disk=/out/releases/v<V>/<disco>`: l'emulatore gira
   **nel browser dell'utente**, quindi con l'audio. Il browser riscarica il disco solo se e' cambiato (`fetch` con `cache:'no-cache'`,
   il server risponde 304).
@@ -248,7 +248,7 @@ Password facoltativa: `VIEW_PASSWORD=... lab64 view` (di default nessuna): auten
 | `out/work/*.prg`, `*.lst`, `*.lbl`, `*.inc`, `*.log` | moduli assemblati, listati, etichette, sorgenti generati, log (`game`, `lobby`, `menu`, `start`, ...) |
 | `out/work/gfx/`, `snd/`, `krill/` | grafica, musica e Krill's Loader generati |
 | `out/work/atlas/` | atlante grafico (`index.html`) |
-| `out/work/memory-map/` | mappa automatica della memoria e del disco (`memmap/c64map.py` di Lab64): `index.html` = indice dei programmi del disco, `program-<nome>.html` = una mappa per programma (dichiarati in `lab64.env`, [build.md](build.md) sezione 4a), `memmap.json` (dal 15/11 niente piu' mappe curate a mano) |
+| `out/work/memory-map/` | mappa automatica della memoria e del disco (`memmap/c64map.py` di Lab64): `index.html` = indice dei programmi del disco, `program-<nome>.html` = una mappa per programma (dichiarati in `lab64.env`, [build.md](wiki/build.md) sezione 4a), `memmap.json` (dal 15/11 niente piu' mappe curate a mano) |
 | `out/work/memprobe/` | (14/11) dump della RAM della sonda in VICE (`./build.sh --probe`, uno per sessione VICE dei test, con scenario e impronta del disco nel `.json` accanto) |
 | `out/work/manual/` | manuale (HTML, PDF, ritagli degli screenshot) |
 | `out/work/simulators/` | report dei simulatori |

@@ -3,7 +3,7 @@
 
 Il programma LORE (src/start.asm con LORE=1 + src/lore/scroll.asm) carica LDAT mentre disegna il titolo, lo decomprime sul
 posto in LD_DST ($2000) e lo fa scorrere dal basso verso l'alto nel modo testo multicolore (banco VIC 0).
-Formato completo: docs/intro.md. In breve, l'immagine decompressa e':
+Formato completo: docs/wiki/intro.md. In breve, l'immagine decompressa e':
   $2000  charset (2 KB): codici 0-63 = font del gioco (out/work/gfx/uifont.bin), 64-254 = forme delle immagini, caricate
          durante lo scorrimento negli "slot" liberi (eventi SHAPES); 255 non si usa (e' l'escape dell'RLE)
   $2800  sprite (fino a 16 x 64 B): mostri del gioco, 2 fotogrammi l'uno (tools/build/monsters.py)

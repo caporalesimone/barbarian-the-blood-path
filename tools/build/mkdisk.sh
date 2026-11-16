@@ -1,18 +1,18 @@
 #!/bin/bash
 # Crea il d64 del gioco (11/11, regola del committente: una sola build, un solo disco).
 # Uso: tools/build/mkdisk.sh [out.d64] [prg]   (default: out/work/disk.d64, out/work/game.zx0)
-#   BARBARIAN = loader con il menu (storia / manuale / gioco); POKE 1020,1 prima del RUN = subito START (docs/cheats.md).
+#   BARBARIAN = loader con il menu (storia / manuale / gioco); POKE 1020,1 prima del RUN = subito START (docs/wiki/cheats.md).
 # File: BARBARIAN, START, GAME (ZX0), MENU1..3, FMAP, TWN1..5 (villaggi dei capitoli), BOSSCH1..3 (piani dei boss),
 # GFX1..8 (grafica dei capitoli: dungeon e boss),
 # SND0..n (brani, tools/build/gen_music.py), TITLE, LORE, LDAT, HELP, JUKEBOX, HL e SAVE-01..05 (salvataggi, Krill).
-# TWN_LAYOUT (variabile d'ambiente, 15/11, TODO M1: posizione dei villaggi sul disco; vedi docs/FastLoader.md e PERF-DISK-21..25):
+# TWN_LAYOUT (variabile d'ambiente, 15/11, TODO M1: posizione dei villaggi sul disco; vedi docs/wiki/FastLoader.md e PERF-DISK-21..25):
 #   end     TWN1 fra i primi file; TWN2..TWN5 in fondo, con la grafica dei loro capitoli (come dal 15/11)
 #   start   TWN1..TWN5 tutti insieme dove sta TWN1
 #   chapter ogni TWNc subito prima di GFX(2c-1), GFX(2c) e BOSSCHc, cosi' quello che un capitolo carica sta vicino (capitolo 1 come
 #           in "end"; BOSSCH2 e BOSSCH3 si spostano con il loro capitolo); TWN5 in fondo
 #   hub     MENU1..3, SND0 (il brano di ogni villaggio, snd_town_c), TWN1..TWN5 e FMAP uno dopo l'altro (stessi segmenti di directory
 #           e stesse tracce di quello che un ingresso nel villaggio carica); il resto come in "end"
-#   hubchap (PREDEFINITO dal 15/11 sera: decisione dopo le misure, docs/FastLoader.md) MENU1..3, SND0, TWN1 e FMAP insieme (come "hub"); TWN2..TWN4 e BOSSCH2/3 con la grafica dei loro capitoli e TWN5 in fondo (come "chapter")
+#   hubchap (PREDEFINITO dal 15/11 sera: decisione dopo le misure, docs/wiki/FastLoader.md) MENU1..3, SND0, TWN1 e FMAP insieme (come "hub"); TWN2..TWN4 e BOSSCH2/3 con la grafica dei loro capitoli e TWN5 in fondo (come "chapter")
 # Provare un layout senza lasciare la build normale: lab64 run env TWN_LAYOUT=start tools/build/mkdisk.sh
 TWN_LAYOUT=${TWN_LAYOUT:-hubchap}
 case $TWN_LAYOUT in end|start|chapter|hub|hubchap) ;; *) echo "mkdisk: TWN_LAYOUT=$TWN_LAYOUT sconosciuto (end|start|chapter|hub|hubchap)"; exit 1;; esac

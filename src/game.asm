@@ -44,8 +44,8 @@ CHARSET    = $a800
 MAP        = $c000          ; 48x48 tile
 LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM della mappa, che nel menu non serve
 
-; ---- (15/11, TODO T1) annotazioni della mappa automatica della memoria (lab64 map, docs/build.md sezione 4a; sintassi nel
-; README di Lab64): "@map" = zone che il gioco scrive solo con puntatori o copie (invisibili all'analisi statica: contano come
+; ---- (15/11, TODO T1) annotazioni della mappa automatica della memoria (lab64 map, docs/wiki/build.md sezione 4a; sintassi in
+; docs/memory-maps.md di Lab64): "@map" = zone che il gioco scrive solo con puntatori o copie (invisibili all'analisi statica: contano come
 ; usate); "@free" = memoria libera e cosa ci puo' stare; "@scenario" = cosa e' in memoria insieme (moduli e file del disco).
 ;@map $8720..$87e8 "Schermo HUD: righe 20-24 di SCR_H (il VIC mostra solo queste, split raster)"
 ;@map $87e8..$87f8 "Fra schermo HUD e puntatori sprite: all'avvio grafica fissa del PRG" free-after=start
@@ -1986,7 +1986,7 @@ CODE2 = $9c00
         * = CODE2
         .include "disk.asm"
         .include "stash_io.asm"
-; cheat god mode (docs/cheats.md): diverso da 0 = il PG non perde vita. Byte del PRG in CODE2 (game_start non lo
+; cheat god mode (docs/wiki/cheats.md): diverso da 0 = il PG non perde vita. Byte del PRG in CODE2 (game_start non lo
 ; azzera): lo scrive START dal POKE 1021,1 dato prima del RUN, il monitor di VICE o TESTGOD=1 (11/11)
 godmode .byte 0
 code2_end:

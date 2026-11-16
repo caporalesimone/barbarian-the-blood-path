@@ -521,7 +521,7 @@ _del    jsr ui_begin        ; (09/11) come io_screen: un solo record da scrivere
 
 ; posto cur_slot libero: byte "eroe presente" a 0 e nome a spazi nell'elenco (record REC_HDR di SAVES). Il record
 ; dell'eroe e quelli dei suoi piani restano sul disco: il prossimo eroe di quel posto li sovrascrive o li ignora
-; (c_vis = 0: nessun piano visitato, docs/salvataggi.md)
+; (c_vis = 0: nessun piano visitato, docs/wiki/salvataggi.md)
 hero_delete:
         ldx cur_slot
         lda #0

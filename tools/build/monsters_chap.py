@@ -5,7 +5,7 @@ Solo DISEGNI, nello stesso formato di tools/build/monsters.py: 12x21 multicolor,
 (le gambe), la variante forte (righe sovrapposte dall'alto: ' ' = lascia la base), nome, colore.
 Un capitolo = 4 famiglie base + 4 varianti forti, come il capitolo 1 (stessi mtype 1..8: la RAM non cresce).
 Come entrano nel gioco (15/11): tools/build/monsters.py chapter_set -> tools/build/gen_gfx.py (file GFXn del capitolo:
-sprite + blocco info con colori e nomi) e docs/bestiario.md. Statistiche e IA restano quelle del tipo 1..8."""
+sprite + blocco info con colori e nomi) e docs/wiki/bestiario.md. Statistiche e IA restano quelle del tipo 1..8."""
 
 # ============================================================== CAPITOLO 2: la palude di Blackwater
 # Drowned: un annegato gonfio, le alghe che pendono, le braccia in avanti

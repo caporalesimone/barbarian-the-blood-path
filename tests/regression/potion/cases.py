@@ -8,7 +8,7 @@ from lib.play import new_game, key, BELT_KEYS, fire_to, find, alive, mpos, floor
 BELT_SLOTS = 4
 CHAIN = True                                                # (one session: after a failure the game state is unknown)
 HUD_BELT = 0xd800 + 22 * 40 + 29                           # colour of belt slot j: HUD_BELT + 2 j (hud_p3)
-HEAL = {13: (20, 0), 14: (50, 0), 15: (40, 4)}              # potion id -> (fixed, per level): docs/oggetti.md
+HEAL = {13: (20, 0), 14: (50, 0), 15: (40, 4)}              # potion id -> (fixed, per level): docs/wiki/oggetti.md
 HEAL_ABYSS = {13: (30, 0), 14: (75, 0), 15: (28, 5)}        # same from level 21 (the Abyss), column heal_abyss
 MAXLEVEL = 20
 COLOUR = {13: 2, 14: 7, 15: 4}                              # red, yellow, violet; 6 (blue) while cooling down

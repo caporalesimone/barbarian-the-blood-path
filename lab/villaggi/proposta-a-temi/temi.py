@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Villaggi dei capitoli (15/11, TODO Z2/M1, docs/villaggio.md): un file TWNc per capitolo con i SUOI tile, la SUA mappa, i
+"""Villaggi dei capitoli (15/11, TODO Z2/M1, docs/wiki/villaggio.md): un file TWNc per capitolo con i SUOI tile, la SUA mappa, i
 SUOI colori e le SUE posizioni (portale, cripta, ingresso, uscita, porte).
 
 Ogni villaggio usa gli stessi 45 posti di tile del villaggio 1 (tools/build/gen_gfx.py TOWN_TILES: il codice del gioco

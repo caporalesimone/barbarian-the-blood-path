@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mappe dei piani del boss dei capitoli (12/11, TODO M1, docs/capitoli.md): data/maps/bosschapN.txt -> out/work/bosschN.prg
+"""Mappe dei piani del boss dei capitoli (12/11, TODO M1, docs/wiki/capitoli.md): data/maps/bosschapN.txt -> out/work/bosschN.prg
 (file BOSSCHN sul disco, N = capitolo 1..CHAPTERS-1; il capitolo CHAPTERS ha la sala del trono, FMAP).
 Testo 48x48, una lettera per casella: '#' muro, '.' pavimento, '<' scale di arrivo, 'B' posto del boss (pavimento).
 File: indirizzo di caricamento FIN_AT (come FMAP: stesso buffer sotto il KERNAL), 4 byte di intestazione (scale x, y;

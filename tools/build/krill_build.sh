@@ -4,7 +4,7 @@
 # perl: cc1541 (il programma C che scrive il disco) e' gia' compilato in lab64-tools (dai suoi sorgenti, stage cc1541-build di Lab64).
 # Uscite: out/work/krill/install.prg (INSTALL), loader.prg (resident, RESIDENT), save.prg (plugin, TRANSIENT),
 #         out/work/krill.inc (simboli per 64tass, tools/build/krill_syms.py).
-# Indirizzi (docs/FastLoader.md): ZP $41 (7 B; il plugin arriva a $57 mentre salva), INSTALL $0840 (dentro START, dopo lo stub BASIC),
+# Indirizzi (docs/wiki/FastLoader.md): ZP $41 (7 B; il plugin arriva a $57 mentre salva), INSTALL $0840 (dentro START, dopo lo stub BASIC),
 # RESIDENT $0200, TRANSIENT $E820 (plugin di save: caricato dal file KSAVE a ogni save, sotto il KERNAL fra l'immagine
 # del file dell'eroe e il buffer del plugin, src/game/rel.asm)
 set -e
@@ -14,7 +14,7 @@ D=out/work/krill
 rm -rf $D; mkdir -p $D
 unzip -q src/third-party/krill/loader-v194.zip -d $D/pkg
 L=$D/pkg/loader
-# (15/11, ex TODO A2, docs/FastLoader.md 4.1) correzione del codice del drive 1541 di r194: dopo un caricamento riuscito il drive tiene
+# (15/11, ex TODO A2, docs/wiki/FastLoader.md 4.1) correzione del codice del drive 1541 di r194: dopo un caricamento riuscito il drive tiene
 # il primo blocco del file seguente nella directory ("prepare next file"); se quel file viene chiesto subito, il blocco si serve
 # dalla cache, ma la lunghezza dell'ultimo blocco si calcola da LINKSECTOR41, che e' lo stesso byte ($7F) di TEMP, sporcato
 # dall'hash del nome appena ricevuto (gethashval). Un file di un solo blocco caricato dopo il suo predecessore arrivava quindi

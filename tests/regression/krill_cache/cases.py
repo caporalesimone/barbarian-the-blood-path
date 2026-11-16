@@ -1,4 +1,4 @@
-"""Krill's Loader: the drive's next-file cache (15/11, ex TODO A2, docs/FastLoader.md 4.1). In r194, after a load the 1541 code
+"""Krill's Loader: the drive's next-file cache (15/11, ex TODO A2, docs/wiki/FastLoader.md 4.1). In r194, after a load the 1541 code
 keeps the first block of the next file of the directory; if that file is asked for next, the block is served from the cache,
 and when it is also the file's last block (a file of one block) its length came from a byte that the hash of the requested
 name had just overwritten: the load ended early or late, with no error (village song SND0 after MENU3: 118 bytes of 241,

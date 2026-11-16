@@ -1,4 +1,4 @@
-"""Every load of a scripted walk through all the chapters equals its file (15/11, ex TODO A2, docs/FastLoader.md 4.1): new hero,
+"""Every load of a scripted walk through all the chapters equals its file (15/11, ex TODO A2, docs/wiki/FastLoader.md 4.1): new hero,
 then for each chapter: crypt, stairs down, up and back to the village, all the levels down to the boss level (chapters
 1-3: BOSSCHc; chapter 4: the throne room, FMAP), the boss beaten (chap_won), back to the village (TWNc, MENU1..3, SND0),
 a save (KSAVE, the hero file), the travel to the next village (chap_travel: TWNc, save); at the end the LOBBY. Every

@@ -1,4 +1,4 @@
-"""Disk times with Krill's Loader (11/11, fast-loader branch; docs/FastLoader.md section 7). Every operation is timed
+"""Disk times with Krill's Loader (11/11, fast-loader branch; docs/wiki/FastLoader.md section 7). Every operation is timed
 with the VICE stopwatch (emulated 1541) and has a hard-coded limit: the measure must stay at least 10% BELOW its limit
 (measure <= 0.9 x limit, rule of the project owner), so a slower loader or save fails before reaching the limit.
 One VICE session: the real START, a new hero in the village, then each routine called from the monitor."""

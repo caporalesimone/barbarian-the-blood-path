@@ -1,4 +1,4 @@
-"""Krill's Loader r194 (11/11, fast-loader branch, docs/FastLoader.md): START installs the loader, the resident sits at
+"""Krill's Loader r194 (11/11, fast-loader branch, docs/wiki/FastLoader.md): START installs the loader, the resident sits at
 $0200, the disk has the pre-allocated save files with the right number of blocks, a hero saved with the plugin comes
 back the same from disk, the hero list (file hl) is rewritten by the plugin. One VICE session."""
 import os, re

@@ -1,4 +1,4 @@
-"""Villages of the chapters (15/11, TODO Z2; sanity moved to regression on 15/11, docs/villaggio.md): every chapter has its own village file TWNc with its own tiles,
+"""Villages of the chapters (15/11, TODO Z2; sanity moved to regression on 15/11, docs/wiki/villaggio.md): every chapter has its own village file TWNc with its own tiles,
 map, colours, solid tiles, name of the healing place and positions (portal, way down, entry, exit, doors). The game copies
 the header of the file into town_k / solidtab (gfx_install) and reads everything from there. One VICE session (CHAIN).
 The expected values come from the same sources as the build (data/town_map*.txt, tools/build/villages.py)."""

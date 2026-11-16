@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Capitoli (11/11): data/chapters.yaml con i piani di ogni capitolo; qui si calcolano i due contatori (docs/quests.md
+"""Capitoli (11/11): data/chapters.yaml con i piani di ogni capitolo; qui si calcolano i due contatori (docs/wiki/quests.md
 sez. 3.8): il piano LOCALE riparte da 1 a ogni capitolo (quello che vede il giocatore), la PROFONDITA' GLOBALE 1..255
 (somma dei piani dei capitoli precedenti + piano locale) regola la difficolta'. L'ultimo capitolo con `levels: rest`
 (l'Abisso) prende i piani che restano fino a global_max. Letto da tools/simulators/chapters.py, tools/atlas/gen_atlas.py e dai test.

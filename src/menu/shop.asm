@@ -11,7 +11,7 @@
 ; R (fabbro) ripara zaino ed equipaggiamento. L'equipaggiamento non si vende mai. Ogni negozio compra solo le
 ; categorie di cio' che vende (sh_cats); gli altri oggetti dello zaino sono grigi (pk_name).
 SH_N = 25
-; (11/11) variabili dei negozi in pagina zero ($82-$8C, libera nel gioco: docs/tecnica.md); shp_stock, sh_mask, sh_lc
+; (11/11) variabili dei negozi in pagina zero ($82-$8C, libera nel gioco: docs/wiki/tecnica.md); shp_stock, sh_mask, sh_lc
 ; restano a $9400 (src/game/ui.asm: le usano anche inventario e baule)
 shop_id   = $82
 shp_first = $83

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Balancing by chapter (11/11, docs/capitoli.md, docs/quests.md 3.8): the chapters come from data/chapters.yaml
+"""Balancing by chapter (11/11, docs/wiki/capitoli.md, docs/wiki/quests.md 3.8): the chapters come from data/chapters.yaml
 (tools/build/chapters_db.py: LOCAL level 1..n of each chapter, the last one is the final map; GLOBAL depth 1..255 = the
 difficulty) and the monsters from the chapter's bestiary (data/monsters/bestiary.tsv, tools/build/bestiary.py): every chapter
 fights its own monsters (concept rows included: their stats are put in the simulator's rules only while simulating).

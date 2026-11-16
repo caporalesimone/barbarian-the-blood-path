@@ -482,7 +482,7 @@ game_start:
         jsr recalc_stats
         jsr hp_full
 .if TESTGOD
-        lda #1                  ; cheat: il PG non perde vita (TESTGOD=1 tools/build/asm.sh test; docs/cheats.md)
+        lda #1                  ; cheat: il PG non perde vita (TESTGOD=1 tools/build/asm.sh test; docs/wiki/cheats.md)
         sta godmode
 .endif
 .if TESTFZ == 1

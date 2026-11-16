@@ -140,7 +140,7 @@ tt2.appendChild(el('tr',`<th>free cells per row</th><td>${Object.entries(TI.rows
 root.appendChild(tt2);
 // ---------------------------------------------------------------- lore
 section('lore','The story (LORE: tools/build/gen_lore.py, data/lore.txt)');
-root.appendChild(el('p','The whole story as it scrolls on the screen (preview of the generator, decoded from the file LDAT: characters, colours, multicolour changes per image, doubled sprites). Format and memory in <code>docs/intro.md</code>.',{className:'mut'}));
+root.appendChild(el('p','The whole story as it scrolls on the screen (preview of the generator, decoded from the file LDAT: characters, colours, multicolour changes per image, doubled sprites). Format and memory in <code>docs/wiki/intro.md</code>.',{className:'mut'}));
 root.appendChild(el('img',null,{src:'lore.png',width:640,style:'image-rendering:pixelated;border:1px solid #333'}));
 // ---------------------------------------------------------------- codici del charset
 section('charset','Game charset: the 256 character codes ($A800)');
@@ -191,7 +191,7 @@ const mb=el('div',null,{className:'menus'});D.menus.forEach(m=>{const f=el('figu
 // ---------------------------------------------------------------- chapters
 D.chapters.forEach(ch=>{
   part('chapter-'+ch.id,'Chapter '+ch.id+' — '+ch.name,
-    (ch.implemented?'':'<b>Design, not in the game code yet</b> (docs/capitoli.md; today the game is one village + levels 1–20). ')+
+    (ch.implemented?'':'<b>Design, not in the game code yet</b> (docs/wiki/capitoli.md; today the game is one village + levels 1–20). ')+
     'Village: '+esc(ch.village.name)+(ch.village.gfx?' ('+esc(ch.village.gfx)+')':'')+' · levels 1–'+ch.levels.n+' (global depth '+ch.levels.first_depth+'–'+ch.levels.last_depth+')'+
     ' · dungeon themes '+ch.themes.join(', ')+' · final map: '+(ch.final?esc(ch.final.name)+' (level '+ch.levels.n+(ch.final.file?', '+esc(ch.final.file):'')+', boss '+esc(ch.final.boss||'-')+')':'none'));
   if(ch.bestiary&&ch.bestiary.length)root.appendChild(el('p','<b>Bestiary</b> (data/monsters/bestiary.tsv, <a href="../bestiario.md">bestiario</a>): '+

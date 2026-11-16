@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Bestiario (11/11): data/monsters/bestiary.tsv e' la sorgente dei mostri, come monstdat.tsv di Diablo/DevilutionX
 (assets/txtdata/monsters/monstdat.tsv + unique_monstdat.tsv). Una riga per mostro, un capitolo per riga: ogni capitolo
-ha il suo bestiario che sostituisce quello del capitolo precedente (docs/bestiario.md). Colonne: data/monsters/README.md.
+ha il suo bestiario che sostituisce quello del capitolo precedente (docs/wiki/bestiario.md). Colonne: data/monsters/README.md.
 
 Nel gioco di oggi (un solo "capitolo" di 20 piani) entrano solo le righe con implemented = yes, nell'ordine del file
 (base, forti, finale: il tipo del mostro = posizione); le altre sono concept. merge_rules(R) / merge_balance(B) rimettono

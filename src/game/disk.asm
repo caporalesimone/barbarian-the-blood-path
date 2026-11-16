@@ -1,5 +1,5 @@
 ; ===================================================================
-;  disk.asm - caricamento dei file con Krill's Loader r194 (11/11, ramo fast-loader; docs/FastLoader.md)
+;  disk.asm - caricamento dei file con Krill's Loader r194 (11/11, ramo fast-loader; docs/wiki/FastLoader.md)
 ;  Il residente (krill_loadraw, $0200) lo installa START: da li' il drive non risponde piu' al KERNAL.
 ;  I salvataggi sono in src/game/rel.asm (file save-0N e hl, plugin di save residente in GAME).
 ; ===================================================================

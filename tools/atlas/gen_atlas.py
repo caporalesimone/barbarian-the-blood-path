@@ -450,7 +450,7 @@ DATA["space"] = space
 # ------------------------------------------------------------------ chapters (data/chapters.yaml) and common menus
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import chapters_db  # noqa: E402
-CHAP = chapters_db.load()["chapters"]          # (11/11) local levels + global depth (docs/quests.md 3.8)
+CHAP = chapters_db.load()["chapters"]          # (11/11) local levels + global depth (docs/wiki/quests.md 3.8)
 import bestiary  # noqa: E402
 BEST = bestiary.load()
 for ch in CHAP:

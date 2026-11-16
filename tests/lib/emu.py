@@ -5,7 +5,7 @@ also runs on a different core (drive 1541-II, Krill's Loader, save plugin, raste
 input) and for scenarios played with a bot from the real disk. A result obtained here is never a measure of the game:
 cycles and timing are confirmed in VICE.
 
-The package is containers/vc64web of Lab64 (docs: docs/emulatore.md). Since 13/11 the daemon runs in its own container,
+The package is containers/vc64web of Lab64 (docs: docs/wiki/emulatore.md). Since 13/11 the daemon runs in its own container,
 lab64-vc64web (node, Playwright, Chromium, ffmpeg and the page already built in the image): ./build.sh --release (or
 --emu) starts it and passes its address in EMU_URL (e.g. http://lab64-vc64web:7064) to the tests, which run in
 lab64-tools. Without EMU_URL the tests are SKIP with the reason, not FAIL. The disk is sent to the daemon in base64
@@ -76,7 +76,7 @@ class Emu:
 
     def load_labels(self, name, set=None):
         """labels of out/work/NAME.lbl. The modules that share addresses (LOBBY and GAME both use $C000) must go in separate
-        sets: set="lobby" -> read as "lobby:nvalid" (docs/emulatore.md); without set they replace each other."""
+        sets: set="lobby" -> read as "lobby:nvalid" (docs/wiki/emulatore.md); without set they replace each other."""
         with open(os.path.join(OUT, name), "r") as f:
             return self.call("loadLabels", f.read(), {"set": set, "activate": False} if set else {})
 

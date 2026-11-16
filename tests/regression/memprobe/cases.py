@@ -1,6 +1,6 @@
 """(15/11, TODO T1) One VICE session that ENDS in each program of the disk, so that the run-time memory probe
 (C64_MEMPROBE=1: ./build.sh --probe or --release, Lab64 memmap/probe.py) has dumps for every memory map, not only for GAME.
-A dump goes to the program whose main file is in RAM when the session closes (docs/build.md section 4a): before these
+A dump goes to the program whose main file is in RAM when the session closes (docs/wiki/build.md section 4a): before these
 tests LORE, HELP, START and JUKEBOX had none and BARBARIAN two. Each test drives its program through its normal use, checks
 that it got there (they are useful tests without the probe too) and closes the session while the program is still in RAM.
 GAME has plenty of sessions already (smoke, sanity and most of regression)."""

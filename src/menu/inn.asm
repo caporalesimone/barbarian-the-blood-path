@@ -595,7 +595,7 @@ h_flash lda h_fl
 
 
 ; variabili della schermata (nel modulo: RAM normale)
-; (11/11) variabili della locanda in pagina zero ($65-$81, libera nel gioco: docs/tecnica.md): niente byte nel file e
+; (11/11) variabili della locanda in pagina zero ($65-$81, libera nel gioco: docs/wiki/tecnica.md): niente byte nel file e
 ; istruzioni piu' corte
 h_sel   = $65                 ; 0 normale, 1..4 = scelta della categoria (arma, armatura, scudo, anello)
 h_rm    = $66                 ; 1 = voce remove (non per l'arma)

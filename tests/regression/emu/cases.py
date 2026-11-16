@@ -1,7 +1,7 @@
 """Second emulator (13/11, committente): the game must also run on vc64web (VirtualC64 in WebAssembly, another core and
 another 1541 emulation than VICE). VICE stays the only authoritative reference: these tests do not decide what is
 correct, they check that the real disk, played like a player with joystick and keyboard only, works there too.
-Package: containers/vc64web of Lab64 (image lab64-vc64web), helper: tests/lib/emu.py, guide: docs/emulatore.md.
+Package: containers/vc64web of Lab64 (image lab64-vc64web), helper: tests/lib/emu.py, guide: docs/wiki/emulatore.md.
 
 One session, a chain (after a failure the following tests are SKIP): real boot from the disk -> LOBBY -> new barbarian
 (saved with Krill's save plugin on the emulated 1541-II) -> village (HUD text read from the screen RAM) -> alchemist
@@ -153,7 +153,7 @@ def portal(ctx):
     e = ctx["e"]
     e.call("resume")
     r = e.run_loop(js("lib.js") + js("hunt_portal.js"), frames=10000)
-    st = r["state"]                                   # (r["exact"] is not checked: a level change reads the disk, docs/emulatore.md)
+    st = r["state"]                                   # (r["exact"] is not checked: a level change reads the disk, docs/wiki/emulatore.md)
     log = " | ".join(st.get("log", []))
     check(st.get("end") == "village", "the bot ended with '%s': %s" % (st.get("end"), log))
     check(any(l.startswith("killed") for l in st["log"]), "no monster was killed: " + log)

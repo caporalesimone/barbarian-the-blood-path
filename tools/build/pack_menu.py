@@ -2,7 +2,7 @@
 """File MENU (11/11, TODO D13): i menu del villaggio (locanda e negozi, src/menu.asm), assemblati da tools/build/asm.sh in
 un'immagine piatta out/work/menu.bin che parte dalla zona piu' bassa, con MPARTS zone di codice (src/game/stash.asm; le
 etichette in out/work/menu.lbl): zona k = MRk_AT .. mzk_top (al massimo MRk_END).
-Ogni zona si comprime ZX0 da sola, in un file suo (docs/FORMATO_DATI.md). Il gioco (src/game/stash.asm,
+Ogni zona si comprime ZX0 da sola, in un file suo (docs/wiki/FORMATO_DATI.md). Il gioco (src/game/stash.asm,
 ovl_town) legge ogni zona in fondo al suo posto (fino a MRk_END) e la decomprime sul posto all'inizio:
 qui si verifica in una memoria di 64 KB (tools/build/pack.py inplace_check) che la decompressione non scavalchi i dati
 compressi ancora da leggere e ricostruisca le zone byte per byte.

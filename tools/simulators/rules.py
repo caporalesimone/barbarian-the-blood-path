@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Motore delle regole NUOVE (docs/SISTEMA_COMBATTIMENTO.md), parametri in data/rules.yaml.
+"""Motore delle regole NUOVE (docs/wiki/SISTEMA_COMBATTIMENTO.md), parametri in data/rules.yaml.
 Solo calcoli, niente simulazione: usato da tools/simulators/sim_rules.py e, piu' avanti, dalla generazione del database
 per l'assembly. Aritmetica come sul C64: interi, divisioni per difetto."""
 import os, re, random, sys

@@ -1,7 +1,7 @@
 # tests/CLAUDE.md — regole dei test
 
 Regole generali nel `CLAUDE.md` della radice; come girano i test (container, flussi, comandi): `docs/getting-started.md` sezione 5;
-dettagli di suite e runner: `docs/test.md`.
+dettagli di suite e runner: `docs/wiki/test.md`.
 
 ## Dove girano
 - Nel container **`lab64-tools`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
@@ -46,7 +46,7 @@ dettagli di suite e runner: `docs/test.md`.
   (`tu_name` in `src/game/levels.asm`), anche negli screenshot e sull'emulatore secondario.
 - **Baule della locanda pieno al limite** (08/11): oro `c_sgold` = 65535 decine = 655350 monete (`TU_SGOLD`; nelle varianti della
   locanda, TESTUI 21/29, anche i 24 posti pieni) e **oro nello zaino** (2350): il totale (657700) usa tutte le 6 cifre.
-- **Pozioni** (08/11): sempre **8 pozioni** (cintura a 8 posti, 4 slot da 2, `docs/quests.md` 6bis). Il riquadro purse ha sempre il
+- **Pozioni** (08/11): sempre **8 pozioni** (cintura a 8 posti, 4 slot da 2, `docs/wiki/quests.md` 6bis). Il riquadro purse ha sempre il
   posto per 8 (2 file da 4). Oggi la cintura del codice ha 4 posti: finché la cintura a 8 non c'è, l'eroe di prova ne ha 4 (TODO).
 
 ## Emulatore secondario (vc64web, 13/11)

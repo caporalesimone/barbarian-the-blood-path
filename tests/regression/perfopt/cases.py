@@ -1,4 +1,4 @@
-"""Dungeon performance, simple optimizations (sanity moved to regression on 11/11; 11/11, docs/prestazioni.md "Dungeon: analisi dell'11/11"): mark_explored
+"""Dungeon performance, simple optimizations (sanity moved to regression on 11/11; 11/11, docs/wiki/prestazioni.md "Dungeon: analisi dell'11/11"): mark_explored
 writes one or two bytes per row with masks instead of one bit at a time (same map of the explored cells), and the HUD
 redraws only the panel that changed (hit taken: HP row; experience: XP row; skill ready: row 23) instead of all four.
 One VICE session, the village (EXPL is saved and restored: in the village it holds the inn chest)."""

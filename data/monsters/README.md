@@ -5,7 +5,7 @@ Copyright © 2026 - Simone Caporale
 Un mostro per riga, **tab** come separatore, come `monstdat.tsv` di Diablo/DevilutionX (11/11). Loader e controllo:
 `tools/build/bestiary.py` (`python3 tools/build/bestiary.py` stampa i bestiari per capitolo). Nel gioco di oggi entrano le righe con
 `implemented = yes`, **nell'ordine del file** (base, forti, finale: il tipo del mostro nel codice = posizione); le altre
-sono concept. Pagina della wiki: [docs/bestiario.md](../../docs/bestiario.md).
+sono concept. Pagina della wiki: [docs/wiki/bestiario.md](../../docs/wiki/bestiario.md).
 
 | Colonna | Significato |
 |---|---|
@@ -29,4 +29,4 @@ sono concept. Pagina della wiki: [docs/bestiario.md](../../docs/bestiario.md).
 | `notes` | testo libero |
 
 Aggiungere un mostro al gioco: riga con `implemented = yes` nel posto giusto (base prima dei forti, il finale in fondo),
-sprite, `./build.sh`, simulatori (`docs/balancing-guide.md`), `docs/mostri.md`.
+sprite, `./build.sh`, simulatori (`docs/wiki/balancing-guide.md`), `docs/wiki/mostri.md`.

@@ -50,7 +50,7 @@ a type, in the order of the table (`0` = empty slot; at most 63 items).
 
 ## Two-handed weapons
 
-`hands` = 2 sets bit 0 of `itfl`. The game code (`docs/oggetti.md`): in the **inventory** (`src/game/ui.asm`) and in the
+`hands` = 2 sets bit 0 of `itfl`. The game code (`docs/wiki/oggetti.md`): in the **inventory** (`src/game/ui.asm`) and in the
 **inn** (`src/ovl2.asm`, `h_equip`) a shield cannot be equipped with a two-handed weapon ("two-handed weapon."), and
 equipping a two-handed weapon sends the shield back to the pack (or, at the inn, to the chest; refused if there is no
 room). In combat a shield does not count and does not wear with a two-handed weapon (`src/game/combat.asm`). Tests:
@@ -61,4 +61,4 @@ room). In combat a shield does not count and does not wear with a two-handed wea
 1. Add a row (all the columns of its type filled, the others empty). 2. `python3 tools/build/items_db.py` (checker).
 3. `./build.sh`: `gen_db.py` checks name lengths, byte ranges, max 63 items. 4. If it can be sold, add it to a shop pool
 in `data/balance.yaml`; if it is loot, it drops by `ilvl` and the category weights. 5. Run the balancing simulators
-(`docs/balancing-guide.md`) and update `docs/oggetti.md`.
+(`docs/wiki/balancing-guide.md`) and update `docs/wiki/oggetti.md`.

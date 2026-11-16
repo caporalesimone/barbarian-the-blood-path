@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Cronometro del modulo MENU (11/11, docs/prestazioni.md sezione "Menu del villaggio"): tempi emulati (VICE, 1541
+"""Cronometro del modulo MENU (11/11, docs/wiki/prestazioni.md sezione "Menu del villaggio"): tempi emulati (VICE, 1541
 emulata, contatore di cicli) di
   1) ovl_town dal disco (quello che succede all'ingresso nel villaggio se il modulo non c'e': dopo l'avvio o il LOBBY);
   2) apertura di fabbro, alchimista e locanda con il modulo in memoria (dal Fire alla schermata disegnata).

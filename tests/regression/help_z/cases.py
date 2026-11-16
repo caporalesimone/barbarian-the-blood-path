@@ -1,4 +1,4 @@
-"""HELP compressed with ZX0 (12/11, TODO M5b, docs/help.md): the HELP file on the disk is out/work/helpz.prg, a small
+"""HELP compressed with ZX0 (12/11, TODO M5b, docs/wiki/help.md): the HELP file on the disk is out/work/helpz.prg, a small
 decompressor (src/help/zx0sfx.asm) followed by out/work/help.zx0; at $080D it unpacks HELP to $0801 and jumps to it.
 Pure Python checks (fast); the run from the disk is covered by LORE-10 (release)."""
 import os, sys

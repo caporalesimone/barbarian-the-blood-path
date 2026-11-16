@@ -13,14 +13,14 @@ Copyright © 2026 - Simone Caporale (note); il loader è © 2022 Gunnar Ruthenbe
 | Licenza | BSD a 3 clausole **con attribuzione obbligatoria**: "Loader by Krill" nella produzione e/o nella documentazione che la accompagna (il solo sito web non basta). Testo completo in `loader/README`, sezione License. Strumenti e decompressori di terzi (`loader/tools`, `loader/src/decompress`) hanno le loro licenze. |
 
 Lo zip sta qui **compresso** e **non si scompatta nel repository**: la build lo scompatta nella cartella usa e getta
-`out/krill/` e da lì costruisce loader, plugin di salvataggio e `cc1541` (vedi `docs/FastLoader.md`).
+`out/krill/` e da lì costruisce loader, plugin di salvataggio e `cc1541` (vedi `docs/wiki/FastLoader.md`).
 
 ## Correzione applicata dalla build (15/11, ex TODO A2)
 
 Lo zip resta **com'è**; `tools/build/krill_build.sh` cambia due righe di `loader/src/drives/drivecode1541.s` nella copia scompattata
 (`TEMP = PREVBLOCKINDEXPLUS1` invece di `LINKSECTOR41`, `BLOCKSIZE = LINKSECTOR41`) e si ferma se il sorgente non è quello atteso.
 Motivo: nel 1541 un file di un solo blocco caricato subito dopo il suo predecessore nella directory arrivava dalla cache del drive
-con una lunghezza sbagliata (l'hash del nome sovrascrive il byte della lunghezza), senza errore. Dettagli: `docs/FastLoader.md` 4.1.
+con una lunghezza sbagliata (l'hash del nome sovrascrive il byte della lunghezza), senza errore. Dettagli: `docs/wiki/FastLoader.md` 4.1.
 
 ## Commenti dal sito (CSDb), conservati come informazione
 
@@ -41,4 +41,4 @@ con una lunghezza sbagliata (l'hash del nome sovrascrive il byte della lunghezza
   `save.s(716): 1581 save code below loadfile81 position` (`loadfile81` è a `$0596` invece di `$0594`; fallisce anche l'esempio
   `samples/save`). Con `ONLY_1541_AND_COMPATIBLE = 1` il codice 1581 non c'è e il target passa senza modifiche.
   Per costruire il plugin con tutti i drive bisognerebbe cambiare `.org $0594` in `.org $0596` in `save.s` (non provato su 1581).
-- Misure (configurazione del gioco, `PLATFORM=c64`): vedi `docs/FastLoader.md`, sezione "Misure".
+- Misure (configurazione del gioco, `PLATFORM=c64`): vedi `docs/wiki/FastLoader.md`, sezione "Misure".

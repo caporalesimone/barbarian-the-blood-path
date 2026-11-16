@@ -17,7 +17,7 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
   generati (tabelle, grafica, versione) stanno in `out/`.
 - Un file nuovo sul disco = un sorgente nuovo in `src/`; il resto nella sottocartella della sua componente.
 - **Margine di memoria**: controllato dalla build (`.cerror` e avviso sotto 1 KB). Mai chiudere un lavoro con il margine negativo.
-- **Mappa della memoria** (15/11, [docs/build.md](../docs/build.md) sezione 4a): la fa `lab64 map` dai listati e dal disco. Ogni zona
+- **Mappa della memoria** (15/11, [docs/wiki/build.md](../docs/wiki/build.md) sezione 4a): la fa `lab64 map` dai listati e dal disco. Ogni zona
   che il codice scrive solo con puntatori o copie (buffer, dati copiati, schermi) ha un'annotazione `;@map` vicino alla costante che la
   definisce; la memoria libera utilizzabile un `;@free ... use=code|code-io-off|data`; cio' che sta in memoria insieme un `;@scenario`.
   Se una modifica occupa una zona dichiarata libera, `lab64 map` lo segnala (avviso `@free ... not free`): spostare o accorciare
@@ -27,15 +27,15 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
 - **Generatore dei piani**: gira nella RAM sotto l'I/O (`src/game/gen_io.asm`, `gen_call` con `$01=$34` e interrupt spenti):
   lì niente accessi a VIC/SID/CIA/colori/KERNAL/disco. Ogni cambiamento della generazione cambia i piani salvati:
   `tests/regression/gen/test_gen.py` (mappe di riferimento) deve passare; se il cambiamento è voluto, `--update` e `c_gver`.
-- **Krill's Loader** (11/11, [docs/FastLoader.md](../docs/FastLoader.md)): dopo `START` il drive non risponde più al KERNAL;
+- **Krill's Loader** (11/11, [docs/wiki/FastLoader.md](../docs/wiki/FastLoader.md)): dopo `START` il drive non risponde più al KERNAL;
   `$0200-$0312` è del residente (niente buffer o segnali lì: `LDFLAGS`/`CHRPRE` a `$8E`/`$8F`, `YN_SAV` a `$0340`),
   `$41-$47` della sua pagina zero (`$41-$57` durante un salvataggio); `$DD00` si scrive solo con il banco VIC (6 bit alti
   a 0, niente lettura-modifica); i salvataggi sono file preallocati riscritti interi dal plugin (`save-0N`, `hl`). Il loader si
   costruisce a ogni build dallo zip (`src/third-party/krill`, `tools/build/krill_build.sh`, configurazione `src/common/krill/`).
-- **Salvataggi** (11/11 sera, regola del committente, [docs/salvataggi.md](../docs/salvataggi.md)): il disco si scrive **solo**
+- **Salvataggi** (11/11 sera, regola del committente, [docs/wiki/salvataggi.md](../docs/wiki/salvataggi.md)): il disco si scrive **solo**
   con "save game", alla creazione dell'eroe e al cambio di capitolo; "quit game" non salva; scale, locanda, scheda del
   personaggio e portale lavorano in RAM (slot dei piani del capitolo, `LVRAM`). **5 piani per capitolo** (`CH_LV`,
-  `data/chapters.yaml`): un capitolo più lungo richiede di rivedere gli slot in RAM. Formato: `docs/FORMATO_DATI.md`, `SAVE_VER`.
+  `data/chapters.yaml`): un capitolo più lungo richiede di rivedere gli slot in RAM. Formato: `docs/wiki/FORMATO_DATI.md`, `SAVE_VER`.
 
 ## Interfaccia e regole di gioco del committente
 - **Movimento** (09/11): ci si muove **solo con WASD o con il joystick** (porta 2), in ogni schermata, menu, gioco, loader e help.
@@ -53,9 +53,9 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
 - **Villaggi dei capitoli** (15/11): **ogni villaggio è diverso dagli altri** (regola del committente: non lo stesso villaggio
   con altri colori; niente fontana, fiume o cripta ripetuti: struttura, luogo di cura e ingresso del sotterraneo propri). Tile,
   colori, tile solidi e nome della cura in `tools/build/vilN_*.py`, mappa in `data/town_mapN.txt`; il gioco legge tutto
-  dall'intestazione del file `TWNc` (`town_k`): **niente costanti di un villaggio nel codice**. Passi e controlli: `docs/villaggio.md`.
+  dall'intestazione del file `TWNc` (`town_k`): **niente costanti di un villaggio nel codice**. Passi e controlli: `docs/wiki/villaggio.md`.
 - **Help**: se cambia un tasto o una schermata, `data/help.txt` nello stesso lavoro (vedi `CLAUDE.md` della radice).
-- **Musica** ([docs/musica.md](../docs/musica.md)): i brani sono dati in `tools/build/songs.py` (elenchi del gioco in `PLAYLIST`),
+- **Musica** ([docs/wiki/musica.md](../docs/wiki/musica.md)): i brani sono dati in `tools/build/songs.py` (elenchi del gioco in `PLAYLIST`),
   compilati da `tools/build/gen_music.py` in file `SNDn` sul disco; un solo player (`src/common/sid_player.inc`) per loader, gioco
   e jukebox. Brani ed effetti si provano con `JUKEBOX` (da rifare più bello, TODO E8). MP3 di ascolto: `gen_music.py --render`
   nel container `lab64-tools` (VICE + ffmpeg) in `out/work/music/`.
@@ -83,8 +83,8 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
 - `tools/simulators/` contiene TUTTI gli script di simulazione delle partite (`sim_rules.py` combattimenti e progressione,
   `fit_rules.py` taratura, `cmp_rules.py` confronti, `rules.py` modello condiviso, `sim_durability.py`, `sim_gold.py`,
   `sim_chest.py`; report in `out/work/simulators/`). **Ogni cambio di regola nel codice o negli yaml va riportato nello stesso
-  lavoro nei simulatori**: il simulatore deve riprodurre il gioco com'è (differenze note: `docs/BILANCIAMENTO.md`,
+  lavoro nei simulatori**: il simulatore deve riprodurre il gioco com'è (differenze note: `docs/wiki/BILANCIAMENTO.md`,
   sezione "Differenze tra simulatore e codice").
-- Come si bilancia (strumenti, obiettivi, procedura, numero di prove): `docs/balancing-guide.md`. Seguirla.
+- Come si bilancia (strumenti, obiettivi, procedura, numero di prove): `docs/wiki/balancing-guide.md`. Seguirla.
 - L'arena (`tools/vice/arena.py` + `src/test/arena.asm`) fa girare il codice vero in VICE: serve a verificare che il simulatore
   non menta.

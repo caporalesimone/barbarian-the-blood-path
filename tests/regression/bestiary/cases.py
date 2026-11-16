@@ -1,4 +1,4 @@
-"""Bestiary (sanity moved to regression on 11/11; 11/11, data/monsters/bestiary.tsv, tools/build/bestiary.py, docs/bestiario.md): the table is the source of the
+"""Bestiary (sanity moved to regression on 11/11; 11/11, data/monsters/bestiary.tsv, tools/build/bestiary.py, docs/wiki/bestiario.md): the table is the source of the
 monsters; the game takes the rows implemented = yes (today's 9 monsters, out/work/db.asm unchanged), every chapter has its own
 bestiary (base, strong variants of its bases, one boss), the final boss is in the last story chapter. Pure Python."""
 import os, re, sys, tempfile

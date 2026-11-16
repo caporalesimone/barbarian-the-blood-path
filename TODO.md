@@ -1,7 +1,7 @@
 # TODO — lavori aperti (riordinato il 15/11/2026)
 
 Solo ciò che resta da fare. Il fatto, con le decisioni datate, sta nella wiki (`docs/`) e, fino all'08/11, in
-[docs/storico-todo.md](docs/storico-todo.md) (archivio, non si aggiorna). Le decisioni nuove si scrivono nella voce a
+[docs/wiki/storico-todo.md](docs/wiki/storico-todo.md) (archivio, non si aggiorna). Le decisioni nuove si scrivono nella voce a
 cui appartengono, con la data; una voce finita si **cancella** e la decisione va nella pagina della wiki interessata.
 I lavori della toolchain stanno nel TODO di Lab64 (`TODO.md` del suo repository).
 
@@ -27,7 +27,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
-| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14 |
+| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, J15 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J3, J2, J1 |
 | Z | [Note urgenti](#z--note-urgenti) | Z4 |
 
@@ -36,7 +36,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 ## 1 — Priorità massima
 
 ### A1 Punti statistica: rifiniture e verifiche a mano — **TOP PRIO** — S (verifica) + M (spostamento nel MENU)
-- Unito a `main` l'11/11 (schermata C in `src/game/charsheet.asm`, `docs/interfaccia.md`, `docs/quests.md`).
+- Unito a `main` l'11/11 (schermata C in `src/game/charsheet.asm`, `docs/wiki/interfaccia.md`, `docs/wiki/quests.md`).
 - **Glifo dell'HUD da confermare** (decisione 11/11): oggi la **freccia verde in su** (`LVUP`, colore 5). Le 20 proposte restano
   in `lab/concept/hud_glyphs/hud_glyphs.png` (+ `glyphs.json`, `make_sheet.py`): il committente deve scegliere il migliore.
 - **Menu**: la schermata C va **riportata alla stessa logica dei menu del villaggio** (modulo MENU, `$01 = $35`, tabella dei
@@ -44,14 +44,14 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
   Nel dungeon il MENU potrebbe non essere in memoria (si carica all'ingresso nel villaggio). Finché non si decide resta in GAME.
 - **Da verificare a mano** (VICE o hardware): aprire C nel villaggio e nel dungeon (anche con mostri vicini), spendere,
   togliere, spostare fra le caratteristiche, undo, confirm (sì/no), uscita con punti in attesa (sì/no), respec con e senza gettoni,
-  ricaricare la partita, CON alzata = vita massima alzata (schermata rifatta il 15/11, Z5: `docs/interfaccia.md`).
+  ricaricare la partita, CON alzata = vita massima alzata (schermata rifatta il 15/11, Z5: `docs/wiki/interfaccia.md`).
 - **Decisioni da confermare** (B12, prese da me l'11/11): (a) **1 punto ogni 2 livelli** (9 al livello 20); (b) vita
   **retroattiva** su COS; ~~(c) all'uscita i punti in attesa si **confermano**~~ **superata il 15/11 dalla richiesta del
   committente (Z5)**: nulla si spende senza conferma esplicita; "confirm" chiede "spend N points for good?", RUN/STOP con
   punti in attesa chiede "spend N points before leaving?" (no = si esce e i punti tornano da spendere); (d) Fire su una
   caratteristica = +1; (e) nessun tetto. Da confermare (15/11, mie): il "no" all'uscita esce comunque (non torna alla
   schermata); la sola voce respec senza punti (cs_mode 1).
-- **Resta**: aggiornare il manuale (pagina dei tasti e dell'HUD) e la tabella delle caratteristiche in `docs/combattimento.md`.
+- **Resta**: aggiornare il manuale (pagina dei tasti e dell'HUD) e la tabella delle caratteristiche in `docs/wiki/combattimento.md`.
 
 ---
 
@@ -67,16 +67,16 @@ non si possono chiudere.
 | B3 (ex D5) | **Pergamene fuori dallo zaino**: contatore 0..10 addosso (tasto 5), pile da 10 nel baule della locanda, opzione "riga dell'oro nella locanda con `s N`". Cooldown della pergamena ≥ 5 s (08/11). | F2 |
 | B4 (ex D6) | **Anelli e nomi**: formato `ring +N <stat>` e quali nomi accorciare (candidati: leather armor, greater healing, healing potion, minor healing, portal scroll, tower shield, viking sword). | E1 |
 | B6 (ex D9) | **Una pergamena garantita per piano?** | G1 |
-| B7 (ex D10) | **Prezzi proporzionali al guadagno** (`docs/BILANCIAMENTO.md` sez. 12). | G2 |
-| B8 (ex D11) | **Quest system** (`docs/quests.md` sez. 5 e 11): villaggi, numero delle quest, pergamena, Torvald, generatori, lore, manuale su disco. | H1 |
+| B7 (ex D10) | **Prezzi proporzionali al guadagno** (`docs/wiki/BILANCIAMENTO.md` sez. 12). | G2 |
+| B8 (ex D11) | **Quest system** (`docs/wiki/quests.md` sez. 5 e 11): villaggi, numero delle quest, pergamena, Torvald, generatori, lore, manuale su disco. | H1 |
 | B9 (ex D14) | **Borsello a gradini**: valori (es. 500 / 1000 / 3000 / 5000, 10 000 al boss finale) e quali tre quest. | H1 |
 | B10 (ex D12) | **Abisso**: ripopolamento, prezzi della città, tetto dell'oro oltre i 16 bit. | H3 |
-| B11 (D-CAP-1..5, 11/11) | **Capitoli** (`docs/capitoli.md`): quanti (i piani sono **5 per capitolo**: `data/chapters.yaml` 5, 5, 5, 5 + Abisso 235 = profondità 255; piano locale da 1 in ogni capitolo, profondità globale per la difficoltà, `docs/quests.md` 3.8); dove vanno Demon e Balrog (oggi da profondità 8–9: fuori dal capitolo 1 di 5 piani); ritorno ai villaggi precedenti; piani dell'Abisso salvati (anello di K record) o rigenerati; mappe fisse nell'Abisso; difficoltà oltre la profondità 32 e oltre 255. | M9, H3 |
+| B11 (D-CAP-1..5, 11/11) | **Capitoli** (`docs/wiki/capitoli.md`): quanti (i piani sono **5 per capitolo**: `data/chapters.yaml` 5, 5, 5, 5 + Abisso 235 = profondità 255; piano locale da 1 in ogni capitolo, profondità globale per la difficoltà, `docs/wiki/quests.md` 3.8); dove vanno Demon e Balrog (oggi da profondità 8–9: fuori dal capitolo 1 di 5 piani); ritorno ai villaggi precedenti; piani dell'Abisso salvati (anello di K record) o rigenerati; mappe fisse nell'Abisso; difficoltà oltre la profondità 32 e oltre 255. | M9, H3 |
 | B12 (11/11) | **Punti statistica**: conferma delle scelte di A1 (punti per livello, vita retroattiva; l'uscita che confermava in silenzio è stata cambiata il 15/11 dalla richiesta del committente, Z5: ora chiede). | A1 |
-| B13 (11/11) | **Frenzy**: corsa massima +50% (≈40 fps fra i mostri) invece di +100% (≈34 fps)? Misure in `docs/prestazioni.md`. Si decide dopo le prove della categoria 8. | D3, K |
-| B15 (11/11) | **Salvataggi con Krill più lenti** ([docs/FastLoader.md](docs/FastLoader.md) sez. 7): "save game" 3,2–5,4 → 7,1–8,6 s, locanda 3,1 → 8,5 s, scale fra piani 10–11 s (il piano lasciato si salva). Causa: il plugin riscrive il file dell'eroe intero (9 blocchi) dopo averlo letto, più la ricarica del plugin (si modifica da solo) e del villaggio. Da decidere: accettare; file più piccoli (un file per piano: più file sul disco, scelta contraria del committente); immagine del file sempre in RAM (niente lettura, ~2 KB); non salvare i piani alle scale ma solo con l'eroe. | M4, M8 |
+| B13 (11/11) | **Frenzy**: corsa massima +50% (≈40 fps fra i mostri) invece di +100% (≈34 fps)? Misure in `docs/wiki/prestazioni.md`. Si decide dopo le prove della categoria 8. | D3, K |
+| B15 (11/11) | **Salvataggi con Krill più lenti** ([docs/wiki/FastLoader.md](docs/wiki/FastLoader.md) sez. 7): "save game" 3,2–5,4 → 7,1–8,6 s, locanda 3,1 → 8,5 s, scale fra piani 10–11 s (il piano lasciato si salva). Causa: il plugin riscrive il file dell'eroe intero (9 blocchi) dopo averlo letto, più la ricarica del plugin (si modifica da solo) e del villaggio. Da decidere: accettare; file più piccoli (un file per piano: più file sul disco, scelta contraria del committente); immagine del file sempre in RAM (niente lettura, ~2 KB); non salvare i piani alle scale ma solo con l'eroe. | M4, M8 |
 | B16 (11/11) | **A fine gioco: build con immagini disco diverse per drive?** Oggi solo 1541 (`_1541` nel nome). Krill supporta anche 1570/71, 1581, CMD FD, 1541U; SD2IEC solo con il ripiego KERNAL. Con tutti i drive l'install passa da 3225 a 6997 B e il plugin non si costruisce senza cambiare `save.s`. | I1, M5 |
-| B17 (15/11) | **A fine sviluppo: trucchi nella release? quali e come?** Oggi il menu **cheats** (RUN/STOP, `src/game/cheats.asm`, [docs/cheats.md](docs/cheats.md)) c'e' nelle build di debug e di test (`CHEATS=1`) e **non** nella release (`CHEATS=0`, 0 B). **Da decidere a fine sviluppo** (non prima: dipende da quanto serve provare il gioco e dalla memoria libera). **Opzioni**: **(a) nessuno** (oggi): release identica a prima dei trucchi, nessuna sorpresa; si perde la comodita' per chi prova la release e per i giocatori in difficolta'. **(b) menu nascosto dietro un codice** digitato al titolo o una sequenza di tasti/joystick (stile Konami): chi lo sa lo accende, gli altri non lo vedono; costa codice in piu' (lettura del codice) oltre ai 395 B del menu e serve decidere se il codice e' per sessione o si ricorda (byte da salvare, **SAVE_VER**). **(c) solo alcuni** (es. god mode e salto di capitolo, senza level up e gettoni): meno byte e meno modi di rovinare il bilanciamento, ma `cheats.asm` va diviso con `.if` per voce (oggi solo `CHEATS` 0/1). **(d) oggetti o oggetti speciali** (anello, pergamena, uscita dal gioco con un bottino particolare) invece del menu: dentro il mondo di gioco, ma toccano formato oggetti e bilanciamento. **(e) segno "barato"** sull'eroe o nella sala della fama (bit nel blocco dell'eroe, **SAVE_VER** nuovo, `docs/FORMATO_DATI.md`): onesto verso i punteggi, serve in qualunque opzione con trucchi in release; con l'opzione (a) non serve. **Cavilli**: (1) **memoria in release**: 395 B di GAME (nella build di debug il margine del codice scende da 2397 a 2002 B); la release ha oggi lo stesso margine di prima, da rimisurare (`lab64 run tools/build/asm.sh release-game`, test `CHEAT-22`, che oggi **vieta** i trucchi nella release e va cambiato se si decide di tenerli); (2) il flag **`CHEATS`** (`tools/build/asm.sh`, `lab64.env`): con trucchi in release va scelta la variante (`CHEATS=1 RELEASE=1` o un flag nuovo), con il manuale e gli screenshot sempre a `CHEATS=0`; (3) **i salvataggi fatti con i trucchi** oggi sono eroi normali **senza segno**: se si adotta (e) quelli vecchi restano senza; (4) i trucchi aggirano la progressione (capitoli, boss, `c_unl`): vanno provati con **`next chapter` dai piani 2-3** (non verificato; il blocco entrando nei villaggi, ex A2, era un difetto del loader, corretto il 15/11: [FastLoader](docs/FastLoader.md) 4.1); (5) il manuale e l'help non parlano di trucchi: se restano in release vanno scritti o taciuti apposta. | H1, E6 |
+| B17 (15/11) | **A fine sviluppo: trucchi nella release? quali e come?** Oggi il menu **cheats** (RUN/STOP, `src/game/cheats.asm`, [docs/wiki/cheats.md](docs/wiki/cheats.md)) c'e' nelle build di debug e di test (`CHEATS=1`) e **non** nella release (`CHEATS=0`, 0 B). **Da decidere a fine sviluppo** (non prima: dipende da quanto serve provare il gioco e dalla memoria libera). **Opzioni**: **(a) nessuno** (oggi): release identica a prima dei trucchi, nessuna sorpresa; si perde la comodita' per chi prova la release e per i giocatori in difficolta'. **(b) menu nascosto dietro un codice** digitato al titolo o una sequenza di tasti/joystick (stile Konami): chi lo sa lo accende, gli altri non lo vedono; costa codice in piu' (lettura del codice) oltre ai 395 B del menu e serve decidere se il codice e' per sessione o si ricorda (byte da salvare, **SAVE_VER**). **(c) solo alcuni** (es. god mode e salto di capitolo, senza level up e gettoni): meno byte e meno modi di rovinare il bilanciamento, ma `cheats.asm` va diviso con `.if` per voce (oggi solo `CHEATS` 0/1). **(d) oggetti o oggetti speciali** (anello, pergamena, uscita dal gioco con un bottino particolare) invece del menu: dentro il mondo di gioco, ma toccano formato oggetti e bilanciamento. **(e) segno "barato"** sull'eroe o nella sala della fama (bit nel blocco dell'eroe, **SAVE_VER** nuovo, `docs/wiki/FORMATO_DATI.md`): onesto verso i punteggi, serve in qualunque opzione con trucchi in release; con l'opzione (a) non serve. **Cavilli**: (1) **memoria in release**: 395 B di GAME (nella build di debug il margine del codice scende da 2397 a 2002 B); la release ha oggi lo stesso margine di prima, da rimisurare (`lab64 run tools/build/asm.sh release-game`, test `CHEAT-22`, che oggi **vieta** i trucchi nella release e va cambiato se si decide di tenerli); (2) il flag **`CHEATS`** (`tools/build/asm.sh`, `lab64.env`): con trucchi in release va scelta la variante (`CHEATS=1 RELEASE=1` o un flag nuovo), con il manuale e gli screenshot sempre a `CHEATS=0`; (3) **i salvataggi fatti con i trucchi** oggi sono eroi normali **senza segno**: se si adotta (e) quelli vecchi restano senza; (4) i trucchi aggirano la progressione (capitoli, boss, `c_unl`): vanno provati con **`next chapter` dai piani 2-3** (non verificato; il blocco entrando nei villaggi, ex A2, era un difetto del loader, corretto il 15/11: [FastLoader](docs/wiki/FastLoader.md) 4.1); (5) il manuale e l'help non parlano di trucchi: se restano in release vanno scritti o taciuti apposta. | H1, E6 |
 
 ---
 
@@ -84,19 +84,19 @@ non si possono chiudere.
 
 Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 
-- **I2** — S. Verifica a mano dal disco di release (`docs/manual-tests.md`, 10 minuti).
+- **I2** — S. Verifica a mano dal disco di release (`docs/wiki/manual-tests.md`, 10 minuti).
 - **I3** — S. Test manuale 019 (locanda): spostare un oggetto, spegnere senza RUN/STOP, riaccendere.
 - **I4** — S. B2 minimappa corrotta nel dungeon (05/11, mai riprodotto): servono screenshot e passi.
 - **I5** — S. RUN/STOP fantasma nelle build NOKEYS in VICE (solo strumenti di test).
 - **I6** — S. Glitch del brano del villaggio (hard restart): da riascoltare.
 - **I8** — S. (13/11) Segnalazioni al team dell'emulatore da riprovare a ogni nuova build: `runLoop` non esatto con un caricamento
-  da disco dentro il ciclo (`framesActual` 490 su 480 nel passo del portale, `docs/emulatore.md`); il pacchetto dichiara quel caso
+  da disco dentro il ciclo (`framesActual` 490 su 480 nel passo del portale, `docs/wiki/emulatore.md`); il pacchetto dichiara quel caso
   non verificato.
 - **I7** — S. (13/11) Licenze **prima di pubblicare il repository**: Krill (BSD-3 con attribuzione), zx0 (BSD-3), file nelle loro
   cartelle del gioco. Le licenze dei componenti di Lab64 (vc64web, ROM Commodore in git, `open-roms`) sono nel TODO di Lab64.
 - **I11** — S-M. **Il monitor remoto di VICE smette di rispondere a metà sessione** (13/11, due volte in `./build.sh --release`:
   PERF-DISK-10..14 con `monitor: no answer to 'load ...' in 20 s`, PERF-OPT-11 `MonitorError` dopo 30 s; rilanciati da soli: PASS).
-  La parte "primo avvio a freddo" è stata corretta il 14/11 (`wait_boot` in Lab64, vedi `docs/test.md`). **Da fare** quando si
+  La parte "primo avvio a freddo" è stata corretta il 14/11 (`wait_boot` in Lab64, vedi `docs/wiki/test.md`). **Da fare** quando si
   ripresenta: registrare il log di VICE e del monitor; capire se dipende dalla macchina (riavvii, disco lento sotto il guest).
 - **I1** — L. Hardware reale (mai provato): avvio, Krill's Loader (caricamenti e salvataggi) su 1541 vera e su 1570/1571 (in VICE
   passano: `KRILL-17`, `KRILL-18`), `quit the game` (reset), OVL2 sotto il KERNAL, TOD senza 9 V AC, tempi di loader, LORE e
@@ -110,7 +110,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 - `SFX_LOWHP` provvisorio da riascoltare nel JUKEBOX; tile del trono dietro il boss.
 
 ### E2 (ex 2.3) Negozi: merce (dopo B1) — S
-- Assortimento in `balance.yaml` (pool e `stock`), `docs/villaggio.md`, manuale.
+- Assortimento in `balance.yaml` (pool e `stock`), `docs/wiki/villaggio.md`, manuale.
 
 ### E5 (ex 2.6) HUD: esperienza a 24 bit (per l'Abisso) — S
 - Oltre 65535 xp: 3 cifre + K, barra a 24 bit (~100–130 B). Dipende dalle soglie oltre il 20 (H3).
@@ -120,11 +120,11 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
   **Cavilli**: caratteri hires, colori < 8; i codici liberi dell'HUD sono finiti (`HUD_FREE`); da ripensare con la cintura a 8 (F1).
 
 ### E1 (ex 2.2) Anelli `ring +N <stat>` e nomi corti (dopo B4) — S-M
-- Nomi in `data/items/items.tsv`, `NAME_SHOW`, `docs/oggetti.md`, help, manuale. Gli id non cambiano: nessun `SAVE_VER`.
+- Nomi in `data/items/items.tsv`, `NAME_SHOW`, `docs/wiki/oggetti.md`, help, manuale. Gli id non cambiano: nessun `SAVE_VER`.
   **Cavillo**: la rarità del materiale va spiegata altrove.
 
 ### M2 Temi audio veri dei villaggi — S-M
-- Brano per capitolo fatto il 12/11 ([musica](docs/musica.md)). **Resta**: scegliere i temi dei villaggi 2–4 (oggi tutti Tavern
+- Brano per capitolo fatto il 12/11 ([musica](docs/wiki/musica.md)). **Resta**: scegliere i temi dei villaggi 2–4 (oggi tutti Tavern
   of Dawn) ed eventualmente i temi dei boss dei capitoli (oggi il piano del boss usa il tema del capitolo).
 
 ### E6 (ex 2.8) Revisione completa del manuale e dell'help prima della prossima release — M
@@ -146,7 +146,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
   play/pausa/stop, filtri. Dettagli: storico in git (`TODO.md` fino a `22388f9`, voce 2.9).
 
 ### E10 Continuita' vera della musica del titolo (START -> GAME -> LOBBY) — M
-- Fatto il 15/11 (ex E3 ed E4): Demon's Eye suona anche in `LOBBY` e nell'help (HELP, [help](docs/help.md)) e nel loader (BARBARIAN, [intro](docs/intro.md)); player e clock CIA in `src/common/title_music.inc` ([musica](docs/musica.md), `SND_MENU`), ma **sempre da capo**: START/LORE usano
+- Fatto il 15/11 (ex E3 ed E4): Demon's Eye suona anche in `LOBBY` e nell'help (HELP, [help](docs/wiki/help.md)) e nel loader (BARBARIAN, [intro](docs/wiki/intro.md)); player e clock CIA in `src/common/title_music.inc` ([musica](docs/wiki/musica.md), `SND_MENU`), ma **sempre da capo**: START/LORE usano
   un altro player (`$BE00`) e `game_start` azzera lo stato del player del gioco, quindi fra un programma e l'altro c'e' una pausa e
   un riavvio. **Resta**: continuita' reale (stesso brano senza stacco) START -> GAME -> LOBBY e dopo ogni LOAD KERNAL, e rinunciare alla
   lettura di disco (~1,5 s) all'ingresso del menu (dati nel LOBBY non entrano: restano ~290 B liberi in `$C000-$CBFF`, il brano ne pesa 259).
@@ -191,24 +191,24 @@ Le voci che cambiano il blocco eroe (C5, F1–F3, G4) vanno fatte insieme per ca
 
 ## 6 — Prestazioni e memoria
 
-Misure e soglie: `tests/regression/perf` (PERF-10..23), [docs/prestazioni.md](docs/prestazioni.md). Ogni intervento si
+Misure e soglie: `tests/regression/perf` (PERF-10..23), [docs/wiki/prestazioni.md](docs/wiki/prestazioni.md). Ogni intervento si
 misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osservazioni P1–P5 di
-[docs/ottimizzazione.md](docs/ottimizzazione.md) non ancora fatte: **suggerite da fare**.
+[docs/wiki/ottimizzazione.md](docs/wiki/ottimizzazione.md) non ancora fatte: **suggerite da fare**.
 
 ### D12 (11/11) Dall'analisi dell'assembly generato (`out/work/asm_audit/analisi_assembly.md`) — S
 - **Fatto il 15/11** (+210 B di margine in GAME, +25 B nel blocco `$9C00`; START −172 B, LORE −170 B): casella del mostro,
-  `GFX_FSTRIP`, 9 ripetizioni sicure, START/LORE con `.if` ([ottimizzazione](docs/ottimizzazione.md) O15–O23).
-- **Restano, lasciate apposta** (motivi in [ottimizzazione](docs/ottimizzazione.md)): `px/py → ent_x/ent_y` (giro per fotogramma,
+  `GFX_FSTRIP`, 9 ripetizioni sicure, START/LORE con `.if` ([ottimizzazione](docs/wiki/ottimizzazione.md) O15–O23).
+- **Restano, lasciate apposta** (motivi in [ottimizzazione](docs/wiki/ottimizzazione.md)): `px/py → ent_x/ent_y` (giro per fotogramma,
   9 B), prologo di `rel_put`/`rel_get` (cambio di `$01` con interrupt spenti, 9 B), ripetizioni in `gen_io.asm` (sotto l'I/O,
   25 B), due finestre di LOBBY (25 B, nessun guadagno per GAME), 58 B di player non usati nel JUKEBOX (`SP_RESUME = 0`).
   Rifare l'analisi dopo ogni lavoro grosso: `lab64 run python3 tools/build/asm_audit.py` (test `ASM-10/11`).
 
 ### D14 (11/11) Spazio del modulo MENU — S (per ogni zona nuova)
-- **Stato** (v1.223, [prestazioni](docs/prestazioni.md#menu-del-villaggio-modulo-menu-residente-1111-v122x)): locanda e
+- **Stato** (v1.223, [prestazioni](docs/wiki/prestazioni.md#menu-del-villaggio-modulo-menu-residente-1111-v122x)): locanda e
   negozi nel modulo MENU, tre zone (zona 1 `$C900-$CFFF` 170 B liberi, zona 2 `$F4E0-$FCFF` 9 B, zona 3 `$A700-$A7FF`
   93 B). Ogni modifica a locanda e negozi deve starci: per crescere, altre zone (slot sprite 20–23 `$A500-$A5FF`, 256 B;
   coda degli slot 41–47 e 58–63 dopo i buffer della musica) o codice più corto (`asm_audit`).
-- **Attenzione** per D8 (`OVLF` a `$C900`) e per il buffer delle quest (`docs/quests.md`, `$CD00`): `$C900-$CFFF` ora è
+- **Attenzione** per D8 (`OVLF` a `$C900`) e per il buffer delle quest (`docs/wiki/quests.md`, `$CD00`): `$C900-$CFFF` ora è
   la zona 1 del MENU, che resta per tutta la partita.
 
 ### D1 (ex P1) Primo ingresso nel piano 1 dal villaggio ~12 s in VICE (poi 5,6–7,3 s fra i piani) — S (misura) + ?
@@ -235,7 +235,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 ### D3 (ex P3, ex 1.9) Frenzy e analisi del dungeon — L
 - **11/11**: profilo per routine (`tools/vice/frame_prof.py`), ottimizzazioni semplici fatte, velocità della Frenzy provate fino a
   +250%: il −50% di fps non si raggiunge; a +100% (oggi) −21/−27%. Tabelle e scenari in
-  [docs/prestazioni.md](docs/prestazioni.md) ("Dungeon: analisi dell'11/11").
+  [docs/wiki/prestazioni.md](docs/wiki/prestazioni.md) ("Dungeon: analisi dell'11/11").
 - **Da decidere (B13)**. **Da fare**, in ordine: lavoro a turni (K5, S-M); camera a casella in Frenzy (K4, M); branchi di
   mostri (M, poco guadagno oggi); scorrimento rifatto (L). Catena degli IRQ fragile (sez. 3.4).
 
@@ -244,7 +244,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 ## 7 — Loader e disco
 
 ### M8 Cosa reintrodurre del fast loader (ex D15) — S (decisione) + ?
-- Krill's Loader è nel gioco ([docs/FastLoader.md](docs/FastLoader.md)). Cache e precaricamento sono stati tolti prima: **da
+- Krill's Loader è nel gioco ([docs/wiki/FastLoader.md](docs/wiki/FastLoader.md)). Cache e precaricamento sono stati tolti prima: **da
   decidere con il committente quali reintrodurre** guardando le misure (villaggio → piano 1 3,1 s, modulo MENU 2,3 s, tema ~1 s):
   oggi nessuna sembra necessaria per i caricamenti; i salvataggi sono il problema (B15). Da provare su hardware reale (I1).
 
@@ -252,7 +252,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - **Richiesta del committente (16/11)**: il menu iniziale va rivisto in modo che **parta con Krill's Loader gia' incluso** (install nel file
   `BARBARIAN`, residente a `$0200`) e lo usi per caricare **LORE, HELP e START/gioco** (`loadraw`) invece del KERNAL con il trampolino.
   Cosi' sparisce anche il doppio caricamento che si vede oggi (BARBARIAN carica START con il KERNAL, START poi carica il resto con Krill).
-- **Cosa implica** (analisi del 16/11, da `docs/FastLoader.md`; nessuna misura fatta):
+- **Cosa implica** (analisi del 16/11, da `docs/wiki/FastLoader.md`; nessuna misura fatta):
   - Il residente occupa `$0200-$0312`, compreso il buffer tastiera del KERNAL (`$0277-$0280`): dopo l'install **l'IRQ del KERNAL non puo'
     scandire la tastiera** (scriverebbe sul codice di Krill). Il menu (e `HELP`) non possono piu' usare `GETIN`: servono un IRQ proprio e la
     lettura diretta della matrice (come `read_input` del gioco) per W/S, RETURN, spazio, 1-4 e le pagine dell'help.
@@ -311,7 +311,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 
 ## 8 — Frenzy: prove in gioco del committente
 
-Il committente prova in gioco le proposte e poi decide (B13). Misure di partenza ([prestazioni](docs/prestazioni.md),
+Il committente prova in gioco le proposte e poi decide (B13). Misure di partenza ([prestazioni](docs/wiki/prestazioni.md),
 "Dungeon: analisi dell'11/11"): fra i mostri ai piani 10–12 la camminata normale fa ~45–48 fps; la Frenzy a +50% ~40,
 a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento** (`maybe_redraw`): lo schermo si scambia ogni
 8 px, cioè ogni 2 fotogrammi a +100%. Disco di prova (su richiesta, uno per proposta, branch `feature/frenzy-*` con versione
@@ -356,7 +356,7 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 
 ### G3 (ex 4.3) Probabilità di uscita per ogni oggetto (stile Diablo) — M
 - `w = R × g(livello area − livello oggetto)`; colonna `dropRate` in `data/items/items.tsv` come in DevilutionX
-  (`itemdat.tsv`). Generatore, simulatore, `docs/bottino.md`. Prerequisito per gli oggetti dell'Abisso (H3).
+  (`itemdat.tsv`). Generatore, simulatore, `docs/wiki/bottino.md`. Prerequisito per gli oggetti dell'Abisso (H3).
 
 ### G6 (ex 4.6) Arena fase 2 — M-L
 - Bot che si muove, posizioni di partenza, strategie; confronto arena / simulatore. Prerequisito per H3.
@@ -381,33 +381,33 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - Trama nuova (niente "20 piani", più città, niente cifre del bilanciamento), immagini con sprite e tile aggiornati,
   possibilmente lette dai file del gioco.
 - (12/11, committente) **Riscrivere la storia in funzione dei capitoli** (4 villaggi + Abisso, 5 piani per capitolo,
-  `docs/capitoli.md`): oggi il testo parla ancora di "twenty floors" (`data/lore.txt`).
+  `docs/wiki/capitoli.md`): oggi il testo parla ancora di "twenty floors" (`data/lore.txt`).
 - (12/11, committente) **Scorrimento**: la velocità va bene. **Interlinee**: sempre **una riga vuota** fra un elemento e
   l'altro; **due righe vuote** dove oggi ce n'è già una (`@gap 1`). Con le interlinee in più **accelerare di circa il 4%**.
   Nota tecnica (non verificata): `LR_SPEED` = 6 fotogrammi per pixel, intero; il 4% si ottiene a schema, p.es. 6-6-6-5
   fotogrammi ogni 4 pixel (−4,2%). Si tocca `src/lore/scroll.asm` e `data/lore.txt` (`tools/build/gen_lore.py`), poi test
-  `LORE` e `docs/intro.md`.
+  `LORE` e `docs/wiki/intro.md`.
   (15/11, committente) **Fatto**: interlinea fra le righe di testo (una riga vuota; due fra i paragrafi: `LINE_GAP`/`PARA_GAP` in
-  `gen_lore.py`) e **fire del joystick 2 tenuto = velocità doppia** ([intro](docs/intro.md)). La storia passa da 220 a 292 righe
+  `gen_lore.py`) e **fire del joystick 2 tenuto = velocità doppia** ([intro](docs/wiki/intro.md)). La storia passa da 220 a 292 righe
   (4 min 13 s a velocità normale): **il 4% di accelerazione di sopra non è stato fatto** (non richiesto): resta da decidere.
 
-### M1 Sequenza dei capitoli: cosa resta ([capitoli](docs/capitoli.md)) — L
+### M1 Sequenza dei capitoli: cosa resta ([capitoli](docs/wiki/capitoli.md)) — L
 - **Effetto grafico del passaggio** di capitolo (oggi: schermo nero, poi le schermate di salvataggio e caricamento): tbd.
-- **Villaggi** (15/11, fatto sul branch `villaggi`, da rivedere con il committente: [villaggio](docs/villaggio.md)): i capitoli
+- **Villaggi** (15/11, fatto sul branch `villaggi`, da rivedere con il committente: [villaggio](docs/wiki/villaggio.md)): i capitoli
   2–4 e la città dell'Abisso (prototipo) hanno tile, mappa, colori e posizioni propri (file `TWNc` con intestazione). **Resta**:
   la revisione del committente (i quattro villaggi sono prototipi; la proposta scartata è in `lab/villaggi/proposta-a-temi/`);
   NPC; un **brano per villaggio** (oggi lo stesso, M2); la **minimappa** dei villaggi nuovi (i colori "acqua" e "strade" seguono
   i ruoli dei posti: nel villaggio 4 il cratere esce blu); l'etichetta dell'ingresso del sotterraneo ("stairs down to level N"
   per tutti: una per villaggio costa una stringa nell'intestazione); prova su **vc64web** e su hardware reale; il passaggio di
   capitolo legge il file del villaggio nuovo due volte (tempo non misurato); la posizione dei villaggi sul disco è decisa e misurata
-  (15/11, disposizione `hubchap`, soglie per villaggio: [FastLoader](docs/FastLoader.md) 7.1); la **città dell'Abisso** oggi si raggiunge
+  (15/11, disposizione `hubchap`, soglie per villaggio: [FastLoader](docs/wiki/FastLoader.md) 7.1); la **città dell'Abisso** oggi si raggiunge
   dall'uscita del villaggio 4 dopo il boss finale e la Bocca non fa nulla (da rifare con H3; la leva della sala del trono resta).
 - **Fan art della mappa del mondo** (15/11): `tools/art/world_map.py` (`out/work/art/world_map.png`); dal 16/11 sta nel
   **manuale italiano** (pagina "IL MONDO", prima del capitolo 4; la genera la build del manuale, non e' in git). Restano da decidere
   la wiki e la scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene; il testo del manuale non racconta la trama
   (in revisione): da rivedere con E6, e da tradurre con E7.
 - **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri**: dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
-  e il loro colore; **meccaniche decise** ([bestiario](docs/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
+  e il loro colore; **meccaniche decise** ([bestiario](docs/wiki/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
   non nel codice (~550 B stimati: M9); dal 15/11 hanno anche il **loro nome** nella barra e i **mostri del capitolo** intorno
   (solo grafica, colore e nome: M9); statistiche proprie, bottino speciale, sala che si chiude: da fare.
 - **Ritorno ai villaggi precedenti** (portale/menu): fuori da questa fase (D-CAP-2).
@@ -419,11 +419,11 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - Intro e testi delle quest nelle due lingue con gli stessi limiti di buffer e disco; con E7 (manuale) ed E9 (stringhe).
 
 ### M9 Capitoli nel codice e bestiari (ex H2, H6) — L
-- Analisi: [docs/capitoli.md](docs/capitoli.md). Già divisi per capitoli: `data/chapters.yaml` (piano locale 1..n, profondità
+- Analisi: [docs/wiki/capitoli.md](docs/wiki/capitoli.md). Già divisi per capitoli: `data/chapters.yaml` (piano locale 1..n, profondità
   globale 1..255 per la difficoltà), atlante, `tools/simulators/chapters.py`, bestiari per capitolo (`data/monsters/bestiary.tsv`).
   **Fatto (15/11, branch `villaggi`)**: ogni capitolo ha nel gioco i **suoi mostri** (4 famiglie + 4 varianti forti, boss di
   capitolo nel piano del boss): sprite, colori e nomi nei file del tema del capitolo, nomi e colori copiati a `NM_AT`
-  ([bestiario](docs/bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)). **Statistiche e IA non sono cambiate**: il tipo *t* di
+  ([bestiario](docs/wiki/bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)). **Statistiche e IA non sono cambiate**: il tipo *t* di
   ogni capitolo ha quelle del tipo *t* del capitolo 1 (per profondità).
   **Da fare nel codice**: **statistiche proprie** per capitolo (le tabelle `mt_*`/`mon_spd`/`mon_llb` da caricare col tema,
   come i nomi: ~120 B per file; oggi le righe dei capitoli 2–4 nel bestiario sono concept); **IA nuove** (distanza per Bone
@@ -439,14 +439,14 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   la mappa fuori da `$C900-$CFFF` (zona 1 del modulo MENU), `lab64 test regression -k VIL-MENU`.
 - 15 quest (o 10), NPC, abilità solo da quest, tre villaggi, stanze fisse, compagno Torvald, pagine su disco (`QSTn`,
   tasto Q). Premi: cintura a 8 (F1), borsello a gradini (B9), **un gettone respec** (A1). Costi: ~1,1 KB di GAME (prima
-  D7/D8), ~300 B in OVLT, ~550 B sotto l'I/O, ~60 blocchi. Analisi: `docs/quests.md`. Da rileggere col modello a capitoli (M9).
+  D7/D8), ~300 B in OVLT, ~550 B sotto l'I/O, ~60 blocchi. Analisi: `docs/wiki/quests.md`. Da rileggere col modello a capitoli (M9).
 
 ### H3 (ex 5.2) The Endless Abyss (dopo B10, B11, G6, E5) — XL
 - Piani 21+ (fino a 255) a temi casuali, livello = piano, `void.table`, boss ×1,5, spade dell'Abisso, `chestLevel`
   riscalato, solo pozioni viola; morte −10% xp; normal / nightmare; città dell'Abisso con prezzi ribilanciati; salvataggio
   dei piani (D-CAP-3). Gettoni respec nei bauli (A1). Test: PERF-22 (cammino nei piani 21–255, oggi SKIP) e PERF-23
   (generatore su tutti i 255 piani: già oggi 0,34–0,84 s). Il generatore regge già i piani oltre il 20.
-- Pozioni nell'Abisso: pozioni per piano da `rules.yaml` `potions.abyss_drop`; `pot_heal` è già pronta (colonna `heal_abyss`, `docs/oggetti.md`).
+- Pozioni nell'Abisso: pozioni per piano da `rules.yaml` `potions.abyss_drop`; `pot_heal` è già pronta (colonna `heal_abyss`, `docs/wiki/oggetti.md`).
 
 ---
 
@@ -458,6 +458,13 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 - Oggi le versioni stanno solo in `out/releases/` (ultime 5, locale). Per GitHub: asset del tag `v<V>` (disco, manuale,
   `manifest.json` con gli SHA-256) invece di conservarle in locale; niente zip dei sorgenti (regola del committente 14/11: lo
   da' gia' il tag). Da decidere con il passaggio a GitHub.
+
+### J15 (17/11) Spostare il manuale fuori da `docs/` in una cartella sua — S
+- Oggi il sorgente del manuale sta in `docs/manual/` (`manuale_src.html`, `tema.css`, `mon/`, `shots/`), mischiato alla
+  documentazione scritta. Obiettivo: una cartella di primo livello (es. `manual/`), cosi' `docs/` resta solo la wiki.
+- Da aggiornare: `tools/manual/gen_manual.py` (riga con `"docs", "manual"`), `tests/smoke/build/cases.py` (stesso percorso),
+  `tools/vice/shots_manual.sh`, `CLAUDE.md`, `README.md` (tabella Structure), `docs/getting-started.md`, `docs/wiki/*.md`
+  che citano `docs/manual/`. Dopo lo spostamento: `./build.sh --manual` e smoke verdi.
 
 ---
 

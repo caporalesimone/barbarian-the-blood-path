@@ -1,6 +1,6 @@
 ; =============================================================================
 ; Avvio con musica: il codice comune di START (src/start.asm) e LORE (src/lore.asm, LORE=1), file START e LORE.
-; (11/11 sera) Entrambi installano Krill's Loader e leggono i file con loadraw (docs/FastLoader.md).
+; (11/11 sera) Entrambi installano Krill's Loader e leggono i file con loadraw (docs/wiki/FastLoader.md).
 ; -----------------------------------------------------------------------------
 ; 1. lo stub BASIC copia il corpo a $A000 (RAM sotto la ROM del BASIC) e lo esegue: install di Krill (KERNAL acceso),
 ;    residente a $0200, poi la musica (IRQ raster).
@@ -36,7 +36,7 @@ ST      = $90
 
 LDFLAGS = $8e                   ; 1 = LOBBY gia' a $C000 (11/11: pagina zero, il residente di Krill occupa $0200-$0312)
 CHRPRE  = $8f                   ; 1 = elenco eroi (file hl) gia' letto, in CHRBUF (lobby.asm)
-POKE_GOD = $03fd                ; (11/11) POKE 1021,1 prima del RUN = god mode (docs/cheats.md); letto prima dell'install
+POKE_GOD = $03fd                ; (11/11) POKE 1021,1 prima del RUN = god mode (docs/wiki/cheats.md); letto prima dell'install
         .include "krill.inc"    ; out/work/krill.inc (tools/build/krill_syms.py): START e LORE installano Krill's Loader r194
 CHRTMP  = TXT ? $b800 : $b000                 ; durante il caricamento: stato (1 = letto) + file hl (elenco eroi)
 CHRBUF  = $d000                 ; dopo SPAZIO (RAM sotto l'I/O, liberata dal villaggio)

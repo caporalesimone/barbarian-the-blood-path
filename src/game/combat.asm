@@ -1,5 +1,5 @@
 ; ===================================================================
-;  combat.asm - regole di combattimento d20 (docs/combattimento.md, numeri: data/rules.yaml)
+;  combat.asm - regole di combattimento d20 (docs/wiki/combattimento.md, numeri: data/rules.yaml)
 ;  statistiche del PG, mostri del piano, tiro per colpire, danni a 16 bit, abilita' a tempo,
 ;  pozioni con ricarica
 ; ===================================================================
@@ -332,7 +332,7 @@ hp_full:
         sta c_hp+1
         rts
 
-; danno al PG: cb_dl/cb_dh (16 bit). godmode diverso da 0: nessun danno (cheat, docs/cheats.md)
+; danno al PG: cb_dl/cb_dh (16 bit). godmode diverso da 0: nessun danno (cheat, docs/wiki/cheats.md)
 hurt_player:
         lda godmode
         bne _s

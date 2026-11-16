@@ -2,7 +2,7 @@
 """Genera out/work/db.asm da data/rules.yaml (combattimento: PG, abilita', oggetti, schede e crescita dei mostri,
 esperienza) e data/balance.yaml (mondo: generazione, bottino, bauli, negozi, nomi, colori).
 uso: python3 tools/build/gen_db.py [--check]
-Formule e significato delle tabelle: docs/combattimento.md, docs/mostri.md, docs/oggetti.md."""
+Formule e significato delle tabelle: docs/wiki/combattimento.md, docs/wiki/mostri.md, docs/wiki/oggetti.md."""
 import os, re, sys, math
 import yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -264,12 +264,12 @@ def main():
     # lunghezza del nome mostrato (08/11): le colonne dei menu (casa, inventario, negozi, riquadro dell'oggetto) hanno
     # 17 caratteri (ui_item riempie fino a 17): al massimo NAME_SHOW = 16, cosi' resta sempre uno spazio prima della
     # cornice o della colonna accanto. Arma/armatura/scudo: "+N " davanti; anello: " str"/" dex"/" con" dietro;
-    # pergamena: "N " davanti (3 caratteri: la pila potrebbe arrivare a 10); pozione: il nome e basta. Documentato in docs/oggetti.md (Nomi).
+    # pergamena: "N " davanti (3 caratteri: la pila potrebbe arrivare a 10); pozione: il nome e basta. Documentato in docs/wiki/oggetti.md (Nomi).
     NAME_SHOW = 16
     for k, cat, it in items[1:]:
         extra = {"weapon": 3, "armor": 3, "shield": 3, "ring": 4, "scroll": 3}.get(cat, 0)
         chk(len(it["name"]) + extra <= NAME_SHOW,
-            f"nome '{it['name']}' ({cat}): {len(it['name'])} caratteri + {extra} mostrati = {len(it['name']) + extra} > {NAME_SHOW} (docs/oggetti.md)")
+            f"nome '{it['name']}' ({cat}): {len(it['name'])} caratteri + {extra} mostrati = {len(it['name']) + extra} > {NAME_SHOW} (docs/wiki/oggetti.md)")
     ids = {k: i for i, (k, _, _) in enumerate(items)}
     o("; ---- oggetti (id = ordine in data/items/items.tsv: armi, armature, scudi, anelli, pozioni, pergamene; 0 = vuoto)")
     o(";      id: " + ", ".join("%d %s" % (i, k) for i, (k, _, _) in enumerate(items)))

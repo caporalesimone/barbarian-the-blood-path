@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Villaggi dei capitoli (15/11, TODO Z2, docs/villaggio.md): un file TWNc per capitolo con i SUOI tile, la SUA mappa, i
+"""Villaggi dei capitoli (15/11, TODO Z2, docs/wiki/villaggio.md): un file TWNc per capitolo con i SUOI tile, la SUA mappa, i
 SUOI colori, i SUOI tile solidi, il nome del SUO luogo di cura e le SUE posizioni (portale, ingresso del sotterraneo,
 ingresso e uscita del villaggio, porte).
 

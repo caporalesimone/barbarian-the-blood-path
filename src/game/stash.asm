@@ -23,7 +23,7 @@ sd_st   .byte STASH_N
 ; ---- modulo MENU (11/11, TODO D6/D13): i menu del villaggio (locanda e negozi, src/menu.asm) in due zone di RAM,
 ;  compressi ZX0 in un file. Si carica all'ingresso nel villaggio (enter_gfx) se non c'e' (ovl_cur = 0: lo azzerano
 ;  game_start e il LOBBY, che copre la zona 1) e poi resta: niente altro scrive nelle due zone.
-;  File "menu1".."menu3" (tools/build/pack_menu.py, docs/FORMATO_DATI.md; 11/11 ramo fast-loader: un file per parte):
+;  File "menu1".."menu3" (tools/build/pack_menu.py, docs/wiki/FORMATO_DATI.md; 11/11 ramo fast-loader: un file per parte):
 ;  ogni parte compressa ha come indirizzo di caricamento (ml_end - lunghezza), cioe' il fondo della sua zona;
 ;  Krill la carica li' (C=0) e lascia l'inizio in krill_loadaddrlo/hi; poi si decomprime sul posto all'inizio
 ;  della zona (ml_dst): pack_menu.py verifica che la scrittura non raggiunga i dati non ancora letti.

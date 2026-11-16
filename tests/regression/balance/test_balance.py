@@ -2,7 +2,7 @@
 """Balance checks with the d20 rules simulator (tools/simulators/sim_rules.py, fixed seed, ~2 s).
 
 Wide thresholds: they catch gross regressions (broken data, inverted curves), not tuning.
-The tuning is in docs/BILANCIAMENTO.md (tools/simulators/fit_rules.py)."""
+The tuning is in docs/wiki/BILANCIAMENTO.md (tools/simulators/fit_rules.py)."""
 import os, sys
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.insert(0, os.path.join(ROOT, "tools", "simulators"))

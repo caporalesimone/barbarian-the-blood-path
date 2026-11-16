@@ -1,5 +1,5 @@
 ; ===================================================================
-;  chapter.asm - sequenza dei capitoli (12/11, TODO M1; docs/capitoli.md)
+;  chapter.asm - sequenza dei capitoli (12/11, TODO M1; docs/wiki/capitoli.md)
 ;  Ogni capitolo c = 1..CHAPTERS ha il suo villaggio (file TWNc, cur_level = 0) e CH_LV piani: i primi CH_LV-1
 ;  generati, l'ultimo e' il piano del boss del capitolo (mappa fissa BOSSCHc, segnaposto; nel capitolo CHAPTERS e' il
 ;  piano finale MAXLEVEL, la sala del trono). I piani si contano internamente da 1 a MAXLEVEL (profondita' globale:
