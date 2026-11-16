@@ -7,7 +7,7 @@ dettagli di suite e runner: `docs/wiki/test.md`.
 - Nel container **`lab64-tools`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
   `./build.sh --release` (anche regression), `lab64 test -k ID`. Mai sull'host.
 - VICE si avvia sempre con `-default` e con **tutte** le ROM di `roms/vice-roms/` di Lab64 passate a mano (`containers/tools/py/vicemon.py` di Lab64,
-  `py/vice_env.sh` di Lab64; nel gioco `tools/vice/vice_env.sh` aggiunge solo `ROOT`): niente configurazione o cartella dati dell'utente.
+  `containers/tools/py/vice_env.sh` di Lab64; nel gioco `tools/vice/vice_env.sh` aggiunge solo `ROOT`): niente configurazione o cartella dati dell'utente.
 - Test sull'emulatore secondario (`EMU-*`): il demone sta in `lab64-vc64web`, acceso da `./build.sh --emu` o `--release`
   (`EMU_URL`); senza demone sono SKIP, non FAIL.
 

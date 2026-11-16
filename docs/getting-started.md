@@ -198,7 +198,7 @@ scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagin
 
 **Come la pagina comanda VICE** (14/11, scelta piu' sicura confermata dal committente): il viewer **non** ha il socket di Docker (chi
 lo ha e' root sull'host). `lab64 up viewer` (o `lab64 view`) avvia anche **`lab64-player`** (immagine `lab64-tools`, `viewer_player.py` di Lab64) se
-`lab64.env` definisce `C64_VIEW_PLAYER` (qui `tools/vice/play.sh`): la pagina manda `POST /control` al server del viewer, che lo
+`lab64.env` definisce `C64_VIEW_PLAYER` (qui `tools/vice/play.sh --size 1100x800`): la pagina manda `POST /control` al server del viewer, che lo
 passa al lettore da un socket Unix nel volume `lab64-x11` (`c64-player.sock`). Comandi: `status`, `play` (percorso sotto `out/`, solo
 `.d64 .g64 .prg .t64 .crt`, niente `..`, il file deve esistere), `basic`, `stop`. Protezioni del server: Host solo `localhost`,
 `127.0.0.1`, `[::1]` (o `VIEW_HOSTS`) contro il DNS rebinding; `/control` e i WebSocket solo dalla stessa origine; `/control` solo con
@@ -212,7 +212,7 @@ Dettagli dello schermo dal vivo:
   valore resta nel browser, `localStorage`). Agisce solo sull'ascolto, non su VICE ne' sulle registrazioni. Gli emulatori di un altro container usano schermo e audio
   con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
   aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
-  **VICE con il suono**, a velocita' reale, sull'ultima build: `lab64 play tools/vice/play.sh [disco.d64|versione]` (senza argomento `out/releases/latest`, con `1.239` quella versione)
+  **VICE con il suono**, a velocita' reale, sull'ultima build: `lab64 play tools/vice/play.sh [--size 1100x800] [disco.d64|versione]` (la finestra non si ridimensiona dopo l'avvio, nemmeno a schermo intero: la misura si da' con `--size`; **− / +** nell'intestazione di `live.html` fanno lo zoom dello schermo, vedi `docs/viewer.md` di Lab64) (senza argomento `out/releases/latest`, con `1.239` quella versione)
   (`lab64 play <comando>` = un comando in `lab64-tools` collegato a schermo e audio del viewer). La tastiera fisica del browser arriva a VICE.
   **Overlay** in `/live.html` (14/11): tre pulsanti nell'intestazione accendono, sopra lo schermo e semitrasparenti, la **tastiera del C64**
   (66 tasti con la disposizione originale e i tasti funzione a destra; SHIFT, CTRL e C= restano premuti fino al tasto successivo, SHIFT LOCK
