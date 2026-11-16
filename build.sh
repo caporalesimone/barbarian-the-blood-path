@@ -46,7 +46,7 @@ on_exit() { rc=$?; cleanup; if [ $rc = 0 ]; then PHASE=fine; status ok; else sta
 trap on_exit EXIT
 trap 'exit 130' INT TERM
 phase avvio
-command -v lab64 >/dev/null || { echo "comando lab64 non trovato: installare Lab64 (<cartella di lab64>/bin/lab64 install)"; exit 1; }
+command -v lab64 >/dev/null || { echo "comando lab64 non trovato: installare Lab64 (<cartella di lab64>/cli/lab64 install)"; exit 1; }
 command -v docker >/dev/null || { echo "Docker non trovato: lab64 check-env"; exit 1; }
 docker info >/dev/null 2>&1 || { echo "il demone Docker non risponde: lab64 check-env"; exit 1; }
 phase immagini

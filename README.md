@@ -54,7 +54,7 @@ Versione del gioco e del formato dei salvataggi: `version.yaml`.
 | `tools/` | `build/` generatori e build, `atlas/` atlante grafico, `memory-map/` mappe RAM e disco, `manual/` manuale, `simulators/` simulatori, `vice/` strumenti in VICE (screenshot, misure, arena), `font/` font della UI |
 | `tests/` | test automatici: `smoke/`, `sanity/`, `regression/`, libreria in `lib/` ([docs/test.md](docs/test.md)) |
 | `docs/` | wiki del gioco ([indice](docs/README.md)), sorgente del manuale (`docs/manual/`), schermate dei menu (`docs/screens/`) |
-| Lab64 (fuori dal progetto) | **Lab64**, la toolchain C64 generica: dal 14/11 **repository a parte**, usato solo con il comando `lab64` (nel PATH: `<cartella di Lab64>/bin/lab64 install`) (README.md di Lab64, in inglese): immagini Docker `lab64-*` (`docker/Dockerfile`) e script `run.sh`, `build-images.sh`, `viewer.sh`, `check_env.sh`; sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `vc64web-custom/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in roms/roms.md di Lab64); mappa automatica `memmap/` |
+| Lab64 (fuori dal progetto) | **Lab64**, la toolchain C64 generica: dal 14/11 **repository a parte**, usato solo con il comando `lab64` (nel PATH: `<cartella di Lab64>/cli/lab64 install`) (README.md di Lab64, in inglese): immagini Docker `lab64-*` (`docker/Dockerfile`) e script in `cli/` e `build-scripts/` (`run.sh`, `build-images.sh`, `check_env.sh`); sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `containers/vc64web/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in roms/roms.md di Lab64); mappa automatica `containers/tools/memmap/` |
 | `lab64.env` | configurazione di Lab64 per il gioco |
 | `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
 | `out/` | tutto ciò che si genera (non in git): `releases/v<versione>/` (ultime 5: disco, atlante, mappe, manuale, report dei test), `work/` (intermedi della build in corso), `cache/` (riusabile), `tmp/` (usa e getta) |
@@ -90,10 +90,10 @@ implementazione: la wiki in docs/ (indice docs/README.md).
   (incluso nell'archivio) per scrivere il disco. Archivio, licenza e note in
   [src/third-party/krill/](src/third-party/krill/README.md); come lo usiamo in [docs/FastLoader.md](docs/FastLoader.md).
   Nel gioco il credito è nel menu dei barbari: "loader by krill - v194".
-- **vc64web / c64-tools** (13/11, `vc64web-custom/` di Lab64): VirtualC64 di Dirk W. Hoffmann in WebAssembly (porting vc64web) con il
+- **vc64web / c64-tools** (13/11, `containers/vc64web/` di Lab64): VirtualC64 di Dirk W. Hoffmann in WebAssembly (porting vc64web) con il
   controllo da riga di comando, usato come **secondo emulatore** per i test `EMU-*` e per i video (VICE resta il riferimento).
-  Licenza **non verificata** (probabile GPL-3.0, vedi `vc64web-custom/third-party/vc64web/README.md` di Lab64); la build prende le ROM
-  Commodore da `roms/` di Lab64 (non sono in git: le aggiunge l'utente prima di costruire le immagini, `roms/roms.md` di Lab64). Provenienza e uso: vc64web-custom/docs/INCLUSION.md di Lab64,
+  Licenza **non verificata** (probabile GPL-3.0, vedi `containers/vc64web/third-party/vc64web/README.md` di Lab64); la build prende le ROM
+  Commodore da `roms/` di Lab64 (non sono in git: le aggiunge l'utente prima di costruire le immagini, `roms/roms.md` di Lab64). Provenienza e uso: containers/vc64web/docs/INCLUSION.md di Lab64,
   [docs/emulatore.md](docs/emulatore.md). TODO `I7`.
 - **ZX0** v2 di Einar Saukas (BSD-3): compressione di `GAME`, `LDAT` e del modulo `MENU`.
 - **VICE** 3.10 (GPL-2.0): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.

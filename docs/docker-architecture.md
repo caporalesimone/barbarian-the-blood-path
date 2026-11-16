@@ -18,7 +18,7 @@ per questo documento; *[non verificato]* = ipotesi.
 - **Container** (nascono e muoiono a ogni comando): quasi tutti con `--rm`. **Nessuno è sempre acceso**: dipendono da cosa chiedi a
   `build.sh` o a `viewer.sh`. Il progetto sta sull'host e si monta in `/work`.
 - **Lingua** (14/11, regola del committente): tutto Lab64 è in inglese (anche i suoi commit) (codice, commenti, messaggi, pagine, README, il pacchetto
-  `vc64web-custom/` compresi documenti ed esempi); la wiki, il TODO e i commit restano in italiano. Conseguenze visibili: il client
+  `containers/vc64web/` compresi documenti ed esempi); la wiki, il TODO e i commit restano in italiano. Conseguenze visibili: il client
   vc64web stampa `ERROR CODE: messaggio`, la schermata del test tasti dice `KEY AND JOYSTICK TEST` ([emulatore.md](emulatore.md)).
 
 ## 2. Immagini e parentela
@@ -51,7 +51,7 @@ flowchart TD
 
     BASE --> MAN["lab64-pdf-gen<br/>Python + WeasyPrint (venv da uno stage pdf-build)"]
 
-    NODE["node:22-bookworm-slim"] --> VC["lab64-vc64web<br/>Playwright + Chromium + ffmpeg<br/>(vc64web-custom/Dockerfile di Lab64)"]
+    NODE["node:22-bookworm-slim"] --> VC["lab64-vc64web<br/>Playwright + Chromium + ffmpeg<br/>(containers/vc64web/Dockerfile di Lab64)"]
 
     classDef gen fill:#e8f0ff,stroke:#4a6fb5;
     classDef game fill:#fff0e0,stroke:#b5834a;
@@ -69,7 +69,7 @@ Linea piena = `FROM`, cioè si ereditano tutti i layer.
 | (stage interno) | `builder` | 64tass, cc65, make, perl, zip, git, Python, zx0, cc1541 | - |
 | `lab64-tools` | `tools` | il builder + VICE 3.10 (gtk3), Xvfb, ffmpeg | 1553 MB (come la vecchia `c64-emu-vice`) |
 | `lab64-viewer` | `viewer` | Xvnc di KasmVNC 1.5.2, PulseAudio, Node + `server.js` | 780 MB |
-| `lab64-vc64web` | `vc64web-custom/Dockerfile` di Lab64 | Node, Playwright, Chromium, ffmpeg, demone dell'emulatore nel browser | 2116 MB |
+| `lab64-vc64web` | `containers/vc64web/Dockerfile` di Lab64 | Node, Playwright, Chromium, ffmpeg, demone dell'emulatore nel browser | 2116 MB |
 | `lab64-pdf-gen` | `pdf-gen` | Python 3, PyYAML, Pillow, pango, DejaVu + WeasyPrint 70 (venv) | 276 MB [misurato 14/11; il vecchio `barbarian-manual` era 937 MB] |
 
 Conseguenze della struttura:

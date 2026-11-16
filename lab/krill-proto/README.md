@@ -8,5 +8,5 @@ nomi da 8 caratteri) con cui sono stati costruiti i binari. Non fa parte della b
 ## Prova a schermo (11/11)
 `p3_screen.asm`: install, load, plugin di save, save di 1 blocco e rilettura con esiti scritti a schermo (richiede i binari
 di Krill e i file `data`, `save`, `s1` come in proto.asm; disco con `cc1541 -M 8`). VICE x64sc true drive: `INST 0000 LOAD 00 PLUG 00 SAVE 00 READ 00` (tutto ok).
-L'emulatore web del committente (VirtualC64 build v32, API 25: demone `c64d` + client `c64`) sta dal 13/11 **nel repository**, in `vc64web-custom/` di Lab64 (guida: [docs/emulatore.md](../../docs/emulatore.md), test `EMU-10..16`). Gli script miei per le versioni precedenti sono stati cancellati su richiesta del committente (13 e 12/11).
+L'emulatore web del committente (VirtualC64 build v32, API 25: demone `c64d` + client `c64`) sta dal 13/11 **nel repository**, in `containers/vc64web/` di Lab64 (guida: [docs/emulatore.md](../../docs/emulatore.md), test `EMU-10..16`). Gli script miei per le versioni precedenti sono stati cancellati su richiesta del committente (13 e 12/11).
 Prova sull'ordine dei file in directory (106 file da 1 blocco prima/dopo): NON conclusiva (il prototipo non arriva alla fine, save8 = $ff), nessun numero da citare.

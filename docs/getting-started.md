@@ -9,7 +9,7 @@ come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in
 ## 1. In breve
 
 ```sh
-git clone <Lab64> ~/lab64 && ~/lab64/bin/lab64 install   # una volta: Lab64 dove si vuole, il comando lab64 nel PATH
+git clone <Lab64> ~/lab64 && ~/lab64/cli/lab64 install   # una volta: Lab64 dove si vuole, il comando lab64 nel PATH
 lab64 check-env               # una volta su un computer nuovo: controlla host, Docker, ROM, posizione del progetto (WSL/Windows)
 lab64 clean [--keep-release-only]   # cancella da out/ cio' che una build ricrea (work, tmp; con l'opzione anche cache); tiene sempre out/releases
 lab64 page                  # solo la pagina portable di vc64web (un HTML con tutte le ROM, per il telefono): out/work/vc64web/; il viewer la offre anche come "↓ HTML"
@@ -38,14 +38,14 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, `run_tests.sh` (suite della build); motore: `lab64 test` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
-| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-images.sh`, `viewer.sh`, `check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `vc64web-custom/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
+| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-images.sh`, `viewer.sh`, `check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `containers/vc64web/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
 | `lab64.env` | configurazione di Lab64 per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
 | `out/` | **tutto cio' che si genera**: `work/` (intermedi e uscite della build in corso), `cache/` (zx0, steps, vc64web: si riusano), `tmp/` (usa e getta), `releases/` (artefatti per versione, ultime 5) | no (solo `.gitkeep`) |
 
 ## 2b. Il comando `./lab64` (14/11)
 
-`lab64` e' il comando di Lab64 (una volta: `<cartella di Lab64>/bin/lab64 install`, poi e' nel PATH; serve solo Docker sull'host).
+`lab64` e' il comando di Lab64 (una volta: `<cartella di Lab64>/cli/lab64 install`, poi e' nel PATH; serve solo Docker sull'host).
 Il gioco non sa dove sta Lab64: lo usa solo con questo comando.
 `lab64 build` = `./build.sh` (`C64_BUILD` in `lab64.env`); `lab64 test [smoke|sanity|regression] [-k ID]` = motore dei test
 di Lab64 sulla cartella `tests/` (`--emu` accende vc64web per quel giro, `--view` / `--no-view` lo schermo del viewer);

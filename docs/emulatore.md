@@ -1,4 +1,4 @@
-# Il secondo emulatore: vc64web (`vc64web-custom` di Lab64)
+# Il secondo emulatore: vc64web (`containers/vc64web` di Lab64)
 
 Copyright © 2026 - Simone Caporale
 
@@ -16,7 +16,7 @@ La precisione di questo core rispetto a VICE non è stata confrontata ciclo per 
 gioco parte e si gioca (test `EMU-10..16`).
 
 Provenienza, cosa è versionato e cosa no (le ROM Commodore no: la build le prende da `roms/` di Lab64), come aggiornare il pacchetto:
-vc64web-custom/docs/INCLUSION.md di Lab64 (`vc64web-custom/docs/INCLUSION.md` di Lab64).
+containers/vc64web/docs/INCLUSION.md di Lab64 (`containers/vc64web/docs/INCLUSION.md` di Lab64).
 
 ## Architettura
 
@@ -36,7 +36,7 @@ copia finché il demone resta acceso).
 
 ## Cosa sa fare (con i riferimenti ai file del pacchetto)
 
-Tutto il pacchetto è in `vc64web-custom/` di Lab64. Documenti: `README.md` (build, registrazioni), `docs/CHANGELOG.md`, `docs/c64-cli.md`
+Tutto il pacchetto è in `containers/vc64web/` di Lab64. Documenti: `README.md` (build, registrazioni), `docs/CHANGELOG.md`, `docs/c64-cli.md`
 (**ogni comando**, con output reali e «What is not verified»), `docs/C64-API.md` (API JavaScript `window.c64`, «Limits
 found»), `docs/scripting.md` (script di testo), `docs/getting-started.md` (prime prove), `docs/C64-TODO.md` (limiti del core),
 `examples/` (script, cicli, shell). Nel seguito «cli §N» = `docs/c64-cli.md` sezione N. Dal 14/11 il pacchetto (documenti,
@@ -92,7 +92,7 @@ segnalare al team: sezione «Trappole»).
 Dal 13/11 il demone gira nel container **`lab64-vc64web`** (immagine costruita dal `Dockerfile` del pacchetto, con le pagine
 già pronte dentro: `lab64 images vc64web` le genera nel builder con `build.py --no-docker --out out/cache/vc64web` e poi fa la
 `docker build` con il contesto `pages=out/cache/vc64web`). Il pacchetto è autonomo e parametrizzato: `--vice-roms`, `--open-roms`, `--out`,
-`--tag` (README e `docs/INCLUSION.md` del pacchetto); le ROM le prende dalla sua `roms/` (`vc64web-custom/roms/` di Lab64), identica a `roms/` di Lab64 del progetto.
+`--tag` (README e `docs/INCLUSION.md` del pacchetto); le ROM le prende dalla sua `roms/` (`containers/vc64web/roms/` di Lab64), identica a `roms/` di Lab64 del progetto.
 
 ```sh
 ./build.sh --emu                                          # build + smoke/sanity con il demone acceso (EMU-* sono in regression)
