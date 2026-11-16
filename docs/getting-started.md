@@ -12,6 +12,7 @@ come girano i test e dove finiscono i file. I dettagli dei singoli passi sono in
 git clone <Lab64> ~/lab64 && ~/lab64/bin/lab64 install   # una volta: Lab64 dove si vuole, il comando lab64 nel PATH
 lab64 check-env               # una volta su un computer nuovo: controlla host, Docker, ROM, posizione del progetto (WSL/Windows)
 lab64 clean [--keep-release-only]   # cancella da out/ cio' che una build ricrea (work, tmp; con l'opzione anche cache); tiene sempre out/releases
+lab64 page                  # solo la pagina portable di vc64web (un HTML con tutte le ROM, per il telefono): out/work/vc64web/; il viewer la offre anche come "↓ HTML"
 ./build.sh                 # TUTTO: disco + mappe + atlante + smoke e sanity + manuale PDF
 ./build.sh --fast          # solo il disco (salta atlante, mappe, manuale); smoke e sanity restano: il comando di tutti i giorni
 ./build.sh --fast --no-test  # il minimo: solo il disco
