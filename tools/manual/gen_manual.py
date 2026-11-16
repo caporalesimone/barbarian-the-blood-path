@@ -4,7 +4,7 @@
 Gira nel container lab64-pdf-gen di Lab64 (WeasyPrint; l'ombra del titolo in copertina non c'e' perche' WeasyPrint ignora
 text-shadow). Dall'host: ./build.sh --manual (o lab64 manual, C64_MANUAL in lab64.env).
 
-Sorgente editabile: docs/manual/manuale_src.html. Stile (15/11): il tema base "c64" di Lab64 (manual/themes/c64.css) +
+Sorgente editabile: docs/manual/manuale_src.html. Stile (15/11): il tema base "c64" di Lab64 (containers/pdf-gen/themes/c64.css) +
 docs/manual/tema.css (solo le regole del gioco). Questo script fa le parti del gioco:
   1. ritaglia gli screenshot grezzi (docs/manual/shots/*.png) in out/work/manual/img/*.png (area utile 320x200 senza bordo);
   1b. la mappa del mondo (fan art, tools/art/world_map.py, Pillow, deterministica) si genera qui, nello stesso container:

@@ -218,7 +218,7 @@ le variabili con i loro nomi).
 (14/11, regola del committente) i programmi esterni sono **all'ultima versione** e si compilano **dai sorgenti** dentro la build
 delle immagini di Lab64 (`docker/Dockerfile` di Lab64, stage `vice-build`, `tass64-build`, `cc65-build`, `cc1541-build`,
 `zx0-build`, tutti da `tools-builder` = base + compilatori e librerie di sviluppo). Versioni, URL e SHA-256 stanno **solo** in
-`sources.conf` di Lab64; `lab64 images` scarica i sorgenti sull'host (curl o git) in `downloads/` di Lab64, li
+`build-scripts/sources.conf` di Lab64; `lab64 images` scarica i sorgenti sull'host (curl o git) in `downloads/` di Lab64, li
 controlla e li cancella a immagini fatte. Nelle immagini finali entrano **solo i binari e le licenze** (`/opt/c64/licenses/`).
 I compilatori non ci sono. La cache di BuildKit tiene gli stage
 compilati: si ricompila solo se cambia un sorgente o la base (`docker builder prune` svuota la cache: poi VICE si ricompila, ~5 min
@@ -235,7 +235,7 @@ misurati il 13/11 insieme alle tre immagini). `./build.sh` costruisce le immagin
 - Effetto misurato il 14/11 del passaggio a 64tass 1.60 e cc1541 4.2: **tutti i `.prg` identici** byte per byte; il **disco cambia**
   (cc1541 4.2 scrive la stessa lista di file in modo diverso) e passa smoke, sanity e regression (Krill su 1541, 1541-II, 1570/1571,
   salvataggi, `EMU-*` su vc64web).
-- Per aggiornare un programma: versione, URL o commit e SHA-256 in `sources.conf` di Lab64, poi `lab64 images --force tools`.
+- Per aggiornare un programma: versione, URL o commit e SHA-256 in `build-scripts/sources.conf` di Lab64, poi `lab64 images --force tools`.
 - **Prova da ambiente pulito** (14/11): immagini, cache di BuildKit, rete e volume cancellati; clone dei due repository affiancati;
   `lab64 check-env`, `./build.sh --release` (immagini ricostruite da zero, tutto ricompilato: ~8 min; 185 PASS + 1 SKIP, `EMU-*`
   compresi), `lab64 images --force` (riscarica i sorgenti, la cache resta valida), progetto di esempio di `lab64 init`

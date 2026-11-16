@@ -39,7 +39,7 @@ Regole valide per **tutto il progetto**. Le regole di dettaglio stanno vicino a 
   **versione di Ubuntu in un solo punto** (`ARG UBUNTU`). vc64web ha il suo Dockerfile (pacchetto autonomo, base node).
 - (14/11, regola del committente) I programmi esterni sono **all'ultima versione** e si compilano **dai sorgenti** dove si puo'
   (VICE, 64tass, cc65, cc1541, zx0: stage `*-build` del Dockerfile di Lab64; la cache di BuildKit evita di ricompilarli); nelle
-  immagini entrano **solo i binari e le licenze**, i sorgenti si buttano. Versioni, URL e SHA-256 **solo** in `sources.conf` di Lab64;
+  immagini entrano **solo i binari e le licenze**, i sorgenti si buttano. Versioni, URL e SHA-256 **solo** in `build-scripts/sources.conf` di Lab64;
   `lab64 images` scarica i sorgenti sull'host in `downloads/` di Lab64 e li cancella a immagini fatte.
 - **Script**: shell POSIX/bash quando lo script lancia solo comandi; Python quando c'e' logica vera. Mai un Python che fa solo da
   involucro a comandi shell. Librerie Python esterne ammesse solo se sono nel container.

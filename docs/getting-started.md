@@ -38,7 +38,7 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, `run_tests.sh` (suite della build); motore: `lab64 test` | sì |
 | `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
-| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-images.sh`, `viewer.sh`, `check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `containers/vc64web/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
+| Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco, README (`README.md` di Lab64), in inglese): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `run.sh`, `build-scripts/build-images.sh`, `viewer.sh`, `check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `containers/vc64web/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `memmap/` (mappa automatica) | nel **suo** repository |
 | `lab64.env` | configurazione di Lab64 per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
 | `out/` | **tutto cio' che si genera**: `work/` (intermedi e uscite della build in corso), `cache/` (zx0, steps, vc64web: si riusano), `tmp/` (usa e getta), `releases/` (artefatti per versione, ultime 5) | no (solo `.gitkeep`) |
@@ -264,7 +264,7 @@ Password facoltativa: `VIEW_PASSWORD=... lab64 view` (di default nessuna): auten
 |---|---|
 | `lab64 check-env`: "disco Windows" | il progetto sta in `/mnt/c/...`: clonarlo nel filesystem di WSL (`~/...`) |
 | `pack: manca zx0` / `mkdisk: manca cc1541` | lo script e' stato lanciato fuori da `lab64-tools`: `lab64 run ...` |
-| download di un sorgente fallito (`lab64 images`) | rete o proxy dell'host: scaricare il file indicato da `sources.conf` di Lab64 a mano in `downloads/` di Lab64 con il nome che stampa lo script (lo SHA-256 viene controllato) |
+| download di un sorgente fallito (`lab64 images`) | rete o proxy dell'host: scaricare il file indicato da `build-scripts/sources.conf` di Lab64 a mano in `downloads/` di Lab64 con il nome che stampa lo script (lo SHA-256 viene controllato) |
 | pip/npm: `SELF_SIGNED_CERT_IN_CHAIN` nella build di un'immagine | proxy che intercetta TLS: `C64_CA_BUNDLE=/percorso/ca.crt lab64 images --force vc64web` e `./build.sh --images` (manuale) |
 | Docker Hub `429 Too Many Requests` | limite delle richieste anonime: `docker login`, poi riprovare (le immagini restano in cache). In alternativa lo specchio di Google: `docker pull mirror.gcr.io/library/node:22-bookworm-slim` e `docker tag` col nome originale (usato il 13/11) |
 | test `EMU-*` SKIP | demone non acceso: `./build.sh --emu` |

@@ -10,7 +10,7 @@ read_input lets the test write joy / joynew / keynew as if the player had presse
 closest to the real game (everything else runs as usual)."""
 import glob, os, re, shutil, signal, socket, subprocess, sys, time
 
-# (14/11) the generic VICE library is Lab64's (py/vicemon.py): Vice, labels, listing, addr_after, ROMS, FRAME, ... come from there
+# (14/11) the generic VICE library is Lab64's (containers/tools/py/vicemon.py): Vice, labels, listing, addr_after, ROMS, FRAME, ... come from there
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault("C64_ROOT", ROOT)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]

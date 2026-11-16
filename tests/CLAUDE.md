@@ -6,7 +6,7 @@ dettagli di suite e runner: `docs/test.md`.
 ## Dove girano
 - Nel container **`lab64-tools`** (VICE 3.10 compilato nell'immagine, Xvfb): `./build.sh` (smoke + sanity),
   `./build.sh --release` (anche regression), `lab64 test -k ID`. Mai sull'host.
-- VICE si avvia sempre con `-default` e con **tutte** le ROM di `roms/vice-roms/` di Lab64 passate a mano (`py/vicemon.py` di Lab64,
+- VICE si avvia sempre con `-default` e con **tutte** le ROM di `roms/vice-roms/` di Lab64 passate a mano (`containers/tools/py/vicemon.py` di Lab64,
   `py/vice_env.sh` di Lab64; nel gioco `tools/vice/vice_env.sh` aggiunge solo `ROOT`): niente configurazione o cartella dati dell'utente.
 - Test sull'emulatore secondario (`EMU-*`): il demone sta in `lab64-vc64web`, acceso da `./build.sh --emu` o `--release`
   (`EMU_URL`); senza demone sono SKIP, non FAIL.
@@ -32,7 +32,7 @@ dettagli di suite e runner: `docs/test.md`.
 - Una cartella per feature in ogni suite, con un `cases.py` che registra i test (gli altri file sono script e dati della feature).
 - **ID** maiuscoli e significativi `AREA-NN` (`SHOP-01`, `INN-CHEST-01`): `01`–`09` smoke, `10`+ sanity e regression; un test
   spostato conserva l'ID. Test (ID, descrizioni, motivi, commenti) **in inglese**.
-- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `Vice` di `py/vicemon.py` di Lab64, usata da `tests/lib/c64.py`). **All'avvio si aspetta il
+- Il più veloce possibile: niente tempi fissi verso VICE (si aspetta il prompt o la fermata, `Vice` di `containers/tools/py/vicemon.py` di Lab64, usata da `tests/lib/c64.py`). **All'avvio si aspetta il
   C64, non un tempo** (14/11, TODO I11): `Vice()` chiama `wait_boot` (Lab64) (vettori IRQ `$0314/5` = `$EA31` e `READY.` sullo schermo; tetto 30 s),
   perche' VICE apre la porta del monitor ~7 s prima di finire il boot a freddo. Un VICE lanciato con `-autostart` non mostra `READY.`:
   `Vice(boot_wait=<s>)`. `Vice.close()` uccide l'intero gruppo di processi (xvfb-run, Xvfb, x64sc).

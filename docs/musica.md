@@ -143,7 +143,7 @@ Rilocabile: tutti gli indirizzi sono offset dall'inizio del brano (16 bit little
 
 Ogni build scrive un **file .sid per brano** (`tools/build/gen_sid.py` -> `out/work/sid/<nome>.sid`), pubblicati con la versione in
 `out/releases/v<V>/music_sid_v<V>/` (gruppo `music` del manifest, `kind: "sid"`). Ogni `.sid` (PSID v2, intestazione scritta da
-`py/psid.py` di Lab64) contiene il **player vero del gioco** (`src/common/sid_player.inc`, assemblato a `$1000`, variabili a `$C000`,
+`containers/common/py/psid.py` di Lab64) contiene il **player vero del gioco** (`src/common/sid_player.inc`, assemblato a `$1000`, variabili a `$C000`,
 voci come nel gioco: lead sulla 2, accordi sulla 1, basso sulla 3) e i dati del brano (`out/work/snd/<nome>.bin`): init `$1000`,
 play `$1003` una volta per fotogramma (50 Hz, PAL), SID 6581. Titolo dal nome in `songs.TITLES`, autore "Barbarian: The Blood Path",
 rilascio con la versione.

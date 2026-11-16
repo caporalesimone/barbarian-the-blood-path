@@ -31,7 +31,7 @@ sv, hl = g("SV_LEN"), g("HDR_LEN")
 open("out/work/hl.prg", "wb").write(bytes([0, 0, g("SAVE_VER")]) + bytes(hl - 1))     # elenco vuoto della versione attuale
 open("out/work/save.prg", "wb").write(bytes([0, 0xe0]) + bytes(sv))
 PY
-# cc1541 (nel PATH di lab64-tools: 4.2, compilato dai sorgenti nella build dell'immagine, sources.conf di Lab64): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
+# cc1541 (nel PATH di lab64-tools: 4.2, compilato dai sorgenti nella build dell'immagine, build-scripts/sources.conf di Lab64): -M 8 = FILENAME_MAXLENGTH del loader (hash dei nomi); BARBARIAN primo (LOAD"*",8)
 CC=cc1541
 command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container lab64-tools (lab64 run ...)"; exit 1; }
 # (14/11) -S 4 = interleave dei settori 4 (quello dei benchmark di Krill): con cc1541 4.2 l'interleave predefinito (10) dava il MENU

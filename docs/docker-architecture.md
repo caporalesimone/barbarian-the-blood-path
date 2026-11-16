@@ -77,8 +77,8 @@ Conseguenze della struttura:
   disco una volta sola per la parte comune. `vc64web` parte da un'altra base e non condivide nulla.
 - **Cambiare Ubuntu**: `ARG UBUNTU` in un solo punto, poi `lab64 images --force` ricompila tutto (VICE, zx0 e cc1541 compresi) sulla base nuova.
 - **`lab64-pdf-gen`** (14/11) parte da `base`, non da `lab64-tools`: WeasyPrint si installa con pip in uno stage a parte (`pdf-build`) e nell'immagine finale entra solo l'ambiente virtuale, senza pip.
-- **Sorgenti scaricati sull'host, non nel build** (14/11: tutti, all'ultima versione, elencati in `sources.conf` di Lab64 con SHA-256 o
-  commit): li scarica `build-images.sh` con `curl` o `git` dell'host (certificati e proxy del computer) in `downloads/` di Lab64 e li passa
+- **Sorgenti scaricati sull'host, non nel build** (14/11: tutti, all'ultima versione, elencati in `build-scripts/sources.conf` di Lab64 con SHA-256 o
+  commit): li scarica `build-scripts/build-images.sh` con `curl` o `git` dell'host (certificati e proxy del computer) in `downloads/` di Lab64 e li passa
   al Dockerfile come *build context* `downloads`. Un eventuale proxy che intercetta TLS entra come segreto
   (`C64_CA_BUNDLE`) solo per le build che usano npm.
 - Le pagine di `vc64web` si generano in `lab64-tools` (`build.py`, nella cartella `out/cache/vc64web/` **di Lab64**) e poi entrano nell'immagine come build context `pages`.
@@ -86,7 +86,7 @@ Conseguenze della struttura:
   (`downloads/` di Lab64, con tutti gli altri sorgenti e il `.deb` di KasmVNC) e `out/cache/vc64web/c64-headless.html` di Lab64 (serve solo a
   costruire l'immagine). `--force` riscarica da solo; il contenuto e' lo stesso, quindi la cache di BuildKit resta valida [dal codice, non
   provato un `--force` dopo la cancellazione: serve la rete]. La pagina `VirtualC64-v*.html` in `out/cache/vc64web/` di Lab64 resta: la usa l'indice del
-  viewer (`viewer.sh` la monta sopra `out/cache/vc64web/` del progetto), e `build-images.sh viewer` la rigenera se manca.
+  viewer (`viewer.sh` la monta sopra `out/cache/vc64web/` del progetto), e `build-scripts/build-images.sh viewer` la rigenera se manca.
 
 ## 3. Container a runtime
 

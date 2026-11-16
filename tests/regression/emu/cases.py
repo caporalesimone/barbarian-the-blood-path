@@ -1,7 +1,7 @@
 """Second emulator (13/11, committente): the game must also run on vc64web (VirtualC64 in WebAssembly, another core and
 another 1541 emulation than VICE). VICE stays the only authoritative reference: these tests do not decide what is
 correct, they check that the real disk, played like a player with joystick and keyboard only, works there too.
-Package: vc64web-custom of Lab64 (image lab64-vc64web), helper: tests/lib/emu.py, guide: docs/emulatore.md.
+Package: containers/vc64web of Lab64 (image lab64-vc64web), helper: tests/lib/emu.py, guide: docs/emulatore.md.
 
 One session, a chain (after a failure the following tests are SKIP): real boot from the disk -> LOBBY -> new barbarian
 (saved with Krill's save plugin on the emulated 1541-II) -> village (HUD text read from the screen RAM) -> alchemist

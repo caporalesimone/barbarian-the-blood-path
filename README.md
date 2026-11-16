@@ -54,7 +54,7 @@ Versione del gioco e del formato dei salvataggi: `version.yaml`.
 | `tools/` | `build/` generatori e build, `atlas/` atlante grafico, `memory-map/` mappe RAM e disco, `manual/` manuale, `simulators/` simulatori, `vice/` strumenti in VICE (screenshot, misure, arena), `font/` font della UI |
 | `tests/` | test automatici: `smoke/`, `sanity/`, `regression/`, libreria in `lib/` ([docs/test.md](docs/test.md)) |
 | `docs/` | wiki del gioco ([indice](docs/README.md)), sorgente del manuale (`docs/manual/`), schermate dei menu (`docs/screens/`) |
-| Lab64 (fuori dal progetto) | **Lab64**, la toolchain C64 generica: dal 14/11 **repository a parte**, usato solo con il comando `lab64` (nel PATH: `<cartella di Lab64>/cli/lab64 install`) (README.md di Lab64, in inglese): immagini Docker `lab64-*` (`docker/Dockerfile`) e script in `cli/` e `build-scripts/` (`run.sh`, `build-images.sh`, `check_env.sh`); sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `containers/vc64web/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in roms/roms.md di Lab64); mappa automatica `containers/tools/memmap/` |
+| Lab64 (fuori dal progetto) | **Lab64**, la toolchain C64 generica: dal 14/11 **repository a parte**, usato solo con il comando `lab64` (nel PATH: `<cartella di Lab64>/cli/lab64 install`) (README.md di Lab64, in inglese): immagini Docker `lab64-*` (`docker/Dockerfile`) e script in `cli/` e `build-scripts/` (`run.sh`, `build-scripts/build-images.sh`, `check_env.sh`); sorgenti di VICE, zx0, cc1541 (compilati dentro le immagini); `containers/vc64web/` (secondo emulatore); ROM del C64 in `roms/` (elenco con SHA-256 e licenze in roms/roms.md di Lab64); mappa automatica `containers/tools/memmap/` |
 | `lab64.env` | configurazione di Lab64 per il gioco |
 | `lab/` | materiale di studio, non usato dalla build ([lab/README.md](lab/README.md)) |
 | `out/` | tutto ciò che si genera (non in git): `releases/v<versione>/` (ultime 5: disco, atlante, mappe, manuale, report dei test), `work/` (intermedi della build in corso), `cache/` (riusabile), `tmp/` (usa e getta) |
@@ -98,5 +98,5 @@ implementazione: la wiki in docs/ (indice docs/README.md).
 - **ZX0** v2 di Einar Saukas (BSD-3): compressione di `GAME`, `LDAT` e del modulo `MENU`.
 - **VICE** 3.10 (GPL-2.0): emulatore di riferimento per test e misure, compilato dai sorgenti ufficiali.
 - **cc1541** 4.2 (MIT): scrive il disco. **64tass** 1.60 (GPL-2.0) e **cc65** (zlib): assemblatori.
-- Programmi dell'host compilati dai sorgenti dentro le immagini di Lab64 (versioni e provenienza in `sources.conf` di Lab64, licenze nell'immagine in `/opt/c64/licenses/`).
+- Programmi dell'host compilati dai sorgenti dentro le immagini di Lab64 (versioni e provenienza in `build-scripts/sources.conf` di Lab64, licenze nell'immagine in `/opt/c64/licenses/`).
 - **Open ROMs** (LGPL-3.0+, `roms/open-roms/LICENSE` di Lab64): ROM libere, ripiego di vc64web.

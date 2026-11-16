@@ -37,8 +37,8 @@ si scrivono quelli della feature nuova.
   `regression/gen/gen_ref.json`).
 - **ID**: maiuscoli, `AREA-NN` (`SHOP-01`, `INN-CHEST-01`, `DUNG-CHEST-01`). Numerazione: `01`–`09` smoke, `10`+
   sanity e regression (un test che passa da una suite all'altra conserva il suo ID). Il runner rifiuta ID duplicati.
-- (14/11) **motore e libreria VICE stanno in Lab64**: `test/run.py` di Lab64 (motore), `py/c64test.py` di Lab64 (registro),
-  `py/vicemon.py` di Lab64 (`Vice`). Nel gioco resta solo cio' che e' del gioco; i `cases.py` importano `c64test` e `vicemon` di Lab64 direttamente.
+- (14/11) **motore e libreria VICE stanno in Lab64**: `containers/tools/test/run.py` di Lab64 (motore), `containers/tools/py/c64test.py` di Lab64 (registro),
+  `containers/tools/py/vicemon.py` di Lab64 (`Vice`). Nel gioco resta solo cio' che e' del gioco; i `cases.py` importano `c64test` e `vicemon` di Lab64 direttamente.
 - `tests/lib/c64.py`: libreria del gioco. `Vice` (di Lab64: x64sc in warp con monitor remoto: **nessun tempo fisso**, ogni
   comando aspetta il prompt, `go` aspetta la fermata e ne legge il contatore di cicli), `Game` (il disco, menu,
   partita, `frames(n, joy, fire, keys)` con l'input scritto all'`rts` di `read_input`, `in_game()` dal ritorno nello

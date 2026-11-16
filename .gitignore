@@ -7,3 +7,5 @@ __pycache__/
 monitor.log
 # MP3 di riferimento: fuori dal repository (11/11), vanno inclusi a mano quando si scarica il progetto (CLAUDE.md)
 lab/music/
+# Lab64 (repository a parte) puo' stare dentro la cartella del gioco (es. ~/repos/barbarian/lab64): mai nel repository del gioco
+/lab64/
