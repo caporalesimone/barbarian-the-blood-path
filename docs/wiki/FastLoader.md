@@ -206,6 +206,11 @@ dissolvenza, `TWNc`, modulo MENU, `gfx_install`, brano), **media / massimo su 10
 | `hub`: MENU, `SND0`, `TWN1..5` insieme | 3,92 / 4,81 | 4,51 / 4,98 | 4,16 / 4,37 | 4,62 / 4,97 | 2,60 / 3,75 |
 | **`hubchap`** (scelta): MENU, `SND0`, `TWN1`, `FMAP` insieme; `TWN2..4` e `BOSSCH2/3` con la grafica dei loro capitoli; `TWN5` in fondo | **4,17 / 4,93** | **3,47 / 3,86** | **3,49 / 3,84** | **3,45 / 3,84** | **2,96 / 3,94** |
 
+- **Rimisura del 17/11** (GAME più grande: quest e percorsi dei mostri), tutti i caricamenti di `PERF-DISK` con i 5 ordini (e `hubchap`
+  con `TWN1` prima di `SND0`): nessun ordine porta tutto sotto il 90% dei limiti. `TWN1` (file da solo) misura 1,71–1,86 s **con
+  ogni ordine** (il 15/11 0,68 s); `hubchap` resta il migliore (fuori solo `song` 1,61 s e `twn1` 1,76 s; gli altri ordini
+  sforano anche su grafica dei capitoli, `town_in` o `hdr`). Decisione del committente: limiti alzati alla misura arrotondata
+  per eccesso al mezzo secondo: `song` 2,0 s, `twn1` 2,0 s, `hdr` 1,0 s (aveva misurato fino a 0,91 s).
 - **Decisione (15/11): `hubchap`**, ora predefinita. (15/11 sera) Il blocco entrando nei villaggi con `hub`/`hubchap` (ex TODO A2)
   era un difetto del loader, corretto (sezione 4.1): `hubchap` resta la predefinita, tempi invariati (`PERF-DISK-21..25` passano
   con le stesse soglie). Tenere tutti i villaggi all'inizio del disco (`start`) è la disposizione
