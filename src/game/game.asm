@@ -2555,7 +2555,8 @@ BF_C  = BF_R*BF_W+BF_R          ; casella centrale (il mostro)
 BF_QN = 32                      ; coda circolare (la frontiera di una finestra 13x13 non supera ~26 caselle)
 BFP   = $a500                   ; direzione dal genitore per casella: $ff = non vista, $fd = muro, $fe = partenza
 BFQ   = BFP+BF_N                ; coda
-;@map BFP..BFQ+BF_QN+26 "Ricerca di percorso dei mostri bloccati (mon_path): direzioni, coda e variabili; libera fuori dalla ricerca"
+BF_END = BFQ+BF_QN+26           ; fine delle variabili (26 B, vedi .virtual sotto)
+;@map BFP..BF_END "Ricerca di percorso dei mostri bloccati (mon_path): direzioni, coda e variabili; libera fuori dalla ricerca"
         .virtual BFQ+BF_QN
 pz_wx   .byte ?                 ; origine della finestra sulla mappa (con segno: fuori mappa = muro)
 pz_wy   .byte ?
