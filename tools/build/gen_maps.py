@@ -70,6 +70,7 @@ def main():
         f.write("; generato da tools/build/gen_maps.py: intestazione dei file dei villaggi (TWNc), copiata in town_k\n")
         f.write("TK_LEN = %d\nTK_NAME = %d\nTK_SOLID = %d\nTX_EXIT_N = 2\nNVIL = %d\nNSEC = %d\n" % (TK_LEN, TK_NAME, TK_SOLID, len(V.VILLAGES), NSEC))
     print("villaggi: intestazione + RLE in byte (max %d): %s" % (TOWN_MAX, ", ".join(msg)))
+    print("settori NPC (al massimo in una finestra di gioco; sprite liberi: 5): " + ", ".join("%d: %d (%d)" % (c, n, w) for c, (n, w) in sorted(SEC_REPORT.items())))
 
 
 TOWN_MAX = 0x760                 # intestazione + RLE: fino a GFX_DUN_AT (src/game.asm)
@@ -83,6 +84,9 @@ def text(t):
 
 def rows_of(path):
     return [l.rstrip("\n") for l in open(path) if not l.startswith(";")]
+
+
+SEC_REPORT = {}                  # villaggio -> (settori, massimo in una finestra): lo stampa main()
 
 
 def sectors(c, m, walk):
@@ -100,7 +104,7 @@ def sectors(c, m, walk):
     worst = max(sum(1 for (x, y, w, h) in secs
                     if any(ok(a, b) for a in range(max(x, wx), min(x + w, wx + 21)) for b in range(max(y, wy), min(y + h, wy + 13))))
                 for wx in range(W - 20) for wy in range(H - 12))
-    print("villaggio %d: %d settori NPC, al massimo %d in una finestra di gioco (sprite liberi: 5)" % (c, len(secs), worst))
+    SEC_REPORT[c] = (len(secs), worst)
     out = b"".join(bytes(s) for s in secs)
     return out + bytes(4 * (NSEC - len(secs)))
 

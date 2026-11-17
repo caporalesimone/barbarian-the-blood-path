@@ -79,8 +79,14 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   Si legge a ogni apertura in `$BC00` (lo schermo B del gioco, ridisegnato all'uscita) e si esegue: in GAME restano ~40 B
   (`ui_quest`). Ogni quest ha quindi il suo spazio (fino a ~590 B di testo) e il testo nuovo si carica con la quest. Costo:
   la schermata di attesa a ogni apertura (~0,5 s, non misurato con precisione).
-- **NPC nel villaggio** (`src/game/quest.asm`): figure dell'eroe in altri colori (sprite 3-7, liberi nel villaggio: verificato a
-  runtime, nel villaggio `sh_en` ha solo lo sprite 0 e i 3-7; gli sprite 1 e 2, fendente ed effetto, restano spenti).
+- **NPC nel villaggio** (`src/game/quest.asm`): sprite 3-7 (liberi nel villaggio: verificato a runtime, `sh_en` ha solo lo
+  sprite 0 e i 3-7; gli sprite 1 e 2, fendente ed effetto, restano spenti; il 7 era hires e dal 17/11 è multicolor come gli
+  altri, `SPRMC`). **Disegni** (17/11, committente: prima erano la figura dell'eroe, marrone e grigia, e sul selciato della
+  piazza sembravano trasparenti): 4 disegni visti di fronte, 2 fotogrammi (fermo / passo): *villager*, *woman*, *elder*,
+  *guard* (`tools/build/npc_gfx.py`), negli slot sprite 12-19 (`$A300`), liberi nel villaggio, caricati con il modulo MENU
+  (zona 4, file `MENU4`). Il vestito usa il colore dello sprite. **Colore** (`npc_look`, `src/menu/npc_look.asm`): a caso, ma
+  mai uno dei colori del villaggio (`tk_pal`: sfondo, multicolor 1 e 2, accento) né il 9 e il 15 (multicolor degli sprite).
+  Disegno a caso per i vaganti (`npc_g`); chi dà la quest è la *woman*, a partire dal giallo.
   **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo nella piazza della fontana** (casella `tk_g` dell'intestazione del villaggio, scelta da `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e lontana dalle porte): avvicinandosi
   da qualunque lato compare il suo nome nella barra; **Fire** = quest letta (`c_qst`, salvato con l'eroe: SAVE_VER $C8) e la
   sua pagina. Dopo la prima volta la pagina si riapre con **Q** o con Fire accanto a lui. I luoghi hanno la precedenza (su una
@@ -98,9 +104,9 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   collisione). **Sprite:** i visibili prendono gli sprite 3..7 uno dopo l'altro (`npc_draw`, al massimo 5; il sesto e i
   successivi, in ordine di numero, non si disegnano). Con tanti settori il limite è **morbido**: `gen_maps.py` stampa il
   massimo di settori in una finestra di gioco (21×13 caselle): 9 nel villaggio 1, 6 nei villaggi 2-4, 7 nel 5; in media nella
-  finestra cadono 2-3 NPC. **Memoria:** le tabelle degli NPC (6 byte per NPC) stanno nella tabella della ricerca di percorso dei
-  mostri (`BFP`, `$A500`): nel villaggio non ci sono mostri e `mon_path` la riempie di `$ff` prima di usarla. Aspetto: tutti hanno
-  la figura dell'eroe; il pool è la tabella di 17 colori `npc_col` (uno per NPC).
+  finestra cadono 2-3 NPC. **Memoria:** le tabelle degli NPC (8 byte per NPC) stanno nella tabella della ricerca di percorso dei
+  mostri (`BFP`, `$A500`): nel villaggio non ci sono mostri e `mon_path` la riempie di `$ff` prima di usarla. Aspetto: vedi i disegni
+  sopra (4 disegni, colore per NPC in `npc_c`, tabelle in `BFP` con le altre: 8 byte per NPC).
 - **Lobby**: nella pagina del barbaro, "current quest:" mostra il titolo della quest letta (`quests.inc`).
 - Test: `tests/sanity/quest/cases.py` (QUEST-10..14).
 - **Memoria**: GAME passa a ~505 B di margine sotto `$8720` (avviso della build sotto 1 KB; con le varianti di test, es.

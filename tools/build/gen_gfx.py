@@ -1227,6 +1227,8 @@ def main():
     mons, strong = mon_bytes(chapter_sets()[0][3])           # mostri base (slot 12..19), forti + boss ($8C00): misure
     open(os.path.join(ROOT, "out", "work", "gfx", "fixed_chr.bin"), "wb").write(fixed)
     open(os.path.join(ROOT, "out", "work", "gfx", "spr_core.bin"), "wb").write(core + misc)
+    import npc_gfx                                          # (17/11) NPC del villaggio: slot 12..19, zona 4 del modulo MENU
+    open(os.path.join(ROOT, "out", "work", "gfx", "npc_spr.bin"), "wb").write(b"".join(s for _, _, s in npc_gfx.npc_sprites()))
     prg = lambda addr, data: bytes([addr & 255, addr >> 8]) + data
     ttiles = bytes(b for q in range(4) for c in range(q * 64, q * 64 + NT) for b in tcs[c])        # villaggio: TOWN_TILES
     open(os.path.join(ROOT, "out", "work", "gfx", "gfx0.prg"), "wb").write(prg(GFX_TOWN_AT, ttiles))

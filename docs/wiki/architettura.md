@@ -63,7 +63,7 @@ flowchart LR
 | `HELP` | `src/help.asm` | `$0801` | il manuale (5 pagine) | [Help](help.md) |
 | `GAME` | `src/game.asm` + `src/game/` | `$0400`–`$9FFF` (residente) | il gioco | sotto |
 | `LOBBY` | `src/lobby.asm` | `$C000`–`$CBFF` | menu iniziale: elenco eroi, scheda, nuovo eroe; non resta in partita | [Interfaccia](interfaccia.md) |
-| `MENU1..3` | `src/menu.asm` + `src/menu/` | zone `$C900`, `$F4E0`, `$A700` | menu del villaggio: locanda e negozi, un file per zona; caricati all'ingresso nel villaggio, poi residenti | [Tecnica](tecnica.md#moduli-su-disco) |
+| `MENU1..4` | `src/menu.asm` + `src/menu/` | zone `$C900`, `$F4E0`, `$A700`, `$A300` (sprite degli NPC, 17/11) | menu del villaggio: locanda e negozi, un file per zona; caricati all'ingresso nel villaggio, poi residenti | [Tecnica](tecnica.md#moduli-su-disco) |
 | `JUKEBOX` | `src/jukebox.asm` | `$0801` | prova di brani ed effetti (i brani sono nel programma: non legge i file `SNDn`) | [Musica](musica.md) |
 | dati | `tools/gen_*.py` | — | grafica, mappe, brani, storia, salvataggi | [Build](build.md), [FORMATO_DATI](FORMATO_DATI.md) |
 
@@ -175,6 +175,7 @@ flowchart TB
     subgraph R2["$A000-$BFFF: banco VIC 2"]
         VIC["sprite, charset $A800, schermi A $B400 / B $BC00,<br/>font della UI $B800"]
         Z3["$A700-$A7FF MENU zona 3"]
+        Z4["$A300-$A4FF MENU zona 4: sprite degli NPC (villaggio)"]
     end
     subgraph R3["$C000-$CFFF"]
         MAP["$C000-$C8FF MAP 48x48<br/>(nel menu iniziale: LOBBY fino a $CBFF)"]

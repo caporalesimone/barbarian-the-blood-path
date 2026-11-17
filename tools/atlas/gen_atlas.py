@@ -484,6 +484,23 @@ scr_dir = os.path.join(ROOT, "docs", "screens")
 DATA["menus"] = [dict(file=f, title=MENUS.get(f[:-4], (f[:-4], ""))[0], desc=MENUS.get(f[:-4], ("", "(no description: add it in tools/atlas/gen_atlas.py MENUS)"))[1])
                  for f in sorted(os.listdir(scr_dir)) if f.endswith(".png") and f != "tutti_i_menu.png"]
 DATA["monsters"] = monster_sets()
+
+
+def npc_sprites():
+    """(17/11) sprite degli NPC del villaggio, dal file che legge il C64 (zona 4 del modulo MENU: out/work/menu_z4.prg)"""
+    sys.path.insert(0, os.path.join(ROOT, "tools", "build"))
+    import npc_gfx
+    d = rd("out/work/menu_z4.prg")[2:]
+    out = []
+    for i, (name, fr, _) in enumerate(npc_gfx.npc_sprites()):
+        png = "npc_%d.png" % i
+        if not CHECK:
+            _spr_png(d[i * 64:i * 64 + 63], 6, os.path.join(OUT, "png", png))
+        out.append(dict(name=name, frame=fr, slot=12 + i, png=png))
+    return out
+
+
+DATA["npcs"] = npc_sprites()
 html = html.replace("/*DATA*/null", json.dumps(DATA, separators=(",", ":")))
 html = html.replace("/*TITLE*/null", json.dumps(title_info))
 open(os.path.join(OUT, "index.html"), "w").write(html)

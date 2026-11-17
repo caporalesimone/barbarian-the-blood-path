@@ -5,6 +5,7 @@
 ;    zona 1  MR1_AT $C900 - $CFFF   RAM normale (dopo la mappa; il LOBBY la copre: ovl_cur = 0)
 ;    zona 2  MR2_AT $F4E0 - $FCFF   RAM sotto il KERNAL (dopo la cache del tema; fino all'11/11 posto del precaricamento)
 ;    zona 3  MR3_AT $A700 - $A7FF   RAM del banco VIC 2: slot sprite 28-31, liberi nel gioco
+;    zona 4  MR4_AT $A300 - $A4FF   (17/11) slot sprite 12-19 (mostri nel dungeon): gli sprite degli NPC del villaggio
 ;  Il gioco lo carica all'ingresso nel villaggio (ovl_town, src/game/stash.asm) se non c'e' e poi resta in memoria.
 ;  Tutti i menu girano con $01 = $35 (KERNAL escluso, interruzioni spente, NMI su nmi_stub): il codice della zona 2
 ;  si esegue solo cosi'. Escono con $01 = $36 prima di ui_exit (che riaccende l'IRQ).
@@ -55,5 +56,11 @@ mz2_top
 
         * = MR3_AT
         .include "menu/shop_fix.asm"
+        .include "menu/npc_look.asm"
 mz3_top
         .cerror mz3_top > MR3_END, "modulo MENU: zona 3 oltre $A7FF di ", mz3_top - MR3_END, " B"
+
+        * = MR4_AT              ; (17/11) zona 4: sprite degli NPC (slot 12-19, tools/build/npc_gfx.py), solo dati
+        .binary "../out/work/gfx/npc_spr.bin"
+mz4_top
+        .cerror mz4_top != SPR_DATA+20*64, "modulo MENU: zona 4 = 8 sprite degli NPC"

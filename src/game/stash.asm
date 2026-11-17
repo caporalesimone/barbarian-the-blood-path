@@ -34,7 +34,11 @@ MR2_AT  = GFX_DUN_END           ; zona 2: dopo la cache del tema ($F4E0), sotto 
 MR2_END = PF_END                ; ($FD00: FMAP)
 MR3_AT  = $a700                 ; zona 3: slot sprite 28-31 del banco VIC 2, liberi nel gioco (mappa automatica: out/work/memory-map/program-game.html)
 MR3_END = $a800                 ; (charset del gioco)
-MPARTS  = 3
+MR4_AT  = SPR_DATA+12*64        ; (17/11) zona 4: slot sprite 12-19 ($A300-$A4FF), mostri del tema nel dungeon (ricopiati da
+MR4_END = SPR_DATA+20*64+16     ; gfx_install a ogni ingresso), liberi nel villaggio: gli sprite degli NPC (tools/build/npc_gfx.py).
+                                ; +16 B: margine della decompressione sul posto (ZX0), nei primi byte di BFP (tabelle degli NPC,
+                                ; scritte da npc_init dopo il caricamento)
+MPARTS  = 4
 OVL_AT  = MR1_AT                ; tabella dei salti del modulo (src/menu.asm)
 MENU_INN  = OVL_AT              ; locanda
 MENU_SHOP = OVL_AT+3            ; negozio A (0 fabbro, 1 alchimista) (jsr mk_off + jmp enter_shop: 6 B)
@@ -63,7 +67,7 @@ _p      stx ml_i
 _t      txa
         lsr
         clc
-        adc #$31                ; "1".."3"
+        adc #$31                ; "1".."4"
         sta cmdbuf+7
         jsr load_file           ; all'indirizzo del file (fondo della zona)
         ldx ml_i
@@ -123,8 +127,8 @@ _r      lda #0
         sta io_quiet
         sec
         rts
-ml_end  .word MR1_END, MR2_END, MR3_END   ; (pack_menu.py: indirizzo di ogni file = fine zona - lunghezza)
-ml_dst  .word MR1_AT, MR2_AT, MR3_AT
+ml_end  .word MR1_END, MR2_END, MR3_END, MR4_END   ; (pack_menu.py: indirizzo di ogni file = fine zona - lunghezza)
+ml_dst  .word MR1_AT, MR2_AT, MR3_AT, MR4_AT
 
 ZX_ZP   = $50                   ; 12 byte della pagina zero del BASIC, liberi nel gioco (come in START, boot.asm)
         .include "zx0.inc"

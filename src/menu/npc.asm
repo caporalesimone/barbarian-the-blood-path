@@ -54,6 +54,7 @@ _put    lda tx                  ; casella -> pixel (centro)
         sta npc_yl,x
         tya
         sta npc_yh,x
+        jsr npc_look            ; (17/11) disegno e colore (zona 3, npc_look.asm)
         cpx #0
         bne _nx
         lda tx

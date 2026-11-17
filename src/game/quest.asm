@@ -22,6 +22,8 @@ npc_yl  .fill NPC_N
 npc_yh  .fill NPC_N
 npc_d   .fill NPC_N             ; direzione (0 +x, 1 -x, 2 +y, 3 -y)
 npc_mv  .fill NPC_N             ; pixel di cammino rimasti (0 = fermo)
+npc_g   .fill NPC_N             ; (17/11) disegno: 0..3 (tools/build/npc_gfx.py, slot 12-19)
+npc_c   .fill NPC_N             ; (17/11) colore del vestito, diverso dai colori del villaggio (npc_look, src/menu/npc_look.asm)
 npc_tend
         .endv
         .cerror npc_tend > BFQ, "tabelle degli NPC oltre BFP (169 B)"
@@ -322,9 +324,9 @@ _l      stx npc_k
         ora bitmask,x
         sta bs_en
         ldy npc_k
-        lda npc_col,y
+        lda npc_c,y
         sta sh_col,x
-        lda npc_d,y             ; figura dell'eroe nella sua direzione; passo animato mentre cammina
+        lda npc_g,y             ; (17/11) il suo disegno, visto di fronte; passo animato mentre cammina
         asl
         sta tmp7
         lda npc_mv,y
@@ -336,7 +338,7 @@ _l      stx npc_k
         and #1
 +       ora tmp7
         clc
-        adc #$80
+        adc #(MR4_AT-$8000)/64  ; slot 12 ($8C)
         sta sh_ptr,x
         inc npc_s
         lda npc_s
@@ -347,5 +349,3 @@ _n      ldx npc_k
         cpx #NPC_N
         bne _l
 _e      rts
-npc_col .byte 7, 5, 14, 15, 13, 3, 2, 4, 8, 6, 9, 11, 12, 1, 5, 14, 15   ; colori (pool): 0 = chi da' la quest, poi uno per settore
-        .cerror * - npc_col != NPC_N, "npc_col: un colore per NPC"

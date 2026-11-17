@@ -14,7 +14,7 @@ HARD = {"town", "menu", "stairs", "save_dng", "save_char"}
 # limits in seconds (11/11, measured values in the comments)
 LIM = {
     "boot": 16.0,         # START from the monitor -> barbarian menu (install, GAME 25 KB + ZX0 unpacking ~4 s, LOBBY, hl): 13.4 s
-    "menu": 3.1,          # ovl_town: MENU1..3 + unpacking: 1.98 s with 30 files on the disk, 2.97 s with 36 (8 GFX files); limit = measured + 0.1 (12/11)
+    "menu": 3.1,          # ovl_town: MENU1..4 + unpacking: 1.98 s with 30 files on the disk, 2.97 s with 36 (8 GFX files); limit = measured + 0.1 (12/11)
     "town": 1.5,          # load_gfx 0: the village (GFX0, 3 KB): 1.10-1.31 s; threshold of the owner (12/11)
     "theme": 1.5,         # load_gfx 1: a dungeon theme (GFX1, 2 KB): 0.98 s; 1.34 s on 12/11 (42 files on the disk: TWN1-4, BOSSCH1-3)
     "song": 2.0,          # (17/11, owner: measure rounded up to the half second; layouts tried: none better) 1.61 s; snd_get: SND0 right after the theme GFX1, a sequence the game never does (15/11: with the

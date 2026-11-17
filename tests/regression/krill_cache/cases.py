@@ -91,7 +91,7 @@ def guard_menu(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["ovl_cur"], 0)
     r, n = count_loads(g, L["ovl_town"])
-    check(n == 3 and r["c"] == 0 and g.b(L["ovl_cur"]) == 1, "right ends: %d reads, C = %d" % (n, r["c"]))
+    check(n == 4 and r["c"] == 0 and g.b(L["ovl_cur"]) == 1, "right ends: %d reads (expected 4: menu1..4), C = %d" % (n, r["c"]))
     a = L["ml_end"] + 4
     lo = g.b(a)
     g.poke(a, lo + 1)
@@ -103,7 +103,7 @@ def guard_menu(ctx):
     check(n == 5 and r["c"] == 1 and g.b(L["ovl_cur"]) == 0, "wrong end of menu3: %d reads (expected 5), C = %d" % (n, r["c"]))
     g.poke(L["ovl_cur"], 0)
     r, n = count_loads(g, L["ovl_town"])
-    check(n == 3 and r["c"] == 0, "module read again: %d reads, C = %d" % (n, r["c"]))
+    check(n == 4 and r["c"] == 0, "module read again: %d reads, C = %d" % (n, r["c"]))
 
 
 @test("KRILL-23", "every file of the disk loaded right after its predecessor in the directory (served from the drive's next-file cache) equals its file: bytes and end address")

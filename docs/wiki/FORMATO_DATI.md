@@ -199,22 +199,23 @@ Tre varianti dello stesso codice (07/11; la catena dei programmi è in [Avvio e 
 
 ### `MENU` — menu del villaggio (locanda e negozi)
 Dall'11/11 (TODO D13): sostituisce i file `OVLT` e `OVL2`; dalla v1.21x contiene anche i negozi. Un file per tutti i
-villaggi. `src/menu.asm` è assemblato in tre zone di RAM (le parti in `src/menu/`):
+villaggi. `src/menu.asm` è assemblato in quattro zone di RAM (le parti in `src/menu/`):
 
 | Zona | Indirizzi | Contenuto (oggi) |
 |---|---|---|
 | 1 | `MR1_AT` `$C900`–`$CFFF` (RAM normale; il LOBBY la copre) | tabella dei salti (`MENU_INN` = `$C900`, `MENU_SHOP` = `$C903`), `mk_off`/`mk_exit`, locanda (`menu/inn.asm`), negozi: comprare e vendere (`menu/shop_act.asm`) |
 | 2 | `MR2_AT` `$F4E0`–`$FCFF` (RAM sotto il KERNAL, dopo la cache del tema) | locanda: scelta dell'equipaggiamento (`menu/inn_eq.asm`), negozi: schermata e cursore (`menu/shop.asm`) |
-| 3 | `MR3_AT` `$A700`–`$A7FF` (slot sprite 28–31, liberi nel gioco) | negozi: riparazione e tetto dell'oro (`menu/shop_fix.asm`) |
+| 3 | `MR3_AT` `$A700`–`$A7FF` (slot sprite 28–31, liberi nel gioco) | negozi: riparazione e tetto dell'oro (`menu/shop_fix.asm`); aspetto degli NPC (`menu/npc_look.asm`, 17/11) |
+| 4 | `MR4_AT` `$A300`–`$A4FF` (+16 B di margine della decompressione in `BFP`; slot sprite 12–19: mostri del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (17/11) sprite degli NPC del villaggio: 4 disegni × 2 fotogrammi (`tools/build/npc_gfx.py`), solo dati |
 
-File `MENU1`..`MENU3` (11/11, Krill): una zona compressa ZX0 per file; l'indirizzo di caricamento del file è
+File `MENU1`..`MENU4` (11/11, Krill; il quarto dal 17/11): una zona compressa ZX0 per file; l'indirizzo di caricamento del file è
 **fine della zona − lunghezza compressa**. Il gioco (`ovl_town`, `src/game/stash.asm`) li legge all'**ingresso nel
 villaggio** se `ovl_cur` = 0 (lo azzerano `game_start` e il caricamento del LOBBY) con `load_file` (indirizzo del
 file); Krill lascia l'inizio in `krill_loadaddrlo/hi` (`ml_src`), poi ogni zona si decomprime sul posto all'inizio
-(`ml_dst`; `$01 = $35`, interruzioni spente, NMI su `nmi_stub`). Niente altro scrive nelle tre zone: il modulo resta
-fino al prossimo LOBBY. `pack_menu.py` verifica la decompressione sul posto (64 KB simulati) e che ogni zona stia nel
-suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi: zona 1 1622 → 1378 B, zona 2
-2071 → 1678 B, zona 3 163 → 161 B (14 blocchi in tutto). Spazio libero: zona 1 170 B, zona 2 9 B, zona 3 93 B (la
+(`ml_dst`; `$01 = $35`, interruzioni spente, NMI su `nmi_stub`). Niente altro scrive nelle zone 1-3: il modulo resta
+fino al prossimo LOBBY (la zona 4 la ricopre il tema all'ingresso nel dungeon, il villaggio la rilegge sempre: `ovl_cur` = 0 in `enter_gfx`). `pack_menu.py` verifica la decompressione sul posto (64 KB simulati) e che ogni zona stia nel
+suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (17/11): zona 1 1741 → 1482 B, zona 2
+2061 → 1677 B, zona 3 231 → 226 B, zona 4 512 → 183 B (15 blocchi in tutto). Spazio libero: zona 1 51 B, zona 2 19 B, zona 3 25 B (la
 build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
 
 ### Compressione (ZX0)

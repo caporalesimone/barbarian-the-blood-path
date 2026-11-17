@@ -1,6 +1,6 @@
 """Every load of a scripted walk through all the chapters equals its file (15/11, ex TODO A2, docs/wiki/FastLoader.md 4.1): new hero,
 then for each chapter: crypt, stairs down, up and back to the village, all the levels down to the boss level (chapters
-1-3: BOSSCHc; chapter 4: the throne room, FMAP), the boss beaten (chap_won), back to the village (TWNc, MENU1..3, SND0),
+1-3: BOSSCHc; chapter 4: the throne room, FMAP), the boss beaten (chap_won), back to the village (TWNc, MENU1..4, SND0),
 a save (KSAVE, the hero file), the travel to the next village (chap_travel: TWNc, save); at the end the LOBBY. Every
 krill_loadraw is stopped and checked when it returns (tests/lib/loads.py, LoadCheck): bytes in RAM and end address equal to
 the file on the disk (hl and save-0N: length only, the plugin rewrites them). One VICE session."""
@@ -33,7 +33,7 @@ def walk(ctx):
         lv(f); lv(f + 1); lv(f, 1); lv(0)             # crypt, stairs down, stairs up, back to the village
         for n in range(f, f + 5): lv(n)               # down to the boss level (chapter 4: the throne room)
         lc.call(L["chap_won"])
-        lv(0)                                         # village of the chapter: TWNc, MENU1..3, SND0
+        lv(0)                                         # village of the chapter: TWNc, MENU1..4, SND0
         lc.call(L["save_char"])                       # KSAVE, hero file read and rewritten, village read again
         lc.call(L["chap_travel"])                     # next village (save of hero and levels)
     check(g.b(L["c_chap"]) == 5, "village 5 expected, c_chap %d" % g.b(L["c_chap"]))

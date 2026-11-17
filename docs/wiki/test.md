@@ -365,7 +365,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `VIL-MENU-11` | after level 1 and back (the module MENU is read again at the village entry): inn and smith without further reads |
 | `FOUNT-10` | fountain: walking on it heals to full hp |
 | `INN-GOLD-11` | inn: Fire on the chest gold row does nothing (no withdrawal since 10/11), the screen stays open |
-| `MENU-10` | out/work/menu1..3.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2 |
+| `MENU-10` | out/work/menu1..4.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2 |
 | `MENU-11` | ovl_town from the disk (as at the village entry): the 3 zones equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
 | `VIL-TWN-11` | village 1 (Aldric's Crossing): header in town_k, solid tiles, colours, map, hero at the entry |

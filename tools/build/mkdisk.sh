@@ -38,7 +38,7 @@ command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container la
 # in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s.
 # I file caricati dal KERNAL (BARBARIAN, START, LORE, HELP) misurati con LOAD: stessi tempi con 10 e con 4 (entro 0,1 s).
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
-      -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg)
+      -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg -f menu4 -w out/work/menu4.prg)
 HUB=0; case $TWN_LAYOUT in hub|hubchap) HUB=1;; esac     # HUB=1: il brano del villaggio (SND0) e i villaggi subito dopo MENU1..3
 [ $HUB = 1 ] && ARGS+=(-f snd0 -w out/work/snd/snd0.prg -f twn1 -w out/work/twn1.prg)
 [ $TWN_LAYOUT = hub ] && ARGS+=(-f twn2 -w out/work/twn2.prg -f twn3 -w out/work/twn3.prg -f twn4 -w out/work/twn4.prg -f twn5 -w out/work/twn5.prg)
