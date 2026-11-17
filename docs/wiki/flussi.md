@@ -111,7 +111,7 @@ stateDiagram-v2
     P0: fase 0, riga 209<br/>schermo HUD $8400, 24 righe
     P1: fase 1, riga 217<br/>multicolor, 38 colonne, sfondo nero
     P2: fase 2, riga 250 (fine HUD)<br/>registri del campo di gioco<br/>dall'ultimo apply_frame
-    P3: fase 3, riga IRQ_BAR = 70<br/>(solo con la barra in alto)
+    P3: fase 3, riga IRQ_BAR = 76<br/>(solo con la barra in alto)
     P0 --> P1
     P1 --> P2
     P2 --> P0: senza barra:<br/>spr_copy + sfx_update

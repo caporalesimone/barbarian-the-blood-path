@@ -11,6 +11,11 @@ Dal 13/11/2026 il progetto include **vc64web** (VirtualC64 compilato in WebAssem
 2. fare ciò che con VICE è scomodo: **un bot che gioca dal disco vero**, video con audio e comandi a schermo, lettura del testo
    a schermo, misure ripetibili dalla riga di comando.
 
+**Dump della memoria** (17/11, Lab64 1.15): nella pagina portabile, sezione della memoria, **Memory dump** salva
+`c64-memdump-<data>.bin` (64 KB di RAM, color RAM, registri del VIC, banco VIC; formato in Lab64 `docs/viewer.md`). Un dump
+fatto durante un problema (un glitch grafico, un valore sbagliato) si legge con le etichette del gioco (`out/work/game.lbl`
+della stessa versione): passarlo insieme al numero di versione del disco.
+
 I numeri ottenuti qui (cicli, durate) **non sono misure del gioco**: si confermano in VICE prima di prendere una decisione.
 La precisione di questo core rispetto a VICE non è stata confrontata ciclo per ciclo [NON VERIFICATO]: l'unica prova è che il
 gioco parte e si gioca (test `EMU-10..16`).

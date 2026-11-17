@@ -5,7 +5,10 @@
 BARSPR     = $8800              ; 8 sprite x 64 byte, visibili al VIC (banco 2)
 BARPTR     = (BARSPR - $8000) / 64
 BAR_Y      = 55
-IRQ_BAR    = 70
+IRQ_BAR    = 76                 ; (17/11, era 70) cambio sprite barra -> gioco DOPO l'ultima riga degli sprite della barra
+                                ; (righe 56-76): uno sprite gia' acceso continua anche se lo si spegne, e con 70 le sue ultime
+                                ; righe si disegnavano con puntatore, colore e X di gioco (puntini sotto il nome dei negozi e sotto
+                                ; la barra della vita dei mostri, a destra: sprite 7, puntatore 0 = $8000, colore 0)
 
         .virtual $91a8
 li_t       .byte ?              ; tile sotto il giocatore (loc_id)
