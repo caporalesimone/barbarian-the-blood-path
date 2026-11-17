@@ -4,15 +4,15 @@
 Gira nel container lab64-pdf-gen di Lab64 (WeasyPrint; l'ombra del titolo in copertina non c'e' perche' WeasyPrint ignora
 text-shadow). Dall'host: ./build.sh --manual (o lab64 manual, C64_MANUAL in lab64.env).
 
-Sorgente editabile: docs/manual/manuale_src.html. Stile (15/11): il tema base "c64" di Lab64 (containers/pdf-gen/themes/c64.css) +
-docs/manual/tema.css (solo le regole del gioco). Questo script fa le parti del gioco:
-  1. ritaglia gli screenshot grezzi (docs/manual/shots/*.png) in out/work/manual/img/*.png (area utile 320x200 senza bordo);
+Sorgente editabile: manual/manuale_src.html. Stile (15/11): il tema base "c64" di Lab64 (containers/pdf-gen/themes/c64.css) +
+manual/tema.css (solo le regole del gioco). Questo script fa le parti del gioco:
+  1. ritaglia gli screenshot grezzi (manual/shots/*.png) in out/work/manual/img/*.png (area utile 320x200 senza bordo);
   1b. la mappa del mondo (fan art, tools/art/world_map.py, Pillow, deterministica) si genera qui, nello stesso container:
      out/work/art/world_map*.png poi out/work/manual/img/world_map.png (480x300, ingrandita a scatti dal CSS: pixel nitidi); non e' in git;
   2. prepara i dati di data/rules.yaml e data/balance.yaml per i segnaposto {{MONSTER_ROWS}} {{STEP_HDR}} {{MIN_ROW}} {{MAX_ROW}};
   3. il resto lo fa c64manual.build di Lab64: segnaposto, tema, tasti <kbd> disegnati, numeri di pagina, manuale.html, PDF
      (WeasyPrint) e avviso per le pagine che traboccano.
-Screenshot: tools/vice/shots_manual.sh (la schermata del nuovo barbaro: variante TESTUI 31); sprite mostri: docs/manual/mon.
+Screenshot: tools/vice/shots_manual.sh (la schermata del nuovo barbaro: variante TESTUI 31); sprite mostri: manual/mon.
 Lingue (11/11; 15/11 tutte nella stessa build): senza --lang fa TUTTI i manuali che hanno il sorgente; --lang it|en uno solo.
 it: manuale_src.html -> manuale.html + Barbarian_Blood_Path_Manuale.pdf; en: manual_src_en.html -> manual_en.html +
 Barbarian_Blood_Path_Manual_EN.pdf (il sorgente inglese non e' ancora scritto: TODO E7). Le parti generate (tabella dei mostri)
@@ -24,7 +24,7 @@ from PIL import Image
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 R = os.path.join(ROOT, "out", "work", "manual")          # (13/11) tutto cio' che genera: HTML, ritagli, PDF
-M = os.path.join(ROOT, "docs", "manual")         # (11/11) sorgente del manuale in docs/manual/
+M = os.path.join(ROOT, "manual")         # (11/11) sorgente del manuale in manual/
 sys.path.insert(0, os.path.join(ROOT, "tools", "build"))
 import bestiary  # noqa: E402
 Y = bestiary.load_balance()       # balance.yaml + mostri (data/monsters/bestiary.tsv, 11/11)
@@ -39,7 +39,7 @@ LANG = sys.argv[sys.argv.index("--lang") + 1]
 assert LANG in ("it", "en"), "--lang it|en"
 SRC, OUT, PDF = SOURCES[LANG]
 if not os.path.exists(os.path.join(M, SRC)):
-    sys.exit("manual source docs/manual/%s missing (the English manual is a TODO)" % SRC)
+    sys.exit("manual source manual/%s missing (the English manual is a TODO)" % SRC)
 W = {"it": {"base": "base", "strong": "forte", "final": "boss finale", "dpf": "dadi/piano", 5: "lenta", 7: "media",
             8: "normale", 9: "veloce"},
      "en": {"base": "base", "strong": "strong", "final": "final boss", "dpf": "dice/level", 5: "slow", 7: "medium",
@@ -94,7 +94,7 @@ for g in range(1, nst + 1):
     hdr += f"<th>{fl[0]}–{fl[-1]}</th>" if len(fl) > 1 else f"<th>{fl[0]}</th>"
 
 # ------------------------------------------------------------------ 3. manuale (Lab64: tema, tasti, numeri di pagina, PDF)
-from c64manual import build  # noqa: E402  (Lab64, container lab64-pdf-gen; tema base "c64" + docs/manual/tema.css)
+from c64manual import build  # noqa: E402  (Lab64, container lab64-pdf-gen; tema base "c64" + manual/tema.css)
 hp, pdf, n = build(os.path.join(M, SRC), out_dir=R, pdf_name=PDF, html_name=OUT, theme=os.path.join(M, "tema.css"),
                    values={"MONSTER_ROWS": rows, "STEP_HDR": hdr, "MIN_ROW": cells(mn), "MAX_ROW": cells(mx)},
                    html_only="--html" in sys.argv, strict="--strict" in sys.argv)

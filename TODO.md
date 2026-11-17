@@ -27,7 +27,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
 | 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
-| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14, J15 |
+| 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J3, J2, J1 |
 | Z | [Note urgenti](#z--note-urgenti) | Z4 |
 
@@ -128,12 +128,12 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
   of Dawn) ed eventualmente i temi dei boss dei capitoli (oggi il piano del boss usa il tema del capitolo).
 
 ### E6 (ex 2.8) Revisione completa del manuale e dell'help prima della prossima release — M
-- Rilettura di `docs/manual/manuale_src.html`, `data/help.txt` (`gen_help.py --snap` se cambia l'HUD), screenshot
+- Rilettura di `manual/manuale_src.html`, `data/help.txt` (`gen_help.py --snap` se cambia l'HUD), screenshot
   (`tools/vice/shots_manual.sh`); impaginazione (pagine mezze vuote dopo il 09/11); figura della morte in pagina 7.
 - (15/11) Il generatore (Lab64) segnala le pagine che traboccano; in `--release` e' un errore (`lab64 manual --strict`).
 
 ### E7 (11/11) Manuale in inglese, oltre all'italiano — M
-- `tools/manual/gen_manual.py --lang en` è pronto (sorgente `docs/manual/manual_src_en.html`, PDF
+- `tools/manual/gen_manual.py --lang en` è pronto (sorgente `manual/manual_src_en.html`, PDF
   `Barbarian_Blood_Path_Manual_EN.pdf`; le parti generate hanno già le parole nelle due lingue; dal 15/11 la build fa da sola tutti
   i manuali che hanno il sorgente e li pubblica): **manca il sorgente
   inglese** (traduzione di `manuale_src.html`, stesso impaginato e stessi segnaposto). Prima di una release pubblica; poi
@@ -458,13 +458,6 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 - Oggi le versioni stanno solo in `out/releases/` (ultime 5, locale). Per GitHub: asset del tag `v<V>` (disco, manuale,
   `manifest.json` con gli SHA-256) invece di conservarle in locale; niente zip dei sorgenti (regola del committente 14/11: lo
   da' gia' il tag). Da decidere con il passaggio a GitHub.
-
-### J15 (17/11) Spostare il manuale fuori da `docs/` in una cartella sua — S
-- Oggi il sorgente del manuale sta in `docs/manual/` (`manuale_src.html`, `tema.css`, `mon/`, `shots/`), mischiato alla
-  documentazione scritta. Obiettivo: una cartella di primo livello (es. `manual/`), cosi' `docs/` resta solo la wiki.
-- Da aggiornare: `tools/manual/gen_manual.py` (riga con `"docs", "manual"`), `tests/smoke/build/cases.py` (stesso percorso),
-  `tools/vice/shots_manual.sh`, `CLAUDE.md`, `README.md` (tabella Structure), `docs/getting-started.md`, `docs/wiki/*.md`
-  che citano `docs/manual/`. Dopo lo spostamento: `./build.sh --manual` e smoke verdi.
 
 ---
 

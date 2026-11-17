@@ -51,7 +51,8 @@ Game version and save format version: `version.yaml`.
 | Folder | Contents |
 |---|---|
 | `data/` | source data (rules and balancing, village map, texts, title image, atlas groups) |
-| `docs/` | `getting-started.md` and `index.md` (the game's wiki index), `wiki/` the wiki pages, `manual/` manual source, `screens/` menu screenshots |
+| `docs/` | `getting-started.md` and `index.md` (the game's wiki index), `wiki/` the wiki pages, `screens/` menu screenshots |
+| `manual/` | manual source (`manuale_src.html`, `tema.css`, `mon/`, `shots/`) |
 | `lab/` | study material, not used by the build ([lab/README.md](lab/README.md)) |
 | `lab64.env` | Lab64 configuration for the game |
 | `out/` | everything that is generated (not in git): `releases/v<version>/` (last 5: disk, atlas, maps, manual, test reports), `work/` (intermediates of the current build), `cache/` (reusable), `tmp/` (throwaway) |

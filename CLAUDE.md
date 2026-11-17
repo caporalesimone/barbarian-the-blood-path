@@ -78,14 +78,14 @@ becomes a test in `tests/`, it does not stay in `tools/`.
   code runs), `docs/wiki/build.md` (pipeline) and `docs/getting-started.md` (build and tests, containers) are updated in the same work when
   a module, a flow, memory, an interrupt, the build or the tests change.
 - Generated documents (in `out/work/`, published in `out/releases/`): RAM and disk maps (`lab64 map` from the listings, the disk and the `@map` / `@free` / `@scenario` annotations in the sources: [docs/wiki/build.md](docs/wiki/build.md) section 4a), graphics atlas (`tools/atlas/`,
-  rules in `src/CLAUDE.md`), manual (`tools/manual/`, source in `docs/manual/`), simulator reports. If what they
+  rules in `src/CLAUDE.md`), manual (`tools/manual/`, source in `manual/`), simulator reports. If what they
   describe changes, the generators are updated.
 - `docs/wiki/FORMATO_DATI.md`: exact format of the files on disk and of the saves; update it together with `SAVE_VER`.
 - **Menu screenshots** (08/11, owner's rule): kept **in git** in `docs/screens/` (one per screen +
   mosaic `tutti_i_menu.png`; 13/11: they stay versioned). Only the changed ones are redone:
   `lab64 run tools/vice/shots_menus.sh inventario locanda ...` (no names: all), the mosaic regenerates itself.
 - **Manual**: PDF with WeasyPrint in the `lab64-pdf-gen` container (`./build.sh --manual` or `lab64 manual`, `tools/manual/gen_manual.py`):
-  (15/11) Lab64's base "c64" theme (page, colors, keys, page numbers) + `docs/manual/tema.css` (only the game's rules);
+  (15/11) Lab64's base "c64" theme (page, colors, keys, page numbers) + `manual/tema.css` (only the game's rules);
   the build makes **all the manuals that have a source** (today Italian; English when `manual_src_en.html` exists), a page
   that overflows is a warning, in `--release` an error.
   **Cover** always with the dungeons' **red theme** (palette 4): `dungeon` screenshot in `tools/vice/shots_manual.sh` (floor 8

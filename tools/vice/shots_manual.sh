@@ -1,8 +1,8 @@
 #!/bin/bash
-# genera gli screenshot del manuale in docs/manual/shots (build di test + VICE); poi tools/manual/gen_manual.py
+# genera gli screenshot del manuale in manual/shots (build di test + VICE); poi tools/manual/gen_manual.py
 # (menu, nuovo barbaro e morte dalle varianti TESTUI 30-32, come tools/vice/shots_menus.sh, 09/11)
 source "$(dirname "${BASH_SOURCE[0]}")/vice_env.sh"
-cd "$ROOT"; D=docs/manual/shots; mkdir -p $D
+cd "$ROOT"; D=manual/shots; mkdir -p $D
 one(){ # nome secondi[:live] VAR=..
   n=$1; sec=${2%%:*}; mode=; [[ $2 == *:live ]] && mode=live; shift 2
   # villaggio: il PG deve stare su una casella percorribile (regola del committente, 06/11)

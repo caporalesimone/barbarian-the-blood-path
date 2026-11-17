@@ -37,7 +37,8 @@ tutto sta nei container o nel progetto. Su Windows si lavora **dentro WSL2**, co
 | `tools/atlas/`, `tools/manual/`, `tools/simulators/` | generatori dei documenti riproducibili e simulatori; scrivono in `out/work/<nome>/` | sì |
 | `tools/vice/`, `tools/font/` | strumenti che girano in VICE (screenshot, misure, arena); sorgenti del font della UI | sì |
 | `tests/` | `smoke/`, `sanity/`, `regression/`, libreria `lib/`, `run_tests.sh` (suite della build); motore: `lab64 test` | sì |
-| `docs/` | documentazione **scritta** (wiki), sorgente del manuale (`docs/manual/`), screenshot dei menu (`docs/screens/`) | sì |
+| `docs/` | documentazione **scritta** (wiki), screenshot dei menu (`docs/screens/`) | sì |
+| `manual/` | sorgente del manuale (`manuale_src.html`, `tema.css`, `mon/`, `shots/`) | sì |
 | Lab64 (fuori dal progetto) | **Lab64, la toolchain C64 generica** (14/11: **repository a parte**, usato solo con il comando `lab64` nel PATH; non sa nulla del gioco; documentazione in inglese: `README.md` e `docs/` di Lab64): `docker/Dockerfile` (immagini `lab64-*`, multi-stage), script `cli/run.sh`, `build-scripts/build-images.sh`, `cli/check_env.sh`; programmi esterni `vice/`, `zx0/`, `cc1541/` (compilati dentro le immagini); `containers/vc64web/` (emulatore secondario, autonomo); `roms/` (ROM del C64: `vice-roms/{C64,DRIVES}/`, `open-roms/`, elenco in `roms.md`); `containers/tools/memmap/` (mappa automatica) | nel **suo** repository |
 | `lab64.env` | configurazione di Lab64 per il gioco: variabili passate ai container, immagini del gioco, disco proposto dal viewer | sì |
 | `lab/` | materiale di studio che la build non usa ([lab/README.md](../lab/README.md)) | sì, tranne `lab/music/` |
