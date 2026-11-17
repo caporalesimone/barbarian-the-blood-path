@@ -74,9 +74,10 @@ leggere il brano (1–2 blocchi) aggiunge ~1,5 s. Il brano cambia a ogni piano, 
 - `music_request` (A = 0 silenzio, `MUS_LVL`, `MUS_FIGHT`; X = velocità): il cambio avviene con un **rilascio
   naturale** (gate spento e release 8 o 9 su tutte le voci, `sp_release`) di 16 × X fotogrammi, poi parte il brano
   nuovo.
-- **Combattimento** (06/11 sera, richiesta del committente): il motivetto parte **solo** a contatto con un mostro
-  forte (variante, `mtype` > `N_BASE`) o un boss con nome (`mon_named`); una volta acceso **lo tiene qualsiasi
-  mostro** a contatto; si spegne `CMB_HOLD` = 150 × 4 fotogrammi (**12 s**) dopo l'ultimo contatto e riprende il
+- **Combattimento** (17/11, richiesta del committente; prima: mostri forti a contatto, 12 s di isteresi): il motivetto
+  parte **solo quando un boss con nome compare sullo schermo** (`mon_named`: il boss finale ha il suo brano ed è escluso) e
+  **resta finché il boss è sullo schermo**: `build_sprites` scrive `mus_cmb` a ogni fotogramma in cui lo sprite del boss è
+  visibile; si spegne `CMB_HOLD` = 25 × 4 fotogrammi (**2 s**) dopo che il boss è uscito dallo schermo o è morto e riprende il
   brano del luogo **dal punto in cui era** (`sp_save` / `sp_resume`; la nota interrotta si perde). La fine del
   combattimento per i bauli in coda (`drops_tick`) usa un contatore a parte (`cmb_t`, 100 fotogrammi, ogni mostro).
 - **A tempo**: `sfx_update` (effetti + `music_update`) gira nell'IRQ di fine HUD (riga 250, `hud.asm`), una volta

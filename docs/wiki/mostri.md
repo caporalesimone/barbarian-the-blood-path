@@ -128,7 +128,7 @@ stateDiagram-v2
   varchi anche non allineati. `tests/regression/monsters/test_ai.py`.
 - I mostri **non entrano nella casella del PG**: si fermano sulla casella adiacente e da lì colpiscono.
 - **Attacco** a contatto (`mon_attack`) ogni 45 fotogrammi (`MON_ATK_T`): regole in
-  [Combattimento](combattimento.md). Un mostro forte o un boss con nome a contatto attiva il tema musicale di combattimento; acceso, lo tiene qualsiasi mostro ([Musica](musica.md)).
+  [Combattimento](combattimento.md). Il tema musicale di combattimento suona solo mentre un boss con nome è sullo schermo ([Musica](musica.md)).
 - Stordimento (`mstun`) e ricarica dell'attacco (`mcd`) scendono di 2 a fotogrammi alterni.
 
 ## Morte di un mostro (`kill_monster`)

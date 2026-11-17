@@ -2382,17 +2382,8 @@ _contact lda m_adx              ; i mostri non entrano nella casella del PG: si 
         cmp #20
         bcs _next
         lda #CMB_DROP           ; mostro a contatto: combattimento in corso (bauli in coda: drops_tick)
-        sta cmb_t
-        lda mus_inc             ; tema di combattimento: lo accende solo un mostro forte o un boss con nome;
-        bne _mh                 ; una volta acceso lo tiene qualsiasi mostro a contatto (isteresi lunga)
-        lda mtype,x
-        cmp #N_BASE+1
-        bcs _mh
-        jsr mon_named
-        bcc _mn
-_mh     lda #CMB_HOLD
-        sta mus_cmb
-_mn     lda mcd,x
+        sta cmb_t               ; (17/11) il tema di combattimento non dipende piu' dai contatti: solo dal boss sullo schermo
+        lda mcd,x
         bne _next
         lda #MON_ATK_T
         sta mcd,x
@@ -3973,6 +3964,12 @@ _ml     ldx bs_m
         lda bs_en
         ora bitmask,x
         sta bs_en
+        ldx bs_m                ; (17/11) boss con nome sullo schermo: tema di combattimento (finche' resta sullo schermo,
+        jsr mon_named           ; poi CMB_HOLD x 4 frame). Il boss finale ha il suo brano (mon_named lo esclude)
+        bcc +
+        lda #CMB_HOLD
+        sta mus_cmb
++       ldx bs_slot
         ldy bs_m
         lda mtype,y
         tay

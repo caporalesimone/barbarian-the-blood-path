@@ -14,11 +14,12 @@
 ;    music_town / music_dungeon  scelta e caricamento dei brani del luogo (a ogni cambio di luogo)
 ;    music_update   una volta per frame (da sfx_update: in gioco dall'IRQ di fine HUD, nelle schermate da ui_input):
 ;                   dissolvenza, brano e tema di combattimento
-;  Il tema di combattimento parte quando un mostro FORTE o un boss con nome e' a contatto col PG (game.asm scrive
-;  mus_cmb); acceso, lo tiene qualsiasi mostro a contatto; si spegne CMB_HOLD x 4 frame (12 s) dopo l'ultimo
-;  contatto; poi si riprende il brano del luogo da dove era. Ogni operazione su disco zittisce il SID (snd_io).
+;  (17/11) Il tema di combattimento parte SOLO quando un boss con nome compare sullo schermo (build_sprites in game.asm
+;  scrive mus_cmb a ogni frame in cui il suo sprite e' visibile) e resta finche' il boss e' sullo schermo; si spegne
+;  CMB_HOLD x 4 frame (2 s) dopo che e' uscito o e' morto; poi si riprende il brano del luogo da dove era. Nessun'altra
+;  occasione (prima: mostri forti a contatto, isteresi di 12 s). Ogni operazione su disco zittisce il SID (snd_io).
 ; ===================================================================
-CMB_HOLD   = 150                ; isteresi del tema di combattimento, in unita' di 4 frame (12 s senza contatti)
+CMB_HOLD   = 25                 ; isteresi del tema di combattimento, in unita' di 4 frame (2 s dopo che il boss e' uscito dallo schermo)
 CMB_DROP   = 100                ; frame dopo l'ultimo contatto con un mostro qualsiasi: fine combattimento (bauli)
 FADE_SLOW  = 2                  ; frame per passo: cambio livello / fine combattimento
 FADE_FAST  = 1                  ; inizio combattimento
@@ -285,7 +286,7 @@ music_update:
         lda mus_flt
         ora #$0f
         sta $d418
-+       ; --- tema di combattimento (solo mostri forti e boss; isteresi CMB_HOLD x 4 frame)
++       ; --- tema di combattimento (solo boss con nome sullo schermo; isteresi CMB_HOLD x 4 frame)
         lda mus_cmb
         beq _nc
         lda mus_inc

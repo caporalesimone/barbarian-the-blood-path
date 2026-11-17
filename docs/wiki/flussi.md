@@ -345,7 +345,7 @@ flowchart TD
     WK --> STN{"stordito?"}
     STN -->|si'| NX
     STN -->|no| CT{"a contatto con il PG?"}
-    CT -->|si'| ATK["mon_attack: tiro per colpire, danno<br/>-> hurt_player (vita, lampo, suono)<br/>tema di combattimento se forte o boss"]
+    CT -->|si'| ATK["mon_attack: tiro per colpire, danno<br/>-> hurt_player (vita, lampo, suono)"]
     CT -->|no| SEL{"fra i 4 piu' vicini scelti?"}
     SEL -->|si'| ST["mon_step: passo verso il PG,<br/>senza avvicinamento percorso breve (mon_path), separazione"]
     SEL -->|no| OFF["sel_offer: candidato per il prossimo giro"]
@@ -445,9 +445,9 @@ stateDiagram-v2
     Luogo: brano del luogo (SND_LBUF)<br/>villaggio / livello a caso / boss
     Combattimento: motivetto (SND_FBUF)
     Silenzio: dissolvenza / disco
-    Luogo --> Combattimento: mostro forte o boss a contatto (mus_cmb)
-    Combattimento --> Combattimento: un mostro a contatto lo tiene
-    Combattimento --> Luogo: 12 s senza contatti:<br/>il brano riprende da dove era
+    Luogo --> Combattimento: boss con nome sullo schermo (mus_cmb, build_sprites)
+    Combattimento --> Combattimento: il boss resta sullo schermo
+    Combattimento --> Luogo: 2 s senza il boss sullo schermo:<br/>il brano riprende da dove era
     Luogo --> Silenzio: change_level: music_fadeout
     Silenzio --> Luogo: music_town / music_dungeon:<br/>brano dal disco (file SNDn)
     Luogo --> Luogo: snd_io durante il disco (SID zitto),<br/>poi volume pieno
