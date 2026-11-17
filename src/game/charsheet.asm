@@ -5,7 +5,7 @@
 ;  caratteristiche (A/D o -/+ o Fire: un punto in meno / in piu', in attesa in cs_pend), confirm (domanda "spend N
 ;  points for good?": si' = i punti in attesa diventano spesi), undo (toglie tutti quelli in attesa), respec (solo con
 ;  gettoni c_resp: uno consumato, tutti i punti spesi tornano da spendere). I punti in attesa si spostano liberamente
-;  fino alla conferma; RUN/STOP con punti in attesa chiede "spend N points before leaving?" (si' = spesi, no = si esce
+;  fino alla conferma; RUN/STOP (o di nuovo C, 17/11) con punti in attesa chiede "spend N points before leaving?" (si' = spesi, no = si esce
 ;  e tornano da spendere). Nessun salvataggio (lo fa "save game"). Statistiche derivate (vita massima, ATT, CA, danno)
 ;  e caratteristiche: valore attuale e, se i punti in attesa lo cambiano, "-> nuovo" in verde. Senza gettoni respec
 ;  la schermata non dice nulla del respec.
@@ -149,6 +149,13 @@ _dr     jsr cs_draw
 _hg     jmp _hg
 .endif
 _in     jsr ui_nav
+        pha                     ; (17/11, committente) C chiude come RUN/STOP (in basso resta scritto solo run/stop)
+        lda keynew+2
+        and #$10
+        beq +
+        pla
+        jmp _back
++       pla
         cmp #NAV_MOVE
         beq _dr
         cmp #NAV_BACK

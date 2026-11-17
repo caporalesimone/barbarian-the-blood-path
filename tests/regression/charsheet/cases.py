@@ -16,7 +16,7 @@ def setup(ctx):
     g = ctx["g"] = Game()
     g.to_menu()
     new_game(g); g.frames(3)
-    lvl(g, 6, (1, 2, 0))                                           # level 6: 3 points, all spent
+    lvl(g, 4, (1, 2, 0))                                           # level 4: 3 points (1 per level from 2, 17/11), all spent
 
 
 def teardown(ctx):
@@ -70,7 +70,7 @@ def cur_to(g, cur):
     g.poke(g.L["ui_cur"], (cur - 1) % g.b(g.L["ui_n"])); g.frames(1, joy=D); g.frames(1)
 
 
-@test("CS-10", "no points, no token: nothing about respec on the screen, no entries, 'no points to spend.', next point at level 8")
+@test("CS-10", "no points, no token: nothing about respec on the screen, no entries, 'no points to spend.', next point at level 5")
 def cs_view(ctx):
     g = ctx["g"]; L = g.L
     open_c(g)
@@ -79,22 +79,22 @@ def cs_view(ctx):
     check(">" not in "".join(row(g, y) for y in range(2, 22)), "an entry cursor is shown:\n%s" % s)
     check("actions" not in s and "confirm" not in s, "the actions box is shown without entries:\n%s" % s)
     check(row(g, 13)[3:22] == "no points to spend.", "row 13: %r" % row(g, 13))
-    check(row(g, 14)[3:24].rstrip() == "next point at level 8", "row 14: %r" % row(g, 14))
+    check(row(g, 14)[3:24].rstrip() == "next point at level 5", "row 14: %r" % row(g, 14))
     check(row(g, 24)[1:14] == "run/stop:back", "row 24: %r" % row(g, 24))
     g.press_fire(); g.frames(2)
     check(not g.in_game() and g.mem(L["c_sadd"], 3) == [1, 2, 0], "fire changed something")
     back(g)
-    lvl(g, 20, (5, 2, 2))                                            # all 9 points spent: no next point
+    lvl(g, 20, (10, 4, 5))                                           # all 19 points spent: no next point
     open_c(g)
     check("next point" not in row(g, 14), "row 14 at level 20: %r" % row(g, 14))
     back(g)
-    lvl(g, 6, (1, 2, 0))
+    lvl(g, 4, (1, 2, 0))
 
 
 @test("CS-11", "no points, 1 token: token count shown, only 'respec' (row 17); yes: points back, full menu without respec")
 def cs_respec(ctx):
     g = ctx["g"]; L = g.L
-    lvl(g, 6, (1, 2, 0), resp=1)
+    lvl(g, 4, (1, 2, 0), resp=1)
     open_c(g)
     check(row(g, 2)[22:35] == "respec tokens" and row(g, 2)[36:39].strip() == "1", "row 2: %r" % row(g, 2))
     check(row(g, 17)[2:10] == "> respec", "row 17: %r" % row(g, 17))
@@ -113,7 +113,7 @@ def cs_respec(ctx):
 @test("CS-12", "points, no token: entries str/dex/con/confirm/undo only, 'points to spend 3', no respec anywhere")
 def cs_points(ctx):
     g = ctx["g"]; L = g.L
-    lvl(g, 6, (0, 0, 0))
+    lvl(g, 4, (0, 0, 0))
     open_c(g)
     s = screen(g)
     check(g.b(L["ui_n"]) == 5 and "respec" not in s and "token" not in s, "respec with 0 tokens:\n%s" % s)
@@ -151,7 +151,7 @@ def cs_preview(ctx):
     hp0, c0 = g.w16(L["hpmax"]), g.b(L["s_con"])
     m0, m1 = (c0 - 10) // 2, (c0 - 9) // 2
     at(g, 2); key(g, K_PLUS, 1)                                         # con +1 (15 -> 16: mod +2 -> +3)
-    want = "hp   %d . %d" % (hp0, hp0 + 1 + 5 * (m1 - m0))              # level 6: +1 con, mod change x 5 levels
+    want = "hp   %d . %d" % (hp0, hp0 + 1 + 3 * (m1 - m0))              # level 4: +1 con, mod change x 3 levels
     check(row(g, 3)[2:2 + len(want)] == want, "row 3: %r (expected %r)" % (row(g, 3), want))
     a = addr(g, 3) + 2 + want.index(".")
     check(g.b(a) == L["CH_ARROW"], "no arrow glyph on row 3")
@@ -196,7 +196,7 @@ def cs_confirm(ctx):
 @test("CS-16", "RUN/STOP with pending points asks 'spend 1 point before leaving?': no = points given back, yes = spent")
 def cs_leave(ctx):
     g = ctx["g"]; L = g.L
-    lvl(g, 6, (1, 1, 0))                                                # 1 point to spend
+    lvl(g, 4, (1, 1, 0))                                                # 1 point to spend
     open_c(g)
     at(g, 1); g.press_fire()                                            # dex +1
     g.run_stop()

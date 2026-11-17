@@ -41,11 +41,11 @@ def hud_icon(g):
     return g.mem(L["SCR_H"] + 800 + 120 + 6, 1)
 
 
-@test("STAT-10", "level up: the stats stay the base ones, the points grow by pl_pts (1 every 2 levels, 2..18)")
+@test("STAT-10", "level up: the stats stay the base ones, the points grow by pl_pts (1 per level, 2..20)")
 def stat_levelup(ctx):
     g = ctx["g"]; L = g.L
     pts = g.mem(L["pl_pts"], 21)
-    check(pts[1] == 0 and pts[2] == 1 and pts[3] == 1 and pts[18] == 9 and pts[20] == 9, "pl_pts %s" % pts)
+    check(pts[1] == 0 and pts[2] == 1 and pts[3] == 2 and pts[18] == 17 and pts[20] == 19, "pl_pts %s" % pts)
     xp_need = g.b(L["xp_n0"]) + 256 * g.b(L["xp_n1"])       # level 1 -> 2
     g.poke(L["c_xp"], xp_need & 255, xp_need >> 8, 0)
     g.poke(L["tmp0"], 0, 0)
@@ -96,7 +96,7 @@ def stat_spend(ctx):
 @test("STAT-13", "C screen: '-' takes a pending point back, undo clears them, exit without changes does not save")
 def stat_minus_reset(ctx):
     g = ctx["g"]; L = g.L
-    set_level(g, 6, (1, 0, 0))                                        # 3 points, 1 spent: 2 to spend
+    set_level(g, 4, (1, 0, 0))                                        # 3 points (level 4, 17/11), 1 spent: 2 to spend
     key(g, K_C, 3)
     g.poke(L["ui_cur"], 2); g.frames(1)
     key(g, K_PLUS, 1); key(g, K_PLUS, 1)
@@ -129,7 +129,7 @@ def stat_exit_applies(ctx):
         set_level(g, lvl, (0, 0, con))
         want = hpmax_expected(g, lvl, L["PL_CON0"] + con)
         check(g.w16(L["hpmax"]) == want, "level %d con +%d: hp max %d (expected %d)" % (lvl, con, g.w16(L["hpmax"]), want))
-    set_level(g, 6, (1, 2, 0))
+    set_level(g, 4, (1, 2, 0))
 
 
 @test("STAT-15", "respec: no entry without tokens; with 2 tokens: yes -> all the points back, 1 token left, not saved on exit")

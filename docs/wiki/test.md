@@ -347,7 +347,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SKILL-13` | Whirlwind: one attack roll on each of the 3 monsters around, 2 s cooldown |
 | `SKILL-14` | Battle Cry: one saving throw per monster in its area (hit_one), the failed ones stunned; 15 s cooldown |
 | `SKILL-15` | Smash: one attack roll on each monster within 44 px, 6 s cooldown |
-| `STAT-10` | level up: the stats stay the base ones, the points grow by pl_pts (1 every 2 levels, 2..18) |
+| `STAT-10` | level up: the stats stay the base ones, the points grow by pl_pts (1 per level, 2..20) |
 | `STAT-11` | HUD: glyph next to the level number (row 23, col 6) while there are points to spend, blank without |
 | `STAT-12` | C screen: D (+) on str, confirm + yes: c_sadd str 1, str 17, no points left; RUN/STOP goes back without saving |
 | `STAT-13` | C screen: '-' takes a pending point back, undo clears them, exit without changes does not save |

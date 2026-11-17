@@ -342,6 +342,12 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 
 ## 9 — Oggetti, combattimento, bilanciamento
 
+### G9 Ribilanciamento dopo 1 punto statistica per livello (17/11) — M
+- Il 17/11 il committente ha scelto 1 punto a ogni livello dal 2 al 20 (19 punti al 20, prima 9): il PG di riferimento
+  (`reference_alloc`) e' piu' forte e i mostri non sono stati ritoccati. Da fare: simulatori e arena
+  (`tools/simulators/`, `tools/vice/arena.py`) sui piani 1-20, confronto con le curve di prima, ritocco di CA e vita dei
+  mostri in `data/rules.yaml` se il PG colpisce o resiste troppo. Test di bilanciamento con `./build.sh --release`.
+
 ### G2 (ex 4.2) Economia: prezzi, oro, riparazioni (dopo B7) — M
 
 ### G5 (ex 4.5) Set di oggetti unici con nome — M

@@ -26,9 +26,10 @@ player:
   # (11/11, branch feature/stat-points) Punti statistica: il passaggio di livello non alza piu' le caratteristiche da
   # solo; il PG riceve punti da spendere nella schermata C (FOR, DES, COS +1 per punto). Numero fisso preso dalla
   # crescita automatica di prima (FOR +1 ai livelli 4/8/12/16/20, COS 6/14, DES 10/18 = 9 punti): 1 punto ogni 2
-  # livelli, dal 2 al 18 = 9 punti al livello 20.
-  stat_points: {per_level: 1, every: 2, first: 2, last: 18}
-  reference_alloc: [str, con, str, dex, str, con, str, dex, str]   # come li spende il PG di riferimento (tools/simulators/, arena, eroe di prova)
+  # livelli, dal 2 al 18 = 9 punti al livello 20. (17/11, committente) 1 punto a OGNI livello, dal 2 al 20 = 19 punti al
+  # livello 20 (il doppio); oltre il 20 resta la crescita automatica (epic_every).
+  stat_points: {per_level: 1, every: 1, first: 2, last: 20}
+  reference_alloc: [str, con, str, dex, str, con, str, dex, str, con, str, dex, str, con, str, dex, str, con, str]   # come li spende il PG di riferimento (tools/simulators/, arena, eroe di prova)
   # Respec: azzera i punti spesi (tornano tutti da spendere). Gettoni: c_resp (max 255); +1 uccidendo il boss finale,
   # +1 regalo di una quest (progetto), nell'Abisso un gettone nei bauli con probabilita' bassa (preso come l'oro).
   respec: {max: 255, final_boss: 1, abyss_chest_percent: 2}

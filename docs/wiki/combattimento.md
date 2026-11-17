@@ -9,8 +9,10 @@ Tutto è in tempo reale (50 fotogrammi al secondo), ma ogni colpo è un tiro di 
 ## Il PG (`recalc_stats`)
 
 **Dall'11/11 (branch `feature/stat-points`)**: le caratteristiche **non crescono più da sole**. Valore = base
-(`PL_STR0` 16, `PL_DEX0` 13, `PL_CON0` 15) + punti spesi (`c_sadd`) nella schermata C; il PG riceve **1 punto ogni 2
-livelli, dal 2 al 18** (`pl_pts`, `rules.yaml player.stat_points`: 9 punti al 20, quanti ne dava la crescita automatica).
+(`PL_STR0` 16, `PL_DEX0` 13, `PL_CON0` 15) + punti spesi (`c_sadd`) nella schermata C; il PG riceve **1 punto a ogni
+livello, dal 2 al 20** (17/11, richiesta del committente; `pl_pts`, `rules.yaml player.stat_points`: 19 punti al 20; fino al
+17/11 1 punto ogni 2 livelli, 9 punti al 20, quanti ne dava la crescita automatica). Oltre il 20 resta la crescita automatica
+(`epic_every`). Il bilanciamento dei mostri non è stato rifatto (da verificare con i simulatori).
 Vita = 10 + COS + (livello − 1) × (6 + mod COS) con la COS di adesso (**retroattiva**: alzare COS alza la vita di tutti
 i livelli). Il PG di riferimento del simulatore, dell'arena e l'eroe di prova (`TESTCL`) spendono i punti come
 `player.reference_alloc` (FOR, COS, FOR, DES, FOR, COS, FOR, DES, FOR): la tabella qui sotto è quella del riferimento
