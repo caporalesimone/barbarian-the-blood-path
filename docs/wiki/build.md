@@ -41,7 +41,7 @@ punto**, il flag dell'assemblatore **`CHEATS`** (`-D CHEATS=...`, scelto da `too
 
 | Build | `CHEATS` | Effetto |
 |---|---|---|
-| debug (`./build.sh`, `--fast`, `tools/build/asm.sh`) | 1 | voce **cheats** nel menu di gioco (RUN/STOP), `src/game/cheats.asm` |
+| debug (`./build.sh`, `--fast`, `tools/build/asm.sh`) | 1 | voce **cheats** nel menu di gioco (RUN/STOP), modulo `CHEATS` sul disco (`src/cheats.asm`, `src/cheats/menu.asm`; 17/11) |
 | test (`tools/build/asm.sh test`, anche durante la release) | 1 | come la debug (i test `CHEAT-*` e lo screenshot `trucchi`) |
 | release (`RELEASE=1`: GAME assemblato da `build_game.sh` e rifatto da `tests/run_tests.sh` alla fine dei test) | 0 | **nessun byte** dei trucchi: GAME e listato identici a quelli di prima dei trucchi (a parte la versione e la riga del `-D`) |
 

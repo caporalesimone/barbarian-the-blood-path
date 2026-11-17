@@ -98,7 +98,7 @@ flowchart TB
     PF["theme.asm<br/>tema del piano, bit di visita"]
     REL["rel.asm<br/>salvataggi con il plugin di Krill<br/>(file per eroe, elenco)"]
     CHAP["chapter.asm<br/>sequenza dei capitoli: piano del boss,<br/>sblocco, uscita del villaggio (12/11)"]
-    CHT["cheats.asm (solo CHEATS=1)<br/>menu dei trucchi (15/11)"]
+    CHT["cheat_menu (solo CHEATS=1)<br/>carica il file CHEATS (17/11)"]
     DISK["disk.asm + stash_io.asm + monpath.asm (CODE2 $9C00)<br/>load_raw (Krill), load_gfx, fin_load, LOBBY, mon_follow"]
     LOOP --> INPUT & PLAYER & CAM & SPR
     LOOP --> GG
@@ -141,7 +141,7 @@ flowchart TB
 | `music.asm` | 361 | richieste di musica, caricamento dei brani, combattimento; player e effetti in `src/common/` | [Musica](musica.md) |
 | `theme.asm` | ~50 | `lvl_theme` (piano → file `GFXn`), `vis_bit`. Dall'11/11 (ramo `fast-loader`) il precaricamento in sottofondo e le cache sono tolti | [Flussi](flussi.md#8-precaricamento-del-tema-tolto) |
 | `chapter.asm` | ~140 | (12/11) sequenza dei capitoli: `chap_first`, `is_cboss`, `chap_enter` (`lv_cboss`), `chap_won` (sblocco), `at_exit`/`exit_open` (uscita del villaggio), `chap_travel` (passaggio al capitolo dopo) | [Capitoli](capitoli.md) |
-| `cheats.asm` | ~150 | (15/11) **solo con `CHEATS=1`** (build di debug e di test; con 0, la release, non si assembla), in fondo al primo blocco di codice: `cheat_menu`, il menu dei trucchi della voce "cheats" del menu di gioco (god mode, level up, respec token, next level, next chapter: richiamano `add_xp`, `resp_add`, `go_down`, `go_tdown`, `chap_won`, `change_level`, `save_level`, `chap_travel`) | [Interfaccia](interfaccia.md), [Build](build.md) |
+| `cheats/menu.asm` (`src/cheats.asm`) | ~150 | (15/11, 17/11) **solo con `CHEATS=1`** (debug e test; la release non ha nulla): menu dei trucchi come **modulo su file** `CHEATS`, letto a `$BC00` (schermo B) quando si apre ed eseguito; in GAME resta `cheat_menu` (~30 B, il caricamento). Fino a 1000 B | [Trucchi](cheats.md) |
 | `rel.asm` | ~650 | salvataggi con il plugin di save di Krill: file `save-0N` (eroe + piani), elenco `hl`, stato compatto dei piani | [Salvataggi](salvataggi.md) |
 | `disk.asm` | ~180 | nomi dei file, `load_raw`/`load_file` (Krill), grafica, sala del trono, LOBBY (blocco `CODE2` `$9C00`–`$9FFF`) | [Tecnica](tecnica.md) |
 | `monpath.asm` | ~70 | (17/11) `mon_follow` e tabelle della ricerca di percorso dei mostri bloccati (`mon_path` sta in `game.asm`; blocco `CODE2`) | [Mostri](mostri.md) |

@@ -9,7 +9,11 @@ Dal 15/11 il modo principale è il **menu dei trucchi** nel gioco (sezione che s
 ## Menu dei trucchi nel gioco (voce "cheats", 15/11)
 
 Per provare il gioco senza giocarlo tutto: saltare piani e capitoli, salire di livello, avere gettoni respec, non morire.
-Codice in `src/game/cheats.asm` (`cheat_menu`), test `CHEAT-10..22` ([Test](test.md)), screenshot
+(17/11) Il menu è un **modulo su file**, `CHEATS` sul disco (`src/cheats.asm` + `src/cheats/menu.asm`, assemblato con le etichette del
+gioco come il LOBBY): `cheat_menu` di GAME lo legge a `$BC00` (lo schermo B del gioco, libero mentre c'è una pagina della UI) e lo
+esegue; costa la schermata di attesa a ogni apertura e non occupa memoria del gioco (prima ~395 B nelle build di debug e di test).
+Spazio per nuove voci: fino a **1000 B** (oggi ~380 B; la build si ferma oltre). La release non ha né il file né la voce.
+Codice in `src/cheats/menu.asm` (`ct_menu`), test `CHEAT-10..22` ([Test](test.md)), screenshot
 [docs/screens/trucchi.png](../screens/trucchi.png).
 
 ### Come si apre

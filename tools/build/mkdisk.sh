@@ -53,6 +53,7 @@ ARGS+=(-f title -w out/work/title.prg -f lore -w out/work/lore.prg -f ldat -w ou
 ARGS+=(-f hl -w out/work/hl.prg -f ksave -w out/work/krill/save.prg)     # ksave: plugin di save di Krill, ricaricato a ogni save
 for s in 1 2 3 4 5; do ARGS+=(-f save-0$s -w out/work/save.prg); done
 for f in out/work/qst[0-9]*.prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) quest (tools/build/gen_quests.py): dopo i file del capitolo 1, per non spostarli sul disco (PERF-DISK)
+[ -f out/work/cheats.prg ] && ARGS+=(-f cheats -w out/work/cheats.prg)     # (17/11) menu dei trucchi: solo debug e test (asm.sh lo toglie in release)
 case $TWN_LAYOUT in
   end)     for c in 2 3 4 5; do ARGS+=(-f twn$c -w out/work/twn$c.prg); done     # villaggi dei capitoli 2-5: in fondo, con la grafica dei loro capitoli (i file del capitolo 1 restano sulle prime tracce)
            for f in out/work/gfx/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;     # capitoli 2-4 (segnaposto)

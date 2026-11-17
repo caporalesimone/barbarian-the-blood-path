@@ -1938,8 +1938,24 @@ mod_chap
         .include "backmenu.asm"          ; (16/11) trampoline e pagina di attesa per "back to main menu" (LOBBY)
         .include "chapter.asm"           ; (12/11) sequenza dei capitoli: TODO M1
 .if CHEATS
+; (17/11) menu dei trucchi per i test: solo con CHEATS = 1 (debug e test, non release). Il menu e' il file CHEATS
+; (src/cheats.asm), letto a CHT_AT (lo schermo B) quando si apre ed eseguito; qui resta solo il caricamento.
+CHT_AT  = SCR_B
 mod_cheats
-        .include "cheats.asm"            ; (15/11) menu dei trucchi per i test: solo con CHEATS = 1 (debug e test, non release)
+cheat_menu:
+        ldy #nm_cht-nm_tab
+        lda #6
+        jsr set_name
+        lda #2                  ; schermata di attesa generica
+        sta io_what
+        lda #<CHT_AT
+        sta ptr0
+        lda #>CHT_AT
+        sta ptr0+1
+        jsr load_raw
+        bcs +
+        jmp CHT_AT
++       jmp ui_gamemenu
 .endif
 
 

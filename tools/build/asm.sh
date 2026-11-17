@@ -39,6 +39,11 @@ ARX=$(echo "$EXTRA" | sed 's/-D NOKEYS=[0-9]*/-D NOKEYS=1/')
 64tass -a $INC src/lobby.asm -o out/work/lobby.prg -l out/work/lobby.lbl -L out/work/lobby.lst > out/work/ovl.log 2>&1 || { grep -v '^$' out/work/ovl.log | head -20; exit 1; }
 64tass -a -b $INC src/qpage.asm -o out/work/qpage.bin -l out/work/qpage.lbl -L out/work/qpage.lst > out/work/qpage.log 2>&1 || { grep -v '^$' out/work/qpage.log | head -20; exit 1; }   # (17/11) pagina della quest
 python3 tools/build/gen_quests.py --files >/dev/null || exit 1   # file QST0..QSTn: pagina + testo
+if [ "$CHEATS" = 1 ]; then          # (17/11) menu dei trucchi: modulo CHEATS sul disco (solo debug e test)
+    64tass -a $INC src/cheats.asm -o out/work/cheats.prg -l out/work/cheats.lbl -L out/work/cheats.lst > out/work/cheats.log 2>&1 || { grep -v '^$' out/work/cheats.log | head -20; exit 1; }
+else
+    rm -f out/work/cheats.prg out/work/cheats.lbl out/work/cheats.lst     # la release non ha il file (test CHEAT-22)
+fi
 64tass -a -b $INC src/menu.asm -o out/work/menu.bin -l out/work/menu.lbl -L out/work/menu.lst > out/work/menu.log 2>&1 || { grep -v "^$" out/work/menu.log | head -20; exit 1; }
 MENUMSG=$(python3 tools/build/pack_menu.py) || exit 1        # file MENU = locanda e negozi, due zone compresse ZX0
 python3 tools/build/gen_title.py >/dev/null || exit 1  # (anche in debug: l'atlante grafico mostra il titolo)

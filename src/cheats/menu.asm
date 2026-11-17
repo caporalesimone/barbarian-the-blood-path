@@ -1,8 +1,8 @@
 ; ===================================================================
-;  cheats.asm - menu dei trucchi per i test (15/11, richiesta del committente): voce "cheats" del menu di gioco
-;  (RUN/STOP). Assemblato SOLO con CHEATS = 1 (build di debug e di test, tools/build/asm.sh); con CHEATS = 0 (release)
-;  non c'e' un solo byte di questo file ne' della voce del menu (src/game/ui.asm, game.asm). Sta in fondo al primo blocco
-;  di codice, dopo chapter.asm: nella build di debug sposta solo gfx_data e cio' che segue, non il codice del gioco.
+;  cheats/menu.asm - menu dei trucchi per i test (15/11, richiesta del committente): voce "cheats" del menu di gioco
+;  (RUN/STOP). (17/11) Modulo su file: CHEATS sul disco (src/cheats.asm), caricato a CHT_AT (= SCR_B) da cheat_menu di GAME
+;  quando si apre ed eseguito; finisce sempre con un salto nel gioco. Solo con CHEATS = 1 (debug e test): la release non ha
+;  ne' il file ne' la voce del menu ne' cheat_menu (src/game/ui.asm, game.asm; test CHEAT-22).
 ;  Voci: god mode (on/off, byte godmode), level up (esperienza alla soglia del livello dopo, poi add_xp: il passaggio
 ;  di livello normale), respec token (resp_add), next level (come le scale; piano del boss: boss ucciso e ritorno al
 ;  villaggio; villaggio: primo piano come la cripta), next chapter (capitolo dopo sbloccato e chap_travel, che salva).
@@ -11,7 +11,7 @@
         .enc "screen"
 CT_N    = 5
 
-cheat_menu:
+ct_menu:
         lda #CT_N
         sta ui_n
         jsr nav_init

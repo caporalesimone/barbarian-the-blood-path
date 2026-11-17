@@ -136,7 +136,7 @@ flowchart TD
 - **Cache**: i passi lenti indipendenti dal gioco passano da `tools/build/cache_run.py` (girano solo se cambiano gli ingressi).
 - Comandi singoli: `lab64 run tools/build/asm.sh` (solo assemblaggio), `lab64 run python3 tools/simulators/sim_rules.py`.
 - **Debug e release** (15/11): GAME cambia solo per il flag `CHEATS` (`-D CHEATS`, `tools/build/asm.sh`): 1 nella build di debug e in
-  quelle di test (voce **cheats** nel menu RUN/STOP, `src/game/cheats.asm`), 0 nella release (`RELEASE=1`: nessun byte dei
+  quelle di test (voce **cheats** nel menu RUN/STOP: modulo `CHEATS` sul disco, `src/cheats.asm`), 0 nella release (`RELEASE=1`: nessun byte dei
   trucchi). A mano: `CHEATS=0 ./build.sh --fast`; solo GAME con i flag della release: `lab64 run tools/build/asm.sh release-game`.
   Dettagli: [build.md](wiki/build.md) "Debug e release".
 
