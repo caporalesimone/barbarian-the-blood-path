@@ -66,7 +66,7 @@ LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM de
 ;@scenario dungeon: game menu gfx? fmap|bossch? ; il tema del capitolo copre la coda del villaggio; mappa del boss del capitolo o sala del trono a $FD00
 ;@scenario salvataggio: game menu ksave save-?? ; save game: immagine del file a $E000 e plugin di save di Krill (la cache del villaggio si rilegge)
 ;@free $87e8..$87f8 "Fra schermo HUD e puntatori sprite (banco VIC)" use=data
-;@free $a500..$a600 "Slot sprite 20-23" use=data
+;@free $a5e3..$a600 "Coda degli slot sprite 20-23 (il resto: ricerca di percorso dei mostri, mon_path)" use=data
 ;@free $fe96..$fffa "Fondo della cache sotto il KERNAL, dopo FMAP (si accorcia se FMAP cresce: lo dice questa verifica)" use=data
 ;@map $a6c0..$a6fc "Minimappa: tabella delle classi dei tile (mm_cls, 48 B) e byte esplorati della riga di celle (mm_ex, 12 B), solo mentre la minimappa e' aperta (ui.asm); il resto dello slot 27 riceve la coda della copia di copy_gfx (byte senza uso)"
 ;@free $a6fc..$a700 "Fine dello slot sprite 27" use=data
@@ -398,7 +398,7 @@ _adv    inc ptr0                ; un byte di sorgente (preserva A)
 ; ---- grafica dei luoghi: cache nella RAM sotto il KERNAL ($E000 villaggio, $E600 tema del dungeon)
 ; installa la grafica in cache: A = 0 villaggio, altro = dungeon (tile + sprite, colori e nomi dei mostri del capitolo)
         .cerror GFX_INFO > 256 || >NM_AT != >(NM_AT+GFX_INFO-1), "blocco info dei mostri (NM_AT) a cavallo di una pagina"
-;@free SND_FBUF_end..NM_AT-1 "Coda degli slot sprite 58-63 (fino al blocco info dei mostri)" use=data
+;@free npc_vend..NM_AT-1 "Coda degli slot sprite 58-63 (fino al blocco info dei mostri), dopo le variabili di quest.asm" use=data
 ;@map NM_AT..$9000 "Colori e nomi dei mostri del capitolo: blocco info del file GFXn copiato da gfx_install"
         .cerror SND_FBUF + SND_FMAX > NM_AT || NM_AT + GFX_INFO > $9000, "NM_AT sovrapposto al motivetto di combattimento o oltre $8FFF"
 gfx_install:
@@ -1078,6 +1078,7 @@ main_loop:
         jsr update_player
         jsr update_attack
         jsr update_monsters
+        jsr npc_tick            ; (17/11) NPC del villaggio (quest.asm)
         jsr drops_tick
         jsr update_bar
 .if (TESTUI == 9) || (TESTUI == 11)
@@ -1907,6 +1908,7 @@ bitmask  .byte 1, 2, 4, 8, 16, 32, 64, 128
 ; etichette di inizio modulo: nomi dei moduli nei listati e nella mappa automatica (lab64 map)
 mod_db
         .include "db.asm"
+        .include "quests.inc"           ; (17/11) titoli e nomi delle quest (tools/build/gen_quests.py)
 mod_dungeon
         .include "dungeon.asm"
 mod_data
@@ -1920,6 +1922,7 @@ mod_levels
 mod_ui
         .include "ui.asm"
         .include "charsheet.asm"         ; (11/11) schermata C: punti statistica, respec
+        .include "quest.asm"             ; (17/11, concept) pagina della quest (Q) e NPC del villaggio
         .include "stash.asm"
 mod_hud
         .include "hud.asm"
@@ -1986,6 +1989,7 @@ CODE2 = $9c00
         * = CODE2
         .include "disk.asm"
         .include "stash_io.asm"
+        .include "monpath.asm"
 ; cheat god mode (docs/wiki/cheats.md): diverso da 0 = il PG non perde vita. Byte del PRG in CODE2 (game_start non lo
 ; azzera): lo scrive START dal POKE 1021,1 dato prima del RUN, il monitor di VICE o TESTGOD=1 (11/11)
 godmode .byte 0

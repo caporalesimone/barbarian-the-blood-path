@@ -347,7 +347,7 @@ flowchart TD
     STN -->|no| CT{"a contatto con il PG?"}
     CT -->|si'| ATK["mon_attack: tiro per colpire, danno<br/>-> hurt_player (vita, lampo, suono)<br/>tema di combattimento se forte o boss"]
     CT -->|no| SEL{"fra i 4 piu' vicini scelti?"}
-    SEL -->|si'| ST["mon_step: passo verso il PG,<br/>scorrimento sui muri, separazione"]
+    SEL -->|si'| ST["mon_step: passo verso il PG,<br/>senza avvicinamento percorso breve (mon_path), separazione"]
     SEL -->|no| OFF["sel_offer: candidato per il prossimo giro"]
     ATK --> NX
     ST --> NX

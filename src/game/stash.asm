@@ -38,6 +38,7 @@ MPARTS  = 3
 OVL_AT  = MR1_AT                ; tabella dei salti del modulo (src/menu.asm)
 MENU_INN  = OVL_AT              ; locanda
 MENU_SHOP = OVL_AT+3            ; negozio A (0 fabbro, 1 alchimista) (jsr mk_off + jmp enter_shop: 6 B)
+MENU_NPC  = OVL_AT+9            ; (17/11) piazza gli NPC del villaggio (src/menu/npc.asm)
 ml_src  = $5c                   ; (pagina zero libera dopo ZX_ZP) inizio dei dati compressi di ogni parte
 ml_i    = ml_src+2*MPARTS
 ml_try  = ml_i+1                ; (15/11) letture rimaste della parte (ex TODO A2)

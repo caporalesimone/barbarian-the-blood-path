@@ -167,6 +167,11 @@ il vecchio (anelli concentrici grigio/ciano) si confondeva con l'acqua e la font
 giallo (palette verde/marrone/grigio chiaro + ciano), quindi si distingue per la forma. Nel dungeon prende i colori
 della palette del piano. Atlante: `out/work/atlas/` (`VILLGO`, `DUNGxO`).
 
+## Abitanti (17/11, concept)
+Quattro abitanti per villaggio, figure dell'eroe in altri colori (sprite 3-6): chi dà la quest, fermo vicino all'ingresso (nome nella
+barra quando gli si è accanto, Fire = la sua quest), e tre che vagano piano e solo con il PG vicino. Piazzati a caso su caselle
+libere attorno all'ingresso (`npc_init`, modulo MENU). Dettagli: [Quest](quests.md), "Concept del 17/11".
+
 ## Armaiolo: tolto (09/11, decisione del committente)
 
 L'armaiolo non c'è più: armature e scudi li vende e li compra il **fabbro** (già dall'08/11). Tolti: il negozio

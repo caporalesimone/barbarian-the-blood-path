@@ -1,0 +1,13 @@
+# Quest (17/11, concept del menu delle quest: docs/wiki/quests.md, "Concept del 17/11"). Testi SEGNAPOSTO (lorem ipsum):
+# solo per provare impaginazione, caricamento da disco e menu. Ogni quest diventa un file QSTn sul disco (tools/build/gen_quests.py),
+# letto a ogni apertura della pagina (tasto Q, Fire davanti all'NPC). Limiti: nome 16 caratteri, titolo 30, premio 36,
+# testo andato a capo a 36 colonne, al massimo 11 righe.
+quests:
+  - id: 1
+    giver: hilde
+    title: the widow's son
+    reward: 120 gold + battle cry
+    text: >-
+      lorem ipsum dolor sit amet, consectetur adipiscing elit. sed do eiusmod tempor incididunt ut labore et dolore
+      magna aliqua. ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+      consequat. duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.

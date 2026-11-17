@@ -26,6 +26,7 @@ python3 tools/build/gen_gfx.py >/dev/null
 python3 tools/build/gen_font.py >/dev/null || exit 1
 python3 tools/build/gen_music.py >/dev/null || exit 1
 python3 tools/build/gen_db.py >/dev/null || exit 1
+python3 tools/build/gen_quests.py >/dev/null || exit 1   # (17/11) quest: file QSTn e quests.inc (concept)
 python3 tools/build/gen_maps.py >/dev/null || exit 1   # prima dell'assemblaggio: scrive town_places.inc (porte per la minimappa)
 rm -f out/work/game.prg
 64tass -a $EXTRA -L out/work/game.lst -l out/work/game.lbl $INC src/game.asm -o out/work/game.prg > out/work/build.log 2>&1 || { grep -v '^$' out/work/build.log | head -${ERRLINES:-40}; exit 1; }
@@ -36,6 +37,8 @@ ARX=$(echo "$EXTRA" | sed 's/-D NOKEYS=[0-9]*/-D NOKEYS=1/')
 64tass -a $INC src/test/arena.asm -o out/work/arena.prg -l out/work/arena.lbl -L out/work/arena.lst >> out/work/arena.log 2>&1 || { grep -v '^$' out/work/arena.log | head -20; exit 1; }
 # moduli su file: assemblati con le etichette del gioco (out/work/game.lbl)
 64tass -a $INC src/lobby.asm -o out/work/lobby.prg -l out/work/lobby.lbl -L out/work/lobby.lst > out/work/ovl.log 2>&1 || { grep -v '^$' out/work/ovl.log | head -20; exit 1; }
+64tass -a -b $INC src/qpage.asm -o out/work/qpage.bin -l out/work/qpage.lbl -L out/work/qpage.lst > out/work/qpage.log 2>&1 || { grep -v '^$' out/work/qpage.log | head -20; exit 1; }   # (17/11) pagina della quest
+python3 tools/build/gen_quests.py --files >/dev/null || exit 1   # file QST0..QSTn: pagina + testo
 64tass -a -b $INC src/menu.asm -o out/work/menu.bin -l out/work/menu.lbl -L out/work/menu.lst > out/work/menu.log 2>&1 || { grep -v "^$" out/work/menu.log | head -20; exit 1; }
 MENUMSG=$(python3 tools/build/pack_menu.py) || exit 1        # file MENU = locanda e negozi, due zone compresse ZX0
 python3 tools/build/gen_title.py >/dev/null || exit 1  # (anche in debug: l'atlante grafico mostra il titolo)

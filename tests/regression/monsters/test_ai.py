@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Monster chase in VICE: seed ANOANO, level 2, hero at (34,20) (report of 06/11: the skeleton of the south-east
 room stayed still in the top-left corner of the room, (37,25), with the hero beyond the wall). Monster 2, awake, must
-get close to the hero (sliding along the wall: mon_slide). Also the hero: pushed against the corner of a gap with
+get close to the hero (17/11: with a short path, mon_path / mon_follow). Also the hero: pushed against the corner of a gap with
 4 px of misalignment he gets through (corner adjustment in try_step_x/try_step_y)."""
 import os, sys, time
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "saves"))

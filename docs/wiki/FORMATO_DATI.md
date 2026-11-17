@@ -65,6 +65,9 @@ DES, COS) e **`c_resp`** (gettoni respec, 0..255), prima del baule della locanda
 Dal formato **$C7** (12/11, branch `capitoli`): dopo `c_resp` **`c_chap`** (capitolo in cui si gioca, 1..4) e **`c_unl`**
 (capitolo più alto sbloccato): blocco da 212 byte, file `SAVE-0N` da 2072 byte (sempre 9 blocchi). Il generatore passa alla
 versione `GVER` 5 (i piani 5, 10, 15 sono mappe fisse).
+Dal formato **$C8** (17/11, concept delle quest): in fondo al blocco, dopo il baule della locanda, **`c_qst`** (quest letta:
+0 nessuna, *n* = file `QSTn`): blocco da 213 byte. File `QST0` … `QSTn` sul disco: codice della pagina della quest (`src/qpage.asm`)
++ testo (`data/quests.yaml`, `tools/build/gen_quests.py`), letti a `$BC00` (schermo B) ed eseguiti.
 Dal formato **$C2** (07/11 sera): zaino da **8** posti (`PACK_N`; `c_pack`, `c_packb`, `c_packd`, `c_packm` da 8 byte,
 l'equipaggiamento segue all'indice 8..11) e in fondo `c_sgold` (16 bit) = oro nel baule della locanda. Blocco da 140 a 110 byte.
 Dal formato **$C3** (08/11 sera): in fondo al blocco il **baule della locanda** (`st_id`, `st_b`, `st_du`, `st_m`, 24 byte

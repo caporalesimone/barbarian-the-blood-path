@@ -435,6 +435,10 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   grigio del capitolo 3 si legge poco sui muri chiari: screenshot `out/work/villages/monsters3.png` dei test `MON-CHAP-*`); se i boss con nome dei piani normali devono avere nomi per capitolo (oggi `first_names`/`epithets` comuni).
 
 ### H1 (ex 5.1) Quest system (dopo B8) — XL
+- (17/11) **Concept fatto** (`docs/wiki/quests.md`, "Concept del 17/11"): pagina Q con file `QSTn` (codice + testo), NPC fermo
+  che dà la quest, tre NPC vaganti, quest nella lobby, `c_qst` nell'eroe. Resta: stati e premi veri, testi, NPC per villaggio,
+  **mini quest** degli NPC minori (es. uccidi 5 mostri di un tipo), e **spostare fuori da GAME il codice degli NPC** (~380 B: il
+  margine di GAME e' sceso a ~505 B, ~56 B nelle varianti di test; la zona 1 del MENU, con `npc_init`, ha 7 B liberi).
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11). **Ogni villaggio nuovo**: locanda con lo stesso baule,
   la mappa fuori da `$C900-$CFFF` (zona 1 del modulo MENU), `lab64 test regression -k VIL-MENU`.
 - 15 quest (o 10), NPC, abilità solo da quest, tre villaggi, stanze fisse, compagno Torvald, pagine su disco (`QSTn`,

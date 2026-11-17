@@ -21,10 +21,10 @@ powers: they start at once
 {a skill shows in the hud only when}
 {your level allows it.}
 
-[1]-[4]  drink a potion of the belt
-[5]  read a portal scroll
+[1]-[4]  belt potions  [5]  portal scroll
 [i]  inventory      [m]  floor map
 [c]  character      [run/stop]  menu
+[q]  quest
 === fire on places
 stand on a place and press [fire]:
  stairs down   the next floor

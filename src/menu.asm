@@ -18,6 +18,7 @@
         jmp ov_stash            ; MENU_INN: locanda
         jsr mk_off              ; MENU_SHOP: negozio A (0 fabbro, 1 alchimista); enter_shop e' nella zona 2: prima
         jmp enter_shop          ; il KERNAL va escluso (con $01 = $36 a $F4E0- si eseguirebbe la ROM)
+        jmp npc_init            ; MENU_NPC (17/11): NPC del villaggio (menu/npc.asm)
 
 ; KERNAL escluso per tutto il menu (sei, NMI in RAM, $01 = $35). Preserva A, X, Y. Da chiamare SOLO dalla zona 1.
 mk_off: sei
@@ -39,6 +40,7 @@ mk_exit:
 
         .include "menu/inn.asm"
         .include "menu/shop_act.asm"
+        .include "menu/npc.asm"
 mz1_top
         .cerror mz1_top > MR1_END, "modulo MENU: zona 1 oltre $CFFF di ", mz1_top - MR1_END, " B"
 ;@free mz1_top..MR1_END "Coda della zona 1 del MENU: codice o dati del modulo MENU (la build stampa lo spazio libero delle zone)" use=code

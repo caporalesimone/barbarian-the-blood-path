@@ -63,6 +63,7 @@ nm_lobby .text "lobby"
 nm_menu .text "menu"                   ; menu del villaggio (locanda), stash.asm
 nm_twn  .text "twn"                    ; (12/11) villaggio del capitolo: "TWN" + cifra (c_chap)
 nm_bch  .text "bossch"                 ; (12/11) mappa del boss del capitolo: "BOSSCH" + cifra
+nm_qst  .text "qst"                    ; (17/11) testo della quest: "QST" + cifra (quest.asm)
 
 ; A = 0 villaggio, 1..8 tema -> carica "GFXn" nella cache sotto il KERNAL. C=1 errore
 load_gfx:

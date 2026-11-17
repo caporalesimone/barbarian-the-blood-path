@@ -108,13 +108,21 @@ stateDiagram-v2
 - Movimento: solo i **4 mostri più vicini** fra quelli svegli si muovono (scelta con un fotogramma di ritardo,
   `sel_offer`/`sel_has`); passi da 2 px verso il PG (`mon_step`, prima l'asse più lontano), collisioni con muri,
   altri mostri e PG (`sep_check`, `occ_check`). Un mostro bloccato aspetta 16 fotogrammi.
-- **Muri e angoli** (06/11 sera, segnalazione con il seed ANOANO, piano 2): se il mostro è bloccato su **entrambi** gli
-  assi verso il PG (per esempio nell'angolo di una stanza con il PG oltre il muro) passa allo **scorrimento lungo il
-  muro** (`slide_start` / `mon_slide`, tabelle `mslide` / `mslc` a `$9ABF`): direzione voluta = l'asse con la
-  distanza maggiore, verso il PG; scorrimento = l'altro asse, dalla parte opposta al PG. A ogni passo prova prima la
-  direzione voluta: appena è libera la segue fino a entrare nella casella nuova più 8 px, poi torna a inseguire.
-  Scorrimento bloccato: si gira; al massimo `SLIDE_N` = 64 passi (128 px). Non è un pathfinding completo: un
-  percorso a labirinto lungo può ancora fermarlo.
+- **Muri, angoli e sacche** (17/11, al posto dello scorrimento lungo i muri del 06/11, che lasciava i mostri negli angoli):
+  il passo verso il PG vale solo se **avvicina** il mostro (distanza di Manhattan, `no_progress`): prima lo scivolamento di
+  1 px sugli spigoli lo faceva oscillare avanti e indietro sul bordo di un muro, senza mai risultare bloccato. Senza
+  avvicinamento parte una **ricerca di percorso** sulle caselle (`mon_path`, BFS in una finestra 13x13 attorno al mostro,
+  tabelle a `$A500`): verso la casella del PG o, se non è nella finestra, la casella della finestra più vicina a lui. Il mostro
+  segue le prime **5 mosse** del percorso casella per casella (`mon_follow`, in `src/game/monpath.asm`: prima allinea l'altro
+  asse al centro della casella, così passa dalle porte), poi torna a inseguire. Se il PG non era raggiungibile nella finestra
+  il percorso è "esplora": alla fine si fa subito un'altra ricerca; in una sacca (nessuna casella più vicina al PG della
+  partenza) va alla casella del bordo della finestra più vicina a lui. La ricerca è **a rate** (PERF-21: fatta tutta insieme
+  costava fino a ~2 frame e un piano superava il tetto di 3 frame): 14 caselle per giro (`PZ_STEP`), 120 in tutto (`PZ_MAXC`),
+  un mostro alla volta (`pz_own`; un altro aspetta, o la riprende se quella è ferma da 8 giri); intanto il mostro aspetta un
+  turno solo invece dei 16 fotogrammi di un mostro bloccato. Stato in `mslide` / `mslc` (mosse a 2 bit), coda di 32 caselle.
+  Misura con un simulatore Python del movimento (stesso algoritmo, mappe vere di 8 piani, 7456 coppie mostro-PG a ≤ 7 caselle):
+  bloccati dall'1,7% (vecchio) allo 0,7%; restano i percorsi lunghi (≥ 17 caselle, giri attorno a un muro più grandi della
+  finestra). `tests/regression/monsters/test_path.py` (MON-AI-11: 5 casi in cui il vecchio inseguimento restava fermo).
 - **Spigoli** (anche per il PG): `try_step_x` / `try_step_y` controllano due sonde sul bordo (±5 px); se ne è
   bloccata una sola (spigolo), l'essere scivola di 1 px dalla parte libera invece di fermarsi, così si entra nei
   varchi anche non allineati. `tests/regression/monsters/test_ai.py`.

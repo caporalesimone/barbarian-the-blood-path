@@ -165,10 +165,13 @@ _sd     lda solid_dun,y
         bpl _sd
         bmi _dun
 _st     jsr town_post           ; la mappa del villaggio e' gia' in MAP (file GFX0, data/town_map.txt)
+        lda #1                  ; (17/11) NPC da piazzare attorno al PG (quest.asm, al primo npc_tick)
+        sta npc_pend
         jsr clear_lvlblk
         jmp music_town
-_dun    ldx #63                 ; mostri: nessuno scorrimento lungo i muri in corso (mslide, mslc)
+_dun    ldx #63                 ; mostri: nessun percorso in corso (mslide, mslc: mon_path)
         lda #0
+        sta pz_run              ; (17/11) nessuna ricerca a meta' dal piano prima
 -       sta mslide,x
         dex
         bpl -

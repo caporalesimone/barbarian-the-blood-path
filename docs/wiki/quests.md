@@ -67,6 +67,40 @@ disco, in background dove si può; elenco dei premi; almeno una decina di quest;
 
 
 
+## Concept del 17/11 (implementato, testi segnaposto)
+
+Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
+- **Pagina della quest**: tasto **Q** (libero nel gioco) ovunque, o **Fire** accanto a chi dà la quest. Menu classico come quelli
+  dei negozi, riquadri con l'etichetta sulla cornice: **from** (chi l'ha data), il **titolo** sulla cornice del testo, il **testo**
+  (fino a 11 righe da 36 colonne), **reward**, **status** (oggi sempre "active"). Senza quest letta: "no quest: talk to the villagers".
+  La pergamena disegnata resta un'idea per dopo (costa grafica e memoria): si parte dal menu classico.
+- **Un file per quest**, `QSTn` (`data/quests.yaml` → `tools/build/gen_quests.py`): il **codice della pagina** (`src/qpage.asm`,
+  ~410 B, assemblato con le etichette del gioco come il LOBBY) **più il testo** della quest; `QST0` = solo la pagina ("no quest").
+  Si legge a ogni apertura in `$BC00` (lo schermo B del gioco, ridisegnato all'uscita) e si esegue: in GAME restano ~40 B
+  (`ui_quest`). Ogni quest ha quindi il suo spazio (fino a ~590 B di testo) e il testo nuovo si carica con la quest. Costo:
+  la schermata di attesa a ogni apertura (~0,5 s, non misurato con precisione).
+- **NPC nel villaggio** (`src/game/quest.asm`): quattro figure dell'eroe in altri colori (sprite 3-6, liberi nel villaggio).
+  **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo** due caselle a sinistra dell'ingresso (o vicino, a caso): avvicinandosi
+  da qualunque lato compare il suo nome nella barra; **Fire** = quest letta (`c_qst`, salvato con l'eroe: SAVE_VER $C8) e la
+  sua pagina. Dopo la prima volta la pagina si riapre con **Q** o con Fire accanto a lui. I luoghi hanno la precedenza (su una
+  porta o una scala vale il luogo).
+- **NPC che vagano** (tre per villaggio): si muovono **solo se il PG è a meno di 10 caselle**, a fotogrammi alterni, e solo
+  quando lo decide il caso (1 volta su 64 per NPC fermo): una casella in una direzione a caso, 2 px per passo; si fermano su
+  un muro e non entrano nella casella del PG. Il PG per ora li attraversa (nessuna collisione).
+- **Lobby**: nella pagina del barbaro, "current quest:" mostra il titolo della quest letta (`quests.inc`).
+- Test: `tests/sanity/quest/cases.py` (QUEST-10..13).
+- **Memoria**: GAME passa a ~505 B di margine sotto `$8720` (avviso della build sotto 1 KB; con le varianti di test, es.
+  `TESTUI=28`, restano ~56 B). Il piazzamento degli NPC (`npc_init`) sta nel modulo MENU (zona 1, `src/menu/npc.asm`, chiamato con
+  `MENU_NPC`): la zona 1 resta con **7 B** liberi. Il resto degli NPC (~380 B) va spostato fuori da GAME prima delle quest vere.
+- **Da fare dopo** (TODO H1): stati veri (offerta, attiva, da riscuotere, fatta), obiettivi e premi, NPC per villaggio con
+  posizioni scelte nella mappa, testi veri.
+
+### Mini quest degli altri NPC (richiesta del 17/11, da progettare)
+Oltre alle quest della trama, **mini quest** date da NPC minori dei villaggi, brevi e ripetibili: per esempio "uccidi 5 mostri di
+un certo tipo" (contatore sui tipi in `kill_monster`), "porta un oggetto", "raggiungi il piano N". Premi piccoli (oro, pozioni,
+un oggetto). Da decidere: quante per villaggio, se una alla volta o più insieme (byte nell'eroe: tipo, parametro, contatore),
+dove si vedono (la stessa pagina Q, con una lista). Usano lo stesso formato di file (`QSTn`) e la stessa pagina.
+
 ## Parte 1 — Il quest system visto dal giocatore
 
 ### In due righe

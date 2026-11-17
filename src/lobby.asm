@@ -390,10 +390,24 @@ dt_redraw
         lda #7
         sta ui_col
         jsr ui_seed
-        #at 19,15               ; quest: segnaposto finche' le quest non esistono (08/11)
+        #at 17,15               ; (17/11, concept) quest letta: il suo titolo (quests.inc di GAME), "-" se nessuna
         lda #7
         sta ui_col
-        #msg "-"
+        ldx c_qst
+        beq +
+        cpx #Q_N+1
+        bcs +
+        lda q_ttl_hi,x
+        pha
+        lda q_ttl_lo,x
+        tay
+        pla
+        tax                     ; X = byte alto
+        tya                     ; A = byte basso
+        jsr ui_puts
+        jmp ++
++       #msg "-"
++
         #at 21,16
         lda #7
         sta ui_col

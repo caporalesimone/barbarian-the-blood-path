@@ -99,7 +99,7 @@ flowchart TB
     REL["rel.asm<br/>salvataggi con il plugin di Krill<br/>(file per eroe, elenco)"]
     CHAP["chapter.asm<br/>sequenza dei capitoli: piano del boss,<br/>sblocco, uscita del villaggio (12/11)"]
     CHT["cheats.asm (solo CHEATS=1)<br/>menu dei trucchi (15/11)"]
-    DISK["disk.asm + stash_io.asm (CODE2 $9C00)<br/>load_raw (Krill), load_gfx, fin_load, LOBBY"]
+    DISK["disk.asm + stash_io.asm + monpath.asm (CODE2 $9C00)<br/>load_raw (Krill), load_gfx, fin_load, LOBBY, mon_follow"]
     LOOP --> INPUT & PLAYER & CAM & SPR
     LOOP --> GG
     LOOP --> PF
@@ -144,6 +144,9 @@ flowchart TB
 | `cheats.asm` | ~150 | (15/11) **solo con `CHEATS=1`** (build di debug e di test; con 0, la release, non si assembla), in fondo al primo blocco di codice: `cheat_menu`, il menu dei trucchi della voce "cheats" del menu di gioco (god mode, level up, respec token, next level, next chapter: richiamano `add_xp`, `resp_add`, `go_down`, `go_tdown`, `chap_won`, `change_level`, `save_level`, `chap_travel`) | [Interfaccia](interfaccia.md), [Build](build.md) |
 | `rel.asm` | ~650 | salvataggi con il plugin di save di Krill: file `save-0N` (eroe + piani), elenco `hl`, stato compatto dei piani | [Salvataggi](salvataggi.md) |
 | `disk.asm` | ~180 | nomi dei file, `load_raw`/`load_file` (Krill), grafica, sala del trono, LOBBY (blocco `CODE2` `$9C00`–`$9FFF`) | [Tecnica](tecnica.md) |
+| `monpath.asm` | ~70 | (17/11) `mon_follow` e tabelle della ricerca di percorso dei mostri bloccati (`mon_path` sta in `game.asm`; blocco `CODE2`) | [Mostri](mostri.md) |
+| `quest.asm` | ~110 | (17/11, concept) NPC del villaggio (fermo + vaganti; il piazzamento in `src/menu/npc.asm`, modulo MENU), `ui_quest` che legge ed esegue il file `QSTn` | [Quest](quests.md) |
+| `src/qpage.asm` | ~170 | (17/11) pagina della quest: modulo in testa ai file `QSTn`, eseguito a `$BC00` | [Quest](quests.md) |
 | `src/menu/*` (modulo MENU) | 1765 | locanda (`inn.asm`, `inn_eq.asm`), negozi (`shop.asm`, `shop_act.asm`, `shop_fix.asm`) | [Villaggio](villaggio.md) |
 
 **Dati generati** che GAME include (cartella `out/`): `db.asm` (oggetti, mostri, regole, negozi: `tools/build/gen_db.py` da
@@ -167,7 +170,7 @@ flowchart TB
         CODE["codice e dati $0400-$7972<br/>(margine 3501 B fino a $8720)"]
         HUDS["$8400 schermo HUD, sprite della barra,<br/>brani SND_LBUF $8A40 / SND_FBUF $8E80,<br/>sprite forti $8C00, nomi dei mostri NM_AT $8F6D"]
         VARS["$9000-$9BFF variabili: gioco, combattimento,<br/>eroe CHRBLK $9500, mostri MRT $9600,<br/>stato del piano LVLBLK $9800, player SID"]
-        C2["$9C00-$9FFF CODE2: disco"]
+        C2["$9C00-$9FFF CODE2: disco, percorsi dei mostri"]
     end
     subgraph R2["$A000-$BFFF: banco VIC 2"]
         VIC["sprite, charset $A800, schermi A $B400 / B $BC00,<br/>font della UI $B800"]

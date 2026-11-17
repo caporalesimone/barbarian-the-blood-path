@@ -113,6 +113,7 @@ st_id   .fill STASH_N    ; baule della locanda: id dei 24 oggetti (0 = vuoto)
 st_b    .fill STASH_N    ; baule della locanda: bonus
 st_du   .fill STASH_N    ; baule della locanda: durabilita' attuale
 st_m    .fill STASH_N    ; baule della locanda: durabilita' massima
+c_qst   .byte ?          ; (17/11, SAVE_VER $C8, concept) quest letta: 0 nessuna, n = file QSTn (quest.asm); in fondo al blocco
 CHREND
         .endv
         .cerror CHREND > mfar, "blocco personaggio sovrapposto a mfar"
@@ -2197,6 +2198,8 @@ _n      inx
 update_monsters:
         lda #0
         sta cur_m
+        sta pz_used             ; (17/11) al massimo una ricerca di percorso (mon_path) per giro
+        inc pz_age
         lda frame               ; scelta dei 4 piu' vicini: raccolta sui frame 0 e 1 di ogni 4
         and #3                  ; (i mostri svegli sono elaborati a frame alterni)
         sta sel_on
@@ -2365,8 +2368,10 @@ _step   jsr mon_step
         lda myl,x
         cmp mo_yl
         bne _mok
+        lda pz_wt               ; (17/11) ricerca di percorso in corso: riprova al prossimo turno
+        bne +
         lda #STUCK_WAIT
-        sta mfar,x
++       sta mfar,x
         jmp _contact
 _mok    dec m_steps
         bne _step
@@ -2396,11 +2401,10 @@ _next   inc cur_m
         jmp _loop
 
 STUCK_WAIT = 8                  ; turni di movimento (= 16 frame) di attesa per un mostro bloccato
-SLIDE_N    = 64                 ; passi (da 2 px) al massimo lungo un muro prima di tornare a inseguire
 
         .virtual $9abf          ; (azzerate con LVLBLK da clear_lvlblk e da load_location)
-mslide  .fill 32                ; 0 = insegue; altrimenti $10 + dir. voluta (bit 0-1) + 4 x dir. di scorrimento (bit 2-3), bit 5 = uscita
-mslc    .fill 32                ; passi di scorrimento residui
+mslide  .fill 32                ; (17/11) percorso (mon_path): bit 0-1 = mossa 5, bit 3 = esplora, bit 4-6 = mosse rimaste (0 = insegue), bit 7 = casella nuova
+mslc    .fill 32                ; mosse 1-4 del percorso (2 bit ciascuna, la corrente nei bit bassi)
 md_d    .byte ?                 ; direzione del passo (mon_try_d)
 mslide_end
         .endv
@@ -2486,9 +2490,14 @@ mon_step:
         sta ot_x
         lda nt_y
         sta ot_y
-        lda mslide,x            ; lungo un muro (06/11: i mostri restavano chiusi negli angoli delle stanze)
+        lda mslide,x            ; (17/11) percorso in corso (mon_path): lo segue
+        and #$70
+        beq _gx
+        jmp mon_follow
+_gx     lda mslide,x            ; percorso finito senza aver visto il PG (bit 3, "esplora"): subito un'altra ricerca
+        and #8
         beq _greedy
-        jmp mon_slide
+        jmp _path
 _greedy lda m_adx
         cmp m_ady
         bcc _ypref
@@ -2511,13 +2520,14 @@ _try_x  lda m_adx
         cmp #2
         bcc _store
         jsr mon_try_x
-_store  lda ent_x               ; nessun passo in nessuna delle due direzioni verso il PG: scorrimento lungo il muro
-        cmp mo_xl
-        bne mon_put
-        lda ent_y
-        cmp mo_yl
-        bne mon_put
-        jsr slide_start
+_store  jsr no_progress         ; (17/11) nessun avvicinamento al PG (muro, o solo lo scivolamento di 1 px di uno spigolo,
+        bcc mon_put             ; che faceva oscillare il mostro negli angoli): percorso breve con una ricerca sulle caselle
+        jsr mon_undo
+_path   jsr mon_path
+        lda mslide,x
+        and #$70
+        beq mon_put             ; nessun percorso (o ricerca gia' fatta in questo giro): fermo, il chiamante aspetta
+        jmp mon_follow
 mon_put lda ent_x
         sta mxl,x
         lda ent_x+1
@@ -2528,92 +2538,323 @@ mon_put lda ent_x
         sta myh,x
         rts
 
-; bloccato verso il PG su entrambi gli assi: direzione voluta = asse con la distanza maggiore, verso il PG;
-; scorrimento = l'altro asse, nel verso opposto al PG (da quella parte c'e' il muro). Direzioni: 0 +x, 1 -x, 2 +y, 3 -y
-slide_start:
-        lda m_adx
-        cmp m_ady
-        bcc _vy
-        lda m_dxh               ; voluta: x verso il PG
-        asl
-        lda #0
-        rol                     ; 0 = +x, 1 = -x
-        sta tmpv
-        lda m_dyh               ; scorrimento: y opposta al PG
-        asl
-        lda #0
-        rol
-        eor #1
-        ora #2
-        jmp _set
-_vy     lda m_dyh               ; voluta: y verso il PG
-        asl
-        lda #0
-        rol
-        ora #2
-        sta tmpv
-        lda m_dxh               ; scorrimento: x opposta al PG
-        asl
-        lda #0
-        rol
-        eor #1
-_set    asl
-        asl
-        ora tmpv
-        clc
-        adc #$10                ; (bit 4: modo attivo, cosi' mslide <> 0 anche con 0 + 0)
-        sta mslide,x
-        lda #SLIDE_N
-        sta mslc,x
-        rts
+; (no_progress: in monpath.asm, blocco CODE2)
 
-; un passo lungo il muro: prima la direzione voluta (appena e' libera la si segue fino a cambiare casella, poi
-; di nuovo inseguimento), altrimenti lo scorrimento; scorrimento bloccato: si gira; passi finiti: inseguimento
-mon_slide:
-        lda mslide,x
-        and #3
-        jsr mon_try_d
-        bcs _sl
-        lda mslide,x            ; gia' nella casella nuova: ancora mezza casella (8 px), poi inseguimento
-        and #$20
+; ---- (17/11) percorso breve dei mostri bloccati. Ricerca in ampiezza (BFS) sulle caselle in una finestra 13x13 attorno al
+; mostro (BF_R = 6): fino alla casella del PG, o alla casella della finestra piu' vicina a lui. Del percorso trovato restano
+; le prime 5 mosse (2 bit ciascuna, la prima nei bit bassi): mslc = mosse 1-4, mslide bit 0-1 = mossa 5, bit 3 = "esplora"
+; (PG non raggiunto nella finestra: a fine percorso un'altra ricerca invece dell'inseguimento; in una sacca senza caselle piu'
+; vicine al PG il percorso va alla casella del bordo della finestra piu' vicina a lui), bit 4-6 = numero di mosse rimaste,
+; bit 7 = casella nuova gia' raggiunta (mon_follow). Al massimo una ricerca per giro (pz_used): costa fino
+; a ~2 frame con la finestra piena, di solito molto meno (si ferma appena trova il PG). Al posto dello scorrimento lungo i
+; muri del 06/11 (che restava negli angoli): docs/wiki/mostri.md.
+BF_R  = 6
+BF_W  = 2*BF_R+1                ; 13
+BF_N  = BF_W*BF_W               ; 169 caselle
+BF_C  = BF_R*BF_W+BF_R          ; casella centrale (il mostro)
+BF_QN = 32                      ; coda circolare (la frontiera di una finestra 13x13 non supera ~26 caselle)
+BFP   = $a500                   ; direzione dal genitore per casella: $ff = non vista, $fd = muro, $fe = partenza
+BFQ   = BFP+BF_N                ; coda
+;@map BFP..BFQ+BF_QN+26 "Ricerca di percorso dei mostri bloccati (mon_path): direzioni, coda e variabili; libera fuori dalla ricerca"
+        .virtual BFQ+BF_QN
+pz_wx   .byte ?                 ; origine della finestra sulla mappa (con segno: fuori mappa = muro)
+pz_wy   .byte ?
+pz_hx   .byte ?                 ; PG nelle coordinate della finestra (con segno)
+pz_hy   .byte ?
+pz_qh   .byte ?
+pz_qt   .byte ?
+pz_c    .byte ?                 ; casella corrente
+pz_cx   .byte ?
+pz_cy   .byte ?
+pz_n    .byte ?
+pz_d    .byte ?
+pz_best .byte ?
+pz_bd   .byte ?
+pz_rl   .byte ?                 ; registro delle mosse (12 bit)
+pz_rh   .byte ?
+pz_used .byte ?
+mf_d    .byte ?                 ; mossa corrente (mon_follow: mon_try_d riscrive md_d)
+pz_bb   .byte ?                 ; casella del bordo della finestra piu' vicina al PG, e la sua distanza
+pz_bbd  .byte ?
+pz_ex   .byte ?                 ; 8 = percorso "esplora" (PG non raggiunto)
+pz_cnt  .byte ?                 ; caselle che si possono ancora esaminare in questo giro
+pz_tot  .byte ?                 ; ... in tutta la ricerca
+pz_run  .byte ?                 ; 1 = ricerca in corso (stato in BFP/BFQ/pz_*) per il mostro pz_own
+pz_own  .byte ?
+pz_age  .byte ?                 ; giri dall'ultima ripresa della ricerca (update_monsters)
+pz_wt   .byte ?                 ; 1 = ricerca in corso per questo mostro: aspetta un turno solo (non STUCK_WAIT)
+        .endv
+PZ_MAXC = 120
+PZ_STEP = 14
+        .cerror BFQ+BF_QN+26 > $a600, "mon_path: tabelle oltre $a600"
+
+mon_path:
+        lda #0
+        sta pz_wt
+        lda pz_used
         beq +
-        dec mslc,x
-        bne _put
-        beq _off
-+       jsr ent_tile            ; passo nella direzione voluta: casella cambiata su quell'asse?
-        lda mslide,x
-        and #2
-        bne _cy
-        lda nt_x
-        cmp ot_x
-        jmp _ch
-_cy     lda nt_y
-        cmp ot_y
-_ch     beq _put
-        lda mslide,x
-        ora #$20
+        rts                     ; (ricerca gia' fatta in questo giro: lo stato del mostro resta com'e')
++       inc pz_used
+        lda #0
         sta mslide,x
-        lda #4
         sta mslc,x
-        bne _put
-_sl     lda mslide,x
-        and #$20
-        bne _off                ; uscendo, la direzione voluta si chiude: inseguimento
-        lda mslide,x
+        stx occ_x
+        lda pz_run              ; (17/11, PERF-21) ricerca a rate: PZ_STEP caselle per giro, PZ_MAXC in tutto
+        beq _new
+        cpx pz_own
+        beq _cont               ; la ricerca di questo mostro continua
+        lda pz_age
+        cmp #8
+        bcs _new                ; quella di un altro e' ferma da 8 giri (mostro morto, sbloccato): la si riprende per questo
+        rts                     ; un altro mostro sta cercando: questo aspetta
+_new    stx pz_own
+        lda #1
+        sta pz_run
+        lda #PZ_MAXC
+        sta pz_tot
+        lda #$ff
+        sta pz_bbd              ; migliore casella del bordo della finestra (per uscire da una sacca)
+        ldy #BF_N-1
+        lda #$ff
+-       sta BFP,y
+        dey
+        cpy #$ff
+        bne -
+        lda ot_x
+        sec
+        sbc #BF_R
+        sta pz_wx
+        lda ot_y
+        sec
+        sbc #BF_R
+        sta pz_wy
+        lda ptx
+        sec
+        sbc pz_wx
+        sta pz_hx
+        lda pty
+        sec
+        sbc pz_wy
+        sta pz_hy
+        lda #$fe
+        sta BFP+BF_C
+        lda #BF_C
+        sta BFQ
+        sta pz_best
+        lda #BF_R
+        sta pz_cx
+        sta pz_cy
+        jsr pz_h
+        sta pz_bd
+        lda #0
+        sta pz_qh
+        lda #1
+        sta pz_qt
+_cont   lda #0
+        sta pz_age
+        lda #PZ_STEP            ; caselle esaminate in questo giro (meno di un frame)
+        sta pz_cnt
+_loop   lda pz_bd
+        bne +                  ; PG raggiunto
+        jmp _done
++
+        ldy pz_qh
+        cpy pz_qt
+        bne +                  ; finestra esplorata
+        jmp _done
++
+        dec pz_tot              ; tetto della ricerca: si usa il migliore trovato finora
+        bne +
+        jmp _done
++       dec pz_cnt              ; fine del giro: si riprende al prossimo (il mostro aspetta un turno solo)
+        bne +
+        lda #1
+        sta pz_wt
+        ldx occ_x
+        rts
++       lda BFQ,y
+        sta pz_c
+        iny
+        tya
+        and #BF_QN-1
+        sta pz_qh
+        lda pz_c                ; colonna e riga: c = 13 * riga + colonna
+        ldy #0
+-       cmp #BF_W
+        bcc +
+        sbc #BF_W
+        iny
+        bne -
++       sta pz_cx
+        sty pz_cy
+        lda #0
+        sta pz_d
+_dir    ldy pz_d
+        lda pz_cx
+        clc
+        adc pz_ddx,y
+        cmp #BF_W
+        bcc +                  ; fuori dalla finestra (anche -1 = $ff)
+        jmp _nd
++
+        sta tx
+        lda pz_cy
+        clc
+        adc pz_ddy,y
+        cmp #BF_W
+        bcc +                  
+        jmp _nd
++
+        sta ty
+        lda pz_c
+        clc
+        adc pz_dc,y
+        sta pz_n
+        tay
+        lda BFP,y
+        cmp #$ff
+        beq +                  ; gia' vista (o muro)
+        jmp _nd
++
+        lda tx                  ; muro? (casella sulla mappa; fuori mappa = muro)
+        pha
+        clc
+        adc pz_wx
+        sta tx
+        cmp #MAPW
+        bcc +                  
+        jmp _wall
++
+        lda ty
+        pha
+        clc
+        adc pz_wy
+        sta ty
+        cmp #MAPH
+        bcs _wall2
+        jsr get_tile
+        tay
+        lda solidtab,y
         lsr
-        lsr
-        and #3
-        jsr mon_try_d
-        bcs _turn
-        dec mslc,x
-        bne _put
-_off    lda #0
+        bcs _wall2
+        pla
+        sta ty
+        pla
+        sta tx
+        ldy pz_n
+        lda pz_d
+        sta BFP,y
+        tya
+        ldy pz_qt
+        sta BFQ,y
+        iny
+        tya
+        and #BF_QN-1
+        sta pz_qt
+        lda pz_cx               ; distanza di Manhattan dal PG della casella nuova
+        pha
+        lda pz_cy
+        pha
+        lda tx
+        sta pz_cx
+        lda ty
+        sta pz_cy
+        jsr pz_h
+        tay
+        pla
+        sta pz_cy
+        pla
+        sta pz_cx
+        lda tx                  ; casella sul bordo della finestra: candidata per uscire da una sacca
+        beq _bb
+        cmp #BF_W-1
+        beq _bb
+        lda ty
+        beq _bb
+        cmp #BF_W-1
+        bne _bn
+_bb     cpy pz_bbd
+        bcs _bn
+        sty pz_bbd
+        lda pz_n
+        sta pz_bb
+_bn     cpy pz_bd
+        bcs _nd
+        sty pz_bd
+        lda pz_n
+        sta pz_best
+        jmp _nd
+_wall2  pla
+_wall   pla
+        ldy pz_n
+        lda #$fd
+        sta BFP,y
+_nd     inc pz_d
+        lda pz_d
+        cmp #4
+        bcs +                  
+        jmp _dir
++
+        jmp _loop
+_done   lda #0                  ; PG non raggiunto: percorso "esplora" (bit 3), e in una sacca (nessuna casella piu' vicina al PG
+        sta pz_run              ; della partenza) la casella del bordo della finestra piu' vicina al PG
+        sta pz_ex
+        lda pz_bd
+        beq _bk
+        lda #8
+        sta pz_ex
+        lda pz_best
+        cmp #BF_C
+        bne _bk
+        lda pz_bbd
+        cmp #$ff
+        beq _bk
+        lda pz_bb
+        sta pz_best
+_bk     lda #0                  ; dal migliore indietro fino al mostro: le mosse piu' vicine al mostro restano nei bit bassi
+        sta pz_rl
+        sta pz_rh
+        sta pz_n                ; numero di mosse (massimo 5)
+        ldy pz_best
+_back   lda BFP,y
+        cmp #4
+        bcs _end                ; partenza
+        sta pz_d
+        asl pz_rl               ; registro = registro * 4 + d (10 bit)
+        rol pz_rh
+        asl pz_rl
+        rol pz_rh
+        ora pz_rl
+        sta pz_rl
+        lda pz_rh
+        and #$03
+        sta pz_rh
+        lda pz_n
+        cmp #5
+        bcs +
+        inc pz_n
++       tya                     ; casella del genitore = casella - passo della direzione
+        ldy pz_d
+        sec
+        sbc pz_dc,y
+        tay
+        jmp _back
+_end    ldx occ_x
+        lda pz_n
+        beq _r
+        asl
+        asl
+        asl
+        asl
+        ora pz_rh
+        ora pz_ex
         sta mslide,x
-        beq _put
-_turn   lda mslide,x            ; muro anche di lato: si torna indietro lungo il muro
-        eor #4
-        sta mslide,x
-_put    jmp mon_put
+        lda pz_rl
+        sta mslc,x
+_r      rts
+
+; (pz_h, pz_ddx/pz_ddy/pz_dc, mon_follow: in monpath.asm, nel secondo blocco di codice CODE2)
+
 
 ; A = direzione (0 +x, 1 -x, 2 +y, 3 -y): passo di 2 px (o 1) con controllo occupazione. C=1 bloccato
 mon_try_d:
@@ -3168,7 +3409,11 @@ _p5     lda keynew+2
         and #$01
         beq _kc
         jsr use_scroll
-_kc     lda keynew+2            ; (11/11) C: schermata del personaggio (punti statistica, respec)
+_kc     lda keynew+7            ; (17/11) Q: pagina della quest (quest.asm)
+        and #$40
+        beq +
+        jmp ui_quest
++       lda keynew+2            ; (11/11) C: schermata del personaggio (punti statistica, respec)
         and #$10
         beq _inv
         jmp ui_charsheet
@@ -3438,15 +3683,20 @@ _n1     cmp #T_DHOME
         bcs _r
         jmp MENU_INN
 _shp    cmp #T_DSMITH
-        bcc _r
+        bcc _np
         cmp #T_DALCH+1
-        bcs _r
+        bcs _np
         sbc #T_DSMITH-1         ; (C=0) negozio 0 fabbro, 1 alchimista
         pha
         jsr ovl_town            ; negozi: modulo MENU
         pla
         bcs _r
         jmp MENU_SHOP
+_np     jsr npc_here            ; (17/11) nessun luogo sotto il PG: accanto a chi da' la quest, la quest e' letta e si apre
+        bcc _r                  ; la sua pagina (quest.asm)
+        lda #Q_CUR
+        sta c_qst
+        jmp ui_quest
 _r      rts
 _st     stx st_kind
         cpx #2
@@ -3691,8 +3941,11 @@ _ring   lda #$9a
         bne _rc
         lda #10
 _rc     sta sh_col+2
-        ; mostri (sprite 3..7)
-_mon    lda #3
+        ; mostri (sprite 3..7); nel villaggio gli NPC (17/11, quest.asm)
+_mon    lda cur_level
+        bne +
+        jmp npc_draw
++       lda #3
         sta bs_slot
         lda #0
         sta bs_m

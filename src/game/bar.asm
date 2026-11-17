@@ -512,12 +512,12 @@ bar_target:                     ; X = indice mostro (preservato)
 ; ===================================================================
 loc_lo  .byte 0, <ls_down, <ls_up, <ls_tdown, <ls_portal, <ls_chest, <ls_kchest, <ls_gchest
         .byte <ls_smith, <ls_alch, <ls_fount, <ls_uptown, <ls_ptown, <ls_nokey, <ls_home, <ls_near, <ls_abyss
-        .byte <ls_lever, <ls_epic, <ls_travel
+        .byte <ls_lever, <ls_epic, <ls_travel, <q_gvr1
 loc_hi  .byte 0, >ls_down, >ls_up, >ls_tdown, >ls_portal, >ls_chest, >ls_kchest, >ls_gchest
         .byte >ls_smith, >ls_alch, >ls_fount, >ls_uptown, >ls_ptown, >ls_nokey, >ls_home, >ls_near, >ls_abyss
-        .byte >ls_lever, >ls_epic, >ls_travel
+        .byte >ls_lever, >ls_epic, >ls_travel, >q_gvr1
 ; numero da accodare: 0 nessuno, 1 = livello+1, 2 = livello-1, 3 = livello di ritorno del portale, 4 = 1
-loc_numk .byte 0, 1, 2, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+loc_numk .byte 0, 1, 2, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
         .enc "screen"
 ls_down   .text "stairs down to level ", 0        ; (12/11, committente) + piano del capitolo 1..5 (loc_cl)
 ls_up     .text "stairs up to level ", 0
@@ -610,7 +610,9 @@ loc_id:
         lda cur_level           ; (12/11) primo piano del capitolo: "stairs up to town"
         jsr lv_grp
         cpx #0
-        bne _r
+        beq +
+        jmp _r
++
         ldy #11
         bne _r
 _n2     ldy #3
@@ -671,7 +673,10 @@ _n6        lda li_t
         iny
         cmp #T_FOUNTAIN
         beq _r
+        jsr npc_here            ; (17/11) nessun luogo: accanto a chi da' la quest, il suo nome (quest.asm)
         ldy #0
+        bcc _r
+        ldy #QL_ID
 _r      tya
         rts
 
