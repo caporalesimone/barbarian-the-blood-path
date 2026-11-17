@@ -79,21 +79,31 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   Si legge a ogni apertura in `$BC00` (lo schermo B del gioco, ridisegnato all'uscita) e si esegue: in GAME restano ~40 B
   (`ui_quest`). Ogni quest ha quindi il suo spazio (fino a ~590 B di testo) e il testo nuovo si carica con la quest. Costo:
   la schermata di attesa a ogni apertura (~0,5 s, non misurato con precisione).
-- **NPC nel villaggio** (`src/game/quest.asm`): quattro figure dell'eroe in altri colori (sprite 3-6, liberi nel villaggio).
-  **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo** due caselle a sinistra dell'ingresso (o vicino, a caso): avvicinandosi
+- **NPC nel villaggio** (`src/game/quest.asm`): figure dell'eroe in altri colori (sprite 3-7, liberi nel villaggio: verificato a
+  runtime, nel villaggio `sh_en` ha solo lo sprite 0 e i 3-7; gli sprite 1 e 2, fendente ed effetto, restano spenti).
+  **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo** vicino all'ingresso (a caso entro 7 caselle dal PG): avvicinandosi
   da qualunque lato compare il suo nome nella barra; **Fire** = quest letta (`c_qst`, salvato con l'eroe: SAVE_VER $C8) e la
   sua pagina. Dopo la prima volta la pagina si riapre con **Q** o con Fire accanto a lui. I luoghi hanno la precedenza (su una
   porta o una scala vale il luogo).
-- **NPC che vagano** (tre per villaggio): si muovono **solo se il PG è a meno di 10 caselle**, a fotogrammi alterni, e solo
-  quando lo decide il caso (1 volta su 64 per NPC fermo): una casella in una direzione a caso, 2 px per passo; si fermano su
-  un muro e non entrano nella casella del PG. Il PG per ora li attraversa (nessuna collisione).
+- **NPC che vagano** (fino a otto per villaggio, 17/11): ogni villaggio ha i SUOI **settori** (`SECTORS` in
+  `tools/build/villages.py`, scelti secondo la forma del villaggio: griglia 3×3 senza il centro nel 1, piattaforme nel 2, tre
+  terrazze nel 3, anello attorno al cratere nel 4, isole nel 5; rettangoli x, y, larghezza, altezza, di 10-20 caselle per lato,
+  nell'intestazione del file `TWNc`, 4 B l'uno, copiati in `tk_sec`). Il walker *n* vive nel settore *n*: **nasce con
+  probabilità 1/2** (numero casuale di NPC: 0-8, in media 4) su una casella libera presa a caso nel settore (16 tentativi, poi
+  assente) e **non ne esce mai** (`npc_in`: il passo che uscirebbe viene scartato). Si muovono **solo se il PG è a meno di 10
+  caselle**, a fotogrammi alterni, e solo quando lo decide il caso (1 volta su 64 per NPC fermo): una casella in una direzione a
+  caso, 2 px per passo; si fermano su un muro e non entrano nella casella del PG. Il PG per ora li attraversa (nessuna
+  collisione). **Sprite:** i visibili prendono gli sprite 3..7 uno dopo l'altro (`npc_draw`, al massimo 5, il sesto non si
+  disegna); la build (`gen_maps.py`) controlla che in nessuna finestra di gioco (21×13 caselle) cadano più di 5 settori, quindi
+  il limite non scatta mai. Aspetto: tutti hanno la figura dell'eroe; il pool è la tabella di 9 colori `npc_col` (uno per NPC).
 - **Lobby**: nella pagina del barbaro, "current quest:" mostra il titolo della quest letta (`quests.inc`).
-- Test: `tests/sanity/quest/cases.py` (QUEST-10..13).
+- Test: `tests/sanity/quest/cases.py` (QUEST-10..14).
 - **Memoria**: GAME passa a ~505 B di margine sotto `$8720` (avviso della build sotto 1 KB; con le varianti di test, es.
-  `TESTUI=28`, restano ~56 B). Il piazzamento degli NPC (`npc_init`) sta nel modulo MENU (zona 1, `src/menu/npc.asm`, chiamato con
-  `MENU_NPC`): la zona 1 resta con **7 B** liberi. Il resto degli NPC (~380 B) va spostato fuori da GAME prima delle quest vere.
-- **Da fare dopo** (TODO H1): stati veri (offerta, attiva, da riscuotere, fatta), obiettivi e premi, NPC per villaggio con
-  posizioni scelte nella mappa, testi veri.
+  `TESTUI=28`, restano ~56 B). Con i settori (17/11) il margine scende a **671 B** (debug) e l'intestazione residente `town_k`
+  cresce di 32 B. Il piazzamento degli NPC (`npc_init`) sta nel modulo MENU (zona 1, `src/menu/npc.asm`, chiamato con
+  `MENU_NPC`): la zona 1 resta con **36 B** liberi. Il resto degli NPC (~500 B) va spostato fuori da GAME prima delle quest vere.
+- **Da fare dopo** (TODO H1): stati veri (offerta, attiva, da riscuotere, fatta), obiettivi e premi, nomi e frasi degli NPC
+  (per ora sono solo figure), testi veri.
 
 ### Mini quest degli altri NPC (richiesta del 17/11, da progettare)
 Oltre alle quest della trama, **mini quest** date da NPC minori dei villaggi, brevi e ripetibili: per esempio "uccidi 5 mostri di

@@ -17,6 +17,7 @@ tp_smith .fill 6                ; porte per le icone della minimappa: fabbro, al
 tx_exit_x .fill TX_EXIT_N       ; uscita del capitolo (caselle =)
 tx_exit_y .fill TX_EXIT_N
 ls_fount .fill TK_NAME          ; nome del luogo di cura (etichetta della barra in alto, con lo 0 finale)
+tk_sec  .fill 4*NSEC            ; (17/11) settori degli NPC vaganti: x, y, larghezza, altezza (larghezza 0 = voce non usata); NPC n usa la voce n-1
         .cerror * - town_k != TK_LEN, "town_k: lunghezza diversa da TK_LEN (tools/build/gen_maps.py)"
 
 ; set di tile (palette) 1..8 per piano: dipende da seed e piano

@@ -29,7 +29,8 @@ def inv_legend():
     d.update(ALIASES)
     return d
 TK_NAME = 25                     # nome del luogo di cura con lo 0 finale
-TK_LEN = 20 + TK_NAME                      # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
+NSEC = 8                         # (17/11) settori degli NPC vaganti per villaggio (x, y, larghezza, altezza: 4 byte l'uno)
+TK_LEN = 20 + TK_NAME + 4 * NSEC           # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
 
 def rle(data):
     out, i = bytearray(), 0
@@ -67,7 +68,7 @@ def main():
         msg.append("%d: %d" % (c, len(k) + len(r)))
     with open(os.path.join(ROOT, "out", "work", "town_places.inc"), "w") as f:
         f.write("; generato da tools/build/gen_maps.py: intestazione dei file dei villaggi (TWNc), copiata in town_k\n")
-        f.write("TK_LEN = %d\nTK_NAME = %d\nTK_SOLID = %d\nTX_EXIT_N = 2\nNVIL = %d\n" % (TK_LEN, TK_NAME, TK_SOLID, len(V.VILLAGES)))
+        f.write("TK_LEN = %d\nTK_NAME = %d\nTK_SOLID = %d\nTX_EXIT_N = 2\nNVIL = %d\nNSEC = %d\n" % (TK_LEN, TK_NAME, TK_SOLID, len(V.VILLAGES), NSEC))
     print("villaggi: intestazione + RLE in byte (max %d): %s" % (TOWN_MAX, ", ".join(msg)))
 
 
@@ -82,6 +83,26 @@ def text(t):
 
 def rows_of(path):
     return [l.rstrip("\n") for l in open(path) if not l.startswith(";")]
+
+
+def sectors(c, m, walk):
+    """(17/11) settori degli NPC vaganti: NSEC voci di 4 byte (x, y, larghezza, altezza in caselle; larghezza 0 = voce non usata).
+    Ogni settore sta nella mappa, e' abbastanza grande e ha abbastanza caselle percorribili; il numero di settori in una
+    finestra di gioco (21 x 13 caselle) non supera i 5 sprite liberi del villaggio (3..7)."""
+    import villages as V
+    secs = V.SECTORS[c]
+    assert len(secs) <= NSEC, "villaggio %d: al massimo %d settori" % (c, NSEC)
+    ok = lambda x, y: 0 <= x < W and 0 <= y < H and m[y * W + x] in walk
+    for (x, y, w, h) in secs:
+        assert 8 <= w <= 63 and 5 <= h <= 63 and x + w <= W and y + h <= H, "villaggio %d: settore %s fuori misura" % (c, (x, y, w, h))
+        n = sum(ok(a, b) for a in range(x, x + w) for b in range(y, y + h))
+        assert n >= 20, "villaggio %d: settore %s con solo %d caselle percorribili" % (c, (x, y, w, h), n)
+    worst = max(sum(1 for (x, y, w, h) in secs
+                    if any(ok(a, b) for a in range(max(x, wx), min(x + w, wx + 21)) for b in range(max(y, wy), min(y + h, wy + 13))))
+                for wx in range(W - 20) for wy in range(H - 12))
+    assert worst <= 5, "villaggio %d: fino a %d settori nella stessa finestra (max 5: sprite 3..7)" % (c, worst)
+    out = b"".join(bytes(s) for s in secs)
+    return out + bytes(4 * (NSEC - len(secs)))
 
 
 def build(c, v):
@@ -132,6 +153,7 @@ def build(c, v):
     assert 0 < len(heal) < TK_NAME and heal == heal.lower() and all(ch in "abcdefghijklmnopqrstuvwxyz '" for ch in heal), heal
     k = bytes([px, py, sx, sy, nx, ny, bg, c1, c2, 8 | acc] + [t for i in pl for t in (i % W, i // W)]
               + [ex[0][0], ex[1][0], ex[0][1], ex[1][1]]) + text(heal).ljust(TK_NAME, b"\0")
+    k += sectors(c, m, walk)
     assert len(k) == TK_LEN
     k += bytes(sol + [0] * (TK_SOLID - len(sol)))          # tile solidi del villaggio (solidtab)
     r = rle(m)

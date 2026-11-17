@@ -279,10 +279,11 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
 | `MON-AI-11` | short path (mon_path): monsters that stayed in a corner or shook on a wall edge reach the hero (5 cases, ANOANO) |
-| `QUEST-10` | village: the NPCs are placed (quest giver + walkers on free tiles) |
+| `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
 | `QUEST-11` | Q with no quest read: the page (file QST0) says 'no quest', RUN/STOP goes back to the game |
 | `QUEST-12` | next to the quest giver: name in the bar, Fire = quest read (c_qst 1) and its page (giver, title, text) |
-| `QUEST-13` | the walkers move (slowly, the hero near) and never stand on the hero's tile |
+| `QUEST-13` | the walkers move (slowly, the hero near), stay inside their sector and never stand on the hero's tile |
+| `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
 | `MON-CHAP-11` | chapter 1: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
 | `MON-CHAP-12` | chapter 2: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
 | `MON-CHAP-13` | chapter 3: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |

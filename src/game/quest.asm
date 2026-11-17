@@ -2,12 +2,13 @@
 ;  quest.asm - (17/11, concept con testi segnaposto) pagina della quest e NPC del villaggio.
 ;  Pagina: tasto Q ovunque, o Fire davanti a chi da' la quest (NPC 0, fermo); il testo e' nel file QSTn (data/quests.yaml,
 ;  tools/build/gen_quests.py), letto a ogni apertura in QBUF = schermo B del gioco (si ridisegna all'uscita: ui_exit).
-;  NPC: 4 nel villaggio, figure dell'eroe in altri colori (sprite 3-6, liberi nel villaggio): lo 0 fermo (quest), gli
-;  altri 1-3 vagano piano (una casella alla volta, a caso) solo con il PG vicino. docs/wiki/quests.md, "Concept del 17/11".
+;  NPC: figure dell'eroe in altri colori (sprite 3-7, liberi nel villaggio; 5 al massimo disegnati insieme): lo 0 fermo (quest),
+;  gli altri vagano piano (una casella alla volta, a caso) solo con il PG vicino e SOLO nel loro settore (17/11, tk_sec).
+;  docs/wiki/quests.md, "Concept del 17/11".
 ; ===================================================================
         .enc "screen"
 QBUF    = SCR_B
-NPC_N   = 4
+NPC_N   = NSEC+1                ; (17/11) lo 0 da' la quest (fermo); gli altri NSEC vagano ognuno nel suo settore (tk_sec, villaggio)
 NPC_R   = 10                    ; gli NPC vaganti si muovono solo con il PG a meno di 10 caselle (su entrambi gli assi)
 QL_ID   = 20                    ; etichetta del luogo (bar.asm): nome di chi da' la quest
 Q_CUR   = 1                     ; (concept) la quest dell'NPC del villaggio
@@ -22,6 +23,7 @@ npc_mv  .fill NPC_N             ; pixel di cammino rimasti (0 = fermo)
 npc_tx0 .byte ?                 ; casella dell'NPC 0
 npc_ty0 .byte ?
 npc_pend .byte ?                ; 1 = da piazzare (ingresso nel villaggio)
+npc_s   .byte ?                 ; prossimo sprite libero in npc_draw
 npc_k   .byte ?
 q_p     .word ?                 ; (src/qpage.asm) puntatore del testo
 q_y     .byte ?
@@ -78,7 +80,54 @@ npc_here:
 _n      clc
         rts
 
-; (npc_init e npc_free: nel modulo MENU, zona 1, src/menu/npc.asm, per il margine di GAME; si chiamano con MENU_NPC)
+; A = numero a caso da 0 a A-1 (A = 1..63). Y conservato.
+npc_rm:
+        sta tmp7
+        jsr rand
+        and #63
+-       cmp tmp7
+        bcc +
+        sbc tmp7
+        bcs -
++       rts
+
+npc_px  ldy #0                  ; A = casella -> A/Y = 16 * A + 8
+        sty tmp7
+        asl
+        rol tmp7
+        asl
+        rol tmp7
+        asl
+        rol tmp7
+        asl
+        rol tmp7
+        ora #8
+        ldy tmp7
+        rts
+
+; C=0 se la casella (tx,ty) e' dentro la mappa, calpestabile e non e' quella del PG. X conservato.
+npc_free:
+        lda tx
+        cmp #MAPW
+        bcs _s
+        lda ty
+        cmp #MAPH
+        bcs _s
+        lda tx
+        cmp ptx
+        bne +
+        lda ty
+        cmp pty
+        beq _s
++       jsr get_tile
+        tay
+        lda solidtab,y
+        lsr
+        rts
+_s      sec
+        rts
+
+; (npc_init: nel modulo MENU, zona 1, src/menu/npc.asm, per il margine di GAME; si chiama con MENU_NPC)
 
 ; un passo per fotogramma alterno: i vaganti, se il PG e' vicino, partono a caso (1 volta su 64) per una casella
 npc_tick:
@@ -127,13 +176,20 @@ _l      lda npc_xh,x
         clc
         adc #NPC_R
         cmp #2*NPC_R+1
-        bcs _n
-        jsr rand
+        bcc +
+        jmp _n
++       jsr rand
         and #63
-        bne _n
+        beq +
+        jmp _n
++
         jsr rand
         and #3
         sta npc_d,x
+        jsr npc_in              ; la casella dopo il passo e' fuori dal settore: resta fermo
+        bcc +
+        jmp _n
++
         lda #8                  ; 8 passi da 2 px = una casella
         sta npc_mv,x
 _mv     lda npc_xl,x
@@ -185,6 +241,34 @@ _n      dex
 _r      rts
 npc_st  .byte 2, $fe, 2, $fe
 
+; X = NPC (1..), (tx, ty) = la sua casella: C=1 se il prossimo passo (npc_d) esce dal suo settore (tk_sec, voce X-1). Cambia tx, ty
+npc_in:
+        ldy npc_d,x
+        lda tx
+        clc
+        adc npc_dx,y
+        sta tx
+        lda ty
+        clc
+        adc npc_dy,y
+        sta ty
+        txa
+        asl
+        asl
+        tay
+        lda tx
+        sec
+        sbc tk_sec-4,y          ; x - x0
+        cmp tk_sec-2,y          ; >= larghezza (anche se negativo: grande)
+        bcs +
+        lda ty
+        sec
+        sbc tk_sec-3,y
+        cmp tk_sec-1,y
++       rts
+npc_dx  .byte 1, $ff, 0, 0
+npc_dy  .byte 0, 0, 1, $ff
+
 ; X = NPC -> (tx, ty) = la sua casella
 npc_tile:
         lda npc_xl,x
@@ -207,8 +291,11 @@ pix_t   sty tmp7                ; A/Y = pixel -> A = casella
         ror
         rts
 
-; sprite degli NPC (villaggio: al posto dei mostri, sprite 3-6), da build_sprites
+; sprite degli NPC (villaggio: al posto dei mostri, sprite 3..7), da build_sprites: gli NPC visibili prendono gli sprite
+; liberi uno dopo l'altro (i settori garantiscono che non siano piu' di 5 insieme; oltre il quinto non si disegna)
 npc_draw:
+        lda #3
+        sta npc_s
         ldx #0
 _l      stx npc_k
         lda npc_xh,x
@@ -221,10 +308,7 @@ _l      stx npc_k
         sta ent_y
         lda npc_yh,x
         sta ent_y+1
-        txa
-        clc
-        adc #3
-        tax
+        ldx npc_s
         jsr spr_pos
         bcc _n
         lda bs_en
@@ -247,9 +331,13 @@ _l      stx npc_k
         clc
         adc #$80
         sta sh_ptr,x
+        inc npc_s
+        lda npc_s
+        cmp #8
+        beq _e
 _n      ldx npc_k
         inx
         cpx #NPC_N
         bne _l
-        rts
-npc_col .byte 7, 5, 14, 15
+_e      rts
+npc_col .byte 7, 5, 14, 15, 13, 3, 2, 4, 8       ; colori (pool): 0 = chi da' la quest, poi uno per settore

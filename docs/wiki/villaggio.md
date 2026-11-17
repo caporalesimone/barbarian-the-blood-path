@@ -31,6 +31,9 @@ non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview
   disegna il tile di quel villaggio; la legenda con i nomi è in testa al file). Lettere speciali: `E` ingresso, `P` posto del
   portale (la casella sotto è l'arrivo), `=` uscita del capitolo (2 caselle). Le prime stesure vengono da
   `lab/villaggi/concept_maps.py`; da lì in poi la fonte è il testo.
+- **Settori degli NPC** (17/11): ogni villaggio ha fino a 8 rettangoli (`SECTORS` in `tools/build/villages.py`, nell'intestazione
+  del file) dove vivono gli NPC che vagano; vedi [quest](quests.md). `gen_maps.py` controlla misure, caselle percorribili e che in
+  una finestra di gioco non cadano più di 5 settori.
 - **Controlli della build** (`tools/build/gen_maps.py`): una sola porta per negozio e locanda con **2 caselle libere davanti**;
   porte, cura, ingresso del sotterraneo, uscita, portale e il suo arrivo **raggiungibili dall'ingresso**; **nessuna casella
   percorribile isolata**; intestazione + mappa entro 1888 B.
@@ -73,8 +76,8 @@ al bordo nord, dalla parte opposta all'ingresso (strada a sud, colonna 16). Le d
 testo della mappa: è la **casella generica di uscita del capitolo** (`ALIASES` in `tools/build/gen_maps.py`: diventa un sentiero, la
 posizione va nell'intestazione del file `TWNc`, `tx_exit_x/y`, 2 caselle dal 15/11). Fuori dalla mappa è solido, quindi lì il PG si
 ferma: finché il capitolo dopo è chiuso la strada "continua" ma non succede nulla; dopo l'uccisione del boss del capitolo
-compare `travel to next chapter` e Fire porta al villaggio dopo ([capitoli](capitoli.md)). Intestazione + mappa RLE: 1811 B su
-1888 (`TOWN_MAX`, 15/11).
+compare `travel to next chapter` e Fire porta al villaggio dopo ([capitoli](capitoli.md)). Intestazione + mappa RLE: 1843 B su
+1888 (`TOWN_MAX`; con i 32 B dei settori NPC del 17/11).
 
 ```mermaid
 flowchart LR
