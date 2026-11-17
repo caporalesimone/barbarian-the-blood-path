@@ -39,7 +39,7 @@ VILLAGES = {
 
 
 # (17/11) Settori degli NPC vaganti, per villaggio: (x, y, larghezza, altezza) in caselle, al massimo NSEC (gen_maps.py).
-# Ogni NPC vagante (il numero 1..8) vive nel suo settore: nasce li' con probabilita' 1/2 e non ne esce mai. I settori seguono
+# Ogni NPC vagante (il numero 1..8) vive nel suo settore: nasce li' con probabilita' 3/4 e non ne esce mai. I settori seguono
 # la forma del villaggio e sono abbastanza grandi; gen_maps.py controlla che in una finestra di gioco (21 x 13 caselle) ce ne
 # siano al massimo 5: gli sprite liberi nel villaggio sono 5 (3..7), quindi gli NPC visibili insieme non superano mai i 5.
 SECTORS = {

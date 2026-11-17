@@ -3,7 +3,7 @@
 ; Variabili e il resto degli NPC (anche npc_rm, npc_px e npc_free, per il margine di questa zona): src/game/quest.asm.
 
 ; piazza gli NPC: lo 0 (quest) a caso attorno al PG (+-7 caselle); gli altri, uno per settore (tk_sec, voce X-1): presenti a
-; caso con probabilita' 1/2, su una casella libera presa a caso nel settore. 16 tentativi per NPC, poi assente.
+; caso con probabilita' 3/4, su una casella libera presa a caso nel settore. 16 tentativi per NPC, poi assente.
 npc_init:
         ldx #NPC_N-1
 _i      lda #$ff
@@ -14,8 +14,8 @@ _i      lda #$ff
         sta npc_k
         cpx #0
         beq _t
-        jsr rand                ; presente solo con probabilita' 1/2
-        and #1
+        jsr rand                ; presente con probabilita' 3/4 (assente con 0 su 0..3)
+        and #3
         beq _nx
 _t      txa
         asl

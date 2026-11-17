@@ -39,7 +39,7 @@ def sector(g, L, i):
 
 
 def with_walkers(g, L):
-    """walkers present at random (1/2 per sector): a new game until there is at least one (8 sectors: 1 time in 256 there is none)"""
+    """walkers present at random (3/4 per sector): a new game until there is at least one (8 sectors: 1 time in 65536 there is none)"""
     for _ in range(6):
         w = [n for n in npcs_now(g, L) if n[0]]
         if w:

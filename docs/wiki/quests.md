@@ -89,7 +89,7 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   `tools/build/villages.py`, scelti secondo la forma del villaggio: griglia 3×3 senza il centro nel 1, piattaforme nel 2, tre
   terrazze nel 3, anello attorno al cratere nel 4, isole nel 5; rettangoli x, y, larghezza, altezza, di 10-20 caselle per lato,
   nell'intestazione del file `TWNc`, 4 B l'uno, copiati in `tk_sec`). Il walker *n* vive nel settore *n*: **nasce con
-  probabilità 1/2** (numero casuale di NPC: 0-8, in media 4) su una casella libera presa a caso nel settore (16 tentativi, poi
+  probabilità 3/4** (numero casuale di NPC: 0-8, in media 6; era 1/2, in media 4, fino al 17/11 sera) su una casella libera presa a caso nel settore (16 tentativi, poi
   assente) e **non ne esce mai** (`npc_in`: il passo che uscirebbe viene scartato). Si muovono **solo se il PG è a meno di 10
   caselle**, a fotogrammi alterni, e solo quando lo decide il caso (1 volta su 64 per NPC fermo): una casella in una direzione a
   caso, 2 px per passo; si fermano su un muro e non entrano nella casella del PG. Il PG per ora li attraversa (nessuna
