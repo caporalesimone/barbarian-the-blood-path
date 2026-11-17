@@ -193,13 +193,13 @@ scuro secondo il sistema, pulsante THEME per cambiarlo; 14/11: testi della pagin
   del disco; elenco dei test (o solo i FAIL, con il motivo).
 - **Andamento** fra le versioni tenute (le misure del progetto, blocchi liberi, durata di build e dei test con le stesse suite) e
   **confronto** fra due versioni (misure, file del disco cambiati, test con esito o tempo diverso).
-- **Prove a mano** ("Try it yourself"): "Empty VICE · READY." (`play.sh --bare`), "Empty vc64web", e i **file propri**: un `.d64 .g64 .prg .t64 .crt`
+- **Prove a mano** ("Try it yourself"): "Empty VICE · READY." (`lab64 vice --bare`), "Empty vc64web", e i **file propri**: un `.d64 .g64 .prg .t64 .crt`
   copiato in `out/tmp/` compare nella pagina con i pulsanti VICE e vc64web. Nella finestra di VICE il menu (File -> Smart attach)
   monta qualunque file del progetto (`/work`).
 
 **Come la pagina comanda VICE** (14/11, scelta piu' sicura confermata dal committente): il viewer **non** ha il socket di Docker (chi
 lo ha e' root sull'host). `lab64 up viewer` (o `lab64 view`) avvia anche **`lab64-player`** (immagine `lab64-tools`, `viewer_player.py` di Lab64) se
-`lab64.env` definisce `C64_VIEW_PLAYER` (qui `tools/vice/play.sh --size 1100x800`): la pagina manda `POST /control` al server del viewer, che lo
+`lab64.env` definisce `C64_VIEW_PLAYER` (qui `lab64 vice`, il comando di Lab64: dimensione della finestra, audio, joystick; `lab64 vice --help`): la pagina manda `POST /control` al server del viewer, che lo
 passa al lettore da un socket Unix nel volume `lab64-x11` (`c64-player.sock`). Comandi: `status`, `play` (percorso sotto `out/`, solo
 `.d64 .g64 .prg .t64 .crt`, niente `..`, il file deve esistere), `basic`, `stop`. Protezioni del server: Host solo `localhost`,
 `127.0.0.1`, `[::1]` (o `VIEW_HOSTS`) contro il DNS rebinding; `/control` e i WebSocket solo dalla stessa origine; `/control` solo con
@@ -213,15 +213,15 @@ Dettagli dello schermo dal vivo:
   valore resta nel browser, `localStorage`). Agisce solo sull'ascolto, non su VICE ne' sulle registrazioni. Gli emulatori di un altro container usano schermo e audio
   con `DISPLAY=:99` e `PULSE_SERVER=unix:/tmp/.X11-unix/pulse` (il socket dell'audio sta nello stesso volume). I VICE dei test si
   aprono su quello schermo (`C64_VIEW=1`) ma restano **senza suono** (`-sounddev dummy`, quasi sempre in warp).
-  **VICE con il suono**, a velocita' reale, sull'ultima build: `lab64 play tools/vice/play.sh [--size 1100x800] [disco.d64|versione]` (la finestra non si ridimensiona dopo l'avvio, nemmeno a schermo intero: la misura si da' con `--size`; **− / +** nell'intestazione di `live.html` fanno lo zoom dello schermo, vedi `docs/viewer.md` di Lab64) (senza argomento `out/releases/latest`, con `1.239` quella versione)
+  **VICE con il suono**, a velocita' reale, sull'ultima build: `lab64 vice [--size 1100x800] [--bare|disco.d64|versione]` (accende da solo lo **schermo remoto**, che all'avvio del viewer e' **spento** perche' pesante: `lab64 screen on|off`, o il pulsante nella pagina, vedi `docs/viewer.md` di Lab64; la finestra non si ridimensiona dopo l'avvio, nemmeno a schermo intero: la misura si da' con `--size`, senza `--size` e' l'86% x 80% di `VIEW_SIZE`; **− / +** nell'intestazione di `live.html` fanno lo zoom dello schermo, vedi `docs/viewer.md` di Lab64) (senza argomento `out/releases/latest`, con `1.239` quella versione)
   (`lab64 play <comando>` = un comando in `lab64-tools` collegato a schermo e audio del viewer). La tastiera fisica del browser arriva a VICE.
   **Overlay** in `/live.html` (14/11): tre pulsanti nell'intestazione accendono, sopra lo schermo e semitrasparenti, la **tastiera del C64**
   (66 tasti con la disposizione originale e i tasti funzione a destra; SHIFT, CTRL e C= restano premuti fino al tasto successivo, SHIFT LOCK
   fino a un secondo tocco), **Joy 1** e **Joy 2** (ciascuno: un cerchio base con il pomello che segue il dito o il mouse, 8 direzioni, piu' un
   pulsante FIRE). I comandi vanno al server del viewer (WebSocket `/input`), che li inietta in Xvnc come secondo client RFB: non dipendono
   dal browser ne' dal NumLock. Joy 2 = porta 2 = quella che legge il gioco (tastierino numerico di VICE); Joy 1 = porta 1 (keyset 1 di VICE su
-  F13-F17, `tools/vice/play.vicerc`). Con la tastiera fisica il tastierino numerico (NumLock attivo) muove il joystick 2; senza tastierino si gioca con
-  W A S D e spazio/RETURN. Tutto serve solo con `play.sh` (VICE dal vivo); i test non usano l'overlay.
+  F13-F17, file di Lab64). Con la tastiera fisica il tastierino numerico (NumLock attivo) muove il joystick 2; senza tastierino si gioca con
+  W A S D e spazio/RETURN. Tutto serve solo con `lab64 vice` (VICE dal vivo); i test non usano l'overlay.
   Provato 14/11 in un browser headless sulla stessa macchina: 18 casi su 18 (8 direzioni e fire, per i due joystick, letti dall'indicatore
   «Joysticks» di VICE), `PRINT"HELLO"`, SHIFT+CLR/HOME, INST/DEL e SHIFT LOCK dalla tastiera a schermo, e nel gioco vero il menu cambia voce con Joy 2.
   **Non** provato: schermo a sfioramento (telefono, tablet), browser e tastiera reali, gamepad fisico. La password del viewer protegge anche `/input` (provato: 401 senza o con password errata).

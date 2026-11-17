@@ -114,8 +114,8 @@ flowchart LR
     end
 
     VIEW["lab64-viewer<br/>:6080 su 127.0.0.1<br/>(--view, lab64 up viewer)"]
-    PLAY["lab64-tools<br/>play.sh: VICE dal vivo<br/>(lab64 play)"]
-    PLR["lab64-player<br/>viewer_player.py → play.sh<br/>(lab64 up viewer)"]
+    PLAY["lab64-tools<br/>lab64 vice: VICE dal vivo<br/>(lab64 vice)"]
+    PLR["lab64-player<br/>viewer_player.py → lab64 vice<br/>(lab64 up viewer)"]
     BR(["browser"])
 
     BSH -->|"1. docker run"| BLDC
@@ -155,10 +155,10 @@ Chi crea cosa:
 | `./build.sh --manual` | solo `lab64-pdf-gen` |
 | `./build.sh --release` | tutto: `--emu`, tutti i test, `lab64-pdf-gen`, poi `lab64-tools` per il pacchetto |
 | `lab64 view` | `lab64-viewer`, poi `lab64-player` (immagine `lab64-tools`, `viewer_player.py` di Lab64) se `lab64.env` definisce `C64_VIEW_PLAYER` |
-| `lab64 play tools/vice/play.sh` | `lab64-viewer` se non c'è, poi `lab64-tools` con VICE dal vivo e audio |
+| `lab64 vice` (o `lab64 play <comando>`) | `lab64-viewer` se non c'è, poi `lab64-tools` con VICE dal vivo e audio |
 | `lab64 run …` | un container `lab64-tools` per quel comando |
 
-Il container di test e quello di `play.sh` sono lo stesso tipo di immagine (`lab64-tools`) con parametri diversi. [dal codice]
+Il container di test e quello di `lab64 vice` sono lo stesso tipo di immagine (`lab64-tools`) con parametri diversi. [dal codice]
 
 ## 4. Reti, volumi, porte
 
@@ -239,8 +239,9 @@ In un browser reale e su una macchina diversa **non** sono state misurate.
 - Senza `--view` il VICE di test usa un proprio schermo virtuale (`xvfb-run -a`) ed è **senza suono** (`-sounddev dummy`, quasi sempre in warp):
   non serve il viewer.
 - Con `--view` (o `C64_VIEW=1`) apre la sua finestra sullo schermo del viewer, sempre senza suono.
-- `play.sh` è l'unico caso con il suono: usa `-sounddev pulse`, il tastierino numerico per il joystick 2 e il keyset 1 su F13-F17 per il joystick 1
-  (`tools/vice/play.vicerc`, caricato con `-addconfig`).
+- `lab64 vice` è l'unico caso con il suono: usa `-sounddev pulse`, il tastierino numerico per il joystick 2 e il keyset 1 su F13-F17 per il joystick 1
+  (tutto in Lab64: `containers/tools/vice/`). Lo schermo remoto del viewer (Xvnc :99) è **spento** finché non lo si accende (`lab64 screen on`, o il pulsante
+  della pagina); `lab64 vice`, `--view` e `lab64 play` lo accendono da soli.
 - `vc64web` è un secondo emulatore, usato solo dai test `EMU-*`. Gira dentro il suo container con un Chromium headless pilotato da Playwright; il
   container ha un `HEALTHCHECK` su `/ping` e `--shm-size 1g`.
 
