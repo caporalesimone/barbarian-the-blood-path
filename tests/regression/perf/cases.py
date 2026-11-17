@@ -205,7 +205,7 @@ def perf_themes(ctx):
         check_walk(ctx, "level %d" % lv, walk(g, 240), mx, wmax)        # (level 20: worst frame 2.95)
 
 
-@test("PERF-20", "final boss fight in the throne room (boss + summons around): lost <= 25%, worst <= 4", slow=True)
+@test("PERF-20", "final boss fight in the throne room (boss + summons around): lost <= 25%, worst <= 4")
 def perf_boss(ctx):
     g, L = ctx["g"], ctx["g"].L
     check(g.b(L["cur_level"]) == 20, "not on level 20")
@@ -222,7 +222,7 @@ def perf_boss(ctx):
     check_walk(ctx, "final boss", durs[1:], 0.25, 4.0)
 
 
-@test("PERF-21", "every dungeon level 1..19 (change_level): walking, lost <= 20%, worst <= 3", slow=True)
+@test("PERF-21", "every dungeon level 1..19 (change_level): walking, lost <= 20%, worst <= 3")
 def perf_all_levels(ctx):
     g, L = ctx["g"], ctx["g"].L
     if g.b(L["cur_level"]) == 20:                # the throne room has no stairs down: up to 19 first
@@ -262,7 +262,7 @@ def gen_cycles(g, lvl):
     return c1 - c0
 
 
-@test("PERF-23", "level generator on EVERY level 1..19 and on every Abyss level 21..255: <= 1.5 s each, up stairs present", slow=True)
+@test("PERF-23", "level generator on EVERY level 1..19 and on every Abyss level 21..255: <= 1.5 s each, up stairs present")
 def perf_gen(ctx):
     g, L = ctx["g"], ctx["g"].L
     cur = g.b(L["cur_level"])

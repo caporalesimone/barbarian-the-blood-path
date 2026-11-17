@@ -1,7 +1,7 @@
 """Shared test library for VICE (10/11): fast remote monitor (no fixed delays: it waits for the prompt or the stop),
 program labels, simulated input and game start.
 
-Protocol: the VICE remote monitor (port 6510) runs one command per line and answers with the prompt "(C:$xxxx) ";
+Protocol: the VICE remote monitor (one port per VICE since Lab64 1.13) runs one command per line and answers with the prompt "(C:$xxxx) ";
 several lines in one send are not all executed, so every command waits for its prompt. "x" (continue) answers only at
 the next stop ("Stop on ..."): the stop line holds the C64 cycle counter, used to measure frame durations.
 

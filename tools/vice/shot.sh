@@ -5,11 +5,11 @@ OUT=$1; SEC=${2:-4}
 source "$(dirname "${BASH_SOURCE[0]}")/vice_env.sh"
 cd "$ROOT"
 tools/build/mkdisk.sh
-($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/work/disk.d64 -remotemonitor >/dev/null 2>&1 &)
+($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/work/disk.d64 $VMON >/dev/null 2>&1 &)
 sleep 8
 python3 - "$OUT" "$SEC" "${3:-}" <<'PY'
-import socket,time,sys
-s=socket.create_connection(("127.0.0.1",6510)); s.settimeout(3)
+import os,socket,time,sys
+s=socket.create_connection(("127.0.0.1",int(os.environ["VMON_PORT"]))); s.settimeout(3)
 def cmd(c,w=1.0):
     s.sendall((c+"\n").encode()); time.sleep(w)
     try: return s.recv(65536).decode(errors='ignore')
@@ -33,4 +33,4 @@ time.sleep(float(sys.argv[2]))
 cmd("",0.5)
 cmd('screenshot "%s" 2'%sys.argv[1],1.5)
 PY
-pkill x64sc
+pkill -f "remotemonitoraddress ip4://127.0.0.1:$VMON_PORT"

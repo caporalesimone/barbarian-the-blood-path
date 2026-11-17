@@ -13,11 +13,11 @@ Formato di data/help.txt: una pagina per sezione "=== titolo"; ogni riga di test
 (dalla riga 2; colonne 1..38). [testo] = giallo (tasti), {testo} = ciano (note). "@hud" = il ritaglio
 dell'HUD (4 righe, colonne 1..38) a partire da quella riga. Righe 0 (titolo) e 24 (tasti dell'help): automatiche.
 """
-import json, os, re, socket, subprocess, sys, time
+import json, os, re, socket, subprocess, sys, time, signal
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
-from vicemon import ROM_ARGS, XRUN, wait_boot  # noqa: E402  (Lab64: x64sc con -default + tutte le ROM di Lab64)
+from vicemon import ROM_ARGS, XRUN, free_port, wait_boot  # noqa: E402  (Lab64: x64sc con -default + tutte le ROM di Lab64)
 SNAP = os.path.join(ROOT, "data", "help_hud.json")
 COL_TXT, COL_KEY, COL_NOTE, COL_TITLE = 1, 7, 3, 7       # colori < 8: caratteri in alta risoluzione (schermo multicolore)
 HUD_X0, HUD_X1 = 1, 39                                     # colonne 1..38 (l'HUD del gioco e' a 38 colonne)
@@ -34,14 +34,16 @@ def snap(path=SNAP):
     subprocess.run(["tools/build/asm.sh", "test"], cwd=ROOT, env=env, check=True, stdout=subprocess.DEVNULL)
     subprocess.run(["tools/build/mkdisk.sh"], cwd=ROOT, check=True)
     L = lbl(os.path.join(ROOT, "out", "work", "game.lbl"))
+    port = free_port()                   # (17/11, Lab64 1.13) porta del monitor tutta sua: altri VICE nello stesso container non disturbano
     vice = subprocess.Popen(XRUN + ["x64sc", "-silent", "-sounddev", "dummy"] + ROM_ARGS + ["-warp", "-8",
-                             os.path.join(ROOT, "out", "work", "disk.d64"), "-remotemonitor"],
-                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                             os.path.join(ROOT, "out", "work", "disk.d64"), "-remotemonitor", "-remotemonitoraddress",
+                             "ip4://127.0.0.1:%d" % port],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
     try:
         s = None
         for _ in range(40):
             try:
-                s = socket.create_connection(("127.0.0.1", 6510)); break
+                s = socket.create_connection(("127.0.0.1", port)); break
             except OSError:
                 time.sleep(0.25)
         wait_boot(s)                         # (14/11, TODO I11) il C64 pronto, non un tempo fisso
@@ -84,8 +86,10 @@ def snap(path=SNAP):
         vic = mem(0xd022, 2)
         cs = mem(0xa800, 2048)
     finally:
-        vice.terminate()
-        subprocess.run(["pkill", "x64sc"], stderr=subprocess.DEVNULL)
+        try:
+            os.killpg(vice.pid, signal.SIGTERM)  # solo il proprio VICE (xvfb-run e x64sc), non quelli di altri comandi
+        except ProcessLookupError:
+            pass
     for x in range(29, 32):             # icone degli oggetti consumati: lampeggiano rosso/giallo, nel ritaglio rosse
         if col[40 + x] == 7:
             col[40 + x] = 2

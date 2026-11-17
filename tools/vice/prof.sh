@@ -3,15 +3,15 @@
 source "$(dirname "${BASH_SOURCE[0]}")/vice_env.sh"
 cd "$ROOT"
 tools/build/mkdisk.sh
-($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/work/disk.d64 -remotemonitor >/dev/null 2>&1 &)
+($XRUN x64sc -silent -sounddev dummy $VROM -warp -8 out/work/disk.d64 $VMON >/dev/null 2>&1 &)
 sleep 8
 python3 - "$@" <<'PY'
-import socket,time,re,sys
+import os,socket,time,re,sys
 lbl={}
 for l in open('out/work/game.lbl'):
     m=re.match(r'(\w+)\s*=\s*\$([0-9a-f]+)',l)
     if m: lbl[m.group(1)]=m.group(2)
-s=socket.create_connection(("127.0.0.1",6510)); s.settimeout(4)
+s=socket.create_connection(("127.0.0.1",int(os.environ["VMON_PORT"]))); s.settimeout(4)
 def cmd(c,w=0.2):
     s.sendall((c+"\n").encode()); time.sleep(w)
     try: return s.recv(65536).decode(errors='ignore')
@@ -36,4 +36,4 @@ for f in sys.argv[1:]:
     if v: print(f"{f:16s} n={len(v)} media={sum(v)//len(v)} max={max(v)} min={min(v)}")
     cmd("x",0.2)
 PY
-pkill x64sc
+pkill -f "remotemonitoraddress ip4://127.0.0.1:$VMON_PORT"
