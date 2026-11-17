@@ -81,7 +81,7 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   la schermata di attesa a ogni apertura (~0,5 s, non misurato con precisione).
 - **NPC nel villaggio** (`src/game/quest.asm`): figure dell'eroe in altri colori (sprite 3-7, liberi nel villaggio: verificato a
   runtime, nel villaggio `sh_en` ha solo lo sprite 0 e i 3-7; gli sprite 1 e 2, fendente ed effetto, restano spenti).
-  **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo** vicino all'ingresso (a caso entro 7 caselle dal PG): avvicinandosi
+  **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo nella piazza della fontana** (casella `tk_g` dell'intestazione del villaggio, scelta da `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e lontana dalle porte): avvicinandosi
   da qualunque lato compare il suo nome nella barra; **Fire** = quest letta (`c_qst`, salvato con l'eroe: SAVE_VER $C8) e la
   sua pagina. Dopo la prima volta la pagina si riapre con **Q** o con Fire accanto a lui. I luoghi hanno la precedenza (su una
   porta o una scala vale il luogo).
@@ -91,7 +91,7 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   nell'intestazione del file `TWNc`, 4 B l'uno, copiati in `tk_sec`). Il walker *n* vive nel settore *n*: **nasce con
   probabilità 3/4** (numero casuale di NPC: 0-8, in media 6; era 1/2, in media 4, fino al 17/11 sera) su una casella libera presa a caso nel settore (16 tentativi, poi
   assente) e **non ne esce mai** (`npc_in`: il passo che uscirebbe viene scartato). Si muovono **solo se il PG è a meno di 10
-  caselle**, a fotogrammi alterni, e solo quando lo decide il caso (1 volta su 64 per NPC fermo): una casella in una direzione a
+  caselle**, a fotogrammi alterni, e solo quando lo decide il caso (1 volta su 16 per NPC fermo (era 1 su 64 fino al 17/11 sera: sembravano immobili)): una casella in una direzione a
   caso, 2 px per passo; si fermano su un muro e non entrano nella casella del PG. Il PG per ora li attraversa (nessuna
   collisione). **Sprite:** i visibili prendono gli sprite 3..7 uno dopo l'altro (`npc_draw`, al massimo 5, il sesto non si
   disegna); la build (`gen_maps.py`) controlla che in nessuna finestra di gioco (21×13 caselle) cadano più di 5 settori, quindi
@@ -101,7 +101,7 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
 - **Memoria**: GAME passa a ~505 B di margine sotto `$8720` (avviso della build sotto 1 KB; con le varianti di test, es.
   `TESTUI=28`, restano ~56 B). Con i settori (17/11) il margine scende a **671 B** (debug) e l'intestazione residente `town_k`
   cresce di 32 B. Il piazzamento degli NPC (`npc_init`) sta nel modulo MENU (zona 1, `src/menu/npc.asm`, chiamato con
-  `MENU_NPC`): la zona 1 resta con **36 B** liberi. Il resto degli NPC (~500 B) va spostato fuori da GAME prima delle quest vere.
+  `MENU_NPC`): la zona 1 resta con **54 B** liberi. Il resto degli NPC (~500 B) va spostato fuori da GAME prima delle quest vere.
 - **Da fare dopo** (TODO H1): stati veri (offerta, attiva, da riscuotere, fatta), obiettivi e premi, nomi e frasi degli NPC
   (per ora sono solo figure), testi veri.
 

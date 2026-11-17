@@ -30,7 +30,7 @@ def inv_legend():
     return d
 TK_NAME = 25                     # nome del luogo di cura con lo 0 finale
 NSEC = 8                         # (17/11) settori degli NPC vaganti per villaggio (x, y, larghezza, altezza: 4 byte l'uno)
-TK_LEN = 20 + TK_NAME + 4 * NSEC           # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
+TK_LEN = 20 + TK_NAME + 4 * NSEC + 2           # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
 
 def rle(data):
     out, i = bytearray(), 0
@@ -105,6 +105,25 @@ def sectors(c, m, walk):
     return out + bytes(4 * (NSEC - len(secs)))
 
 
+def giver(c, m, walk, seen, pl, need):
+    """(17/11) casella di chi da' la quest: nella piazza della fontana (2 byte: x, y). La piu' vicina al centro della fontana a
+    distanza 3 o piu' (poi 2, poi 1 se la piazza e' stretta), raggiungibile, con le 8 caselle attorno percorribili (non
+    sbarra niente) e lontana almeno 3 caselle dalle porte, dal portale e dall'ingresso del sotterraneo."""
+    F = [(i % W, i // W) for i in range(W * H) if m[i] == G.TTID["FOUNTAIN"]]
+    cx, cy = sum(x for x, _ in F) / len(F), sum(y for _, y in F) / len(F)
+    avoid = [(i % W, i // W + 1) for i in pl] + [need["arrivo dal portale"], need["cripta"], need["uscita"], need["uscita 2"]]
+    for dmin in (3, 2, 1):
+        cand = [(max(abs(x - cx), abs(y - cy)), x, y) for y in range(H) for x in range(W)
+                if (x, y) in seen and m[y * W + x] != G.TTID["FOUNTAIN"] and max(abs(x - cx), abs(y - cy)) >= dmin
+                and all(m[(y + dy) * W + x + dx] in walk for dx in (-1, 0, 1) for dy in (-1, 0, 1) if 0 <= x + dx < W and 0 <= y + dy < H)
+                and all(max(abs(x - a), abs(y - b)) >= 3 for a, b in avoid)]
+        if cand:
+            d, x, y = min(cand)
+            assert d <= 7, "villaggio %d: nessuna casella libera vicino alla fontana per chi da' la quest" % c
+            return bytes([x, y])
+    raise AssertionError("villaggio %d: nessuna casella per chi da' la quest" % c)
+
+
 def build(c, v):
     import villages as V
     """mappa RLE e intestazione (TK_LEN byte) del villaggio c, con i controlli"""
@@ -153,7 +172,7 @@ def build(c, v):
     assert 0 < len(heal) < TK_NAME and heal == heal.lower() and all(ch in "abcdefghijklmnopqrstuvwxyz '" for ch in heal), heal
     k = bytes([px, py, sx, sy, nx, ny, bg, c1, c2, 8 | acc] + [t for i in pl for t in (i % W, i // W)]
               + [ex[0][0], ex[1][0], ex[0][1], ex[1][1]]) + text(heal).ljust(TK_NAME, b"\0")
-    k += sectors(c, m, walk)
+    k += sectors(c, m, walk) + giver(c, m, walk, seen, pl, need)
     assert len(k) == TK_LEN
     k += bytes(sol + [0] * (TK_SOLID - len(sol)))          # tile solidi del villaggio (solidtab)
     r = rle(m)

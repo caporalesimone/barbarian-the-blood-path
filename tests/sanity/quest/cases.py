@@ -60,6 +60,7 @@ def npcs(ctx):
     g.frames(4)
     now = npcs_now(g, L)
     check(now and now[0][0] == 0, "no quest giver: %s" % now)
+    check(now[0][1:] == tuple(g.mem(L["tk_g"], 2)), "the quest giver is not on its tile of the fountain square (tk_g %s): %s" % (list(g.mem(L["tk_g"], 2)), now[0]))
     for i, tx, ty in now:
         check(g.tile(tx, ty) != 0xff and not (g.mem(L["solidtab"] + g.tile(tx, ty), 1)[0] & 1), "NPC %d on a solid tile (%d,%d)" % (i, tx, ty))
         if i:

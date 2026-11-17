@@ -76,8 +76,8 @@ al bordo nord, dalla parte opposta all'ingresso (strada a sud, colonna 16). Le d
 testo della mappa: è la **casella generica di uscita del capitolo** (`ALIASES` in `tools/build/gen_maps.py`: diventa un sentiero, la
 posizione va nell'intestazione del file `TWNc`, `tx_exit_x/y`, 2 caselle dal 15/11). Fuori dalla mappa è solido, quindi lì il PG si
 ferma: finché il capitolo dopo è chiuso la strada "continua" ma non succede nulla; dopo l'uccisione del boss del capitolo
-compare `travel to next chapter` e Fire porta al villaggio dopo ([capitoli](capitoli.md)). Intestazione + mappa RLE: 1843 B su
-1888 (`TOWN_MAX`; con i 32 B dei settori NPC del 17/11).
+compare `travel to next chapter` e Fire porta al villaggio dopo ([capitoli](capitoli.md)). Intestazione + mappa RLE: 1845 B su
+1888 (`TOWN_MAX`; con i 34 B dei settori NPC e della casella di chi dà la quest, 17/11).
 
 ```mermaid
 flowchart LR

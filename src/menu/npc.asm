@@ -2,7 +2,7 @@
 ; Chiamato da npc_tick (src/game/quest.asm) con MENU_NPC al primo giro nel villaggio (il modulo e' gia' in memoria).
 ; Variabili e il resto degli NPC (anche npc_rm, npc_px e npc_free, per il margine di questa zona): src/game/quest.asm.
 
-; piazza gli NPC: lo 0 (quest) a caso attorno al PG (+-7 caselle); gli altri, uno per settore (tk_sec, voce X-1): presenti a
+; piazza gli NPC: lo 0 (quest) nella piazza della fontana (tk_g); gli altri, uno per settore (tk_sec, voce X-1): presenti a
 ; caso con probabilita' 3/4, su una casella libera presa a caso nel settore. 16 tentativi per NPC, poi assente.
 npc_init:
         ldx #NPC_N-1
@@ -23,19 +23,9 @@ _t      txa
         tay
         cpx #0
         bne _s
-        lda #15                 ; chi da' la quest: attorno al PG
-        jsr npc_rm
-        clc
-        adc ptx
-        sec
-        sbc #7
+        lda tk_g                ; chi da' la quest: la sua casella nella piazza della fontana (intestazione del villaggio)
         sta tx
-        lda #15
-        jsr npc_rm
-        clc
-        adc pty
-        sec
-        sbc #7
+        lda tk_g+1
         sta ty
         jmp _f
 _s      lda tk_sec-2,y

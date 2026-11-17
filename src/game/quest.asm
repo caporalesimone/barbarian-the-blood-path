@@ -178,8 +178,8 @@ _l      lda npc_xh,x
         cmp #2*NPC_R+1
         bcc +
         jmp _n
-+       jsr rand
-        and #63
++       jsr rand                ; (17/11) parte 1 volta su 16 (era 64: sembravano tutti fermi)
+        and #15
         beq +
         jmp _n
 +
