@@ -13,13 +13,20 @@ NPC_R   = 10                    ; gli NPC vaganti si muovono solo con il PG a me
 QL_ID   = 20                    ; etichetta del luogo (bar.asm): nome di chi da' la quest
 Q_CUR   = 1                     ; (concept) la quest dell'NPC del villaggio
 
-        .virtual SND_FBUF_end   ; (coda degli slot sprite 58-63, prima di NM_AT)
+; Le tabelle degli NPC stanno nella tabella della ricerca di percorso dei mostri (BFP, $A500, 169 B): nel villaggio non ci sono
+; mostri, e ogni ricerca (mon_path) la riempie di $ff prima di usarla. Annotazione @map di BFP in game.asm.
+        .virtual BFP
 npc_xl  .fill NPC_N
 npc_xh  .fill NPC_N             ; $ff = NPC assente
 npc_yl  .fill NPC_N
 npc_yh  .fill NPC_N
 npc_d   .fill NPC_N             ; direzione (0 +x, 1 -x, 2 +y, 3 -y)
 npc_mv  .fill NPC_N             ; pixel di cammino rimasti (0 = fermo)
+npc_tend
+        .endv
+        .cerror npc_tend > BFQ, "tabelle degli NPC oltre BFP (169 B)"
+
+        .virtual SND_FBUF_end   ; (coda degli slot sprite 58-63, prima di NM_AT)
 npc_tx0 .byte ?                 ; casella dell'NPC 0
 npc_ty0 .byte ?
 npc_pend .byte ?                ; 1 = da piazzare (ingresso nel villaggio)
@@ -340,4 +347,5 @@ _n      ldx npc_k
         cpx #NPC_N
         bne _l
 _e      rts
-npc_col .byte 7, 5, 14, 15, 13, 3, 2, 4, 8       ; colori (pool): 0 = chi da' la quest, poi uno per settore
+npc_col .byte 7, 5, 14, 15, 13, 3, 2, 4, 8, 6, 9, 11, 12, 1, 5, 14, 15   ; colori (pool): 0 = chi da' la quest, poi uno per settore
+        .cerror * - npc_col != NPC_N, "npc_col: un colore per NPC"

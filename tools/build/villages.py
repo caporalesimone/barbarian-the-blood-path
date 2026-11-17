@@ -39,15 +39,23 @@ VILLAGES = {
 
 
 # (17/11) Settori degli NPC vaganti, per villaggio: (x, y, larghezza, altezza) in caselle, al massimo NSEC (gen_maps.py).
-# Ogni NPC vagante (il numero 1..8) vive nel suo settore: nasce li' con probabilita' 3/4 e non ne esce mai. I settori seguono
-# la forma del villaggio e sono abbastanza grandi; gen_maps.py controlla che in una finestra di gioco (21 x 13 caselle) ce ne
-# siano al massimo 5: gli sprite liberi nel villaggio sono 5 (3..7), quindi gli NPC visibili insieme non superano mai i 5.
+# Ogni NPC vagante (il numero 1..NSEC) vive nel suo settore: nasce li' con probabilita' 7/8 e non ne esce mai. I settori seguono
+# la forma del villaggio (almeno 20 caselle percorribili l'uno). Gli sprite liberi nel villaggio sono 5 (3..7): se in una
+# finestra di gioco (21 x 13 caselle) i settori sono di piu', oltre il quinto NPC visibile non si disegna (gen_maps.py scrive
+# il massimo di ogni villaggio).
+def _grid(xs, ys, w, h):
+    return [(x, y, w, h) for y in ys for x in xs]
+
+
 SECTORS = {
-    1: [(x, y, 15 if x < 32 else 14, 15 if y < 32 else 14) for x in (2, 17, 32) for y in (2, 17, 32) if (x, y) != (17, 17)],  # griglia 3x3 senza il centro
-    2: [(4, 9, 10, 14), (26, 10, 20, 6), (16, 16, 12, 7), (28, 28, 15, 8), (12, 36, 10, 5), (36, 36, 11, 5), (0, 41, 41, 5)],  # piattaforme
-    3: [(8, 5, 16, 10), (24, 5, 21, 10), (3, 19, 17, 13), (20, 19, 14, 13), (34, 19, 11, 13), (4, 34, 20, 11), (24, 34, 22, 11)],  # tre terrazze
-    4: [(2, 2, 16, 15), (30, 2, 17, 15), (14, 6, 22, 11), (2, 17, 16, 13), (31, 17, 16, 13), (2, 30, 22, 16), (24, 30, 23, 16)],  # anello attorno al cratere
-    5: [(4, 5, 11, 8), (19, 4, 15, 9), (36, 5, 11, 8), (3, 21, 14, 8), (17, 20, 16, 10), (33, 20, 14, 10), (16, 38, 15, 6), (34, 36, 13, 7)],  # isole
+    1: _grid((2, 13, 24, 35), (2, 13, 24, 35), 11, 11),           # griglia 4x4
+    2: [(4, 9, 10, 14), (26, 10, 20, 6), (16, 16, 12, 7), (3, 26, 11, 12), (28, 28, 15, 8), (12, 36, 10, 5), (36, 36, 11, 5),
+        (0, 41, 14, 5), (14, 41, 14, 5), (28, 41, 13, 5), (40, 17, 8, 23)],   # piattaforme
+    3: [(8, 5, 13, 10), (21, 5, 12, 10), (33, 5, 12, 10), (2, 0, 8, 15), (3, 19, 11, 13), (14, 19, 10, 13), (24, 19, 10, 13),
+        (34, 19, 11, 13), (4, 34, 11, 11), (15, 34, 10, 11), (25, 34, 10, 11), (35, 34, 11, 11)],   # tre terrazze
+    4: _grid((2, 14, 26, 37), (2, 14, 26, 37), 11, 11),           # anello attorno al cratere (griglia 4x4)
+    5: [(4, 5, 11, 8), (19, 4, 8, 9), (26, 4, 8, 9), (36, 5, 11, 8), (3, 21, 8, 8), (9, 21, 8, 8), (17, 20, 8, 10), (25, 20, 8, 10),
+        (33, 20, 8, 10), (39, 20, 8, 10), (16, 38, 15, 6), (34, 36, 13, 7)],   # isole
 }
 
 

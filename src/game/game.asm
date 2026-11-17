@@ -2556,7 +2556,7 @@ BF_QN = 32                      ; coda circolare (la frontiera di una finestra 1
 BFP   = $a500                   ; direzione dal genitore per casella: $ff = non vista, $fd = muro, $fe = partenza
 BFQ   = BFP+BF_N                ; coda
 BF_END = BFQ+BF_QN+26           ; fine delle variabili (26 B, vedi .virtual sotto)
-;@map BFP..BF_END "Ricerca di percorso dei mostri bloccati (mon_path): direzioni, coda e variabili; libera fuori dalla ricerca"
+;@map BFP..BF_END "Ricerca di percorso dei mostri bloccati (mon_path): direzioni, coda e variabili; nel villaggio (senza mostri) le tabelle degli NPC (quest.asm)"
         .virtual BFQ+BF_QN
 pz_wx   .byte ?                 ; origine della finestra sulla mappa (con segno: fuori mappa = muro)
 pz_wy   .byte ?

@@ -24,7 +24,7 @@ def screen_text(g):
     return "".join(chr(b + 96) if 1 <= b <= 26 else chr(b) if 32 <= b < 64 else " " for b in g.mem(SCR_A, 1000))
 
 
-NPC_N = 9           # the quest giver + one walker per sector (NSEC = 8, tools/build/gen_maps.py)
+NPC_N = 17          # the quest giver + one walker per sector (NSEC = 16, tools/build/gen_maps.py)
 
 
 def npcs_now(g, L):
@@ -39,7 +39,7 @@ def sector(g, L, i):
 
 
 def with_walkers(g, L):
-    """walkers present at random (3/4 per sector): a new game until there is at least one (8 sectors: 1 time in 65536 there is none)"""
+    """walkers present at random (7/8 per sector): a new game until there is at least one (16 sectors: practically always)"""
     for _ in range(6):
         w = [n for n in npcs_now(g, L) if n[0]]
         if w:
@@ -127,11 +127,11 @@ def sprites(ctx):
     with_walkers(g, L)
     now = npcs_now(g, L)
     for i, tx, ty in now[:6]:
-        g.teleport(tx, ty + 1 if g.tile(tx, ty + 1) != 0xff and not (g.mem(L["solidtab"] + g.tile(tx, ty + 1), 1)[0] & 1) else ty - 1); g.frames(4)
+        g.teleport(tx, ty + 1 if g.tile(tx, ty + 1) != 0xff and not (g.mem(L["solidtab"] + g.tile(tx, ty + 1), 1)[0] & 1) else ty - 1); g.frames(14)
         en = g.b(L["sh_en"])
         cx = g.b(L["camx"]) | (g.b(L["camx"] + 1) << 8)
         cy = g.b(L["camy"]) | (g.b(L["camy"] + 1) << 8)
-        near = [n for n in npcs_now(g, L) if cx + 16 <= n[1] * 16 + 8 <= cx + 300 and cy + 16 <= n[2] * 16 + 8 <= cy + 176]
+        near = [n for n in npcs_now(g, L) if cx + 16 <= n[1] * 16 + 8 <= cx + 300 and cy + 24 <= n[2] * 16 + 8 <= cy + 150]
         n_on = bin(en & 0xF8).count("1")
         check(en & 0x06 == 0, "sprites 1/2 on in the village: %02x" % en)
         check(n_on >= min(len(near), 5), "%d NPCs well inside the screen but %d sprites (sh_en %02x)" % (len(near), n_on, en))

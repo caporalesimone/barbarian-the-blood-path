@@ -29,7 +29,7 @@ def inv_legend():
     d.update(ALIASES)
     return d
 TK_NAME = 25                     # nome del luogo di cura con lo 0 finale
-NSEC = 8                         # (17/11) settori degli NPC vaganti per villaggio (x, y, larghezza, altezza: 4 byte l'uno)
+NSEC = 16                        # (17/11) settori degli NPC vaganti per villaggio (x, y, larghezza, altezza: 4 byte l'uno)
 TK_LEN = 20 + TK_NAME + 4 * NSEC + 2           # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
 
 def rle(data):
@@ -88,7 +88,7 @@ def rows_of(path):
 def sectors(c, m, walk):
     """(17/11) settori degli NPC vaganti: NSEC voci di 4 byte (x, y, larghezza, altezza in caselle; larghezza 0 = voce non usata).
     Ogni settore sta nella mappa, e' abbastanza grande e ha abbastanza caselle percorribili; il numero di settori in una
-    finestra di gioco (21 x 13 caselle) non supera i 5 sprite liberi del villaggio (3..7)."""
+    finestra di gioco (21 x 13 caselle) e' quello che viene stampato (oltre 5 NPC visibili non si disegna)."""
     import villages as V
     secs = V.SECTORS[c]
     assert len(secs) <= NSEC, "villaggio %d: al massimo %d settori" % (c, NSEC)
@@ -100,7 +100,7 @@ def sectors(c, m, walk):
     worst = max(sum(1 for (x, y, w, h) in secs
                     if any(ok(a, b) for a in range(max(x, wx), min(x + w, wx + 21)) for b in range(max(y, wy), min(y + h, wy + 13))))
                 for wx in range(W - 20) for wy in range(H - 12))
-    assert worst <= 5, "villaggio %d: fino a %d settori nella stessa finestra (max 5: sprite 3..7)" % (c, worst)
+    print("villaggio %d: %d settori NPC, al massimo %d in una finestra di gioco (sprite liberi: 5)" % (c, len(secs), worst))
     out = b"".join(bytes(s) for s in secs)
     return out + bytes(4 * (NSEC - len(secs)))
 
