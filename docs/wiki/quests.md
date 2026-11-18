@@ -93,7 +93,7 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   altri, `SPRMC`). **Disegni** (17/11, committente: prima erano la figura dell'eroe, marrone e grigia, e sul selciato della
   piazza sembravano trasparenti): 4 disegni visti di fronte, 2 fotogrammi (fermo / passo): *villager*, *woman*, *elder*,
   *guard* (`tools/build/npc_gfx.py`), negli slot sprite 12-19 (`$A300`), liberi nel villaggio, caricati con il modulo MENU
-  (zona 4, file `MENU4`). Il vestito usa il colore dello sprite. **Colore** (`npc_look`, `src/menu/npc_look.asm`): a caso, ma
+  (zona 4, file `MENU`). Il vestito usa il colore dello sprite. **Colore** (`npc_look`, `src/menu/npc_look.asm`): a caso, ma
   mai uno dei colori del villaggio (`tk_pal`: sfondo, multicolor 1 e 2, accento) né il 9 e il 15 (multicolor degli sprite).
   Disegno a caso per i vaganti (`npc_g`); chi dà la quest è la *woman*, a partire dal giallo.
   **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo nella piazza della fontana** (casella `tk_g` dell'intestazione del villaggio, scelta da `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e lontana dalle porte): avvicinandosi

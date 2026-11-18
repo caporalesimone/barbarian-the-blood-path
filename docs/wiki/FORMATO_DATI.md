@@ -15,7 +15,7 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `LDAT` | PRG | dati della storia compressi ZX0 (charset, sprite, forme delle immagini, righe RLE con eventi), decompressi sul posto a `$2000`; formato in [Avvio e storia](intro.md#formato-di-ldat) | `tools/build/gen_lore.py` |
 | `GAME` | PRG | il gioco **compresso ZX0** (06/11): indirizzo di caricamento = quello del flusso compresso (`GAME_ZX_AT`, ~`$44B3`), decompresso sul posto dal loader in `$0400` (`GAME_ENTRY`, nessuno stub BASIC). Vedi «Compressione» | build (`tools/build/pack.py`) |
 | `LOBBY` | PRG | modulo del menu iniziale (codice, caricato a `$C000`) | build |
-| `MENU1`, `MENU2`, `MENU3` | PRG | (11/11) menu del villaggio (locanda e negozi, `src/menu.asm`): una zona di RAM compressa ZX0 per file; si leggono all'ingresso nel villaggio se il modulo non è in memoria, poi resta. Vedi «MENU» | build (`tools/build/pack_menu.py`) |
+| `MENU` | PRG | (11/11; 18/11 un file solo, prima `MENU1`…`MENU5`) menu del villaggio e NPC (`src/menu.asm`): intestazione + le cinque zone di RAM compresse ZX0; si legge all'ingresso nel villaggio. Vedi «MENU» | build (`tools/build/pack_menu.py`) |
 | `TITLE` | PRG | schermata del titolo: bitmap multicolor + schermo + colore, 10000 byte | build |
 | `TWN1` … `TWN5` | PRG | (12/11; 15/11) villaggio del capitolo *c* (`c_chap`): tile + intestazione + mappa RLE; ognuno con tile, colori e mappa suoi (`tools/build/villages.py`); `TWN5` = città dell'Abisso (prototipo) | build |
 | `BOSSCH1` … `BOSSCH3` | PRG | (12/11) mappa del piano del boss dei capitoli 1–3 (piani 5, 10, 15): 4 byte (scale x, y; boss x, y) + RLE come `FMAP`, caricata a `FIN_AT`; segnaposto (`data/maps/bosschapN.txt`, `tools/build/gen_bossmap.py`) | build |
@@ -210,18 +210,29 @@ villaggi. `src/menu.asm` è assemblato in quattro zone di RAM (le parti in `src/
 | 1 | `MR1_AT` `$C900`–`$CFFF` (RAM normale; il LOBBY la copre) | tabella dei salti (`MENU_INN` = `$C900`, `MENU_SHOP` = `$C903`), `mk_off`/`mk_exit`, locanda (`menu/inn.asm`), negozi: comprare e vendere (`menu/shop_act.asm`) |
 | 2 | `MR2_AT` `$F4E0`–`$FCFF` (RAM sotto il KERNAL, dopo la cache del tema) | locanda: scelta dell'equipaggiamento (`menu/inn_eq.asm`), negozi: schermata e cursore (`menu/shop.asm`) |
 | 3 | `MR3_AT` `$A700`–`$A7FF` (slot sprite 28–31, liberi nel gioco) | negozi: riparazione e tetto dell'oro (`menu/shop_fix.asm`); aspetto degli NPC (`menu/npc_look.asm`, 17/11) |
-| 4 | `MR4_AT` `$A300`–`$A4FF` (+16 B di margine della decompressione in `BFP`; slot sprite 12–19: mostri del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (17/11) sprite degli NPC del villaggio: 4 disegni × 2 fotogrammi (`tools/build/npc_gfx.py`), solo dati |
+| 4 | `MR4_AT` `$A300`–`$A4FF` (slot sprite 12–19: mostri del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (17/11) sprite degli NPC del villaggio: 4 disegni × 2 fotogrammi (`tools/build/npc_gfx.py`), solo dati |
 | 5 | `MR5_AT` `$8C00`–`$8E7F` (sprite forti e boss del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (18/11) sprite del "!" (`$8C00`, puntatore `$30`), tabella dei salti `NPC_JT` (`$8C40`: `npc_init`, `npc_draw5`, `npc_talk5`), capitoli delle quest `q_ch`, piazzamento e sprite degli NPC (`menu/npc.asm`) |
 
-File `MENU1`..`MENU5` (11/11, Krill; il quarto dal 17/11, il quinto dal 18/11): una zona compressa ZX0 per file; l'indirizzo di caricamento del file è
-**fine della zona − lunghezza compressa**. Il gioco (`ovl_town`, `src/game/stash.asm`) li legge all'**ingresso nel
-villaggio** se `ovl_cur` = 0 (lo azzerano `game_start` e il caricamento del LOBBY) con `load_file` (indirizzo del
-file); Krill lascia l'inizio in `krill_loadaddrlo/hi` (`ml_src`), poi ogni zona si decomprime sul posto all'inizio
-(`ml_dst`; `$01 = $35`, interruzioni spente, NMI su `nmi_stub`). Niente altro scrive nelle zone 1-3: il modulo resta
-fino al prossimo LOBBY (le zone 4 e 5 le ricopre il tema all'ingresso nel dungeon, il villaggio la rilegge sempre: `ovl_cur` = 0 in `enter_gfx`). `pack_menu.py` verifica la decompressione sul posto (64 KB simulati) e che ogni zona stia nel
-suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (18/11): zona 1 1603 → 1358 B, zona 2
-2061 → 1675 B, zona 3 231 → 226 B, zona 4 512 → 183 B, zona 5 602 → 503 B (17 blocchi in tutto). Spazio libero: zona 1 189 B,
-zona 2 19 B, zona 3 25 B, zona 5 38 B (la build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
+File **`MENU`** (18/11, revisione R2: **un file solo**; dall'11/11 era un file per zona, `MENU1`…`MENU5`, e ogni file in più
+costava ~0,4 s a ogni ingresso nel villaggio). Struttura (`tools/build/pack_menu.py`):
+
+| Byte | Contenuto |
+|---|---|
+| 0 | numero di parti *N* (= `MPARTS`, 5) |
+| 1 … 4*N* | per ogni parte, nell'ordine di decompressione: indirizzo dei dati compressi (2 B), destinazione = inizio della zona (2 B) |
+| … | le parti compresse ZX0: prima le zone 1, 3, 4, 5, per ultima la zona 2 |
+
+Il file **finisce a `MR2_END`** (`$FD00`, fine della zona 2): Krill lo carica al suo indirizzo (`load_file`, C = 0), nella RAM
+sotto il KERNAL fra la fine della cache del villaggio (`ML_LO` = `TK_AT` + `TOWN_MAX` = `$ED00`) e `$FCFF`. Il gioco
+(`ovl_town` / `ml_read`, `src/game/stash.asm`) lo legge all'**ingresso nel villaggio** se `ovl_cur` = 0 (lo azzerano
+`game_start`, il caricamento del LOBBY e `enter_gfx`, perché il dungeon copre le zone 4 e 5), controlla che finisca a
+`ml_end` (altrimenti lo rilegge, fino a 3 volte), poi con `$01 = $35`, interruzioni spente e NMI su `nmi_stub` scorre
+l'intestazione: le zone 1, 3, 4, 5 si decomprimono dall'appoggio nelle loro zone, la zona 2 per ultima **sul posto**.
+`pack_menu.py` simula tutto in 64 KB (nessuna scrittura su dati non ancora letti, ogni zona uguale byte per byte, file
+sopra `ML_LO`) e scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (18/11): 3966 B (16 blocchi),
+**130 B sopra `ML_LO`**: il modulo compresso non può crescere oltre (la build si ferma). Zone: 1 1603 → 1356 B, 2 2061 → 1677 B,
+3 231 → 226 B, 4 512 → 183 B, 5 602 → 503 B; spazio libero: zona 1 189 B, zona 2 19 B, zona 3 25 B, zona 4 0 B, zona 5 38 B (la
+build lo stampa). Tempo della lettura con la decompressione: 3,1 s (`PERF-DISK-11`; con cinque file 3,5 s).
 
 ### Compressione (ZX0)
 - Compressore: **ZX0 v2** di Einar Saukas (C, compilato dai sorgenti ufficiali in Lab64: `build-scripts/sources.conf` di Lab64, licenza BSD-3), compilato con

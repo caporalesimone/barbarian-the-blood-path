@@ -17,7 +17,9 @@ def prg(name):
 
 
 def zones():
-    return [prg("menu_z%d.prg" % k) for k in (1, 2, 3)]
+    """every zone of the module (menu_z1..N.prg, N = MPARTS)"""
+    n = len([f for f in os.listdir(OUT) if f.startswith("menu_z") and f.endswith(".prg")])
+    return [prg("menu_z%d.prg" % k) for k in range(1, n + 1)]
 
 
 def zones_ok(g):
@@ -52,18 +54,25 @@ def game(ctx):
     return ctx["g"]
 
 
-@test("MENU-10", "out/work/menu1..N.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..N (N = MPARTS), no OVLT/OVL2")
+@test("MENU-10", "out/work/menu.prg (one file since 18/11): header (parts, source and destination), parts ZX0(zone k), ends at MR2_END, above ML_LO; shops out of GAME; the disks have MENU, no MENU1/OVLT/OVL2")
 def menu_file(ctx):
     import sys, importlib.util, re
     sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
     import zx0dec
     G = {m.group(1): m.group(2) for m in re.finditer(r"^(\w+)\s*=\s*(\$?[0-9a-f]+)", open(os.path.join(OUT, "game.lbl")).read(), re.M)}
     num = lambda v: int(v[1:], 16) if v.startswith("$") else int(v)
-    for k, (a, b) in enumerate(zones()):
-        d = open(os.path.join(OUT, "menu%d.prg" % (k + 1)), "rb").read()
-        at, end = d[0] | d[1] << 8, num(G["MR%d_END" % (k + 1)])
-        check(at + len(d) - 2 == end, "menu%d: loads at $%04x, ends at $%04x (zone end $%04x)" % (k + 1, at, at + len(d) - 2, end))
-        check(zx0dec.zx0_decompress(d[2:]) == b, "part %d is not zone %d" % (k + 1, k + 1))
+    at, f = prg("menu.prg")
+    check(at + len(f) == num(G["MR2_END"]) and at >= num(G["ML_LO"]), "menu.prg at $%04x-$%04x (MR2_END $%04x, ML_LO $%04x)" % (at, at + len(f), num(G["MR2_END"]), num(G["ML_LO"])))
+    zs = {a: b for a, b in zones()}
+    check(f[0] == len(zs), "header: %d parts, %d zones" % (f[0], len(zs)))
+    starts = []
+    for i in range(f[0]):
+        src, dst = f[1 + 4 * i] | f[2 + 4 * i] << 8, f[3 + 4 * i] | f[4 + 4 * i] << 8
+        check(dst in zs, "part %d: destination $%04x is not a zone" % (i + 1, dst))
+        starts.append((src - at, dst))
+    ends = [s for s, _ in starts[1:]] + [len(f)]
+    for (off, dst), e in zip(starts, ends):
+        check(zx0dec.zx0_decompress(bytes(f[off:e])) == zs[dst], "the part for $%04x is not its zone" % dst)
     lb = open(os.path.join(OUT, "game.lbl")).read()
     for name in ("enter_shop", "shop_buy", "shop_sell", "shop_repair", "sh_item", "gold_pay", "ov_stash"):
         check(not re.search(r"^%s\s*=" % name, lb, re.M), "%s is still in GAME" % name)
@@ -71,10 +80,10 @@ def menu_file(ctx):
     dk = importlib.util.module_from_spec(spec); spec.loader.exec_module(dk)
     for f in dk.D64:
         names = dk.directory(f)
-        check(all("menu%d" % k in names for k in range(1, num(G["MPARTS"]) + 1)) and "ovlt" not in names and "ovl2" not in names, "%s: %s" % (os.path.basename(f), names))
+        check("menu" in names and "menu1" not in names and "ovlt" not in names and "ovl2" not in names, "%s: %s" % (os.path.basename(f), names))
 
 
-@test("MENU-11", "ovl_town from the disk (as at the village entry): the 3 zones equal to the module, ovl_cur = 1, $01 back to $36, < 11 s")
+@test("MENU-11", "ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 back to $36, < 11 s")
 def menu_load(ctx):
     g = game(ctx); L = g.L
     g.poke(L["ovl_cur"], 0)

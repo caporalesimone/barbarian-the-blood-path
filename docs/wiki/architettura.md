@@ -63,7 +63,7 @@ flowchart LR
 | `HELP` | `src/help.asm` | `$0801` | il manuale (5 pagine) | [Help](help.md) |
 | `GAME` | `src/game.asm` + `src/game/` | `$0400`–`$9FFF` (residente) | il gioco | sotto |
 | `LOBBY` | `src/lobby.asm` | `$C000`–`$CBFF` | menu iniziale: elenco eroi, scheda, nuovo eroe; non resta in partita | [Interfaccia](interfaccia.md) |
-| `MENU1..4` | `src/menu.asm` + `src/menu/` | zone `$C900`, `$F4E0`, `$A700`, `$A300` (sprite degli NPC, 17/11) | menu del villaggio: locanda e negozi, un file per zona; caricati all'ingresso nel villaggio, poi residenti | [Tecnica](tecnica.md#moduli-su-disco) |
+| `MENU` (un file, 18/11) | `src/menu.asm` + `src/menu/` | zone `$C900`, `$F4E0`, `$A700`, `$A300` (sprite degli NPC, 17/11), `$8C00` (NPC e "!", 18/11) | menu del villaggio: locanda e negozi, un file per zona; caricati all'ingresso nel villaggio, poi residenti | [Tecnica](tecnica.md#moduli-su-disco) |
 | `JUKEBOX` | `src/jukebox.asm` | `$0801` | prova di brani ed effetti (i brani sono nel programma: non legge i file `SNDn`) | [Musica](musica.md) |
 | dati | `tools/gen_*.py` | — | grafica, mappe, brani, storia, salvataggi | [Build](build.md), [FORMATO_DATI](FORMATO_DATI.md) |
 

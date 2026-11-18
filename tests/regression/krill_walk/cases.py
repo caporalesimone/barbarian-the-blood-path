@@ -33,7 +33,7 @@ def walk(ctx):
         lv(f); lv(f + 1); lv(f, 1); lv(0)             # crypt, stairs down, stairs up, back to the village
         for n in range(f, f + 5): lv(n)               # down to the boss level (chapter 4: the throne room)
         lc.call(L["chap_won"])
-        lv(0)                                         # village of the chapter: TWNc, MENU1..4, SND0
+        lv(0)                                         # village of the chapter: TWNc, MENU (one file since 18/11), SND0
         lc.call(L["save_char"])                       # KSAVE, hero file read and rewritten, village read again
         lc.call(L["chap_travel"])                     # next village (save of hero and levels)
     check(g.b(L["c_chap"]) == 5, "village 5 expected, c_chap %d" % g.b(L["c_chap"]))
@@ -41,6 +41,6 @@ def walk(ctx):
     names = [n for n, _, _ in lc.loads]
     bad = lc.bad()
     check(not bad, "%d of %d loads differ from their file: %s" % (len(bad), len(names), "; ".join("%s (%s)" % b for b in bad[:8])))
-    for need in ("menu3", "snd0", "fmap", "bossch1", "bossch2", "bossch3", "twn5", "ksave", "lobby"):
+    for need in ("menu", "snd0", "fmap", "bossch1", "bossch2", "bossch3", "twn5", "ksave", "lobby"):
         check(need in names, "the walk did not load %s (%d loads: %s)" % (need, len(names), " ".join(names)))
-    check(("menu2", "menu3") in lc.pairs(), "menu3 never loaded right after menu2 (the drive's next-file cache)")
+    check(("menu", "snd0") in lc.pairs(), "snd0 never loaded right after menu (the drive's next-file cache)")

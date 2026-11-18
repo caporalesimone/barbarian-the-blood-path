@@ -44,11 +44,10 @@ def zx0(data, tag):
     return open(cf, "rb").read(), delta
 
 
-def inplace_check(comp, load_at, dest, orig):
-    """decompressione sul posto in una memoria di 64 KB: stessa logica di zx0dec ma su memoria condivisa"""
-    mem = bytearray(65536)
-    mem[load_at:load_at + len(comp)] = comp
-    st = {"src": load_at, "dst": dest, "mask": 0, "val": 0, "back": False, "last": 0}
+def mem_unpack(mem, src, dest, file_end):
+    """(18/11) decompressione ZX0 in una memoria di 64 KB condivisa (stessa logica di zx0dec): legge da src, scrive da dest;
+    errore se scrive su dati del file non ancora letti (fra il punto di lettura e file_end). Ritorna (fine scritta, fine letta)"""
+    st = {"src": src, "dst": dest, "mask": 0, "val": 0, "back": False, "last": 0}
 
     def byte():
         b = mem[st["src"]]
@@ -73,7 +72,7 @@ def inplace_check(comp, load_at, dest, orig):
         return v
 
     def put(b):
-        if st["dst"] >= st["src"] and st["dst"] < load_at + len(comp):
+        if st["dst"] >= st["src"] and st["dst"] < file_end:
             raise AssertionError("la decompressione sul posto sovrascrive dati non ancora letti")
         mem[st["dst"]] = b
         st["dst"] += 1
@@ -100,6 +99,14 @@ def inplace_check(comp, load_at, dest, orig):
             st["back"] = True
             copy(last, elias(0) + 1)
             state = "new" if bit() else "lit"
+    return st["dst"], st["src"]
+
+
+def inplace_check(comp, load_at, dest, orig):
+    """decompressione sul posto in una memoria di 64 KB: stessa logica di zx0dec ma su memoria condivisa"""
+    mem = bytearray(65536)
+    mem[load_at:load_at + len(comp)] = comp
+    mem_unpack(mem, load_at, dest, load_at + len(comp))
     assert mem[dest:dest + len(orig)] == orig, "decompressione sul posto: risultato diverso"
 
 

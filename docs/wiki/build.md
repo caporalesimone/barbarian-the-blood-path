@@ -132,7 +132,7 @@ flowchart TD
 ```mermaid
 flowchart LR
     SV["salvataggi vuoti: hl (versione attuale),<br/>save-01..05 (SV_LEN da out/work/game.lbl)"] --> W
-    W["cc1541 di Krill (-M 8): barbarian (primo), start, game (ZX0), lobby,<br/>menu1..5, gfx0, fmap, gfx1..n, snd0..n, title, lore, ldat,<br/>help, jukebox, hl, ksave, save-01..05"] --> DR["out/work/disk.d64 (release)"]
+    W["cc1541 di Krill (-M 8): barbarian (primo), start, game (ZX0), lobby,<br/>menu, gfx0, fmap, gfx1..n, snd0..n, title, lore, ldat,<br/>help, jukebox, hl, ksave, save-01..05"] --> DR["out/work/disk.d64 (release)"]
 ```
 
 **Un solo disco** (11/11 sera, regola del committente): per lo sviluppo `POKE 1020,1` prima del `RUN` salta il menu del

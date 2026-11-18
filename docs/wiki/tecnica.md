@@ -32,7 +32,7 @@ Oltre a `LOBBY` ($C000, solo nel menu iniziale), il gioco ha un modulo su disco:
 `src/menu/`, assemblato con le etichette del gioco), i **menu del villaggio: locanda e negozi** (11/11, TODO D13). Sta in
 tre zone di RAM (zona 1 `$C900`–`$CFFF`, zona 2 `$F4E0`–`$FCFF` sotto il KERNAL, zona 3 `$A700`–`$A7FF`; formato e
 contenuto in [FORMATO_DATI](FORMATO_DATI.md#menu--menu-del-villaggio-locanda-e-negozi)), compresso zona per zona con ZX0,
-una zona per file (`MENU1`..`MENU4`, letti con Krill: 2,3 s).
+dal 18/11 un file solo (`MENU`, cinque zone, letto con Krill: 3,1 s con la decompressione).
 - **Quando si carica**: all'ingresso nel villaggio (`enter_gfx` → `ovl_town`, `src/game/stash.asm`) (dal 11/11, ramo `fast-loader`,
   **a ogni ingresso**: `enter_gfx` azzera `ovl_cur`; niente più residenza fra una visita e l'altra). Dentro una visita al
   villaggio **resta**. Le porte richiamano `ovl_town` (riprova se il primo
@@ -53,7 +53,7 @@ una zona per file (`MENU1`..`MENU4`, letti con Krill: 2,3 s).
 ## Disco
 
 `BARBARIAN` (il loader con il menu), `START` (avvio del gioco con attesa e musica), `LORE` e `LDAT` (la storia, [Avvio e storia](intro.md)), `HELP` (il manuale, [Help](help.md)), `GAME` (**compresso ZX0**, decompresso sul posto dal loader: avvio da 154 a 111 s,
-[FORMATO_DATI](FORMATO_DATI.md#compressione-zx0)), `LOBBY`, `MENU1`..`MENU4` (locanda, negozi, sprite degli NPC: quattro zone compresse), `TITLE`, `GFX0` (villaggio + mappa RLE), `FMAP`,
+[FORMATO_DATI](FORMATO_DATI.md#compressione-zx0)), `LOBBY`, `MENU` (locanda, negozi, NPC: cinque zone compresse in un file), `TITLE`, `GFX0` (villaggio + mappa RLE), `FMAP`,
 `GFX1` (temi 1–7), `GFX2` (tema 8), `SND0`…`SNDn` (brani, [Musica](musica.md)), `HL` e `SAVE-01`..`SAVE-05`
 (salvataggi), `KSAVE` (plugin di save di Krill). Dall'11/11 il gioco legge e scrive con **Krill's Loader**
 ([FastLoader](FastLoader.md)): disco per la 1541 (`_1541` nel nome). **Un solo disco** (11/11 sera, regola del
@@ -68,7 +68,7 @@ sequenceDiagram
     L->>D: install di Krill (KERNAL), poi con Krill GAME, LOBBY, hl (elenco eroi)
     Note over L: schermata di attesa e musica durante il caricamento
     L->>G: avvio (segnali in $8E-$8F)
-    G->>D: GFXn del piano, GFX0, MENU1..4, SNDn (Krill, sempre dal disco)
+    G->>D: GFXn del piano, GFX0, MENU, SNDn (Krill, sempre dal disco)
     G->>D: save-0N: eroe e piani (plugin di save di Krill, file intero)
 ```
 

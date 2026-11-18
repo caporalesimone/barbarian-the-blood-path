@@ -41,6 +41,7 @@ Un commit per blocco, smoke + sanity a ogni blocco, regression a più riprese. C
 | Blocco | Cosa | Effetto |
 |---|---|---|
 | R1 | spioncino: `io_screen` prosegue in `ui_pwait` (era un `jmp` alla riga dopo), `mon_path` salta direttamente a `mon_put` (4 salti a un `jmp`); `ent_pl` (posizione del PG in `ent_x/ent_y`) al posto di due copie uguali in `update_player` e `bs_body` | +12 B di margine di GAME (690 → 702 B) |
+| R2 | **modulo MENU in un file solo** (era un file per zona, 5 dal 17-18/11): intestazione con sorgente e destinazione di ogni parte, file che finisce alla fine della zona 2 e si appoggia nella RAM sotto il KERNAL libera nel villaggio (`ML_LO` = `$ED00` … `$FCFF`); le zone 1, 3, 4, 5 si decomprimono dall'appoggio, la zona 2 sul posto (`ml_read`, `tools/build/pack_menu.py` con la simulazione in 64 KB, `pack.py mem_unpack`). La zona 4 non ha più bisogno dei 16 B di margine in `BFP` | `menu` 3,48 → 3,10 s a ogni ingresso nel villaggio; +55 B di margine di GAME (702 → 757 B: il ciclo sulle 5 parti con le tabelle è diventato la lettura dell'intestazione) |
 
 ## Da valutare: codice e generalizzazioni
 

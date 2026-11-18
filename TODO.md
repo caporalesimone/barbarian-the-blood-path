@@ -269,13 +269,8 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - Alternativa piu' piccola (non valutata a fondo): lasciare il KERNAL al menu e ridurre solo il primo caricamento (START).
 
 ### M3 Prestazioni dei caricamenti (ex J9) — M
-- (18/11) **PERF-DISK fuori limite dopo la quinta parte del MENU** (`menu5`, NPC nella zona 5; decisione del committente da
-  prendere): `menu` 3,48 s (limite 3,1: un file in piu', ~+0,3 s a ogni ingresso nel villaggio), `twn1` 2,50 s (limite 2,0:
-  i file dopo `menu4` si spostano di 2 blocchi), `hdr_write` 6,20 s (90% di 6,8), `in2` 5,46 s (90% di 5,3), `in5` 4,22 s
-  (90% di 4,6). Provate 5 posizioni di `menu5` sul disco (dopo `menu4`, dopo `twn1`, dopo i temi del capitolo 1, prima dei
-  file del titolo, dopo i salvataggi, in fondo): questa (dopo `menu4`, con `QST2..8` in fondo) e' la migliore; `menu5` in fondo
-  porta il `menu` a 5,0 s. Strade: alzare i limiti, oppure togliere un file (zona 5 dentro il file di un'altra zona: oggi non
-  c'e' spazio), oppure leggere il MENU solo quando cambia villaggio.
+- (18/11) **PERF-DISK**: con la revisione R2 il modulo MENU e' un file solo (era 5): `menu` 3,10 s (limite 3,1). Tempi e
+  limiti da ricalibrare con il committente (tabella nel rapporto della revisione del 18/11).
 - **Stato (12/11 sera, VICE, 42 file sul disco)**: scale nello stesso capitolo **2,24 s** (`PERF-DISK-13`; obiettivo del
   committente < 2 s), ingresso completo nel villaggio 4,8-4,9 s (`PERF-DISK-14`), tema `GFXn` 1,34 s, save nel dungeon
   8,3-9,3 s, save nel villaggio 9,45 s (soglia 9,5 s). Limiti in `tests/regression/perf_disk` (quelli del committente portati a

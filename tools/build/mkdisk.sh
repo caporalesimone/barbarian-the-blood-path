@@ -2,7 +2,7 @@
 # Crea il d64 del gioco (11/11, regola del committente: una sola build, un solo disco).
 # Uso: tools/build/mkdisk.sh [out.d64] [prg]   (default: out/work/disk.d64, out/work/game.zx0)
 #   BARBARIAN = loader con il menu (storia / manuale / gioco); POKE 1020,1 prima del RUN = subito START (docs/wiki/cheats.md).
-# File: BARBARIAN, START, GAME (ZX0), MENU1..3, FMAP, TWN1..5 (villaggi dei capitoli), BOSSCH1..3 (piani dei boss),
+# File: BARBARIAN, START, GAME (ZX0), MENU, FMAP, TWN1..5 (villaggi dei capitoli), BOSSCH1..3 (piani dei boss),
 # GFX1..8 (grafica dei capitoli: dungeon e boss),
 # SND0..n (brani, tools/build/gen_music.py), TITLE, LORE, LDAT, HELP, JUKEBOX, HL e SAVE-01..05 (salvataggi, Krill).
 # TWN_LAYOUT (variabile d'ambiente, 15/11, TODO M1: posizione dei villaggi sul disco; vedi docs/wiki/FastLoader.md e PERF-DISK-21..25):
@@ -10,9 +10,9 @@
 #   start   TWN1..TWN5 tutti insieme dove sta TWN1
 #   chapter ogni TWNc subito prima di GFX(2c-1), GFX(2c) e BOSSCHc, cosi' quello che un capitolo carica sta vicino (capitolo 1 come
 #           in "end"; BOSSCH2 e BOSSCH3 si spostano con il loro capitolo); TWN5 in fondo
-#   hub     MENU1..3, SND0 (il brano di ogni villaggio, snd_town_c), TWN1..TWN5 e FMAP uno dopo l'altro (stessi segmenti di directory
+#   hub     MENU, SND0 (il brano di ogni villaggio, snd_town_c), TWN1..TWN5 e FMAP uno dopo l'altro (stessi segmenti di directory
 #           e stesse tracce di quello che un ingresso nel villaggio carica); il resto come in "end"
-#   hubchap (PREDEFINITO dal 15/11 sera: decisione dopo le misure, docs/wiki/FastLoader.md) MENU1..3, SND0, TWN1 e FMAP insieme (come "hub"); TWN2..TWN4 e BOSSCH2/3 con la grafica dei loro capitoli e TWN5 in fondo (come "chapter")
+#   hubchap (PREDEFINITO dal 15/11 sera: decisione dopo le misure, docs/wiki/FastLoader.md) MENU, SND0, TWN1 e FMAP insieme (come "hub"); TWN2..TWN4 e BOSSCH2/3 con la grafica dei loro capitoli e TWN5 in fondo (come "chapter")
 # Provare un layout senza lasciare la build normale: lab64 run env TWN_LAYOUT=start tools/build/mkdisk.sh
 TWN_LAYOUT=${TWN_LAYOUT:-hubchap}
 case $TWN_LAYOUT in end|start|chapter|hub|hubchap) ;; *) echo "mkdisk: TWN_LAYOUT=$TWN_LAYOUT sconosciuto (end|start|chapter|hub|hubchap)"; exit 1;; esac
@@ -38,9 +38,8 @@ command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container la
 # in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s.
 # I file caricati dal KERNAL (BARBARIAN, START, LORE, HELP) misurati con LOAD: stessi tempi con 10 e con 4 (entro 0,1 s).
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
-      -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg -f menu4 -w out/work/menu4.prg
-      -f menu5 -w out/work/menu5.prg)       # (18/11) quinta parte (NPC del villaggio, src/menu/npc.asm)
-HUB=0; case $TWN_LAYOUT in hub|hubchap) HUB=1;; esac     # HUB=1: il brano del villaggio (SND0) e i villaggi subito dopo MENU1..3
+      -f menu -w out/work/menu.prg)       # (18/11) modulo MENU: un file solo (prima menu1..menu5, tools/build/pack_menu.py)
+HUB=0; case $TWN_LAYOUT in hub|hubchap) HUB=1;; esac     # HUB=1: il brano del villaggio (SND0) e i villaggi subito dopo MENU
 [ $HUB = 1 ] && ARGS+=(-f snd0 -w out/work/snd/snd0.prg -f twn1 -w out/work/twn1.prg)
 [ $TWN_LAYOUT = hub ] && ARGS+=(-f twn2 -w out/work/twn2.prg -f twn3 -w out/work/twn3.prg -f twn4 -w out/work/twn4.prg -f twn5 -w out/work/twn5.prg)
 ARGS+=(-f fmap -w out/work/fmap.prg)

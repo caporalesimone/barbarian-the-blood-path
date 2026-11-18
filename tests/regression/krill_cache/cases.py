@@ -2,7 +2,8 @@
 keeps the first block of the next file of the directory; if that file is asked for next, the block is served from the cache,
 and when it is also the file's last block (a file of one block) its length came from a byte that the hash of the requested
 name had just overwritten: the load ended early or late, with no error (village song SND0 after MENU3: 118 bytes of 241,
-the song player then looped for ever in the IRQ; MENU3 after MENU2: 39 bytes past its zone, into the charset). Fixed in the
+the song player then looped for ever in the IRQ; MENU3 after MENU2: 39 bytes past its zone, into the charset; since 18/11
+MENU is one file). Fixed in the
 drive code at build time (tools/build/krill_build.sh); the game also checks the end address of songs and MENU parts and
 reads them again (snd_get, ovl_town). One VICE session, tests in order (CHAIN); KRILL-23 overwrites the RAM, so it is last."""
 import os
@@ -47,25 +48,24 @@ def count_loads(g, a, regs="", tmax=120):
     return out, n
 
 
-@test("KRILL-20", "village entry order: MENU1, MENU2, MENU3 (load_file) then SND0 (load_raw): each one read whole at the first read (end address and bytes)")
+@test("KRILL-20", "village entry order: MENU (load_file, one file since 18/11) then SND0 (load_raw): each one read whole at the first read (end address and bytes)")
 def cache_menu_snd(ctx):
     g = ctx["g"]; L = g.L; F = ctx["files"]
-    ends = [g.w16(L["ml_end"] + 2 * k) for k in range(3)]
-    for k in range(3):
-        name(g, "menu%d" % (k + 1))
-        r = g.call_keep(L["load_file"], tmax=60)
-        d = F["menu%d" % (k + 1)]
-        la = d[0] | d[1] << 8
-        end = g.w16(ENDADDR)
-        check(r["c"] == 0 and end == ends[k], "menu%d: C = %d, end $%04x, expected $%04x (%+d bytes)" % (k + 1, r["c"], end, ends[k], end - ends[k]))
-        check(ram(g, la, len(d) - 2) == d[2:], "menu%d: bytes differ from the file" % (k + 1))
+    end0 = g.w16(L["ml_end"])
+    name(g, "menu")
+    r = g.call_keep(L["load_file"], tmax=60)
+    d = F["menu"]
+    la = d[0] | d[1] << 8
+    end = g.w16(ENDADDR)
+    check(r["c"] == 0 and end == end0, "menu: C = %d, end $%04x, expected $%04x (%+d bytes)" % (r["c"], end, end0, end - end0))
+    check(ram(g, la, len(d) - 2) == d[2:], "menu: bytes differ from the file")
     name(g, "snd0")
     g.poke16(L["ptr0"], L["SND_LBUF"])
     r = g.call_keep(L["load_raw"], tmax=60)
     d = F["snd0"][2:]
     end = g.w16(ENDADDR)
-    check(r["c"] == 0 and end == L["SND_LBUF"] + len(d), "snd0 after menu3: C = %d, end $%04x, expected $%04x (%+d bytes)" % (r["c"], end, L["SND_LBUF"] + len(d), end - L["SND_LBUF"] - len(d)))
-    check(bytes(g.mem(L["SND_LBUF"], len(d))) == d, "snd0 after menu3: bytes differ from the file")
+    check(r["c"] == 0 and end == L["SND_LBUF"] + len(d), "snd0 after menu: C = %d, end $%04x, expected $%04x (%+d bytes)" % (r["c"], end, L["SND_LBUF"] + len(d), end - L["SND_LBUF"] - len(d)))
+    check(bytes(g.mem(L["SND_LBUF"], len(d))) == d, "snd0 after menu: bytes differ from the file")
 
 
 @test("KRILL-21", "snd_get checks the end address: every song read once into both buffers; with a wrong expected length 3 reads, then no music in that buffer (snd_cur = 0)")
@@ -86,14 +86,13 @@ def guard_snd(ctx):
     check(n == 3 and g.b(L["snd_cur"]) == 0, "wrong length: %d reads (expected 3), snd_cur %d (expected 0)" % (n, g.b(L["snd_cur"])))
 
 
-@test("KRILL-22", "ovl_town checks the end of every MENU part (= end of its zone): a part that does not end there is read 3 times, then C = 1")
+@test("KRILL-22", "ovl_town checks the end of the MENU file (= end of zone 2, ml_end): a file that does not end there is read 3 times, then C = 1")
 def guard_menu(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["ovl_cur"], 0)
     r, n = count_loads(g, L["ovl_town"])
-    P = L["MPARTS"]                                  # (18/11) 5 parts: menu1..5
-    check(n == P and r["c"] == 0 and g.b(L["ovl_cur"]) == 1, "right ends: %d reads (expected %d: menu1..%d), C = %d" % (n, P, P, r["c"]))
-    a = L["ml_end"] + 4
+    check(n == 1 and r["c"] == 0 and g.b(L["ovl_cur"]) == 1, "right end: %d reads (expected 1: one file since 18/11), C = %d" % (n, r["c"]))
+    a = L["ml_end"]
     lo = g.b(a)
     g.poke(a, lo + 1)
     g.poke(L["ovl_cur"], 0)
@@ -101,10 +100,10 @@ def guard_menu(ctx):
         r, n = count_loads(g, L["ovl_town"])
     finally:
         g.poke(a, lo)
-    check(n == 5 and r["c"] == 1 and g.b(L["ovl_cur"]) == 0, "wrong end of menu3: %d reads (expected 5), C = %d" % (n, r["c"]))
+    check(n == 3 and r["c"] == 1 and g.b(L["ovl_cur"]) == 0, "wrong end: %d reads (expected 3), C = %d" % (n, r["c"]))
     g.poke(L["ovl_cur"], 0)
     r, n = count_loads(g, L["ovl_town"])
-    check(n == P and r["c"] == 0, "module read again: %d reads, C = %d" % (n, r["c"]))
+    check(n == 1 and r["c"] == 0, "module read again: %d reads, C = %d" % (n, r["c"]))
 
 
 @test("KRILL-23", "every file of the disk loaded right after its predecessor in the directory (served from the drive's next-file cache) equals its file: bytes and end address")

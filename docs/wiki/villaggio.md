@@ -271,8 +271,8 @@ Schermata rifatta l'08/11 (progetto con il committente, concept ASCII in [Refact
 **Locanda e negozi** stanno nel modulo su disco **MENU** (`src/menu.asm`; formato in
 [FORMATO_DATI](FORMATO_DATI.md#menu--menu-del-villaggio-locanda-e-negozi), memoria in [Tecnica](tecnica.md#moduli-su-disco)):
 - si carica **a ogni ingresso nel villaggio** (dall'11/11, ramo `fast-loader`: niente residenza fra una visita e
-  l'altra), in tre file `menu1..3` letti con Krill's Loader: **2,0–2,3 s** (VICE, 1541 emulata, `MENU-11`; con il
-  KERNAL erano 10,5 s);
+  l'altra), dal 18/11 in **un file** (`menu`, cinque zone; prima un file per zona) letto con Krill's Loader: **3,1 s** con la
+  decompressione (VICE, 1541 emulata, `PERF-DISK-11`; con il KERNAL erano 10,5 s);
 - dentro la visita **resta**: fabbro, alchimista e locanda si aprono in **0,12–0,16 s**;
 - il precaricamento del tema in sottofondo non c'è più (tolto l'11/11, [Flussi](flussi.md#8-precaricamento-del-tema-tolto)).
 

@@ -28,7 +28,7 @@ flowchart LR
     S -->|loadraw| G["GAME (ZX0)"]
     S -->|loadraw| L["LOBBY"]
     S -->|loadraw LOAD_TO| H["hl (elenco eroi)"]
-    G -->|loadraw| X["MENU1..4, GFX0..n, FMAP, SNDn"]
+    G -->|loadraw| X["MENU, GFX0..n, FMAP, SNDn"]
     G -->|loadraw + plugin| V["save-01..05, hl"]
     B -->|KERNAL| O["HELP, JUKEBOX"]
     B -->|tramp_run| LO["LORE: install, TITLE, LDAT,<br/>uninstall prima del ritorno"]
@@ -83,14 +83,14 @@ sequenceDiagram
 | Routine | Uso |
 |---|---|
 | `load_raw` | nome in `cmdbuf+3` (0 finale), destinazione `ptr0` (`LOAD_TO`): temi, villaggio, `FMAP`, brani, `LOBBY` |
-| `load_file` | all'indirizzo scritto nel file (C = 0): le cinque parti del modulo `MENU` (`menu1..5`, 18/11) |
+| `load_file` | all'indirizzo scritto nel file (C = 0): il modulo `MENU` (un file solo dal 18/11; prima `menu1..5`) |
 | `set_name`/`set_name4` | scrivono il nome e lo 0 finale |
 
 - **Musica**: zittita prima del disco (`snd_io`), come con il KERNAL; gli IRQ restano accesi durante i caricamenti
   (Krill li permette, anche con sprite e badline).
 - **Schermata**: titolo + "please wait" senza barra (`io_screen`): Krill non dà un avanzamento durante un `loadraw`
   e i caricamenti durano 1-2 s. Dall'11/11 sera niente barre in tutto il gioco (anche `START`).
-- **Modulo MENU**: cinque file `menu1..5` (18/11) (`tools/build/pack_menu.py`): l'indirizzo di ogni file è la fine della sua zona meno
+- **Modulo MENU** (18/11: un file solo, `menu`, che finisce alla fine della zona 2; vedi [FORMATO_DATI](FORMATO_DATI.md)). Fino al 18/11 un file per zona (`tools/build/pack_menu.py`): l'indirizzo di ogni file era la fine della sua zona meno
   la lunghezza compressa; Krill lo carica lì e lascia l'inizio in `krill_loadaddrlo/hi`, poi il ZX0 decomprime sul posto.
 - Pagina zero: `$41-$47` sono di Krill durante un caricamento (il gioco usa fino a `$40`); `$41-$57` durante un save.
 
@@ -141,7 +141,7 @@ del trono, villaggi 1-5, salvataggi, viaggi, LOBBY: 131 letture, fra cui 12 volt
 1541 vera, 1541-II e 1570/71 vere (i test `KRILL-17/18` in VICE passano), vc64web (test `EMU-*` non rifatti: servono il demone).
 Versioni di Krill più recenti della r194: non controllate (potrebbero avere già la correzione).
 
-Test: `KRILL-20` (l'ingresso nel villaggio: MENU1..4 e poi SND0, ogni file giusto alla prima lettura), `KRILL-21` e `KRILL-22`
+Test: `KRILL-20` (l'ingresso nel villaggio: MENU e poi SND0, ogni file giusto alla prima lettura), `KRILL-21` e `KRILL-22`
 (controlli del gioco), `KRILL-23`, `KRILL-24` (`tests/regression/krill_cache`, `tests/regression/krill_walk`, `tests/lib/loads.py`).
 
 ## 5. Salvataggi (`src/game/rel.asm`, [salvataggi.md](salvataggi.md))
@@ -256,7 +256,7 @@ dissolvenza, `TWNc`, modulo MENU, `gfx_install`, brano), **media / massimo su 10
 | `src/game.asm` | `LDFLAGS` a `$8E`, banco VIC senza lettura di `$DD00`, `godmode` in CODE2 |
 | `src/lobby.asm` | `CHRPRE` a `$8F`, credito "loader by krill - v194" |
 | `src/game/ui.asm` | `io_screen` senza barra, `YN_SAV` a `$0340` |
-| `tools/build/mkdisk.sh`, `tools/build/pack_menu.py`, `tools/build/asm.sh` | disco con `cc1541`, `menu1..5` (mappa del disco: `lab64 map`, sezione "Disk" dell'indice) |
+| `tools/build/mkdisk.sh`, `tools/build/pack_menu.py`, `tools/build/asm.sh` | disco con `cc1541`, `menu` (mappa del disco: `lab64 map`, sezione "Disk" dell'indice) |
 | `tests/lib/c64.py` | i test entrano sempre dal `START` vero (installa Krill) |
 | strumenti VICE (`tools/vice/*.sh`, `tools/build/gen_help.py`) | partono da `START` (`g 080d`), non più da `GAME` a `$0400` |
 
