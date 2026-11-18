@@ -51,6 +51,13 @@ Un commit per blocco, smoke + sanity a ogni blocco, regression a più riprese. C
 | R10 | **rilettura del villaggio dopo un salvataggio tolta** (`sv_end`, `town_at`): era un resto della cache dei villaggi di prima dell'11/11; dall'11/11 la grafica si rilegge a ogni ingresso e il file a `$E000` serve solo a `gfx_install`, che nessuno richiama dopo. Nel villaggio prima `gfx_install`, poi il MENU: l'appoggio del file MENU parte da `$E000` (`ML_LO`) | +67 B di margine di GAME (849 → 916); salvataggi nel villaggio piu' veloci: save_char 8,29 → 6,60 s, hdr_write 5,80 → 3,50 s, load_char 2,44 → 0,70 s; appoggio del MENU 57 B → 3,3 KB |
 | R11 | **passo degli NPC nella zona 6 del MENU**: `npc_tick6` (`src/menu/npc_tick.asm`) nelle tabelle dei mostri `MRT` `$9600-$977F`, inutili nel villaggio (`lb_cnt` = 0; entrando in un piano le riscrivono `init_monsters_rt` o la STASH). Possibile grazie all'appoggio di 3,3 KB liberato da R10. `pend_save` copia dalla STASH solo `LVLBLK` (prima anche `MRT`, che nel villaggio avrebbe cancellato il codice: PG-SAVE-01 si bloccava) | +346 B di margine di GAME (916 → 1262); file MENU 4328 B (18 blocchi), 3096 B sopra `ML_LO`; zona 6: 31 B liberi |
 
+### PERF-DISK deterministici (18/11, dopo R11)
+
+Ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del giro del disco: conta la piu'
+lenta; una misura fuori limite non interrompe piu' la sequenza (prima cambiava lo stato di partenza del capitolo dopo).
+Due run consecutivi: stessi numeri (±0,04 s). Limiti alzati con la regola "1,15 x misura": in1 6,6, twn2 2,5, boss1 3,2
+(`tests/regression/perf_disk/cases.py`). La tabella qui sotto (prima di R10-R11, misure a fase singola) resta come storico.
+
 ### Tempi del 18/11 (fine della revisione, VICE; da ricalibrare con il committente)
 
 Due giri: la regression completa (le misure di un test si fermano alla prima fuori limite) e un giro dei soli PERF-DISK

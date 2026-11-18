@@ -269,8 +269,20 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - Alternativa piu' piccola (non valutata a fondo): lasciare il KERNAL al menu e ridurre solo il primo caricamento (START).
 
 ### M3 Prestazioni dei caricamenti (ex J9) — M
-- (18/11) **PERF-DISK**: con la revisione R2 il modulo MENU e' un file solo (era 5): `menu` 3,10 s (limite 3,1). Tempi e
-  limiti da ricalibrare con il committente (tabella nel rapporto della revisione del 18/11).
+- (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
+  disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
+  misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da
+  un'altra testina e un altro settore della directory (twn3 2,35 s in un run, 0,95 s nell'altro). Ora due run danno gli
+  stessi numeri (±0,04 s). Ricalibrati con la regola del 15/11 (1,15 x la misura, per eccesso a 0,1 s): in1 5,7 → 6,6,
+  twn2 2,2 → 2,5, boss1 3,0 → 3,2; soglie del committente invariate. Da capire perche' in1 (5,66 s) costa ~2 s piu' di in2-in5.
+- (18/11) **Il file letto per ultimo pesa ~1,3 s**: `change_level` villaggio → piano 1 chiamato dal monitor costa 4,56 s se
+  l'ultimo file letto e' il villaggio, 5,7-5,8 s se e' `hl` o il salvataggio dell'eroe (misure in VICE, fase peggiore). Dalla
+  revisione R10 (niente rilettura del villaggio dopo un salvataggio) la prima discesa dopo un salvataggio nel villaggio paga
+  questo costo: `PERF-12` (village -> 1, limite 5 s) misura 5,9 s (4,6 s prima di R10), mentre `save_char` e' sceso di 1,7 s.
+  Causa probabile (**non verificata** nel sorgente di Krill): la ricerca nella directory, perche' `GFX1` e' nel 2° settore della
+  directory e `hl`/`save-0N` nel 3°-4°. Leva da provare: i file letti a ogni cambio di luogo (`GFXn`, `TWNn`, `MENU`, `SNDn`)
+  nei primi settori della directory, quelli rari (`title`, `lore`, `help`, `jukebox`, `cheats`) in fondo. `PERF-12` resta
+  fuori limite finche' il committente non decide (limite o layout).
 - **Stato (12/11 sera, VICE, 42 file sul disco)**: scale nello stesso capitolo **2,24 s** (`PERF-DISK-13`; obiettivo del
   committente < 2 s), ingresso completo nel villaggio 4,8-4,9 s (`PERF-DISK-14`), tema `GFXn` 1,34 s, save nel dungeon
   8,3-9,3 s, save nel villaggio 9,45 s (soglia 9,5 s). Limiti in `tests/regression/perf_disk` (quelli del committente portati a

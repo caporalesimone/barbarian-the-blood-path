@@ -189,6 +189,11 @@ Test: `KRILL-20` (l'ingresso nel villaggio: MENU e poi SND0, ogni file giusto al
   Decisione aperta in `TODO.md` (B15).
 - L'install costa circa 3,2 KB in più nel file `START`, letto dal KERNAL (compreso nei 34,5 s). Comprimerlo con ZX0
   dà solo il 13% (3223 → 2807 B): lasciato stare (decisione dell'11/11).
+- (18/11) **Come misurano i test `PERF-DISK`** (`tests/regression/perf_disk/cases.py`): ogni operazione parte da uno snapshot di
+  VICE (macchina e drive) e si ripete in 6 fasi del giro del disco; conta la piu' lenta. Una misura fuori limite non ferma
+  piu' la sequenza (lo stato di testina e directory lasciato al passo dopo resta lo stesso). Risultato: due run danno gli
+  stessi numeri. **Il file letto per ultimo conta** fino a ~1,3 s (villaggio → piano 1: 4,56 s dopo il villaggio, 5,7-5,8 s
+  dopo `hl` o il salvataggio dell'eroe; causa probabile la ricerca nella directory di Krill, **non verificata**: TODO M3).
 
 ### 7.1 Posizione dei villaggi sul disco e tempi per villaggio (15/11) [MISURATO, tempo emulato]
 
