@@ -63,6 +63,12 @@ vettori come all'accensione), caricano il file all'indirizzo del PRG (`$0801`) c
   19656 cicli (50 Hz PAL esatti, non il passo del KERNAL), vettore `$0314` proprio. **Ogni voce** scelta ferma tutto (`tm_stop`: SID a 0, vettore
   `$EA31`, latch del KERNAL) prima del `LOAD` del trampolino, che sovrascrive il programma; tornando da LORE o HELP il brano riparte da capo
   ([Musica](musica.md), TODO E10). Il cursore lampeggiante è spento (`$CC`).
+- **Un fotogramma del menu** (19/11, ex TODO I6): il ciclo aspetta il prossimo IRQ della musica (`tm_wait`: contatore `tm_fc`,
+  +1 in `tm_irq`). Prima aspettava la riga raster 250 (`lda $d012 / cmp #250`): il timer del CIA ha lo stesso periodo del
+  fotogramma, quindi il suo IRQ (~39 righe, player + `$EA31`) cade sempre alla stessa riga, e se copriva la 250 la riga non
+  si vedeva mai: menu fermo per sempre con la musica che suonava (all'avvio e al ritorno da LORE o HELP, a seconda della fase
+  del timer: ~12% in teoria, 5 volte su 9 nel test `LORE-10`, che era il sintomo). Test `BOOT-17` (8 fasi dell'IRQ, comprese
+  le righe 241-249 che bloccavano il ciclo vecchio).
 - Voci: **hear the legend** (LORE), **read the game manual** (programma `HELP`, [Help](help.md)), **walk the blood path** (START) e (16/11, committente) **4 exit game**: `tm_stop`, poi IOINIT/RESTOR/CINT e `jmp ($a002)` (avvio a caldo del BASIC, `READY.`); test `BOOT-14`. Sotto: aiuto,
   versione, copyright. La riga d'aiuto dice solo **"fire to choose"** (12/11, committente).
 - Tasti: joystick 2 su/giù e fire; `1` `2` `3`; `W`/`S` o cursore; spazio o RETURN. La voce scelta è gialla con la

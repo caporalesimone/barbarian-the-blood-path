@@ -23,7 +23,7 @@ src     = $fb                   ; (2) flusso RLE
 dst     = $fd                   ; (2) destinazione
 tmp     = $04                   ; (18/11) avanzamento del flusso RLE
 SP_VARS = $c000                 ; variabili del player (RAM libera: l'help non usa altro sopra $3800)
-;@map SP_VARS..SP_VEND "Variabili del player SID (Demon's Eye, src/common/title_music.inc)"
+;@map SP_VARS..SP_VEND+1 "Variabili del player SID (Demon's Eye, src/common/title_music.inc) e contatore dei fotogrammi tm_fc"
 
         .include "vic_init.inc" ; (11/11, O13) #vic_text_init (solo una macro: nessun byte)
         * = $0801

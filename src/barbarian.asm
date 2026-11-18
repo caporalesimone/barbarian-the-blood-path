@@ -25,7 +25,7 @@ GETIN   = $ffe4
 ;@map $0400..$07e8 "Schermo del menu"
 .if MENU
 SP_VARS = $c000                 ; variabili del player (RAM libera: BARBARIAN sta sotto $3800)
-;@map SP_VARS..SP_VEND "Variabili del player SID (Demon's Eye, src/common/title_music.inc)"
+;@map SP_VARS..SP_VEND+1 "Variabili del player SID (Demon's Eye, src/common/title_music.inc) e contatore dei fotogrammi tm_fc"
 .endif
 ;@map FONT+512 "Font del menu: codici 0-63 del font del gioco (uifont.bin), sopra i programmi che il trampoline carica"
 NITEM   = 4                     ; (16/11) la quarta voce, exit game, torna al BASIC
@@ -98,7 +98,7 @@ _lc     lda ($fb),y
 
 ; un fotogramma del menu del loader: tasti 1-3 (scelta diretta), W/S o joystick (voce), Fire/RETURN/spazio (scegli)
 loop:
-        jsr wait_frame
+        jsr tm_wait             ; (19/11, TODO I6) un fotogramma dal clock della musica, non dalla riga raster 250
         jsr GETIN               ; tastiera (IRQ del KERNAL)
         beq _joy
         cmp #"1"
@@ -253,14 +253,6 @@ _c      lda #32
         rts
 lg_p    = $02                   ; (2) puntatore alle celle del logo (pagina zero libera: il BASIC non gira)
 lg_q    = $04                   ; (2) puntatore ai colori del logo
-
-wait_frame:
--       lda $d011               ; attende la riga 250 (una volta per fotogramma)
-        bmi -
--       lda $d012
-        cmp #250
-        bne -
-        rts
 
 ; voci: la scelta in giallo con la freccia, le altre in grigio
 draw_sel:

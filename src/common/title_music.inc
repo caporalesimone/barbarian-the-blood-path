@@ -25,7 +25,8 @@ SP_V2   = 14
 SP_RESUME = 0                   ; niente sp_resume / sp_release
         .include "sid_player.inc"
         .include "sid_title.inc"        ; out/work/sid_title.inc (tools/build/gen_music.py): il brano
-        .cerror SP_VARS + SP_VSIZE > $d000, "variabili del player oltre $CFFF"
+tm_fc   = SP_VARS + SP_VSIZE        ; (19/11, TODO I6) contatore dei fotogrammi: +1 a ogni tm_irq (tm_wait)
+        .cerror tm_fc + 1 > $d000, "variabili del player oltre $CFFF"
 
 ; Demon's Eye con il player unico: SID azzerato, brano dall'inizio, vettore IRQ su tm_irq e CIA1 timer A con il
 ; latch di un fotogramma PAL (TM_LATCH), ricaricato subito
@@ -81,7 +82,17 @@ _c      sta $d400,x
         lda $dc0d               ; eventuale IRQ del timer in sospeso: confermato
         rts
 
+; un fotogramma (19/11, TODO I6): attende il prossimo tm_irq. Al posto dell'attesa di una riga raster: l'IRQ del CIA ha
+; lo stesso periodo del fotogramma (19656 cicli), quindi cade sempre alla stessa riga; se copre la riga attesa (dura ~39
+; righe) la riga si perde a ogni fotogramma e il programma resta fermo per sempre (BARBARIAN, LORE-10). Solo dopo tm_start + cli.
+tm_wait:
+        lda tm_fc
+-       cmp tm_fc
+        beq -
+        rts
+
 ; IRQ del CIA1 a 50 Hz: un passo del player, poi l'IRQ del KERNAL (tastiera)
 tm_irq:
+        inc tm_fc
         jsr sp_play
         jmp KERNAL_IRQ

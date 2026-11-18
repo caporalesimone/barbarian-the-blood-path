@@ -140,3 +140,42 @@ script("TITLEMUSIC-10", "HELP: Demon's Eye with its own IRQ clock (CIA1 timer A,
        [PY, os.path.join(H, "test_title_music.py"), "help"])
 script("TITLEMUSIC-11", "BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD",
        [PY, os.path.join(H, "test_title_music.py"), "barbarian"])
+
+
+@test("BOOT-17", "BARBARIAN menu: one loop per frame whatever the phase of the music IRQ (CIA1 timer locked to the frame; "
+      "before 19/11 an IRQ over raster line 250 froze the menu for ever, TODO I6, LORE-10 hangs)")
+def boot_irq_phase(ctx):
+    """The menu waits for a frame with tm_wait (tm_fc, +1 in tm_irq). The IRQ is moved to a given raster line by a stub that
+    reloads CIA1 timer A (force load) with the cycles to that line, then the latch of one PAL frame again; then the menu loop
+    must run once per IRQ (50 IRQs). Lines 241, 246, 249: the phases that froze the old wait on line 250."""
+    from lib.c64 import Vice, OUT, labels
+    L = labels("barbarian")
+    v = Vice(os.path.join(OUT, "disk.d64"))
+
+    def ras():
+        r = v.mem(0xd011, 2)
+        return r[1] + (256 if r[0] & 0x80 else 0)
+    bad = []
+    try:
+        v.load(os.path.join(OUT, "barbarian.prg")); v.pc(0x080d)
+        v.brk(L["loop"]); v.go(60); v.delbrk()
+        for line in (200, 230, 241, 246, 249, 253, 300, 10):
+            n = ((line - ras()) % 312) * 63
+            pc = v.regs()["pc"]
+            code = [0xa9, n & 255, 0x8d, 0x04, 0xdc, 0xa9, n >> 8, 0x8d, 0x05, 0xdc, 0xa9, 0x11, 0x8d, 0x0e, 0xdc,
+                    0xa9, 19655 & 255, 0x8d, 0x04, 0xdc, 0xa9, 19655 >> 8, 0x8d, 0x05, 0xdc, 0xea]
+            v.poke(0xcf00, *code)                               # $CF00: free RAM for BARBARIAN (player variables at $C000)
+            v.pc(0xcf00); v.brk(0xcf00 + len(code) - 1); v.go(5); v.delbrk(); v.pc(pc)
+            v.brk(L["tm_irq"]); v.go(5); v.go(5)
+            at = ras()
+            v.brk(L["loop"])
+            irq = loops = 0
+            while irq < 50:
+                v.go(5)
+                if v.regs()["pc"] == L["tm_irq"]: irq += 1
+                else: loops += 1
+            v.delbrk()
+            if loops < 48: bad.append("IRQ at line %d: %d menu loops in 50 frames" % (at, loops))
+    finally:
+        v.close()
+    check(not bad, "; ".join(bad))
