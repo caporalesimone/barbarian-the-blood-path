@@ -208,8 +208,9 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   negozi nel modulo MENU, tre zone (zona 1 `$C900-$CFFF` 170 B liberi, zona 2 `$F4E0-$FCFF` 9 B, zona 3 `$A700-$A7FF`
   93 B). Ogni modifica a locanda e negozi deve starci: per crescere, altre zone (slot sprite 20–23 `$A500-$A5FF`, 256 B;
   coda degli slot 41–47 e 58–63 dopo i buffer della musica) o codice più corto (`asm_audit`).
-- **Attenzione** per D8 (`OVLF` a `$C900`) e per il buffer delle quest (`docs/wiki/quests.md`, `$CD00`): `$C900-$CFFF` ora è
-  la zona 1 del MENU, che resta per tutta la partita.
+- (19/11, verificato nel codice) `$C900-$CFFF` (zona 1 del MENU) **è libera in tutti i piani del dungeon**: ogni chiamata nel
+  modulo (`MENU_INN`, `MENU_SHOP`, `MENU_NHERE`, `npc_tick`) passa da `cur_level` = 0, ed `enter_gfx` rilegge il MENU a ogni
+  ingresso nel villaggio (`ovl_cur` = 0). La nota di prima ("resta per tutta la partita") era sbagliata. Vale per D8.
 
 ### D1 (ex P1) Primo ingresso nel piano 1 dal villaggio ~12 s in VICE (poi 5,6–7,3 s fra i piani) — S (misura) + ?
 - Misurare cosa si legge (tema, brano, piano) col cronometro; il precaricamento del tema parte dopo N caselle e forse non
@@ -234,7 +235,11 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 
 ### D8 (ex 6.2) Codice del piano finale in overlay (`OVLF` a `$C900`) — M-L
 - `gen_final` + tabelle, `ui_lever`, `at_lever`, parte di `place_boss`, `final_tick`: ~1 KB di GAME. Ospiterà Torvald (H1).
-  Conflitto con la zona 1 del MENU (D14).
+  (19/11) Misura dai listati: in GAME `final_tick` 155 B, `ui_lever` 335, `at_lever` 20, `fin_doors` 24, `place_boss` +
+  `boss_name_idx` 138 (in parte comune a tutti i boss), `fin_load` 47 (CODE2); `gen_final` sta sotto l'I/O (non e' GAME): il
+  guadagno sul margine e' ~0,55-0,7 KB, non 1 KB. Nessun conflitto con il MENU (D14: zona 1 libera nel dungeon).
+  Proposta allargata (da decidere): **modulo del dungeon** a `$C900` (1792 B) con il piano finale, spawn dei mostri
+  (`spawn_monsters` 269 B, `place_monster` 166, `floor_types` 212) e le meccaniche dei boss dei capitoli (~550 B stimati, M9).
 
 ### D3 (ex P3, ex 1.9) Frenzy e analisi del dungeon — L
 - **11/11**: profilo per routine (`tools/vice/frame_prof.py`), ottimizzazioni semplici fatte, velocità della Frenzy provate fino a
