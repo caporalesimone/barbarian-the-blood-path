@@ -52,8 +52,16 @@ for f in out/work/snd/snd*.prg; do n=$(basename $f .prg); [ $HUB = 1 ] && [ $n =
 ARGS+=(-f title -w out/work/title.prg -f lore -w out/work/lore.prg -f ldat -w out/work/ldat.prg -f help -w out/work/helpz.prg -f jukebox -w out/work/jukebox.prg)
 ARGS+=(-f hl -w out/work/hl.prg -f ksave -w out/work/krill/save.prg)     # ksave: plugin di save di Krill, ricaricato a ogni save
 for s in 1 2 3 4 5; do ARGS+=(-f save-0$s -w out/work/save.prg); done
-for f in out/work/qst[01].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) quest (tools/build/gen_quests.py): dopo i file del capitolo 1, per non spostarli sul disco (PERF-DISK); le altre in fondo
-[ -f out/work/cheats.prg ] && ARGS+=(-f cheats -w out/work/cheats.prg)     # (17/11) menu dei trucchi: solo debug e test (asm.sh lo toglie in release)
+# (18/11, PERF-12, docs/wiki/FastLoader.md 7.2) Krill cerca un file in una finestra di 11 voci della directory e, se non c'e',
+# legge i settori della directory successivi in giro (solo in avanti). Dopo un salvataggio la finestra sta sui file di
+# salvataggio: per la prima discesa nel piano 1 servono GFX1 e SND1, che stanno prima. Due voci in piu' (loop file di cc1541,
+# stessi dati) subito dopo save-05 li fanno trovare senza fare il giro: villaggio -> piano 1 dopo un salvataggio 6,0 -> 3,8 s.
+# Al loro posto prima c'erano QST0 e QST1, spostate in fondo: il giro della directory resta di 52 voci e le voci dei capitoli
+# 2-5 restano alla stessa posizione.
+ARGS+=(-m -N -f gfx1 -l gfx1 -N -f snd1 -l snd1)
+# (17/11) menu dei trucchi: solo debug e test (asm.sh lo toglie in release). (18/11) in release al suo posto una voce in piu'
+# di hl (loop file): la directory ha le stesse voci nelle stesse posizioni, quindi gli stessi tempi di debug.
+if [ -f out/work/cheats.prg ]; then ARGS+=(-f cheats -w out/work/cheats.prg); else ARGS+=(-N -f hl -l hl); fi
 case $TWN_LAYOUT in
   end)     for c in 2 3 4 5; do ARGS+=(-f twn$c -w out/work/twn$c.prg); done     # villaggi dei capitoli 2-5: in fondo, con la grafica dei loro capitoli (i file del capitolo 1 restano sulle prime tracce)
            for f in out/work/gfx/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;     # capitoli 2-4 (segnaposto)
@@ -67,4 +75,9 @@ esac
 # (18/11) le quest QST2..QST8 (piu' quest, tools/build/gen_quests.py) in fondo al disco: si leggono di rado (dettaglio di una
 # quest) e cosi' non spostano i file dei capitoli 2-5 (PERF-DISK)
 for f in out/work/qst[2-9].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done
+for f in out/work/qst[01].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) elenco delle quest; (18/11) in fondo (vedi le voci in piu' dopo save-05)
 $CC "${ARGS[@]}" "$OUT" > out/work/mkdisk.log 2>&1 || { cat out/work/mkdisk.log; echo "mkdisk: errore cc1541"; exit 1; }
+# (18/11) catena della directory con interleave 2 (cc1541 la scrive con 3): Krill legge i settori della directory uno dopo
+# l'altro e con 2 ne trova uno ogni ~21 ms invece di ~32 ms; misurato: 0,1-0,6 s in meno su quasi tutti i caricamenti
+# (PERF-DISK), nessuno piu' lento. Con 1 Krill non fa in tempo e perde un giro a settore (piu' lento di 3).
+python3 tools/build/d64_dirilv.py "$OUT" ${DIR_ILV:-2} >> out/work/mkdisk.log || { echo "mkdisk: errore catena della directory"; exit 1; }

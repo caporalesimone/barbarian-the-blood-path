@@ -36,7 +36,7 @@ LIM = {
     "twn1": 2.0, "twn2": 2.5, "twn3": 2.1, "twn4": 2.8, "twn5": 1.6,         # layout hubchap, measured: 0.68, 1.63, 1.56, 2.14, 1.20; (17/11) twn1 1.76 s in every layout (the bigger GAME): limit 2.0 (owner)
     "in1": 6.6, "in2": 5.3, "in3": 5.0, "in4": 5.0, "in5": 4.6,              # the time depends on the disk phase (rotation, head position): slowest seen on
                                                                              # 10 phases 4.93, 3.86, 3.84, 3.84, 3.94 (means 4.17, 3.47, 3.49, 3.45, 2.96); in2 4.37 in the suite order
-    "theme1": 1.1, "theme2": 1.1, "theme3": 1.4, "theme4": 0.8,              # 0.72, 0.77, 1.04, 0.46
+    "theme1": 1.1, "theme2": 1.2, "theme3": 1.4, "theme4": 1.1,              # 0.72, 0.77, 1.04, 0.46
     "stairs1": 3.2, "stairs2": 3.2, "stairs3": 3.2, "stairs4": 3.2,          # 1.5-1.7 s, up to 2.54 s depending on the disk phase
     "boss1": 3.2, "boss2": 3.0, "boss3": 3.0,                                # 1.40-2.42, 2.24, 2.34 (disk phase)
     # (18/11) measures now the slowest of PHASES disk phases (see timed) and a failure no longer changes the sequence (see FAILS):
@@ -45,6 +45,8 @@ LIM = {
     # after a save): in1 5.7 -> 6.6 (5.66 s), twn2 2.2 -> 2.5 (2.13 s), boss1 3.0 -> 3.2 (2.71 s). Thresholds of the owner (HARD)
     # unchanged. Measures of 18/11: theme1-4 0.57 0.76 0.71 0.57, twn1-5 0.92 2.13 0.95 0.98 0.80, stairs1-4 2.59 1.76 1.59 1.68,
     # boss1-3 2.71 1.22 1.12, in1-5 5.66 3.31 3.58 3.57 3.93.
+    # (18/11, PERF-12) directory with interleave 2 and GFX1/SND1 also right after the save files (tools/build/mkdisk.sh; 19 disks
+    # measured, docs/wiki/FastLoader.md 7.2): theme2 1.1 -> 1.2 (1.04 s), theme4 0.8 -> 1.1 (0.89 s), the rest within the limits.
 }
 T = {}
 

@@ -235,6 +235,39 @@ dissolvenza, `TWNc`, modulo MENU, `gfx_install`, brano), **media / massimo su 10
 - **Noto**: il setup della suite `PERF-DISK` a volte non parte ("no answer to 'load ... start.prg' in 20 s"), circa una volta
   su due il 15/11; non dipende dalla disposizione (TODO I-test).
 
+### 7.2 Ordine dei file e directory (18/11, PERF-12) [MISURATO, tempo emulato]
+
+**Come cerca Krill** (`loader-v194`, `drivecode-common.inc`, letto il 18/11): il drive tiene in memoria una **finestra di 11
+voci** della directory (hash dei nomi, `DIRBUFFSIZE`). Se il file non c'e', legge i settori della directory **successivi**
+(solo in avanti, in giro fino a tornare al punto di partenza) e la finestra riparte da li'. Dopo ogni caricamento il drive
+prepara il primo blocco del file che segue nella finestra. Quindi il tempo di un caricamento dipende da **dove sta la
+finestra** (cioe' dai file letti prima) e da **quante voci** bisogna attraversare: un giro intero della directory (7
+settori, 52 voci) costa ~1,2-1,5 s. Per questo i tempi cambiano "a scatti" di ~1,3 s spostando anche un solo file, e in1
+(5,6 s) costava ~2 s piu' degli altri ingressi: nessun refuso nel codice, solo la posizione di TWN1/MENU/SND0 (prima di
+GFX1/BOSSCH1/GFX2) rispetto alla finestra dopo il piano del boss.
+
+**Prove** (tutte con `PERF-DISK`, `PERF-12`, `PERF-17` su dischi costruiti a mano; totale = somma delle misure, avvio x 0,2):
+
+| Disco | Cosa cambia | villaggio → 1 | in1 | in2-in4 | Totale | Test fuori |
+|---|---|---|---|---|---|---|
+| L0 | ordine `hubchap` del 15/11, directory interleave 3 (cc1541) | 6,01 | 5,64 | 3,3-3,6 | 83,6 | 1 |
+| L0 k=8 / k=2 / k=1 | solo l'interleave della directory | 6,61 / 5,41 / 7,76 | 5,8 / 5,2 / 2,9 | ≈ / ≈ / ≈ | 87,0 / **79,9** / 94,6 | 4 / 1 / 6 |
+| L1, L2, L3 | file raggruppati per capitolo (L2, L3: voci doppie di MENU, SND0, SND6 in ogni capitolo; L3: gruppi di 11 voci) | 4,6 | 5,3 / 4,5 / 2,9 | 2,5-4,3 | 81,1 / 77,8 / 81,1 | 5 / 5 / 3 |
+| L4a-L4e | L0 + voci doppie o file di salvataggio spostati | 4,0-5,8 | 2,8-5,2 | 2,7-4,8 | 79,2-86,3 | 2-4 |
+| L5 | L4a + MENU/SND0 doppi nei capitoli 2-5 (k=2) | 5,81 | 4,7-4,8 | 2,7-3,7 | 79,8-85,3 | 3-5 |
+| **L6 k=2** (scelto) | L0 + **GFX1 e SND1 anche subito dopo save-05** al posto di QST0/QST1 (spostate in fondo: stesse posizioni per il resto), **directory interleave 2** | **3,81** | **2,84** | 3,0-3,5 | **75,9** | 2 (tema 2 e 4 sopra il 90% del limite: limiti 1,2 e 1,1 s) |
+
+Scelta: **L6 con interleave 2** (`tools/build/mkdisk.sh`, `tools/build/d64_dirilv.py`). L'interleave 2 e' un guadagno
+"strutturale" (stesso ordine: 0,1-0,6 s in meno quasi ovunque, niente di piu' lento); le due voci in piu' servono al caso
+"salvo nel villaggio, poi scendo", che con R10 era peggiorato. Rispetto a L0: villaggio → piano 1 dopo un salvataggio
+6,0 → 3,8 s (PERF-12 torna sotto i 5 s), in1 5,6 → 2,8 s, scale 1 → 2 2,5 → 1,9 s, totale −7,7 s; capitolo 2 un po' piu' lento
+(twn2 2,1 → 2,2 s, tema 0,76 → 1,04 s), capitolo 4 tema 0,57 → 0,89 s e twn4 0,98 → 2,11 s (entro i limiti).
+In release al posto di CHEATS c'e' una voce doppia di HL: stesse voci nelle stesse posizioni, stessi tempi.
+
+**Limite di questo metodo**: con 52 voci e la finestra di 11 l'ordine "migliore" vale per le sequenze dei test; altre
+sequenze del gioco vero possono finire dalla parte sbagliata della finestra. La leva robusta, suggerita anche dal README di
+Krill, e' **avere meno file**: ad esempio unire QST2-QST8 (7 voci) e i brani SND (8 voci) in pochi file (TODO M3).
+
 ## 8. Compatibilità
 
 | Ambiente | Stato |

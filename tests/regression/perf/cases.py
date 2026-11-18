@@ -130,10 +130,13 @@ def level_time(g, target):
 @test("PERF-12", "change of level (stairs, Krill): village -> 1 <= 5 s, 1 -> 2 <= 13 s, 2 -> 1 <= 13 s (the level left is saved: whole hero file)")
 def perf_level(ctx):
     g = ctx["g"]
+    bad = []                                                        # (18/11) all three measured, then the verdict: same sequence pass or fail
     for a, b, mx in ((0, 1, 5.0), (1, 2, 13.0), (2, 1, 13.0)):      # 11/11 KERNAL without cache: 11.1, 13.8, 15.8 s; Krill: 3.1, 10.2, 11.4
         t = level_time(g, b)
         print("      level %d -> %d: %.2f s" % (a, b, t))
-        check(t <= mx, "level %d -> %d: %.2f s (max %.0f s)" % (a, b, t, mx))
+        if t > mx:
+            bad.append("level %d -> %d: %.2f s (max %.0f s)" % (a, b, t, mx))
+    check(not bad, "; ".join(bad))
 
 
 @test("PERF-13", "dungeon level 1: walking (corridors, rooms), lost frames <= 6%, worst frame <= 2.5")
