@@ -22,21 +22,37 @@ dell'HUD), `tools/build/gen_help.py` (genera `out/work/help.inc` e l'anteprima `
 
 ```mermaid
 flowchart LR
-    B["BARBARIAN<br/>voce 2"] -->|trampoline| H["HELP<br/>pagina 1..5"]
+    B["BARBARIAN<br/>voce 2"] -->|trampoline| H["HELP<br/>pagina 1..19"]
     H -->|"RUN/STOP / freccia a sinistra<br/>(fire dall'ultima pagina: di nuovo la prima)"| B
 ```
 
 ## Pagine
 
+(18/11, committente: "il testo è troppo compatto e si capisce poco") **19 pagine** invece di 5: sezioni con il titolo in verde
+(`<...>` in `data/help.txt`) e una riga vuota fra l'una e l'altra, **elenchi dei tasti** in due colonne (tasto in giallo, che
+cosa fa dalla colonna 21: un TAB in `data/help.txt`), **una pagina per ogni abilità e potere** (memoria: dal 18/11 le pagine
+stanno dopo il charset, vedi Tecnica), la scheda del personaggio **C** (punti e tasti) e il **respec** su pagine loro, le
+quest **Q**.
+
 | # | Titolo | Contenuto |
 |---|---|---|
-| 1 | moving and fighting | movimento (joystick 2, W A S D), attacco (fire/spazio tenuto), le abilità H J K L con il livello, Rage U e Frenzy O con livello e durata, pozioni 1–4, pergamena 5, I, M, RUN/STOP |
-| 2 | fire on places | fire su scale giù/su, cripta, portale (dal piano al villaggio e ritorno), porte dei negozi e della locanda, baule (nessun mostro vicino, chiave per il baule chiuso); la fontana cura camminandoci sopra |
-| 3 | inventory, chests and shops | regola comune delle schermate (W/S o leva, fire, RUN/STOP), inventario (fire usa, DEL elimina; oggetti rotti in rosso), baule (fire prende), negozi (fire compra, vende, ripara; R ripara dal fabbro), baule della locanda (pack, chest 1, chest 2, exit), mappa (fire, M o RUN/STOP) |
-| 4 | menus and saving | come ci si muove in tutte le schermate (W/S o leva, fire, RUN/STOP), menu di gioco (resume, save game, quit game che salva), menu dei barbari, scheda del barbaro (start, delete, back; domande: fire = sì), nuovo barbaro (RETURN, F1, DEL, RUN/STOP; stesso seed = stesso dungeon), morte (metà dell'oro, risveglio al villaggio) |
-| 5 | the hud | **ritaglio dell'HUD vero** con 8 marcatori numerati sopra e sotto, e la legenda: HP/XP, barre, icone dell'usura (lampeggiano al 20%, fisse in rosso se rotte), LV, H J K L (giallo = quella del fire), U O (giallo attiva, bianco pronta, ciano in ricarica), chiavi, cintura (pozioni blu in ricarica, pergamena); la riga in alto del gioco (luogo o mostro con la sua vita) |
+| 1 | all the keys | tutti i tasti del gioco in elenco: movimento, fire, H J K L, U O, 1-4, 5, I, M, C, Q, RUN/STOP |
+| 2 | moving and fighting | camminare, colpire (fire tenuto = colpi di seguito), cadenza: arma e DES bassa più lenta, DES 18 = cadenza dell'arma |
+| 3 | skills and powers | che cosa sono, tasti e livelli (H 1, J 3, K 6, L 12, U 9, O 15), ricariche, critico 19-20 dal livello 17 |
+| 4-7 | skill: slash / whirlwind / battle cry / smash | una pagina per abilità: livello, che cosa fa, ricarica, consiglio |
+| 8-9 | power: rage / frenzy | livello, effetto e durata, ricarica, colori nell'HUD |
+| 10 | fire on places | scale, cripta, portale, porte dei negozi e della locanda, baule; la fontana cura |
+| 11 | people of the village | Hilde nella piazza della fontana, i vaganti che si fermano vicino al PG, il "quest giver" con il "!" |
+| 12 | your quests (q) | elenco (scegliere, aprire, uscire), dettaglio (titolo, capitolo, stato giallo, storia, premio; W/S scorre) |
+| 13 | your character (c) | 1 punto per livello dal 2 al 20, a che cosa servono FOR/DES/COS, i tasti della scheda, nulla si spende senza conferma |
+| 14 | respec | che cosa fa il gettone, dove si trova (boss finale), come si usa |
+| 15 | inventory (i) | regola comune delle schermate, inventario (fire, DEL, I), oggetti rotti, mappa (M) |
+| 16 | chests and shops | baule del piano, fabbro e alchimista (comprare, vendere, riparare, R), baule della locanda |
+| 17 | menus and saving | menu di gioco, salvataggi automatici, domande sì/no, menu principale |
+| 18 | new barbarian, death | nuovo barbaro (RETURN, F1, W/S, fire, DEL, RUN/STOP), morte, oro addosso (10000 al massimo) |
+| 19 | the hud | **ritaglio dell'HUD vero** con 8 marcatori numerati e la legenda (come prima) |
 
-Anteprima delle 5 pagine (generata dalla build di release): ![help](../../out/work/atlas/help.png)
+Anteprima delle pagine (generata da ogni build): ![help](../../out/work/atlas/help.png)
 
 ## Tasti dell'help
 
@@ -46,18 +62,21 @@ Anteprima delle 5 pagine (generata dalla build di release): ![help](../../out/wo
 | joystick sinistra, A, DEL | pagina precedente |
 | RUN/STOP, freccia a sinistra | di nuovo il loader (unico modo di uscire: dal 16/11 fire, spazio, RETURN, D e destra dall'ultima pagina tornano alla prima) |
 
-Riga 0: titolo della pagina in giallo e "n/5" in ciano; riga 24: "fire: next  left: back  run/stop: menu".
+Riga 0: titolo della pagina in giallo e "n/19" in ciano; riga 24: "fire: next  left: back  run/stop: menu".
 
 ## Tecnica
 
 - Banco VIC 0, schermo `$0400`, charset a `$3000` (`$D018` = `$1C`): codici 0–63 = font della UI
-  (`out/work/gfx/uifont.bin`, lo stesso del gioco), codici 64.. = i glifi dell'HUD usati nel ritaglio (29). Il programma
-  (codice + pagine) sta in `$0801`–`$2D89` (con il player e Demon's Eye, ~1,6 KB: restano ~630 B sotto `$3000`); un `.cerror` controlla che non arrivi a `$3000`. Variabili del player a `$C000` (170 B, `SP_VARS`).
+  (`out/work/gfx/uifont.bin`, lo stesso del gioco), codici 64.. = i glifi dell'HUD usati nel ritaglio. Il codice (con il player
+  e Demon's Eye) sta sotto `$3000`; (18/11) **glifi e pagine dopo il charset, da `$3800`** (fino a `$8000`, dove il decompressore
+  di `src/help/zx0sfx.asm` tiene i dati compressi: due `.cerror`). Nel file il buco `$3000-$37FF` è fatto di zeri, che ZX0
+  comprime quasi a niente. Variabili del player a `$C000` (170 B, `SP_VARS`).
 - Schermo in **modo testo multicolore** (`$D016` = `$18`): il testo ha colori < 8 (alta risoluzione: bianco testo,
   giallo tasti e titoli, ciano note), il ritaglio dell'HUD i suoi colori, con `$D022`/`$D023` del tema fotografato.
   È lo stesso trucco del loader con il logo.
-- Pagine: schermo (1000 byte) e colori (1000 byte) in **RLE** (coppie conteggio, valore; 0 = fine), 5 950 byte circa per
-  5 pagine. Il disegno spegne lo schermo (`$D011`), decomprime in `$0400` e `$D800`, aspetta un fotogramma e lo
+- Pagine: schermo (1000 byte) e colori (1000 byte) in **RLE** (18/11: byte di controllo 1..127 = ripetizione del byte dopo,
+  129..255 = 1..127 byte copiati così come sono, 0 = fine; prima solo coppie conteggio-valore, che raddoppiavano il testo):
+  ~9,1 KB per 19 pagine. Il disegno spegne lo schermo (`$D011`), decomprime in `$0400` e `$D800`, aspetta un fotogramma e lo
   riaccende. La tastiera passa dall'IRQ del KERNAL (`GETIN`), il joystick dalla porta 2 (`$DC00`, solo le nuove pressioni).
 - **Musica** (15/11, ex TODO E4): suona **Demon's Eye** (lo stesso brano del titolo e del menu principale, non piu' la Tavern of Dawn
   immaginata nel TODO: decisione del committente, un solo brano ovunque) con il player unico (`src/common/sid_player.inc`, senza

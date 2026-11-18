@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
-"""Quest (17/11, concept): data/quests.yaml -> out/work/quests.inc (prima di GAME) e, con --files (dopo src/qpage.asm),
-out/work/qstN.prg: un file per quest, QSTn sul disco, piu' QST0 ("no quest"). Copyright 2026 - Simone Caporale
+"""Quest (17/11, concept; 18/11 elenco e dettaglio): data/quests.yaml -> out/work/quests.inc (GAME), out/work/quests_m.inc
+(modulo MENU) e, con --files (dopo src/qpage.asm), i file del disco. Copyright 2026 - Simone Caporale
 
-File QSTn (letto da GAME a QBUF = SCR_B ed eseguito, solo mentre la pagina della quest e' aperta, src/game/quest.asm):
-  codice della pagina (out/work/qpage.bin, src/qpage.asm), poi il testo: nome di chi la da' 0, titolo 0, premio 0, righe del
-  testo (ciascuna 0), $FF. Codici dello schermo (font della UI). QST0 = codice + $FF.
-quests.inc (GAME e LOBBY): Q_N = numero di quest, q_ttl_lo/q_ttl_hi + titoli (lobby, pagina del barbaro), q_gvr_lo/q_gvr_hi
-+ nomi (etichetta dell'NPC nel villaggio)."""
+File QST0 (letto da GAME a QBUF = SCR_B ed eseguito, src/game/quest.asm ui_quest): codice della pagina (out/work/qpage.bin,
+  src/qpage.asm) + indice: per ogni quest 1..Q_N il capitolo (1 byte) e il titolo (0 finale).
+File QSTn, n = 1..Q_N (letto dalla pagina a QTXT = $B000 quando se ne apre il dettaglio): premio 0, numero di righe dello stato
+  (1 byte), righe dello stato e poi del testo (ciascuna 0 finale), $FF. Codici dello schermo (font della UI).
+quests.inc (GAME): Q_N e q_gvr1 (nome di Hilde: etichetta dell'NPC 0 nel villaggio).
+quests_m.inc (MENU, src/menu/npc.asm): q_ch = capitolo di ogni quest (gli NPC che vagano offrono quelle del capitolo o prima)."""
 import os, sys, textwrap
 import yaml
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "out", "work")
-W, LINES = 36, 11
+W = 36                    # colonne del testo nel riquadro del dettaglio
+QBUF, QTXT = 0xBC00, 0xB000
+QBUF_MAX, QTXT_MAX = 1024, 1024     # QST0: tutto lo schermo B (i puntatori degli sprite li riscrive l'IRQ, spento nella UI); QSTn: $B000-$B3FF
 
 
 def scr(s):
@@ -29,39 +32,51 @@ def scr(s):
     return bytes(out)
 
 
+def wrap(s):
+    return textwrap.wrap(" ".join(str(s).split()), W)
+
+
 def main():
     qs = yaml.safe_load(open(os.path.join(ROOT, "data", "quests.yaml")))["quests"]
     files = "--files" in sys.argv[1:]
-    page = open(os.path.join(OUT, "qpage.bin"), "rb").read() if files else b""
-    inc = ["; generato da tools/build/gen_quests.py (data/quests.yaml): non modificare", "Q_N = %d" % len(qs)]
-    if files:
-        open(os.path.join(OUT, "qst0.prg"), "wb").write(bytes([0x00, 0xbc]) + page + b"\xff")
+    if not 1 <= len(qs) <= 8:
+        sys.exit("gen_quests: da 1 a 8 quest (c_qst e' una maschera di 8 bit)")
+    index = bytearray()
     for n, q in enumerate(qs, 1):
         if q["id"] != n:
             sys.exit("gen_quests: id %s fuori ordine (attesi 1..N)" % q["id"])
-        for k, lim in (("giver", 16), ("title", 30), ("reward", 36)):
+        for k, lim in (("giver", 16), ("title", 24), ("reward", 36)):
             if len(q[k]) > lim:
                 sys.exit("gen_quests: quest %d: %s piu' lungo di %d caratteri" % (n, k, lim))
-        lines = textwrap.wrap(" ".join(str(q["text"]).split()), W)
-        if len(lines) > LINES:
-            sys.exit("gen_quests: quest %d: testo di %d righe (massimo %d)" % (n, len(lines), LINES))
-        data = bytearray(page)
-        for s_ in (q["giver"], q["title"], q["reward"]):
-            data += scr(s_) + b"\0"
-        for ln in lines:
+        if not 1 <= q["chapter"] <= 9:
+            sys.exit("gen_quests: quest %d: capitolo %s (1..9)" % (n, q["chapter"]))
+        if (n == 1) != (q["giver"] == "hilde"):
+            sys.exit("gen_quests: la quest 1 e solo lei e' di hilde (NPC 0); le altre le offrono gli NPC che vagano")
+        index += bytes([q["chapter"]]) + scr(q["title"]) + b"\0"
+        st, tx = wrap(q["status"]), wrap(q["text"])
+        data = bytearray(scr(q["reward"]) + b"\0" + bytes([len(st)]))
+        for ln in st + tx:
             data += scr(ln) + b"\0"
         data.append(0xff)
-        if len(data) > 1000:
-            sys.exit("gen_quests: quest %d: %d B, oltre i 1000 B di QBUF (codice della pagina + testo)" % (n, len(data)))
+        if len(data) > QTXT_MAX:
+            sys.exit("gen_quests: quest %d: %d B, oltre i %d B di QTXT" % (n, len(data), QTXT_MAX))
         if files:
-            open(os.path.join(OUT, "qst%d.prg" % n), "wb").write(bytes([0x00, 0xbc]) + bytes(data))
-        inc.append("q_ttl%d .text %s, 0" % (n, ", ".join(str(b) for b in scr(q["title"]))))
-        inc.append("q_gvr%d .text %s, 0" % (n, ", ".join(str(b) for b in scr(q["giver"]))))
-    inc.append("q_ttl_lo .byte 0" + "".join(", <q_ttl%d" % n for n in range(1, len(qs) + 1)))
-    inc.append("q_ttl_hi .byte 0" + "".join(", >q_ttl%d" % n for n in range(1, len(qs) + 1)))
-    if not files:
-        open(os.path.join(OUT, "quests.inc"), "w").write("\n".join(inc) + "\n")
-    print("quest: %d%s" % (len(qs), (" (qst0..qst%d.prg, pagina %d B)" % (len(qs), len(page))) if files else ""))
+            open(os.path.join(OUT, "qst%d.prg" % n), "wb").write(bytes([QTXT & 255, QTXT >> 8]) + bytes(data))
+    if files:
+        page = open(os.path.join(OUT, "qpage.bin"), "rb").read()
+        d = page + bytes(index)
+        if len(d) > QBUF_MAX:
+            sys.exit("gen_quests: QST0 di %d B (pagina %d + indice %d), oltre i %d B di QBUF" % (len(d), len(page), len(index), QBUF_MAX))
+        open(os.path.join(OUT, "qst0.prg"), "wb").write(bytes([QBUF & 255, QBUF >> 8]) + d)
+        print("quest: %d (qst0 %d B: pagina %d + indice %d; qst1..qst%d)" % (len(qs), len(d), len(page), len(index), len(qs)))
+        return
+    inc = ["; generato da tools/build/gen_quests.py (data/quests.yaml): non modificare", "Q_N = %d" % len(qs),
+           "q_gvr1 .text %s, 0" % ", ".join(str(b) for b in scr(qs[0]["giver"]))]
+    open(os.path.join(OUT, "quests.inc"), "w").write("\n".join(inc) + "\n")
+    open(os.path.join(OUT, "quests_m.inc"), "w").write(
+        "; generato da tools/build/gen_quests.py (data/quests.yaml): capitolo di ogni quest (indice = quest - 1)\n"
+        "q_ch .byte %s\n" % ", ".join(str(q["chapter"]) for q in qs))
+    print("quest: %d" % len(qs))
 
 
 if __name__ == "__main__":

@@ -131,20 +131,22 @@ try:
     check(wait_text("hear the legend") and all(t in scr_text() for t in ("game manual", "walk the blood path")),
           "BARBARIAN: menu with its three entries")
     shot("front", 1.0)
-    key("2")                                                    # the manual (HELP from disk): 5 pages
-    check(wait_text("moving and fighting"), "BARBARIAN -> HELP: page 1 (moving and fighting)")
+    # (18/11) the pages of the manual, from data/help.txt (19 pages; titles as on the screen, codes 32..63 and a..z)
+    HP = [ln[4:].strip() for ln in open(os.path.join(ROOT, "data", "help.txt")) if ln.startswith("=== ")]
+    key("2")                                                    # the manual (HELP from disk)
+    check(wait_text(HP[0]), "BARBARIAN -> HELP: page 1 (%s)" % HP[0])
     shot("help1", 1.0)
-    for n, t in enumerate(["fire on places", "inventory, chests and shops", "menus and saving", "the hud"]):
+    for n, t in enumerate(HP[1:]):
         key(" ")
         check(wait_text(t, 40), "HELP: page %d (%s)" % (n + 2, t))
         shot("help%d" % (n + 2), 1.0)
     key(chr(3))                                                 # RUN/STOP (GETIN = 3)
     check(wait_text("hear the legend"), "HELP -> BARBARIAN (RUN/STOP): the menu again")
     key("2")
-    wait_text("moving and fighting")
-    for _ in range(5):
+    wait_text(HP[0])
+    for _ in range(len(HP)):
         key(" "); stops(GETIN, 40)
-    check(wait_text("moving and fighting"), "HELP: next from the last page goes back to the first page (16/11)")
+    check(wait_text(HP[0]), "HELP: next from the last page goes back to the first page (16/11)")
     key(chr(3))                                                 # only RUN/STOP leaves the manual
     check(wait_text("hear the legend"), "HELP: RUN/STOP from page 1 goes back to the menu")
     # 2. key 1 -> LORE: loading, LDAT unpacked

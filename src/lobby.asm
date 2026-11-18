@@ -369,7 +369,7 @@ dt_redraw
         .byte 0,22,12
         .text "con"
         .byte 0,2,15
-        .text "current quest:"
+        .text "active quests:"
         .byte 0,2,16
         .text "completed quests:"
         .byte 0,1,24
@@ -390,24 +390,18 @@ dt_redraw
         lda #7
         sta ui_col
         jsr ui_seed
-        #at 17,15               ; (17/11, concept) quest letta: il suo titolo (quests.inc di GAME), "-" se nessuna
+        #at 21,15               ; (18/11) quest prese: quante (bit di c_qst; i titoli sono nella pagina delle quest, file QST0)
         lda #7
         sta ui_col
-        ldx c_qst
-        beq +
-        cpx #Q_N+1
-        bcs +
-        lda q_ttl_hi,x
-        pha
-        lda q_ttl_lo,x
-        tay
-        pla
-        tax                     ; X = byte alto
-        tya                     ; A = byte basso
-        jsr ui_puts
-        jmp ++
-+       #msg "-"
-+
+        lda c_qst
+        ldx #0
+-       lsr
+        bcc +
+        inx
++       tay
+        bne -
+        txa
+        jsr ui_b3l
         #at 21,16
         lda #7
         sta ui_col

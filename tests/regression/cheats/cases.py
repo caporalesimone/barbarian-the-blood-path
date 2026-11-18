@@ -1,7 +1,8 @@
 """Cheats for the tests (15/11, request of the project owner): the entry "cheats" of the game menu (RUN/STOP), only in builds
 assembled with CHEATS=1 (debug and test builds; tools/build/asm.sh), src/game/cheats.asm. Five actions: god mode on/off,
 level up (the normal level-up path), respec token, next level (stairs; boss level -> boss killed, back to the village;
-village -> first level), next chapter (unlock + chap_travel, which saves). Everything through the real menus (RUN/STOP,
+village -> first level), next chapter (unlock + chap_travel, which saves), (18/11) gold +1000 (GOLD_MAX at most).
+(18/11) Moved from sanity/ to regression/ when the quest list became the feature under work. Everything through the real menus (RUN/STOP,
 joystick, Fire) in one VICE session, tests in order (CHAIN). In a build without cheats (CHEATS=0, the release) the VICE
 tests are SKIP and CHEAT-22 checks that the release assembly has no cheat code."""
 import os, re, subprocess
@@ -10,7 +11,7 @@ from lib.c64 import Game, ROOT, labels
 from lib.play import new_game, U, D
 
 CHAIN = True
-CH = {"god": 0, "level": 1, "respec": 2, "next_level": 3, "next_chapter": 4}
+CH = {"god": 0, "level": 1, "respec": 2, "next_level": 3, "next_chapter": 4, "gold": 5}
 
 
 def setup(ctx):
@@ -80,8 +81,8 @@ def menu(ctx):
     check(text(g, 15, 14, 6) == "cheats", "game menu row 14: %r, expected 'cheats'" % text(g, 15, 14, 6))
     g.run_stop(); g.frames(2)
     open_cheats(g)
-    got = [text(g, 13, 8 + 2 * i, 15).rstrip() for i in range(5)]
-    exp = ["> god mode: off", "  level up", "  respec token", "  next level", "  next chapter"]
+    got = [text(g, 13, 8 + 2 * i, 15).rstrip() for i in range(6)]
+    exp = ["> god mode: off", "  level up", "  respec token", "  next level", "  next chapter", "  gold ?1000"]
     check(got == exp, "cheat menu %s, expected %s" % (got, exp))
     check(text(g, 17, 4, 6) == "cheats", "title %r" % text(g, 17, 4, 6))
     g.run_stop(); g.frames(2)
@@ -135,6 +136,18 @@ def respec(ctx):
     msg = cheat(g, "respec")
     check(g.b(L["c_resp"]) == r + 1, "tokens %d -> %d" % (r, g.b(L["c_resp"])))
     check(msg == "tokens %d" % (r + 1), "message %r" % msg)
+
+
+@test("CHEAT-23", "gold +1000: 1000 coins on the hero at every Fire (GOLD_MAX at most), message 'gold N'")
+def gold(ctx):
+    g, L = need(ctx)
+    g.poke16(L["c_gold"], 100)
+    msg = cheat(g, "gold")
+    check(g.w16(L["c_gold"]) == 1100, "gold %d, expected 1100" % g.w16(L["c_gold"]))
+    check(msg == "gold 1100", "message %r" % msg)
+    g.poke16(L["c_gold"], L["GOLD_MAX"] - 500)
+    cheat(g, "gold")
+    check(g.w16(L["c_gold"]) == L["GOLD_MAX"], "gold %d, expected GOLD_MAX %d" % (g.w16(L["c_gold"]), L["GOLD_MAX"]))
 
 
 @test("CHEAT-14", "level up at the maximum level (PL_MAXLVL): nothing changes, message 'limit reached'")

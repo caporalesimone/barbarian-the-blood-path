@@ -41,7 +41,7 @@ per livello. Tetto del livello prima dell'Abisso: 20 (`PL_MAXLVL`).
 | CA | 10 + min(mod DES, limite dell'armatura) + CA armatura + magia + CA scudo + magia (scudo ignorato con arma a due mani) |
 | critico | 20 naturale; dal livello 17 (`CRIT_LVL`) 19–20 |
 | CD di Battle Cry | 8 + competenza + mod FOR |
-| cadenza | `itrate` dell'arma (fotogrammi fra due Slash) |
+| cadenza | (18/11, committente: "con Fire tenuto la velocità dipende dalle stat, all'inizio più lenta") `itrate` dell'arma + max(0, `ATK_SLOW` − `ATK_DEX` × mod DES) fotogrammi fra due Slash (`s_rate`, `recalc_stats`; `data/rules.yaml` `player.attack_speed`: 12 e 3). DES 13 (mod +1): +9 (pugnale 12 → 21, 0,24 → 0,42 s); DES 16-17 (+3): +3; DES 18 (+4) o più: la cadenza dell'arma. Vale per ogni Slash, tenuto o premuto ogni volta |
 | penetrazione | `itpen` dell'arma: si sottrae alla CA del mostro |
 
 L'anello aggiunge +N (rame 1, argento 2, oro 3) al **modificatore** della caratteristica scritta nel suo byte
@@ -84,7 +84,7 @@ Si scelgono con H J K L (`sel_skill`, solo se il livello basta) e si usano tenen
 
 | Abilità | Tasto | Livello | Ricarica | Area (semilarghezza × semialtezza, px) | Effetto |
 |---|---|---|---|---|---|
-| Slash | H | 1 | cadenza dell'arma | 15 × 15, 16 px davanti al PG | un tiro d'attacco |
+| Slash | H | 1 | cadenza (arma + DES bassa, vedi sopra) | 15 × 15, 16 px davanti al PG | un tiro d'attacco |
 | Whirlwind | J | 3 | 100 fot. (2 s) | 26 × 26 intorno al PG | un tiro a ogni mostro vicino |
 | Battle Cry | K | 6 | 750 fot. (15 s) | 80 × 64 intorno al PG | tiro salvezza o stordito 100 fot. (2 s) |
 | Smash | L | 12 | 300 fot. (6 s) | 44 × 44 intorno al PG | vantaggio, dadi × 2, stordimento 25 fot. |

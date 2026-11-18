@@ -38,7 +38,8 @@ command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container la
 # in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s.
 # I file caricati dal KERNAL (BARBARIAN, START, LORE, HELP) misurati con LOAD: stessi tempi con 10 e con 4 (entro 0,1 s).
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
-      -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg -f menu4 -w out/work/menu4.prg)
+      -f menu1 -w out/work/menu1.prg -f menu2 -w out/work/menu2.prg -f menu3 -w out/work/menu3.prg -f menu4 -w out/work/menu4.prg
+      -f menu5 -w out/work/menu5.prg)       # (18/11) quinta parte (NPC del villaggio, src/menu/npc.asm)
 HUB=0; case $TWN_LAYOUT in hub|hubchap) HUB=1;; esac     # HUB=1: il brano del villaggio (SND0) e i villaggi subito dopo MENU1..3
 [ $HUB = 1 ] && ARGS+=(-f snd0 -w out/work/snd/snd0.prg -f twn1 -w out/work/twn1.prg)
 [ $TWN_LAYOUT = hub ] && ARGS+=(-f twn2 -w out/work/twn2.prg -f twn3 -w out/work/twn3.prg -f twn4 -w out/work/twn4.prg -f twn5 -w out/work/twn5.prg)
@@ -52,7 +53,7 @@ for f in out/work/snd/snd*.prg; do n=$(basename $f .prg); [ $HUB = 1 ] && [ $n =
 ARGS+=(-f title -w out/work/title.prg -f lore -w out/work/lore.prg -f ldat -w out/work/ldat.prg -f help -w out/work/helpz.prg -f jukebox -w out/work/jukebox.prg)
 ARGS+=(-f hl -w out/work/hl.prg -f ksave -w out/work/krill/save.prg)     # ksave: plugin di save di Krill, ricaricato a ogni save
 for s in 1 2 3 4 5; do ARGS+=(-f save-0$s -w out/work/save.prg); done
-for f in out/work/qst[0-9]*.prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) quest (tools/build/gen_quests.py): dopo i file del capitolo 1, per non spostarli sul disco (PERF-DISK)
+for f in out/work/qst[01].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) quest (tools/build/gen_quests.py): dopo i file del capitolo 1, per non spostarli sul disco (PERF-DISK); le altre in fondo
 [ -f out/work/cheats.prg ] && ARGS+=(-f cheats -w out/work/cheats.prg)     # (17/11) menu dei trucchi: solo debug e test (asm.sh lo toglie in release)
 case $TWN_LAYOUT in
   end)     for c in 2 3 4 5; do ARGS+=(-f twn$c -w out/work/twn$c.prg); done     # villaggi dei capitoli 2-5: in fondo, con la grafica dei loro capitoli (i file del capitolo 1 restano sulle prime tracce)
@@ -64,4 +65,7 @@ case $TWN_LAYOUT in
            ARGS+=(-f twn4 -w out/work/twn4.prg -f gfx7 -w out/work/gfx/gfx7.prg -f gfx8 -w out/work/gfx/gfx8.prg
                   -f twn5 -w out/work/twn5.prg) ;;
 esac
+# (18/11) le quest QST2..QST8 (piu' quest, tools/build/gen_quests.py) in fondo al disco: si leggono di rado (dettaglio di una
+# quest) e cosi' non spostano i file dei capitoli 2-5 (PERF-DISK)
+for f in out/work/qst[2-9].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done
 $CC "${ARGS[@]}" "$OUT" > out/work/mkdisk.log 2>&1 || { cat out/work/mkdisk.log; echo "mkdisk: errore cc1541"; exit 1; }

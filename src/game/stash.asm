@@ -38,11 +38,17 @@ MR4_AT  = SPR_DATA+12*64        ; (17/11) zona 4: slot sprite 12-19 ($A300-$A4FF
 MR4_END = SPR_DATA+20*64+16     ; gfx_install a ogni ingresso), liberi nel villaggio: gli sprite degli NPC (tools/build/npc_gfx.py).
                                 ; +16 B: margine della decompressione sul posto (ZX0), nei primi byte di BFP (tabelle degli NPC,
                                 ; scritte da npc_init dopo il caricamento)
-MPARTS  = 4
+MR5_AT  = $8c00                 ; (18/11) zona 5: sprite forti e boss del tema nel dungeon ($8C00-$8E7F, ricopiati da gfx_install a
+MR5_END = $8e80                 ; ogni ingresso), liberi nel villaggio: lo sprite del "!" e il codice degli NPC (src/menu/npc.asm)
+MPARTS  = 5
 OVL_AT  = MR1_AT                ; tabella dei salti del modulo (src/menu.asm)
 MENU_INN  = OVL_AT              ; locanda
 MENU_SHOP = OVL_AT+3            ; negozio A (0 fabbro, 1 alchimista) (jsr mk_off + jmp enter_shop: 6 B)
-MENU_NPC  = OVL_AT+9            ; (17/11) piazza gli NPC del villaggio (src/menu/npc.asm)
+NPC_BANG  = MR5_AT              ; (18/11) sprite del "!" (puntatore $30), all'inizio della zona 5
+NPC_JT    = MR5_AT+64           ; tabella dei salti degli NPC (zona 5): piazzamento, sprite, Fire
+NPC_JINIT  = NPC_JT              ; piazzamento (ingresso nel villaggio)
+NPC_JDRAW  = NPC_JT+3
+NPC_JTALK  = NPC_JT+6
 ml_src  = $5c                   ; (pagina zero libera dopo ZX_ZP) inizio dei dati compressi di ogni parte
 ml_i    = ml_src+2*MPARTS
 ml_try  = ml_i+1                ; (15/11) letture rimaste della parte (ex TODO A2)
@@ -127,8 +133,8 @@ _r      lda #0
         sta io_quiet
         sec
         rts
-ml_end  .word MR1_END, MR2_END, MR3_END, MR4_END   ; (pack_menu.py: indirizzo di ogni file = fine zona - lunghezza)
-ml_dst  .word MR1_AT, MR2_AT, MR3_AT, MR4_AT
+ml_end  .word MR1_END, MR2_END, MR3_END, MR4_END, MR5_END   ; (pack_menu.py: indirizzo di ogni file = fine zona - lunghezza)
+ml_dst  .word MR1_AT, MR2_AT, MR3_AT, MR4_AT, MR5_AT
 
 ZX_ZP   = $50                   ; 12 byte della pagina zero del BASIC, liberi nel gioco (come in START, boot.asm)
         .include "zx0.inc"

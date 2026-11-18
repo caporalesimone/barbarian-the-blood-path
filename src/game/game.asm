@@ -113,7 +113,7 @@ st_id   .fill STASH_N    ; baule della locanda: id dei 24 oggetti (0 = vuoto)
 st_b    .fill STASH_N    ; baule della locanda: bonus
 st_du   .fill STASH_N    ; baule della locanda: durabilita' attuale
 st_m    .fill STASH_N    ; baule della locanda: durabilita' massima
-c_qst   .byte ?          ; (17/11, SAVE_VER $C8, concept) quest letta: 0 nessuna, n = file QSTn (quest.asm); in fondo al blocco
+c_qst   .byte ?          ; (17/11, SAVE_VER $C8, concept) quest prese: (18/11) maschera, bit n-1 = quest n (file QSTn); in fondo al blocco
 CHREND
         .endv
         .cerror CHREND > mfar, "blocco personaggio sovrapposto a mfar"
@@ -3401,9 +3401,10 @@ _p5     lda keynew+2
         and #$01
         beq _kc
         jsr use_scroll
-_kc     lda keynew+7            ; (17/11) Q: pagina della quest (quest.asm)
+_kc     lda keynew+7            ; (17/11) Q: pagina delle quest (quest.asm; 18/11: l'elenco)
         and #$40
         beq +
+        lda #0
         jmp ui_quest
 +       lda keynew+2            ; (11/11) C: schermata del personaggio (punti statistica, respec)
         and #$10
@@ -3684,11 +3685,9 @@ _shp    cmp #T_DSMITH
         pla
         bcs _r
         jmp MENU_SHOP
-_np     jsr npc_here            ; (17/11) nessun luogo sotto il PG: accanto a chi da' la quest, la quest e' letta e si apre
-        bcc _r                  ; la sua pagina (quest.asm)
-        lda #Q_CUR
-        sta c_qst
-        jmp ui_quest
+_np     jsr npc_here            ; (17/11) nessun luogo sotto il PG: accanto a chi da' una quest (18/11: Hilde o un NPC che
+        bcc _r                  ; vaga con il "!"), la quest e' presa e si apre il suo dettaglio (NPC_JTALK, src/menu/npc.asm)
+        jmp NPC_JTALK
 _r      rts
 _st     stx st_kind
         cpx #2

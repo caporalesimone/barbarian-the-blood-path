@@ -1,95 +1,316 @@
 # HELP: il manuale del menu del loader (tools/build/gen_help.py). Una pagina per "=== titolo"; ogni riga = una riga
-# dello schermo dalla 2, colonne 1..38. [testo] giallo (tasti), {testo} ciano (note), "@hud" = ritaglio dell'HUD (4 righe).
+# dello schermo dalla 2, colonne 1..38. [testo] giallo (tasti), {testo} ciano (note), <testo> verde (titoli delle sezioni), "@hud" = ritaglio dell'HUD (4 righe).
 # Icone della UI (08/11 sera): ¤ moneta (mai la parola gold), † spada, ‡ armatura, ° anello, # scudo.
 # Tutto quello che c'e' qui deve essere vero nel codice: se cambia un tasto, cambia anche questa pagina.
+# (18/11, committente) testo meno fitto: piu' pagine, sezioni distanziate, elenchi dei tasti, una pagina per abilita',
+# la scheda del personaggio [c] con punti e respec, le quest [q].
+=== all the keys
+ <moving>
+   [joystick 2] or [w a s d]
+   [fire] or [space]	strike, talk
+
+ <skills and powers>
+   [h] [j] [k] [l]	choose a skill
+   [u] [o]	rage, frenzy
+
+ <belt>
+   [1] [2] [3] [4]	drink a potion
+   [5]	portal scroll
+
+ <screens>
+   [i]	inventory
+   [m]	floor map
+   [c]	your character
+   [q]	your quests
+   [run/stop]	game menu
 === moving and fighting
-[joystick 2] or [w a s d]  move
-[fire] or [space]  attack with the skill
-you have chosen: hold it to keep on
-striking.
+ <walk>
+   [joystick 2] or [w a s d]
 
-skills: choose the one fire uses
- [h] slash       level 1, one blow
- [j] whirlwind   level 3, all around
- [k] battle cry  level 6, stuns them
- [l] smash       level 12, double dice
-powers: they start at once
- [u] rage        level 9, for 6 s the
-               damage you take halves
- [o] frenzy      level 15, for 5 s two
-               blows per fire, faster
-{a skill shows in the hud only when}
-{your level allows it.}
+ <fight>
+   [fire] or [space]	strike with the
+   	chosen skill
+   hold [fire]	keep striking
 
-[1]-[4]  belt potions  [5]  portal scroll
-[i]  inventory      [m]  floor map
-[c]  character      [run/stop]  menu
-[q]  quest
+ <how fast you strike>
+   your weapon sets the pace, and a
+   low dex makes you slower: with
+   dex 18 you strike as fast as the
+   weapon allows.
+   {raise dex with the points of the}
+   {character screen [c].}
+
+ the skills are in the next pages.
+=== skills and powers
+ a skill is the attack that [fire] uses.
+ choose it with its key:
+   [h] slash	level 1
+   [j] whirlwind	level 3
+   [k] battle cry	level 6
+   [l] smash	level 12
+
+ a power starts at once with its key:
+   [u] rage	level 9
+   [o] frenzy	level 15
+
+ every skill but slash and both powers
+ need time to recharge after use.
+
+ {a skill shows in the hud only when}
+ {your level allows it. from level 17}
+ {a roll of 19 or 20 is a critical.}
+=== skill: slash (h)
+ your basic attack, from level 1.
+
+ <what it does>
+   one blow at the monster in front
+   of you: one attack roll, the dice
+   of your weapon plus your str.
+
+ <recharge>
+   the pace of your weapon, slower
+   with a low dex.
+
+ <tip>
+   hold [fire]: it strikes again as
+   soon as it can.
+=== skill: whirlwind (j)
+ from level 3.
+
+ <what it does>
+   you spin around: one attack roll
+   for every monster close to you,
+   on every side.
+
+ <recharge>
+   2 seconds.
+
+ <tip>
+   use it when they surround you:
+   one [fire], many blows.
+=== skill: battle cry (k)
+ from level 6.
+
+ <what it does>
+   a cry that reaches the monsters
+   around you, even a few steps away.
+   each one makes a saving throw: if
+   it fails, it is stunned for
+   2 seconds and does not move or hit.
+
+ <recharge>
+   15 seconds.
+
+ <tip>
+   the higher your str, the harder
+   the saving throw.
+=== skill: smash (l)
+ from level 12.
+
+ <what it does>
+   a heavy blow around you: two attack
+   rolls (the best counts), double
+   dice, and the monster hit is
+   stunned for half a second, even
+   a boss.
+
+ <recharge>
+   6 seconds.
+=== power: rage (u)
+ from level 9. it starts at once.
+
+ <what it does>
+   for 6 seconds the damage you take
+   is halved.
+
+ <recharge>
+   30 seconds.
+
+ <in the hud>
+   {yellow: on   white: ready}
+   {cyan: recharging}
+=== power: frenzy (o)
+ from level 15. it starts at once.
+
+ <what it does>
+   for 5 seconds every [fire] strikes
+   twice (battle cry once), and every
+   blow that hits makes you run
+   faster: up to twice your speed.
+
+ <recharge>
+   30 seconds.
+
+ <in the hud>
+   {yellow: on   white: ready}
+   {cyan: recharging}
 === fire on places
-stand on a place and press [fire]:
- stairs down   the next floor
- stairs up     the floor above
-               (from floor 1: village)
- crypt         floor 1
- portal        on a floor: the village
-               in the village: back to
-               the floor you left
- shop door     smith or alchemist
- inn door      your inn chest
- chest         open it, if no monster
-               is near; a key chest
-               needs a key.
+ stand on a place and press [fire]:
 
-walk on the fountain: it heals you.
+   stairs down	the next floor
+   stairs up	the floor above
+   	{floor 1: village}
+   crypt	floor 1
+   portal	on a floor: the
+   	village; in the
+   	village: back to
+   	the floor you left
+   shop door	smith or alchemist
+   inn door	your inn chest
+   chest	open it, if no
+   	monster is near
+   	{key chest: a key}
 
-{every floor remembers what you did}
-{there when you leave it.}
-=== inventory, chests and shops
-every screen works the same way:
- [w] [s] or [stick] up/down: move
- [fire] select   [run/stop] back
-inventory [i]   {the pack holds 8 items}
- [fire] use   [del] drop   ([i] closes)
- {a broken item (red) stays on you but}
- {does nothing: repair it or swap it.}
-chest: [fire] takes an item
-shops: smith, alchemist
- [fire] on wares: buy (your ¤, then
- the inn's). on the pack: sell. smith:
- [fire] on worn gear or [r]: repair.
- a potion: choose its belt slot.
-inn chest (your inn): 24 items
- [fire] moves an item between pack
- and chest; on your ¤: into the chest
- in tens (0..9 stay on you).
- [right] from the pack to the chest.
- [fire] on a page number: next page.
- [fire] on an equipped slot: choose
- what to wear ([run/stop] cancels).
-map [m]: [fire], [m] or [run/stop]
+ walk on the fountain: it heals you.
+ {every floor remembers what you did.}
+=== people of the village
+ <hilde>
+   she waits in the fountain square.
+   stand next to her and press [fire]:
+   she gives you her quest.
+
+ <villagers>
+   they walk around the village. when
+   you come close they stop, so you
+   can talk to them.
+
+ <the quest giver>
+   now and then a villager has a quest
+   for you: a yellow [!] over his head
+   and quest giver at the top of the
+   screen. stand next to him, [fire].
+
+ {the [!] goes away once you take}
+ {the quest.}
+=== your quests (q)
+ [q] shows the quests you took.
+
+ <the list>
+   [w] [s] or [stick]	choose
+   [fire]	open the quest
+   [run/stop] or [q]	back
+
+ <a quest>
+   title, chapter, its status (in
+   yellow, at the top), the story
+   and the reward.
+   [w] [s] or [stick]	scroll the text
+   [run/stop] or [fire]	back to the list
+
+ {up and more on the box: there is}
+ {more text above or below.}
+=== your character (c)
+ every level from 2 to 20 gives you
+ 1 stat point to spend.
+
+   str	attack, damage,
+   	battle cry
+   dex	armor class,
+   	attack speed
+   con	hit points
+
+ <the keys>
+   [w] [s]	choose
+   [a] [d] or [-] [+]	a point less, more
+   [fire] on a stat	a point more
+   [fire] on confirm	spend the points
+   [fire] on undo	take them back
+   [run/stop] or [c]	back
+
+ {nothing is spent until you confirm.}
+ {yellow arrow in the hud: points to}
+ {spend.}
+=== respec
+ a respec token gives back all the
+ points you spent: you can choose
+ again.
+
+ <where to find them>
+   killing the final boss.
+
+ <how to use one>
+   [c], then respec (it shows only
+   if you have a token), [y] or
+   [fire] to confirm.
+
+ {the screen shows how many tokens}
+ {you have.}
+=== inventory (i)
+ every screen works the same way:
+   [w] [s] or [stick]	move
+   [fire]	select
+   [run/stop]	back
+
+ <inventory>
+   [fire]	use or wear
+   [del]	drop
+   [i]	close
+   {the pack holds 8 items.}
+
+ {a broken item (red) stays on you}
+ {but does nothing: repair it or}
+ {swap it.}
+
+ <floor map>
+   [fire] [m] [run/stop]	close
+=== chests and shops
+ <chest on a floor>
+   [fire]	take an item
+
+ <smith, alchemist>
+   [fire] on wares	buy (your ¤,
+   	then the inn's ¤)
+   [fire] on the pack	sell
+   [fire] on worn gear	repair (smith)
+   [r]	repair (smith)
+   {a potion: choose its belt slot.}
+
+ <inn chest> {(every inn): 24 items}
+   [fire]	between pack and
+   	chest
+   [fire] on your ¤	into the chest in
+   	tens (0-9 stay on)
+   [right]	from pack to chest
+   [fire] on a page	next page
+   [fire] on a slot	what to wear
+   	([run/stop] cancels)
 === menus and saving
-game menu [run/stop]
- resume, save game, quit game
- {quit game: back to the main menu}
- autosave: levels 5-6, 10-11, 15-16
-{never switch off while saving!}
-main menu: choose a barbarian to see
- his sheet: start, delete, back.
-questions: [y] or [fire] = yes,
- [n] or [run/stop] = no.
- quit the game: back to basic
-new barbarian
- name, [return], seed, [return]
- seed: 6 letters or digits, [f1] random
- then w/s choose, fire edits or starts
- [del] delete   [run/stop] back
- {the same seed makes the same dungeon.}
+ <game menu> [run/stop]
+   resume, save game, quit game
+   {quit game: back to the main menu}
 
-if you die you lose half of the ¤
-you carry (the ¤ in your inn chest
-is safe) and wake up in the village.
-you can carry up to 10000¤: keep
-the rest in your inn chest.
+ <saving>
+   autosave: levels 5-6, 10-11, 15-16
+   {never switch off while saving!}
+
+ <questions>
+   [y] or [fire]	yes
+   [n] or [run/stop]	no
+
+ <main menu>
+   choose a barbarian to see his
+   sheet: start, delete, back.
+   quit the game: back to basic.
+=== new barbarian, death
+ <new barbarian>
+   name, [return], seed, [return]
+   seed: 6 letters or digits
+   [f1]	random seed
+   [w] [s]	choose
+   [fire]	edit or start
+   [del]	delete
+   [run/stop]	back
+   {the same seed makes the same}
+   {dungeon.}
+
+ <death>
+   you lose half of the ¤ you carry
+   (the ¤ in your inn chest is safe)
+   and wake up in the village.
+
+ <the ¤ you carry>
+   up to 10000¤: keep the rest in
+   your inn chest.
 === the hud
 [1]              [2]             [3]
 @hud

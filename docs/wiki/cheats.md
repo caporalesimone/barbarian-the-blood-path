@@ -12,7 +12,7 @@ Per provare il gioco senza giocarlo tutto: saltare piani e capitoli, salire di l
 (17/11) Il menu è un **modulo su file**, `CHEATS` sul disco (`src/cheats.asm` + `src/cheats/menu.asm`, assemblato con le etichette del
 gioco come il LOBBY): `cheat_menu` di GAME lo legge a `$BC00` (lo schermo B del gioco, libero mentre c'è una pagina della UI) e lo
 esegue; costa la schermata di attesa a ogni apertura e non occupa memoria del gioco (prima ~395 B nelle build di debug e di test).
-Spazio per nuove voci: fino a **1000 B** (oggi ~380 B; la build si ferma oltre). La release non ha né il file né la voce.
+Spazio per nuove voci: fino a **1000 B** (oggi ~440 B; la build si ferma oltre). La release non ha né il file né la voce.
 Codice in `src/cheats/menu.asm` (`ct_menu`), test `CHEAT-10..22` ([Test](test.md)), screenshot
 [docs/screens/trucchi.png](../screens/trucchi.png).
 
@@ -33,6 +33,7 @@ Codice in `src/cheats/menu.asm` (`ct_menu`), test `CHEAT-10..22` ([Test](test.md
 | `respec token` | +1 gettone respec (si usa nella schermata C) | `tokens N` (il totale) | Si ferma a `RESP_MAX` (255, `data/rules.yaml`): il messaggio mostra il totale, che non cresce più |
 | `next level` | Come le scale in giù, vedi sotto | nessuno (il gioco cambia schermata) | Villaggio 5: `limit reached` |
 | `next chapter` | Sblocca il capitolo dopo e **viaggia al suo villaggio** come l'uscita del capitolo (`chap_travel`): **salva** | nessuno (il gioco cambia schermata) | Villaggio 5 (l'ultimo): `limit reached` |
+| `gold +1000` | (18/11, committente) **1000 monete addosso a ogni Fire** (`add_gold16`) | `gold N` (l'oro addosso) | Al massimo `GOLD_MAX` (10000, `data/balance.yaml`): il resto va portato nel baule della locanda |
 
 Dettaglio di **`next level`** secondo dove si è:
 

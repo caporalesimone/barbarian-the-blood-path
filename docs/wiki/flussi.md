@@ -418,7 +418,7 @@ sequenceDiagram
     participant M as modulo MENU
     V->>O: ingresso nel villaggio
     alt ovl_cur = 0 (dopo l'avvio o il LOBBY)
-        O->>D: load_file menu1, menu2, menu3 - ogni zona compressa<br/>in fondo alla sua zona ($D000, $FD00, $A800)
+        O->>D: load_file menu1..menu5 - ogni zona compressa<br/>in fondo alla sua zona ($D000, $FD00, $A800, $A510, $8E80)
         O->>O: fine del file = fine della zona? altrimenti la parte si rilegge (3 volte, poi C = 1, dal 15/11)
         O->>O: sei, $01 = $35, zx0_unpack x 3, $01 = $36
         Note over O: ovl_cur = 1 (2,3 s con Krill, 10,5 s con il KERNAL)

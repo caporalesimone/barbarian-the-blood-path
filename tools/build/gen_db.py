@@ -178,6 +178,9 @@ def main():
     o(f"RESP_MAX    = {byte(RS['max'], 'respec.max')}           ; gettoni respec al massimo")
     o(f"RESP_FINAL  = {byte(RS['final_boss'], 'respec.final_boss')}             ; gettoni per il boss finale")
     o(f"RESP_DROP   = {byte(round(RS['abyss_chest_percent'] * 256 / 100), 'abyss_chest_percent')}             ; bauli dell'Abisso: gettone se rand < RESP_DROP (x/256)")
+    AS = P["attack_speed"]                # (18/11) cadenza dell'attacco: arma + max(0, slow - per_dex x mod DES)
+    o(f"ATK_SLOW    = {byte(AS['slow'], 'attack_speed.slow')}            ; rallentamento dell'attacco base (fotogrammi)")
+    o(f"ATK_DEX     = {byte(AS['per_dex'], 'attack_speed.per_dex')}             ; ... meno questo per punto di mod DES")
     o(f"CRIT_LVL    = {byte(R['skills']['brutal_critical_level'], 'brutal_critical_level')}")
     dc = R["dex_cap"]
     o()

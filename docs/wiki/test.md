@@ -120,7 +120,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 |---|---|
 | `BUILD-01` | memory margin positive (code below $8720 >= 128 B, total >= 256 B) |
 | `BUILD-02` | SAVE_VER in the PRG = save_version in version.yaml |
-| `BUILD-03` | "version x.y" centred in the loader (full line with "loader by krill vNNN", VER_LX) and in the game menu |
+| `BUILD-03` | "version x.y" centred in the loader, start menu and game menu |
 | `BUILD-04` | manual: images and placeholders of the source |
 | `BUILD-05` | graphics atlas: names, ids, sample dungeon, groups |
 | `PG-NEW-01` | new barbarian: name, seed, game starts in the village |
@@ -150,25 +150,19 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (13)
+### sanity (7)
 
 | ID | Test |
 |---|---|
-| `CHEAT-10` | game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter |
-| `CHEAT-11` | god mode on: no damage (hurt_player); god mode off: damage again |
-| `CHEAT-12` | level up: level + 1, xp = threshold of that level, stat points of pl_pts, hp max up and full; message 'level N' |
-| `CHEAT-13` | respec token: +1, message 'tokens N' |
-| `CHEAT-14` | level up at the maximum level (PL_MAXLVL): nothing changes, message 'limit reached' |
-| `CHEAT-15` | next level in the village: the first level of the chapter (as the crypt) |
-| `CHEAT-16` | next level in a level of the chapter: the next level (as the stairs down) |
-| `CHEAT-17` | next level on level 4 -> boss level 5; there: boss killed (c_unl = 2, exit open), back to village 1 at the crypt |
-| `CHEAT-18` | next chapter from a level (village 1 -> level 1 -> village 2): unlocked, saved in village 2, no portal back |
-| `CHEAT-19` | next chapter in a village (village 2 -> 3, then 4): c_unl follows, hero saved there |
-| `CHEAT-20` | next level in the throne room (level 20): as the final boss killed (c_won, c_unl 5, respec gift), village 4 |
-| `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
-| `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
+| `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
+| `QUEST-11` | Q with no quest taken: the list (file QST0) says 'talk to the villagers', RUN/STOP goes back to the game |
+| `QUEST-12` | Hilde: '!' over her head, name in the bar; Fire = quest 1 taken and its detail (title, chapter, yellow status, text, reward); back: the list; the '!' is gone |
+| `QUEST-13` | the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop |
+| `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
+| `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |
+| `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
 
-### regression (187)
+### regression (216)
 
 | ID | Test |
 |---|---|
@@ -185,15 +179,12 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LORE-11` | LORE story stream: one blank row between the text rows of a paragraph, two between paragraphs, size limits (15/11) |
 | `HELP-10` | release: the HUD crop in the help equals the game HUD |
 | `BOOT-12` | RUN/STOP while the KERNAL loads LORE (from the BARBARIAN menu): back to the menu, no red border (12/11) |
-| `PROBE-10` | BARBARIAN: the loader menu with its three entries; the session ends in BARBARIAN (memory probe) |
-| `PROBE-11` | LORE from the BARBARIAN menu: title, PRESS SPACE, the story scrolls; the session ends in LORE (memory probe) |
-| `PROBE-12` | HELP from the BARBARIAN menu: the five pages; the session ends in HELP on the last page (memory probe) |
-| `PROBE-13` | START: Krill installed, GAME loaded; the session ends in START just before GAME is unpacked (memory probe) |
-| `PROBE-14` | JUKEBOX: two tunes played and stopped; the session ends in JUKEBOX (memory probe) |
-| `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase (row 10) and 'please wait' (row 13), as START's wait screen (16/11) |
-| `BOOT-15` | START is silent (no SID player); LORE keeps its player (16/11) |
-| `BOOT-16` | HELP and LORE exits: wait page (phrase row 10, 'please wait' row 13, VIC bank 0 / `$0400` / `$3800`) before the reload of BARBARIAN (16/11) |
-| `BOOT-14` | BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), `$D018` as at power-on (16/11) |
+| `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase (row 10, yellow) and 'please wait' (row 13), as the START wait screen (16/11) |
+| `BOOT-14` | BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), keyboard and screen as at power-on (16/11) |
+| `BOOT-15` | START is silent (no SID player): the menu music stops when the game is chosen and restarts only in the lobby (16/11) |
+| `BOOT-16` | HELP and LORE exits: wait page (phrase on row 10, 'please wait' on row 13, VIC bank 0, screen on) before the reload of BARBARIAN (16/11) |
+| `TITLEMUSIC-10` | HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
+| `TITLEMUSIC-11` | BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |
 | `BUILD-12` | variant: Fire on stairs (TESTFIRE) |
@@ -209,13 +200,27 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-SEQ-12` | killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2) |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
 | `CHAP-SEQ-14` | chapter 2: the crypt leads to level 6 (first of the chapter); its stairs up lead back to the village |
-| `CS-10` | no points, no token: nothing about respec on the screen, no entries, 'no points to spend.', next point at level 8 |
+| `CS-10` | no points, no token: nothing about respec on the screen, no entries, 'no points to spend.', next point at level 5 |
 | `CS-11` | no points, 1 token: token count shown, only 'respec' (row 17); yes: points back, full menu without respec |
 | `CS-12` | points, no token: entries str/dex/con/confirm/undo only, 'points to spend 3', no respec anywhere |
 | `CS-13` | before confirming, points move freely: D/+ add, A/- take back, between str/dex/con; undo takes all back |
 | `CS-14` | preview: con +1 shows 'hp N -> N+6' and 'mod +2 -> +3' (new values green); hint of the stat under the cursor |
 | `CS-15` | confirm asks 'spend 2 points for good?': no = keep editing, yes = spent and 'no points to spend.' if none left |
 | `CS-16` | RUN/STOP with pending points asks 'spend 1 point before leaving?': no = points given back, yes = spent |
+| `CHEAT-10` | game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter |
+| `CHEAT-11` | god mode on: no damage (hurt_player); god mode off: damage again |
+| `CHEAT-12` | level up: level + 1, xp = threshold of that level, stat points of pl_pts, hp max up and full; message 'level N' |
+| `CHEAT-13` | respec token: +1, message 'tokens N' |
+| `CHEAT-23` | gold +1000: 1000 coins on the hero at every Fire (GOLD_MAX at most), message 'gold N' |
+| `CHEAT-14` | level up at the maximum level (PL_MAXLVL): nothing changes, message 'limit reached' |
+| `CHEAT-15` | next level in the village: the first level of the chapter (as the crypt) |
+| `CHEAT-16` | next level in a level of the chapter: the next level (as the stairs down) |
+| `CHEAT-17` | next level on level 4 -> boss level 5; there: boss killed (c_unl = 2, exit open), back to village 1 at the crypt |
+| `CHEAT-18` | next chapter from a level (village 1 -> level 1 -> village 2): unlocked, saved in village 2, no portal back |
+| `CHEAT-19` | next chapter in a village (village 2 -> 3, then 4): c_unl follows, hero saved there |
+| `CHEAT-20` | next level in the throne room (level 20): as the final boss killed (c_won, c_unl 5, respec gift), village 4 |
+| `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
+| `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
 | `DISK-10` | the disk has every file (loader, START, game, LORE, LDAT, TITLE, HELP, JUKEBOX, saves, ...) |
 | `DISK-12` | entry of the tests (11/11, Krill): the real START from the monitor (Krill installed), new game in the village |
 | `DUNG-CHEST-10` | key chest: without a key 'it is locked' (stays closed); with a key it opens, one key used |
@@ -246,8 +251,6 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SHOP-FIX-10` | smith repair (shop_repair, confirmation simulated): sword 200, durability 10/100, 1000 gold -> 950, 99/99 |
 | `HELP-Z-10` | out/work/help.zx0 unpacks to out/work/help.prg byte by byte; the packed file is under 55% of the blocks |
 | `HELP-Z-11` | the disk holds the packed HELP (file 'help' equals out/work/helpz.prg) |
-| `TITLEMUSIC-11` | BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
-| `TITLEMUSIC-10` | HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
 | `HUD-XP-10` | XP line: thousands from 10000 (10K ... 65K) |
 | `INV-DROP-10` | DEL on a pack item: N keeps it, Y drops it; DEL on an empty slot asks nothing |
 | `INV-2H-10` | two-handed weapon with a shield on: the shield goes back to the pack; full pack: refused |
@@ -275,15 +278,15 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
 | `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |
 | `LOBBY-12` | main menu plays Demon's Eye (file SND_MENU in the buffer of the place, player running); leaving it fades to silence, then music_town loads the village song |
+| `PROBE-10` | BARBARIAN: the loader menu with its three entries; the session ends in BARBARIAN (memory probe) |
+| `PROBE-11` | LORE from the BARBARIAN menu: title, PRESS SPACE, the story scrolls; the session ends in LORE (memory probe) |
+| `PROBE-12` | HELP from the BARBARIAN menu: the five pages; the session ends in HELP on the last page (memory probe) |
+| `PROBE-13` | START: Krill installed, GAME loaded; the session ends in START just before GAME is unpacked (memory probe) |
+| `PROBE-14` | JUKEBOX: two tunes played and stopped; the session ends in JUKEBOX (memory probe) |
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
 | `MON-AI-11` | short path (mon_path): monsters that stayed in a corner or shook on a wall edge reach the hero (5 cases, ANOANO) |
-| `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
-| `QUEST-11` | Q with no quest read: the page (file QST0) says 'no quest', RUN/STOP goes back to the game |
-| `QUEST-12` | next to the quest giver: name in the bar, Fire = quest read (c_qst 1) and its page (giver, title, text) |
-| `QUEST-13` | the walkers move (slowly, the hero near), stay inside their sector and never stand on the hero's tile |
-| `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
 | `MON-CHAP-11` | chapter 1: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
 | `MON-CHAP-12` | chapter 2: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
 | `MON-CHAP-13` | chapter 3: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
@@ -294,7 +297,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |
 | `OPT-12` | neg16 / sabs: -tmp0:1 and |tmp0:1| saturated at 255 |
 | `OPT-02` | gold_total: c_gold + 10 x c_sgold (24 bit) at the limits |
-| `OPT-05` | pot_heal: itval + itdn x level for the three potions at levels 1 and 99 |
+| `OPT-05` | pot_heal: itval + itdn x level for the three potions at levels 1 and 20, Abyss values (pab_*) at level 99 |
 | `OPT-03` | set_name4 / set_name: every name of nm_tab in cmdbuf+3.., nlen = length, io_dir = 1, A = 1, X kept |
 | `OPT-12B` | put_hero: the hero on tile (A, X) -> px/py = tile x 16 + 8 (centre) |
 | `PERF-10` | village: walking in 8 directions, lost frames <= 2%, worst frame <= 2 |
@@ -332,14 +335,15 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SHOP-SELL-11` | alchemist: sell a belt potion (slot freed) and one scroll of a stack, at half price |
 | `BELT-13` | save from the game menu, belt wiped in RAM, hero loaded from disk: same belt |
 | `BELT-14` | death keeps the belt (no potion lost) |
+| `POT-10` | pot_heal: dungeon column up to level 20, Abyss column (heal_abyss) from level 21, all potions, Y kept |
 | `SAVE-10` | new disk: menu without error, no heroes |
 | `SAVE-11` | hl (hero list) missing: menu without error, the game starts |
 | `SAVE-12` | hero list zeroed / random / never written: no error, no heroes |
 | `SAVE-13` | list from another version: offer to delete |
 | `SAVE-14` | cycles new game -> level -> quit -> continue: the hero stays |
-| `SAVE-17` | back to main menu (lobby): Krill uninstalled, BARBARIAN reloaded, menu items 1-4 on screen (16/11) |
 | `SAVE-15` | quit the game -> BASIC (READY.), no re-entry; Krill uninstalled: KERNAL LOAD from the disk works again |
 | `SAVE-16` | details screen: delete the barbarian (cancel, confirm, new session) |
+| `SAVE-17` | lobby: back to main menu -> Krill uninstalled, BARBARIAN reloaded (menu items 1-4) |
 | `PG-NEW-10` | new barbarian through the UI: name, seed, joystick, F1, DEL |
 | `SAVE-REL-10` | saved level state (REL): monsters, chests, fog, return, repopulation |
 | `SHOP-SLOT-10` | potion: belt slot choice (W/S wrap, RUN/STOP cancels, fire pays) |

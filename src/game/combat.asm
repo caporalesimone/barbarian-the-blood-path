@@ -261,7 +261,18 @@ _nr     lda s_str
         sta s_dn                ; (A = 0) nessun dado, nessun danno fisso
         sta s_dk
 +
-        lda itrate,x
+        lda s_dex               ; (18/11, committente) cadenza = arma + max(0, ATK_SLOW - ATK_DEX x mod DES): all'inizio
+        jsr modv                ; piu' lenta, con la DES torna quella dell'arma (data/rules.yaml player.attack_speed)
+        tay
+        lda #ATK_SLOW
+-       dey
+        bmi +
+        sec
+        sbc #ATK_DEX
+        bcs -
+        lda #0
++       clc
+        adc itrate,x
         sta s_rate
         lda itpen,x
         sta s_pen

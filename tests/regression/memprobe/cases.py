@@ -76,14 +76,15 @@ def probe_lore(ctx):
         v.close()
 
 
-@test("PROBE-12", "HELP from the BARBARIAN menu: the five pages; the session ends in HELP on the last page (memory probe)")
+@test("PROBE-12", "HELP from the BARBARIAN menu: all the pages (data/help.txt); the session ends in HELP on the last page (memory probe)")
 def probe_help(ctx):
+    HP = [ln[4:].strip() for ln in open(os.path.join(OUT, "..", "..", "data", "help.txt")) if ln.startswith("=== ")]
     v = Vice(os.path.join(OUT, "disk.d64"))
     try:
         check(barbarian_menu(v), "no BARBARIAN menu")
         key(v, "2")
-        check(wait_text(v, "moving and fighting"), "BARBARIAN -> HELP: no page 1")
-        for n, t in enumerate(["fire on places", "inventory, chests and shops", "menus and saving", "the hud"]):
+        check(wait_text(v, HP[0]), "BARBARIAN -> HELP: no page 1")
+        for n, t in enumerate(HP[1:]):
             key(v, " ")
             check(wait_text(v, t, 40), "HELP: no page %d (%s)" % (n + 2, t))
     finally:

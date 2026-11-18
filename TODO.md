@@ -269,6 +269,13 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - Alternativa piu' piccola (non valutata a fondo): lasciare il KERNAL al menu e ridurre solo il primo caricamento (START).
 
 ### M3 Prestazioni dei caricamenti (ex J9) — M
+- (18/11) **PERF-DISK fuori limite dopo la quinta parte del MENU** (`menu5`, NPC nella zona 5; decisione del committente da
+  prendere): `menu` 3,48 s (limite 3,1: un file in piu', ~+0,3 s a ogni ingresso nel villaggio), `twn1` 2,50 s (limite 2,0:
+  i file dopo `menu4` si spostano di 2 blocchi), `hdr_write` 6,20 s (90% di 6,8), `in2` 5,46 s (90% di 5,3), `in5` 4,22 s
+  (90% di 4,6). Provate 5 posizioni di `menu5` sul disco (dopo `menu4`, dopo `twn1`, dopo i temi del capitolo 1, prima dei
+  file del titolo, dopo i salvataggi, in fondo): questa (dopo `menu4`, con `QST2..8` in fondo) e' la migliore; `menu5` in fondo
+  porta il `menu` a 5,0 s. Strade: alzare i limiti, oppure togliere un file (zona 5 dentro il file di un'altra zona: oggi non
+  c'e' spazio), oppure leggere il MENU solo quando cambia villaggio.
 - **Stato (12/11 sera, VICE, 42 file sul disco)**: scale nello stesso capitolo **2,24 s** (`PERF-DISK-13`; obiettivo del
   committente < 2 s), ingresso completo nel villaggio 4,8-4,9 s (`PERF-DISK-14`), tema `GFXn` 1,34 s, save nel dungeon
   8,3-9,3 s, save nel villaggio 9,45 s (soglia 9,5 s). Limiti in `tests/regression/perf_disk` (quelli del committente portati a
@@ -347,6 +354,10 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   (`reference_alloc`) e' piu' forte e i mostri non sono stati ritoccati. Da fare: simulatori e arena
   (`tools/simulators/`, `tools/vice/arena.py`) sui piani 1-20, confronto con le curve di prima, ritocco di CA e vita dei
   mostri in `data/rules.yaml` se il PG colpisce o resiste troppo. Test di bilanciamento con `./build.sh --release`.
+- (18/11) In piu' la **cadenza dello Slash dipende dalla DES** (`player.attack_speed`: + max(0, 12 - 3 x mod DES) fotogrammi):
+  all'inizio il PG colpisce piu' lentamente (pugnale 0,24 -> 0,42 s), dalla DES 18 come prima. Il simulatore lo riproduce
+  (`tools/simulators/rules.py`); il PG di riferimento spende in DES un punto ogni 4 (DES 18 solo verso il livello 16):
+  i primi piani diventano piu' duri. Da misurare con il resto di questo punto.
 
 ### G2 (ex 4.2) Economia: prezzi, oro, riparazioni (dopo B7) — M
 
@@ -443,8 +454,14 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 ### H1 (ex 5.1) Quest system (dopo B8) — XL
 - (17/11) **Concept fatto** (`docs/wiki/quests.md`, "Concept del 17/11"): pagina Q con file `QSTn` (codice + testo), NPC fermo
   che dà la quest, tre NPC vaganti, quest nella lobby, `c_qst` nell'eroe. Resta: stati e premi veri, testi, NPC per villaggio,
-  **mini quest** degli NPC minori (es. uccidi 5 mostri di un tipo), e **spostare fuori da GAME il codice degli NPC** (~380 B: il
-  margine di GAME e' sceso a ~505 B, ~56 B nelle varianti di test; la zona 1 del MENU, con `npc_init`, ha 7 B liberi).
+  **mini quest** degli NPC minori (es. uccidi 5 mostri di un tipo).
+- (18/11) **Fatto**: elenco e dettaglio delle quest (Q: file `QST0` con l'indice, testo `QSTn` a `$B000`, stato segnaposto
+  giallo, scorrimento), `c_qst` maschera (8 quest al massimo), "!" sopra chi ha una quest, NPC che vagano e offrono quest
+  segnaposto ("quest giver"), NPC fermi con il PG vicino, zona 5 del MENU (`$8C00`) con piazzamento, sprite e Fire degli NPC.
+  **Resta**: cosa mostra lo **stato** (oggi segnaposto giallo, decisione del committente: si decide con il quest system), stati
+  veri, obiettivi, premi, testi; spostare fuori da GAME anche `npc_tick` e `npc_here` (~330 B; margine di GAME 690 B, zona 5
+  con 38 B liberi: servira' un'altra zona o codice piu' corto); **`QST0` e' pieno** (1021 B su 1024: pagina 849 B + indice
+  172 B): piu' quest o titoli piu' lunghi richiedono l'indice in un file a parte o codice piu' corto.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11). **Ogni villaggio nuovo**: locanda con lo stesso baule,
   la mappa fuori da `$C900-$CFFF` (zona 1 del modulo MENU), `lab64 test regression -k VIL-MENU`.
 - 15 quest (o 10), NPC, abilità solo da quest, tre villaggi, stanze fisse, compagno Torvald, pagine su disco (`QSTn`,

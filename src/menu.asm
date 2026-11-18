@@ -6,6 +6,7 @@
 ;    zona 2  MR2_AT $F4E0 - $FCFF   RAM sotto il KERNAL (dopo la cache del tema; fino all'11/11 posto del precaricamento)
 ;    zona 3  MR3_AT $A700 - $A7FF   RAM del banco VIC 2: slot sprite 28-31, liberi nel gioco
 ;    zona 4  MR4_AT $A300 - $A4FF   (17/11) slot sprite 12-19 (mostri nel dungeon): gli sprite degli NPC del villaggio
+;    zona 5  MR5_AT $8C00 - $8E7F   (18/11) sprite forti e boss del tema (dungeon): il "!" e il codice degli NPC (menu/npc.asm)
 ;  Il gioco lo carica all'ingresso nel villaggio (ovl_town, src/game/stash.asm) se non c'e' e poi resta in memoria.
 ;  Tutti i menu girano con $01 = $35 (KERNAL escluso, interruzioni spente, NMI su nmi_stub): il codice della zona 2
 ;  si esegue solo cosi'. Escono con $01 = $36 prima di ui_exit (che riaccende l'IRQ).
@@ -19,7 +20,6 @@
         jmp ov_stash            ; MENU_INN: locanda
         jsr mk_off              ; MENU_SHOP: negozio A (0 fabbro, 1 alchimista); enter_shop e' nella zona 2: prima
         jmp enter_shop          ; il KERNAL va escluso (con $01 = $36 a $F4E0- si eseguirebbe la ROM)
-        jmp npc_init            ; MENU_NPC (17/11): NPC del villaggio (menu/npc.asm)
 
 ; KERNAL escluso per tutto il menu (sei, NMI in RAM, $01 = $35). Preserva A, X, Y. Da chiamare SOLO dalla zona 1.
 mk_off: sei
@@ -41,11 +41,11 @@ mk_exit:
 
         .include "menu/inn.asm"
         .include "menu/shop_act.asm"
-        .include "menu/npc.asm"
 mz1_top
         .cerror mz1_top > MR1_END, "modulo MENU: zona 1 oltre $CFFF di ", mz1_top - MR1_END, " B"
 ;@free mz1_top..MR1_END "Coda della zona 1 del MENU: codice o dati del modulo MENU (la build stampa lo spazio libero delle zone)" use=code
 ;@free mz2_top..MR2_END "Coda della zona 2 del MENU (sotto il KERNAL, gira con $01=$35): codice del modulo MENU o dati" use=code
+;@free mz5_top..MR5_END "Coda della zona 5 del MENU (sprite forti del tema nel dungeon): codice degli NPC o dati, solo nel villaggio" use=code
 ;@free mz3_top..MR3_END "Coda della zona 3 del MENU (banco VIC, slot sprite 28-31): codice del modulo MENU o dati" use=code
 
         * = MR2_AT
@@ -64,3 +64,8 @@ mz3_top
         .binary "../out/work/gfx/npc_spr.bin"
 mz4_top
         .cerror mz4_top != SPR_DATA+20*64, "modulo MENU: zona 4 = 8 sprite degli NPC"
+
+        * = MR5_AT              ; (18/11) zona 5: sprite del "!" e codice degli NPC del villaggio (menu/npc.asm)
+        .include "menu/npc.asm"
+mz5_top
+        .cerror mz5_top > MR5_END, "modulo MENU: zona 5 oltre $8E7F di ", mz5_top - MR5_END, " B"

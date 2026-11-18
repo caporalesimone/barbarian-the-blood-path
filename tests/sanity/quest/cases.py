@@ -1,9 +1,11 @@
-"""Quest concept (17/11, src/game/quest.asm, src/qpage.asm): the page of the quest (Q, Fire next to the quest giver), the NPCs of
-the village. One VICE session, a new barbarian in the village."""
+"""Quest concept (17/11, src/game/quest.asm, src/qpage.asm, src/menu/npc.asm): the NPCs of the village; (18/11) several quests
+taken together: the list (Q) and the detail of a quest (title, chapter, yellow status placeholder, text that scrolls, reward),
+the "!" over who has a quest to give, walkers that offer a quest ("quest giver") and stop with the hero near, the attack cadence
+from DEX. One VICE session, a new barbarian in the village."""
 import os
 from c64test import test, check
 from lib.c64 import Game, OUT
-from lib.play import new_game
+from lib.play import new_game, D
 
 CHAIN = True
 SCR_A = 0xB400
@@ -48,6 +50,38 @@ def with_walkers(g, L):
     check(False, "no walker in 6 new games")
 
 
+COLRAM = 0xD800
+BANG_PTR = 0x30     # sprite of the "!" ($8C00, zone 5 of the MENU module)
+
+
+def free(g, L, tx, ty):
+    return g.tile(tx, ty) != 0xff and not (g.mem(L["solidtab"] + g.tile(tx, ty), 1)[0] & 1)
+
+
+def next_to(g, L, tx, ty, dist=1):
+    """a free tile at distance dist (on one axis, or diagonal for 1) from (tx, ty)"""
+    for dx, dy in ((dist, 0), (-dist, 0), (0, dist), (0, -dist), (dist, dist), (-dist, -dist), (dist, -dist), (-dist, dist)):
+        if free(g, L, tx + dx, ty + dy):
+            return tx + dx, ty + dy
+    check(False, "no free tile at distance %d from (%d,%d)" % (dist, tx, ty))
+
+
+def bangs(g, L):
+    """[(sprite, x, y)] of the "!" on (sprites 1-2 with the pointer of the "!")"""
+    en = g.b(L["sh_en"])
+    return [(s, g.b(L["sh_x"] + s), g.b(L["sh_y"] + s)) for s in (1, 2) if en & (1 << s) and g.b(L["sh_ptr"] + s) == BANG_PTR]
+
+
+def npc_sprite(g, L, i):
+    """(x, y) of the sprite of NPC i if it is drawn (pointer of its design, colour npc_c)"""
+    en = g.b(L["sh_en"])
+    g_, c = g.b(L["npc_g"] + i), g.b(L["npc_c"] + i)
+    for s in range(3, 8):
+        if en & (1 << s) and (g.b(L["sh_ptr"] + s) - 0x8C) // 2 == g_ and g.b(L["sh_col"] + s) & 15 == c:
+            return g.b(L["sh_x"] + s), g.b(L["sh_y"] + s)
+    return None
+
+
 def inside(sec, tx, ty):
     x, y, w, h = sec
     return x <= tx < x + w and y <= ty < y + h
@@ -65,49 +99,61 @@ def npcs(ctx):
         check(g.tile(tx, ty) != 0xff and not (g.mem(L["solidtab"] + g.tile(tx, ty), 1)[0] & 1), "NPC %d on a solid tile (%d,%d)" % (i, tx, ty))
         if i:
             check(inside(sector(g, L, i), tx, ty), "walker %d (%d,%d) outside its sector %s" % (i, tx, ty, sector(g, L, i)))
+    q = g.mem(L["npc_q"], NPC_N)
+    check(q[0] == 1, "the quest giver does not offer quest 1: npc_q %s" % q)
+    given = [q[i] for i, _, _ in now if i and q[i]]
+    check(len(given) == len(set(given)) and all(2 <= x <= L["Q_N"] for x in given), "walkers' quests wrong or repeated: %s" % given)
     ctx["now"] = now
 
 
-@test("QUEST-11", "Q with no quest read: the page (file QST0) says 'no quest', RUN/STOP goes back to the game")
+@test("QUEST-11", "Q with no quest taken: the list (file QST0) says 'talk to the villagers', RUN/STOP goes back to the game")
 def page_none(ctx):
     g, L = ctx["g"], ctx["L"]
     g.frames(1, keys={7: 0x40}); g.frames(20)
     t = screen_text(g)
     g.screenshot(os.path.join(OUT, "quest_none.png"))
-    check("no quest" in t, "no 'no quest' on the screen")
+    check("quests" in t and "talk to the villagers" in t, "no empty list on the screen")
     g.frames(1, keys={7: 0x80}); g.frames(3)
     check(g.b(L["cur_level"]) == 0 and g.b(L["c_qst"]) == 0, "not back in the village")
 
 
-@test("QUEST-12", "next to the quest giver: name in the bar, Fire = quest read (c_qst 1) and its page (giver, title, text)")
+@test("QUEST-12", "Hilde: '!' over her head, name in the bar; Fire = quest 1 taken and its detail (title, chapter, yellow status, text, reward); back: the list; the '!' is gone")
 def page_quest(ctx):
     g, L = ctx["g"], ctx["L"]
     tx, ty = g.b(L["npc_tx0"]), g.b(L["npc_ty0"])
-    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (-1, -1)):
-        if g.tile(tx + dx, ty + dy) not in (0xff,) and not (g.mem(L["solidtab"] + g.tile(tx + dx, ty + dy), 1)[0] & 1):
-            break
-    g.teleport(tx + dx, ty + dy); g.frames(6)
+    g.teleport(*next_to(g, L, tx, ty)); g.frames(20)
     check(g.b(L["bar_lab"]) == L["QL_ID"], "bar label %d (expected the quest giver %d)" % (g.b(L["bar_lab"]), L["QL_ID"]))
+    hs = npc_sprite(g, L, 0)
+    check(hs is not None, "Hilde not drawn")
+    b = [x for x in bangs(g, L) if x[1] == hs[0] and x[2] < hs[1]]
+    check(b, "no '!' over Hilde (sprite at %s, '!' %s)" % (hs, bangs(g, L)))
     g.screenshot(os.path.join(OUT, "quest_npc.png"))
-    g.press_fire(); g.frames(20)
+    g.press_fire(); g.frames(25)
     t = screen_text(g)
     g.screenshot(os.path.join(OUT, "quest_page.png"))
     check(g.b(L["c_qst"]) == 1, "c_qst %d (expected 1)" % g.b(L["c_qst"]))
-    check("hilde" in t and "widow" in t and "lorem ipsum" in t, "giver, title or text missing on the page")
-    g.frames(1, keys={7: 0x80}); g.frames(3)
+    check("widow" in t and "chapter 1" in t and "lorem ipsum" in t and "reward" in t and "120 gold" in t, "title, chapter, text or reward missing")
+    row = t.find("status: placeholder")
+    check(row >= 0, "no status placeholder")
+    check(g.b(COLRAM + row) & 15 == 7, "the status is not yellow (colour %d)" % (g.b(COLRAM + row) & 15))
+    check(row // 40 < t.find("lorem ipsum") // 40, "the status is not before the text")
+    g.run_stop(); g.frames(4)
+    t = screen_text(g)
+    g.screenshot(os.path.join(OUT, "quest_list.png"))
+    check("quests" in t and "the widow's son" in t and "ch. 1" in t, "the list does not show quest 1")
+    g.run_stop(); g.frames(20)
+    check(g.in_game(), "RUN/STOP from the list does not go back to the game")
+    hs = npc_sprite(g, L, 0)
+    check(hs is None or not [x for x in bangs(g, L) if x[1] == hs[0]], "the '!' is still over Hilde")
 
 
-@test("QUEST-13", "the walkers move (slowly, the hero near), stay inside their sector and never stand on the hero's tile")
+@test("QUEST-13", "the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop")
 def walkers(ctx):
     g, L = ctx["g"], ctx["L"]
     walk = with_walkers(g, L)
     i, tx, ty = walk[0]
     sec = sector(g, L, i)
-    # the hero next to the walker (any free neighbour tile)
-    for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1), (2, 0), (-2, 0), (0, 2), (0, -2)):
-        if g.tile(tx + dx, ty + dy) != 0xff and not (g.mem(L["solidtab"] + g.tile(tx + dx, ty + dy), 1)[0] & 1):
-            break
-    g.teleport(tx + dx, ty + dy); g.frames(6)
+    g.teleport(*next_to(g, L, tx, ty, 4)); g.frames(6)
     seen = {(tx, ty)}
     for _ in range(40):
         g.frames(20)
@@ -117,8 +163,15 @@ def walkers(ctx):
         check(inside(sec, wx, wy), "walker %d left its sector %s: (%d,%d)" % (i, sec, wx, wy))
         check((wx, wy) != (g.b(L["ptx"]), g.b(L["pty"])), "walker %d on the hero's tile" % i)
         seen.add((wx, wy))
-    check(len(seen) > 1, "walker %d did not move in 800 frames with the hero next to it" % i)
+        if len(seen) > 1: break
+    check(len(seen) > 1, "walker %d did not move in 800 frames with the hero 4 tiles away" % i)
     check(npcs_now(g, L)[0][1:] == (g.b(L["npc_tx0"]), g.b(L["npc_ty0"])), "the quest giver moved")
+    _, wx, wy = {n[0]: n for n in npcs_now(g, L)}[i]
+    g.teleport(*next_to(g, L, wx, wy)); g.frames(20)
+    _, wx, wy = {n[0]: n for n in npcs_now(g, L)}[i]
+    for _ in range(20):
+        g.frames(20)
+        check({n[0]: n for n in npcs_now(g, L)}[i][1:] == (wx, wy), "walker %d moved with the hero next to it" % i)
 
 
 @test("QUEST-14", "the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5)")
@@ -133,5 +186,55 @@ def sprites(ctx):
         cy = g.b(L["camy"]) | (g.b(L["camy"] + 1) << 8)
         near = [n for n in npcs_now(g, L) if cx + 16 <= n[1] * 16 + 8 <= cx + 300 and cy + 24 <= n[2] * 16 + 8 <= cy + 150]
         n_on = bin(en & 0xF8).count("1")
-        check(en & 0x06 == 0, "sprites 1/2 on in the village: %02x" % en)
+        check(all(g.b(L["sh_ptr"] + k) == BANG_PTR for k in (1, 2) if en & (1 << k)), "sprites 1/2 on in the village, not as '!': %02x" % en)
         check(n_on >= min(len(near), 5), "%d NPCs well inside the screen but %d sprites (sh_en %02x)" % (len(near), n_on, en))
+
+
+@test("QUEST-15", "a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests")
+def walker_quest(ctx):
+    g, L = ctx["g"], ctx["L"]
+    i, tx, ty = with_walkers(g, L)[0]
+    c = g.b(L["c_qst"]) & ~2
+    g.poke(L["c_qst"], c); g.poke(L["npc_q"] + i, 2)
+    g.teleport(*next_to(g, L, tx, ty)); g.frames(20)
+    _, tx, ty = {n[0]: n for n in npcs_now(g, L)}[i]
+    g.teleport(*next_to(g, L, tx, ty)); g.frames(36)
+    check(g.b(L["bar_lab"]) == L["QL_GV"], "bar label %d (expected 'quest giver' %d)" % (g.b(L["bar_lab"]), L["QL_GV"]))
+    ws = npc_sprite(g, L, i)
+    check(ws is not None and [x for x in bangs(g, L) if x[1] == ws[0] and x[2] < ws[1]], "no '!' over the walker %d" % i)
+    g.screenshot(os.path.join(OUT, "quest_giver.png"))
+    g.press_fire(); g.frames(25)
+    check(g.b(L["c_qst"]) & 2, "quest 2 not taken: c_qst %02x" % g.b(L["c_qst"]))
+    check(g.b(L["npc_q"] + i) == 0, "the walker still offers a quest")
+    t = screen_text(g)
+    check("rats in the cellar" in t and " more " in t, "detail of quest 2 without its title or without ' more '")
+    first = t[5 * 40:6 * 40]
+    for _ in range(3):
+        g.frames(1, joy=D); g.frames(2)
+    t = screen_text(g)
+    g.screenshot(os.path.join(OUT, "quest_scroll.png"))
+    check(t[5 * 40:6 * 40] != first and " up " in t, "the text did not scroll down")
+    g.run_stop(); g.frames(4)
+    t = screen_text(g)
+    check("the widow's son" in t and "rats in the cellar" in t, "the list does not show 2 quests")
+    g.run_stop(); g.frames(20)
+    check(g.in_game(), "not back in the game")
+
+
+@test("QUEST-16", "attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's")
+def cadence(ctx):
+    g, L = ctx["g"], ctx["L"]
+    import yaml
+    from lib.c64 import ROOT
+    a = yaml.safe_load(open(os.path.join(ROOT, "data", "rules.yaml")))["player"]["attack_speed"]
+    w = g.b(L["itrate"] + g.b(L["c_eq"]))
+    sad = g.b(L["c_sadd"] + 1)
+    g.call_keep(L["recalc_stats"])
+    dex = g.b(L["s_dex"])
+    exp = w + max(0, a["slow"] - a["per_dex"] * ((dex - 10) // 2))
+    check(g.b(L["s_rate"]) == exp, "s_rate %d, expected %d (weapon %d, DEX %d)" % (g.b(L["s_rate"]), exp, w, dex))
+    g.poke(L["c_sadd"] + 1, sad + 18 - dex)
+    g.call_keep(L["recalc_stats"])
+    check(g.b(L["s_dex"]) == 18 and g.b(L["s_rate"]) == w, "DEX %d: s_rate %d, expected the weapon's %d" % (g.b(L["s_dex"]), g.b(L["s_rate"]), w))
+    g.poke(L["c_sadd"] + 1, sad)
+    g.call_keep(L["recalc_stats"])

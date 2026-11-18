@@ -1,17 +1,22 @@
 ; ===================================================================
-;  quest.asm - (17/11, concept con testi segnaposto) pagina della quest e NPC del villaggio.
-;  Pagina: tasto Q ovunque, o Fire davanti a chi da' la quest (NPC 0, fermo); il testo e' nel file QSTn (data/quests.yaml,
-;  tools/build/gen_quests.py), letto a ogni apertura in QBUF = schermo B del gioco (si ridisegna all'uscita: ui_exit).
-;  NPC: figure dell'eroe in altri colori (sprite 3-7, liberi nel villaggio; 5 al massimo disegnati insieme): lo 0 fermo (quest),
-;  gli altri vagano piano (una casella alla volta, a caso) solo con il PG vicino e SOLO nel loro settore (17/11, tk_sec).
-;  docs/wiki/quests.md, "Concept del 17/11".
+;  quest.asm - (17/11, concept con testi segnaposto) quest e NPC del villaggio: nel gioco restano le variabili, l'apertura
+;  delle pagine e i punti d'ingresso; il codice degli NPC sta nel modulo MENU (zona 5, $8C00, src/menu/npc.asm, 18/11).
+;  Pagine (18/11, committente): tasto Q ovunque = elenco delle quest prese; Fire accanto a chi da' una quest = la si prende
+;  e si apre il suo dettaglio. Pagina = file QST0 (codice + indice: capitolo e titolo di ogni quest, src/qpage.asm) letto in
+;  QBUF = schermo B del gioco; il testo di una quest (QSTn) lo legge la pagina in QTXT. docs/wiki/quests.md.
+;  NPC: lo 0 (Hilde, quest 1) fermo nella piazza della fontana; gli altri vagano nel loro settore (tk_sec) e ogni tanto
+;  offrono una quest (npc_q). Chi ha una quest da dare ha un "!" sopra la testa (sprite 1 e 2).
 ; ===================================================================
         .enc "screen"
 QBUF    = SCR_B
+QTXT    = $b000                 ; (18/11) testo della quest aperta (file QSTn): sprite della barra, set B ($B000-$B3FF; come la
+                                ; minimappa, la pagina li usa e all'uscita la barra si ricostruisce: qp_out in src/qpage.asm)
+QTXT_END = SCR_A
 NPC_N   = NSEC+1                ; (17/11) lo 0 da' la quest (fermo); gli altri NSEC vagano ognuno nel suo settore (tk_sec, villaggio)
-NPC_R   = 10                    ; gli NPC vaganti si muovono solo con il PG a meno di 10 caselle (su entrambi gli assi)
 QL_ID   = 20                    ; etichetta del luogo (bar.asm): nome di chi da' la quest
-Q_CUR   = 1                     ; (concept) la quest dell'NPC del villaggio
+QL_GV   = 21                    ; (18/11) "quest giver": NPC che vaga con una quest da dare
+Q_CUR   = 1                     ; (concept) la quest di Hilde
+        .cerror Q_N > 8, "quest: al massimo 8 (c_qst e' una maschera di 8 bit)"
 
 ; Le tabelle degli NPC stanno nella tabella della ricerca di percorso dei mostri (BFP, $A500, 169 B): nel villaggio non ci sono
 ; mostri, e ogni ricerca (mon_path) la riempie di $ff prima di usarla. Annotazione @map di BFP in game.asm.
@@ -24,6 +29,7 @@ npc_d   .fill NPC_N             ; direzione (0 +x, 1 -x, 2 +y, 3 -y)
 npc_mv  .fill NPC_N             ; pixel di cammino rimasti (0 = fermo)
 npc_g   .fill NPC_N             ; (17/11) disegno: 0..3 (tools/build/npc_gfx.py, slot 12-19)
 npc_c   .fill NPC_N             ; (17/11) colore del vestito, diverso dai colori del villaggio (npc_look, src/menu/npc_look.asm)
+npc_q   .fill NPC_N             ; (18/11) quest da dare (1..Q_N), 0 = nessuna; lo 0 ha sempre la quest 1
 npc_tend
         .endv
         .cerror npc_tend > BFQ, "tabelle degli NPC oltre BFP (169 B)"
@@ -34,22 +40,21 @@ npc_ty0 .byte ?
 npc_pend .byte ?                ; 1 = da piazzare (ingresso nel villaggio)
 npc_s   .byte ?                 ; prossimo sprite libero in npc_draw
 npc_k   .byte ?
-q_p     .word ?                 ; (src/qpage.asm) puntatore del testo
-q_y     .byte ?
+npc_b   .byte ?                 ; (18/11) prossimo sprite del "!" (1, 2; 3 = finiti)
+npc_am  .byte ?                 ; (18/11) quest gia' offerte in questo villaggio (maschera, npc_init)
+q_open  .byte ?                 ; (18/11) quest da aprire subito nella pagina (0 = elenco)
 npc_vend
         .endv
-;@map SND_FBUF_end..npc_vend "Quest e NPC del villaggio (quest.asm): posizioni, cammino, puntatore del testo"
+;@map SND_FBUF_end..npc_vend "Quest e NPC del villaggio (quest.asm): posizioni, cammino, quest da aprire"
         .cerror npc_vend > NM_AT, "variabili di quest.asm oltre NM_AT"
 
-; ------------------------------------------------------------------ pagina della quest
-; La pagina e' un modulo su file: QSTn = codice della pagina (src/qpage.asm) + testo della quest n (QST0 = "no quest"),
-; caricato a QBUF ed eseguito (finisce con ui_exit). Nel gioco restano solo queste righe.
+; ------------------------------------------------------------------ pagina delle quest
+; A = quest da aprire subito (0 = elenco). Il file QST0 (codice + indice) a QBUF, eseguito (finisce con ui_exit).
 ui_quest:
-        ldy #nm_qst-nm_tab      ; "QST" + numero della quest (0 = nessuna)
+        sta q_open
+        ldy #nm_qst-nm_tab      ; "QST0"
         jsr set_name4
-        lda c_qst
-        clc
-        adc #$30
+        lda #$30
         sta cmdbuf+6
         lda #2                  ; schermata di attesa generica (titolo e "please wait")
         sta io_what
@@ -62,123 +67,74 @@ ui_quest:
         jmp QBUF
 +       jmp ui_exit             ; file non letto: di nuovo nel gioco
 
-; ------------------------------------------------------------------ NPC del villaggio
-; C=1 se il PG e' accanto all'NPC 0 (a una casella, anche in diagonale) nel villaggio
-npc_here:
-        lda cur_level
+; ------------------------------------------------------------------ NPC del villaggio: ingressi nel modulo MENU (zona 5)
+; Il codice c'e' solo nel villaggio, con il modulo MENU in memoria e gli NPC gia' piazzati (npc_pend = 0).
+NPC_R    = 10                   ; i vaganti si muovono solo con il PG a meno di 10 caselle (su entrambi gli assi)
+NPC_STOP = 2                    ; (18/11) ... e stanno fermi con il PG a 2 caselle o meno
+npc_draw:
+        jsr npc_ok
+        bcc +
+        jmp NPC_JDRAW
++       rts
+
+
+; C=1 se il codice degli NPC si puo' chiamare (villaggio, modulo MENU in memoria, NPC piazzati)
+npc_ok: lda cur_level
+        ora npc_pend
         bne _n
-        lda npc_xh
-        cmp #$ff
+        lda ovl_cur
         beq _n
-        lda ptx
-        sec
-        sbc npc_tx0
-        clc
-        adc #1
-        cmp #3
-        bcs _n
-        lda pty
-        sec
-        sbc npc_ty0
-        clc
-        adc #1
-        cmp #3
-        bcs _n
         sec
         rts
 _n      clc
         rts
 
-; A = numero a caso da 0 a A-1 (A = 1..63). Y conservato.
-npc_rm:
-        sta tmp7
-        jsr rand
-        and #63
--       cmp tmp7
-        bcc +
-        sbc tmp7
-        bcs -
-+       rts
-
-npc_px  ldy #0                  ; A = casella -> A/Y = 16 * A + 8
-        sty tmp7
-        asl
-        rol tmp7
-        asl
-        rol tmp7
-        asl
-        rol tmp7
-        asl
-        rol tmp7
-        ora #8
-        ldy tmp7
-        rts
-
-; C=0 se la casella (tx,ty) e' dentro la mappa, calpestabile e non e' quella del PG. X conservato.
-npc_free:
-        lda tx
-        cmp #MAPW
-        bcs _s
-        lda ty
-        cmp #MAPH
-        bcs _s
-        lda tx
-        cmp ptx
-        bne +
-        lda ty
-        cmp pty
-        beq _s
-+       jsr get_tile
-        tay
-        lda solidtab,y
-        lsr
-        rts
-_s      sec
-        rts
-
-; (npc_init: nel modulo MENU, zona 1, src/menu/npc.asm, per il margine di GAME; si chiama con MENU_NPC)
-
-; un passo per fotogramma alterno: i vaganti, se il PG e' vicino, partono a caso (1 volta su 64) per una casella
+; ------------------------------------------------------------------ un giro (dal ciclo principale, nel villaggio)
+; al primo giro piazza gli NPC; poi, a fotogrammi alterni, un passo per i vaganti: con il PG vicino (NPC_R) partono a caso
+; (1 volta su 16) per una casella, ma non se il PG e' a NPC_STOP caselle o meno (18/11)
 npc_tick:
         lda cur_level
-        beq +                  
-        jmp _r
-+
-        lda npc_pend
-        beq +
-        lda ovl_cur             ; modulo MENU in memoria (letto entrando nel villaggio): piazza gli NPC
+        bne _r0
+        lda ovl_cur             ; modulo MENU in memoria (letto entrando nel villaggio)
+        bne +
+_r0     rts
++       lda npc_pend
         beq +
         lda #0
         sta npc_pend
         jsr player_tile         ; (ptx, pty dell'ingresso: al primo giro non sono ancora aggiornati)
-        jsr MENU_NPC
+        jsr NPC_JINIT           ; npc_init (src/menu/npc.asm)
++       lda frame
+        and #15
+        bne +
+        lda #$ff                ; (18/11) ogni 16 fotogrammi l'etichetta del luogo si ricalcola (bar.asm, loc_check): un NPC
+        sta lc_x                ; arrivato accanto al PG fermo, o la quest appena presa
 +       lda frame
         and #1
-        beq +                  
-        jmp _r
-+
-        ldx #NPC_N-1
+        beq +
+        rts
++       ldx #NPC_N-1
 _l      lda npc_xh,x
         cmp #$ff
-        bne +                  
+        bne +
         jmp _n
-+
-        lda npc_mv,x
++       lda npc_mv,x
         bne _mv
         cpx #0                  ; chi da' la quest resta fermo
-        bne +                  
+        bne +
         jmp _n
-+
-        jsr npc_tile
++       jsr npc_tile
         lda tx
         sec
         sbc ptx
         clc
         adc #NPC_R
         cmp #2*NPC_R+1
-        bcc +                  
+        bcc +
         jmp _n
-+
++       sec
+        sbc #NPC_R-NPC_STOP     ; dx + NPC_STOP (0..2 x NPC_STOP = vicino)
+        sta tmp6
         lda ty
         sec
         sbc pty
@@ -187,19 +143,25 @@ _l      lda npc_xh,x
         cmp #2*NPC_R+1
         bcc +
         jmp _n
-+       jsr rand                ; (17/11) parte 1 volta su 16 (era 64: sembravano tutti fermi)
++       sec
+        sbc #NPC_R-NPC_STOP     ; dy + NPC_STOP
+        cmp #2*NPC_STOP+1
+        bcs _go
+        lda tmp6
+        cmp #2*NPC_STOP+1
+        bcs _go
+        jmp _n                  ; PG a NPC_STOP caselle o meno su entrambi gli assi: fermo
+_go     jsr rand                ; (17/11) parte 1 volta su 16 (era 64: sembravano tutti fermi)
         and #15
         beq +
         jmp _n
-+
-        jsr rand
++       jsr rand
         and #3
         sta npc_d,x
         jsr npc_in              ; la casella dopo il passo e' fuori dal settore: resta fermo
         bcc +
         jmp _n
-+
-        lda #8                  ; 8 passi da 2 px = una casella
++       lda #8                  ; 8 passi da 2 px = una casella
         sta npc_mv,x
 _mv     lda npc_xl,x
         sta ent_x
@@ -244,10 +206,9 @@ _ok     lda ent_x
 _stop   lda #0
         sta npc_mv,x
 _n      dex
-        bmi +                  
+        bmi +
         jmp _l
-+
-_r      rts
++       rts
 npc_st  .byte 2, $fe, 2, $fe
 
 ; X = NPC (1..), (tx, ty) = la sua casella: C=1 se il prossimo passo (npc_d) esce dal suo settore (tk_sec, voce X-1). Cambia tx, ty
@@ -278,7 +239,7 @@ npc_in:
 npc_dx  .byte 1, $ff, 0, 0
 npc_dy  .byte 0, 0, 1, $ff
 
-; X = NPC -> (tx, ty) = la sua casella
+; X = NPC -> (tx, ty) = la sua casella. X conservato
 npc_tile:
         lda npc_xl,x
         ldy npc_xh,x
@@ -300,52 +261,68 @@ pix_t   sty tmp7                ; A/Y = pixel -> A = casella
         ror
         rts
 
-; sprite degli NPC (villaggio: al posto dei mostri, sprite 3..7), da build_sprites: gli NPC visibili prendono gli sprite
-; liberi uno dopo l'altro (i settori garantiscono che non siano piu' di 5 insieme; oltre il quinto non si disegna)
-npc_draw:
-        lda #3
-        sta npc_s
+; ------------------------------------------------------------------ chi e' accanto al PG
+; C=1 se il PG e' accanto (a una casella, anche in diagonale) a Hilde o a un NPC con una quest da dare: X = NPC, Y = etichetta
+; del luogo (QL_ID Hilde, QL_GV "quest giver"). tx, ty conservati (loc_id, bar.asm)
+npc_here:
+        jsr npc_ok
+        bcs +
+        rts
++       lda tx
+        pha
+        lda ty
+        pha
         ldx #0
-_l      stx npc_k
-        lda npc_xh,x
+_l      lda npc_xh,x
         cmp #$ff
         beq _n
-        sta ent_x+1
-        lda npc_xl,x
-        sta ent_x
-        lda npc_yl,x
-        sta ent_y
-        lda npc_yh,x
-        sta ent_y+1
-        ldx npc_s
-        jsr spr_pos
+        txa
+        beq _t                  ; Hilde: sempre (anche con la quest gia' presa: la si rilegge)
+        tay
+        jsr npc_offer
         bcc _n
-        lda bs_en
-        ora bitmask,x
-        sta bs_en
-        ldy npc_k
-        lda npc_c,y
-        sta sh_col,x
-        lda npc_g,y             ; (17/11) il suo disegno, visto di fronte; passo animato mentre cammina
-        asl
-        sta tmp7
-        lda npc_mv,y
-        beq +
-        lda frame
-        lsr
-        lsr
-        lsr
-        and #1
-+       ora tmp7
+_t      jsr npc_tile
+        lda tx
+        sec
+        sbc ptx
         clc
-        adc #(MR4_AT-$8000)/64  ; slot 12 ($8C)
-        sta sh_ptr,x
-        inc npc_s
-        lda npc_s
-        cmp #8
-        beq _e
-_n      ldx npc_k
-        inx
+        adc #1
+        cmp #3
+        bcs _n
+        lda ty
+        sec
+        sbc pty
+        clc
+        adc #1
+        cmp #3
+        bcs _n
+        ldy #QL_GV
+        txa
+        bne +
+        ldy #QL_ID
++       sec
+        bcs _x
+_n      inx
         cpx #NPC_N
         bne _l
-_e      rts
+        clc
+_x      pla
+        sta ty
+        pla
+        sta tx
+        rts
+
+; Y = NPC: C=1 se ha una quest da dare (A = quest). Cambia Y
+npc_offer:
+        lda npc_q,y
+        beq _no
+        tay
+        lda bitmask-1,y
+        and c_qst
+        bne _no
+        tya
+        sec
+        rts
+_no     clc
+        rts
+

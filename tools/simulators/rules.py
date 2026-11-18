@@ -113,6 +113,8 @@ class Hero:
         self.wmagic = magic if wmagic is None else wmagic
         self.dice = Dice(w["dice"])
         self.rate, self.pen = w["rate"], w["pen"]
+        AS = R["player"]["attack_speed"]          # (18/11) cadenza: arma + max(0, slow - per_dex x mod DES) (recalc_stats)
+        self.rate += max(0, AS["slow"] - AS["per_dex"] * self.m["dex"])
         self.speed = 1
         amod = self.m["str"]
         self.att = self.prof + amod + self.wmagic

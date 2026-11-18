@@ -52,7 +52,7 @@ def game(ctx):
     return ctx["g"]
 
 
-@test("MENU-10", "out/work/menu1..4.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2")
+@test("MENU-10", "out/work/menu1..N.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..N (N = MPARTS), no OVLT/OVL2")
 def menu_file(ctx):
     import sys, importlib.util, re
     sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
@@ -71,7 +71,7 @@ def menu_file(ctx):
     dk = importlib.util.module_from_spec(spec); spec.loader.exec_module(dk)
     for f in dk.D64:
         names = dk.directory(f)
-        check(all("menu%d" % k in names for k in (1, 2, 3)) and "ovlt" not in names and "ovl2" not in names, "%s: %s" % (os.path.basename(f), names))
+        check(all("menu%d" % k in names for k in range(1, num(G["MPARTS"]) + 1)) and "ovlt" not in names and "ovl2" not in names, "%s: %s" % (os.path.basename(f), names))
 
 
 @test("MENU-11", "ovl_town from the disk (as at the village entry): the 3 zones equal to the module, ovl_cur = 1, $01 back to $36, < 11 s")

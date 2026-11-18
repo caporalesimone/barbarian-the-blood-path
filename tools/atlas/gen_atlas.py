@@ -497,6 +497,18 @@ def npc_sprites():
         if not CHECK:
             _spr_png(d[i * 64:i * 64 + 63], 6, os.path.join(OUT, "png", png))
         out.append(dict(name=name, frame=fr, slot=12 + i, png=png))
+    # (18/11) il "!" sopra chi ha una quest da dare: sprite in alta risoluzione, giallo, all'inizio della zona 5 ($8C00)
+    b = rd("out/work/menu_z5.prg")[2:66]
+    if not CHECK:
+        im = Image.new("RGB", (24 * 6, 21 * 6), (24, 24, 28))
+        for y in range(21):
+            for x in range(24):
+                if b[y * 3 + x // 8] & (128 >> (x % 8)):
+                    for yy in range(6):
+                        for xx in range(6):
+                            im.putpixel((x * 6 + xx, y * 6 + yy), PAL[7])
+        im.save(os.path.join(OUT, "png", "npc_bang.png"), optimize=True)
+    out.append(dict(name="! (quest to give)", frame=0, slot="$8C00", png="npc_bang.png"))
     return out
 
 

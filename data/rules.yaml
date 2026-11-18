@@ -33,6 +33,10 @@ player:
   # Respec: azzera i punti spesi (tornano tutti da spendere). Gettoni: c_resp (max 255); +1 uccidendo il boss finale,
   # +1 regalo di una quest (progetto), nell'Abisso un gettone nei bauli con probabilita' bassa (preso come l'oro).
   respec: {max: 255, final_boss: 1, abyss_chest_percent: 2}
+  # (18/11, committente) cadenza dell'attacco base (Slash, anche con Fire tenuto premuto): cadenza dell'arma + un
+  # rallentamento che cala con la DES: + max(0, slow - per_dex x mod DES) fotogrammi. All'inizio (DES 13, mod +1) +9
+  # (pugnale 12 -> 21 fotogrammi, 0,24 -> 0,42 s); con mod DES +4 (DES 18) nessun rallentamento: la cadenza dell'arma.
+  attack_speed: {slow: 12, per_dex: 3}
   epic_every: 4            # oltre il 20: +1 a FOR, COS, DES a rotazione ogni 4 livelli
   prof_every: 4            # competenza: 2 + (livello-1)/4 -> 2..6 al 20, poi +1 ogni 4 livelli
   hp_level1: "10+CON"      # vita al livello 1: 10 + valore di COS (25)

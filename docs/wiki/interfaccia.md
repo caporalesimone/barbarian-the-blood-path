@@ -18,7 +18,7 @@ Tutti i testi del gioco sono in inglese; i nomi di oggetti, mostri e abilità no
 | I | inventario |
 | M | mappa del piano (solo le parti esplorate) |
 | C | (11/11, branch `feature/stat-points`) schermata del personaggio: punti statistica e respec (`ui_charsheet`) |
-| Q | (17/11, concept) pagina della quest: chi l'ha data, titolo, testo, premio, stato; senza quest letta "no quest" (`ui_quest`, file `QSTn`, [Quest](quests.md)) |
+| Q | (17/11, concept; 18/11 elenco) elenco delle quest prese (titolo, capitolo); Fire = dettaglio: titolo, capitolo, stato segnaposto giallo, testo che scorre con W/S, premio; senza quest "talk to the villagers" (`ui_quest`, file `QST0` + `QSTn`, [Quest](quests.md)) |
 | Fire accanto a chi dà la quest | (17/11, villaggio) la quest è letta e si apre la sua pagina (i luoghi hanno la precedenza) |
 | RUN/STOP | menu di gioco: resume, save game (salva e torna al gioco, senza schermata di conferma: basta l'attesa di `io_screen`, 08/11 sera), quit game (torna al menu dei barbari **senza salvare**, 11/11 sera) |
 
@@ -190,8 +190,8 @@ Elenco dei 5 eroi (slot), creazione (nome, seed casuale o scritto), scheda dell'
 3-6: `name` e `seed` con due spazi prima del valore; a destra `sessions` = numero della partita, 9 bit di `c_game`,
 1..511 poi ricomincia, e `time` = ore in 3 cifre e minuti in 2), **progress** (righe 7-14 a sinistra: level, exp,
 gold = oro totale, deaths, kills, abyss depth) e **stats** (a destra: max hp, attack, armor class, str, dex, con),
-**quests** (righe 15-18: `current quest:` e `completed quests:`, **segnaposto** `-` e `0 / -` finché le quest non
-esistono); etichette in ciano, valori in giallo allineati a destra fino alla colonna 17 o 37 (oro totale a 6 cifre,
+**quests** (righe 15-18: `active quests:` = quante quest sono prese, 18/11, e `completed quests:`, **segnaposto** `0 / -`
+finché le quest non si completano); etichette in ciano, valori in giallo allineati a destra fino alla colonna 17 o 37 (oro totale a 6 cifre,
 `ui_num6`, dal 10/11: il baule conta le decine). Nel riquadro delle righe 19-23 tre voci in colonna,
 **start game**, **delete** + nome del PG e **back** (`ui_nav`: su/giù scelgono, la scelta è gialla con la freccia); fire su
 start game entra in partita, su delete chiede "delete this barbarian?" in riga 23 (tasti "y:yes  n:no" in riga 24): fire o Y cancella (`hero_delete`:

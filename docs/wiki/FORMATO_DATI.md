@@ -65,9 +65,13 @@ DES, COS) e **`c_resp`** (gettoni respec, 0..255), prima del baule della locanda
 Dal formato **$C7** (12/11, branch `capitoli`): dopo `c_resp` **`c_chap`** (capitolo in cui si gioca, 1..4) e **`c_unl`**
 (capitolo più alto sbloccato): blocco da 212 byte, file `SAVE-0N` da 2072 byte (sempre 9 blocchi). Il generatore passa alla
 versione `GVER` 5 (i piani 5, 10, 15 sono mappe fisse).
-Dal formato **$C8** (17/11, concept delle quest): in fondo al blocco, dopo il baule della locanda, **`c_qst`** (quest letta:
-0 nessuna, *n* = file `QSTn`): blocco da 213 byte. File `QST0` … `QSTn` sul disco: codice della pagina della quest (`src/qpage.asm`)
-+ testo (`data/quests.yaml`, `tools/build/gen_quests.py`), letti a `$BC00` (schermo B) ed eseguiti.
+Dal formato **$C8** (17/11, concept delle quest): in fondo al blocco, dopo il baule della locanda, **`c_qst`**: blocco da 213
+byte. (18/11) `c_qst` è una **maschera** delle quest prese (bit *n*-1 = quest *n*, al massimo 8); i valori di prima (0 nessuna,
+1 = quest 1) restano validi, quindi il formato non cambia. File delle quest (`data/quests.yaml`, `tools/build/gen_quests.py`):
+- `QST0` (caricato a `$BC00`, schermo B, ed eseguito): codice della pagina (`src/qpage.asm`) + **indice**: per ogni quest 1..`Q_N`
+  il capitolo (1 byte) e il titolo (codici dello schermo, 0 finale). Al massimo 1024 B.
+- `QST1` … `QST8` (caricati a `$B000` dalla pagina): premio (0 finale), numero di righe dello stato (1 byte), righe dello stato e
+  poi del testo (36 colonne, ciascuna con lo 0 finale), `$FF`. Al massimo 1024 B.
 Dal formato **$C2** (07/11 sera): zaino da **8** posti (`PACK_N`; `c_pack`, `c_packb`, `c_packd`, `c_packm` da 8 byte,
 l'equipaggiamento segue all'indice 8..11) e in fondo `c_sgold` (16 bit) = oro nel baule della locanda. Blocco da 140 a 110 byte.
 Dal formato **$C3** (08/11 sera): in fondo al blocco il **baule della locanda** (`st_id`, `st_b`, `st_du`, `st_m`, 24 byte
@@ -207,16 +211,17 @@ villaggi. `src/menu.asm` è assemblato in quattro zone di RAM (le parti in `src/
 | 2 | `MR2_AT` `$F4E0`–`$FCFF` (RAM sotto il KERNAL, dopo la cache del tema) | locanda: scelta dell'equipaggiamento (`menu/inn_eq.asm`), negozi: schermata e cursore (`menu/shop.asm`) |
 | 3 | `MR3_AT` `$A700`–`$A7FF` (slot sprite 28–31, liberi nel gioco) | negozi: riparazione e tetto dell'oro (`menu/shop_fix.asm`); aspetto degli NPC (`menu/npc_look.asm`, 17/11) |
 | 4 | `MR4_AT` `$A300`–`$A4FF` (+16 B di margine della decompressione in `BFP`; slot sprite 12–19: mostri del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (17/11) sprite degli NPC del villaggio: 4 disegni × 2 fotogrammi (`tools/build/npc_gfx.py`), solo dati |
+| 5 | `MR5_AT` `$8C00`–`$8E7F` (sprite forti e boss del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (18/11) sprite del "!" (`$8C00`, puntatore `$30`), tabella dei salti `NPC_JT` (`$8C40`: `npc_init`, `npc_draw5`, `npc_talk5`), capitoli delle quest `q_ch`, piazzamento e sprite degli NPC (`menu/npc.asm`) |
 
-File `MENU1`..`MENU4` (11/11, Krill; il quarto dal 17/11): una zona compressa ZX0 per file; l'indirizzo di caricamento del file è
+File `MENU1`..`MENU5` (11/11, Krill; il quarto dal 17/11, il quinto dal 18/11): una zona compressa ZX0 per file; l'indirizzo di caricamento del file è
 **fine della zona − lunghezza compressa**. Il gioco (`ovl_town`, `src/game/stash.asm`) li legge all'**ingresso nel
 villaggio** se `ovl_cur` = 0 (lo azzerano `game_start` e il caricamento del LOBBY) con `load_file` (indirizzo del
 file); Krill lascia l'inizio in `krill_loadaddrlo/hi` (`ml_src`), poi ogni zona si decomprime sul posto all'inizio
 (`ml_dst`; `$01 = $35`, interruzioni spente, NMI su `nmi_stub`). Niente altro scrive nelle zone 1-3: il modulo resta
-fino al prossimo LOBBY (la zona 4 la ricopre il tema all'ingresso nel dungeon, il villaggio la rilegge sempre: `ovl_cur` = 0 in `enter_gfx`). `pack_menu.py` verifica la decompressione sul posto (64 KB simulati) e che ogni zona stia nel
-suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (17/11): zona 1 1741 → 1482 B, zona 2
-2061 → 1677 B, zona 3 231 → 226 B, zona 4 512 → 183 B (15 blocchi in tutto). Spazio libero: zona 1 51 B, zona 2 19 B, zona 3 25 B (la
-build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
+fino al prossimo LOBBY (le zone 4 e 5 le ricopre il tema all'ingresso nel dungeon, il villaggio la rilegge sempre: `ovl_cur` = 0 in `enter_gfx`). `pack_menu.py` verifica la decompressione sul posto (64 KB simulati) e che ogni zona stia nel
+suo spazio; scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (18/11): zona 1 1603 → 1358 B, zona 2
+2061 → 1675 B, zona 3 231 → 226 B, zona 4 512 → 183 B, zona 5 602 → 503 B (17 blocchi in tutto). Spazio libero: zona 1 189 B,
+zona 2 19 B, zona 3 25 B, zona 5 38 B (la build lo stampa). Tempo: 2,3 s (prima, un file letto con il KERNAL: 10,5 s).
 
 ### Compressione (ZX0)
 - Compressore: **ZX0 v2** di Einar Saukas (C, compilato dai sorgenti ufficiali in Lab64: `build-scripts/sources.conf` di Lab64, licenza BSD-3), compilato con

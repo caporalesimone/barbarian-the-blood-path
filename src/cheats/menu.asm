@@ -6,10 +6,12 @@
 ;  Voci: god mode (on/off, byte godmode), level up (esperienza alla soglia del livello dopo, poi add_xp: il passaggio
 ;  di livello normale), respec token (resp_add), next level (come le scale; piano del boss: boss ucciso e ritorno al
 ;  villaggio; villaggio: primo piano come la cripta), next chapter (capitolo dopo sbloccato e chap_travel, che salva).
+;  (18/11, committente) gold +1000: a ogni Fire 1000 monete addosso (add_gold16: al massimo GOLD_MAX, il resto nel baule
+;  della locanda lo si porta a mano).
 ;  Fire = fai, RUN/STOP = menu di gioco, W/S o joystick = scegli; la riga 23 conferma.
 ; ===================================================================
         .enc "screen"
-CT_N    = 5
+CT_N    = 6
 
 ct_menu:
         lda #CT_N
@@ -34,6 +36,8 @@ ct_menu:
         .text "next level"
         .byte 0,15,16
         .text "next chapter"
+        .byte 0,15,18
+        .text "gold +1000"
         .byte 0,$ff
 _dr     ldx #CT_N-1             ; '>' sulla voce del cursore
 _l      stx tmp3
@@ -122,7 +126,9 @@ _boss   jsr chap_won            ; piano del boss del capitolo: come la sua morte
 _home   lda #0                  ; al villaggio del capitolo, alla cripta (come le scale in su dal primo piano)
         tax
         jmp change_level
-_c4     lda c_chap              ; 4 next chapter
+_c4     cmp #4
+        bne _gold
+_ch     lda c_chap              ; 4 next chapter
         cmp #CHAPTERS+1
         bcs _max
         cmp c_unl               ; capitolo dopo sbloccato (c_unl almeno c_chap + 1)
@@ -136,5 +142,19 @@ _c4     lda c_chap              ; 4 next chapter
         sta cur_level
         sta c_loc
 _tv     jmp chap_travel
+_gold   lda #<1000              ; 5 gold +1000 (18/11)
+        ldx #>1000
+        jsr add_gold16
+        #msg "gold "
+        lda c_gold
+        sta tmp0
+        lda c_gold+1
+        sta tmp1
+        lda #1
+        sta ui_nl
+        jsr ui_num5
+        lda #0
+        sta ui_nl
+        jmp _dr
 
         .enc "none"

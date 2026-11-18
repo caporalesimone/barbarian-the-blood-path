@@ -5,7 +5,9 @@ con il terreno). Quattro disegni visti di fronte, due fotogrammi l'uno (fermo / 
 con il modulo MENU (zona 4, src/menu.asm). Valori dei pixel come l'eroe: 1 = marrone (multicolor 0, colore 9), 2 = colore
 dello sprite (vestito: quello dell'NPC, scelto diverso dai colori del villaggio), 3 = grigio chiaro (multicolor 1, colore 15).
 Il vestito usa il 2, cosi' l'NPC resta visibile anche su un terreno marrone o grigio.
-Puntatore = $8C + 2 x disegno + fotogramma (npc_draw, src/game/quest.asm)."""
+Puntatore = $8C + 2 x disegno + fotogramma (npc_draw, src/menu/npc.asm).
+(18/11, committente) BANG: il "!" sopra la testa di chi ha una quest da dare, sprite in alta risoluzione (un colore) a $8C00
+(puntatore $30, inizio della zona 5 del modulo MENU), disegnato a pixel doppi come gli NPC (12 colonne, X = acceso)."""
 
 # righe 0..20; i fotogrammi del passo cambiano solo le righe da WALK_FROM in giu'
 WALK_FROM = 15
@@ -167,3 +169,32 @@ def npc_sprites():
         out.append((name, 1, bytes(mc_bytes(grid(base[:WALK_FROM] + walk)))))
     assert len(out) == 8
     return out
+
+
+BANG = [
+    "....XXXX....",
+    "...XXXXXX...",
+    "...XXXXXX...",
+    "...XXXXXX...",
+    "...XXXXXX...",
+    "....XXXX....",
+    "....XXXX....",
+    "....XXXX....",
+    ".....XX.....",
+    ".....XX.....",
+    "............",
+    "....XXXX....",
+    "....XXXX....",
+    "....XXXX....",
+] + ["............"] * 7
+BANG_ROWS = 14                 # righe disegnate (npc_draw lo mette 18 righe sopra la testa dell'NPC)
+
+
+def bang_sprite():
+    """64 byte: sprite in alta risoluzione, ogni colonna di BANG = 2 pixel"""
+    assert len(BANG) == 21 and all(len(r) == 12 and set(r) <= set(".X") for r in BANG)
+    out = []
+    for r in BANG:
+        bits = "".join("11" if c == "X" else "00" for c in r)
+        out += [int(bits[i:i + 8], 2) for i in (0, 8, 16)]
+    return bytes(out + [0])

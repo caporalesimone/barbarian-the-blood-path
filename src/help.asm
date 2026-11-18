@@ -21,6 +21,7 @@ pg      = $02                   ; pagina attuale
 jprev   = $03                   ; joystick al fotogramma precedente
 src     = $fb                   ; (2) flusso RLE
 dst     = $fd                   ; (2) destinazione
+tmp     = $04                   ; (18/11) avanzamento del flusso RLE
 SP_VARS = $c000                 ; variabili del player (RAM libera: l'help non usa altro sopra $3800)
 ;@map SP_VARS..SP_VEND "Variabili del player SID (Demon's Eye, src/common/title_music.inc)"
 
@@ -140,14 +141,16 @@ draw_page:
         sta $d011
         rts
 
-; RLE: coppie (conteggio, valore) fino al conteggio 0; A = pagina alta della destinazione
+; RLE (18/11): byte di controllo n = 1..127: n copie del byte dopo; 129..255: n-128 byte cosi' come sono; 0 = fine.
+; A = pagina alta della destinazione
 unrle   sta dst+1
         lda #0
         sta dst
 _r      ldy #0
         lda (src),y
         beq _end
-        tax
+        bmi _lit
+        tax                     ; ripetizione
         iny
         lda (src),y
         ldy #0
@@ -155,7 +158,22 @@ _w      sta (dst),y
         iny
         dex
         bne _w
-        tya                     ; dst += conteggio
+        lda #2
+        bne _adv
+_lit    and #$7f                ; byte copiati
+        tax
+_c      iny
+        lda (src),y
+        dey
+        sta (dst),y
+        iny
+        dex
+        bne _c
+        tya                     ; Y = n: dst += n, src += n + 1
+        clc
+        adc #1
+_adv    sta tmp                 ; src += A, dst += Y
+        tya
         clc
         adc dst
         sta dst
@@ -163,7 +181,7 @@ _w      sta (dst),y
         inc dst+1
 +       lda src
         clc
-        adc #2
+        adc tmp
         sta src
         bcc _r
         inc src+1
@@ -198,6 +216,9 @@ wm_msg  .word $0400 + 10 * 40 + 8     ; frase centrata (23 colonne) in riga 10, 
         .text "please wait", 0
         .word 0
         .enc "none"
+help_lo
+        .cerror help_lo > CHARS, "HELP: codice oltre $3000 (charset)"
+        * = CHARS+$800          ; (18/11, piu' pagine) glifi e pagine dopo il charset ($3800-), fino al blocco del decompressore
         .include "help.inc"     ; out/work/help.inc (tools/build/gen_help.py): glifi dell'HUD e pagine
 help_end
-        .cerror help_end > CHARS, "HELP oltre $3000 (charset)"
+        .cerror help_end > $8000, "HELP oltre $8000 (src/help/zx0sfx.asm decomprime da li')"

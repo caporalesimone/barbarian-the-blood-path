@@ -12,7 +12,8 @@ parametro (`dungeon.floors`): pozioni, riferimento e taratura seguono. Tutti i n
 piano; i confronti sono di `tools/simulators/cmp_rules.py`; il report completo è `out/work/simulators/simulazione_regole.html`
 (`tools/simulators/sim_rules.py`). Il gioco in assembly usa `data/rules.yaml` + `data/balance.yaml` via `tools/build/gen_db.py`.
 
-Vincoli del simulatore (uguali al gioco): bot fermo davanti ai mostri, attacco base ogni "cadenza" dell'arma, un mostro
+Vincoli del simulatore (uguali al gioco): bot fermo davanti ai mostri, attacco base ogni "cadenza" (arma + rallentamento per DES
+bassa, 18/11: `player.attack_speed`, `tools/simulators/rules.py`), un mostro
 attacca al contatto e poi ogni 0,9 s, ogni colpo del PG ferma il mostro per 0,1 s, 4 pozioni in cintura (rossa, rossa,
 gialla, viola) bevute sotto il 35% della vita.
 
@@ -65,7 +66,7 @@ Tre caratteristiche, tutte usate. `mod = (valore − 10) / 2` per difetto.
 
 | abilità | livello | ricarica | durata | effetto |
 |---|---|---|---|---|
-| Slash | 1 | cadenza dell'arma | — | attacco base |
+| Slash | 1 | cadenza dell'arma + max(0, 12 − 3 × mod DES) (18/11) | — | attacco base |
 | Whirlwind | 3 | 2 s | — | colpisce tutti i mostri adiacenti, dadi ×1 |
 | Battle Cry | 6 | 15 s | stordisce 2 s | ogni mostro adiacente: d20 + salvezza ≥ 8 + competenza + mod FOR o resta fermo |
 | Rage | 9 | 30 s | 6 s | danni subiti dimezzati |

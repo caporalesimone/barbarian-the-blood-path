@@ -10,7 +10,8 @@
                                  coincidano ancora con il charset del gioco). Poi ricompila la build normale.
 
 Formato di data/help.txt: una pagina per sezione "=== titolo"; ogni riga di testo e' una riga dello schermo
-(dalla riga 2; colonne 1..38). [testo] = giallo (tasti), {testo} = ciano (note). "@hud" = il ritaglio
+(dalla riga 2; colonne 1..38). [testo] = giallo (tasti), {testo} = ciano (note), <testo> = verde (titoli delle sezioni, 18/11),
+TAB = colonna 21 (elenchi dei tasti: tasto, TAB, che cosa fa; le righe che continuano cominciano con un TAB). "@hud" = il ritaglio
 dell'HUD (4 righe, colonne 1..38) a partire da quella riga. Righe 0 (titolo) e 24 (tasti dell'help): automatiche.
 """
 import json, os, re, socket, subprocess, sys, time, signal
@@ -19,9 +20,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
 from vicemon import ROM_ARGS, XRUN, free_port, wait_boot  # noqa: E402  (Lab64: x64sc con -default + tutte le ROM di Lab64)
 SNAP = os.path.join(ROOT, "data", "help_hud.json")
-COL_TXT, COL_KEY, COL_NOTE, COL_TITLE = 1, 7, 3, 7       # colori < 8: caratteri in alta risoluzione (schermo multicolore)
+COL_TXT, COL_KEY, COL_NOTE, COL_TITLE, COL_HEAD = 1, 7, 3, 7, 5       # colori < 8: caratteri in alta risoluzione (schermo multicolore)
 HUD_X0, HUD_X1 = 1, 39                                     # colonne 1..38 (l'HUD del gioco e' a 38 colonne)
 FOOT = "fire: next  left: back  run/stop: menu"
+TAB = 21                                                   # (18/11) un TAB in data/help.txt porta a questa colonna
 
 
 def lbl(path):
@@ -172,9 +174,12 @@ def build():
                 raise SystemExit("help.txt: pagina '%s' troppo lunga" % title)
             x = 1; c = COL_TXT
             for ch in ln:
+                if ch == "\t":                     # (18/11) colonna delle descrizioni: elenchi dei tasti allineati
+                    x = max(x + 1, TAB); continue
                 if ch == "[": c = COL_KEY; continue
                 if ch == "{": c = COL_NOTE; continue
-                if ch in "]}": c = COL_TXT; continue
+                if ch == "<": c = COL_HEAD; continue
+                if ch in "]}>": c = COL_TXT; continue
                 if x > 38 and ch != " ":
                     raise SystemExit("help.txt: riga oltre la colonna 38: %r" % ln)
                 if x < 40:
@@ -184,13 +189,25 @@ def build():
     return hud, glyph_codes, pages, screens
 
 
-def rle(seq):                         # coppie (conteggio 1..255, valore); conteggio 0 = fine
-    out = []; i = 0
+def rle(seq):
+    """(18/11, piu' pagine) byte di controllo n: 1..127 = n copie del byte dopo; 129..255 = n-128 byte copiati cosi' come
+    sono; 0 = fine (unrle in src/help.asm). Le coppie (conteggio, valore) di prima raddoppiavano il testo."""
+    out = []; lit = []; i = 0
+
+    def flush():
+        while lit:
+            k = lit[:127]; del lit[:127]
+            out.extend([128 + len(k)] + k)
     while i < len(seq):
         j = i
-        while j < len(seq) and seq[j] == seq[i] and j - i < 255:
+        while j < len(seq) and seq[j] == seq[i] and j - i < 127:
             j += 1
-        out += [j - i, seq[i]]; i = j
+        if j - i >= 3:
+            flush(); out += [j - i, seq[i]]
+        else:
+            lit.extend(seq[i:j])
+        i = j
+    flush()
     return out + [0]
 
 

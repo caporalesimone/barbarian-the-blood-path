@@ -70,17 +70,26 @@ disco, in background dove si può; elenco dei premi; almeno una decina di quest;
 ## Concept del 17/11 (implementato, testi segnaposto)
 
 Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
-- **Pagina della quest**: tasto **Q** (libero nel gioco) ovunque, o **Fire** accanto a chi dà la quest. Menu classico come quelli
-  dei negozi, riquadri con l'etichetta sulla cornice: **from** (chi l'ha data), il **titolo** sulla cornice del testo, il **testo**
-  (fino a 11 righe da 36 colonne), **reward**, **status** (oggi sempre "active"). Senza quest letta: "no quest: talk to the villagers".
-  La pergamena disegnata resta un'idea per dopo (costa grafica e memoria): si parte dal menu classico.
-- **Un file per quest**, `QSTn` (`data/quests.yaml` → `tools/build/gen_quests.py`): il **codice della pagina** (`src/qpage.asm`,
-  ~410 B, assemblato con le etichette del gioco come il LOBBY) **più il testo** della quest; `QST0` = solo la pagina ("no quest").
-  Si legge a ogni apertura in `$BC00` (lo schermo B del gioco, ridisegnato all'uscita) e si esegue: in GAME restano ~40 B
-  (`ui_quest`). Ogni quest ha quindi il suo spazio (fino a ~590 B di testo) e il testo nuovo si carica con la quest. Costo:
-  la schermata di attesa a ogni apertura (~0,5 s, non misurato con precisione).
+- **Pagine delle quest** (18/11, committente: si possono prendere più quest, quindi un elenco). Tasto **Q** ovunque =
+  **elenco** delle quest prese (titolo e "ch. N", W/S o joystick per scegliere, Fire = dettaglio, RUN/STOP o Q = di nuovo nel
+  gioco; senza quest "talk to the villagers"). **Dettaglio**: titolo sulla cornice in alto, "chapter N", poi nel riquadro del
+  testo **lo stato** (righe gialle, **segnaposto**: cosa mostrerà lo si decide con il quest system vero, TODO H1; oggi
+  "status: placeholder (to be defined with the quest system)", campo `status` di `data/quests.yaml`) e il testo, infine
+  **reward**. Il riquadro mostra 14 righe: un testo più lungo **scorre** di una riga con W/S o il joystick, con " up " e " more "
+  sulla cornice quando c'è testo sopra o sotto. RUN/STOP, Fire o Q = di nuovo l'elenco. Fire accanto a chi dà una quest apre
+  subito il dettaglio di quella quest (poi l'elenco). La pergamena disegnata resta un'idea per dopo.
+- **File** (`data/quests.yaml` → `tools/build/gen_quests.py`; formato in [FORMATO_DATI](FORMATO_DATI.md)): **`QST0`** = codice
+  della pagina (`src/qpage.asm`, ~860 B, assemblato con le etichette del gioco come il LOBBY) + **indice** (capitolo e titolo di
+  ogni quest), letto da `ui_quest` a `$BC00` (schermo B del gioco, tutto il kilobyte: i puntatori degli sprite in fondo li
+  riscrive l'IRQ, spento nella UI) con la schermata di attesa; **`QSTn`** (n = 1..8) = premio, righe dello stato e del testo,
+  letto dalla pagina a `QTXT` = `$B000` (set B degli sprite della barra in alto: come la minimappa, all'uscita la barra si
+  ricostruisce) **senza** schermata di attesa quando si apre il dettaglio (pausa breve del disco, non misurata). In GAME restano
+  ~40 B (`ui_quest`, A = quest da aprire subito). `c_qst` (salvato con l'eroe) è dal 18/11 una **maschera**: bit *n*-1 = quest
+  *n* presa (i valori 0 e 1 di prima restano validi: nessun cambio di `SAVE_VER`); al massimo 8 quest.
+- **Quest segnaposto** (18/11): la 1 di Hilde (capitolo 1) e 7 quest "piccole" (2..8, capitoli 1, 1, 2, 2, 3, 4, 5) che offrono
+  gli NPC che vagano; la 2 ha un testo lungo per provare lo scorrimento.
 - **NPC nel villaggio** (`src/game/quest.asm`): sprite 3-7 (liberi nel villaggio: verificato a runtime, `sh_en` ha solo lo
-  sprite 0 e i 3-7; gli sprite 1 e 2, fendente ed effetto, restano spenti; il 7 era hires e dal 17/11 è multicolor come gli
+  sprite 0 e i 3-7; gli sprite 1 e 2 (fendente ed effetto nel dungeon) dal 18/11 servono al "!"; il 7 era hires e dal 17/11 è multicolor come gli
   altri, `SPRMC`). **Disegni** (17/11, committente: prima erano la figura dell'eroe, marrone e grigia, e sul selciato della
   piazza sembravano trasparenti): 4 disegni visti di fronte, 2 fotogrammi (fermo / passo): *villager*, *woman*, *elder*,
   *guard* (`tools/build/npc_gfx.py`), negli slot sprite 12-19 (`$A300`), liberi nel villaggio, caricati con il modulo MENU
@@ -88,9 +97,21 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   mai uno dei colori del villaggio (`tk_pal`: sfondo, multicolor 1 e 2, accento) né il 9 e il 15 (multicolor degli sprite).
   Disegno a caso per i vaganti (`npc_g`); chi dà la quest è la *woman*, a partire dal giallo.
   **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo nella piazza della fontana** (casella `tk_g` dell'intestazione del villaggio, scelta da `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e lontana dalle porte): avvicinandosi
-  da qualunque lato compare il suo nome nella barra; **Fire** = quest letta (`c_qst`, salvato con l'eroe: SAVE_VER $C8) e la
-  sua pagina. Dopo la prima volta la pagina si riapre con **Q** o con Fire accanto a lui. I luoghi hanno la precedenza (su una
-  porta o una scala vale il luogo).
+  da qualunque lato compare il suo nome nella barra; **Fire** = quest presa (bit 0 di `c_qst`, salvato con l'eroe) e il suo
+  dettaglio. Dopo la prima volta il dettaglio si riapre con Fire accanto a lei (o dall'elenco, Q). I luoghi hanno la
+  precedenza (su una porta o una scala vale il luogo).
+- **"!" sopra chi ha una quest da dare** (18/11, committente: "bello evidente"): sprite in alta risoluzione a `$8C00`
+  (puntatore `$30`, `BANG` in `tools/build/npc_gfx.py`, 14 righe, pixel doppi come gli NPC), 18 righe sopra lo sprite dell'NPC,
+  **ondeggia** di 2 righe e passa dal giallo al bianco ogni 16 fotogrammi. Usa gli sprite **1** e **2** (liberi nel villaggio;
+  il 2 solo se l'effetto del colpo non c'è): al massimo due "!" sullo schermo, gli altri non si disegnano. Non si disegna sopra
+  la riga 80 (barra in alto, `IRQ_BAR`). Sparisce quando la quest è presa (`npc_offer`: quest dell'NPC non ancora in `c_qst`).
+- **NPC che vagano con una quest** (18/11, committente): all'ingresso nel villaggio ogni vagante, con probabilità **1/4**, offre
+  una quest (`npc_q`, `npc_pick`): la prima fra le 2..8 non ancora presa, non già offerta da un altro NPC in quella visita e del
+  capitolo attuale o di uno prima (`q_ch`). Accanto a lui la barra dice **"quest giver"** (`QL_GV`); Fire = quest presa, il suo
+  dettaglio, e lui torna un NPC qualunque (`npc_q` = 0, niente "!", niente nome). L'etichetta del luogo si ricalcola ogni 16
+  fotogrammi (`lc_x` = `$ff` in `npc_tick`): un NPC che si ferma accanto al PG fermo, o la quest appena presa, si vedono subito.
+- **Si fermano con il PG vicino** (18/11, committente: per fare Fire su di loro senza inseguirli): un vagante con il PG a
+  **2 caselle o meno** (su entrambi gli assi, `NPC_STOP`) non parte per un altro passo; il passo in corso finisce.
 - **NPC che vagano** (fino a sedici per villaggio, 17/11): ogni villaggio ha i SUOI **settori** (`SECTORS` in
   `tools/build/villages.py`, scelti secondo la forma del villaggio: griglia 4×4 nel 1 e nel 4 (anello attorno al cratere),
   piattaforme nel 2 (11 settori), tre terrazze nel 3 (12), isole nel 5 (12); rettangoli x, y, larghezza, altezza di 8-15 caselle
@@ -107,12 +128,18 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   finestra cadono 2-3 NPC. **Memoria:** le tabelle degli NPC (8 byte per NPC) stanno nella tabella della ricerca di percorso dei
   mostri (`BFP`, `$A500`): nel villaggio non ci sono mostri e `mon_path` la riempie di `$ff` prima di usarla. Aspetto: vedi i disegni
   sopra (4 disegni, colore per NPC in `npc_c`, tabelle in `BFP` con le altre: 8 byte per NPC).
-- **Lobby**: nella pagina del barbaro, "current quest:" mostra il titolo della quest letta (`quests.inc`).
-- Test: `tests/sanity/quest/cases.py` (QUEST-10..14).
+- **Lobby**: nella pagina del barbaro, "active quests:" mostra quante quest sono prese (18/11; prima il titolo dell'unica quest,
+  ma i titoli ora stanno solo nel file `QST0`).
+- Test: `tests/sanity/quest/cases.py` (QUEST-10..16: piazzamento e quest offerte, elenco vuoto, Hilde con "!" e dettaglio,
+  vaganti che si fermano, sprite, vagante "quest giver" e scorrimento del testo, cadenza dell'attacco).
 - **Memoria**: GAME passa a ~505 B di margine sotto `$8720` (avviso della build sotto 1 KB; con le varianti di test, es.
   `TESTUI=28`, restano ~56 B). Con i settori (17/11) il margine scende a **629 B** (debug) e l'intestazione residente `town_k`
-  cresce di 66 B (16 settori e la casella di chi dà la quest). Il piazzamento degli NPC (`npc_init`) sta nel modulo MENU (zona 1, `src/menu/npc.asm`, chiamato con
-  `MENU_NPC`): la zona 1 resta con **54 B** liberi. Il resto degli NPC (~500 B) va spostato fuori da GAME prima delle quest vere.
+  cresce di 66 B (16 settori e la casella di chi dà la quest). (18/11) Il modulo MENU ha una **zona 5** (`$8C00-$8E7F`: sprite
+  forti e boss del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso; il villaggio rilegge sempre il modulo) con lo
+  sprite del "!", la tabella dei salti `NPC_JT` (piazzamento `npc_init` con `npc_pick`, sprite `npc_draw5` con il "!", Fire
+  `npc_talk5`), `src/menu/npc.asm`; 38 B liberi. In GAME restano il passo dei vaganti (`npc_tick`), chi è accanto
+  (`npc_here`, `npc_offer`) e i punti d'ingresso (`npc_ok`): margine **690 B** (debug). La zona 1 torna a 189 B liberi. Prima
+  delle quest vere vanno spostati anche `npc_tick` e `npc_here` (TODO H1).
 - **Da fare dopo** (TODO H1): stati veri (offerta, attiva, da riscuotere, fatta), obiettivi e premi, nomi e frasi degli NPC
   (per ora sono solo figure), testi veri.
 
