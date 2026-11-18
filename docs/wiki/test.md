@@ -175,7 +175,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BEST-12` | the checker refuses a wrong bestiary: strong_of of another chapter, unknown tier, duplicate id |
 | `BOOT-10` | POKE 1020,1: BARBARIAN -> START from disk without the menu (Krill installed), GAME, LOBBY and hero list loaded |
 | `BOOT-11` | START from the monitor (wait screen, no bar) up to the game menu |
-| `LORE-10` | release: BARBARIAN menu, HELP (5 pages), LORE (identical LDAT), joystick fire held = double scroll speed (released: normal; held at the end: no exit), return, START |
+| `LORE-10` | release: BARBARIAN menu, HELP (all the pages of data/help.txt), LORE (identical LDAT), joystick fire held = double scroll speed (released: normal; held at the end: no exit), return, START |
 | `LORE-11` | LORE story stream: one blank row between the text rows of a paragraph, two between paragraphs, size limits (15/11) |
 | `HELP-10` | release: the HUD crop in the help equals the game HUD |
 | `BOOT-12` | RUN/STOP while the KERNAL loads LORE (from the BARBARIAN menu): back to the menu, no red border (12/11) |
@@ -267,9 +267,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (9 blocks), barbarian first |
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
 | `KRILL-13` | no KERNAL disk call left in GAME, LOBBY, MENU and START (listing scan: after the install the drive does not answer the KERNAL) |
-| `KRILL-20` | village entry order: MENU1, MENU2, MENU3 (load_file) then SND0 (load_raw): each one read whole at the first read (end address and bytes) |
+| `KRILL-20` | village entry order: MENU (load_file, one file since 18/11) then SND0 (load_raw): each one read whole at the first read (end address and bytes) |
 | `KRILL-21` | snd_get checks the end address: every song read once into both buffers; with a wrong expected length 3 reads, then no music in that buffer (snd_cur = 0) |
-| `KRILL-22` | ovl_town checks the end of every MENU part (= end of its zone): a part that does not end there is read 3 times, then C = 1 |
+| `KRILL-22` | ovl_town checks the end of the MENU file (= end of zone 2, ml_end): a file that does not end there is read 3 times, then C = 1 |
 | `KRILL-23` | every file of the disk loaded right after its predecessor in the directory (served from the drive's next-file cache) equals its file: bytes and end address |
 | `KRILL-17` | 1541-II (VICE 1542): START with Krill, menu, new hero (save plugin), village read |
 | `KRILL-18` | 1570 / 1571 in 1541 mode: as KRILL-17 (ROMs dos1570 / dos1571 of Lab64) |
@@ -280,7 +280,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LOBBY-12` | main menu plays Demon's Eye (file SND_MENU in the buffer of the place, player running); leaving it fades to silence, then music_town loads the village song |
 | `PROBE-10` | BARBARIAN: the loader menu with its three entries; the session ends in BARBARIAN (memory probe) |
 | `PROBE-11` | LORE from the BARBARIAN menu: title, PRESS SPACE, the story scrolls; the session ends in LORE (memory probe) |
-| `PROBE-12` | HELP from the BARBARIAN menu: the five pages; the session ends in HELP on the last page (memory probe) |
+| `PROBE-12` | HELP from the BARBARIAN menu: all the pages (data/help.txt); the session ends in HELP on the last page (memory probe) |
 | `PROBE-13` | START: Krill installed, GAME loaded; the session ends in START just before GAME is unpacked (memory probe) |
 | `PROBE-14` | JUKEBOX: two tunes played and stopped; the session ends in JUKEBOX (memory probe) |
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |
@@ -369,8 +369,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `VIL-MENU-11` | after level 1 and back (the module MENU is read again at the village entry): inn and smith without further reads |
 | `FOUNT-10` | fountain: walking on it heals to full hp |
 | `INN-GOLD-11` | inn: Fire on the chest gold row does nothing (no withdrawal since 10/11), the screen stays open |
-| `MENU-10` | out/work/menu1..4.prg (Krill: one file per zone, load address = zone end - length), part k = ZX0(zone k); shops out of GAME; the disks have MENU1..3, no OVLT/OVL2 |
-| `MENU-11` | ovl_town from the disk (as at the village entry): the 3 zones equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
+| `MENU-10` | out/work/menu.prg (one file since 18/11): header (parts, source and destination), parts ZX0(zone k), ends at MR2_END, above ML_LO; shops out of GAME; the disks have MENU, no MENU1/OVLT/OVL2 |
+| `MENU-11` | ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
 | `VIL-TWN-11` | village 1 (Aldric's Crossing): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-12` | village 2 (Blackwater Mill): header in town_k, solid tiles, colours, map, hero at the entry |

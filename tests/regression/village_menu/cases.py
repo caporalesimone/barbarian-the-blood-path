@@ -1,6 +1,6 @@
-"""Module MENU with the village menus (11/11, TODO D13): inn AND shops (src/menu.asm) in three RAM zones, ZX0-compressed
-zone by zone in one file (tools/build/pack_menu.py); GAME loads it once when entering the village (ovl_town) and it stays:
-the theme prefetch writes straight into the theme cache ($ED00), no more into $F500. The shops left GAME (only the item
+"""Module MENU with the village menus (11/11, TODO D13): inn, shops and (17-18/11) the NPCs (src/menu.asm) in five RAM zones,
+ZX0-compressed zone by zone in one file since 18/11 (tools/build/pack_menu.py: header + parts, staged under the KERNAL);
+GAME reads it at every village entry (ovl_town) and it stays for the visit (the theme prefetch of 11/11 is gone). The shops left GAME (only the item
 box of the dungeon chest, ch_item, stays). One VICE session for the in-game cases."""
 import os
 from c64test import test, check

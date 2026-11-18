@@ -1,6 +1,6 @@
 """Every load of a scripted walk through all the chapters equals its file (15/11, ex TODO A2, docs/wiki/FastLoader.md 4.1): new hero,
 then for each chapter: crypt, stairs down, up and back to the village, all the levels down to the boss level (chapters
-1-3: BOSSCHc; chapter 4: the throne room, FMAP), the boss beaten (chap_won), back to the village (TWNc, MENU1..4, SND0),
+1-3: BOSSCHc; chapter 4: the throne room, FMAP), the boss beaten (chap_won), back to the village (TWNc, MENU, SND0),
 a save (KSAVE, the hero file), the travel to the next village (chap_travel: TWNc, save); at the end the LOBBY. Every
 krill_loadraw is stopped and checked when it returns (tests/lib/loads.py, LoadCheck): bytes in RAM and end address equal to
 the file on the disk (hl and save-0N: length only, the plugin rewrites them). One VICE session."""
