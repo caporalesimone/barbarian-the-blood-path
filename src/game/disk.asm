@@ -153,8 +153,8 @@ fin_unp sta ptr0                ; ptr0 = flusso RLE -> MAP
 bmap_load:
         lda bm_tail             ; (18/11) mappa nella coda del tema GFX(2c): niente disco
         beq _disk
-        lda #<GFX_DUN_END
-        ldx #>GFX_DUN_END
+        lda bm_at               ; (19/11) dopo il codice del piano, se c'e'
+        ldx bm_at+1
         jmp bm_unp
 _disk   ldy #nm_bch-nm_tab
         lda #6

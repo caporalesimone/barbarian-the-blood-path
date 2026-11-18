@@ -39,6 +39,11 @@ ARX=$(echo "$EXTRA" | sed 's/-D NOKEYS=[0-9]*/-D NOKEYS=1/')
 64tass -a $INC src/lobby.asm -o out/work/lobby.prg -l out/work/lobby.lbl -L out/work/lobby.lst > out/work/ovl.log 2>&1 || { grep -v '^$' out/work/ovl.log | head -20; exit 1; }
 64tass -a -b $INC src/qpage.asm -o out/work/qpage.bin -l out/work/qpage.lbl -L out/work/qpage.lst > out/work/qpage.log 2>&1 || { grep -v '^$' out/work/qpage.log | head -20; exit 1; }   # (17/11) pagina della quest
 python3 tools/build/gen_quests.py --files >/dev/null || exit 1   # file QST0..QSTn: pagina + testo
+for c in 1 2 3; do                  # (19/11) meccaniche dei boss dei capitoli 1-3: code di GFX2, GFX4, GFX6 (bundle.py)
+    [ -f src/game/ovl_boss$c.asm ] || { rm -f out/work/ovl_boss$c.bin; continue; }
+    64tass -a -b $INC src/game/ovl_boss$c.asm -o out/work/ovl_boss$c.bin -l out/work/ovl_boss$c.lbl -L out/work/ovl_boss$c.lst > out/work/ovl_boss$c.log 2>&1 || { grep -v '^$' out/work/ovl_boss$c.log | head -20; exit 1; }
+done
+64tass -a -b $INC src/game/ovl_final.asm -o out/work/ovl_final.bin -l out/work/ovl_final.lbl -L out/work/ovl_final.lst > out/work/ovl_final.log 2>&1 || { grep -v '^$' out/work/ovl_final.log | head -20; exit 1; }   # (19/11) codice del piano 20: coda di GFX8 (bundle.py)
 64tass -a -b $INC src/game/gen_citadel.asm -o out/work/gen_cit.bin -l out/work/gen_cit.lbl -L out/work/gen_cit.lst > out/work/gen_cit.log 2>&1 || { grep -v '^$' out/work/gen_cit.log | head -20; exit 1; }   # (19/11) cittadella: coda di GFX7 (bundle.py)
 if [ "$CHEATS" = 1 ]; then          # (17/11) menu dei trucchi: modulo CHEATS sul disco (solo debug e test)
     64tass -a $INC src/cheats.asm -o out/work/cheats.prg -l out/work/cheats.lbl -L out/work/cheats.lst > out/work/cheats.log 2>&1 || { grep -v '^$' out/work/cheats.log | head -20; exit 1; }

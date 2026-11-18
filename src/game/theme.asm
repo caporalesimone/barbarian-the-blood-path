@@ -37,3 +37,49 @@ vis_bit:
         tay
         lda bitmask,y
         rts
+
+; ---------------------------------------------------------------------------------------------------------------------
+; (19/11) CODICE DEL PIANO (docs/wiki/dungeon.md "Codice del piano"): il codice che serve a un solo tipo di piano (sala del
+; trono; piani del boss dei capitoli) non sta in GAME: sta nella coda del file del tema di quel piano (tools/build/bundle.py,
+; src/game/ovl_*.asm) e gfx_tail (music.asm) lo copia a OVP_AT = $C900, la zona 1 del MENU, libera in tutti i piani del
+; dungeon (il MENU si rilegge a ogni ingresso nel villaggio). ovp_ok = 1 se il tema del piano attuale ne aveva uno. Tabella
+; dei salti all'inizio del codice: OVJ_INIT dopo il piazzamento dei mostri (load_location), OVJ_TICK a ogni giro, OVJ_FIRE
+; con Fire su T_DHOME (la leva della sala del trono). Nelle build ARENA e TESTUI 36 il codice del piano 20 resta in GAME.
+; ---------------------------------------------------------------------------------------------------------------------
+OVP_AT   = $c900
+OVP_END  = $d000
+; (nessuna annotazione @map: la zona e' gia' quella del MENU, zona 1, con la sua coda @free; lab64 map le vedrebbe sovrapposte)
+OVJ_INIT = 0
+OVJ_TICK = 3
+OVJ_FIRE = 6
+OVJ_DMG  = 9                    ; (19/11) colpo del PG a un mostro: il danno si puo' cambiare (scudo di Varok, mugnaio scoperto)
+ovp_ok  .byte 0
+ovp_tint .byte 0                ; (19/11) colore del boss del capitolo deciso dal codice del piano (0 = il suo), build_sprites
+.if OVP_RES
+ovp_init = final_init
+ovp_tick = final_tick
+ovp_dmg rts
+.if ARENA
+ovp_fire rts
+.else
+ovp_fire = ui_lever
+.endif
+.else
+ovp_tick:
+        lda #OVJ_TICK
+        .byte $2c               ; (bit $xxA9: salta il lda dopo)
+ovp_init:
+        lda #OVJ_INIT
+        .byte $2c
+ovp_fire:
+        lda #OVJ_FIRE
+        .byte $2c
+ovp_dmg:                        ; X = mostro colpito, cb_dl/cb_dh = danno (si puo' cambiare); X conservato
+        lda #OVJ_DMG
+        ldy ovp_ok
+        beq +
+        sta _j+1
+_j      jmp OVP_AT
++       rts
+.endif
+

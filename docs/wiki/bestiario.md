@@ -121,6 +121,20 @@ insieme costano ~550 B stimati, da mettere in un modulo caricato con il piano de
 **Da decidere con il committente**: se i boss di capitolo lasciano un bottino proprio, se la sala si chiude, i numeri (vita,
 danno, tempi) dopo la taratura con i simulatori.
 
+**Nel codice dal 19/11** (boss dei capitoli 1–3; il Lord of Ruin resta com'era): ogni meccanica è **codice del piano**
+(`src/game/ovl_boss1..3.asm` + parti comuni `src/game/ovl_boss.inc`, nella coda di `GFX2`, `GFX4`, `GFX6`, copiato a `$C900`
+entrando nel piano: [dungeon](dungeon.md#codice-del-piano-1911)); in GAME solo gli agganci (`ovp_tick`, `ovp_init`, `ovp_dmg` nel
+colpo del PG, `ovp_tint` per il colore del boss in `build_sprites`). Numeri messi da me il 19/11 (dalla tabella sopra, **da provare
+in gioco e da tarare**):
+
+| Boss | Come è fatta | Scelte mie (19/11) |
+|---|---|---|
+| The Hollow Abbot | sotto **2/3** e **1/3** della vita: fermo 50 fotogrammi (1 s), lampeggia verde, bordo verde, suono del portale; poi 2 **Skeleton** (tipo 2) sulle caselle di pavimento accanto, svegli. Finché uno è vivo: +1 vita ogni **25** fotogrammi (verde a tratti), mai oltre il massimo. Al rientro le soglie già superate non si ripetono | nessun limite al numero di rigenerazioni; gli scheletri sono mostri normali del piano 5 |
+| The Miller of Blackwater | sveglio: **200** fotogrammi di attesa, **50** di carica (fermo, lampeggia bianco), il colpo: se il PG è entro **36 px** (2 caselle + mezzo corpo) **due attacchi** normali (`mon_attack`: tiro per colpire e danno del mostro), lampo bianco del bordo; poi **75** fotogrammi scoperto (fermo, lampeggia azzurro, colpi del PG ×2). Sotto metà vita **2 Drowned** (tipo 1), una volta | "danno doppio" = due attacchi con il loro tiro per colpire (non un colpo sicuro); niente anello del Whirlwind: solo il lampo del bordo |
+| Varok the Oathbreaker | sveglio, libero: allineato con il PG (scarto < 8 px su un asse) a **32–143 px**: avviso **25** fotogrammi (fermo, lampeggia giallo), poi carica a **4 px** per fotogramma nella direzione del PG (massimo 60 fotogrammi): contro un muro **stordito 100** fotogrammi (grigio, lampo del bordo), se raggiunge il PG **due attacchi** e si ferma; dopo ogni carica **75** fotogrammi di pausa. Lo scudo dimezza i colpi del PG (almeno 1), non da stordito | la carica non passa sugli spigoli (nessuno scivolamento); gli altri mostri non la fermano |
+
+Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco** (19/11): leggibilità degli avvisi, difficoltà.
+
 ### Concept dei comuni (in breve)
 - Capitolo 2 (palude, mulino): **Drowned** (cadavere gonfio, lento e resistente; lascia una pozza che rallenta), **Bog
   Crawler** (scarabeo d'acqua, veloce, in branco), **Mire Witchling** (piccola strega, cugina dei Fallen; sputo a corto raggio).

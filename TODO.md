@@ -22,7 +22,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
-| 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D8, D3 |
+| 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M10, M3, M4, M5 |
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
@@ -210,7 +210,8 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   coda degli slot 41–47 e 58–63 dopo i buffer della musica) o codice più corto (`asm_audit`).
 - (19/11, verificato nel codice) `$C900-$CFFF` (zona 1 del MENU) **è libera in tutti i piani del dungeon**: ogni chiamata nel
   modulo (`MENU_INN`, `MENU_SHOP`, `MENU_NHERE`, `npc_tick`) passa da `cur_level` = 0, ed `enter_gfx` rilegge il MENU a ogni
-  ingresso nel villaggio (`ovl_cur` = 0). La nota di prima ("resta per tutta la partita") era sbagliata. Vale per D8.
+  ingresso nel villaggio (`ovl_cur` = 0). La nota di prima ("resta per tutta la partita") era sbagliata. Dal 19/11 nel dungeon
+  ci sta il **codice del piano** ([dungeon](docs/wiki/dungeon.md#codice-del-piano-1911); ex D8, fatto per il piano 20).
 
 ### D1 (ex P1) Primo ingresso nel piano 1 dal villaggio ~12 s in VICE (poi 5,6–7,3 s fra i piani) — S (misura) + ?
 - Misurare cosa si legge (tema, brano, piano) col cronometro; il precaricamento del tema parte dopo N caselle e forse non
@@ -232,14 +233,6 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 
 ### D11 (ex 6.5) Compressione ZX0 dei file rimasti — M
 - MENU, GFX0, temi: ~5 s in meno all'avvio (stima). Decompressore pronto (`src/common/zx0.inc`).
-
-### D8 (ex 6.2) Codice del piano finale in overlay (`OVLF` a `$C900`) — M-L
-- `gen_final` + tabelle, `ui_lever`, `at_lever`, parte di `place_boss`, `final_tick`: ~1 KB di GAME. Ospiterà Torvald (H1).
-  (19/11) Misura dai listati: in GAME `final_tick` 155 B, `ui_lever` 335, `at_lever` 20, `fin_doors` 24, `place_boss` +
-  `boss_name_idx` 138 (in parte comune a tutti i boss), `fin_load` 47 (CODE2); `gen_final` sta sotto l'I/O (non e' GAME): il
-  guadagno sul margine e' ~0,55-0,7 KB, non 1 KB. Nessun conflitto con il MENU (D14: zona 1 libera nel dungeon).
-  Proposta allargata (da decidere): **modulo del dungeon** a `$C900` (1792 B) con il piano finale, spawn dei mostri
-  (`spawn_monsters` 269 B, `place_monster` 166, `floor_types` 212) e le meccaniche dei boss dei capitoli (~550 B stimati, M9).
 
 ### D3 (ex P3, ex 1.9) Frenzy e analisi del dungeon — L
 - **11/11**: profilo per routine (`tools/vice/frame_prof.py`), ottimizzazioni semplici fatte, velocità della Frenzy provate fino a
@@ -440,9 +433,10 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - **Boss veri** (le **mappe vere** dei piani del boss dei capitoli 1–3 sono fatte il 19/11: cripta, isola nella palude, grotta
   crollata, [dungeon](docs/wiki/dungeon.md#piani-del-boss-dei-capitoli-13-5-10-15-gen_cboss-1211-mappe-vere-dal-1911); da
   provare in gioco a mano): dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
-  e il loro colore; **meccaniche decise** ([bestiario](docs/wiki/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
-  non nel codice (~550 B stimati: M9); dal 15/11 hanno anche il **loro nome** nella barra e i **mostri del capitolo** intorno
-  (solo grafica, colore e nome: M9); statistiche proprie, bottino speciale, sala che si chiude: da fare.
+  e il loro colore; **meccaniche nel codice dal 19/11** (codice del piano, [bestiario](docs/wiki/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)):
+  i numeri sono miei, **da provare in gioco e da tarare** (simulatori: non riproducono le meccaniche); dal 15/11 hanno anche il
+  **loro nome** nella barra e i **mostri del capitolo** intorno (solo grafica, colore e nome: M9); statistiche proprie, bottino
+  speciale, sala che si chiude, pentacolo che brucia del Lord of Ruin: da fare (decisioni del committente).
 - **Ritorno ai villaggi precedenti** (portale/menu): fuori da questa fase (D-CAP-2).
 - **Tile di accesso al dungeon generico**: la cripta (`T_TSTAIRS`) è già un tile da mettere dove si vuole; più ingressi con
   destinazioni diverse richiederebbero una tabella (utilità da confermare).
@@ -521,7 +515,7 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 
 ## 12 — Idee per dopo
 
-- **J3** — S. Sprite del boss finale solo nel tema 8; da verificare con D8.
+- **J3** — S. Sprite del boss finale solo nel tema 8; da verificare con il codice del piano (ex D8, [dungeon](docs/wiki/dungeon.md#codice-del-piano-1911)).
 - **J2** — S-M. Anello della velocità (ex 2.7): riuso di `fz_move`; dopo E1.
 - **J1** — M. Prefetch nuovo (salvataggio del piano in sottofondo, record N±1, brano successivo): 300–500 B + ~1 KB di buffer.
 

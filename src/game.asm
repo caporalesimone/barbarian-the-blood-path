@@ -261,6 +261,7 @@ LDFLAGS = $8e
         .weak
 ARENA = 0
         .endweak
+OVP_RES = ARENA || (TESTUI == 36)   ; (19/11) codice del piano 20 in GAME (theme.asm, src/game/final.asm)
 AR_BASE  = $c900                ; tabella di salto del modulo arena (src/test/arena.asm), RAM libera dopo MAP
 AR_MAIN  = AR_BASE              ; avvio (da game_start)
 AR_INPUT = AR_BASE+3            ; ogni fotogramma (da read_input): bot -> joy, fine combattimento
@@ -1977,6 +1978,9 @@ mod_rel
 mod_chap
         .include "backmenu.asm"          ; (16/11) trampoline e pagina di attesa per "back to main menu" (LOBBY)
         .include "chapter.asm"           ; (12/11) sequenza dei capitoli: TODO M1
+.if OVP_RES
+        .include "final.asm"             ; (19/11) codice del piano 20 residente solo nelle build ARENA e TESTUI 36 (theme.asm)
+.endif
 .if CHEATS
 ; (17/11) menu dei trucchi per i test: solo con CHEATS = 1 (debug e test, non release). Il menu e' il file CHEATS
 ; (src/cheats.asm), letto a CHT_AT (lo schermo B) quando si apre ed eseguito; qui resta solo il caricamento.

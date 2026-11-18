@@ -64,6 +64,7 @@ flowchart LR
 | `GAME` | `src/game.asm` + `src/game/` | `$0400`–`$9FFF` (residente) | il gioco | sotto |
 | `LOBBY` | `src/lobby.asm` | `$C000`–`$CBFF` | menu iniziale: elenco eroi, scheda, nuovo eroe; non resta in partita | [Interfaccia](interfaccia.md) |
 | `MENU` (un file, 18/11) | `src/menu.asm` + `src/menu/` | zone `$C900`, `$F4E0`, `$A700`, `$A300` (sprite degli NPC, 17/11), `$8C00` (NPC e "!", 18/11) | menu del villaggio: locanda e negozi, un file per zona; caricati all'ingresso nel villaggio, poi residenti | [Tecnica](tecnica.md#moduli-su-disco) |
+| codice del piano (19/11, nessun file proprio) | `src/game/ovl_final.asm` (+ `final.asm`), `src/game/ovl_boss1..3.asm` (+ `ovl_boss.inc`) | `$C900`–`$CFFF` (copiato dalla coda di `GFX8`, `GFX2`, `GFX4`, `GFX6`) | sala del trono (evocazioni, leva) e meccaniche dei boss dei capitoli; solo nel suo piano | [Dungeon](dungeon.md#codice-del-piano-1911) |
 | `JUKEBOX` | `src/jukebox.asm` | `$0801` | prova di brani ed effetti (i brani sono nel programma: non legge i file `SNDn`) | [Musica](musica.md) |
 | dati | `tools/gen_*.py` | — | grafica, mappe, brani, storia, salvataggi | [Build](build.md), [FORMATO_DATI](FORMATO_DATI.md) |
 
@@ -200,6 +201,7 @@ flowchart TB
 | `MAP` `$C000`–`$C8FF` | `gfx_install` (villaggio: RLE dalla cache) / `gen_dungeon` (dal seed) / `fin_load` | cambio di luogo | nel menu iniziale la copre il LOBBY |
 | LOBBY `$C000`–`$CBFF` | `START` la prima volta, poi `load_menu` | inizio della partita | copre anche `$C900`–`$CBFF`: per questo `ovl_cur` = 0 |
 | MENU zona 1/2/3 | `ovl_town` a **ogni** ingresso nel villaggio (`enter_gfx` azzera `ovl_cur`) | uscita dal villaggio | dentro una visita al villaggio restano |
+| codice del piano `$C900`–`$CFFF` (19/11) | `ovp_copy` (`gfx_tail`) dalla coda del tema del piano (oggi `GFX8`, sala del trono) | lettura del tema successivo | nel dungeon la zona 1 del MENU è libera: [dungeon](dungeon.md#codice-del-piano-1911) |
 | STASH `$D000`–`$D07F` | `st_out` (portale, morte) | rientro nel piano (`st_in`) o cambio | boss, 5 mostri caldi e 10 bauli lasciati del piano lasciato (19/11) |
 | generatore `$D080`– | avvio (`gen_install`) | sempre | eseguito con `$01 = $34` |
 | file del villaggio `$E000` | `load_gfx 0` | `gfx_install` lo usa subito; poi il file MENU ci si appoggia (18/11) | (11/11) nessuna cache: si rilegge a ogni ingresso; dal 18/11 non si rilegge dopo un salvataggio |

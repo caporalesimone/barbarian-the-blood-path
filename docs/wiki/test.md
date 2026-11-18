@@ -162,7 +162,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |
 | `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
 
-### regression (217)
+### regression (221)
 
 | ID | Test |
 |---|---|
@@ -236,6 +236,10 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SKILL-10` | Frenzy (O): level 15 needed; 5 s; two attacks per Fire; run +100% = 4 px per frame; normal run after |
 | `SKILL-11` | Rage (U): level 9 needed; 6 s; damage taken halved (min 1), full damage without Rage |
 | `DEATH-10` | death on level 20 (throne room): village, half gold, deepest level 20 kept |
+| `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900; a wave of the final boss from that code; level 19 no level code; village: MENU again at $C900 (19/11) |
+| `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 a stop and 2 Skeletons; regeneration while they live |
+| `OVP-12` | level 10, The Miller of Blackwater (GFX4): charge, blow, uncovered (hits x2); 2 Drowned under half life, once |
+| `OVP-13` | level 15, Varok the Oathbreaker (GFX6): warning and charge along the row; the shield halves the hits, not when stunned |
 | `THRONE-10` | throne room: north wall closed, boss killed -> wall open, epic chest without key, lever -> portal |
 | `EMU-10` | vc64web: real boot from the disk (LOAD, POKE 1020,1, RUN): START with Krill, GAME and LOBBY loaded, menu shown |
 | `EMU-11` | vc64web: new barbarian from the menu (joystick + keyboard), saved to disk by the Krill plugin, village reached |

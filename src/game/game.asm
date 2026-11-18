@@ -1930,140 +1930,7 @@ _next   ldx rt_i
 
 ; ---- boss finale: evocazioni quando la vita scende sotto 3/4, 1/2, 1/4 (2 mostri, max 4 evocati vivi)
 EPIC_ITEMS = 3
-; a ogni giro nella sala del trono: quando la vita del boss finale scende sotto la soglia dell'ondata (fb_th) evoca
-; un'ondata di mostri, se i vivi sono pochi (final_summons in data/rules.yaml)
-final_tick:
-        lda cur_level
-        cmp #MAXLEVEL
-        beq _go
-_q      rts
-_go     ldx lb_boss
-        beq _q
-        dex
-        lda malive,x
-        beq _q
-        lda fb_wave
-        cmp #3
-        bcs _q
-        jsr fb_th               ; vita <= soglia dell'ondata corrente?
-        bcc _q
-        inc fb_wave
-        ldy #0                  ; mostri vivi oltre al boss
-        ldx #0
-_c      cpx lb_cnt
-        bcs _cd
-        lda malive,x
-        beq +
-        iny
-+       inx
-        bne _c
-_cd     cpy #SUM_MAXALIVE+1     ; (boss compreso)
-        bcs _r
-        lda #SUM_WAVE
-        sta gf_n
-        lda #5
-        jsr rndrange
-        sta gf_t                ; prima punta della stella
-_s      ldy lb_cnt
-        cpy #32
-        bcs _r
-        ldx #SUM_FLOOR          ; tipi comuni del piano SUM_FLOOR (statistiche del piano del boss)
-        lda maxtype_tab,x
-        jsr rndrange
-        clc
-        adc #1
-        sta mtype,y
-        lda gf_t
-        asl
-        tax
-        lda fin_tip,x
-        sta mix,y
-        lda fin_tip+1,x
-        sta miy,y
-        lda #1
-        sta malive,y
-        lda #0
-        sta mfar,y
-        inc lb_cnt
-        tya
-        tax
-        jsr init_rt_from
-        ldx lb_cnt
-        dex
-        lda #1
-        sta mwake,x
-        lda gf_t                ; punta successiva (due oltre: mai vicine)
-        clc
-        adc #2
-        cmp #5
-        bcc +
-        sbc #5
-+       sta gf_t
-        dec gf_n
-        bne _s
-_r      rts
-
-; X = boss: C=1 se la vita e' sotto la soglia dell'ondata fb_wave (max x (3 - fb_wave) / 4). Preserva X.
-fb_th:
-        lda mhm,x               ; tmp0/tmp1 = max / 4
-        sta tmp0
-        lda mhmh,x
-        lsr
-        ror tmp0
-        lsr
-        ror tmp0
-        sta tmp1
-        lda #0
-        sta tmp2
-        sta tmp3
-        lda #3
-        sec
-        sbc fb_wave
-        tay
-_t      dey
-        bmi _e
-        clc
-        lda tmp2
-        adc tmp0
-        sta tmp2
-        lda tmp3
-        adc tmp1
-        sta tmp3
-        jmp _t
-_e      lda tmp2                ; C = (soglia >= vita) e vita != soglia
-        cmp mhp,x
-        lda tmp3
-        sbc mhph,x
-        bcc _no
-        lda tmp2
-        cmp mhp,x
-        bne _y
-        lda tmp3
-        cmp mhph,x
-        beq _no
-_y      sec
-        rts
-_no     clc
-        rts
-
-; all'ingresso nell'ultimo piano: le ondate gia' superate (vita del boss sotto la soglia) non si ripetono
-final_init:
-        lda #0
-        sta fb_wave
-        lda cur_level
-        cmp #MAXLEVEL
-        bne _r
-        ldx lb_boss
-        beq _r
-        dex
-_l      lda fb_wave
-        cmp #3
-        bcs _r
-        jsr fb_th
-        bcc _r
-        inc fb_wave
-        bne _l
-_r      rts
+; (19/11) final_tick, fb_th, final_init: src/game/final.asm (codice del piano 20, nella coda di GFX8 e copiato a OVP_AT)
 
 ; X = indice mostro. Preserva X.
 kill_monster:
@@ -3488,7 +3355,7 @@ _f2     lda flash_t
         bne _g
         lda #0
         sta BORDER
-_g      jsr final_tick
+_g      jsr ovp_tick               ; (19/11) codice del piano: evocazioni del boss finale, meccaniche dei boss (theme.asm)
         lda sk_t                ; scadenza del nome dell'abilita'
         beq _sk
         dec sk_t
@@ -3712,7 +3579,7 @@ _n1     cmp #T_DHOME
         lda cur_level
         cmp #MAXLEVEL
         bne +
-        jmp ui_lever            ; sala del trono: la leva
+        jmp ovp_fire            ; sala del trono: la leva (19/11: codice del piano 20, final.asm)
 +       jsr ovl_town            ; locanda: modulo MENU (gia' in memoria dall'ingresso nel villaggio)
         bcs _r
         jmp MENU_INN
@@ -4039,11 +3906,15 @@ _nob    lda NM_AT-1,y           ; (15/11) colore del tipo nel set del capitolo (
         cmp lb_boss
         bne _nf
         cpy #T_FINAL
-        beq _nf
+        beq _ti
         lda frame
         and #8
         beq _nf
         lda #1
+        sta sh_col,x
+        bne _nf
+_ti     lda ovp_tint            ; (19/11) boss del capitolo: colore deciso dal codice del piano (carica, stordito...)
+        beq _nf
         sta sh_col,x
 _nf
         lda frame

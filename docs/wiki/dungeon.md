@@ -201,6 +201,30 @@ resta nella sala del trono a stella):
 - **Non verificato in gioco a mano** (19/11): la leggibilità degli arredi sullo schermo vero e il passo nelle passerelle lunghe
   della palude; l'arrivo nel piano 10 è sempre dal cancello a sud, mentre l'uscita del piano 9 è su un lato a caso.
 
+## Codice del piano (19/11)
+
+Il codice che serve a **un solo tipo di piano** non sta in GAME: viaggia nella **coda del file del tema** di quel piano
+(`tools/build/bundle.py`, segno `| $40`, [FORMATO_DATI](FORMATO_DATI.md) "Coda dei file") e `gfx_tail` (`ovp_copy`, `src/game/music.asm`)
+lo copia a `OVP_AT` = `$C900`–`$CFFF` a ogni lettura del tema. `$C900` è la zona 1 del MENU, **libera in tutti i piani del dungeon**:
+ogni chiamata nel MENU passa da `cur_level` = 0 e il MENU si rilegge a ogni ingresso nel villaggio (`enter_gfx`); `ovp_copy` mette
+comunque `ovl_cur` = 0. Nessuna lettura di disco in più (il tema si legge comunque), nessun file nuovo.
+
+- **Aggancio in GAME** (`src/game/theme.asm`): `ovp_ok` (1 = il tema del piano attuale aveva il codice; `gfx_tail` lo azzera a ogni
+  lettura, villaggi compresi) e tre ingressi che saltano alla tabella all'inizio del codice: `ovp_init` (load_location, dopo i mostri e
+  i bauli), `ovp_tick` (ogni giro del ciclo principale), `ovp_fire` (Fire su `T_DHOME`, la leva). Senza codice del piano: `rts`.
+- **Oggi**: la **sala del trono** (`src/game/final.asm` → `src/game/ovl_final.asm` → `out/work/ovl_final.bin`, 613 B, coda di `GFX8`):
+  evocazioni del boss finale (`final_tick`, `fb_th`, `final_init`) e la leva (`ui_lever`). Margine di GAME 969 → 1445 B
+  (1425 B con gli agganci delle meccaniche dei boss; le meccaniche stesse non costano nulla a GAME: 586, 612, 744 B a `$C900`).
+  Restano in GAME `at_lever`, `fin_doors`, `fin_chests` (li usano anche il generatore e l'etichetta in alto).
+- **Build ARENA e TESTUI 36** (`OVP_RES`): il codice del piano 20 resta in GAME (l'arena carica il tema senza `gfx_tail`; lo
+  screenshot della leva parte senza piano 20).
+- **Boss dei capitoli 1–3** (19/11): le loro meccaniche (`src/game/ovl_boss1..3.asm`, parti comuni `ovl_boss.inc`) nelle code
+  di `GFX2`, `GFX4`, `GFX6`, prima della mappa del boss ([bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)).
+  Ingressi in più: `ovp_dmg` (colpo del PG a un mostro, `hit_one`: il danno si può cambiare) e `ovp_tint` (colore del boss del
+  capitolo in `build_sprites`, 0 = il suo; azzerato da `gfx_tail`).
+- Test: `OVP-10` (copia a `$C900`, ondata del boss finale dal codice copiato, `ovp_ok` = 0 al piano 19, MENU di nuovo a `$C900` nel
+  villaggio), `OVP-11..13` (abate, mugnaio, Varok), `THRONE-10` (la leva).
+
 ## Piano 20: la sala del trono (`gen_final`)
 
 Mappa fissa **pregenerata** (dal 07/11): `tools/build/gen_final.py` (nella build) scrive il file `FMAP` del disco

@@ -2730,56 +2730,7 @@ ui_died:
         jmp ui_wait_fire
 
 
-; ------------------------------------------------------------------ la leva della sala del trono
-ui_lever:
-        lda #2
-        sta ui_n
-        jsr nav_init
-_dr     jsr ui_begin
-        #at 12,3
-        #msg "congratulations,"
-        #at 14,4
-        jsr ui_cname
-        #at 5,7
-        #msg "slaying the demon lord is only"
-        #at 13,8
-        #msg "the beginning."
-        #at 6,10
-        #msg "this lever opens the gate to"
-        #at 11,11
-        #msg "the endless abyss."
-        #at 13,14
-        #msg "are you sure?"
-        #at 14,17
-        #msg "give up"
-        #at 14,19
-        #msg "pull the lever"
-_mk     #at 12,17
-        ldx #0
-        jsr ui_mark
-        #at 12,19
-        ldx #1
-        jsr ui_mark
-        #at 1,24
-        #msg "fire:select"
-_in     jsr ui_nav
-        cmp #NAV_MOVE
-        beq _mk
-        cmp #NAV_FIRE
-        bne _in
-        lda ui_cur
-        beq _x                  ; give up
-        lda #1                  ; pull the lever: al posto della leva il portale nero
-        sta c_lever
-        lda #FIN_AX
-        sta tx
-        lda #FIN_AY
-        sta ty
-        lda #T_BPORTAL
-        jsr set_tile
-        lda #SFX_PORTAL
-        jsr sfx_play
-_x      jmp ui_exit
+; (19/11) la leva della sala del trono (ui_lever): src/game/final.asm (codice del piano 20)
 
 ; ------------------------------------------------------------------ conferma scale
 ui_n2:                          ; A -> 1..2 cifre senza riempimento

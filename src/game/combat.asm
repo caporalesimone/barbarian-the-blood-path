@@ -730,6 +730,7 @@ _hit    lda s_dn                ; arma rotta: il colpo arriva ma non fa nulla (n
         ldx #0
         jsr wear
         ldx ho_i
+        jsr ovp_dmg             ; (19/11) codice del piano: scudo di Varok, mugnaio scoperto (theme.asm)
         lda mhp,x
         sec
         sbc cb_dl

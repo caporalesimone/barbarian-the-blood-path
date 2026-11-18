@@ -376,9 +376,18 @@ _steady jmp sp_play
 ; boss finale), cosi' music_town / music_dungeon non cercano il file SNDn. $80 = mappa del piano del boss (GFX(2c), c = 1-3)
 ; a GFX_DUN_END: bmap_load la scompatta da li' invece di leggere BOSSCHc. Altro valore: niente coda (il gioco legge i file
 ; come prima). Il buffer si tocca solo se ha un altro brano (change_level ha gia' sfumato la musica).
+; (19/11) Bit 6 del segno ($40): a GFX_DUN_END c'e' il CODICE DEL PIANO (2 byte di lunghezza L, poi L byte assemblati per
+; OVP_AT = $C900: src/game/ovl_*.asm, tools/build/bundle.py); si copia a OVP_AT (libera nel dungeon: la zona 1 del MENU si
+; rilegge a ogni ingresso nel villaggio) e ovp_ok = 1; il resto della coda (mappa del boss) comincia dopo (bm_at).
 gfx_tail:
         lda #0
         sta bm_tail
+        sta ovp_ok
+        sta ovp_tint
+        lda #<GFX_DUN_END
+        sta bm_at
+        lda #>GFX_DUN_END
+        sta bm_at+1
         bcs _r                  ; lettura fallita: niente coda
         lda krill_endaddrlo
         sec
@@ -392,10 +401,16 @@ gfx_tail:
         sta $01
         ldy #0
         lda (ptr0),y
+        sta tmp2
+        and #$40
+        beq _nov
+        jsr ovp_copy            ; codice del piano -> OVP_AT
+_nov    lda tmp2
+        and #$bf
         bpl _snd
         cmp #$80
         bne _x
-        sta bm_tail             ; mappa del boss a GFX_DUN_END
+        sta bm_tail             ; mappa del boss a bm_at
         beq _x
 _snd    cmp #SND_N
         bcs _x
@@ -439,4 +454,46 @@ _x      lda #$36
         cli
         clc
 _r      rts
-bm_tail .byte 0                 ; $80: la mappa del piano del boss e' a GFX_DUN_END (coda del tema)
+bm_tail .byte 0                 ; $80: la mappa del piano del boss e' nella coda del tema, a bm_at
+bm_at   .word 0                 ; (19/11) dove comincia la mappa: GFX_DUN_END, o dopo il codice del piano
+
+; (19/11) $01 = $35: codice del piano (lunghezza a GFX_DUN_END, poi i byte) -> OVP_AT; bm_at dopo il codice; ovp_ok = 1.
+; La zona 1 del MENU e' coperta: ovl_cur = 0 (nel villaggio il MENU si rilegge comunque a ogni ingresso)
+ovp_copy:
+        lda GFX_DUN_END
+        sta tmp0
+        lda GFX_DUN_END+1
+        sta tmp1
+        lda #<(GFX_DUN_END+2)
+        sta ptr1
+        lda #>(GFX_DUN_END+2)
+        sta ptr1+1
+        lda #<OVP_AT
+        sta ptr2
+        lda #>OVP_AT
+        sta ptr2+1
+        ldy #0
+_c      lda (ptr1),y
+        sta (ptr2),y
+        inc ptr1
+        bne +
+        inc ptr1+1
++       inc ptr2
+        bne +
+        inc ptr2+1
++       lda tmp0
+        bne +
+        dec tmp1
++       dec tmp0
+        lda tmp0
+        ora tmp1
+        bne _c
+        lda ptr1                ; la mappa del boss (se c'e') segue il codice
+        sta bm_at
+        lda ptr1+1
+        sta bm_at+1
+        lda #1
+        sta ovp_ok
+        lda #0
+        sta ovl_cur
+        rts

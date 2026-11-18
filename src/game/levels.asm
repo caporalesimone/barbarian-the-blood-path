@@ -213,7 +213,7 @@ _ok     jsr init_monsters_rt        ; scale: mostri rimasti ricalcolati (vita pi
 +       lda #0
         sta pend_lvl
 _mem
-        jsr final_init
+        jsr ovp_init            ; (19/11) codice del piano: ondate gia' superate del boss finale (final.asm), boss dei capitoli
         jsr apply_chests
         jsr place_portal_tile
 .if TESTBUILD == 0

@@ -29,7 +29,8 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | Segno | Cosa c'è prima | Cosa fa il gioco |
 |---|---|---|
 | `0` … `SND_N − 1` | il brano *n* (i byte del file `SNDn` senza indirizzo, `snd_llo/hi` byte) subito prima del segno | lo copia nel buffer del luogo (`SND_LBUF`) e scrive `snd_cur`, se il buffer non lo ha già: `music_town` / `music_dungeon` non cercano più `SNDn` |
-| `$80` | la mappa del piano del boss (byte di `BOSSCHc` senza indirizzo) da `GFX_DUN_END` (`$F4E0`, subito dopo il tema) | `bm_tail` = `$80`: `bmap_load` la scompatta da lì |
+| `$80` | la mappa del piano del boss (byte di `BOSSCHc` senza indirizzo) da `GFX_DUN_END` (`$F4E0`, subito dopo il tema) | `bm_tail` = `$80`: `bmap_load` la scompatta da lì (`bm_at`) |
+| bit 6 (`$40`, 19/11) insieme a uno dei due sopra | a `GFX_DUN_END` il **codice del piano**: 2 byte di lunghezza *L*, poi *L* byte assemblati per `OVP_AT` = `$C900` (`src/game/ovl_*.asm`); il resto della coda (mappa del boss) comincia dopo | `ovp_copy` lo copia a `$C900`, `ovp_ok` = 1, `bm_at` = dopo il codice ([dungeon](dungeon.md#codice-del-piano-1911)). Oggi `GFX8` (sala del trono) e `GFX2`, `GFX4`, `GFX6` (meccaniche dei boss dei capitoli, prima della mappa del boss) |
 
 (19/11) Nel file del tema dei piani di un capitolo a **cittadella** (`map.style: citadel`, oggi `GFX7`) fra il tema e il brano
 c'è il **codice della cittadella** (`out/work/gen_cit.bin`, ~258 B, da `src/game/gen_citadel.asm` assemblato per

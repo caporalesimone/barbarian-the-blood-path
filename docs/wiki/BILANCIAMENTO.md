@@ -356,6 +356,10 @@ la frequenza dei tesori buoni (10% dei tiri a ≥ 0,8 T), l'oro dei bauli epici 
 - Bottino: `sim_chest.py` riproduce `gen_item` (categoria, L = round(T·u²), oggetto migliore ≤ L, magia da
   `bon_tab[L]`), ma non la sequenza esatta del generatore del gioco (i bauli del piano sono deterministici dal
   seed nel gioco).
+- (19/11) **Meccaniche dei boss dei capitoli 1–3** (evocazioni e rigenerazione dell'abate, giro della macina, carica e scudo
+  di Varok: [bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)): il simulatore (`tools/simulators/chapters.py`,
+  boss di capitolo) **non le riproduce**, la percentuale di vittoria contro i boss dei capitoli è quella del boss senza meccaniche.
+  Da aggiungere quando i numeri saranno decisi in gioco.
 
 ## 12. Prezzi proporzionali al guadagno — PROPOSTA (06/11 sera, non applicata)
 

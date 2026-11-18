@@ -10,7 +10,10 @@ si trova contando dal segno all'indietro, quindi i byte in mezzo non lo spostano
 Code: TWNc = brano del villaggio (snd_town_c), GFX(2c-1) = brano dei piani del capitolo (snd_lvl_c), GFX(2c) per c = 1-3 = mappa
 del boss, GFX(2*CHAPTERS) = brano del boss finale (SND_BOSS). Scrive out/work/bundle/twnC.prg e gfxN.prg (quelli che vanno sul
 disco, tools/build/mkdisk.sh); i file di partenza in out/work e out/work/gfx restano come sono (atlante, strumenti).
-I file SNDn restano sul disco (JUKEBOX, LOBBY e riserva); i BOSSCHc no (tools/build/mkdisk.sh)."""
+I file SNDn restano sul disco (JUKEBOX, LOBBY e riserva); i BOSSCHc no (tools/build/mkdisk.sh).
+(19/11) CODICE DEL PIANO (src/game/theme.asm, src/game/ovl_*.asm, assemblato a OVP_AT = $C900): nei file di OVL subito dopo il
+tema, a GFX_DUN_END, 2 byte di lunghezza e il codice; il resto della coda (mappa del boss, brano) dopo; segno | $40. gfx_tail
+lo copia a OVP_AT. Mai nei file con il codice della cittadella (assemblato proprio a GFX_DUN_END)."""
 import os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,6 +46,11 @@ def main():
     cit = {2 * ch["id"] - 1 for ch in chapters_db.load()["chapters"] if (ch.get("map") or {}).get("style") == "citadel"}
     citcode = rd("gen_cit.bin")
     gfx_end = int(re.search(r"^GFX_DUN_END\s*=\s*\$([0-9a-f]+)", open(os.path.join(W, "game.lbl")).read(), re.M | re.I).group(1), 16)
+    ovl = {2 * len(lvl): "ovl_final.bin"}             # (19/11) GFX8: sala del trono
+    for c in range(1, len(lvl)):                      # GFX2, GFX4, GFX6: meccaniche dei boss dei capitoli 1-3 (ovl_bossC)
+        if os.path.exists(os.path.join(W, "ovl_boss%d.bin" % c)):
+            ovl[2 * c] = "ovl_boss%d.bin" % c
+    assert not set(ovl) & cit, "codice del piano e cittadella nello stesso file"
     rep = []
     for c, k in enumerate(town, 1):
         f = "twn%d.prg" % c
@@ -54,6 +62,11 @@ def main():
         d = rd("gfx/gfx%d.prg" % n)
         a = d[0] | d[1] << 8
         assert a + len(d) - 2 == gfx_end, "gfx%d: non finisce a GFX_DUN_END" % n
+        flag = 0
+        if n in ovl:
+            oc = rd(ovl[n])
+            d += bytes([len(oc) & 255, len(oc) >> 8]) + oc; flag = 0x40
+            rep.append("gfx%d+%s(%d B)" % (n, ovl[n][:-4], len(oc)))
         if n % 2:
             if n in cit:
                 d += citcode; rep.append("gfx%d+citadel(%d B)" % (n, len(citcode)))
@@ -64,6 +77,8 @@ def main():
             d += m + b"\x80"; rep.append("gfx%d+bossch%d" % (n, n // 2))
         else:
             d += song(boss); rep.append("gfx%d+snd%d" % (n, boss))
+        if flag:
+            d = d[:-1] + bytes([d[-1] | flag])
         assert a + len(d) - 2 <= 0xFD00, "gfx%d: la coda arriva oltre $FD00 (FMAP)" % n
         open(os.path.join(OUT, "gfx%d.prg" % n), "wb").write(d)
     print("bundle: " + " ".join(rep))
