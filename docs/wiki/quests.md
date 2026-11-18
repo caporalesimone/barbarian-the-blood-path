@@ -824,6 +824,44 @@ flowchart LR
     G1 & G2 & G3 --> O["MAP, vis, rcx/rcy, scale"] --> P["post_walls, spawn, bauli<br/>(uguali per tutti)"]
 ```
 
+### 9bis. Revisione del 18/11 (design, non implementato): uno stile per capitolo
+
+Stato del codice il 18/11: **un solo generatore** (stanze rettangolari, corridoi a L larghi 2) per tutti i capitoli; per
+capitolo cambiano solo grafica, palette e mostri, per piano i parametri dello "stile" dal seed. Il disegno qui sopra (tre
+file `GENn` per tratto) è superato dai capitoli: decisioni del committente del 18/11:
+
+| Capitolo | Piani | Stile | Grafica |
+|---|---|---|---|
+| 1 Aldric's Crossing | 1–5 | **dungeon di oggi** (stanze e corridoi) | mattoni (temi 1, 2) |
+| 2 Blackwater Mill | 6–10 | **palude** (proposta sotto, da confermare) | acqua nera, fango, assi |
+| 3 The Last Camp | 11–15 | **grotte**: il piano 11 in una grotta di roccia **innevata**, 12–14 grotte di roccia | roccia con la neve sulle creste (11), roccia nuda (12–14) |
+| 4 The Throne of Ruin | 16–20 | **cittadella** (BSP simmetrico, come sopra) | pietra squadrata, colonne |
+
+**Grotte** (capitolo 3; prototipo Python del 18/11): in ogni cella una macchia irregolare (passeggiata casuale dal centro,
+40–90 passi), gallerie tortuose larghe 2 fra le celle dell'albero (passi verso la meta con deviazioni), un passo di automa
+cellulare per arrotondare le pareti. Il centro di ogni cella resta pavimento (contratto `rcx`/`rcy`). Stima **non misurata**:
+~250–300 B di codice, ~0,35 s in più di generazione per il passo dell'automa. La neve del piano 11 senza un file in più: gli
+stessi tile della roccia con la "cresta" disegnata in un colore condiviso del multicolor, bianco al piano 11 e grigio/marrone
+ai piani 12–14 (un byte di palette per piano; da verificare con la grafica del tema).
+
+**Palude** (capitolo 2, proposta): si entra dalla botola della cantina allagata del mulino.
+- Piano 6, **cantine allagate**: le stanze di oggi (mattoni) con pozze d'acqua dentro e corridoi in parte allagati: il
+  passaggio fra il villaggio e la palude.
+- Piani 7–9, **isole e passerelle**: isole di fango e erba (le macchie delle grotte, lisciate) nell'acqua nera, unite da
+  passerelle di assi dritte larghe 1–2 al posto dei corridoi; canne e radici sul bordo delle isole, qualche pozza bassa.
+  Al posto dei muri c'è l'**acqua**: non si cammina, ma si vede oltre (niente facciate dei muri: riva al posto della facciata).
+- Piano 10, **il mulino allagato** (boss, mappa fissa come oggi).
+- Va con i mostri del capitolo già pensati (bestiario): il Drowned lascia una pozza che rallenta, il Will-o'-Wisp
+  galleggia sull'acqua, il Bog Crawler arriva in branco lungo le passerelle (strette: si combatte uno alla volta).
+- Costi e dubbi: tile nuovi per riva, assi, canne (il tema ha 27 posti); `post_walls` deve distinguere acqua e roccia;
+  le pozze che rallentano sarebbero una meccanica nuova (facoltativa).
+
+**Contratto e memoria**: tutti gli stili dentro `gen_io` (scelta per capitolo), non in file separati: niente letture in
+più e niente file nuovi (la directory è già lunga, [FastLoader.md](FastLoader.md) 7.2). Spazio: dopo gli slot `LVRAM`
+restano ~1,3 KB sotto l'I/O. Da aggiornare con ogni stile: la copia Python di `post_walls` nell'atlante, i riferimenti di
+`test_gen` per capitolo e `c_gver` (cambiano i piani dei capitoli toccati negli eroi salvati); i bauli provano oggi una sola
+casella nel rettangolo della stanza: con stanze non rettangolari servono più tentativi (i mostri ne fanno già 12).
+
 ## 10. Avvio: menu leggero, lore, manuale, menu principale
 
 > **Implementato in parte il 07/11 (v1.27)**, descrizione di com'è nel codice in [Avvio e storia](intro.md): il FRONT

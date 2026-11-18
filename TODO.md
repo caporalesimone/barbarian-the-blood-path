@@ -436,6 +436,15 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   destinazioni diverse richiederebbero una tabella (utilità da confermare).
 - (12/11, committente) **Confermato**: un tema grafico dei livelli per capitolo (`GFX1..8`) va bene così.
 
+### M11 (18/11) Stile delle mappe per capitolo — L
+- **Obiettivo**: piani diversi per capitolo (oggi un solo generatore). Decisioni del committente (18/11): capitolo 1 dungeon
+  di oggi, capitolo 3 grotte (piano 11 roccia innevata, 12-14 roccia), capitolo 4 cittadella; capitolo 2 palude: proposta
+  in [quests](docs/wiki/quests.md) 9bis (cantine allagate al 6, isole e passerelle 7-9), **da confermare**.
+- **Cosa serve**: stili dentro `gen_io` (~1,3 KB liberi sotto l'I/O dopo `LVRAM`); tile di roccia, neve, acqua, riva, assi
+  nei temi 3-6 (27 posti per tema); `post_walls` e la sua copia nell'atlante; bauli con più tentativi; `test_gen` per
+  capitolo e `c_gver`. Ordine proposto: grotte (capitolo 3), poi palude, poi cittadella.
+- **Attenzione**: cambia la generazione dei capitoli 2-4 degli eroi salvati; stime di codice e tempi non misurate.
+
 ### H5 (ex 5.4) Due build: inglese e italiano (dopo H4) — L
 - Intro e testi delle quest nelle due lingue con gli stessi limiti di buffer e disco; con E7 (manuale) ed E9 (stringhe).
 
