@@ -49,6 +49,55 @@ Un commit per blocco, smoke + sanity a ogni blocco, regression a più riprese. C
 | R7-R8 | elenco dei test e docstring aggiornati; mappa della memoria: il programma GAME comprende `menu`, `qst*`, `cheats` (11 file del disco erano senza programma) | — |
 | R9 | vendita nei negozi: l'oro con `add_gold16` di GAME invece di una somma a mano | zona 1 del MENU: 91 → 101 B liberi |
 
+### Tempi del 18/11 (fine della revisione, VICE; da ricalibrare con il committente)
+
+Due giri: la regression completa (le misure di un test si fermano alla prima fuori limite) e un giro dei soli PERF-DISK
+con i limiti moltiplicati per 10 (tutte le misure). "max" = soglia del test (90% del limite, il limite per menu, town,
+stairs, save_dng, save_char).
+
+| Misura | Giro 1 (s) | Giro 2 (s) | Limite (s) | Soglia (s) | Esito |
+|---|---|---|---|---|---|
+| boot | 11.56 | 11.56 | 16.0 | 14.40 | ok |
+| menu | 2.91 | 2.91 | 3.1 | 3.10 | ok (3,10-3,12 in altri giri) |
+| town | 0.74 | 0.74 | 1.5 | 1.50 | ok |
+| theme | 0.56 | 0.56 | 1.5 | 1.35 | ok |
+| song | 0.20 | 0.20 | 2.0 | 1.80 | ok |
+| hdr | 0.61 | 0.61 | 1.0 | 0.90 | ok |
+| load_char | 2.44 | 2.44 | 3.4 | 3.06 | ok |
+| stairs | 2.51 | 2.31 | 4.0 | 4.00 | ok |
+| town_in | 2.70 | 2.74 | 5.6 | 5.04 | ok (5,76 in un giro precedente) |
+| save_dng | 7.16 | 7.16 | 9.4 | 9.40 | ok |
+| save_char | 8.29 | 8.29 | 9.6 | 9.60 | ok |
+| hdr_write | 5.80 | 5.80 | 6.8 | 6.12 | ok (6,20 in giri precedenti) |
+| theme1 | 0.56 | 0.56 | 1.1 | 0.99 | ok |
+| twn1 | 2.44 | 2.44 | 2.0 | 1.80 | **fuori** (1,76 prima del 17/11) |
+| stairs1 | — | 1.36 | 3.2 | 2.88 | ok |
+| boss1 | — | 1.50 | 3.0 | 2.70 | ok |
+| in1 | — | 5.76 | 5.7 | 5.13 | **fuori** |
+| theme2 | 0.72 | 0.92 | 1.1 | 0.99 | ok |
+| twn2 | 0.68 | 2.08 | 2.2 | 1.98 | variabile: **fuori** nel giro 2 |
+| stairs2 | 1.52 | 1.73 | 3.2 | 2.88 | ok |
+| boss2 | 1.17 | 1.13 | 3.0 | 2.70 | ok |
+| in2 | 3.45 | 3.43 | 5.3 | 4.77 | ok |
+| theme3 | 0.65 | 0.65 | 1.4 | 1.26 | ok |
+| twn3 | 2.75 | 1.15 | 2.1 | 1.89 | variabile: **fuori** nel giro 1 |
+| stairs3 | — | 1.55 | 3.2 | 2.88 | ok |
+| boss3 | — | 1.50 | 3.0 | 2.70 | ok |
+| in3 | — | 3.88 | 5.0 | 4.50 | ok |
+| theme4 | 0.52 | 0.52 | 0.8 | 0.72 | ok |
+| twn4 | 0.88 | 0.88 | 2.8 | 2.52 | ok |
+| stairs4 | 1.88 | 1.68 | 3.2 | 2.88 | ok |
+| in4 | 4.69 | 3.47 | 5.0 | 4.50 | variabile: **fuori** nel giro 1 |
+| twn5 | 0.80 | 0.80 | 1.6 | 1.44 | ok |
+| in5 | 4.19 | 4.04 | 4.6 | 4.14 | variabile: **fuori** nel giro 1 |
+
+Gli altri tempi (tutti nei limiti): villaggio 0,0% di fotogrammi persi (PERF-10), inventario 0,10 s e minimappa 0,26 s
+(PERF-11), negozi e locanda 0,12-0,14 s (PERF-19), cambi di piano 4,63 / 2,46 / 1,60 s (PERF-12), piano 1 0,9% e con i mostri
+1,6% (PERF-13/14), Frenzy 24,1% (PERF-15, limite 40%), combattimento 5,9% (PERF-16), save game 7,24 s (PERF-17), piani
+5/10/15/20 2,5 / 0,4 / 0,4 / 0,0% (PERF-18), boss finale 0,4% (PERF-20), piani 1-19 al massimo 12,6% (piano 14, PERF-21),
+generatore 0,33-0,84 s (PERF-23). Durata dei test: smoke 11,1 s (tetto 20), smoke + sanity 16,5 s (tetto 35); in regression
+i piu' lunghi sono ASM-10 40,5 s, LORE-10 26,0 s, KRILL-24 25,1 s, HELP-10 16,6 s, PERF-23 16,0 s, PERF-21 14,7 s.
+
 ## Da valutare: codice e generalizzazioni
 
 In ordine di resa stimata. "Rischio" = cosa può rompersi; tutte le aree hanno test (indicati).
