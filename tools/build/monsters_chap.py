@@ -7,7 +7,7 @@ Un capitolo = 4 famiglie base + 4 varianti forti, come il capitolo 1 (stessi mty
 Come entrano nel gioco (15/11): tools/build/monsters.py chapter_set -> tools/build/gen_gfx.py (file GFXn del capitolo:
 sprite + blocco info con colori e nomi) e docs/wiki/bestiario.md. Statistiche e IA restano quelle del tipo 1..8."""
 
-# ============================================================== CAPITOLO 2: la palude di Blackwater
+# ============================================================== CAPITOLO 2: la palude di BadWater
 # Drowned: un annegato gonfio, le alghe che pendono, le braccia in avanti
 DROWNED = [
     "............",

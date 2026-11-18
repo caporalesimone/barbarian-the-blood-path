@@ -29,14 +29,14 @@ chapters:
     final: {name: "The Crypt of the Abbot", file: data/maps/bosschap1.txt, generator: tools/build/gen_bossmap.py, atlas_set: BOSS1, boss: hollow_abbot, palette: 8}
 
   - id: 2
-    name: "Blackwater Mill"
+    name: "BadWater Mill"
     implemented: false
-    village: {name: "Blackwater Mill", gfx: TWN2, map: data/town_map2.txt, pf_n: null, atlas_set: VILL2}
+    village: {name: "BadWater Mill", gfx: TWN2, map: data/town_map2.txt, pf_n: null, atlas_set: VILL2}
     levels: 5
     themes: [3, 4]
     map: {style: swamp, palettes: [12, 12, 12, 12]}     # (18/11, owner) one swamp: levels 6-9 side by side, gates on the borders
     atlas_sets: [SWAMP, DUNGD]
-    final: {name: "The Flooded Mill", file: data/maps/bosschap2.txt, generator: tools/build/gen_bossmap.py, atlas_set: BOSS2, boss: miller_of_blackwater, palette: 12}
+    final: {name: "The Flooded Mill", file: data/maps/bosschap2.txt, generator: tools/build/gen_bossmap.py, atlas_set: BOSS2, boss: miller_of_badwater, palette: 12}
 
   - id: 3
     name: "The Last Camp"

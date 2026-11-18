@@ -99,7 +99,7 @@ def ovp_abbot(ctx):
     g.poke(L["godmode"], 0)
 
 
-@test("OVP-12", "level 10, The Miller of Blackwater (GFX4): awake, every 4 s a 1 s charge, the blow, 1.5 s uncovered (hits x2); "
+@test("OVP-12", "level 10, The Miller of BadWater (GFX4): awake, every 4 s a 1 s charge, the blow, 1.5 s uncovered (hits x2); "
       "under half life 2 Drowned once")
 def ovp_miller(ctx):
     g = ctx["g"]; L = g.L

@@ -297,7 +297,7 @@ ABBOT_L1 = [
     ".cccccccccc.",
     ".ccc.cc.ccc.",
 ]
-# The Miller of Blackwater (capitolo 2): un mugnaio enorme, cappello, grembiule, la mazza con la macina.
+# The Miller of BadWater (capitolo 2): un mugnaio enorme, cappello, grembiule, la mazza con la macina.
 MILLER = [
     "...bbbbbb...",
     "..bbbbbbbb..",
@@ -383,7 +383,7 @@ STRONG = [
 FINAL = ("lord of ruin", frames(LORD, LORD_L1), 2)
 # boss dei capitoli 1-3 (15/11): nel posto del boss finale del file del piano del boss del loro capitolo
 CBOSS = {1: ("the hollow abbot", frames(ABBOT, ABBOT_L1), 14),
-         2: ("the miller of blackwater", frames(MILLER, MILLER_L1), 8),
+         2: ("the miller of badwater", frames(MILLER, MILLER_L1), 8),
          3: ("varok the oathbreaker", frames(VAROK, VAROK_L1), 7)}
 
 # ------------------------------------------------------------------ set di mostri per capitolo (07/11 sera, 15/11)

@@ -1,5 +1,5 @@
 ; ===================================================================
-;  ovl_boss2.asm - (19/11) CODICE DEL PIANO 10: The Miller of Blackwater (capitolo 2, docs/wiki/bestiario.md "Meccaniche dei
+;  ovl_boss2.asm - (19/11) CODICE DEL PIANO 10: The Miller of BadWater (capitolo 2, docs/wiki/bestiario.md "Meccaniche dei
 ;  boss di capitolo"). A OVP_AT, nella coda di GFX4 (tools/build/bundle.py), copiato da gfx_tail entrando nel piano.
 ;  IL GIRO DELLA MACINA: sveglio, ogni 4 s carica il colpo (1 s fermo, lampeggia bianco), poi colpisce tutto attorno a se'
 ;  entro 2 caselle (due attacchi, lampo bianco del bordo) e resta SCOPERTO 1,5 s (fermo, lampeggia azzurro: subisce danno

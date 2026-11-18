@@ -18,7 +18,7 @@ restano quelli del villaggio 1).
   pal   (sfondo, multicolor 1, multicolor 2, accento 0..7) = valori 0, 1, 2, 3 dei pixel
   heal  nome del luogo di cura nella barra in alto (minuscolo, al massimo TK_NAME - 1 caratteri)
   map   testo 48x48 in data/"""
-import vil2_blackwater, vil3_lastcamp, vil4_ruinsgate, vil5_abyss
+import vil2_badwater, vil3_lastcamp, vil4_ruinsgate, vil5_abyss
 
 TK_NAME = 25
 MUST_SOLID = ("WATERL", "WATERR", "GRAVE", "GRAVE2", "CRYPTL", "CRYPTR", "CRYPTA", "CRYPTB", "CRYPTC")
@@ -31,7 +31,7 @@ def _v(mod, n):
 
 VILLAGES = {
     1: dict(name="Aldric's Crossing", pal=(5, 9, 15, 3), heal="fountain of saint aldric", map="data/town_map.txt", tiles={}),
-    2: _v(vil2_blackwater, 2),
+    2: _v(vil2_badwater, 2),
     3: _v(vil3_lastcamp, 3),
     4: _v(vil4_ruinsgate, 4),
     5: _v(vil5_abyss, 5),

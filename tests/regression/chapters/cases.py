@@ -40,6 +40,6 @@ def chap_sim(ctx):
     g = C.groups(C.chapter(2), c2[0]["depth"])
     check(all(m in [b["id"] for b in C.bestiary(C.chapter(2))] for v in g.values() for m in v), "chapter 2 fights monsters of other chapters: %s" % g)
     bosses = {r["chapter"]: r["boss"] for r in rows if "boss" in r}
-    check(bosses.get(1) == "hollow_abbot" and bosses.get(2) == "miller_of_blackwater", "chapter bosses %s" % bosses)
+    check(bosses.get(1) == "hollow_abbot" and bosses.get(2) == "miller_of_badwater", "chapter bosses %s" % bosses)
     ab = [r for r in rows if r["chapter"] == 5]
     check(ab and ab[-1]["depth"] == 255 and all(0 <= r["chest_level"] <= 255 for r in ab), "Abyss rows %s" % ab[-1:])
