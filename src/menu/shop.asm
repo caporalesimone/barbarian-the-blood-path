@@ -203,6 +203,8 @@ sh_buys:
         sec
 +       rts
 
+; negozio: merce, zaino ed equipaggiamento con il '>' sulla voce del cursore (sul posto della cintura nella scelta
+; del posto della pozione, sh_slot), poi il riquadro dell'oggetto scelto
 sh_draw:
         lda ui_lc               ; nella scelta del posto della pozione il '>' e' sul posto (sh_slot)
         ldx sh_slot
@@ -342,6 +344,7 @@ _bk     #msg "  run/stop:"
 _b      #msg "back"
         rts
 
+; Fire nel negozio sulla voce ui_lc: merce = compra, zaino = vende, equipaggiamento (posti 8-11) = ripara
 sh_fire:
         lda ui_lc
         cmp #8
@@ -510,6 +513,7 @@ _sb     lda c_sgold
         sta c_gold+1
         rts
 
+; messaggio "not enough" + moneta in riga 23
 no_gold:
         jsr msg23
         #msg "not enough "

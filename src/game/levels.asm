@@ -46,6 +46,8 @@ _red    lda #4
 _t      lda #0
         rts
 
+; eroe nuovo nel blocco CHRBLK: azzerato, caratteristiche e vita iniziali, pugnale, oro e pozioni di partenza
+; (il generatore casuale resta quello di prima: rnd salvato e rimesso)
 new_character:
         lda #<CHRBLK
         sta ptr0
@@ -147,6 +149,8 @@ _dun    jsr lvl_theme           ; file del tema del piano
         lda #1
         jmp gfx_install
 
+; ingresso in un luogo (cur_level): grafica e modulo MENU (enter_gfx), etichetta in alto da ricalcolare, palette,
+; tile solidi; nel villaggio NPC da piazzare e brano del villaggio, nel dungeon mostri senza percorsi in corso
 load_location:
         jsr chap_enter          ; (12/11) lv_cboss: piano del boss di un capitolo?
         jsr enter_gfx
@@ -324,6 +328,7 @@ _l      txa
         jsr wait_vblank
         dex
         bpl _l
+; SID zitto subito: gate delle tre voci a 0 e volume 0 (il filtro resta quello del brano)
 snd_mute:
         lda #0
         sta $d404
@@ -358,6 +363,7 @@ stash_level:
 ; STASH -> LVLBLK, STASHM -> MRT
 stash_get:
         lda #1
+; tmp5 = 0 salva, 1 ripristina: copia LVLBLK e MRT del piano nella STASH (RAM sotto l'I/O) o viceversa
 stash_both:
         sta tmp5
         ldx #1
@@ -441,6 +447,7 @@ put_hero:
         sta py+1
         rts
 
+; avvio di una partita (dopo LOBBY o START): variabili $9000-$9BFF azzerate, eroe, luogo, HUD, IRQ, poi il ciclo
 game_start:
         lda #$90                ; azzera tutte le variabili $9000-$9BFF (incluso LVLBLK)
         sta ptr0+1
@@ -877,6 +884,7 @@ _u10    ldx cur_level         ; nomi dei boss per piano ($0350/$0360,x)
         jsr ui_exit
         jmp main_loop
 
+; (varianti di test TESTUI) eroe di prova: equipaggiamento, zaino, cintura, oro e baule pieni (tests/CLAUDE.md)
 test_ui_fill:
         ldx #4
 _e      lda tu_eq-1,x
@@ -947,6 +955,7 @@ tu_name .byte 2,12,1,3,11,32,20,8,15,18,14,5     ; "black thorne": 12 caratteri 
         .cerror * - tu_name != NAME_LEN, "tu_name: NAME_LEN caratteri"
         .fill 11, 32
 
+; (varianti di test TESTLVL/TESTSP) mostri di prova attorno al PG
 test_spawn:
 .if TESTLVL == 0
         rts

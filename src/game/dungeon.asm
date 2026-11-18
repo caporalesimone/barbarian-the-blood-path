@@ -19,6 +19,7 @@ tile_to_pix:                ; A = coordinata tile -> tmp0/tmp1 = A*16+8
         sta tmp1
         rts
 
+; MAP piena di muro (T_WALL, 9 pagine), prima della generazione
 clear_map:
         lda #<MAP
         sta ptr0
@@ -110,6 +111,7 @@ T_FCIRC = T_GRASSB              ; cerchio
 ; apre le stanze laterali (muri -> pavimento; ridisegna se lo schermo e' attivo)
 T_BPORTAL = T_FREE8              ; (15/11, C2) sala del trono: portale NERO della leva (posto libero 8 del file del tema 8, calpestabile)
 T_LEVER = T_DHOME                ; nella sala del trono lo slot della porta di casa e' la leva (file del tema 8)
+; sala del trono con il boss gia' sconfitto: le porte delle stanze laterali (fin_door) diventano pavimento
 fin_doors:
         ldx #0
 _d      lda fin_door,x

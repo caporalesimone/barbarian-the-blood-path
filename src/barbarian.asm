@@ -96,6 +96,7 @@ _lc     lda ($fb),y
         jsr tm_start            ; Demon's Eye (clock a 50 Hz PAL, vettore IRQ proprio; torna con l'I flag acceso)
         cli
 
+; un fotogramma del menu del loader: tasti 1-3 (scelta diretta), W/S o joystick (voce), Fire/RETURN/spazio (scegli)
 loop:
         jsr wait_frame
         jsr GETIN               ; tastiera (IRQ del KERNAL)
@@ -130,6 +131,7 @@ _joy    lda $dc00               ; joystick 2: su (bit 0), giu' (bit 1), fire (bi
         lsr
         bcs down
         jmp choose
+; voce sopra / sotto (senza giro)
 up      lda sel
         beq loop
         dec sel
@@ -348,6 +350,7 @@ _e      iny
         tya
         jsr adv
         jmp print_all
+; A = byte da saltare: ($FB) += A
 adv     clc
         adc $fb
         sta $fb

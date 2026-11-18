@@ -96,6 +96,7 @@ _cp     lda (zp0),y
 
 body
         .logical $a000
+; avvio di START/LORE dopo la copia a $A000: stack, IRQ dei CIA spenti, VIC, musica del titolo, poi caricamenti
 main:
         sei
         ldx #$ff
@@ -241,6 +242,7 @@ _rs     jmp lore_exit
 .endif                          ; !TXT
 
 .if !LORE                       ; (15/11, TODO D12) LORE non parte mai direttamente col gioco: ha lore_start / lore_exit
+; fine di START: IRQ e sprite spenti, SID muto, poi salto al gioco gia' decompresso (GAME_ENTRY)
 start_game
         sei                     ; partenza del gioco
         lda #0
@@ -295,6 +297,7 @@ _cb     lda CHRTMP,x
         jmp $0400               ; GAME_ENTRY (src/main.asm)
 .endif                          ; !LORE
 
+; NMI (RESTORE) ignorata durante l'avvio
 nmi     rti
 
 .if !TXT                        ; (15/11, D12) solo PRESS SPACE (START con la schermata di attesa non lo usa)
@@ -308,6 +311,7 @@ _x      sta $d000,x
         cpx #10
         bne _x
         rts
+; A = Y degli sprite 0-4 (PRESS SPACE)
 set_y   ldx #8
 _y      sta $d001,x
         dex
@@ -396,6 +400,7 @@ nm_barb_n = * - nm_barb
 .endif
 
 .if !LORE
+; START: Krill carica GAME (ZX0, poi decompresso sul posto), LOBBY e l'elenco degli eroi (hl); okf = esito
 load_all:
         lda #0
         sta CHRTMP              ; elenco eroi non ancora letto
@@ -748,6 +753,7 @@ SP_RESUME = 0                   ; (15/11, TODO D12) START e LORE non riprendono 
         .include "sid_player.inc"
         .include "sid_title.inc"        ; out/work/sid_title.inc (tools/build/gen_music.py)
         .cerror SP_VARS + SP_VSIZE > $c000, "variabili del player oltre $BFFF"
+; musica del titolo: SID muto, poi il brano Demon's Eye dall'inizio (player unico)
 lm_init:
         ldx #$18
         lda #0

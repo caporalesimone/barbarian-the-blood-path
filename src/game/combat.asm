@@ -336,6 +336,7 @@ hp_cap:
         sbc hpmax+1
         bcs hp_full
         rts
+; vita piena (c_hp = hpmax)
 hp_full:
         lda hpmax
         sta c_hp
@@ -913,6 +914,7 @@ _m      sta mw_l
         inc mu1
 +       rts
 
+; X = posto della cintura: beve la pozione (drink: niente se in ricarica o con la vita piena), poi il posto e' vuoto
 use_potion:
         ldy c_beltt,x
         beq _no

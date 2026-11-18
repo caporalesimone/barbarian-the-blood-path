@@ -20,6 +20,7 @@ zx_bit  .macro                  ; un bit -> C (20 cicli, 35 con la ricarica)
 +
         .endm
 
+; decompressione ZX0 da zx_src a zx_dst (vedi l'intestazione del file)
 zx0_unpack:
         lda #1
         sta zx_off
@@ -137,6 +138,7 @@ zx_el0: lda #1
         sta zx_len
         lda #0
         sta zx_len+1
+; numero di Elias gamma in zx_len (bit di dati alternati a bit di fine; zx_elv = ingresso dal secondo bit)
 zx_ell  #zx_bit
         bcs zx_elr
 zx_elv  #zx_bit                 ; (ingresso dal secondo bit: lunghezza dopo un nuovo offset)

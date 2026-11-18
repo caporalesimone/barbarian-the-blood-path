@@ -239,6 +239,7 @@ start:
         jsr init_vic
         jmp game_start
 
+; NMI (RESTORE) con il KERNAL escluso: nessun effetto (i vettori $FFFA/$FFFB puntano qui nei menu e nei caricamenti)
 nmi_stub:
         rti
 
@@ -401,6 +402,8 @@ _adv    inc ptr0                ; un byte di sorgente (preserva A)
 ;@free npc_vend..NM_AT-1 "Coda degli slot sprite 58-63 (fino al blocco info dei mostri), dopo le variabili di quest.asm" use=data
 ;@map NM_AT..$9000 "Colori e nomi dei mostri del capitolo: blocco info del file GFXn copiato da gfx_install"
         .cerror SND_FBUF + SND_FMAX > NM_AT || NM_AT + GFX_INFO > $9000, "NM_AT sovrapposto al motivetto di combattimento o oltre $8FFF"
+; A = 0 villaggio, altro = dungeon: dalla cache sotto il KERNAL installa tile (4 strisce del charset), intestazione,
+; tile solidi, colori e mappa del villaggio; nel dungeon sprite dei mostri, sprite forti e boss ($8C00), colori e nomi (NM_AT)
 gfx_install:
         sta tmp5
         sei
@@ -523,6 +526,7 @@ _by     lda (ptr0),y
         bne _pg
         rts
 
+; registri del VIC all'avvio del gioco: bordo e sfondo neri, sprite spenti, multicolor degli sprite (9, 15)
 init_vic:
         lda #0
         sta BORDER
@@ -679,6 +683,7 @@ tile_patch:
         tax
         rts
 
+; (tx, ty) = casella appena cambiata da set_tile: la ridisegna sullo schermo visibile se e' nella finestra (tp_ox/tp_oy)
 tp_draw:
         lda tx
         asl
@@ -838,6 +843,8 @@ _nz     lda st_nz
 _no     sec
         rts
 
+; A = passo verticale con segno (px): ent_y si sposta se le caselle d'arrivo (colonne del corpo) non sono solide;
+; C=1 se bloccato (ent_y invariato)
 try_step_y:
         sta st_d
         clc
@@ -1025,6 +1032,7 @@ _run    dec scr_cnt
 _end    lda #0
         sta joy
         sta scr_cnt
+; fine delle varianti di test del ciclo (TESTUI, script dei tasti): niente da fare
 test_done:
         rts
 .endif
@@ -1135,6 +1143,7 @@ tm_sample:
         sty TM_T0+1
 _x      rts
 
+; (TMDBG) fine del campionamento dei tempi di un giro: cicli del CIA2 timer A salvati in TM_PL/TM_PH
 tm_end:
         lda frame
         cmp #40
@@ -1389,6 +1398,8 @@ tmark   .macro v
 .endif
         .endm
 
+; ridisegno della finestra di gioco: completo se force_redraw, altrimenti solo se la camera ha cambiato casella
+; (scorrimento a righe/colonne nel buffer nascosto, poi pend_flip)
 maybe_redraw:
         lda force_redraw
         beq _nf
@@ -1611,6 +1622,7 @@ _bufset sec
         sta pf_valid
         rts
 
+; A = righe da preparare in questo giro: continua il ridisegno a passi (pf_step di pf_tot) senza superare il fotogramma
 rc_run:
         sta rc_cnt
 _lp     lda pf_step
@@ -1673,6 +1685,7 @@ _save   lda ptr0
         jmp _lp
 _done   rts
 
+; ptr1 += 40 (riga di caratteri successiva)
 next_row_single:
         lda ptr1
         clc
@@ -1711,6 +1724,7 @@ render_pair:
         sta rp_s3+2
         ldy rs_n1
         ldx rs_n2
+; cuore della copia di una riga di tile: i 4 caratteri di ogni tile (+$40, +$80, +$C0) con indirizzi automodificati
 rp_lp   lda (ptr0),y
 rp_s0   sta $c000,x
         ora #$40
@@ -1824,6 +1838,8 @@ _xok    lda ent_y
 _hide   clc
         rts
 
+; inizio del fotogramma (dopo wait_vblank): scambio dei due schermi se pend_flip, $D018, sfondo, ombre degli sprite
+; nei registri del VIC e puntatori negli schermi
 apply_frame:
         lda pend_flip
         beq +
@@ -1935,6 +1951,8 @@ mod_chap
 ; (src/cheats.asm), letto a CHT_AT (lo schermo B) quando si apre ed eseguito; qui resta solo il caricamento.
 CHT_AT  = SCR_B
 mod_cheats
+; (CHEATS = 1) voce cheats del menu di gioco: il modulo CHEATS dal disco a CHT_AT (schermo B) ed eseguito; se non si
+; legge, di nuovo il menu di gioco
 cheat_menu:
         ldy #nm_cht-nm_tab
         lda #6

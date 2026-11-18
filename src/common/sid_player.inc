@@ -220,6 +220,7 @@ _n      lda #1
 .endif
 
 .if SP_RESUME
+; (SP_RESUME) posizione di ogni voce del brano salvata in sp_sv, per riprenderlo da li' (sp_resume)
 sp_save:
         ldx #3*10-1
 _c      lda sp_pos,x
@@ -229,6 +230,7 @@ _c      lda sp_pos,x
         rts
 .endif
 
+; brano fermo: sp_on = 0, gate delle voci non riservate agli effetti a 0
 sp_stop:
         lda #0
         sta sp_on
@@ -318,6 +320,7 @@ _a      lda $ffff
         bne +
         inc sp_ph,x
 +       rts
+; X = voce: il prossimo byte della sua traccia (sp_ol/sp_oh, letto con un indirizzo automodificato), poi avanza
 sp_rdo: lda sp_ol,x
         sta _a+1
         lda sp_oh,x

@@ -11,6 +11,8 @@ GEN_WALLS = <GEN_AT + 3
 gen_jtab:
         jmp gen_dmain
         jmp post_walls
+; GEN_MAIN: genera il piano cur_level in MAP (sala del trono e piani dei boss dei capitoli: mappe fisse); dopo
+; stanze, corridoi e scale, i muri (post_walls)
 gen_dmain:
         lda cur_level
         cmp #MAXLEVEL
@@ -59,6 +61,7 @@ gen_dmain:
 minsz_tab .byte 4, 5, 6, 4
 
 
+; sala del trono (piano MAXLEVEL): mappa fissa (FMAP), scale e posizioni del boss; stanze laterali aperte se c_won
 gen_final:
         jsr seed_level          ; il generatore casuale resta deterministico (contenuto dei bauli)
         lda c_won               ; boss gia' sconfitto: stanze laterali aperte
@@ -128,6 +131,7 @@ _v      sta vis,x
         sta rcy+1
         jmp post_walls
 
+; una stanza per cella della griglia 4x4: larghezza e altezza a caso (lv_minw..11), posizione a caso nella cella
 gen_rooms:
         ldx #0
 _cell   stx cur
@@ -237,6 +241,8 @@ try_cand:                   ; A = cella vicina; aggiunge se non visitata
         inc ncand
 _no     rts
 
+; collegamenti fra le celle: albero casuale dalla cella di partenza (vis), poi qualche anello in piu'; carve_corr
+; per ogni coppia
 gen_links:
         ldx #15
         lda #0
@@ -376,6 +382,7 @@ _nex2   ldx cur
         bne _ex
         rts
 
+; corridoio largo 2 fra le stanze cc_a e cc_b: un tratto orizzontale e uno verticale (carve_h, carve_v)
 carve_corr:
         ldx cc_a
         ldy cc_b
@@ -413,6 +420,7 @@ _v      lda rcx,y
         jsr carve_v
         rts
 
+; tratto orizzontale largo 2 (righe ch_y, ch_y+1) da ch_x0 a ch_x1
 carve_h:
         lda ch_x0
         sta tx
@@ -430,6 +438,7 @@ _l      lda ch_y
         bne _l
 _d      rts
 
+; tratto verticale largo 2 (colonne ch_y, ch_y+1) da ch_x0 a ch_x1 (stesse variabili di carve_h, assi scambiati)
 carve_v:
         lda ch_x0
         sta ty
@@ -447,6 +456,8 @@ _l      lda ch_y
         bne _l
 _d      rts
 
+; scale: quelle in su in una stanza abitabile a caso (st_s), quelle in giu' in un'altra stanza abitabile (st_e) il cui numero
+; di cella dista da 5 a 11 (modulo 16) da st_s; dopo 60 tentativi va bene qualunque stanza diversa da st_s
 gen_stairs:
 _p1     lda #16
         jsr rndrange
@@ -499,6 +510,8 @@ _got    stx st_e
         jsr set_tile
 _nodn   rts
 
+; GEN_WALLS: rifinitura dei muri (tile di muro secondo i vicini) su tutta la mappa; la stessa logica e' in
+; tools/atlas/gen_atlas.py (src/CLAUDE.md)
 post_walls:
         ldx #0
 _ry     lda maprow_lo,x

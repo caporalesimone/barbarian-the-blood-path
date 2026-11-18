@@ -124,6 +124,7 @@ MR_HERO = 3
 MR_NEW  = 10
 MR_QUIT = 11
 MR_X    = 9
+; menu dei barbari: gli slot (nome o vuoto) e le voci in fondo, con il '>' sulla voce del cursore
 menu_draw:
         ldx #0
 _l      stx tmp3
@@ -169,6 +170,8 @@ md_arrow:
         lda #$20
         jmp ui_putc
 
+; menu iniziale (LOBBY): elenco degli eroi letto dal disco, scelta (scheda del barbaro, nuovo barbaro, uscita);
+; la musica parte quando la pagina e' completa
 ui_menu:
         lda #0                  ; (16/11, committente) la musica parte solo a caricamento finito e pagina pronta: vedi _dr
         sta mp_done
@@ -317,6 +320,7 @@ _d      lda tmp0
 ; start = in partita (A=1), su delete = domanda y/n e cancellazione (A=0); RUN/STOP o DEL = di nuovo l'elenco (A=0)
 DT_ROW  = 19                    ; start game / delete <nome> / back, in colonna (08/11: riquadro 18-22, riga 23 per la domanda)
 dt_tt   .text "saved game", 0
+; scheda del barbaro salvato (slot scelto): riquadri barbaro, progressi, caratteristiche, quest; start game, delete, back
 detail_screen:
         lda #0
         sta dt_sel
@@ -578,6 +582,7 @@ dt_arw  lda #1                  ; bianco, oppure giallo con la freccia
         jmp ui_putc
 dt_sel  .byte 0
 
+; A = carattere in coda al campo in scrittura (nome o seed, namebuf), se c'e' posto
 name_add:
         ldx nlen2
         cpx #NAME_LEN
@@ -621,6 +626,7 @@ _l      stx tmp3
         rts
 ne_box  .byte 4,2,32,4, 4,6,32,4, 4,10,32,3
 
+; nuovo barbaro: i campi nome, seed e le voci; cornici ridisegnate solo quando cambia il campo attivo
 name_draw:
         lda nfield              ; (16/11) cornici e titoli solo se cambia il campo attivo (primo disegno: ne_last = $ff): ridisegnarli
         cmp ne_last             ; a ogni tasto li cancellava per un fotogramma intero (ne_boxes dura ~16000 cicli: i titoli tornano
@@ -684,6 +690,7 @@ _n      ldx tmp3
         bne _l
         rts
 
+; il campo del seed (6 caratteri) con il cursore se lo si sta scrivendo
 seed_draw:
         lda #$ff
         ldx nedit
@@ -760,6 +767,7 @@ NE_ERR  = 14                    ; riga del messaggio "name already in use."
 ne_last .byte $ff               ; campo di cui ne_boxes ha disegnato la cornice verde ($ff = nessuno: ridisegno)
 nedit   .byte 0                 ; 1 = si scrive il campo nfield, 0 = scelta con joystick/W-S (dopo il seed)
 tt_new  .text "new barbarian", 0
+; schermata del nuovo barbaro: nome (RETURN), seed (RETURN, F1 = a caso), poi scelta fra le voci con W/S e Fire
 name_entry:
         lda #$ff
         sta ne_last

@@ -44,6 +44,7 @@ irq_init:
         sta $0315
         rts
 
+; accende l'IRQ a raster del gioco (fasi irq_ph: barra in alto, HUD, fine HUD), con il vettore su irq_h
 irq_on:
         sei
         lda #0
@@ -57,6 +58,7 @@ irq_on:
         cli
         rts
 
+; spegne l'IRQ a raster (schermate della UI, disco): niente split, niente musica dal raster
 irq_off:
         sei
         lda #0
@@ -65,6 +67,8 @@ irq_off:
         sta $d019
         rts
 
+; IRQ a raster, una fase per riga (irq_ph): 0 = inizio dell'HUD (schermo SCR_H, 24 righe), 1 = HUD multicolore,
+; 2 = riga 250, campo di gioco ripristinato (ap_*), 3 = barra in alto e sprite di gioco (bar.asm); esce dal KERNAL ($EA81)
 irq_h:
         lda #$ff
         sta $d019

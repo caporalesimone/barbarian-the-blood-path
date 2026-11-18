@@ -172,6 +172,8 @@ _s      ldx tmp7
         bne _c
 _d      rts
 
+; nbuf <- testo della barra in alto: l'etichetta del luogo (bar_lab, loc_name) o il nome del mostro bersaglio (bar_m:
+; tipo, boss del capitolo dal file del tema, boss del piano con il nome generato da bh1..bh3)
 bar_name:
         ldx #23
         lda #$20
@@ -582,6 +584,8 @@ _y      sec
 _n      clc
         rts
 
+; A = etichetta del luogo sotto il PG (0 = nessuna): uscita del villaggio, scale, portali, porte, bauli, fontana,
+; leva, chi da' una quest (npc_here); tx, ty conservati
 loc_id:
         lda tx
         pha
@@ -808,6 +812,7 @@ _d      adc #10
 _u      pla
         clc
         adc #$30
+; A = carattere in coda a nbuf (24 al massimo)
 nb_chr  ldx bn_i
         cpx #24
         bcs nb_r

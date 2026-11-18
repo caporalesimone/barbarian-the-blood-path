@@ -27,6 +27,8 @@ SP_RESUME = 0                   ; niente sp_resume / sp_release
         .include "sid_title.inc"        ; out/work/sid_title.inc (tools/build/gen_music.py): il brano
         .cerror SP_VARS + SP_VSIZE > $d000, "variabili del player oltre $CFFF"
 
+; Demon's Eye con il player unico: SID azzerato, brano dall'inizio, vettore IRQ su tm_irq e CIA1 timer A con il
+; latch di un fotogramma PAL (TM_LATCH), ricaricato subito
 tm_start:
         sei
         ldx #$18                ; SID azzerato
@@ -56,6 +58,7 @@ _c      sta $d400,x
         sta $dc0e
         rts
 
+; musica ferma: player fermo, SID tutto a 0, IRQ e CIA come prima (prima del LOAD del KERNAL)
 tm_stop:
         sei
         jsr sp_stop
@@ -78,6 +81,7 @@ _c      sta $d400,x
         lda $dc0d               ; eventuale IRQ del timer in sospeso: confermato
         rts
 
+; IRQ del CIA1 a 50 Hz: un passo del player, poi l'IRQ del KERNAL (tastiera)
 tm_irq:
         jsr sp_play
         jmp KERNAL_IRQ

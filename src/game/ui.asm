@@ -202,6 +202,7 @@ _n      lda cp
         sta cidx
         rts
 
+; A = carattere: alla posizione corrente (cp/ccp + cidx) con il colore ui_col (il cursore '>' nel suo colore), avanza
 ui_putc:
         ora inv
         ldy cidx
@@ -357,6 +358,8 @@ p6l     .byte 100000 & 255, 10000 & 255, 1000 & 255, 100, 10, 1
 p6m     .byte (100000 >> 8) & 255, 10000 >> 8, 1000 >> 8, 0, 0, 0
 p6h     .byte 100000 >> 16, 0, 0, 0, 0, 0
 
+; tmp0/tmp1 = numero a 16 bit: ui_num5 in 5 cifre, ui_num3 in 3 (destra, spazi davanti; ui_nl = 1: a sinistra);
+; colore UC_VALUE, o ui_fc se impostato
 ui_num5:
         ldx #0
         beq ui_numx
@@ -542,6 +545,7 @@ _d      pla
         sta ui_col
         rts
 
+; un fotogramma di una schermata della UI: attesa del vblank, contatore, effetti sonori, lettura di joystick e tastiera
 ui_input:
         jsr wait_vblank
         inc frame
@@ -583,6 +587,8 @@ _c      sta (cp),y
         bne _c
         rts
 
+; uscita da una schermata della UI: palette, camera e finestra di gioco ridisegnate, HUD e sprite, i tasti che hanno
+; chiuso la schermata non valgono nel gioco, IRQ riacceso
 ui_exit:
         jsr pal_for_level
         jsr set_palette
@@ -614,6 +620,7 @@ cur_up:
 _s      stx ui_cur
         rts
 
+; cursore giu' (con giro su ui_n)
 cur_dn:
         ldx ui_cur
         inx
@@ -648,6 +655,8 @@ nav_sync:
 +       sta ui_lc
         rts
 
+; un fotogramma del motore dei menu: A = NAV_BACK (RUN/STOP), NAV_MOVE (su/giu': ui_cur cambiato), NAV_FIRE (Fire su
+; una voce), NAV_TAB (Fire con la lista vuota), NAV_NONE
 ui_nav:
         jsr ui_input
 .if NOKEYS                      ; build degli screenshot: la schermata resta com'e' (in VICE, prima del ciclo di
@@ -1164,6 +1173,7 @@ _ok     jsr ib_at0              ; riga 1: caratteristica principale + secondaria
 ib_at0: ldx #21
         ldy ib_y
         jmp ui_at
+; cursore alla seconda riga del riquadro dell'oggetto (colonna 21)
 ib_at1: ldx #21
         ldy ib_y
         iny
@@ -1191,6 +1201,7 @@ _sp     lda #$20
         lda #$20
         jmp ui_putc
 
+; Fire nell'inventario sulla voce ui_cur: zaino = usa (pozione, pergamena) o indossa; equipaggiamento = toglie
 inv_act:
         ldx ui_cur
         cpx #PACK_N
@@ -1280,6 +1291,7 @@ eq_get: tya
         lda c_eqm,y
         sta it_m
         rts
+; it_* -> posto Y dell'equipaggiamento
 eq_put: lda it_i
         sta c_eq,y
         lda it_b
@@ -1289,6 +1301,7 @@ eq_put: lda it_i
         lda it_m
         sta c_eqm,y
         rts
+; posto Y (0..3) dell'equipaggiamento vuoto
 eq_zero: tya
         and #3
         tay
@@ -1308,6 +1321,7 @@ pk_put: lda it_i
         lda it_m
         sta c_packm,x
         rts
+; posto X dello zaino vuoto
 pk_zero: lda #0
         sta c_pack,x
         sta c_packb,x
@@ -1491,6 +1505,7 @@ _p2     lda S4_BUF,y
 
 ; valore di vendita: "val 1200o d135/178" (08/11: numero e poi la moneta)
 it_val  #msg "val "             ; valore di vendita: meta' del prezzo
+; valore di vendita dell'oggetto ui_sel (meta' del prezzo), allineato a sinistra
 it_half lda ui_sel
         asl
         tay
@@ -2150,6 +2165,8 @@ mm_q    .macro ptr, ev
         ror mm_bits
         .endm
 
+; minimappa (M): la mappa del luogo a celle 2x2, le caselle viste, il marcatore del PG; nel villaggio i nomi
+; dei luoghi e le icone delle porte. Si chiude con Fire, M o RUN/STOP
 ui_minimap:
         jsr irq_off             ; niente split raster HUD sopra la mappa
         jsr player_tile         ; ptx/pty aggiornati (coordinate nel testo in basso)
@@ -2382,6 +2399,7 @@ mg_c    .byte 1, 1, 1, 1, 7, 7, 7
 MI_N    = 3                     ; fabbro, alchimista, locanda (09/11: niente armaiolo)
 mi_ic   .byte CH_ANVIL, CH_FLASK, CH_INN       ; locanda: il boccale (09/11, prima la casetta CH_HOME)
 mi_c    .byte 1, 7, 13
+; minimappa del villaggio: le icone di fabbro, alchimista e locanda (sprite 0-2) sulle loro porte
 mm_icons:
         ldx #0
 _l      txa
@@ -2613,6 +2631,7 @@ keymap  .byte 0,0,0,0,0,0,0,0
         .byte 0,0,0,0,0,0,0,0
         .byte $31,0,0,$32,$20,0,17,0
 
+; A = slot dell'eroe (0..): stampa i NAME_LEN caratteri del suo nome (slot_name)
 ui_name:
         asl
         asl
@@ -2679,6 +2698,7 @@ _w      jsr ui_input
 _r      rts
 
 tt_died .text "you have died", 0
+; schermata della morte: titolo rosso con il teschio, oro perso, Fire o RUN/STOP per continuare
 ui_died:
         jsr ui_begin
         lda #3                  ; (09/11, concept del committente) titolo rosso con teschio, riquadro, tasto in riga 24
@@ -2814,6 +2834,7 @@ ui_pwait:
         #msg "please wait"
         rts
 
+; attesa "reading barbarians" (lettura dell'elenco degli eroi)
 io_screen_scan:
         jsr ui_begin
         #at 11,9
@@ -2863,6 +2884,7 @@ gm3     .text "cheats", 0
 .endif
 
 
+; menu di gioco: le voci (gm_lo/gm_hi) con il '>' sulla voce del cursore
 gm_draw:
         ldx #0
 _l      stx tmp3
@@ -2895,6 +2917,7 @@ _l      stx tmp3
         rts
 
 tt_gm   .text "game menu", 0
+; menu di gioco (RUN/STOP): resume, save game, quit game (e cheats con CHEATS = 1)
 ui_gamemenu:
 .if CHEATS
         lda #4
@@ -3110,6 +3133,7 @@ _z      cpy #8
 +       sta ui_lc
         rts
 
+; baule del piano: zaino, equipaggiamento, contenuto del baule, borsello e oggetto scelto
 ch_draw:
         jsr list8
         jsr eq_std
@@ -3117,6 +3141,7 @@ ch_draw:
         jsr purse_draw
         jmp ch_item
 
+; Y = posto nel contenuto del baule ch_cur (4 posti per baule) della voce ui_cur
 chest_idx:
         lda ch_cur
         asl

@@ -748,6 +748,7 @@ _n      iny
 ; oro automatico: A = quantita' (byte); add_gold16: A basso, X alto. Tetto GOLD_MAX addosso: l'eccedenza si perde
 add_gold:
         ldx #0
+; A/X = monete da aggiungere (16 bit; add_gold: A, X = 0): oro addosso al massimo GOLD_MAX, HUD da ridisegnare
 add_gold16:
         clc
         adc c_gold
@@ -885,6 +886,7 @@ _l      jsr gen_item
         sta ch_t,x
         rts
 
+; bauli del piano (ch_t, cx_x, cx_y) sulla mappa: il tile T_CHEST nella casella di ognuno (il tipo resta in ch_t)
 apply_chests:
         ldx #0
 _l      lda ch_t,x
@@ -1208,6 +1210,7 @@ drops_tick:
         jmp flush_one
 _r      rts
 
+; un baule in attesa (pd_f, lasciato da un mostro durante il combattimento) compare sulla mappa; pd_any = 0 se non ce ne sono piu'
 flush_one:
         ldy #PD_MAX-1
 _s      lda pd_f,y
@@ -1470,6 +1473,7 @@ _p
         clc
 _r      rts
 
+; una chiave in piu' (al massimo 10), con il suono della raccolta
 give_key:
         lda c_keys
         cmp #10                 ; massimo 10 chiavi
@@ -1677,6 +1681,8 @@ clear_lvlblk:
         jmp fill_pages
         .cerror LVLEND > LVLBLK + $300, "clear_lvlblk: LVLBLK oltre 3 pagine"
 
+; un mostro nuovo nella stanza scelta da spawn_monsters (tipo a caso fino a maxtype_tab del piano; una variante
+; forte per stanza se il piano lo permette); niente se il piano ha gia' mon_cap mostri
 place_monster:
         lda lb_cnt
         cmp mon_cap
@@ -1749,6 +1755,8 @@ _free   ldy lb_cnt
         inc lb_cnt
         rts
 
+; popola il piano: fra mon_min e mon_cap mostri nelle stanze abitabili (vis = 1, non quella di partenza);
+; il piano del boss di un capitolo ha solo il boss (place_boss)
 spawn_monsters:
         lda #0
         sta lb_cnt
@@ -1911,6 +1919,8 @@ _next   ldx rt_i
 
 ; ---- boss finale: evocazioni quando la vita scende sotto 3/4, 1/2, 1/4 (2 mostri, max 4 evocati vivi)
 EPIC_ITEMS = 3
+; a ogni giro nella sala del trono: quando la vita del boss finale scende sotto la soglia dell'ondata (fb_th) evoca
+; un'ondata di mostri, se i vivi sono pochi (final_summons in data/rules.yaml)
 final_tick:
         lda cur_level
         cmp #MAXLEVEL
@@ -2403,6 +2413,7 @@ mslide_end
 
 ; ---- i 4 mostri piu' vicini che si muovono (scelta con un frame di ritardo)
 SEL_N = 4
+; inizio della scelta dei SEL_N mostri piu' vicini di questo giro (sel_nx vuota)
 sel_begin:
         ldy #SEL_N-1
         lda #$ff
@@ -2412,6 +2423,7 @@ _c      sta sel_nx,y
         bpl _c
         rts
 
+; fine del giro: la scelta diventa quella valida per il giro dopo (sel_cu, letta da sel_has)
 sel_commit:
         ldy #SEL_N-1
 _c      lda sel_nx,y
@@ -2462,6 +2474,8 @@ _n      iny
         sta sel_nx,y
 _r      rts
 
+; X = mostro sveglio: un passo verso il PG (o lungo il percorso trovato da mon_path); occ_check evita gli altri mostri.
+; ent_x/ent_y = posizione nuova (mon_put la scrive), mo_* = quella di partenza (mon_undo)
 mon_step:
         lda mxl,x
         sta ent_x
@@ -2519,6 +2533,7 @@ _path   jsr mon_path
         and #$70
         beq mon_put             ; nessun percorso (o ricerca gia' fatta in questo giro): fermo, il chiamante aspetta
         jmp mon_follow
+; X = mostro: la posizione ent_x/ent_y diventa la sua (mxl/mxh, myl/myh)
 mon_put lda ent_x
         sta mxl,x
         lda ent_x+1
@@ -2580,6 +2595,7 @@ PZ_MAXC = 120
 PZ_STEP = 14
         .cerror BFQ+BF_QN+26 > $a600, "mon_path: tabelle oltre $a600"
 
+; X = mostro bloccato: ricerca del percorso (descrizione completa sopra); al massimo una ricerca per giro (pz_used)
 mon_path:
         lda #0
         sta pz_wt
@@ -2881,6 +2897,7 @@ mon_try_x:
         jmp mon_undo
 _r      rts
 
+; X = mostro: passo verticale verso il PG; C=1 (e posizione di prima) se c'e' un muro o un altro mostro
 mon_try_y:
         jsr step_y_toward
         bcs _r
@@ -2889,6 +2906,7 @@ mon_try_y:
         jmp mon_undo
 _r      rts
 
+; torna alla posizione di partenza del passo (mo_*); C=1 = passo non fatto
 mon_undo:
         lda mo_xl
         sta ent_x
@@ -3150,6 +3168,7 @@ _l      lda #$fe
         jmp try_step_x
 _r      rts
 
+; passo verticale di 2 px verso il PG (m_dyh = segno), poi di 1 px se il primo urta; C=1 se bloccato
 step_y_toward:
         lda m_dyh
         bmi _l
@@ -3230,6 +3249,7 @@ _lf     lda ha_x
         dec ha_x+1
 _r4     rts
 
+; area del colpo (ha_*) ed effetto (fx_*) centrati sul PG: Whirlwind, Battle Cry, Smash
 centre_on_player:
         lda px
         sta ha_x
@@ -3263,6 +3283,8 @@ _pl     ldx cur_sk
         bne _pl
         rts
 
+; X = abilita' (0..3): un'esecuzione. Ricarica (lo Slash: la cadenza s_rate), ricarica comune GCD_T, suono,
+; area del colpo e effetto secondo l'abilita', poi hit_area
 perform_skill1:
         stx cur_sk
         stx ha_kind
@@ -3333,6 +3355,7 @@ _cry    jsr centre_on_player
         sta fx_timer
         jmp hit_area
 
+; X = abilita' (0..3): diventa quella del Fire se il livello basta (sk_req); il nome compare per un po' nell'HUD
 sel_skill:
         lda c_lvl
         cmp sk_req,x
@@ -3345,6 +3368,8 @@ sel_skill:
         sta hud_dirty
 _no     rts
 
+; tasti del gioco (una volta per giro, solo i tasti appena premuti, keynew): abilita', poteri, cintura, pergamena,
+; Q, C, I, M, RUN/STOP. Le schermate si aprono con jmp: al ritorno il giro ricomincia da capo
 handle_keys:
 ; abilita': H J K L (riga 3 bit 5, riga 4 bit 2, riga 4 bit 5, riga 5 bit 2); Rage U (riga 3 bit 6), Frenzy O (riga 4 bit 6)
         lda keynew+3
@@ -3438,6 +3463,7 @@ player_tile:
         sta pty
         rts
 
+; orologio, timer dell'effetto e del lampo del bordo, boss finale, esplorazione, tile sotto il PG, bauli in attesa
 update_world:
         dec tod_cnt             ; minuti giocati: orologio TOD del CIA2 letto ogni 256 fotogrammi (5 s)
         bne _f
@@ -3488,6 +3514,7 @@ _same   jsr act_tick
 .endif
 _alive  rts                     ; (08/11: nessun menu di vittoria; tornera' con il quest system, docs/wiki/quests.md 6ter)
 
+; esplorazione per la minimappa: le caselle a 4 o meno dal PG diventano viste (bit per settore)
 mark_explored:
         lda ptx
         sec
@@ -3573,6 +3600,7 @@ _row    ldx me_y
 me_lm   .byte $ff, $fe, $fc, $f8, $f0, $e0, $c0, $80     ; colonne da x a 7 del byte
 me_rm   .byte $01, $03, $07, $0f, $1f, $3f, $7f, $ff     ; colonne da 0 a x del byte
 
+; tile sotto il PG appena raggiunto: solo la fontana fa qualcosa da sola (cura); il resto aspetta il Fire (act_tick)
 tile_trigger:
         lda ptx
         sta tx
@@ -3598,6 +3626,7 @@ _heal   jsr hp_full
         ldx #6
         jmp set_flash
 
+; scale e passaggi: cambiano luogo con change_level (A = piano, X = da dove si arriva: 0 scale giu', 1 su, 2 portale)
 go_down lda cur_level
         cmp #MAXLEVEL           ; The Endless Abyss: non ancora disponibile
         bcc +
@@ -3618,6 +3647,7 @@ _u1     lda cur_level
         sbc #1
         ldx #1
         jmp change_level
+; portale: dal piano al villaggio; dal villaggio al piano lasciato (c_retlvl)
 go_portal
         lda cur_level
         beq _ft
@@ -3747,6 +3777,7 @@ _n      inx
 _free   clc
         rts
 
+; morte del PG: suono, conteggio, schermata, meta' dell'oro addosso perso, risveglio al villaggio
 player_die:
         jsr tod_tick            ; minuti giocati aggiornati prima del salvataggio
         lda #SFX_DIE
@@ -3786,6 +3817,8 @@ tod_start:
         sta $dd08               ; decimi: riparte
         rts
 
+; minuti giocati: legge l'orologio TOD del CIA2 (ore, minuti, secondi, decimi: l'ordine che sblocca il latch), aggiunge
+; ore x 60 + minuti ai bit 9-23 di c_game e fa ripartire l'orologio da 0 minuti con secondi e decimi conservati
 tod_tick:
         lda $dd0b               ; ore: congela i registri (latch)
         and #$1f                ; senza il bit PM
@@ -3873,6 +3906,7 @@ build_sprites:
         cli
         rts
 
+; costruisce le ombre degli sprite del giro (sh_*): PG (0), effetto (2), mostri o NPC (3-7); HUD a pezzi (hud_step)
 bs_body:
         jsr hud_step
         lda frame               ; avvisi dell'HUD: una volta ogni 16 fotogrammi

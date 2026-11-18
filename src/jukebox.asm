@@ -41,6 +41,7 @@ tmp     .byte ?
         .endv
 NITEM   = JB_NSONG + SFX_N
 
+; avvio del JUKEBOX: IRQ proprio (player SID a ogni fotogramma), schermo, elenco dei brani e degli effetti
 main:
         sei
         lda #<irq
@@ -83,6 +84,7 @@ main:
         lda #$0d
         jmp kgot
 .endif
+; ciclo principale: un tasto (GETIN) o la fine del brano in modo singolo (playing = $FE)
 loop    jsr GETIN
         bne kgot
         lda playing             ; brano finito da solo (singolo)
@@ -92,6 +94,7 @@ loop    jsr GETIN
         sta playing
         jsr draw
         jmp loop
+; A = tasto: indice nella tabella keys e salto alla sua azione (su, giu', suona, pausa, ripeti, ferma)
 kgot    ldx #0
 _f      cmp keys,x
         beq _go
@@ -170,9 +173,11 @@ k_stop  sei
         sta paused
         jsr sid_clear
         cli
+; ridisegna l'elenco e torna al ciclo
 redraw  jsr draw
         jmp loop
 
+; tutti i registri del SID a 0 (silenzio)
 sid_clear:
         ldx #$18
         lda #0
@@ -183,6 +188,7 @@ _c      sta $d400,x
         sta $d418
         rts
 
+; IRQ del JUKEBOX: un passo del player (se non in pausa), poi l'IRQ del KERNAL (tastiera)
 irq     lda #$ff
         sta $d019
         lda paused

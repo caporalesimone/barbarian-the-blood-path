@@ -188,6 +188,7 @@ menu_run:
 _ld
         jsr load_menu
         jmp LOBBY_AT
+; menu iniziale: il modulo LOBBY dal disco a LOBBY_AT ($C000, sopra la mappa; copre la zona 1 del MENU: ovl_cur = 0)
 load_menu:
         lda #0
         sta ovl_cur             ; il LOBBY ($C000-$CBFF) copre la zona 1 del modulo MENU

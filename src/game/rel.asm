@@ -104,6 +104,8 @@ rel_get:
         ora #0
         rts
 
+; fine di un gruppo di operazioni sui salvataggi (rel_hold): se l'immagine del file e' stata letta (sv_in), la si
+; scrive sul disco una volta sola e il villaggio, se c'era, si rilegge (sv_end)
 rel_done:
         lda #0
         sta rel_hold
@@ -234,6 +236,7 @@ img_on:
         lda tmp6
         pha
         rts
+; fine di img_on: $01 e interrupt come prima, C della lettura conservato
 img_off:
         pla
         sta tmp6

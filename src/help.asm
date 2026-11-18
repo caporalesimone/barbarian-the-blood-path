@@ -64,8 +64,10 @@ _g      lda help_glyphs,x
         sta jprev               ; fire gia' premuto nel loader: non conta
         jsr tm_start            ; Demon's Eye (clock a 50 Hz PAL, vettore IRQ proprio)
         cli
+; disegna la pagina pg e aspetta i tasti
 show    jsr draw_page
 
+; un fotogramma: tastiera (GETIN) poi joystick (solo le nuove pressioni): pagina dopo, prima, uscita
 loop    jsr wait_frame
         jsr GETIN
         beq _joy
@@ -95,6 +97,7 @@ _joy    lda $dc00               ; joystick 2: sinistra (bit 2), destra (bit 3), 
         bne prev
         beq next
 
+; pagina dopo (dall'ultima: la prima)
 next    ldx pg
         inx
         cpx #HELP_NP
@@ -102,6 +105,7 @@ next    ldx pg
         ldx #0                  ; (16/11, committente) dall'ultima pagina si torna alla prima; si esce solo con RUN/STOP
 +       stx pg
         jmp show
+; pagina prima (dalla prima: niente)
 prev    ldx pg
         beq loop
         dex
@@ -191,6 +195,7 @@ _end    inc src                 ; salta lo 0 finale
         inc src+1
 +       rts
 
+; attende il passaggio del raster dalla riga 256 e oltre alle prime righe: uno per fotogramma
 wait_frame
 _w1     lda $d011               ; attende la riga 255 (uno per fotogramma)
         bpl _w1

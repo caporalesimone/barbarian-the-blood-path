@@ -136,6 +136,7 @@ _ns     lda lstate
         lda lfedge              ; fermo: fire (nuova pressione) per uscire
         beq lmain
 
+; fine della storia: IRQ, sprite e volume spenti, poi di nuovo il loader BARBARIAN (trampoline)
 lore_exit:
         sei
         lda #0
@@ -242,6 +243,7 @@ _bl     lda #32
         rts
 _ev     sta lnev
         jsr lp_inc
+; evento in corso del flusso della storia (lnev = eventi rimasti): forme del logo o righe di testo, poi RLE
 dec_evl lda lnev
         beq _rle
         dec lnev
@@ -383,6 +385,7 @@ ev_split:                       ; 2 mc1 mc2 -> in attesa del passo
         jsr lp_add
         jmp dec_evl
 
+; lp += 1 (lp_add: lp += A)
 lp_inc  lda #1
 lp_add  clc
         adc lp
@@ -680,6 +683,7 @@ _nb     lda #IRQ_LB
         sta lirqk
         rts
 
+; colori multicolore ($D022/$D023) della fascia lsi dello split a raster
 set_split:
         ldx lsi
         lda ls1,x

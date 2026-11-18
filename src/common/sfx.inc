@@ -23,6 +23,8 @@ sfx_sr  .byte $f2, $f4, $f6, $f4, $f8, $fa, $c9, $00
 sfx_dur .byte 4, 5, 8, 6, 16, 30, 40, 12
 sfx_dfh .byte 0, 0, 0, 0, 0, 0, 2, 0   ; salita della frequenza per frame (byte alto)
 
+; A = effetto (SFX_*): la voce 1 del SID passa agli effetti (sp_mute) e suona l'effetto (frequenza, inviluppo,
+; forma d'onda, durata, scivolata); X, Y conservati
 sfx_play:
         stx sfx_sx
         sty sfx_sy
@@ -53,6 +55,8 @@ sfx_play:
         ldy sfx_sy
         rts
 
+; un fotogramma dell'effetto: scivolata della frequenza, gate chiuso a fine durata, voce 1 di nuovo al brano dopo
+; il rilascio (SFX_REL)
 sfx_step:
         lda sfx_own
         beq _r
