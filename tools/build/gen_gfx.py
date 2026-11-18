@@ -54,7 +54,7 @@ DUN_LEGEND = {"WALL": "#", "WALLFACE": "=", "FLOOR": ".", "FLOORB": ",", "FLOORC
               "PORTAL": "O", "TREE": "T", "TSTAIRS": "^", "CHEST": "c", "FREE25": "5", "FREE26": "6"}
 DUN_USED = {"WALL", "WALLFACE", "FLOOR", "FLOORB", "FLOORC", "STAIRSD", "STAIRSU",
             "PORTAL", "CHEST"}
-# sala del trono (file GFX2, tema 8): stessi posti, ma 7 = leva, 12 = linee della stella, 13 = cerchio del pentacolo
+# sala del trono (file GFX8, tema 8; fino al 19/11 anche GFX2/4/6, i piani del boss dei capitoli): stessi posti, ma 7 = leva, 12 = linee della stella, 13 = cerchio del pentacolo
 # (15/11, TODO C2) 8 = portale nero della leva (posto libero nei dungeon; l'unico dei posti liberi che si puo' calpestare)
 TRONO_NAMES = {"DHOME": "LEVER", "GRASSA": "STAR", "GRASSB": "CIRCLE", "FREE8": "BLACKP"}
 TRONO_USED = DUN_USED - {"STAIRSD"} | {"DHOME", "GRASSA", "GRASSB", "FREE8"}
@@ -1303,8 +1303,23 @@ def main():
                         (r["chapter"] == c or r["tier"] == "final")))
         assert [r["name"].lower() for r in exp] == M_names(m), "GFX%d: nomi %s, bestiario %s" % (n, M_names(m), [r["name"] for r in exp])
         assert [r["color"] for r in exp] == M_cols(m), "GFX%d: colori %s, bestiario %s" % (n, M_cols(m), [r["color"] for r in exp])
+    # (19/11) piani del boss dei capitoli 1-3 (richiesta del committente: tema e forma propri): i tile del tema dei piani del
+    # capitolo (mattoni, palude, grotte) piu' gli arredi del piano (tools/build/boss_gfx.py: sarcofagi, mulino, macerie...);
+    # il boss finale (ultimo capitolo, GFX8) resta nella sala del trono
+    import boss_gfx
+
+    def cboss_tiles(c):
+        bt = bytearray(cave_t if c in caves else swamp_t if c in swamps else dun_t)
+        for n_, gr in boss_gfx.tiles(c).items():
+            for q, ch in enumerate(tile_chars(gr)):
+                o = (q * DN + TID[n_]) * 8
+                bt[o:o + 8] = bytes(ch)
+        return bytes(bt)
     for (n, c, boss, m), r in zip(sets, raws):
-        tl = boss_t if boss else cave_t if c in caves else swamp_t if c in swamps else dun_t
+        if boss and c < CHAPTERS:
+            tl = cboss_tiles(c)
+        else:
+            tl = boss_t if boss else cave_t if c in caves else swamp_t if c in swamps else dun_t
         files.append(tl + b"".join(mon_bytes(m)) + info_bytes(r, INFO))
     global GFX_DUN_AT
     GFX_DUN_AT = GFX_DUN_END - len(files[0])

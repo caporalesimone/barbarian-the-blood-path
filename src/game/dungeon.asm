@@ -87,7 +87,7 @@ gen_dungeon:
         cmp #MAXLEVEL
         bne +
         jsr fin_load            ; MAP = mappa di base (dalla cache FIN_AT; dal disco la prima volta)
-+       lda lv_cboss            ; (12/11) piano del boss di un capitolo: mappa fissa BOSSCHc (segnaposto)
++       lda lv_cboss            ; (12/11) piano del boss di un capitolo: mappa fissa BOSSCHc (19/11: cripta, isola, grotta)
         beq +
         jsr bmap_load
 +       lda #GEN_MAIN

@@ -77,7 +77,7 @@ def tiles_from(data, n):
 
 town_t = tiles_from(rd("out/work/gfx/gfx0.prg")[2:], NT)
 dun_t = tiles_from(rd("out/work/gfx/gfx1.prg")[2:], DN)
-trono_t = tiles_from(rd("out/work/gfx/gfx2.prg")[2:], DN)
+trono_t = tiles_from(rd("out/work/gfx/gfx8.prg")[2:], DN)    # (19/11) GFX8: GFX2/4/6 sono i piani del boss dei capitoli 1-3
 
 
 def post_walls(m, rng):
@@ -195,9 +195,35 @@ swamp_t = tiles_from(rd("out/work/gfx/gfx3.prg")[2:], DN)
 add_set("SWAMP", "Swamp, levels 6-9 (GFX3, palette 12)", swamp_t,
         {i: ("SWAMP:" + G.TILES[i] if G.TILES[i] in SG.tiles() else G.TILES[i]) for i in range(DN)}, DUN_LET, 12, smap,
         {G.TID[n] for n in G.DUN_USED} | {G.TID["PATH"]}, G.SOLID, False, mapsrc="data/atlas_swamp.txt")
-add_set("TRONO", "Throne room, level 20 (GFX2, palette 4)", trono_t,
+add_set("TRONO", "Throne room, level 20 (GFX8, palette 4)", trono_t,
         {i: G.TRONO_NAMES.get(G.TILES[i], G.TILES[i]) for i in range(DN)}, DUN_LET, 4, fm,
         {G.TID[n] for n in G.TRONO_USED}, G.SOLID, False)
+# (19/11) piani del boss dei capitoli 1-3 (tools/build/boss_gfx.py, data/maps/bosschapN.txt): tile del tema dei piani del
+# capitolo + arredi propri, palette del piano (data/chapters.yaml final.palette)
+import boss_gfx as BG  # noqa: E402
+_chp = {ch["id"]: ch for ch in __import__("chapters_db").load()["chapters"]}
+for _c in (1, 2, 3):
+    _bn = {}
+    for _i in range(DN):
+        _t = G.TILES[_i]
+        if _t in BG.NAMES[_c]:
+            AN.TILE["%s:%s" % (BG.SET_CODE[_c], _t)] = BG.NAMES[_c][_t]
+            _bn[_i] = "%s:%s" % (BG.SET_CODE[_c], _t)
+        elif _c == 2 and _t in SG.tiles():
+            _bn[_i] = "SWAMP:" + _t
+        elif _c == 3 and _t in CG.tiles():
+            _bn[_i] = "CAVE:" + _t
+        else:
+            _bn[_i] = _t
+    _leg = dict({"#": "WALL", ".": "FLOOR", "<": "STAIRSU", "B": "FLOOR"}, **BG.LEGEND[_c])
+    _src = "data/maps/bosschap%d.txt" % _c
+    _bm = read_map(_src, {k: G.TID[v] for k, v in _leg.items()})
+    post_walls(_bm, random.Random(7))
+    _pi = _chp[_c]["final"]["palette"]
+    add_set(BG.SET_CODE[_c], "%s, level %d (GFX%d, palette %d)" % (_chp[_c]["final"]["name"], 5 * _c, 2 * _c, _pi),
+            tiles_from(rd("out/work/gfx/gfx%d.prg" % (2 * _c))[2:], DN), _bn, DUN_LET, _pi, _bm,
+            {G.TID[n] for n in G.DUN_USED - {"STAIRSD", "PORTAL"}} | {G.TID[v] for v in BG.LEGEND[_c].values()}, G.SOLID, False,
+            mapsrc=_src)
 
 # ------------------------------------------------------------------ controlli
 # nomi e descrizioni (tools/atlas/atlas_names.py, regola del committente del 10/11: ogni tile e ogni glifo ha il suo nome)
@@ -443,11 +469,12 @@ for g in groups:
 space = []
 for s in SETS:
     if (s["code"].startswith("DUNG") and s["code"] != "DUNGA") or (s["code"].startswith("VILL") and s["code"] != "VILLG") \
-            or s["code"] in ("CAVRK", "CAVIC", "SWAMP"):  # (18/11) stessi posti di CAVSN (e di DUNGA)
+            or s["code"] in ("CAVRK", "CAVIC", "SWAMP", "BOSS2", "BOSS3"):  # (18/11) stessi posti di CAVSN (e di DUNGA); (19/11) BOSS1-3 = stessi posti
+
         continue
     cap = len(s["tiles"])
     free = [i for i in range(cap) if i not in s["used"]]
-    nm = {"VILLG": "Village tiles (GFX0)", "DUNGA": "Dungeon tiles (GFX1, every theme 1-7 but 3: swamp, and 5: caves)", "TRONO": "Throne room tiles (GFX2)",
+    nm = {"VILLG": "Village tiles (GFX0)", "DUNGA": "Dungeon tiles (GFX1, every theme 1-7 but 3: swamp, and 5: caves)", "TRONO": "Throne room tiles (GFX8)", "BOSS1": "Chapter boss levels 1-3 (GFX2, GFX4, GFX6: theme of the chapter + furniture)",
           "CAVSN": "Cave tiles (GFX5, chapter 3: rock instead of bricks)"}[s["code"]]
     note = ("every slot of the charset (45 = 64 codes of the quarter minus the 19 fixed HUD characters) is used by the village"
             if s["code"] == "VILLG" else

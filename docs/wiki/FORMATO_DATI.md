@@ -18,9 +18,9 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `MENU` | PRG | (11/11; 18/11 un file solo, prima `MENU1`…`MENU5`) menu del villaggio e NPC (`src/menu.asm`): intestazione + le cinque zone di RAM compresse ZX0; si legge all'ingresso nel villaggio. Vedi «MENU» | build (`tools/build/pack_menu.py`) |
 | `TITLE` | PRG | schermata del titolo: bitmap multicolor + schermo + colore, 10000 byte | build |
 | `TWN1` … `TWN5` | PRG | (12/11; 15/11) villaggio del capitolo *c* (`c_chap`): tile + intestazione + mappa RLE; ognuno con tile, colori e mappa suoi (`tools/build/villages.py`); `TWN5` = città dell'Abisso (prototipo). (18/11) In **coda** il brano del villaggio + il suo numero come ultimo byte (sotto) | build (`tools/build/bundle.py`) |
-| ~~`BOSSCH1` … `BOSSCH3`~~ | — | (18/11) **non più sul disco**: la mappa del piano del boss dei capitoli 1–3 (piani 5, 10, 15: 4 byte = scale x, y; boss x, y + RLE come `FMAP`; `data/maps/bosschapN.txt`, `tools/build/gen_bossmap.py` → `out/work/bosschN.prg`) sta nella coda di `GFX(2c)` | build |
+| ~~`BOSSCH1` … `BOSSCH3`~~ | — | (18/11) **non più sul disco**: la mappa del piano del boss dei capitoli 1–3 (piani 5, 10, 15: 4 byte = scale x, y; boss x, y + RLE come `FMAP`; `data/maps/bosschapN.txt`, `tools/build/gen_bossmap.py` → `out/work/bosschN.prg`; dal 19/11 le caselle sono anche i tile degli arredi del capitolo, `tools/build/boss_gfx.py`) sta nella coda di `GFX(2c)` | build |
 | `FMAP` | PRG | mappa di base della sala del trono (piano 20), RLE come la mappa del villaggio (`b < $C0` tile, `$C0 + n` ripete il byte seguente `n + 2` volte), 48 × 48 caselle; caselle della stella e del cerchio = `$80 \| tile` (marcatori risolti da `post_walls`). Indirizzo di carico = `FIN_AT` = `$FD00` (`fin_load` la legge nella cache sotto il KERNAL, in fondo: da `PF_END` ai vettori `$FFFA`, 762 B; dal 10/11) | `tools/build/gen_final.py` |
-| `GFX1` … `GFX8` | PRG | (12/11) grafica per capitolo: tile + sprite dei mostri; per il capitolo *c*: `GFX(2c−1)` = piani del dungeon, `GFX(2c)` = piano del boss (sala del trono). Oggi i file dei capitoli 2–4 sono copie del capitolo 1 (segnaposto; `GFX5` con le grotte). (18/11) In **coda**: `GFX(2c−1)` il brano del capitolo, `GFX(2c)` (c = 1–3) la mappa del piano del boss, `GFX8` il brano del boss finale (sotto) | build (`tools/build/bundle.py`) |
+| `GFX1` … `GFX8` | PRG | (12/11) grafica per capitolo: tile + sprite dei mostri; per il capitolo *c*: `GFX(2c−1)` = piani del dungeon, `GFX(2c)` = piano del boss (19/11: `GFX2`/`4`/`6` tile dei piani del capitolo + arredi del piano del boss; `GFX8` sala del trono). `GFX3` palude, `GFX5` grotte, `GFX7` cittadella (copia dei mattoni). (18/11) In **coda**: `GFX(2c−1)` il brano del capitolo, `GFX(2c)` (c = 1–3) la mappa del piano del boss, `GFX8` il brano del boss finale (sotto) | build (`tools/build/bundle.py`) |
 | `SND0` … `SNDn` | PRG | un brano per file (villaggio, livelli, boss finale, combattimento: ordine e nomi nel commento di `out/work/music_tab.inc`); indirizzo di caricamento 0 (ignorato: il gioco li legge nel buffer del luogo o del combattimento). Formato in [Musica](musica.md) | build (`tools/build/gen_music.py`) |
 
 **Coda dei file `TWNc` e `GFXn`** (18/11, revisione dei file, [FastLoader](FastLoader.md) 7.3; `tools/build/bundle.py`, letta da
@@ -171,8 +171,9 @@ Il file **finisce sempre a `$F4E0`** (`GFX_DUN_END`, inizio della zona 2 del MEN
 l'installazione (un salvataggio lo sovrascrive: buffer del plugin `SV_SCR`).
 
 File del piano: `GFX(2c−1)` per i piani 1–4 del capitolo *c*, `GFX(2c)` per il suo piano del boss (5, 10, 15, 20) (`lvl_theme`,
-`src/game/theme.asm`). Nei file `GFX(2c)` gli slot dei tile 12 e 13 contengono la grafica del pentacolo (stella e cerchio) della
-sala del trono e lo slot della porta della locanda la leva.
+`src/game/theme.asm`). Nel file `GFX8` (sala del trono) gli slot dei tile 12 e 13 contengono la grafica del pentacolo (stella e
+cerchio) e lo slot della porta della locanda la leva; nei file `GFX2`, `GFX4`, `GFX6` (19/11) gli slot 9–11, 12–14 e 25–26 gli arredi
+del piano del boss del capitolo ([dungeon](dungeon.md#piani-del-boss-dei-capitoli-13-5-10-15-gen_cboss-1211-mappe-vere-dal-1911)).
 
 ### Mappa della cache (RAM sotto il KERNAL)
 

@@ -240,7 +240,7 @@ def scene(which, x, y, w, h):
         post_walls(dm)
         _scn["town"] = (tmap, _tiles("out/work/gfx/gfx0.prg", nt), pal(0))
         _scn["dungeon"] = (dm, _tiles("out/work/gfx/gfx1.prg", dn), pal(4))      # tema rosso (palette 4), come la copertina
-        _scn["final"] = (fm, _tiles("out/work/gfx/gfx2.prg", dn), pal(4))
+        _scn["final"] = (fm, _tiles("out/work/gfx/gfx8.prg", dn), pal(4))   # (19/11) sala del trono: GFX8 (GFX2 e' la cripta)
     mp, tiles, pal = _scn[which]
     a = np.zeros((h * 16, w * 8, 3))
     for ty in range(h):

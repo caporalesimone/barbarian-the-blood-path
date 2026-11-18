@@ -432,7 +432,9 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   **manuale italiano** (pagina "IL MONDO", prima del capitolo 4; la genera la build del manuale, non e' in git). Restano da decidere
   la wiki e la scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene; il testo del manuale non racconta la trama
   (in revisione): da rivedere con E6, e da tradurre con E7.
-- **Mappe vere dei boss** (`data/maps/bosschapN.txt`) e **boss veri**: dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
+- **Boss veri** (le **mappe vere** dei piani del boss dei capitoli 1–3 sono fatte il 19/11: cripta, isola nella palude, grotta
+  crollata, [dungeon](docs/wiki/dungeon.md#piani-del-boss-dei-capitoli-13-5-10-15-gen_cboss-1211-mappe-vere-dal-1911); da
+  provare in gioco a mano): dal 15/11 i boss dei capitoli 1–3 hanno il loro **sprite**
   e il loro colore; **meccaniche decise** ([bestiario](docs/wiki/bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) ma
   non nel codice (~550 B stimati: M9); dal 15/11 hanno anche il **loro nome** nella barra e i **mostri del capitolo** intorno
   (solo grafica, colore e nome: M9); statistiche proprie, bottino speciale, sala che si chiude: da fare.

@@ -162,7 +162,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |
 | `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
 
-### regression (216)
+### regression (217)
 
 | ID | Test |
 |---|---|
@@ -197,6 +197,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-10` | chapters.yaml: local levels restart at 1, global depth = previous levels + local, the Abyss fills up to 255 |
 | `CHAP-11` | tools/simulators/chapters.py: every generated level of a chapter at its global depth with the chapter's bestiary, the chapter boss |
 | `CHAP-SEQ-10` | new hero in chapter 1 (c_chap = c_unl = 1); the village exit is closed: no label, the edge stops the hero |
+| `BOSSMAP-10` | boss levels 5, 10, 15: the map of data/maps/bosschapN.txt (after post_walls), the furniture of the chapter, stairs up to the boss walkable, no stairs down, its own palette (final.palette), the tiles of GFX(2c) from boss_gfx.py (19/11) |
 | `CHAP-SEQ-11` | level 5 = boss level of chapter 1: map BOSSCH1 (stairs up, no stairs down), boss drawn as the final boss |
 | `CHAP-SEQ-12` | killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2) |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |

@@ -160,20 +160,46 @@ si specchia (`cit_finish` in `gen_io.asm`, ~250 B). Stesso contratto delle stanz
 
 `lvl_theme` (12/11, un file di grafica per capitolo): capitolo *c* = `lv_grp(piano)`; piani del dungeon → `GFX(2c−1)`,
 piano del boss del capitolo (5, 10, 15) → `GFX(2c)`, piano 20 → `GFX(2·CHAPTERS)`. Per ogni capitolo due file, **tile + sprite dei mostri del capitolo**: `GFX(2c−1)` per i piani del dungeon,
-`GFX(2c)` per il piano del boss (sala del trono: piani 5, 10, 15 e 20; i file dei capitoli 2–4 sono copie segnaposto,
-pronte da modificare; dal 18/11 `GFX5` ha muri e pavimenti di roccia: grotte). Niente più deduplica: 8 file `GFX1`…`GFX8` (8 blocchi ciascuno). La palette per piano resta
+`GFX(2c)` per il piano del boss (dal 19/11 `GFX2`, `GFX4`, `GFX6` = tile dei piani del capitolo + arredi del piano del boss,
+sotto; `GFX8` = sala del trono del piano 20; dal 18/11 `GFX3` palude e `GFX5` grotte). Niente più deduplica: 8 file `GFX1`…`GFX8` (8 blocchi ciascuno). La palette per piano resta
 `pal_for_level`.
 Il tema del piano successivo si precarica in background ([Tecnica](tecnica.md)).
 
-## Piani del boss dei capitoli 1–3: 5, 10, 15 (`gen_cboss`, 12/11)
+## Piani del boss dei capitoli 1–3: 5, 10, 15 (`gen_cboss`, 12/11; mappe vere dal 19/11)
 
 Ultimo piano dei capitoli 1–3 (`is_cboss`: indice 4 nel gruppo di 5, non `MAXLEVEL`; `lv_cboss` da `chap_enter`):
-mappa fissa `BOSSCHc` (dal 18/11 nella coda del tema `GFX(2c)`; `data/maps/bosschapN.txt` → `tools/build/gen_bossmap.py`, segnaposto quadrato: sala 16×16 e corridoio
-da sud) letta da `bmap_load` nel buffer di `FMAP`; i 4 byte di testa danno scale di arrivo e posto del boss (`bm_hdr`).
+mappa fissa `BOSSCHc` (dal 18/11 nella coda del tema `GFX(2c)`; `data/maps/bosschapN.txt` → `tools/build/gen_bossmap.py`)
+letta da `bmap_load` nel buffer di `FMAP`; i 4 byte di testa danno scale di arrivo e posto del boss (`bm_hdr`).
 `gen_cboss` (sotto l'I/O) prepara le due stanze logiche (arrivo, sala) e chiama `post_walls`. Niente scale in giù, nessun
-mostro normale (`spawn_monsters` esce subito), solo il boss del piano (`place_boss`, al centro della sala, statistiche del
-piano) disegnato con lo **sprite del boss finale** (`build_sprites`). Grafica `GFX(2c)` (tile della sala del trono, set
-di mostri del capitolo), palette rossa. La sua morte sblocca il capitolo dopo (`chap_won`, [capitoli](capitoli.md)).
+mostro normale (`spawn_monsters` esce subito), solo il boss del piano (`place_boss`, sulla casella `B`, statistiche del
+piano) disegnato con il **suo sprite** nel posto del boss finale del file (`build_sprites`). La sua morte sblocca il
+capitolo dopo (`chap_won`, [capitoli](capitoli.md)).
+
+**Mappe** (19/11, richiesta del committente: ogni piano del boss ha tema e forma propri, legati al capitolo; il boss finale
+resta nella sala del trono a stella):
+
+| Capitolo | Piano | Luogo | Forma | Tile (`GFX(2c)`) | Palette |
+|---|---|---|---|---|---|
+| 1 | 5 | **The Crypt of the Abbot**: cripta | croce latina verso nord: discesa dalle scale con le candele, nartece con le ossa, navata con colonne, sarcofagi e tappeto processionale, transetto (ossario a ovest, camera dei sarcofagi con le lastre incise a est), abside con altare e candelabri; l'abate davanti all'altare | mattoni del capitolo 1 + sarcofago, colonna, candelabro, altare, mucchio d'ossa (solidi), ossa sparse, tappeto, lastra tombale (calpestabili) | 8 (grigia, fiamme gialle) |
+| 2 | 10 | **The Flooded Mill**: isola al centro della palude | acqua tutt'intorno (il muro della palude), arrivo dal cancello su un isolotto a sud, isolotti con alberi morti uniti da passerelle e da un guado di pietre; sull'isola centrale il mulino in rovina (muri spezzati, assi marce, macina, ruota sulla riva ovest); il mugnaio nella radura a sud del mulino | palude del capitolo 2 + muro del mulino, macina, ruota, canne, albero morto (solidi), assi marce, pietre del guado (calpestabili), passerelle | 12 (palude) |
+| 3 | 15 | **The Broken Bastion**: grotta semi crollata | galleria d'arrivo da sud-ovest con i puntelli, sala ovest, salita alla galleria nord con le mura cadute del bastione, frana di macerie fra la sala ovest e la sala del boss (varchi di ghiaia), volta crollata a nord-est della sala del boss; stalagmiti come ripari (la carica di Varok, [bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) | grotte del capitolo 3 + macerie, masso, stalagmite, puntello, conci del bastione (solidi), ghiaia, pavimento crepato (calpestabili) | 10 (roccia grigia) |
+
+- **Lettere delle mappe**: `#` muro (nel capitolo 2 l'acqua), `.` pavimento, `<` scale di arrivo, `B` boss, più gli arredi del
+  capitolo (`tools/build/boss_gfx.py` `LEGEND`, legenda in testa a ogni file). Ogni casella diventa il numero del tile; `post_walls`
+  fa le facciate dei muri (e la riva della palude) e varia il pavimento come negli altri piani.
+- **Posti dei tile**: gli arredi stanno nei posti liberi dei dungeon: solidi `FREE9-11`, `FREE25-26`; calpestabili `GRASSA`,
+  `GRASSB`, `PATH`. Mai `FREE8` (portale nero: etichetta "the endless abyss"), `DHOME` (Fire = locanda), porte dei negozi,
+  fontana, portale, cripta, baule: hanno un ruolo nel codice.
+- **Grafica**: `tools/build/gen_gfx.py` (`cboss_tiles`) parte dai tile dei piani del capitolo (mattoni, palude, grotte) e sostituisce
+  i posti degli arredi; il file `GFX8` (sala del trono) non cambia.
+- **Palette**: `data/chapters.yaml` `final.palette` → `lv_look` del piano del boss (`tools/build/gen_db.py`); `pal_for_level`
+  guarda `lv_look` prima del rosso dei piani del boss (rosso solo se la palette manca).
+- **Generatore**: `GVER` 10 (i piani salvati con le mappe segnaposto si rigenerano, `migrate_char`).
+- **Atlante**: set `BOSS1`, `BOSS2`, `BOSS3` con la mappa intera. Test: `BOSSMAP-10` (mappa uguale al file dopo `post_walls`,
+  arredi presenti, boss raggiungibile dalle scale, palette, tile del file uguali a `boss_gfx.py`; screenshot in
+  `out/work/bossmaps/`), `CHAP-SEQ-11`, `VIL-BOSS-10`, `GEN-10` (mappe di riferimento).
+- **Non verificato in gioco a mano** (19/11): la leggibilità degli arredi sullo schermo vero e il passo nelle passerelle lunghe
+  della palude; l'arrivo nel piano 10 è sempre dal cancello a sud, mentre l'uscita del piano 9 è su un lato a caso.
 
 ## Piano 20: la sala del trono (`gen_final`)
 

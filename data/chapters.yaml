@@ -12,6 +12,8 @@
 # (18/11) map (optional): look of the generated levels of the chapter (not the final map). style: rooms (default: rooms and
 # corridors), caves, swamp or citadel (docs/wiki/dungeon.md); palettes: palette of each generated level, local level 1, 2, ... (0 or missing =
 # the random palette of today, from seed and level). Compiled by tools/build/gen_db.py into lv_look (one byte per level).
+# (19/11) final.palette (chapters 1-3): palette of the boss level (the fixed map of tools/build/gen_bossmap.py, tiles of
+# tools/build/boss_gfx.py); missing = red (4), as the throne room.
 
 global_max: 255
 today: {levels: 20, note: "one village (Aldric's Crossing), levels 1-19 generated + the throne room on level 20 = depth 1-20"}
@@ -24,7 +26,7 @@ chapters:
     levels: 5
     themes: [1, 2]
     atlas_sets: [DUNGA, DUNGB]
-    final: {name: "The Crypt of the Abbot", file: null, generator: null, atlas_set: null, boss: hollow_abbot}
+    final: {name: "The Crypt of the Abbot", file: data/maps/bosschap1.txt, generator: tools/build/gen_bossmap.py, atlas_set: BOSS1, boss: hollow_abbot, palette: 8}
 
   - id: 2
     name: "Blackwater Mill"
@@ -34,7 +36,7 @@ chapters:
     themes: [3, 4]
     map: {style: swamp, palettes: [12, 12, 12, 12]}     # (18/11, owner) one swamp: levels 6-9 side by side, gates on the borders
     atlas_sets: [SWAMP, DUNGD]
-    final: {name: "The Flooded Mill", file: null, generator: null, atlas_set: null, boss: miller_of_blackwater}
+    final: {name: "The Flooded Mill", file: data/maps/bosschap2.txt, generator: tools/build/gen_bossmap.py, atlas_set: BOSS2, boss: miller_of_blackwater, palette: 12}
 
   - id: 3
     name: "The Last Camp"
@@ -44,7 +46,7 @@ chapters:
     themes: [5, 6]
     map: {style: caves, palettes: [9, 11, 10, 10]}      # (18/11, owner) level 11 white snowy caves, 12 icy (light blue), 13-14 grey rock
     atlas_sets: [CAVSN, CAVIC, CAVRK]
-    final: {name: "The Broken Bastion", file: null, generator: null, atlas_set: null, boss: varok_oathbreaker}
+    final: {name: "The Broken Bastion", file: data/maps/bosschap3.txt, generator: tools/build/gen_bossmap.py, atlas_set: BOSS3, boss: varok_oathbreaker, palette: 10}
 
   - id: 4
     name: "The Throne of Ruin"

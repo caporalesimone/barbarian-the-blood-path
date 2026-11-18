@@ -135,7 +135,7 @@ def main():
 
     # (18/11) aspetto dei piani generati (data/chapters.yaml, campo map): un byte per piano 0..MAXLEVEL, bit 0-3 palette
     # (0 = quella casuale di pal_for_level), bit 4-6 stile della mappa (nessuno = stanze, bit 4 grotte, 5 palude, 6 cittadella: gen_io.asm). Il piano del boss
-    # del capitolo (l'ultimo) ha la sua mappa fissa e resta 0.
+    # del capitolo (l'ultimo) ha la sua mappa fissa: (19/11) solo la palette, da final.palette (capitoli 1-3; 0 = rossa).
     import chapters_db
     STYLES = {"rooms": 0, "caves": 1, "swamp": 2, "citadel": 4}     # un bit per stile (and #LK_x nel codice)
     look = [0] * (maxl + 1)
@@ -152,6 +152,11 @@ def main():
             pl = pals[loc - 1] if loc <= len(pals) else 0
             chk(0 <= pl <= 15, f"chapters.yaml: capitolo {ch['id']}: palette {pl}")
             look[d] = pl | st << 4
+        fp = (ch.get("final") or {}).get("palette", 0)
+        d = ch["first_depth"] + ch["n_levels"] - 1                  # piano del boss del capitolo
+        chk(0 <= fp <= 15, f"chapters.yaml: capitolo {ch['id']}: final.palette {fp}")
+        if fp and d < maxl:
+            look[d] = fp
     o("; ---- aspetto dei piani generati (data/chapters.yaml map): bit 0-3 palette (0 = casuale), bit 4-6 stile (bit 4 grotte, 5 palude, 6 cittadella)")
     o.bytes("lv_look", look)
     o("LK_CAVE     = $10")

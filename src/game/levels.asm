@@ -27,15 +27,15 @@ pal_for_level:
         beq _t
         cmp #MAXLEVEL           ; ultimo piano: palette rossa fissa (contrasto del pentacolo)
         beq _red
-        lda lv_cboss            ; (12/11) piano del boss di un capitolo: anche lui rosso (tile della sala del trono)
+        tax                     ; (18/11) palette fissa del piano (data/chapters.yaml map.palettes; 19/11 per il piano del
+        lda lv_look,x           ; boss del capitolo final.palette): bit 0-3 di lv_look
+        and #$0f
+        bne _r
+        lda lv_cboss            ; (12/11) piano del boss di un capitolo senza palette propria: rosso
         beq +
 _red    lda #4
         rts
-+       ldx cur_level           ; (18/11) palette fissa del piano (data/chapters.yaml map.palettes): bit 0-3 di lv_look
-        lda lv_look,x
-        and #$0f
-        bne _r
-        lda cur_level
++       lda cur_level
         asl
         clc
         adc cur_level
