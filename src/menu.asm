@@ -7,6 +7,7 @@
 ;    zona 3  MR3_AT $A700 - $A7FF   RAM del banco VIC 2: slot sprite 28-31, liberi nel gioco
 ;    zona 4  MR4_AT $A300 - $A4FF   (17/11) slot sprite 12-19 (mostri nel dungeon): gli sprite degli NPC del villaggio
 ;    zona 5  MR5_AT $8C00 - $8E7F   (18/11) sprite forti e boss del tema (dungeon): il "!" e il codice degli NPC (menu/npc.asm)
+;    zona 6  MR6_AT $9600 - $977F   (18/11) tabelle dei mostri in gioco (MRT, dungeon): il passo degli NPC (menu/npc_tick.asm)
 ;  Il gioco lo carica all'ingresso nel villaggio (ovl_town, src/game/stash.asm) se non c'e' e poi resta in memoria.
 ;  Tutti i menu girano con $01 = $35 (KERNAL escluso, interruzioni spente, NMI su nmi_stub): il codice della zona 2
 ;  si esegue solo cosi'. Escono con $01 = $36 prima di ui_exit (che riaccende l'IRQ).
@@ -71,3 +72,8 @@ mz4_top
         .include "menu/npc.asm"
 mz5_top
         .cerror mz5_top > MR5_END, "modulo MENU: zona 5 oltre $8E7F di ", mz5_top - MR5_END, " B"
+
+        * = MR6_AT              ; (18/11, R11) zona 6: il passo degli NPC (menu/npc_tick.asm), all'inizio della zona (salto di npc_tick)
+        .include "menu/npc_tick.asm"
+mz6_top
+        .cerror mz6_top > MR6_END, "modulo MENU: zona 6 oltre $977F di ", mz6_top - MR6_END, " B"

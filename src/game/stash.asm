@@ -41,7 +41,9 @@ MR4_AT  = SPR_DATA+12*64        ; (17/11) zona 4: slot sprite 12-19 ($A300-$A4FF
 MR4_END = SPR_DATA+20*64        ; gfx_install a ogni ingresso), liberi nel villaggio: gli sprite degli NPC (tools/build/npc_gfx.py)
 MR5_AT  = $8c00                 ; (18/11) zona 5: sprite forti e boss del tema nel dungeon ($8C00-$8E7F, ricopiati da gfx_install a
 MR5_END = $8e80                 ; ogni ingresso), liberi nel villaggio: lo sprite del "!" e il codice degli NPC (src/menu/npc.asm)
-MPARTS  = 5
+MR6_AT  = MRT                   ; (18/11) zona 6: tabelle dei mostri in gioco ($9600-$977F), inutili nel villaggio (lb_cnt = 0) e
+MR6_END = MRT+MRT_N             ; riscritte a ogni ingresso nel dungeon: il passo degli NPC (src/menu/npc_tick.asm)
+MPARTS  = 6
 ML_LO   = GFX_TOWN_AT           ; (18/11) il file del modulo si appoggia da $E000 (il villaggio e' gia' installato: enter_gfx)
 OVL_AT  = MR1_AT                ; tabella dei salti del modulo (src/menu.asm)
 MENU_INN  = OVL_AT              ; locanda

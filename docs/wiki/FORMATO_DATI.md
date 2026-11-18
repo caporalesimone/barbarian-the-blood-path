@@ -203,7 +203,7 @@ Tre varianti dello stesso codice (07/11; la catena dei programmi è in [Avvio e 
 
 ### `MENU` — menu del villaggio (locanda e negozi)
 Dall'11/11 (TODO D13): sostituisce i file `OVLT` e `OVL2`; dalla v1.21x contiene anche i negozi. Un file per tutti i
-villaggi. `src/menu.asm` è assemblato in quattro zone di RAM (le parti in `src/menu/`):
+villaggi. `src/menu.asm` è assemblato in sei zone di RAM (le parti in `src/menu/`):
 
 | Zona | Indirizzi | Contenuto (oggi) |
 |---|---|---|
@@ -212,15 +212,16 @@ villaggi. `src/menu.asm` è assemblato in quattro zone di RAM (le parti in `src/
 | 3 | `MR3_AT` `$A700`–`$A7FF` (slot sprite 28–31, liberi nel gioco) | negozi: riparazione e tetto dell'oro (`menu/shop_fix.asm`); aspetto degli NPC (`menu/npc_look.asm`, 17/11) |
 | 4 | `MR4_AT` `$A300`–`$A4FF` (slot sprite 12–19: mostri del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (17/11) sprite degli NPC del villaggio: 4 disegni × 2 fotogrammi (`tools/build/npc_gfx.py`), solo dati |
 | 5 | `MR5_AT` `$8C00`–`$8E7F` (sprite forti e boss del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (18/11) sprite del "!" (`$8C00`, puntatore `$30`), tabella dei salti `NPC_JT` (`$8C40`: `npc_init`, `npc_draw5`, `npc_talk5`), capitoli delle quest `q_ch`, piazzamento e sprite degli NPC (`menu/npc.asm`) |
+| 6 | `MR6_AT` = `MRT` `$9600`–`$977F` (tabelle dei mostri del piano: nel villaggio non servono, `lb_cnt` = 0; entrando in un piano le riscrivono `init_monsters_rt` o la STASH) | (18/11, revisione R11) passo dei vaganti `npc_tick6` (`menu/npc_tick.asm`), chiamato da `npc_tick` di GAME a `MR6_AT`. Per questo `pend_save` (salvataggio nel villaggio) copia dalla STASH solo `LVLBLK`, non `MRT` |
 
 File **`MENU`** (18/11, revisione R2: **un file solo**; dall'11/11 era un file per zona, `MENU1`…`MENU5`, e ogni file in più
 costava ~0,4 s a ogni ingresso nel villaggio). Struttura (`tools/build/pack_menu.py`):
 
 | Byte | Contenuto |
 |---|---|
-| 0 | numero di parti *N* (= `MPARTS`, 5) |
+| 0 | numero di parti *N* (= `MPARTS`, 6) |
 | 1 … 4*N* | per ogni parte, nell'ordine di decompressione: indirizzo dei dati compressi (2 B), destinazione = inizio della zona (2 B) |
-| … | le parti compresse ZX0: prima le zone 1, 3, 4, 5, per ultima la zona 2 |
+| … | le parti compresse ZX0: prima le zone 1, 3, 4, 5, 6, per ultima la zona 2 |
 
 Il file **finisce a `MR2_END`** (`$FD00`, fine della zona 2): Krill lo carica al suo indirizzo (`load_file`, C = 0), nella RAM
 sotto il KERNAL fra `$E000` (`ML_LO`: dal 18/11 il villaggio si installa prima del MENU, quindi il suo file non serve più) e
@@ -228,12 +229,12 @@ sotto il KERNAL fra `$E000` (`ML_LO`: dal 18/11 il villaggio si installa prima d
 (`ovl_town` / `ml_read`, `src/game/stash.asm`) lo legge all'**ingresso nel villaggio** se `ovl_cur` = 0 (lo azzerano
 `game_start`, il caricamento del LOBBY e `enter_gfx`, perché il dungeon copre le zone 4 e 5), controlla che finisca a
 `ml_end` (altrimenti lo rilegge, fino a 3 volte), poi con `$01 = $35`, interruzioni spente e NMI su `nmi_stub` scorre
-l'intestazione: le zone 1, 3, 4, 5 si decomprimono dall'appoggio nelle loro zone, la zona 2 per ultima **sul posto**.
+l'intestazione: le zone 1, 3, 4, 5, 6 si decomprimono dall'appoggio nelle loro zone, la zona 2 per ultima **sul posto**.
 `pack_menu.py` simula tutto in 64 KB (nessuna scrittura su dati non ancora letti, ogni zona uguale byte per byte, file
-sopra `ML_LO`) e scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (18/11): 3966 B (16 blocchi),
-~3,3 KB sopra `ML_LO` (prima del 18/11 l'appoggio partiva da `$ED00` e restavano 57 B). Zone: 1 1603 → 1356 B, 2 2061 → 1677 B,
-3 231 → 226 B, 4 512 → 183 B, 5 602 → 503 B; spazio libero: zona 1 189 B, zona 2 19 B, zona 3 25 B, zona 4 0 B, zona 5 38 B (la
-build lo stampa). Tempo della lettura con la decompressione: 3,1 s (`PERF-DISK-11`; con cinque file 3,5 s).
+sopra `ML_LO`) e scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (18/11, R11): 4328 B (18 blocchi),
+3096 B sopra `ML_LO` (prima del 18/11 l'appoggio partiva da `$ED00` e restavano 57 B). Zone: 1 1691 → 1439 B, 2 2049 → 1670 B,
+3 231 → 226 B, 4 512 → 183 B, 5 602 → 503 B, 6 353 → 282 B; spazio libero: zona 1 101 B, zona 2 31 B, zona 3 25 B, zona 4 0 B,
+zona 5 38 B, zona 6 31 B (la build lo stampa). Tempo della lettura con la decompressione: 3,1 s (`PERF-DISK-11`; con cinque file 3,5 s).
 
 ### Compressione (ZX0)
 - Compressore: **ZX0 v2** di Einar Saukas (C, compilato dai sorgenti ufficiali in Lab64: `build-scripts/sources.conf` di Lab64, licenza BSD-3), compilato con

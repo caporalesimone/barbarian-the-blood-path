@@ -145,7 +145,7 @@ flowchart TB
 | `rel.asm` | ~650 | salvataggi con il plugin di save di Krill: file `save-0N` (eroe + piani), elenco `hl`, stato compatto dei piani | [Salvataggi](salvataggi.md) |
 | `disk.asm` | ~180 | nomi dei file, `load_raw`/`load_file` (Krill), grafica, sala del trono, LOBBY (blocco `CODE2` `$9C00`–`$9FFF`) | [Tecnica](tecnica.md) |
 | `monpath.asm` | ~70 | (17/11) `mon_follow` e tabelle della ricerca di percorso dei mostri bloccati (`mon_path` sta in `game.asm`; blocco `CODE2`) | [Mostri](mostri.md) |
-| `quest.asm` | ~150 | (17/11, concept) NPC del villaggio: passo dei vaganti (`npc_tick`, fermi con il PG vicino), chi è accanto (`npc_here`, `npc_offer`), punti d'ingresso nel modulo MENU (zona 5: piazzamento, sprite e "!", Fire, `src/menu/npc.asm`); `ui_quest` che legge ed esegue il file `QST0` (18/11: elenco e dettaglio) | [Quest](quests.md) |
+| `quest.asm` | ~150 | (17/11, concept) NPC del villaggio: punti d'ingresso nel modulo MENU (`npc_tick` → zona 6 in `MRT`, passo dei vaganti fermi con il PG vicino, `src/menu/npc_tick.asm`; `npc_here` → zona 1, chi è accanto; zona 5: piazzamento, sprite e "!", Fire, `src/menu/npc.asm`); `ui_quest` che legge ed esegue il file `QST0` (18/11: elenco e dettaglio) | [Quest](quests.md) |
 | `src/qpage.asm` | ~330 | (17/11; 18/11 elenco e dettaglio) pagine delle quest: modulo in testa al file `QST0` (con l'indice), eseguito a `$BC00`; legge il testo `QSTn` a `$B000` | [Quest](quests.md) |
 | `src/menu/*` (modulo MENU) | 1765 | locanda (`inn.asm`, `inn_eq.asm`), negozi (`shop.asm`, `shop_act.asm`, `shop_fix.asm`) | [Villaggio](villaggio.md) |
 
@@ -169,7 +169,7 @@ flowchart TB
     subgraph R1["$0400-$9FFF: GAME residente"]
         CODE["codice e dati $0400-$7972<br/>(margine 3501 B fino a $8720)"]
         HUDS["$8400 schermo HUD, sprite della barra,<br/>brani SND_LBUF $8A40 / SND_FBUF $8E80,<br/>sprite forti $8C00 (villaggio: MENU zona 5, NPC e '!'), nomi dei mostri NM_AT $8F6D"]
-        VARS["$9000-$9BFF variabili: gioco, combattimento,<br/>eroe CHRBLK $9500, mostri MRT $9600,<br/>stato del piano LVLBLK $9800, player SID"]
+        VARS["$9000-$9BFF variabili: gioco, combattimento,<br/>eroe CHRBLK $9500, mostri MRT $9600 (villaggio: MENU zona 6),<br/>stato del piano LVLBLK $9800, player SID"]
         C2["$9C00-$9FFF CODE2: disco, percorsi dei mostri"]
     end
     subgraph R2["$A000-$BFFF: banco VIC 2"]

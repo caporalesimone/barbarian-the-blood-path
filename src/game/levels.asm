@@ -363,8 +363,9 @@ stash_get:
         lda #1
 ; tmp5 = 0 salva, 1 ripristina: copia LVLBLK e MRT del piano nella STASH (RAM sotto l'I/O) o viceversa
 stash_both:
+        ldx #1                  ; blocchi 1 (MRT) e 0 (LVLBLK)
+stash_x:                        ; (18/11, R11) X = 0: solo LVLBLK
         sta tmp5
-        ldx #1
 _b      stx tmp4
         lda sb_lo,x             ; blocco x: 0 = LVLBLK, 1 = MRT
         sta ptr0
@@ -422,9 +423,12 @@ _fl     jsr pend_save
 _no     clc
         rts
 
-; STASH -> slot del piano in RAM (LVLBLK viene sovrascritto: il chiamante lo ricostruisce)
+; STASH -> slot del piano in RAM (LVLBLK viene sovrascritto: il chiamante lo ricostruisce). (18/11, R11) Solo LVLBLK: lo
+; stato compatto (lv_put) non usa MRT, e nel villaggio ("save game") MRT e' la zona 6 del MENU (il passo degli NPC)
 pend_save:
-        jsr stash_get
+        lda #1
+        ldx #0
+        jsr stash_x
         lda pend_lvl
         jmp save_lvlblk
 
