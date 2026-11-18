@@ -53,17 +53,25 @@ gen_dmain:
         jsr clear_map
         ldx cur_level           ; (18/11) stile della mappa del piano (data/chapters.yaml map.style, tabella lv_look)
         lda lv_look,x
-        and #LK_CAVE
-        sta lv_cave
-        jsr gen_rooms
+        and #LK_CAVE|LK_SWAMP
+        sta lv_cave             ; grotte e palude: macchie al posto dei rettangoli
+        and #LK_SWAMP
+        sta lv_swamp
+        beq +
+        lda #0                  ; palude: tutte le 16 isole (i cancelli vanno nelle colonne 0 e 3)
+        sta lv_drop
++       jsr gen_rooms
         jsr gen_links
         jsr carve_rooms
         lda lv_cave
         beq +
         jsr cave_smooth
++       lda lv_swamp
+        beq +
+        jsr swamp_gates         ; palude: cancelli sui bordi ovest ed est al posto delle scale
+        jmp post_walls
 +       jsr gen_stairs
-        jsr post_walls
-        rts
+        jmp post_walls
 
 minsz_tab .byte 4, 5, 6, 4
 
@@ -650,7 +658,10 @@ _nex2   ldx cur
 
 ; corridoio largo 2 fra le stanze cc_a e cc_b: un tratto orizzontale e uno verticale (carve_h, carve_v)
 carve_corr:
-        lda lv_cave             ; (18/11) grotte: galleria tortuosa
+        lda lv_swamp            ; (18/11) palude: passerella di assi
+        beq +
+        jmp carve_plank
++       lda lv_cave             ; (18/11) grotte: galleria tortuosa
         beq +
         jmp carve_worm
 +       ldx cc_a
@@ -834,3 +845,168 @@ _pn     iny
         bne _pv
         rts
 
+; ---------------------------------------------------------------------------------------------------------------------
+; (18/11, TODO M11) PALUDE (capitolo 2, docs/wiki/dungeon.md "Palude"): i piani 6-9 sono AFFIANCATI da ovest a est in
+; un'unica palude. Le isole sono le macchie delle grotte (carve_blob + cave_smooth), l'acqua e' il muro (tile 0, solido),
+; le stanze sono collegate da passerelle di assi larghe 1 (carve_plank: a L, solo sull'acqua). Al posto delle scale due
+; CANCELLI (swamp_gates): quello delle scale su sul bordo ovest (x = 1, verso il piano prima o il villaggio), quello delle
+; scale giu' sul bordo est (x = MAPW-2, verso il piano dopo). La riga di un cancello dipende solo dal seed del capitolo e
+; dal confine (gate_row): il cancello est del piano L e quello ovest del piano L+1 stanno sulla stessa riga, quindi
+; passando si arriva allo stesso punto del bordo.
+; ---------------------------------------------------------------------------------------------------------------------
+T_PLANK = T_PATH                ; passerella: posto 14, calpestabile, mai usato nei dungeon (tools/build/swamp_gfx.py)
+lv_swamp .byte 0                ; LK_SWAMP se il piano e' di palude
+pk_e    .byte 0                 ; fine del tratto di passerella
+gr_b    .byte 0                 ; confine (piano a ovest) per gate_row
+
+; passerella sulla casella (tx, ty) se e' acqua
+plank_at:
+        ldy ty
+        lda maprow_lo,y
+        sta ptr0
+        lda maprow_hi,y
+        sta ptr0+1
+        ldy tx
+        lda (ptr0),y
+        bne +
+        lda #T_PLANK
+        sta (ptr0),y
++       rts
+
+; tratto orizzontale da tx a pk_e (compresi) alla riga ty
+pk_h:
+_l      jsr plank_at
+        lda tx
+        cmp pk_e
+        beq _d
+        bcc _i
+        dec tx
+        bpl _l
+_i      inc tx
+        bpl _l
+_d      rts
+
+; tratto verticale da ty a pk_e (compresi) alla colonna tx
+pk_v:
+_l      jsr plank_at
+        lda ty
+        cmp pk_e
+        beq _d
+        bcc _i
+        dec ty
+        bpl _l
+_i      inc ty
+        bpl _l
+_d      rts
+
+; passerella fra i centri delle stanze cc_a e cc_b: orizzontale alla riga di cc_a, poi verticale alla colonna di cc_b
+carve_plank:
+        ldx cc_a
+        ldy cc_b
+        lda rcy,x
+        sta ty
+        lda rcx,x
+        sta tx
+        lda rcx,y
+        sta pk_e
+        jsr pk_h
+        ldy cc_b
+        lda rcy,y
+        sta pk_e
+        jmp pk_v
+
+; A mod 36
+mod36:
+-       cmp #36
+        bcc +
+        sbc #36
+        bcs -
++       rts
+
+; A = confine (numero del piano a ovest) -> A = riga del cancello 6..41: (somma delle 6 cifre del seed + gr_tab[confine
+; mod 8]) mod 36 + 6 (tabella irregolare: i cancelli non scendono a scala da un piano all'altro)
+gate_row:
+        and #7
+        tax
+        lda gr_tab,x
+        sta gr_b
+        ldx #5
+        lda #0
+-       clc
+        adc c_seedt,x
+        dex
+        bpl -
+        jsr mod36
+        clc
+        adc gr_b
+        jsr mod36
+        clc
+        adc #6
+        rts
+
+gr_tab  .byte 0, 17, 5, 29, 11, 23, 2, 31
+
+; A = riga -> X = cella della colonna 0 nella fascia di quella riga ((riga / 12) * 4)
+row_cell:
+        ldx #0
+-       cmp #12
+        bcc +
+        sbc #12
+        inx
+        inx
+        inx
+        inx
+        bne -
++       rts
+
+; cancelli ovest ed est con la passerella fino al centro della stanza della loro fascia (colonna 0 e colonna 3)
+swamp_gates:
+        lda cur_level           ; ovest: confine con il piano prima
+        sec
+        sbc #1
+        jsr gate_row
+        sta ty
+        sta st_up_y
+        jsr row_cell
+        stx st_s
+        lda #1
+        sta tx
+        sta st_up_x
+        lda rcx,x
+        sta pk_e
+        jsr pk_h
+        ldx st_s
+        lda rcy,x
+        sta pk_e
+        jsr pk_v
+        lda st_up_x
+        sta tx
+        lda st_up_y
+        sta ty
+        lda #T_STAIRSU
+        jsr set_tile
+        lda cur_level           ; est: confine con il piano dopo
+        jsr gate_row
+        sta ty
+        sta st_dn_y
+        jsr row_cell
+        inx
+        inx
+        inx
+        stx st_e
+        lda #MAPW-2
+        sta tx
+        sta st_dn_x
+        lda rcx,x
+        sta pk_e
+        jsr pk_h
+        ldx st_e
+        lda rcy,x
+        sta pk_e
+        jsr pk_v
+        lda st_dn_x
+        sta tx
+        lda st_dn_y
+        sta ty
+        lda #T_STAIRSD
+        jmp set_tile

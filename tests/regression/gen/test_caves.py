@@ -2,7 +2,7 @@
 """(18/11, TODO M11) Caves of chapter 3 (src/game/gen_io.asm: carve_blob, carve_worm, cave_smooth), in VICE: for SEEDS seeds
 and the generated levels 11-14, the map must be connected (every floor tile reachable from the stairs up, the stairs down
 among them), the border of the map is wall, there are at least MIN_FLOOR floor tiles and the generation time stays under
-MAX_GEN seconds (emulated). Palette of the level: 9 on level 11 (snowy rock), 10 on 12-14 (data/chapters.yaml map.palettes).
+MAX_GEN seconds (emulated). Palette of the level (data/chapters.yaml map.palettes): 9 on level 11 (white, snowy), 11 on 12 (icy), 10 on 13-14 (grey rock).
 Usage: python3 tests/regression/gen/test_caves.py"""
 import collections, os, random, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
@@ -60,7 +60,7 @@ def main():
                 if t > MAX_GEN:
                     err.append("%s: generation %.2f s (max %.1f s)" % (tag, t, MAX_GEN))
                 look = g.b(L["lv_look"] + lv)
-                want = 9 if lv == 11 else 10
+                want = {11: 9, 12: 11}.get(lv, 10)
                 if look & 15 != want or not look & 0x10:
                     err.append("%s: lv_look %02x (palette %d and caves wanted)" % (tag, look, want))
         print("caves: %d seeds x levels 11-14, slowest generation %.2f s" % (SEEDS, worst))

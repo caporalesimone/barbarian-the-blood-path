@@ -2,7 +2,7 @@
 `map: {style: caves}` (data/chapters.yaml); li usa tools/build/gen_gfx.py al posto dei mattoni nel file del tema dei piani.
 
 Classi dei pixel multicolor (palette in src/game.asm): 0 sfondo (nero), 1 roccia (pal_c1), 2 neve sulle creste o roccia
-chiara (pal_c2: bianco nella palette 9 del piano 11, grigio chiaro nella 10), 3 ombre (colore della RAM: blu nella 9, nero
+chiara (pal_c2: bianco nelle palette 9 e 11 dei piani 11 e 12, grigio chiaro nella 10), 3 ombre (colore della RAM: blu nelle 9 e 11, nero
 nella 10). Le crepe degli strati sono buchi neri (classe 0): stanno bene con tutte e due le palette. Generatore casuale proprio: gli altri tile e file non cambiano."""
 import random
 

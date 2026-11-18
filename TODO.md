@@ -278,8 +278,9 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - (18/11) **Directory e finestra di Krill** (risolto per PERF-12, [docs/wiki/FastLoader.md](docs/wiki/FastLoader.md) 7.2):
   Krill cerca i file in una finestra di 11 voci e va solo in avanti nella directory; con 52 voci un giro costa ~1,3 s e i
   tempi cambiano a scatti spostando un file. Scelto (19 dischi misurati) l'ordine L6 con la directory a interleave 2:
-  villaggio → piano 1 dopo un salvataggio 6,0 → 3,8 s, in1 5,6 → 2,8 s, totale delle misure −7,7 s. **Da fare**: meno file
-  (unire QST2-QST8 e i brani SND in pochi file) per accorciare il giro e rendere i tempi meno dipendenti dalla sequenza.
+  villaggio → piano 1 dopo un salvataggio 6,0 → 3,8 s, in1 5,6 → 2,8 s, totale delle misure −7,7 s. (18/11 pomeriggio)
+  code dei file (FastLoader 7.3): brani e mappe del boss dentro `TWNc`/`GFXn`, niente `BOSSCHc`, totale 73,6 s. **Resta**: le
+  pagine QST1-QST8 (8 voci) in meno file quando i testi delle quest saranno veri (oggi segnaposto: si deciderà sulle misure).
 - **Stato (12/11 sera, VICE, 42 file sul disco)**: scale nello stesso capitolo **2,24 s** (`PERF-DISK-13`; obiettivo del
   committente < 2 s), ingresso completo nel villaggio 4,8-4,9 s (`PERF-DISK-14`), tema `GFXn` 1,34 s, save nel dungeon
   8,3-9,3 s, save nel villaggio 9,45 s (soglia 9,5 s). Limiti in `tests/regression/perf_disk` (quelli del committente portati a
@@ -437,13 +438,12 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - (12/11, committente) **Confermato**: un tema grafico dei livelli per capitolo (`GFX1..8`) va bene così.
 
 ### M11 (18/11) Stile delle mappe per capitolo — L
-- **Fatto (18/11)**: grotte nel capitolo 3 (piano 11 roccia innevata, 12-14 roccia): [dungeon](docs/wiki/dungeon.md) "Grotte".
+- **Fatto (18/11)**: grotte nel capitolo 3 (piano 11 innevato, 12 ghiaccio azzurrino, 13-14 roccia grigia): [dungeon](docs/wiki/dungeon.md) "Grotte".
   Da rivedere con il committente in gioco: forma (macchie e gallerie), colori delle palette 9 e 10, tempo di generazione
   (0,8-0,95 s contro 0,3 s delle stanze).
-- **Palude** (capitolo 2, decisa il 18/11: [quests](docs/wiki/quests.md) 9bis): piani 6-9 affiancati 2 × 2 in un'unica mappa,
-  si passa camminando oltre il bordo (niente scale), acqua verde scura, isole, passerelle. Serve: varchi sul bordo dal seed
-  del capitolo, modo di arrivo "dal bordo" in `change_level`, tile acqua/riva/assi nel tema 3, passaggio veloce (sotto 1 s:
-  tema non riletto se uguale, niente dissolvenza). Da decidere: minimappa, varchi per lato, piano 6.
+- **Palude** (capitolo 2, prototipo del 18/11 pomeriggio: [dungeon](docs/wiki/dungeon.md) "Palude"): piani 6-9 in fila da ovest a
+  est, cancelli sui bordi al posto delle scale (il caricamento resta), isole, passerelle, palette 12 unica. Da rivedere con il
+  committente in gioco: colori dell'acqua, cancelli, isole; restano facoltativi le pozze che rallentano e i mostri sull'acqua.
 - **Cittadella** (capitolo 4, BSP simmetrico): da fare dopo la palude.
 - **Attenzione**: ogni stile cambia i piani salvati di quel capitolo (`GVER`, `test_gen`).
 

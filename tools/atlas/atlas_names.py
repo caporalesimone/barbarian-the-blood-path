@@ -11,11 +11,20 @@ TILE = {
     # dungeon (files GFX1/GFX2, slots 0..26)
     "WALL": ("wall", "dungeon wall seen from above (solid)"),
     # (18/11, TODO M11) grotte (capitolo 3, tools/build/cave_gfx.py): stessi posti, roccia al posto dei mattoni
-    "CAVE:WALL": ("rock", "cave rock seen from above (solid); snow flecks on level 11 (palette 9)"),
-    "CAVE:WALLFACE": ("rock face", "rock face above a floor: snowy (palette 9) or pale crest, strata, shade at the bottom"),
+    "CAVE:WALL": ("rock", "cave rock seen from above (solid); snow flecks on level 11 (palette 9), ice on 12 (11)"),
+    "CAVE:WALLFACE": ("rock face", "rock face above a floor: snowy (palette 9), icy (11) or pale crest (10), strata, shade at the bottom"),
     "CAVE:FLOOR": ("cave floor", "dark earth with gravel"),
     "CAVE:FLOORB": ("cave floor, stone", "cave floor with a stone (random variant set by post_walls, 1/8)"),
     "CAVE:FLOORC": ("cave floor, pebbles", "cave floor with pebbles (random variant set by post_walls, 1/8)"),
+    # (18/11) palude (capitolo 2, tools/build/swamp_gfx.py)
+    "SWAMP:WALL": ("swamp water", "dark green sludge (solid): the water around the islands"),
+    "SWAMP:WALLFACE": ("bank", "water above an island or a boardwalk, with reeds (post_walls)"),
+    "SWAMP:FLOOR": ("mud", "mud and grass of an island"),
+    "SWAMP:FLOORB": ("mud, tall grass", "mud with a tuft of tall grass (random variant set by post_walls, 1/8)"),
+    "SWAMP:FLOORC": ("mud, puddle", "mud with a puddle (random variant set by post_walls, 1/8)"),
+    "SWAMP:PATH": ("boardwalk", "planks over the water between the islands (slot 14, walkable, T_PLANK)"),
+    "SWAMP:STAIRSD": ("gate east", "wooden gate on the east border: to the next level of the swamp (stairs down)"),
+    "SWAMP:STAIRSU": ("gate west", "wooden gate on the west border: to the level before or the village (stairs up)"),
     "WALLFACE": ("wall face", "wall with its face showing: post_walls puts it above a floor"),
     "FLOOR": ("floor", "dungeon floor"),
     "FLOORB": ("floor B", "cracked floor (random variant set by post_walls, 1/8)"),

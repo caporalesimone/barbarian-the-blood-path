@@ -370,3 +370,73 @@ _silent jsr sp_stop
         rts
 _steady jmp sp_play
 
+; (18/11, revisione dei file, docs/wiki/FastLoader.md 7.3) CODA dei file TWNc e GFXn (tools/build/bundle.py): l'ultimo byte
+; del file dice cosa c'e' prima di lui. 0..SND_N-1 = un brano (i suoi snd_llo/hi byte subito prima del segno): si copia nel
+; buffer del luogo, come se snd_get l'avesse letto (TWNc: il brano del villaggio; GFX(2c-1): il brano del capitolo; GFX8: il
+; boss finale), cosi' music_town / music_dungeon non cercano il file SNDn. $80 = mappa del piano del boss (GFX(2c), c = 1-3)
+; a GFX_DUN_END: bmap_load la scompatta da li' invece di leggere BOSSCHc. Altro valore: niente coda (il gioco legge i file
+; come prima). Il buffer si tocca solo se ha un altro brano (change_level ha gia' sfumato la musica).
+gfx_tail:
+        lda #0
+        sta bm_tail
+        bcs _r                  ; lettura fallita: niente coda
+        lda krill_endaddrlo
+        sec
+        sbc #1
+        sta ptr0
+        lda krill_endaddrhi
+        sbc #0
+        sta ptr0+1
+        sei
+        lda #$35                ; la coda sta sotto il KERNAL
+        sta $01
+        ldy #0
+        lda (ptr0),y
+        bpl _snd
+        cmp #$80
+        bne _x
+        sta bm_tail             ; mappa del boss a GFX_DUN_END
+        beq _x
+_snd    cmp #SND_N
+        bcs _x
+        tax
+        inx
+        cpx snd_cur             ; gia' nel buffer del luogo
+        beq _x
+        stx snd_cur
+        dex
+        lda ptr0                ; inizio del brano = segno - lunghezza
+        sec
+        sbc snd_llo,x
+        sta ptr0
+        lda ptr0+1
+        sbc snd_lhi,x
+        sta ptr0+1
+        lda #<SND_LBUF
+        sta ptr1
+        lda #>SND_LBUF
+        sta ptr1+1
+        lda snd_llo,x           ; tmp0/tmp1 = byte da copiare
+        sta tmp0
+        lda snd_lhi,x
+        sta tmp1
+        ldy #0
+_c      lda (ptr0),y
+        sta (ptr1),y
+        iny
+        bne +
+        inc ptr0+1
+        inc ptr1+1
++       lda tmp0
+        bne +
+        dec tmp1
++       dec tmp0
+        lda tmp0
+        ora tmp1
+        bne _c
+_x      lda #$36
+        sta $01
+        cli
+        clc
+_r      rts
+bm_tail .byte 0                 ; $80: la mappa del piano del boss e' a GFX_DUN_END (coda del tema)

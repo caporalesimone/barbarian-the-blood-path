@@ -517,12 +517,13 @@ bar_target:                     ; X = indice mostro (preservato)
 ; ===================================================================
 loc_lo  .byte 0, <ls_down, <ls_up, <ls_tdown, <ls_portal, <ls_chest, <ls_kchest, <ls_gchest
         .byte <ls_smith, <ls_alch, <ls_fount, <ls_uptown, <ls_ptown, <ls_nokey, <ls_home, <ls_near, <ls_abyss
-        .byte <ls_lever, <ls_epic, <ls_travel, <q_gvr1, <ls_qgv
+        .byte <ls_lever, <ls_epic, <ls_travel, <q_gvr1, <ls_qgv, <ls_gdn, <ls_gup, <ls_gtown
 loc_hi  .byte 0, >ls_down, >ls_up, >ls_tdown, >ls_portal, >ls_chest, >ls_kchest, >ls_gchest
         .byte >ls_smith, >ls_alch, >ls_fount, >ls_uptown, >ls_ptown, >ls_nokey, >ls_home, >ls_near, >ls_abyss
-        .byte >ls_lever, >ls_epic, >ls_travel, >q_gvr1, >ls_qgv
+        .byte >ls_lever, >ls_epic, >ls_travel, >q_gvr1, >ls_qgv, >ls_gdn, >ls_gup, >ls_gtown
+gate_id .byte 22, 23, 0, 0, 0, 0, 0, 0, 0, 0, 24   ; (18/11) palude: id 1, 2, 11 -> cancelli
 ; numero da accodare: 0 nessuno, 1 = livello+1, 2 = livello-1, 3 = livello di ritorno del portale, 4 = 1
-loc_numk .byte 0, 1, 2, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+loc_numk .byte 0, 1, 2, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0
         .enc "screen"
 ls_down   .text "stairs down to level ", 0        ; (12/11, committente) + piano del capitolo 1..5 (loc_cl)
 ls_up     .text "stairs up to level ", 0
@@ -543,6 +544,9 @@ ls_abyss  .text "the endless abyss", 0
 ls_lever  .text "a suspicious lever", 0
 ls_epic   .text "epic chest", 0
 ls_travel .text "travel to next chapter", 0     ; (12/11, testo provvisorio del committente)
+ls_gdn    .text "gate to level ", 0              ; (18/11) palude: cancello est (verso il piano dopo)
+ls_gup    .text "gate back to level ", 0         ; cancello ovest
+ls_gtown  .text "gate back to town", 0
         .enc "none"
 
 ; id etichetta (0 = nessuna) per il tile sotto il giocatore -> A
@@ -610,8 +614,7 @@ loc_id:
 +       ldy #1
         cmp #T_STAIRSD
         bne +
-        tya
-        rts
+        jmp _gate
 +       cmp #T_STAIRSU
         bne _n2
         ldy #2
@@ -619,10 +622,21 @@ loc_id:
         jsr lv_grp
         cpx #0
         beq +
-        jmp _r
+        jmp _gate
 +
         ldy #11
-        bne _r
+_gate   txa                     ; (18/11) palude: "gate to ..." al posto di "stairs ..." (id 1, 2, 11 -> 22, 23, 24)
+        pha
+        ldx cur_level
+        lda lv_look,x
+        and #LK_SWAMP
+        beq +
+        lda gate_id-1,y
+        tay
++       pla
+        tax
+        tya
+        rts
 _n2     ldy #3
         cmp #T_TSTAIRS
         beq _r

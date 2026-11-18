@@ -252,7 +252,16 @@ _dun    lda spawn_mode
         adc #1
         ldx st_up_y
         jmp _put
-_dn     lda st_dn_x
+_dn     ldy cur_level           ; (18/11) palude: il cancello est sta sul bordo, l'eroe compare a ovest del cancello
+        lda lv_look,y
+        and #LK_SWAMP
+        beq +
+        lda st_dn_x
+        sec
+        sbc #1
+        ldx st_dn_y
+        jmp _put
++       lda st_dn_x
         clc
         adc #1
         ldx st_dn_y

@@ -581,12 +581,13 @@ col_fill:
         bne -
         rts
 
-; palette 0 villaggio, 1-8 dungeon (scelte da pal_for_level), (18/11) 9 grotta innevata e 10 grotta di roccia (capitolo 3:
-; data/chapters.yaml map.palettes, tabella lv_look). Coppie di bit: 01 = pal_c1, 10 = pal_c2, 11 = colore della RAM (0-7)
-pal_bg  .byte 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-pal_c1  .byte 9, 11, 11, 6, 2, 9, 5, 4, 11, 12, 9
-pal_c2  .byte 15, 9, 8, 14, 10, 7, 13, 10, 12, 1, 15
-pal_ram .byte 11, 15, 15, 11, 15, 15, 15, 15, 15, 14, 8
+; palette 0 villaggio, 1-8 dungeon (scelte da pal_for_level); dal 18/11 palette fisse dei piani (data/chapters.yaml
+; map.palettes, tabella lv_look): 9 grotta innevata (bianca), 10 grotta di roccia (grigia), 11 grotta di ghiaccio (azzurrina),
+; 12 palude (una per tutti i piani). Coppie di bit: 01 = pal_c1, 10 = pal_c2, 11 = colore della RAM (0-7)
+pal_bg  .byte 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+pal_c1  .byte 9, 11, 11, 6, 2, 9, 5, 4, 11, 15, 12, 14, 9
+pal_c2  .byte 15, 9, 8, 14, 10, 7, 13, 10, 12, 1, 15, 1, 5
+pal_ram .byte 11, 15, 15, 11, 15, 15, 15, 15, 15, 14, 8, 14, 13
 
 ; ------------------------------------------------------------------ PRNG xorshift16
 ; ritorna A casuale (hi)

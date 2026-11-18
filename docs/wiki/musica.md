@@ -18,7 +18,9 @@ unico), `src/game/music.asm` (logica del gioco: scelta, caricamento, dissolvenze
 
 **Dal 12/11** (TODO M2) `PLAYLIST` ha in `town` e `level` **un brano per capitolo** (1..4, nell'ordine); un brano ripetuto è
 un solo file (`songs.game_files`), e `tools/build/gen_music.py` scrive le tabelle `snd_town_c` / `snd_lvl_c` (`out/work/music_tab.inc`).
-`snd_get` **non rilegge un brano già nel buffer** (`snd_cur`): fra i piani dello stesso capitolo il brano del luogo e il
+(18/11) Il brano del villaggio sta nella coda del file `TWNc`, quello dei piani del capitolo nella coda di `GFX(2c−1)`, quello
+del boss finale nella coda di `GFX8` ([FORMATO_DATI](FORMATO_DATI.md), "Coda dei file"): `gfx_tail` lo copia nel buffer del
+luogo appena letto il file, quindi di solito `snd_get` lo trova già lì. `snd_get` **non rilegge un brano già nel buffer** (`snd_cur`): fra i piani dello stesso capitolo il brano del luogo e il
 motivetto di combattimento non toccano il disco. Misura (`PERF-DISK-13`, VICE): scale nello stesso capitolo da 2,80 s a
 **2,24 s**. Il combattimento resta un elenco (uno a caso per piano; al massimo 36 file `SND0`–`SNDZ`). I candidati non scelti (`03_the_watcher`, `11_crypt_steps`,
 `12_bone_halls`, `14_war_drums`, `21_*`–`23_*`, `32_fight_2`, `33_fight_3`) restano in `SONGS`.

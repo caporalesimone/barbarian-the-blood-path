@@ -94,7 +94,8 @@ load_gfx:
         sta ptr1+1
         txa
         bne +
-        jmp load_raw
+        jsr load_raw
+        jmp gfx_tail
 +
         lda #<GFX_DUN_AT
         sta ptr0
@@ -104,7 +105,9 @@ load_gfx:
         sta ptr1
         lda #>GFX_DUN_END
         sta ptr1+1
-        jmp load_raw
+        jsr load_raw
+        jmp gfx_tail            ; (18/11) coda del file: music.asm
+
 
 ; (15/11, TODO D12) legge il file di nome gia' impostato in FIN_AT..FIN_END (FMAP e BOSSCHc)
 fin_rd:
@@ -148,7 +151,12 @@ fin_unp sta ptr0                ; ptr0 = flusso RLE -> MAP
 ; (12/11, TODO M1) mappa del piano del boss del capitolo (file BOSSCHc, tools/build/gen_bossmap.py) -> MAP: stesso buffer
 ; di FMAP (FIN_AT); i primi 4 byte sono scale di arrivo (x, y) e posto del boss (x, y) -> bm_hdr, poi l'RLE
 bmap_load:
-        ldy #nm_bch-nm_tab
+        lda bm_tail             ; (18/11) mappa nella coda del tema GFX(2c): niente disco
+        beq _disk
+        lda #<GFX_DUN_END
+        ldx #>GFX_DUN_END
+        jmp bm_unp
+_disk   ldy #nm_bch-nm_tab
         lda #6
         jsr set_name
         sta io_what
@@ -162,19 +170,29 @@ bmap_load:
         lda #7
         sta nlen
         jsr fin_rd
+        lda #<FIN_AT
+        ldx #>FIN_AT
+bm_unp  sta ptr2                ; A/X = file della mappa: 4 byte di intestazione (bm_hdr), poi l'RLE
+        stx ptr2+1
         sei
         lda #$35
         sta $01
-        ldx #3
--       lda FIN_AT,x
-        sta bm_hdr,x
-        dex
+        ldy #3
+-       lda (ptr2),y
+        sta bm_hdr,y
+        dey
         bpl -
         lda #$36
         sta $01
         cli
-        lda #<(FIN_AT+4)
-        ldx #>(FIN_AT+4)
+        lda ptr2
+        clc
+        adc #4
+        pha
+        lda ptr2+1
+        adc #0
+        tax
+        pla
         jmp fin_unp
 
 ; modulo LOBBY (menu iniziale) -> $C000 ed esecuzione (il menu restituisce A come ui_menu)

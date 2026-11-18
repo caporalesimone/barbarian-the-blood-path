@@ -16,10 +16,10 @@ Dal 12/11 (branch `capitoli`) il gioco ha la **sequenza** dei 4 capitoli, con co
 
 ```mermaid
 flowchart LR
-    V1["Villaggio 1<br/>TWN1"] -->|cripta| L1["piani 1-4<br/>(generati)"] --> B1["piano 5<br/>BOSSCH1"]
+    V1["Villaggio 1<br/>TWN1"] -->|cripta| L1["piani 1-4<br/>(generati)"] --> B1["piano 5<br/>mappa fissa<br/>(coda di GFX2)"]
     B1 -->|boss ucciso: c_unl = 2| V1
     V1 -->|"uscita a nord (=)<br/>travel to next chapter"| V2["Villaggio 2<br/>TWN2"]
-    V2 -->|cripta| L2["piani 6-9"] --> B2["piano 10<br/>BOSSCH2"]
+    V2 -->|cripta| L2["piani 6-9<br/>(palude)"] --> B2["piano 10<br/>mappa fissa<br/>(coda di GFX4)"]
     V2 -.-> V3["Villaggio 3 ..."] -.-> V4["Villaggio 4<br/>TWN4"]
     V4 -->|cripta| L4["piani 16-19"] --> F["piano 20<br/>sala del trono (FMAP)"]
 ```
@@ -30,7 +30,7 @@ flowchart LR
 | Stato dell'eroe | `c_chap` (capitolo in cui si gioca) e `c_unl` (capitolo più alto sbloccato), `SAVE_VER` $C7 | `game.asm`, [formato](FORMATO_DATI.md) |
 | Villaggi | file `TWN1`…`TWN5` (`load_gfx 0` con `c_chap`). **Dal 15/11 ogni villaggio è diverso**: tile, mappa, colori, tile solidi, nome della cura e posizioni propri, nell'intestazione del file ([villaggio](villaggio.md#i-villaggi-dei-capitoli-1511)): Aldric's Crossing, Blackwater Mill (palafitte), The Last Camp (terrazze nella neve), Ruin's Gate (rovine attorno al cratere), The City of the Abyss (prototipo) | `disk.asm`, `levels.asm` (`town_k`), `tools/build/villages.py` |
 | Cripta | porta al primo piano del capitolo (`go_tdown`: `5(c−1)+1`); dal primo piano le scale salgono al villaggio | `game.asm`, `bar.asm` |
-| Piano del boss (5, 10, 15) | mappa fissa `BOSSCHc` (`data/maps/bosschapN.txt` → `tools/build/gen_bossmap.py`: 4 byte di intestazione con scale e boss, poi RLE come `FMAP`), letta nel buffer di `FMAP` (`bmap_load`), completata da `gen_cboss` (`post_walls`). Niente scale in giù, solo il boss del piano (`place_boss`, statistiche del piano). **Dal 15/11 ogni boss ha il suo sprite** (The Hollow Abbot, The Miller of Blackwater, Varok the Oathbreaker: `tools/build/monsters.py` `CBOSS`), nel posto del boss finale del file `GFX(2c)`, con il suo colore e il suo nome nella barra (blocco info del file); meccaniche decise ma non nel codice ([bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)); grafica `GFX(2c)` (tile della sala del trono), palette rossa | `gen_io.asm`, `disk.asm`, `game.asm` |
+| Piano del boss (5, 10, 15) | mappa fissa `BOSSCHc` (`data/maps/bosschapN.txt` → `tools/build/gen_bossmap.py`: 4 byte di intestazione con scale e boss, poi RLE come `FMAP`), (18/11) nella coda del tema `GFX(2c)`, scompattata da lì da `bmap_load` (il file `BOSSCHc` non è più sul disco: [FORMATO_DATI](FORMATO_DATI.md) "Coda dei file"), completata da `gen_cboss` (`post_walls`). Niente scale in giù, solo il boss del piano (`place_boss`, statistiche del piano). **Dal 15/11 ogni boss ha il suo sprite** (The Hollow Abbot, The Miller of Blackwater, Varok the Oathbreaker: `tools/build/monsters.py` `CBOSS`), nel posto del boss finale del file `GFX(2c)`, con il suo colore e il suo nome nella barra (blocco info del file); meccaniche decise ma non nel codice ([bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)); grafica `GFX(2c)` (tile della sala del trono), palette rossa | `gen_io.asm`, `disk.asm`, `game.asm` |
 | Sblocco | uccidere il boss del piano del boss del capitolo *c* → `c_unl` = *c*+1 (lampo del bordo) | `chap_won` |
 | Uscita | caselle `=` di `data/town_map.txt` (sentiero largo 2 a nord, dalla chiesa al bordo; il bordo della mappa è solido): chiusa = nessuna etichetta, il PG si ferma; aperta = `travel to next chapter` e con Fire `chap_travel`: musica sfumata, schermo nero, `c_chap`+1, eroe all'ingresso sud, salvataggio di eroe e piani (`chap_savef`), villaggio nuovo | `chapter.asm`, `tools/build/gen_maps.py` (`ALIASES`, `tx_exit`) |
 | Capitolo 4 | il piano 20 resta la sala del trono e il boss finale. (15/11, prototipo) Ucciso il boss finale `c_unl` = 5: l'uscita del villaggio 4 (la scala nel cratere) porta alla **città dell'Abisso** (`TWN5`), dove la Bocca non porta ancora da nessuna parte (`go_tdown`) | `game.asm` |

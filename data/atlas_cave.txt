@@ -1,4 +1,4 @@
-; (18/11) Grotta di esempio per l'atlante (sezioni CAVSN, CAVRK): la mappa del piano 12 generata dal gioco (seed ANOANO,
+; (18/11) Grotta di esempio per l'atlante (sezioni CAVSN, CAVIC, CAVRK): la mappa del piano 12 generata dal gioco (seed ANOANO,
 ; capitolo 3, src/game/gen_io.asm carve_blob/carve_worm/cave_smooth) con il portale aggiunto a mano. Stesse lettere di
 ; data/atlas_dungeon.txt (DUN_LEGEND): solo muri (#), pavimento (.) e oggetti; facce e pavimenti variati li mette post_walls.
 ################################################

@@ -49,7 +49,7 @@ flowchart TD
     CK -->|no| NA["rigenera senza stanze assenti"] --> GL
     CK -->|sì| EX["corridoi extra fra celle vicine<br/>(1 su lv_xl)"]
     EX --> CR["carve_rooms: scava le stanze raggiunte"]
-    CR --> SM["(grotte) cave_smooth"] --> GS["gen_stairs: scale su e giù"]
+    CR --> SM["(grotte, palude) cave_smooth"] --> GS["gen_stairs: scale su e giù<br/>(palude: swamp_gates)"]
     GS --> PW["post_walls: facciate dei muri,<br/>pavimento variato (2 su 8)"]
 ```
 
@@ -67,7 +67,7 @@ flowchart TD
 ### Grotte (capitolo 3, dal 18/11)
 Lo **stile della mappa** è per capitolo (`data/chapters.yaml`, campo `map`: `style: rooms|caves`, `palettes` per piano locale),
 compilato da `tools/build/gen_db.py` nella tabella **`lv_look`** (un byte per piano: bit 0-3 palette, 0 = quella casuale di
-`pal_for_level`; bit 4 = grotte). Oggi: capitolo 3 a grotte, piano 11 palette 9 (roccia innevata), 12-14 palette 10 (roccia);
+`pal_for_level`; bit 4 = grotte). Oggi: capitolo 3 a grotte, piano 11 palette 9 (bianca, innevata), 12 palette 11 (ghiaccio azzurrino), 13-14 palette 10 (roccia grigia);
 gli altri capitoli come prima. Con le grotte (`lv_cave`) cambiano tre passi, tutto il resto (stile, celle, `vis`, albero, anelli,
 scale, `post_walls`) resta uguale:
 - `carve_blob` al posto di `carve_rooms`: nella stanza una **macchia** = passeggiata casuale di (larghezza + altezza) × 8 passi
@@ -79,13 +79,35 @@ scale, `post_walls`) resta uguale:
 - `cave_smooth` dopo lo scavo: un passo di **automa cellulare** sui muri interni (un muro con al massimo 2 muri fra gli 8 vicini
   diventa pavimento: niente spuntoni); i muri si segnano prima e si cambiano dopo, così il risultato non dipende dall'ordine.
 - Grafica: nel file del tema dei piani del capitolo (`GFX5`) muro, parete e pavimenti sono di **roccia**
-  (`tools/build/cave_gfx.py`): parete con la cresta nel colore `pal_c2` (bianco = neve nella palette 9, grigio chiaro nella 10),
+  (`tools/build/cave_gfx.py`): parete con la cresta nel colore `pal_c2` (bianco = neve nelle palette 9 e 11, grigio chiaro nella 10),
   strati e crepe neri. Il file del boss (`GFX6`) resta quello di prima.
 - Costi (misurati in VICE, 18/11): generazione 0,76-0,95 s (stanze ~0,3 s); codice +567 B sotto l'I/O (`gen_io_end` `$DB5D`,
   `LVRAM` fino a `$DD2E`, 722 B liberi fino a `$E000`). Bauli: `chest_in_room` prova fino a 4 caselle del rettangolo (prima 1).
 - Test: `GEN-10` (mappe di riferimento, anche i piani 11 e 13) e `GEN-11` (6 seed × piani 11-14: tutto il pavimento
-  raggiungibile dalle scale, bordo di muro, almeno 300 caselle di pavimento, generazione sotto 1,2 s, palette 9/10).
+  raggiungibile dalle scale, bordo di muro, almeno 300 caselle di pavimento, generazione sotto 1,2 s, palette 9/11/10).
 - Versione del generatore `GVER` 6: un eroe salvato con la 5 tiene il seed e rigenera i piani (`migrate_char`).
+
+### Palude (capitolo 2, dal 18/11)
+Piani 6-9 (`map: {style: swamp}`, palette 12 per tutti): una **palude unica** fatta di quattro piani **affiancati da ovest a
+est**. Si passa da un piano all'altro con un **cancello** sul bordo (il caricamento resta, decisione del committente del 18/11):
+il cancello ovest prende il posto delle scale su (verso il piano prima; dal piano 6 verso il villaggio, "gate back to town"),
+quello est delle scale giù (verso il piano dopo; dal piano 9 verso il mulino del boss, piano 10). Fire sul cancello come sulle
+scale; si arriva accanto al cancello corrispondente del piano vicino, **sulla stessa riga**: la palude continua oltre il bordo.
+- Isole: le macchie delle grotte (`carve_blob` + `cave_smooth`), tutte e 16 (`lv_drop` = 0); acqua = muro (tile 0, solido),
+  riva = facciata del muro (`post_walls`).
+- `carve_plank` al posto dei corridoi: **passerelle** di assi larghe 1, a L fra i centri delle isole dell'albero di
+  `gen_links` (anelli compresi), solo sull'acqua; tile `PATH` (posto 14: calpestabile e mai usato nei dungeon).
+- `swamp_gates`: riga del cancello = (somma delle 6 cifre del seed + `gr_tab[confine mod 8]`) mod 36 + 6, dove il confine è il
+  numero del piano a ovest: il cancello est del piano *L* e quello ovest del piano *L*+1 la calcolano uguale. Il cancello
+  ovest sta a x = 1, quello est a x = 46, ciascuno con la passerella fino al centro dell'isola della sua fascia (colonna 0 o 3:
+  `st_s`, `st_e`). Arrivando dal piano dopo l'eroe compare a ovest del cancello est (`place_player`).
+- Etichette: "gate to level N", "gate back to level N", "gate back to town" (`loc_id`, `gate_id`).
+- Grafica: `tools/build/swamp_gfx.py` nel tema `GFX3` (acqua verde scura con riflessi, riva con le canne, fango ed erba,
+  passerelle, cancelli); il file del boss (`GFX4`) resta com'era.
+- Misure (VICE, 18/11): generazione 0,84-0,87 s; codice +326 B sotto l'I/O. Test `GEN-12` (5 seed × piani 6-9: cancelli sui
+  bordi, righe uguali fra piani vicini, tutto raggiungibile, tempo) e `GEN-10` (piani 6 e 9 di riferimento).
+- Differenza dal disegno del mattino (quadrato 2 × 2): i piani sono in fila (1 × 4), così ogni piano ha due soli vicini e
+  bastano i due cancelli che prendono il posto delle scale, senza modi di arrivo nuovi.
 
 ### Scale
 - `gen_stairs`: scale **su** al centro di una stanza a caso (`st_s`), scale **giù** al centro di un'altra (`st_e`)
@@ -109,7 +131,7 @@ Il tema del piano successivo si precarica in background ([Tecnica](tecnica.md)).
 ## Piani del boss dei capitoli 1–3: 5, 10, 15 (`gen_cboss`, 12/11)
 
 Ultimo piano dei capitoli 1–3 (`is_cboss`: indice 4 nel gruppo di 5, non `MAXLEVEL`; `lv_cboss` da `chap_enter`):
-mappa fissa `BOSSCHc` (`data/maps/bosschapN.txt` → `tools/build/gen_bossmap.py`, segnaposto quadrato: sala 16×16 e corridoio
+mappa fissa `BOSSCHc` (dal 18/11 nella coda del tema `GFX(2c)`; `data/maps/bosschapN.txt` → `tools/build/gen_bossmap.py`, segnaposto quadrato: sala 16×16 e corridoio
 da sud) letta da `bmap_load` nel buffer di `FMAP`; i 4 byte di testa danno scale di arrivo e posto del boss (`bm_hdr`).
 `gen_cboss` (sotto l'I/O) prepara le due stanze logiche (arrivo, sala) e chiama `post_walls`. Niente scale in giù, nessun
 mostro normale (`spawn_monsters` esce subito), solo il boss del piano (`place_boss`, al centro della sala, statistiche del

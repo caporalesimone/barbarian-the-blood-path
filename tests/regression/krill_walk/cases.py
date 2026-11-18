@@ -12,6 +12,18 @@ from lib.loads import LoadCheck
 CHAIN = True
 
 
+def song(ctx, where, tab, c):
+    """(18/11) the song of the place (tail of TWNc / GFXn) is in the buffer of the place, byte for byte, and snd_cur says so"""
+    import os, re
+    from lib.c64 import OUT
+    g = ctx["g"]; L = g.L
+    t = open(os.path.join(OUT, "music_tab.inc")).read()
+    k = int(re.search(r"^%s\s+\.byte\s+([\d, ]+)" % tab, t, re.M).group(1).split(",")[c - 1])
+    d = open(os.path.join(OUT, "snd", "snd%d.prg" % k), "rb").read()[2:]
+    if g.b(L["snd_cur"]) != k + 1 or bytes(g.mem(L["SND_LBUF"], len(d))) != d:
+        ctx.setdefault("song_err", []).append("%s: song %d not in the buffer of the place (snd_cur %d)" % (where, k, g.b(L["snd_cur"])))
+
+
 def setup(ctx):
     g = ctx["g"] = Game()
     g.to_menu()
@@ -30,7 +42,9 @@ def walk(ctx):
     for c in range(1, 5):
         check(g.b(L["c_chap"]) == c, "chapter %d expected, c_chap %d" % (c, g.b(L["c_chap"])))
         f = (c - 1) * 5 + 1
-        lv(f); lv(f + 1); lv(f, 1); lv(0)             # crypt, stairs down, stairs up, back to the village
+        lv(f); song(ctx, "level %d" % f, "snd_lvl_c", c)
+        lv(f + 1); lv(f, 1); lv(0)                    # crypt, stairs down, stairs up, back to the village
+        song(ctx, "village %d" % c, "snd_town_c", c)
         for n in range(f, f + 5): lv(n)               # down to the boss level (chapter 4: the throne room)
         lc.call(L["chap_won"])
         lv(0)                                         # village of the chapter: TWNc, MENU (one file since 18/11), SND0
@@ -41,6 +55,9 @@ def walk(ctx):
     names = [n for n, _, _ in lc.loads]
     bad = lc.bad()
     check(not bad, "%d of %d loads differ from their file: %s" % (len(bad), len(names), "; ".join("%s (%s)" % b for b in bad[:8])))
-    for need in ("menu", "snd0", "fmap", "bossch1", "bossch2", "bossch3", "twn5", "ksave", "lobby"):
+    # (18/11) SND0..SND5 and BOSSCH1..3 are in the tails of TWNc / GFXn (tools/build/bundle.py): the walk does not read them
+    for need in ("menu", "twn1", "gfx2", "gfx4", "gfx6", "fmap", "twn5", "ksave", "lobby"):
         check(need in names, "the walk did not load %s (%d loads: %s)" % (need, len(names), " ".join(names)))
-    check(("menu", "snd0") in lc.pairs(), "snd0 never loaded right after menu (the drive's next-file cache)")
+    for n in ("snd0", "snd1", "snd2", "snd3", "snd4", "bossch1", "bossch2", "bossch3"):
+        check(n not in names, "the walk loaded %s: its data are in a tail (%d loads: %s)" % (n, len(names), " ".join(names)))
+    check(not ctx.get("song_err"), "; ".join(ctx.get("song_err", [])))

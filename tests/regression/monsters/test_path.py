@@ -11,8 +11,8 @@ CASES = [  # (level, monster tile, hero tile): the old code stayed at the monste
     (1, (18, 10), (13, 15)),
     (1, (13, 16), (6, 18)),
     (3, (38, 32), (41, 27)),
-    (6, (37, 21), (41, 25)),
-    (7, (5, 22), (5, 29)),
+    # (18/11) the cases on levels 6 and 7 are gone: since then they are swamp levels (islands and boardwalks), their maps are not
+    # those of the simulator any more
 ]
 err = []
 T.fresh()

@@ -2,8 +2,9 @@
 # Crea il d64 del gioco (11/11, regola del committente: una sola build, un solo disco).
 # Uso: tools/build/mkdisk.sh [out.d64] [prg]   (default: out/work/disk.d64, out/work/game.zx0)
 #   BARBARIAN = loader con il menu (storia / manuale / gioco); POKE 1020,1 prima del RUN = subito START (docs/wiki/cheats.md).
-# File: BARBARIAN, START, GAME (ZX0), MENU, FMAP, TWN1..5 (villaggi dei capitoli), BOSSCH1..3 (piani dei boss),
-# GFX1..8 (grafica dei capitoli: dungeon e boss),
+# File: BARBARIAN, START, GAME (ZX0), MENU, FMAP, TWN1..5 (villaggi dei capitoli, con il loro brano in coda),
+# GFX1..8 (grafica dei capitoli: dungeon con il brano del capitolo in coda, boss con la mappa del piano del boss in coda;
+# tools/build/bundle.py),
 # SND0..n (brani, tools/build/gen_music.py), TITLE, LORE, LDAT, HELP, JUKEBOX, HL e SAVE-01..05 (salvataggi, Krill).
 # TWN_LAYOUT (variabile d'ambiente, 15/11, TODO M1: posizione dei villaggi sul disco; vedi docs/wiki/FastLoader.md e PERF-DISK-21..25):
 #   end     TWN1 fra i primi file; TWN2..TWN5 in fondo, con la grafica dei loro capitoli (come dal 15/11)
@@ -21,6 +22,8 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 OUT=${1:-out/work/disk.d64}; PRG=${2:-out/work/game.zx0}     # GAME compresso ZX0 (tools/build/pack.py)
 rm -f "$OUT"
 BRB=out/work/barbarian.prg
+# (18/11, revisione dei file, docs/wiki/FastLoader.md 7.3) TWNc e GFXn con la coda (brano del luogo o mappa del boss): out/work/bundle/
+python3 tools/build/bundle.py > out/work/bundle.log || { cat out/work/bundle.log; echo "mkdisk: errore delle code (bundle.py)"; exit 1; }
 # (11/11, ramo fast-loader) salvataggi per Krill: file gia' presenti con la lunghezza giusta (il plugin di save
 # riscrive solo file esistenti con lo stesso numero di blocchi): hl (elenco eroi) e save-01..05 (un file per eroe)
 python3 - <<'PY' || { echo "mkdisk: errore file dei salvataggi"; exit 1; }
@@ -40,37 +43,36 @@ command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container la
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
       -f menu -w out/work/menu.prg)       # (18/11) modulo MENU: un file solo (prima menu1..menu5, tools/build/pack_menu.py)
 HUB=0; case $TWN_LAYOUT in hub|hubchap) HUB=1;; esac     # HUB=1: il brano del villaggio (SND0) e i villaggi subito dopo MENU
-[ $HUB = 1 ] && ARGS+=(-f snd0 -w out/work/snd/snd0.prg -f twn1 -w out/work/twn1.prg)
-[ $TWN_LAYOUT = hub ] && ARGS+=(-f twn2 -w out/work/twn2.prg -f twn3 -w out/work/twn3.prg -f twn4 -w out/work/twn4.prg -f twn5 -w out/work/twn5.prg)
+[ $HUB = 1 ] && ARGS+=(-f snd0 -w out/work/snd/snd0.prg -f twn1 -w out/work/bundle/twn1.prg)
+[ $TWN_LAYOUT = hub ] && ARGS+=(-f twn2 -w out/work/bundle/twn2.prg -f twn3 -w out/work/bundle/twn3.prg -f twn4 -w out/work/bundle/twn4.prg -f twn5 -w out/work/bundle/twn5.prg)
 ARGS+=(-f fmap -w out/work/fmap.prg)
 TW="1"; [ $TWN_LAYOUT = start ] && TW="1 2 3 4 5"; [ $HUB = 1 ] && TW=""
-for c in $TW; do ARGS+=(-f twn$c -w out/work/twn$c.prg); done     # (15/11) villaggi dei capitoli, ognuno con tile, mappa e colori suoi (tools/build/villages.py): qui il capitolo 1, gli altri in fondo (5 = la citta' dell'Abisso, prototipo)
-BC="1 2 3"; case $TWN_LAYOUT in chapter|hubchap) BC="1";; esac       # (chapter) BOSSCH2 e 3 vanno con il loro capitolo, in fondo
-for c in $BC; do ARGS+=(-f bossch$c -w out/work/bossch$c.prg); done    # (12/11) piani del boss dei capitoli 1-3 (segnaposto, tools/build/gen_bossmap.py)
-for f in out/work/gfx/gfx[12].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done     # capitolo 1: dungeon e boss (i file dei capitoli 2-4 in fondo al disco: lasciano ai file usati spesso le tracce di prima)
+for c in $TW; do ARGS+=(-f twn$c -w out/work/bundle/twn$c.prg); done     # (15/11) villaggi dei capitoli, ognuno con tile, mappa e colori suoi (tools/build/villages.py): qui il capitolo 1, gli altri in fondo (5 = la citta' dell'Abisso, prototipo)
+# (18/11) niente piu' BOSSCH1..3: la mappa del piano del boss sta nella coda di GFX(2c) (tools/build/bundle.py)
+for f in out/work/bundle/gfx[12].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done     # capitolo 1: dungeon e boss (i file dei capitoli 2-4 in fondo al disco: lasciano ai file usati spesso le tracce di prima)
 for f in out/work/snd/snd*.prg; do n=$(basename $f .prg); [ $HUB = 1 ] && [ $n = snd0 ] && continue; ARGS+=(-f $n -w $f); done     # brani (tools/build/gen_music.py)
 ARGS+=(-f title -w out/work/title.prg -f lore -w out/work/lore.prg -f ldat -w out/work/ldat.prg -f help -w out/work/helpz.prg -f jukebox -w out/work/jukebox.prg)
 ARGS+=(-f hl -w out/work/hl.prg -f ksave -w out/work/krill/save.prg)     # ksave: plugin di save di Krill, ricaricato a ogni save
 for s in 1 2 3 4 5; do ARGS+=(-f save-0$s -w out/work/save.prg); done
 # (18/11, PERF-12, docs/wiki/FastLoader.md 7.2) Krill cerca un file in una finestra di 11 voci della directory e, se non c'e',
 # legge i settori della directory successivi in giro (solo in avanti). Dopo un salvataggio la finestra sta sui file di
-# salvataggio: per la prima discesa nel piano 1 servono GFX1 e SND1, che stanno prima. Due voci in piu' (loop file di cc1541,
-# stessi dati) subito dopo save-05 li fanno trovare senza fare il giro: villaggio -> piano 1 dopo un salvataggio 6,0 -> 3,8 s.
-# Al loro posto prima c'erano QST0 e QST1, spostate in fondo: il giro della directory resta di 52 voci e le voci dei capitoli
-# 2-5 restano alla stessa posizione.
-ARGS+=(-m -N -f gfx1 -l gfx1 -N -f snd1 -l snd1)
+# salvataggio: per la prima discesa nel piano 1 serve GFX1, che sta prima. Una voce in piu' (loop file di cc1541,
+# stessi dati) subito dopo save-05 lo fa trovare senza fare il giro: villaggio -> piano 1 dopo un salvataggio 6,0 -> 3,8 s.
+# Al suo posto prima c'erano QST0 e QST1, spostate in fondo. (18/11 pomeriggio) 50 voci: niente BOSSCHc (coda di GFX(2c)).
+ARGS+=(-m -N -f gfx1 -l gfx1)      # (18/11 pomeriggio) senza la voce doppia di SND1: il brano del capitolo sta nella coda di GFX1
+                                    # (tools/build/bundle.py); misurato: somma dei tempi 76,2 -> 73,6 s, nessun test fuori
 # (17/11) menu dei trucchi: solo debug e test (asm.sh lo toglie in release). (18/11) in release al suo posto una voce in piu'
 # di hl (loop file): la directory ha le stesse voci nelle stesse posizioni, quindi gli stessi tempi di debug.
 if [ -f out/work/cheats.prg ]; then ARGS+=(-f cheats -w out/work/cheats.prg); else ARGS+=(-N -f hl -l hl); fi
 case $TWN_LAYOUT in
-  end)     for c in 2 3 4 5; do ARGS+=(-f twn$c -w out/work/twn$c.prg); done     # villaggi dei capitoli 2-5: in fondo, con la grafica dei loro capitoli (i file del capitolo 1 restano sulle prime tracce)
-           for f in out/work/gfx/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;     # capitoli 2-4 (segnaposto)
-  hub)     for f in out/work/gfx/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;
-  start)   for f in out/work/gfx/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;
-  chapter|hubchap) for c in 2 3; do ARGS+=(-f twn$c -w out/work/twn$c.prg -f bossch$c -w out/work/bossch$c.prg
-                                   -f gfx$((2*c-1)) -w out/work/gfx/gfx$((2*c-1)).prg -f gfx$((2*c)) -w out/work/gfx/gfx$((2*c)).prg); done
-           ARGS+=(-f twn4 -w out/work/twn4.prg -f gfx7 -w out/work/gfx/gfx7.prg -f gfx8 -w out/work/gfx/gfx8.prg
-                  -f twn5 -w out/work/twn5.prg) ;;
+  end)     for c in 2 3 4 5; do ARGS+=(-f twn$c -w out/work/bundle/twn$c.prg); done     # villaggi dei capitoli 2-5: in fondo, con la grafica dei loro capitoli (i file del capitolo 1 restano sulle prime tracce)
+           for f in out/work/bundle/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;     # capitoli 2-4 (segnaposto)
+  hub)     for f in out/work/bundle/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;
+  start)   for f in out/work/bundle/gfx[3-9].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w $f); done ;;
+  chapter|hubchap) for c in 2 3; do ARGS+=(-f twn$c -w out/work/bundle/twn$c.prg
+                                   -f gfx$((2*c-1)) -w out/work/bundle/gfx$((2*c-1)).prg -f gfx$((2*c)) -w out/work/bundle/gfx$((2*c)).prg); done
+           ARGS+=(-f twn4 -w out/work/bundle/twn4.prg -f gfx7 -w out/work/bundle/gfx7.prg -f gfx8 -w out/work/bundle/gfx8.prg
+                  -f twn5 -w out/work/bundle/twn5.prg) ;;
 esac
 # (18/11) le quest QST2..QST8 (piu' quest, tools/build/gen_quests.py) in fondo al disco: si leggono di rado (dettaglio di una
 # quest) e cosi' non spostano i file dei capitoli 2-5 (PERF-DISK)

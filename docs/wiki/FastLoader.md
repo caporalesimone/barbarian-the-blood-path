@@ -268,6 +268,25 @@ In release al posto di CHEATS c'e' una voce doppia di HL: stesse voci nelle stes
 sequenze del gioco vero possono finire dalla parte sbagliata della finestra. La leva robusta, suggerita anche dal README di
 Krill, e' **avere meno file**: ad esempio unire QST2-QST8 (7 voci) e i brani SND (8 voci) in pochi file (TODO M3).
 
+### 7.3 Meno file da cercare: code dei file (18/11 pomeriggio) [MISURATO, tempo emulato]
+
+Proposta del committente: un file per capitolo con tutto dentro. **Scartata**: villaggio, tema dei piani e MENU usano a turno le
+stesse zone di RAM, quindi ogni cambio di luogo rileggerebbe tutto il capitolo (~35-50 blocchi, ~65 ms a blocco: scale 3-4 s
+invece di 1,4-1,9 s). **Fatto** invece: i dati che si leggono **sempre insieme** stanno nello stesso file (coda dei file `TWNc` e
+`GFXn`, [FORMATO_DATI](FORMATO_DATI.md)): il brano del villaggio in `TWNc`, il brano del capitolo in `GFX(2c−1)`, la mappa del
+piano del boss in `GFX(2c)` (niente più `BOSSCH1..3` sul disco), il brano del boss finale in `GFX8`. Una ricerca nella directory
+costa 0,1-1,4 s, un blocco in più ~65 ms. Misure (somma di `PERF-DISK`, `PERF-12`, `PERF-17`; grotte comprese):
+
+| Disco | Totale | Note |
+|---|---|---|
+| L6 (7.2, prima delle grotte) | 75,9 | riferimento |
+| B1: code dei file, stesso ordine | 76,2 | `town_in` 3,84 → 2,98 s, `song` 1,40 → 1,21; in3 4,93 (oltre il 90%) |
+| **B2: B1 senza la voce doppia di SND1** (scelto) | **73,6** | nessun test fuori; `song` 0,21 s, `save_dng` 6,6 s, in3 3,73 s |
+| B4-B6: brani SND, poi anche TITLE/LORE/LDAT/HELP/JUKEBOX in fondo | 75,1-77,6 | peggio: lo spostamento cambia le finestre |
+
+Le stazioni di gioco con meno ricerche (villaggio, boss, prima discesa) migliorano in modo stabile; il resto dipende ancora
+dalla finestra di Krill (7.2). Restano 50 voci.
+
 ## 8. Compatibilità
 
 | Ambiente | Stato |

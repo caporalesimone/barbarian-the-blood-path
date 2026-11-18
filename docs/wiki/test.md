@@ -243,7 +243,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `EMU-15` | vc64web: kill a monster in the crypt, read the portal scroll, take the portal back to the village |
 | `EMU-16` | vc64web: reset and boot again from the same disk copy: the hero saved at creation is in the LOBBY list |
 | `GEN-10` | reference maps, throne room from FMAP and from the cache |
-| `GEN-11` | caves of chapter 3 (levels 11-14, 6 seeds): connected, border of wall, enough floor, generation under 1.2 s, palettes 9/10 |
+| `GEN-11` | caves of chapter 3 (levels 11-14, 6 seeds): connected, border of wall, enough floor, generation under 1.2 s, palettes 9/11/10 |
+| `GEN-12` | swamp of chapter 2 (levels 6-9, 5 seeds): gates on the west and east borders, the east gate of a level on the row of the west gate of the next one, all reachable, generation under 1.2 s, palette 12 |
 | `INN-GOLD-10` | inn chest: deposit in tens (remainder kept, chest full, purse full) |
 | `GOLD-CAP-10` | gold picked up: GOLD_MAX cap on the hero (add_gold16) |
 | `SHOP-PAY-10` | payment: carried gold first, then the chest in tens, change back on the hero (gold_need/gold_pay) |
@@ -287,7 +288,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PG-NEW-11` | new barbarian typed with keys: DEL, WASD as letters, ENTER to seed, ENTER to start, fire = start |
 | `PG-NEW-12` | new barbarian: empty name refused by ENTER, RUN/STOP leaves with A=0 |
 | `MON-AI-10` | awake monster reaches the hero along the wall (ANOANO level 2); hero on corners |
-| `MON-AI-11` | short path (mon_path): monsters that stayed in a corner or shook on a wall edge reach the hero (5 cases, ANOANO) |
+| `MON-AI-11` | short path (mon_path): monsters that stayed in a corner or shook on a wall edge reach the hero (3 cases, ANOANO) |
 | `MON-CHAP-11` | chapter 1: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
 | `MON-CHAP-12` | chapter 2: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |
 | `MON-CHAP-13` | chapter 3: a dungeon level and the boss level give the sprites, colours and names of the chapter; a monster of the chapter has its name drawn in the top bar |

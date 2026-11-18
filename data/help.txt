@@ -150,6 +150,8 @@
    stairs down	the next floor
    stairs up	the floor above
    	{floor 1: village}
+   gate	{swamp:} the next
+   	part of the swamp
    crypt	floor 1
    portal	on a floor: the
    	village; in the

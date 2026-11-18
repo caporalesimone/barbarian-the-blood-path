@@ -122,7 +122,7 @@ stateDiagram-v2
   turno solo invece dei 16 fotogrammi di un mostro bloccato. Stato in `mslide` / `mslc` (mosse a 2 bit), coda di 32 caselle.
   Misura con un simulatore Python del movimento (stesso algoritmo, mappe vere di 8 piani, 7456 coppie mostro-PG a ≤ 7 caselle):
   bloccati dall'1,7% (vecchio) allo 0,7%; restano i percorsi lunghi (≥ 17 caselle, giri attorno a un muro più grandi della
-  finestra). `tests/regression/monsters/test_path.py` (MON-AI-11: 5 casi in cui il vecchio inseguimento restava fermo).
+  finestra). `tests/regression/monsters/test_path.py` (MON-AI-11: 3 casi in cui il vecchio inseguimento restava fermo; dal 18/11 senza i 2 dei piani 6 e 7, diventati palude).
 - **Spigoli** (anche per il PG): `try_step_x` / `try_step_y` controllano due sonde sul bordo (±5 px); se ne è
   bloccata una sola (spigolo), l'essere scivola di 1 px dalla parte libera invece di fermarsi, così si entra nei
   varchi anche non allineati. `tests/regression/monsters/test_ai.py`.

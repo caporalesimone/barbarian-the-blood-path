@@ -1279,6 +1279,15 @@ def main():
             cave_t[o:o + 8] = bytes(ch)
     cave_t = bytes(cave_t)
     caves = {ch["id"] for ch in chapters_db.load()["chapters"] if (ch.get("map") or {}).get("style") == "caves"}
+    # (18/11) palude (map.style swamp): acqua, riva, fango, passerelle e cancelli (tools/build/swamp_gfx.py)
+    import swamp_gfx
+    swamp_t = bytearray(dun_t)
+    for n_, gr in swamp_gfx.tiles().items():
+        for q, ch in enumerate(tile_chars(gr)):
+            o = (q * DN + TID[n_]) * 8
+            swamp_t[o:o + 8] = bytes(ch)
+    swamp_t = bytes(swamp_t)
+    swamps = {ch["id"] for ch in chapters_db.load()["chapters"] if (ch.get("map") or {}).get("style") == "swamp"}
     sets = chapter_sets()                                   # GFX(2c-1) dungeon, GFX(2c) boss del capitolo c
     raws = [info_raw(m) for _, _, _, m in sets]
     INFO = max(info_len(r) for r in raws)
@@ -1295,7 +1304,7 @@ def main():
         assert [r["name"].lower() for r in exp] == M_names(m), "GFX%d: nomi %s, bestiario %s" % (n, M_names(m), [r["name"] for r in exp])
         assert [r["color"] for r in exp] == M_cols(m), "GFX%d: colori %s, bestiario %s" % (n, M_cols(m), [r["color"] for r in exp])
     for (n, c, boss, m), r in zip(sets, raws):
-        tl = boss_t if boss else cave_t if c in caves else dun_t
+        tl = boss_t if boss else cave_t if c in caves else swamp_t if c in swamps else dun_t
         files.append(tl + b"".join(mon_bytes(m)) + info_bytes(r, INFO))
     global GFX_DUN_AT
     GFX_DUN_AT = GFX_DUN_END - len(files[0])
