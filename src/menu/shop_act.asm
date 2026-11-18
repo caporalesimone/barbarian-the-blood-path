@@ -125,13 +125,9 @@ _z      jsr pk_zero
         jmp _gd
 _bt     lda #0
         sta c_beltt-20,x
-_gd     lda c_gold
-        clc
-        adc shp_price
-        sta c_gold
-        lda c_gold+1
-        adc shp_price+1
-        sta c_gold+1
+_gd     lda shp_price           ; (18/11, R9) l'oro con add_gold16 di GAME (il tetto lo ha gia' controllato purse_room)
+        ldx shp_price+1
+        jsr add_gold16
         jsr recalc_stats
         jsr msg23
         #msg "sold."

@@ -45,6 +45,9 @@ Un commit per blocco, smoke + sanity a ogni blocco, regression a più riprese. C
 | R3 | chi è accanto al PG nel villaggio (`npc_here1`, `npc_offer`) da GAME alla zona 1 del MENU (`src/menu/npc_here.asm`, salto `MENU_NHERE`); in GAME resta `npc_here` con il controllo `npc_ok` | +92 B di margine di GAME (757 → 849 B); zona 1: 189 → 91 B liberi; file MENU 40 B sopra `ML_LO` |
 | R4 | commenti: una riga (ingresso, uscita, cosa fa) sulle routine che non ne avevano, in GAME (`game.asm`, `game/game.asm`, `ui.asm`, `levels.asm`, `gen_io.asm`, `hud.asm`, `bar.asm`, `combat.asm`, `rel.asm`, `disk.asm`, `dungeon.asm`), nel MENU (negozi), in LOBBY, JUKEBOX, HELP, BARBARIAN, LORE e nelle parti comuni (`boot.asm`, player SID, musica del titolo, ZX0, effetti). Corretto il commento di `gen_stairs` | nessun byte cambiato |
 | R5 | confronto fra programmi (codice del MENU e del LOBBY uguale a quello di GAME): `h_zeq2` della locanda era una copia di `pk_zero` di GAME, ora la chiama (il resto delle finestre uguali sono sequenze brevi senza una routine comune) | zona 2 del MENU: 19 → 31 B liberi |
+| R6 | help: "autosave: levels 5-6, 10-11, 15-16" (modello a 20 piani) corretto: si salva da soli al viaggio verso il capitolo dopo e alla creazione dell'eroe | discrepanza fra help e codice |
+| R7-R8 | elenco dei test e docstring aggiornati; mappa della memoria: il programma GAME comprende `menu`, `qst*`, `cheats` (11 file del disco erano senza programma) | — |
+| R9 | vendita nei negozi: l'oro con `add_gold16` di GAME invece di una somma a mano | zona 1 del MENU: 91 → 101 B liberi |
 
 ## Da valutare: codice e generalizzazioni
 
