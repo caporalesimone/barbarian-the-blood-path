@@ -48,6 +48,7 @@ Un commit per blocco, smoke + sanity a ogni blocco, regression a più riprese. C
 | R6 | help: "autosave: levels 5-6, 10-11, 15-16" (modello a 20 piani) corretto: si salva da soli al viaggio verso il capitolo dopo e alla creazione dell'eroe | discrepanza fra help e codice |
 | R7-R8 | elenco dei test e docstring aggiornati; mappa della memoria: il programma GAME comprende `menu`, `qst*`, `cheats` (11 file del disco erano senza programma) | — |
 | R9 | vendita nei negozi: l'oro con `add_gold16` di GAME invece di una somma a mano | zona 1 del MENU: 91 → 101 B liberi |
+| R10 | **rilettura del villaggio dopo un salvataggio tolta** (`sv_end`, `town_at`): era un resto della cache dei villaggi di prima dell'11/11; dall'11/11 la grafica si rilegge a ogni ingresso e il file a `$E000` serve solo a `gfx_install`, che nessuno richiama dopo. Nel villaggio prima `gfx_install`, poi il MENU: l'appoggio del file MENU parte da `$E000` (`ML_LO`) | +67 B di margine di GAME (849 → 916); salvataggi nel villaggio piu' veloci: save_char 8,29 → 6,60 s, hdr_write 5,80 → 3,50 s, load_char 2,44 → 0,70 s; appoggio del MENU 57 B → 3,3 KB |
 
 ### Tempi del 18/11 (fine della revisione, VICE; da ricalibrare con il committente)
 

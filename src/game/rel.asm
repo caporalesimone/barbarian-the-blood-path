@@ -16,7 +16,8 @@
 ;  si sceglie, cosi' spegnendo non si duplica nulla).
 ;  RAM, solo durante un salvataggio, sotto il KERNAL: immagine del file SV_IMG ($E000), plugin di save krill_save ($E820,
 ;  file KSAVE), buffer del plugin SV_SCR ($ECE0, $0800 byte, fino a $F4DF: subito sotto la zona 2 del MENU). Liberi nel
-;  dungeon; nel villaggio $E000-$ECFF e' il villaggio (GFX0), che dopo si rilegge (sv_end, town_at). Il plugin
+;  dungeon e nel villaggio (18/11: il file del villaggio a $E000 serve solo fino a gfx_install; prima dell'11/11 era una
+;  cache e dopo un salvataggio si rileggeva, sv_end: rilettura rimasta senza motivo e tolta il 18/11). Il plugin
 ;  si carica dal file KSAVE prima di ogni save (si modifica da solo: va comunque ricaricato). Durante il save: $01 = $35,
 ;  interrupt spenti (il plugin gira nella RAM sotto il KERNAL).
 ;
@@ -105,7 +106,7 @@ rel_get:
         rts
 
 ; fine di un gruppo di operazioni sui salvataggi (rel_hold): se l'immagine del file e' stata letta (sv_in), la si
-; scrive sul disco una volta sola e il villaggio, se c'era, si rilegge (sv_end)
+; scrive sul disco una volta sola
 rel_done:
         lda #0
         sta rel_hold
@@ -114,7 +115,7 @@ rel_done:
         lda #0
         sta sv_in
         jsr sv_write
-        jmp sv_end
+        rts
 _x      rts
 
 ; immagine del file: letta una sola volta sotto rel_hold (sv_in), altrimenti a ogni operazione
@@ -133,7 +134,7 @@ sv_put:
         lda rel_hold
         bne _x
         jsr sv_write
-        jmp sv_end
+        rts
 _x      rts
 
 ; nome del file dell'eroe cur_slot: "save-0N" in sv_nm
@@ -259,24 +260,6 @@ img_off:
         pha
         rts
 
-; dopo un'operazione con SV_IMG: se il villaggio era a $E000 lo si rilegge (solo la RAM: grafica gia' installata)
-sv_end:
-        php
-        lda sv_in               ; immagine ancora da scrivere (rel_hold): il villaggio si rilegge dopo rel_done
-        bne _x
-        lda town_at
-        beq _x
-        lda io_quiet
-        pha
-        lda #1
-        sta io_quiet
-        lda #0
-        jsr load_gfx
-        pla
-        sta io_quiet
-_x      plp
-        rts
-
 ; ---------------------------------------------------------------- eroi
 ; solo l'eroe (creazione dell'eroe, prove): le parti dei piani restano quelle del disco
 save_char:
@@ -336,7 +319,7 @@ load_char:
         lda #0
         sta io_what
         jsr sv_read
-        bcs _bad
+        bcs _old
         jsr img_on
         ldx #0
 _l      lda SV_IMG,x
@@ -345,7 +328,6 @@ _l      lda SV_IMG,x
         cpx #HERO_LEN
         bne _l
         jsr img_off
-        jsr sv_end
         lda c_magic
         cmp #SAVE_VER
         beq _ok
@@ -353,8 +335,6 @@ _old    lda #1
         sta sv_old
         sec
         rts
-_bad    jsr sv_end
-        jmp _old
 _ok     jsr migrate_char
         clc
         rts
@@ -403,7 +383,7 @@ _c      lda slot_name,y
         lda #<nm_hl
         ldx #>nm_hl
         jsr sv_save             ; (il plugin si carica a $E820: nel villaggio copre il villaggio)
-        jmp sv_end
+        rts
 nm_hl   .text "hl"
         .byte 0
 
@@ -509,9 +489,8 @@ save_lvlblk:
         clc
         rts
 
-; il file dell'eroe non si legge: niente scrittura (C=1); il villaggio, se era a $E000, si rilegge
+; il file dell'eroe non si legge: niente scrittura (C=1)
 sv_fail:
-        jsr sv_end
         sec
         rts
 
@@ -608,9 +587,8 @@ chap_ensure:
         bcs _bad
         lda #1                  ; immagine -> slot
         jsr chap_copy
-        jmp sv_end
-_bad    jsr sv_end
-        lda #0                  ; slot vuoti: primo byte 0 (lv_get li scarta perche' diverso dal piano)
+        rts
+_bad    lda #0                  ; slot vuoti: primo byte 0 (lv_get li scarta perche' diverso dal piano)
         sta tmp6
 -       lda tmp6
         clc

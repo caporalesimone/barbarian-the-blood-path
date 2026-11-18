@@ -223,14 +223,15 @@ costava ~0,4 s a ogni ingresso nel villaggio). Struttura (`tools/build/pack_menu
 | … | le parti compresse ZX0: prima le zone 1, 3, 4, 5, per ultima la zona 2 |
 
 Il file **finisce a `MR2_END`** (`$FD00`, fine della zona 2): Krill lo carica al suo indirizzo (`load_file`, C = 0), nella RAM
-sotto il KERNAL fra la fine della cache del villaggio (`ML_LO` = `TK_AT` + `TOWN_MAX` = `$ED00`) e `$FCFF`. Il gioco
+sotto il KERNAL fra `$E000` (`ML_LO`: dal 18/11 il villaggio si installa prima del MENU, quindi il suo file non serve più) e
+`$FCFF`. Il gioco
 (`ovl_town` / `ml_read`, `src/game/stash.asm`) lo legge all'**ingresso nel villaggio** se `ovl_cur` = 0 (lo azzerano
 `game_start`, il caricamento del LOBBY e `enter_gfx`, perché il dungeon copre le zone 4 e 5), controlla che finisca a
 `ml_end` (altrimenti lo rilegge, fino a 3 volte), poi con `$01 = $35`, interruzioni spente e NMI su `nmi_stub` scorre
 l'intestazione: le zone 1, 3, 4, 5 si decomprimono dall'appoggio nelle loro zone, la zona 2 per ultima **sul posto**.
 `pack_menu.py` simula tutto in 64 KB (nessuna scrittura su dati non ancora letti, ogni zona uguale byte per byte, file
 sopra `ML_LO`) e scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (18/11): 3966 B (16 blocchi),
-**130 B sopra `ML_LO`**: il modulo compresso non può crescere oltre (la build si ferma). Zone: 1 1603 → 1356 B, 2 2061 → 1677 B,
+~3,3 KB sopra `ML_LO` (prima del 18/11 l'appoggio partiva da `$ED00` e restavano 57 B). Zone: 1 1603 → 1356 B, 2 2061 → 1677 B,
 3 231 → 226 B, 4 512 → 183 B, 5 602 → 503 B; spazio libero: zona 1 189 B, zona 2 19 B, zona 3 25 B, zona 4 0 B, zona 5 38 B (la
 build lo stampa). Tempo della lettura con la decompressione: 3,1 s (`PERF-DISK-11`; con cinque file 3,5 s).
 

@@ -202,7 +202,7 @@ flowchart TB
 | MENU zona 1/2/3 | `ovl_town` a **ogni** ingresso nel villaggio (`enter_gfx` azzera `ovl_cur`) | uscita dal villaggio | dentro una visita al villaggio restano |
 | STASH `$D000`–`$D47F` | `stash_level` (portale, morte) | rientro nel piano o cambio | stato del piano lasciato senza salvarlo |
 | generatore `$D480`– | avvio (`gen_install`) | sempre | eseguito con `$01 = $34` |
-| buffer del villaggio `$E000` | `load_gfx 0` | ingresso successivo; un salvataggio nel villaggio (`sv_end` lo rilegge) | (11/11) nessuna cache: si rilegge a ogni ingresso |
+| file del villaggio `$E000` | `load_gfx 0` | `gfx_install` lo usa subito; poi il file MENU ci si appoggia (18/11) | (11/11) nessuna cache: si rilegge a ogni ingresso; dal 18/11 non si rilegge dopo un salvataggio |
 | immagine del salvataggio `$E000`, buffer del plugin `$ECA0` | `sv_read` / plugin di save | fine del salvataggio | solo durante un salvataggio (`$01 = $35`) |
 | buffer del tema `GFX_DUN_AT` (`$EC6D`)–`$F4DF` | `load_gfx n` | `gfx_install` (poi dato morto: un salvataggio lo copre) | (15/11) i primi 147 B sono la coda del buffer del villaggio: villaggio e dungeon non sono mai in RAM insieme |
 | colori e nomi dei mostri `NM_AT` (`$8F6D`–`$8FFF`) | `gfx_install` (blocco info del tema) | tema successivo | (15/11) `build_sprites` (colore), `bar_name` (nome) |

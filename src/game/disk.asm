@@ -13,7 +13,6 @@ sv_old  .byte ?                 ; 1 = trovati salvataggi di un'altra versione
 ovl_cur .byte ?                 ; 1 = modulo MENU (menu del villaggio) in memoria (azzerato da game_start e load_menu)
         .endv
         .virtual hw_low+1               ; (11/11, Krill) byte liberi dopo HUD e IRQ (src/game/hud.asm), fino a $97FF
-town_at .byte ?                 ; 1 = villaggio (GFX0) a $E000: un salvataggio lo copre e lo fa rileggere (rel.asm)
 sv_par  .fill 10                ; parametri del plugin di save: nome, da, lunghezza, indirizzo nel file, buffer
 sv_nm   .fill 8                 ; "save-0N" + 0
 dsk_end

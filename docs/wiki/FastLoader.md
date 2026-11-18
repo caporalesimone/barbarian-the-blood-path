@@ -151,8 +151,8 @@ Test: `KRILL-20` (l'ingresso nel villaggio: MENU e poi SND0, ogni file giusto al
 - Ogni scrittura riscrive il file intero: `sv_read` (Krill) → si cambia la parte (eroe o piano) → `sv_write` (plugin).
   Con `rel_hold` (menu RUN/STOP, nuovo eroe) più parti vanno in una sola riscrittura (`rel_done`).
 - RAM: immagine del file a `$E000` (`SV_IMG`), plugin a `$E820`, buffer del plugin `$0800` byte a `$ECE0` (`SV_SCR`), tutti sotto il
-  KERNAL: durante il save `$01 = $35` e interrupt spenti; la lettura dell'immagine (`img_on`/`img_off`) idem. Nel
-  villaggio `$E000` è il villaggio: dopo il salvataggio si rilegge (`sv_end`, `town_at`).
+  KERNAL: durante il save `$01 = $35` e interrupt spenti; la lettura dell'immagine (`img_on`/`img_off`) idem. Il file
+  del villaggio a `$E000` serve solo fino a `gfx_install`: dal 18/11 non si rilegge dopo il salvataggio (`sv_end`, `town_at` tolti).
 - **Il plugin modifica il proprio codice** (17 byte, [MISURATO]: una seconda chiamata senza ricarica si blocca): si
   **carica dal file `KSAVE` prima di ogni save** (~0,5 s) a `$E820`, nella RAM libera durante un salvataggio. Fino
   all'11/11 sera aveva un posto fisso di 1203 B in GAME: tolto, il margine del codice è tornato a 3193 B.
@@ -166,7 +166,7 @@ Test: `KRILL-20` (l'ingresso nel villaggio: MENU e poi SND0, ogni file giusto al
 | `$8E`, `$8F` | `LDFLAGS`, `CHRPRE` | liberi |
 | `$0340-$0367` | `YN_SAV` (riga 24 salvata dalle domande y/n) | `$0200` |
 | margine del codice | 3193 B (il codice del disco con il KERNAL è uscito; il plugin non sta in GAME) | 2930 B |
-| `$97E9-$97FB` | `town_at`, parametri del plugin, nome del file dell'eroe | liberi |
+| `$97E9-$97FB` | parametri del plugin, nome del file dell'eroe (`town_at` tolto il 18/11) | liberi |
 | `$E000-$E815`, `$E820-$ECD2`, `$ECE0-$F4DF` | immagine del file dell'eroe, plugin, buffer del plugin: solo durante un salvataggio | cache del villaggio (tolta) |
 | `godmode` | byte del PRG in CODE2 (non azzerato da `game_start`) | `$02A9` |
 

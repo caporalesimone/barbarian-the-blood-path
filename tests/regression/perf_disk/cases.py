@@ -121,10 +121,8 @@ def perf_town_in(ctx):
 @test("PERF-DISK-12", "saves with the Krill plugin (hero file in the village, hero list) <= their limits")
 def perf_saves(ctx):
     g = ctx["g"]; L = g.L
-    g.poke(L["town_at"], 0)
-    limit("save_dng", timed(g, L["save_char"]))
-    g.poke(L["town_at"], 1)
-    limit("save_char", timed(g, L["save_char"]))
+    limit("save_dng", timed(g, L["save_char"]))         # (18/11) no village read again after a save (sv_end removed):
+    limit("save_char", timed(g, L["save_char"]))        # the same operation in the village and in a dungeon
     limit("hdr_write", timed(g, L["hdr_write"]))
 
 

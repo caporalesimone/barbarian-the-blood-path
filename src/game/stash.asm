@@ -26,8 +26,8 @@ sd_st   .byte STASH_N
 ;  (18/11, revisione R2) UN SOLO FILE "menu" (prima uno per zona, menu1..menu5: ogni file in piu' costava ~0,4 s a ogni
 ;  ingresso nel villaggio). tools/build/pack_menu.py lo scrive cosi': intestazione (numero di parti, poi per ogni parte
 ;  indirizzo dei dati compressi e destinazione, 4 B), poi le parti compresse, l'ultima e' la zona 2. Il file finisce
-;  esattamente a MR2_END: Krill lo carica al suo indirizzo (C=0), cioe' nella RAM sotto il KERNAL fra la fine della cache
-;  del villaggio (TK_AT+TOWN_MAX, $ED00) e la fine della zona 2. Si decomprimono prima le parti che vanno altrove (zone 1,
+;  esattamente a MR2_END: Krill lo carica al suo indirizzo (C=0), cioe' nella RAM sotto il KERNAL fra $E000 (ML_LO: il
+;  file del villaggio e' gia' installato, enter_gfx) e la fine della zona 2. Si decomprimono prima le parti che vanno altrove (zone 1,
 ;  3, 4, 5: i dati restano nell'area di appoggio) e per ultima la zona 2, sul posto: pack_menu.py verifica che la
 ;  scrittura non raggiunga i dati non ancora letti e che il file non tocchi la cache del villaggio.
 MR1_AT  = $c900                 ; zona 1: $C900-$CFFF (la mappa finisce a $C8FF; il LOBBY arriva a $CBFF)
@@ -42,7 +42,7 @@ MR4_END = SPR_DATA+20*64        ; gfx_install a ogni ingresso), liberi nel villa
 MR5_AT  = $8c00                 ; (18/11) zona 5: sprite forti e boss del tema nel dungeon ($8C00-$8E7F, ricopiati da gfx_install a
 MR5_END = $8e80                 ; ogni ingresso), liberi nel villaggio: lo sprite del "!" e il codice degli NPC (src/menu/npc.asm)
 MPARTS  = 5
-ML_LO   = TK_AT+TOWN_MAX        ; (18/11) il file del modulo non scende sotto la fine della cache del villaggio (pack_menu.py)
+ML_LO   = GFX_TOWN_AT           ; (18/11) il file del modulo si appoggia da $E000 (il villaggio e' gia' installato: enter_gfx)
 OVL_AT  = MR1_AT                ; tabella dei salti del modulo (src/menu.asm)
 MENU_INN  = OVL_AT              ; locanda
 MENU_SHOP = OVL_AT+3            ; negozio A (0 fabbro, 1 alchimista) (jsr mk_off + jmp enter_shop: 6 B)

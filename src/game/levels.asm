@@ -131,19 +131,17 @@ _np     rts
 
 ; ---- caricamento / generazione di un luogo (cur_level)
 ; grafica del luogo: si rilegge sempre dal disco (nessuna cache dal 11/11, ramo fast-loader), poi la si installa.
-; town_at = 1 mentre il villaggio e' a $E000: un salvataggio usa quella RAM e lo rilegge (rel.asm, sv_end)
+; (18/11) Nel villaggio prima l'installazione e poi il modulo MENU: il file del villaggio a $E000 non serve piu' e la RAM
+; sotto il KERNAL da $E000 fa da appoggio al file MENU (ML_LO, stash.asm)
 enter_gfx:
-        lda #0
-        sta town_at
         lda cur_level
         bne _dun
         jsr load_gfx
-        inc town_at
+        lda #0
+        jsr gfx_install
         lda #0
         sta ovl_cur             ; il modulo MENU si rilegge a ogni ingresso nel villaggio
-        jsr ovl_town            ; modulo MENU (negozi e locanda)
-        lda #0
-        jmp gfx_install
+        jmp ovl_town            ; modulo MENU (negozi, locanda, NPC)
 _dun    jsr lvl_theme           ; file del tema del piano
         jsr load_gfx
         lda #1

@@ -104,8 +104,6 @@ chap_travel:
         lda tk_nx
         ldx tk_ny
         jsr put_hero
-        lda #0                  ; il villaggio a $E000 non si rilegge dopo il salvataggio: si cambia luogo
-        sta town_at
         jsr tod_tick
         jsr chap_savef
         lda #0

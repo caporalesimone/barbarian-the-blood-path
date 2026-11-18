@@ -34,8 +34,9 @@ il gioco salva da solo eroe e piani del capitolo lasciato (`chap_save`, eroe reg
 
 Ogni scrittura riscrive **il file intero** (`sv_all`): il gioco legge il file dell'eroe (`sv_read`, Krill, ~0,8 s)
 nell'immagine a `$E000`, ci copia l'eroe e i 5 slot del capitolo (blocco contiguo, `chap_copy`), ricarica il plugin
-(file `ksave`, ~0,5 s: modifica il proprio codice) e riscrive i 9 blocchi (`sv_write`). Nel villaggio l'immagine copre il
-villaggio, che poi si rilegge (`sv_end`, ~1 s). Gli stati degli altri capitoli restano quelli del file.
+(file `ksave`, ~0,5 s: modifica il proprio codice) e riscrive i 9 blocchi (`sv_write`). Il file del villaggio a `$E000` serve solo fino
+all'installazione: dal 18/11 non si rilegge più dopo un salvataggio (`sv_end`, ~0,7-1,7 s, era un resto della cache di
+prima dell'11/11). Gli stati degli altri capitoli restano quelli del file.
 
 | Evento | Disco | Tempo misurato (VICE, `PERF-DISK`) |
 |---|---|---|
