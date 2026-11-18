@@ -156,6 +156,8 @@ costruisce install, residente e plugin di save con `ca65`/`ld65` e `src/common/k
 | `tools/build/gen_quests.py` | (17/11; 18/11 elenco) quest: `data/quests.yaml` → `out/work/quests.inc` (`Q_N`, nome di Hilde per GAME), `out/work/quests_m.inc` (capitoli, modulo MENU) e, dopo `src/qpage.asm`, i file `QST0` (codice della pagina + indice) e `QST1`…`QST8` (premio, stato, testo) |
 | `tools/manual/gen_manual.py` | manuale per la release (`lab64 manual`): ritagli, mappa del mondo (esegue `tools/art/world_map.py`, Pillow, in `out/work/art/` e `out/work/manual/img/`) e dati del gioco, poi `c64manual` di Lab64 con il tema base "c64" + `manual/tema.css` |
 | `tools/vice/arena.py` + `src/test/arena.asm` | combattimenti veri in VICE per controllare i simulatori |
+| `src/game/gen_citadel.asm` → `out/work/gen_cit.bin` | (19/11) codice della cittadella, assemblato da `tools/build/asm.sh` con le etichette del gioco per `GFX_DUN_END`; `tools/build/bundle.py` lo mette nella coda di `GFX7` ([Dungeon](dungeon.md) "Cittadella") |
+| `tools/vice/video_perf.py` | (19/11) video in tempo reale dei piani 1 e 14 con la Frenzy ([prestazioni](prestazioni.md)) |
 | `tools/vice/*` | screenshot (`shots_menus.sh`, `shots_manual.sh`), profilo per fotogramma (`frame_prof.py`), cronometro del MENU (`menu_time.py`) |
 | `tools/simulators/*.py` | simulatori di combattimento, progressione, economia ([Bilanciamento](balancing-guide.md)) |
 | `lab64 test` | i test: `smoke`, `sanity`, `regression` ([Test](test.md)) |

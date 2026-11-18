@@ -65,9 +65,10 @@ flowchart TD
   probabilità 1/`lv_xl` (anelli nella mappa).
 
 ### Grotte (capitolo 3, dal 18/11)
-Lo **stile della mappa** è per capitolo (`data/chapters.yaml`, campo `map`: `style: rooms|caves`, `palettes` per piano locale),
+Lo **stile della mappa** è per capitolo (`data/chapters.yaml`, campo `map`: `style: rooms|caves|swamp|citadel`, `palettes` per piano locale),
 compilato da `tools/build/gen_db.py` nella tabella **`lv_look`** (un byte per piano: bit 0-3 palette, 0 = quella casuale di
-`pal_for_level`; bit 4 = grotte). Oggi: capitolo 3 a grotte, piano 11 palette 9 (bianca, innevata), 12 palette 11 (ghiaccio azzurrino), 13-14 palette 10 (roccia grigia);
+`pal_for_level`; un bit per stile: bit 4 grotte `LK_CAVE`, bit 5 palude `LK_SWAMP`, bit 6 cittadella `LK_CIT` (19/11), nessuno = stanze;
+il codice prova il suo bit con `and #LK_x`). Oggi: capitolo 3 a grotte, piano 11 palette 9 (bianca, innevata), 12 palette 11 (ghiaccio azzurrino), 13-14 palette 10 (roccia grigia);
 gli altri capitoli come prima. Con le grotte (`lv_cave`) cambiano tre passi, tutto il resto (stile, celle, `vis`, albero, anelli,
 scale, `post_walls`) resta uguale:
 - `carve_blob` al posto di `carve_rooms`: nella stanza una **macchia** = passeggiata casuale di (larghezza + altezza) × 8 passi
@@ -126,6 +127,30 @@ cancello del piano vicino, **sul lato opposto e nello stesso punto**: la palude 
   con distanza di indice di cella 5..11 (modulo 16) per allontanarle; dopo 60 tentativi si accetta. Al piano 20
   non ci sono scale giù.
 - La stanza delle scale su non riceve mostri né bauli; la stanza delle scale giù ospita il **boss del piano**.
+
+### Cittadella (capitolo 4, prototipo del 19/11)
+Piani 16-19 (`map: {style: citadel}`, palette ancora casuale: da scegliere con il committente). Disegno di
+[quests](quests.md) (`GEN3`): sale grandi con colonne, porte allineate, **simmetria sinistra/destra**; si genera metà mappa e
+si specchia (`cit_finish` in `gen_io.asm`, ~250 B). Stesso contratto delle stanze (16 celle, `vis`, rettangoli, centri, albero):
+- sale **7..10 × 7..10**, tutte presenti (`lv_drop` = 0); l'albero di `gen_links` e gli anelli **solo nella metà sinistra**
+  (celle delle colonne 2-3 segnate assenti per l'albero, partenza in colonna 0-1);
+- **colonne**: un muro su una griglia di 3 caselle (x = 2, 5 .. 20; y = 2, 5 .. 44) dove il quadrato 3×3 intorno è tutto
+  pavimento, cioè dentro le sale. Un muro con 8 vicini di pavimento non separa mai nulla (`post_walls` gli dà la facciata);
+- **passaggi sull'asse**: da 1 a 4 corridoi dritti larghi 2 dalla sala della colonna 1 fino all'asse (x = 24), sulla riga del
+  centro della sala; lo specchio li prolunga nella sala gemella (porte allineate). Almeno uno, quindi il piano è collegato;
+- **specchio**: colonne 24..47 = 23..0; celle 2-3 = specchio delle 1-0 (`rx' = 48 - rx - rw`, `rcx' = 46 - rcx`, così i
+  corridoi larghi 2 restano sull'asse della sala gemella). Poi `gen_stairs` (le scale sono l'unica cosa non simmetrica) e
+  `post_walls`.
+- Memoria: il codice (`src/game/gen_citadel.asm`, ~258 B) **non** sta nel PRG `GAME` né sotto l'I/O (pieni: il PRG deve
+  finire prima di `$9C00` anche nelle build di test, che hanno ~300 B in più): è assemblato per `GFX_DUN_END` (`$F4E0`) e sta
+  nella **coda del file del tema** `GFX7` fra il tema e il brano (`tools/build/bundle.py`, [FORMATO_DATI](FORMATO_DATI.md)):
+  entrando in un piano della cittadella il tema si legge sempre prima della generazione. Le variabili di grotte e cittadella
+  (`$87E8`-`$87F4`) e della palude (`$A5E3`-`$A5FA`) sono passate nelle zone libere annotate di GAME (`.virtual`). Restano
+  ~260 B sotto l'I/O dopo gli slot dei piani e ~128 B prima di `$9C00` nella build di test più grande (`TESTUI=28`).
+- Misure (VICE, 19/11): generazione fino a 0,62 s; almeno 70 colonne e 1044 caselle calpestabili per piano. Test `GEN-13`
+  (6 seed × piani 16-19: collegato, simmetrico salvo le scale, colonne, sale grandi, tempo).
+- Da rivedere con il committente in gioco: palette, densità delle colonne, numero dei passaggi sull'asse; facoltativi i
+  corridoi dritti al posto di quelli a L.
 
 ### Rifinitura
 - `post_walls`: ogni muro con pavimento sotto diventa "facciata" (`T_WALLFACE`); ogni pavimento ha 2/8 di

@@ -10,7 +10,7 @@
 # the last one is the final map), themes (dungeon palettes GFXn), atlas_sets, final (final map: name, file, generator,
 # atlas_set, boss = id in the bestiary).
 # (18/11) map (optional): look of the generated levels of the chapter (not the final map). style: rooms (default: rooms and
-# corridors), caves or swamp (docs/wiki/dungeon.md); palettes: palette of each generated level, local level 1, 2, ... (0 or missing =
+# corridors), caves, swamp or citadel (docs/wiki/dungeon.md); palettes: palette of each generated level, local level 1, 2, ... (0 or missing =
 # the random palette of today, from seed and level). Compiled by tools/build/gen_db.py into lv_look (one byte per level).
 
 global_max: 255
@@ -52,6 +52,7 @@ chapters:
     village: {name: "Ruin's Gate", gfx: TWN4, map: data/town_map4.txt, pf_n: null, atlas_set: VILL4}
     levels: 5
     themes: [7, 8]
+    map: {style: citadel}                                # (19/11, prototype) BSP-like halls with columns, left/right symmetry
     atlas_sets: [DUNGG, DUNGH]
     final: {name: "The Throne of Ruin", file: FMAP, generator: tools/build/gen_final.py, atlas_set: TRONO, boss: lord_of_ruin}
 

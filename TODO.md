@@ -448,7 +448,12 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - **Palude** (capitolo 2, prototipo del 18/11 pomeriggio: [dungeon](docs/wiki/dungeon.md) "Palude"): piani 6-9 affiancati lungo un
   percorso a caso (uscita su un lato qualsiasi), cancelli sui bordi al posto delle scale (il caricamento resta), isole, passerelle, palette 12 unica. (19/11) cancelli dello stesso piano ad almeno 40 caselle, `gate_hash` da tutto il seed. Da rivedere con il
   committente in gioco: colori dell'acqua, cancelli, isole; restano facoltativi le pozze che rallentano e i mostri sull'acqua.
-- **Cittadella** (capitolo 4, BSP simmetrico): da fare dopo la palude.
+- **Cittadella** (capitolo 4, prototipo del 19/11: [dungeon](docs/wiki/dungeon.md) "Cittadella"): sale con colonne, simmetria
+  sinistra/destra. Da rivedere con il committente in gioco: palette (oggi casuale), colonne, passaggi sull'asse.
+- **Memoria del generatore** (19/11): il PRG `GAME` (codice + grafica fissa + immagine del generatore) deve finire prima di
+  `$9C00`: oggi `$99BF` (build normale), `$9B80` nella build di test più grande (`TESTUI=28`, 128 B di margine). Il "margine
+  codice" stampato dalla build (fino a `$8720`) non lo dice: va aggiunto alla stampa. Per altro codice di uno stile solo
+  conviene la strada della cittadella (codice nella coda del file del tema, `GFX_DUN_END`).
 - **Attenzione**: ogni stile cambia i piani salvati di quel capitolo (`GVER`, `test_gen`).
 
 ### H5 (ex 5.4) Due build: inglese e italiano (dopo H4) — L

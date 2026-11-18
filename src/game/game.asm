@@ -226,7 +226,7 @@ cs_cu      .byte ?
 cs_k       .byte ?
 cs_end
         .endv
-GVER       = 8              ; 6 (18/11): grotte nel capitolo 3; 7 (19/11): cancelli della palude distanti; 8: gate_hash da tutto il seed (gen_io.asm); da 5 in su si rigenerano solo i piani (migrate_char)
+GVER       = 9              ; 6 (18/11): grotte nel capitolo 3; 7 (19/11): cancelli della palude distanti; 8: gate_hash da tutto il seed; 9: cittadella nel capitolo 4, mostri solo sul pavimento (gen_io.asm); da 5 in su si rigenerano solo i piani (migrate_char)
 
 
 ; categorie, id oggetti e tutte le tabelle di bilanciamento: vedi db.asm (generato)
@@ -1737,6 +1737,11 @@ _pos    ldx cur
         adc ry,x
         adc #1
         sta tmp1
+        sta ty                  ; (19/11) solo sul pavimento: nelle grotte, nella palude e fra le colonne della cittadella
+        lda tmp0                ; il rettangolo della stanza non e' tutto pavimento (prima nascevano anche nei muri)
+        sta tx
+        jsr floor_ok
+        bcs _taken
         ldx #0                  ; casella gia' occupata da un altro mostro?
 _oc     cpx lb_cnt
         bcs _free

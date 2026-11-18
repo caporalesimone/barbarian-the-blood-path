@@ -55,19 +55,34 @@ gen_dmain:
         adc #3
         sta lv_xl               ; 1 collegamento extra ogni 3..6
         jsr clear_map
-        ldx cur_level           ; (18/11) stile della mappa del piano (data/chapters.yaml map.style, tabella lv_look)
-        lda lv_look,x
-        and #LK_CAVE|LK_SWAMP
-        sta lv_cave             ; grotte e palude: macchie al posto dei rettangoli
-        and #LK_SWAMP
+        ldx cur_level           ; (18/11) stile della mappa del piano (data/chapters.yaml map.style, tabella lv_look):
+        lda lv_look,x           ; bit 4-6: grotte, palude, cittadella (19/11); nessuno = stanze
+        and #LK_STYLE
+        ldx #0
+        stx lv_cave
+        stx lv_swamp
+        stx lv_cit
+        cmp #LK_CIT
+        bne +
+        sta lv_cit              ; cittadella: sale grandi (7..10), tutte presenti
+        lda #7
+        sta lv_minw
+        sta lv_minh
+        stx lv_drop
+        jmp _gr
++       cmp #LK_SWAMP
+        bne +
         sta lv_swamp
-        beq +
-        lda #0                  ; palude: tutte le 16 isole (i cancelli vanno nelle colonne 0 e 3)
-        sta lv_drop
-+       jsr gen_rooms
+        stx lv_drop             ; palude: tutte le 16 isole (i cancelli vanno nelle colonne 0 e 3)
++       and #LK_CAVE|LK_SWAMP
+        sta lv_cave             ; grotte e palude: macchie al posto dei rettangoli
+_gr     jsr gen_rooms
         jsr gen_links
         jsr carve_rooms
-        lda lv_cave
+        lda lv_cit
+        beq +
+        jsr cit_finish          ; cittadella: colonne, passaggi sull'asse, specchio della meta' sinistra
++       lda lv_cave
         beq +
         jsr cave_smooth
 +       lda lv_swamp
@@ -95,16 +110,23 @@ minsz_tab .byte 4, 5, 6, 4
 SM_MAX   = 2
 WORM_LAT = 64                   ; rand < 64: passo di lato (1 su 4)
 lv_cave .byte 0                 ; LK_CAVE se il piano e' a grotte
-wx      .byte 0                 ; posizione del pennello (angolo in alto a sinistra del 2x2)
-wy      .byte 0
-wtx     .byte 0                 ; meta della galleria
-wty     .byte 0
-bl_x0   .byte 0                 ; limiti del pennello nella stanza
-bl_x1   .byte 0
-bl_y0   .byte 0
-bl_y1   .byte 0
-bl_n    .byte 0                 ; passi che restano
-cv_k    .byte 0                 ; muri contati fra i vicini
+        .virtual $87e8          ; (19/11) variabili di grotte e cittadella fuori dalla RAM sotto l'I/O (fra schermo HUD e puntatori sprite)
+wx      .byte ?                 ; posizione del pennello (angolo in alto a sinistra del 2x2)
+wy      .byte ?
+wtx     .byte ?                 ; meta della galleria
+wty     .byte ?
+bl_x0   .byte ?                 ; limiti del pennello nella stanza
+bl_x1   .byte ?
+bl_y0   .byte ?
+bl_y1   .byte ?
+bl_n    .byte ?                 ; passi che restano
+cv_k    .byte ?                 ; muri contati fra i vicini
+cit_px   .byte ?
+cit_py   .byte ?
+cit_na    .byte ?                 ; passaggi sull'asse fatti
+cv_vend
+        .endv
+        .cerror cv_vend > $87f8, "variabili di grotte e cittadella oltre $87F7"
 
 ; pavimento 2x2 con l'angolo in (wx, wy)
 brush:
@@ -529,8 +551,22 @@ _v      sta vis,x
         bpl _v
         lda #16
         jsr rndrange
-        sta stk
+        ldx lv_cit              ; (19/11) cittadella: l'albero solo nella meta' sinistra (colonne 0-1), la destra la copia
+        beq _gs
+        and #$fd                ; colonna 2 -> 0, 3 -> 1
+_gs     sta stk
         sta gl_start
+        txa
+        beq _gh
+        ldx #15
+_gc     txa
+        and #2
+        beq _gn
+        lda #2
+        sta vis,x               ; colonne 2-3: assenti per l'albero (try_cand le salta)
+_gn     dex
+        bpl _gc
+_gh
         lda lv_drop
         beq _nd0
         ldx #15
@@ -862,6 +898,24 @@ _pn     iny
 ; ---------------------------------------------------------------------------------------------------------------------
 T_PLANK = T_PATH                ; passerella: posto 14, calpestabile, mai usato nei dungeon (tools/build/swamp_gfx.py)
 lv_swamp .byte 0                ; LK_SWAMP se il piano e' di palude
+
+; ---------------------------------------------------------------------------------------------------------------------
+; (19/11, TODO M11) CITTADELLA (capitolo 4, prototipo; docs/wiki/dungeon.md "Cittadella"): stesso contratto delle stanze
+; (16 celle, vis, rx/ry/rw/rh, rcx/rcy, albero), ma si genera solo la meta' sinistra (colonne 0-1 della griglia):
+;  - sale grandi 7..10 x 7..10, tutte presenti (lv_drop = 0); albero di gen_links e anelli solo fra le celle sinistre;
+;  - colonne: un muro su una griglia di 3 caselle (x = 2, 5 .. 20; y = 2, 5 .. 44) dove il quadrato 3x3 intorno e' tutto
+;    pavimento, cioe' dentro le sale: un muro con 8 vicini di pavimento non separa mai nulla;
+;  - passaggi sull'asse: da 1 a 4 corridoi dritti dalla sala della colonna 1 fino all'asse (x = 24), sulla riga rcy della
+;    sala (porte allineate: lo specchio li completa nella sala gemella); almeno uno, quindi il piano e' collegato;
+;  - specchio: colonne 24..47 della mappa = colonne 23..0; celle 2-3 = specchio delle 1-0 (rx' = 48 - rx - rw,
+;    rcx' = 46 - rcx: i corridoi larghi 2 in rcx, rcx+1 restano sull'asse della sala gemella).
+; Le scale (gen_stairs) vengono dopo lo specchio: l'unica cosa non simmetrica.
+; Il codice (cit_finish) NON sta qui: e' in src/game/gen_citadel.asm, nella coda del file del tema dei piani del capitolo
+; (GFX7, tools/build/bundle.py) a GFX_DUN_END, sotto il KERNAL: c'e' solo quando servono i piani della cittadella.
+; ---------------------------------------------------------------------------------------------------------------------
+lv_cit  .byte 0                 ; LK_CIT se il piano e' una cittadella
+cit_finish = GFX_DUN_END        ; (gen_citadel.asm, coda di GFX7)
+
 pk_e    .byte 0                 ; fine del tratto di passerella
 gr_b    .byte 0                 ; confine (piano a ovest) per gate_row
 
@@ -1245,30 +1299,34 @@ _ok     lda sw_p0
         sta sw_pout
 _x      rts
 
-sw_last  .byte 0
-sw_pin   .byte 0                ; punto d'ingresso e d'uscita del piano sw_kk
-sw_pout  .byte 0
-sw_kk    .byte 0
-sw_q     .byte 0
-sw_n2    .byte 0
-sw_cx    .byte 0
-sw_cy    .byte 0
-sw_ix    .byte 0
-sw_iy    .byte 0
-sw_p0    .byte 0
-sw_bd    .byte 0
-sw_t2    .byte 0
-sw_dd    .byte 0
-sw_first .byte 0                ; primo piano generato del capitolo
-sw_t    .byte 0
-sw_k    .byte 0
-sw_d    .byte 0
-sw_n    .byte 0
-sw_s    .byte 0                 ; gate_put: lato, punto, cella
-sw_p    .byte 0
-sw_c    .byte 0
-gx      .byte 0                 ; cancello
-gy      .byte 0
+        .virtual $a5e3          ; (19/11) variabili della palude fuori dalla RAM sotto l'I/O: coda degli slot sprite 20-23
+sw_last  .byte ?
+sw_pin   .byte ?                ; punto d'ingresso e d'uscita del piano sw_kk
+sw_pout  .byte ?
+sw_kk    .byte ?
+sw_q     .byte ?
+sw_n2    .byte ?
+sw_cx    .byte ?
+sw_cy    .byte ?
+sw_ix    .byte ?
+sw_iy    .byte ?
+sw_p0    .byte ?
+sw_bd    .byte ?
+sw_t2    .byte ?
+sw_dd    .byte ?
+sw_first .byte ?                ; primo piano generato del capitolo
+sw_t    .byte ?
+sw_k    .byte ?
+sw_d    .byte ?
+sw_n    .byte ?
+sw_s    .byte ?                 ; gate_put: lato, punto, cella
+sw_p    .byte ?
+sw_c    .byte ?
+gx      .byte ?                 ; cancello
+gy      .byte ?
+sw_vend
+        .endv
+        .cerror sw_vend > $a600, "variabili della palude oltre $A5FF"
 
 ; ---------------------------------------------------------------------------------------------------------------------
 ; (19/11) PIANO LASCIATO PER PORTALE O MORTE (levels.asm "stato del piano lasciato"; docs/wiki/salvataggi.md). Lo stato

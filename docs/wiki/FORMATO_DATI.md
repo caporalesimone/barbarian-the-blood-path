@@ -31,6 +31,11 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `0` … `SND_N − 1` | il brano *n* (i byte del file `SNDn` senza indirizzo, `snd_llo/hi` byte) subito prima del segno | lo copia nel buffer del luogo (`SND_LBUF`) e scrive `snd_cur`, se il buffer non lo ha già: `music_town` / `music_dungeon` non cercano più `SNDn` |
 | `$80` | la mappa del piano del boss (byte di `BOSSCHc` senza indirizzo) da `GFX_DUN_END` (`$F4E0`, subito dopo il tema) | `bm_tail` = `$80`: `bmap_load` la scompatta da lì |
 
+(19/11) Nel file del tema dei piani di un capitolo a **cittadella** (`map.style: citadel`, oggi `GFX7`) fra il tema e il brano
+c'è il **codice della cittadella** (`out/work/gen_cit.bin`, ~258 B, da `src/game/gen_citadel.asm` assemblato per
+`GFX_DUN_END`): il generatore lo chiama lì (`cit_finish`, sotto il KERNAL, `$01 = $34`). Il brano si trova contando
+all'indietro dal segno, quindi quei byte non lo spostano.
+
 Le code arrivano al massimo a `$FD00` (FMAP); nel villaggio stanno nell'appoggio sotto il KERNAL che poi riceve il MENU.
 I file `SND0`…`SND7` restano sul disco: li leggono `JUKEBOX`, `LOBBY` (brano del menu), il motivetto di combattimento e i casi
 senza coda (piano del boss raggiunto con il portale dal villaggio).

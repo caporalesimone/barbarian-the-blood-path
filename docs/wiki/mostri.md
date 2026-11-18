@@ -61,7 +61,7 @@ flowchart TD
     E --> F{"rnd < strong_tab[piano]?"}
     F -->|sì| G["il primo mostro della stanza<br/>è la variante forte"]
     F -->|no| H
-    G --> H["place_monster × n: tipo base 1..maxtype_tab[piano],<br/>casella libera dentro la stanza (12 tentativi)"]
+    G --> H["place_monster × n: tipo base 1..maxtype_tab[piano],<br/>casella libera dentro la stanza (12 tentativi);<br/>dal 19/11 solo sul pavimento (floor_ok)"]
     H --> I{"altre stanze?"}
     I -->|sì| D
     I -->|no| J["finché meno di mon_min (64 tentativi):<br/>un mostro base in una stanza a caso"]

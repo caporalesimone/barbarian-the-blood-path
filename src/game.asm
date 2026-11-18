@@ -65,8 +65,10 @@ LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM de
 ;@scenario villaggio: game menu twn? ; MENU nelle sue tre zone ($C900, $A700, sotto il KERNAL), un villaggio nella cache a $E000
 ;@scenario dungeon: game menu gfx? fmap|bossch? ; il tema del capitolo copre la coda del villaggio; mappa del boss del capitolo o sala del trono a $FD00
 ;@scenario salvataggio: game menu ksave save-?? ; save game: immagine del file a $E000 e plugin di save di Krill (la cache del villaggio si rilegge)
-;@free $87e8..$87f8 "Fra schermo HUD e puntatori sprite (banco VIC)" use=data
-;@free $a5e3..$a600 "Coda degli slot sprite 20-23 (il resto: ricerca di percorso dei mostri, mon_path)" use=data
+;@map $87e8..$87f5 "Variabili di grotte e cittadella (gen_io.asm, 19/11: fuori dalla RAM sotto l'I/O)"
+;@free $87f5..$87f8 "Fra schermo HUD e puntatori sprite (banco VIC)" use=data
+;@map $a5e3..$a5fb "Variabili della palude (gen_io.asm, 19/11: fuori dalla RAM sotto l'I/O)"
+;@free $a5fb..$a600 "Coda degli slot sprite 20-23 (il resto: ricerca di percorso dei mostri, mon_path)" use=data
 ;@free $fe96..$fffa "Fondo della cache sotto il KERNAL, dopo FMAP (si accorcia se FMAP cresce: lo dice questa verifica)" use=data
 ;@map $a6c0..$a6fc "Minimappa: tabella delle classi dei tile (mm_cls, 48 B) e byte esplorati della riga di celle (mm_ex, 12 B), solo mentre la minimappa e' aperta (ui.asm); il resto dello slot 27 riceve la coda della copia di copy_gfx (byte senza uso)"
 ;@free $a6fc..$a700 "Fine dello slot sprite 27" use=data

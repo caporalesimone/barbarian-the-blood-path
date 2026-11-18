@@ -4,6 +4,9 @@ cambiando luogo porta in fondo i dati che servono subito dopo, cosi' il gioco no
 ricerca costa 0,1-1,4 s, leggere un blocco ~65 ms). L'ultimo byte del file e' il segno (src/game/disk.asm gfx_tail):
   0..SND_N-1  il brano (dati del file SNDn senza indirizzo, snd_llo/hi byte) sta subito prima del segno;
   $80         la mappa del piano del boss (file BOSSCHc senza indirizzo) comincia a GFX_DUN_END, subito dopo il tema.
+(19/11) Nel file del tema dei piani di un capitolo a cittadella (data/chapters.yaml map.style citadel, oggi GFX7) fra il tema e
+il brano c'e' il codice della cittadella (out/work/gen_cit.bin, src/game/gen_citadel.asm), assemblato per GFX_DUN_END: il brano
+si trova contando dal segno all'indietro, quindi i byte in mezzo non lo spostano.
 Code: TWNc = brano del villaggio (snd_town_c), GFX(2c-1) = brano dei piani del capitolo (snd_lvl_c), GFX(2c) per c = 1-3 = mappa
 del boss, GFX(2*CHAPTERS) = brano del boss finale (SND_BOSS). Scrive out/work/bundle/twnC.prg e gfxN.prg (quelli che vanno sul
 disco, tools/build/mkdisk.sh); i file di partenza in out/work e out/work/gfx restano come sono (atlante, strumenti).
@@ -34,6 +37,11 @@ def main():
         assert len(d) == lo[k], "snd%d: %d B, snd_llo %d" % (k, len(d), lo[k])
         return d + bytes([k])
 
+    import sys
+    sys.path.insert(0, os.path.join(ROOT, "tools", "build"))
+    import chapters_db
+    cit = {2 * ch["id"] - 1 for ch in chapters_db.load()["chapters"] if (ch.get("map") or {}).get("style") == "citadel"}
+    citcode = rd("gen_cit.bin")
     gfx_end = int(re.search(r"^GFX_DUN_END\s*=\s*\$([0-9a-f]+)", open(os.path.join(W, "game.lbl")).read(), re.M | re.I).group(1), 16)
     rep = []
     for c, k in enumerate(town, 1):
@@ -47,6 +55,8 @@ def main():
         a = d[0] | d[1] << 8
         assert a + len(d) - 2 == gfx_end, "gfx%d: non finisce a GFX_DUN_END" % n
         if n % 2:
+            if n in cit:
+                d += citcode; rep.append("gfx%d+citadel(%d B)" % (n, len(citcode)))
             d += song(lvl[n // 2]); rep.append("gfx%d+snd%d" % (n, lvl[n // 2]))
         elif n < ngfx:
             m = rd("bossch%d.prg" % (n // 2))[2:]
