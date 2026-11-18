@@ -929,16 +929,25 @@ mod36:
         bcs -
 +       rts
 
-; A = confine (numero del piano da cui si esce) -> A = somma delle 6 cifre del seed + gr_tab[confine mod 8] (mod 256)
+; A = confine (numero del piano da cui si esce) -> A = byte casuale del confine, dipende da tutto il seed e dal confine
+; (19/11: prima la somma delle 6 cifre + gr_tab, solo ~195 valori e uguale per i seed anagrammi). Stato del PRNG
+; come seed_level, con il confine | $c0 al posto del piano (mai uguale a quello di un piano 1..63); rnd conservato.
 gate_hash:
-        and #7
+        ora #$c0
         tax
-        lda gr_tab,x
-        ldx #5
--       clc
-        adc c_seedt,x
-        dex
-        bpl -
+        lda rnd
+        pha
+        lda rnd+1
+        pha
+        txa
+        jsr seed_mix
+        jsr rand                ; A = rnd+1
+        sta gr_h
+        pla
+        sta rnd+1
+        pla
+        sta rnd
+        lda gr_h
         rts
 
 ; A = confine -> A = punto del cancello sul lato, 6..41
@@ -949,7 +958,7 @@ gate_row:
         adc #6
         rts
 
-gr_tab  .byte 0, 17, 5, 29, 11, 23, 2, 31
+gr_h    .byte 0                 ; risultato di gate_hash
 
 ; A = confine -> A = direzione a caso 0..3 (senza vincoli)
 gate_hd:

@@ -146,6 +146,7 @@ sp_        .byte ?
 ncand      .byte ?
 cur        .byte ?
 cc_a       .byte ?
+sd_n       .byte ?          ; (19/11) numero mescolato al seed da seed_mix (piano o confine della palude)
 ci_try     .byte ?          ; (18/11) tentativi del baule in una stanza (chest_in_room)
 sw_in      .byte ?          ; (18/11) palude: lato del cancello d'ingresso (0 nord, 1 est, 2 sud, 3 ovest; gen_io.asm swamp_gates)
 sw_out     .byte ?          ; lato del cancello d'uscita

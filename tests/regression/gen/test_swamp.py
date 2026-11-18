@@ -4,7 +4,8 @@ VICE: for SEEDS seeds and the levels 6-9, every walkable tile is reachable from 
 (stairs down) among them; both gates are on the border (x or y = 1 or 46), on two different sides; the exit gate of level L
 and the entry gate of level L+1 are on opposite sides at the same point (the levels side by side make one swamp, in a random
 path: not always west to east); over all the seeds the exits use at least 3 of the 4 sides; generation under MAX_GEN s,
-palette 12 on every level; (19/11) the two gates of a level at least MIN_GATE_D tiles apart.
+palette 12 on every level; (19/11) the two gates of a level at least MIN_GATE_D tiles apart; two seeds with the same
+digits in another order (ANAGRAMS: "anoano" of the report) do not have the same gates (gate_hash uses the whole seed).
 Usage: python3 tests/regression/gen/test_swamp.py"""
 import collections, os, random, sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
@@ -18,6 +19,7 @@ MAX_GEN = 1.2            # s; measured 18/11: 0.84-0.87 s
 MIN_GATE_D = 34          # (19/11) gen_io.asm sw_adj: 40 wanted; on two sides next to each other the farthest point can give 34
 WALK = {2, 3, 4, 5, 6, 14, 24}      # floors, gates (stairs), boardwalk (PATH), chest
 W = 48
+ANAGRAMS = ([10, 23, 24, 10, 23, 24], [24, 10, 23, 10, 23, 24])      # "anoano", "oanano"
 
 
 def main():
@@ -32,8 +34,10 @@ def main():
         worst = 0
         sides = [0, 0, 0, 0]
         dmin = 999
-        for s in range(SEEDS):
-            g.poke(L["c_seedt"], *[rng.randrange(36) for _ in range(6)])
+        gates = []
+        for s, seed in enumerate([[rng.randrange(36) for _ in range(6)] for _ in range(SEEDS)] + list(ANAGRAMS)):
+            g.poke(L["c_seedt"], *seed)
+            gates.append([])
             g.poke(L["c_vis"], 0, 0, 0)
             prev = None
             for lv in (6, 7, 8, 9):
@@ -71,12 +75,15 @@ def main():
                     if up != want:
                         err.append("%s: entry gate at %s, the exit gate of the level before at %s wants %s" % (tag, up, prev, want))
                 prev = dn
+                gates[-1].append((up, dn))
                 if t > MAX_GEN:
                     err.append("%s: generation %.2f s (max %.1f s)" % (tag, t, MAX_GEN))
                 look = g.b(L["lv_look"] + lv)
                 if look != 0x2C:
                     err.append("%s: lv_look %02x (palette 12 and swamp wanted)" % (tag, look))
-        print("swamp: %d seeds x levels 6-9, slowest generation %.2f s, exits N E S W %s, closest gates %d tiles" % (SEEDS, worst, sides, dmin))
+        print("swamp: %d+2 seeds x levels 6-9, slowest generation %.2f s, exits N E S W %s, closest gates %d tiles" % (SEEDS, worst, sides, dmin))
+        if gates[-1] == gates[-2]:
+            err.append("anagram seeds %s and %s: same gates %s" % (ANAGRAMS[0], ANAGRAMS[1], gates[-1]))
         if sum(1 for n in sides if n) < 3:
             err.append("exits on %s sides only (N E S W: %s)" % (sum(1 for n in sides if n), sides))
     finally:

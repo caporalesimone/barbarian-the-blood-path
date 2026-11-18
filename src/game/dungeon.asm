@@ -42,6 +42,10 @@ fill_pages:
 
 ; stato del PRNG per (seed, piano): mescola le 6 cifre del seed e il numero del piano
 seed_level:
+        lda cur_level
+; (19/11) A = numero (piano; confine della palude | $c0, gate_hash) -> rnd: stesso mescolamento per tutti
+seed_mix:
+        sta sd_n
         lda #$a5
         sta rnd
         lda #$3c
@@ -61,7 +65,7 @@ _h      lda rnd
         bne _h
         lda rnd
         clc
-        adc cur_level
+        adc sd_n
         sta rnd
         lda rnd+1
         adc #$47

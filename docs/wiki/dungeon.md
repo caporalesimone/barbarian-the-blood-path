@@ -99,7 +99,7 @@ cancello del piano vicino, **sul lato opposto e nello stesso punto**: la palude 
 - Lati: ingresso = opposto di *d(L−1)*, uscita = *d(L)*; nel primo piano l'ingresso è su un lato a caso diverso dall'uscita,
   nell'ultimo l'uscita è su un lato a caso diverso dall'ingresso (`swamp_gates`, `dir_of`, `gate_hd`). I lati restano in
   `sw_in` / `sw_out` (RAM di GAME): `place_player` mette l'eroe una casella verso l'interno (`sw_dxt` / `sw_dyt`).
-- Punto del cancello sul lato = (somma delle 6 cifre del seed + `gr_tab[confine mod 8]`) mod 36 + 6, dove il confine è il
+- Punto del cancello sul lato = `gate_hash` mod 36 + 6 (19/11: `gate_hash` = byte del PRNG con lo stato di `seed_mix(confine | $C0)`, cioè tutto il seed e il confine come `seed_level` fa con il piano; prima la somma delle cifre, ~195 valori e uguale per i seed anagrammi; anche le direzioni `gate_hd` ne dipendono), dove il confine è il
   numero del piano da cui si esce: i due piani vicini lo calcolano uguale (`gate_row`). Cancello sul bordo a x o y = 1 o 46,
   con la passerella fino al centro dell'isola della sua fascia su quel lato (`gate_put`; `st_s`, `st_e`).
 - **Cancelli lontani** (19/11, segnalazione del committente: piano 9 del seed `ANOANO` con ingresso e uscita quasi
