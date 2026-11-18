@@ -137,9 +137,10 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   cresce di 66 B (16 settori e la casella di chi dà la quest). (18/11) Il modulo MENU ha una **zona 5** (`$8C00-$8E7F`: sprite
   forti e boss del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso; il villaggio rilegge sempre il modulo) con lo
   sprite del "!", la tabella dei salti `NPC_JT` (piazzamento `npc_init` con `npc_pick`, sprite `npc_draw5` con il "!", Fire
-  `npc_talk5`), `src/menu/npc.asm`; 38 B liberi. In GAME restano il passo dei vaganti (`npc_tick`), chi è accanto
-  (`npc_here`, `npc_offer`) e i punti d'ingresso (`npc_ok`): margine **690 B** (debug). La zona 1 torna a 189 B liberi. Prima
-  delle quest vere vanno spostati anche `npc_tick` e `npc_here` (TODO H1).
+  `npc_talk5`), `src/menu/npc.asm`; 38 B liberi. In GAME restano il passo dei vaganti (`npc_tick`) e i punti d'ingresso
+  (`npc_ok`, `npc_here`); chi è accanto al PG (`npc_here1`, `npc_offer`) sta nella zona 1 del MENU dal 18/11 (revisione R3,
+  `src/menu/npc_here.asm`, `MENU_NHERE`): margine di GAME **849 B** (debug), zona 1 con 91 B liberi. Prima delle quest vere va
+  spostato anche `npc_tick` (TODO H1).
 - **Da fare dopo** (TODO H1): stati veri (offerta, attiva, da riscuotere, fatta), obiettivi e premi, nomi e frasi degli NPC
   (per ora sono solo figure), testi veri.
 

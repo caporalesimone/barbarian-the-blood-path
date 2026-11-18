@@ -46,6 +46,7 @@ ML_LO   = TK_AT+TOWN_MAX        ; (18/11) il file del modulo non scende sotto la
 OVL_AT  = MR1_AT                ; tabella dei salti del modulo (src/menu.asm)
 MENU_INN  = OVL_AT              ; locanda
 MENU_SHOP = OVL_AT+3            ; negozio A (0 fabbro, 1 alchimista) (jsr mk_off + jmp enter_shop: 6 B)
+MENU_NHERE = OVL_AT+9           ; (18/11) chi e' accanto al PG (src/menu/npc_here.asm)
 NPC_BANG  = MR5_AT              ; (18/11) sprite del "!" (puntatore $30), all'inizio della zona 5
 NPC_JT    = MR5_AT+64           ; tabella dei salti degli NPC (zona 5): piazzamento, sprite, Fire
 NPC_JINIT  = NPC_JT              ; piazzamento (ingresso nel villaggio)

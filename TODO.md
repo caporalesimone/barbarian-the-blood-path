@@ -454,8 +454,8 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   giallo, scorrimento), `c_qst` maschera (8 quest al massimo), "!" sopra chi ha una quest, NPC che vagano e offrono quest
   segnaposto ("quest giver"), NPC fermi con il PG vicino, zona 5 del MENU (`$8C00`) con piazzamento, sprite e Fire degli NPC.
   **Resta**: cosa mostra lo **stato** (oggi segnaposto giallo, decisione del committente: si decide con il quest system), stati
-  veri, obiettivi, premi, testi; spostare fuori da GAME anche `npc_tick` e `npc_here` (~330 B; margine di GAME 690 B, zona 5
-  con 38 B liberi: servira' un'altra zona o codice piu' corto); **`QST0` e' pieno** (1021 B su 1024: pagina 849 B + indice
+  veri, obiettivi, premi, testi; spostare fuori da GAME anche `npc_tick` (~210 B; `npc_here` e' nella zona 1 dal 18/11, R3;
+  margine di GAME 849 B; il file MENU e' a 40 B dal limite `ML_LO`: per crescere serve piu' spazio di appoggio); **`QST0` e' pieno** (1021 B su 1024: pagina 849 B + indice
   172 B): piu' quest o titoli piu' lunghi richiedono l'indice in un file a parte o codice piu' corto.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11). **Ogni villaggio nuovo**: locanda con lo stesso baule,
   la mappa fuori da `$C900-$CFFF` (zona 1 del modulo MENU), `lab64 test regression -k VIL-MENU`.
