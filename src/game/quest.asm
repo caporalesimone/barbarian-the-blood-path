@@ -69,11 +69,37 @@ ui_quest:
 
 ; ------------------------------------------------------------------ NPC del villaggio: ingressi nel modulo MENU (zona 5)
 ; Il codice c'e' solo nel villaggio, con il modulo MENU in memoria e gli NPC gia' piazzati (npc_pend = 0).
+; (19/11) nel fotogramma di un ridisegno completo (rd_sync) gli NPC tengono gli sprite del fotogramma prima (posizioni in
+; sh_x/sh_y, solo i bit di bs_en e bs_msb da rimettere): ridisegno + sprite degli NPC sforavano il fotogramma. Un fotogramma
+; con gli NPC spostati di 1-2 pixel rispetto allo scorrimento al posto di un fotogramma perso.
 npc_draw:
         jsr npc_ok
-        bcc +
-        jmp NPC_JDRAW
-+       rts
+        bcc _r
+        lda rd_sync
+        bne _old
+        lda bs_en
+        pha
+        lda bs_msb
+        pha
+        jsr NPC_JDRAW
+        pla
+        eor bs_msb
+        sta npc_msbm            ; bit aggiunti da npc_draw5 (lui li accende soltanto)
+        pla
+        eor bs_en
+        sta npc_enm
+_r      rts
+_old    lda bs_en               ; sprite liberi in questo fotogramma fra quelli degli NPC
+        eor #$ff
+        and npc_enm
+        sta tmp7
+        ora bs_en
+        sta bs_en
+        lda npc_msbm
+        and tmp7
+        ora bs_msb
+        sta bs_msb
+        rts
 
 
 ; C=1 se il codice degli NPC si puo' chiamare (villaggio, modulo MENU in memoria, NPC piazzati)
@@ -90,11 +116,15 @@ _n      clc
 ; ------------------------------------------------------------------ un giro (dal ciclo principale, nel villaggio)
 ; al primo giro piazza gli NPC; poi, a fotogrammi alterni, un passo per i vaganti: con il PG vicino (NPC_R) partono a caso
 ; (1 volta su 16) per una casella, ma non se il PG e' a NPC_STOP caselle o meno (18/11)
+; (19/11) dopo update_camera: nei fotogrammi in cui maybe_redraw ridisegna (la camera cambia cella, o force_redraw) il passo
+; salta: ridisegno + NPC + i loro sprite sforavano il fotogramma (fotogrammi persi 0,3% -> 3-4% camminando vicino agli NPC)
 npc_tick:                       ; (18/11, revisione R11) il passo dei vaganti sta nel modulo MENU (zona 6, src/menu/npc_tick.asm)
         lda cur_level
         bne +
         lda ovl_cur             ; modulo MENU in memoria (letto entrando nel villaggio)
         beq +
+        jsr redraw_due
+        bcs +
         jmp MR6_AT
 +       rts
 

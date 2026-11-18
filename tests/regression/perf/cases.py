@@ -287,3 +287,40 @@ def perf_gen(ctx):
     nodn = [x for x in range(1, 20) if res[x][2] != 1]
     check(not nodn, "dungeon levels without exactly one down stairs: %s" % nodn)
     ctx["res"]["generator"] = (max(ts), 0)
+
+
+@test("PERF-24", "every village 1..5: walking from next to each wandering NPC (they walk too), lost <= 1.5%, worst <= 2.1 "
+      "(19/11: before 3-4% near the NPCs)")
+def perf_village_npc(ctx):
+    """The wandering NPCs (npc_tick, their sprites in build_sprites, the place label) on top of a full redraw of the screen
+    made the frame too long: since 19/11 that work waits one frame when maybe_redraw redraws (redraw_due). Start 3 tiles from
+    each NPC, 100 frames of walking, turning as soon as the hero stops (2 frames): with the PERF walk (4 frames per
+    step) the old code lost only 0-0.6%, with this one 1.8-4.4%."""
+    g, L = ctx["g"], ctx["g"].L
+    n = L["npc_xh"] - L["npc_xl"]
+    rows = []
+    for c in (1, 2, 3, 4, 5):
+        g.poke(L["c_chap"], c); g.poke(L["c_unl"], max(c, g.b(L["c_unl"])))
+        g.call_keep(L["change_level"], regs="a=00,x=04", tmax=150); g.frames(5)
+        sol = {i for i, v in enumerate(g.mem(L["solidtab"], 48)) if v}
+        xl, xh, yl, yh = (g.mem(L[k], n) for k in ("npc_xl", "npc_xh", "npc_yl", "npc_yh"))
+        durs = []
+        for i in [i for i in range(n) if xh[i] != 0xff]:
+            nx, ny = (xl[i] + 256 * xh[i]) >> 4, (yl[i] + 256 * yh[i]) >> 4
+            for dx, dy in ((3, 0), (-3, 0), (0, 3), (0, -3)):
+                if g.tile(nx + dx, ny + dy) not in sol and 2 < nx + dx < 45 and 2 < ny + dy < 45:
+                    g.teleport(nx + dx, ny + dy); g.frames(2)
+                    k, still, last, d = len(durs), 0, None, []
+                    for _ in range(100):            # a turn as soon as the hero stops (2 frames): the walk of a player
+                        d += g.frames(1, joy=DIRS[k % len(DIRS)])   # bumping into the NPCs, many full redraws
+                        pos = (g.w16(L["px"]), g.w16(L["py"]))
+                        still = still + 1 if pos == last else 0
+                        last = pos
+                        if still >= 2: k += 1; still = 0
+                    durs += d[1:]
+                    break
+        lo, wo = lost(durs), worst(durs)
+        rows.append((c, lo, wo))
+        print("      village %d: %d frames, lost %.1f%%, worst %.2f" % (c, len(durs), 100 * lo, wo))
+    bad = [(c, lo, wo) for c, lo, wo in rows if lo > 0.015 or wo > 2.1]
+    check(not bad, "villages over the thresholds: %s" % ", ".join("%d (%.1f%%, %.2f)" % (c, 100 * a, b) for c, a, b in bad))

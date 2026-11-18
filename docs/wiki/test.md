@@ -246,6 +246,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `GEN-10` | reference maps, throne room from FMAP and from the cache |
 | `GEN-11` | caves of chapter 3 (levels 11-14, 6 seeds): connected, border of wall, enough floor, generation under 1.2 s, palettes 9/11/10 |
 | `GEN-12` | swamp of chapter 2 (levels 6-9, 8 seeds): entry and exit gates on two sides of the border, the exit of a level facing the entry of the next one (random path, at least 3 sides used), all reachable, generation under 1.2 s, palette 12 |
+| `GEN-13` | citadel of chapter 4 (levels 16-19, 6 seeds): connected, symmetric left/right (but the stairs), columns, big halls, generation under 1.0 s; no monster born in a wall or in the water on levels 1-19 |
 | `INN-GOLD-10` | inn chest: deposit in tens (remainder kept, chest full, purse full) |
 | `GOLD-CAP-10` | gold picked up: GOLD_MAX cap on the hero (add_gold16) |
 | `SHOP-PAY-10` | payment: carried gold first, then the chest in tens, change back on the hero (gold_need/gold_pay) |
@@ -317,6 +318,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PERF-21` | every dungeon level 1..19 (change_level): walking, lost <= 20%, worst <= 3 |
 | `PERF-22` | Abyss levels 21..255: walking (when the Abyss exists) |
 | `PERF-23` | level generator on EVERY level 1..19 and on every Abyss level 21..255: <= 1.5 s each, up stairs present |
+| `PERF-24` | every village 1..5: walking from next to each wandering NPC, lost <= 1.5%, worst <= 2.1 (19/11: before 3-4%) |
 | `PERF-DISK-10` | START from the monitor to the barbarian menu (Krill install, GAME, LOBBY, hl) <= its limit |
 | `PERF-DISK-11` | loads with Krill (MENU, village, theme, song, hero list, hero file) <= their limits |
 | `PERF-DISK-13` | stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM) <= its limit |

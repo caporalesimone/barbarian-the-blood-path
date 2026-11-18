@@ -140,7 +140,8 @@ Prima versione giocabile, da sistemare (richiesta del committente del 17/11):
   `npc_talk5`), `src/menu/npc.asm`; 38 B liberi. In GAME restano i punti d'ingresso (`npc_tick`, `npc_ok`, `npc_here`): il passo dei vaganti
   sta dal 18/11 nella zona 6 del MENU (revisione R11: `MRT`, `src/menu/npc_tick.asm`, margine di GAME 916 → 1262 B); chi è accanto al PG (`npc_here1`, `npc_offer`) sta nella zona 1 del MENU dal 18/11 (revisione R3,
   `src/menu/npc_here.asm`, `MENU_NHERE`): margine di GAME **849 B** (debug), zona 1 con 91 B liberi. Prima delle quest vere va
-  spostato anche `npc_tick` (TODO H1).
+  spostato anche `npc_tick` (TODO H1). (19/11) Il passo tocca metà degli NPC per fotogramma e salta i fotogrammi di ridisegno
+  ([prestazioni](prestazioni.md) "Villaggi: vaganti e ridisegno").
 - **Da fare dopo** (TODO H1): stati veri (offerta, attiva, da riscuotere, fatta), obiettivi e premi, nomi e frasi degli NPC
   (per ora sono solo figure), testi veri.
 

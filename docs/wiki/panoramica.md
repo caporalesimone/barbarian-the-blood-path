@@ -74,9 +74,10 @@ mescolato con il raster e il timer della CIA.
 | 7 | `update_attack` | ricariche e durate (`tick_timers`), Fire = abilità scelta |
 | 8 | `update_monsters` | IA a fotogrammi alterni, attacchi a contatto |
 | 9 | `drops_tick` | a fine combattimento piazza un tesoro in coda |
-| 10 | `update_bar` | barra in alto (nome del luogo o del mostro bersaglio) |
-| 11 | `update_world` | tile sotto il PG (oggetti, fontana), Fire su scale/porte/bauli, nebbia, boss finale |
-| 12 | `update_camera`, `maybe_redraw` | scorrimento a passi di tile, ridisegno del buffer nascosto |
+| 10 | `update_world` | tile sotto il PG (oggetti, fontana), Fire su scale/porte/bauli, nebbia, boss finale |
+| 11 | `update_camera` | scorrimento a passi di tile |
+| 12 | `update_bar`, `npc_tick` | barra in alto (nome del luogo o del mostro bersaglio); villaggio: passo dei vaganti. (19/11) Nei fotogrammi di ridisegno aspettano (`redraw_due`, [Flussi](flussi.md)) |
+| 12b | `maybe_redraw` | ridisegno del buffer nascosto |
 | 13 | `build_sprites` | PG, mostri visibili (multiplex), effetti delle abilità |
 
 Il ciclo dura al massimo un fotogramma PAL (19 656 cicli): i mostri lontani sono riesaminati 1 fotogramma su 16

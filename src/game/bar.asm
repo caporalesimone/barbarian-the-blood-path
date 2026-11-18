@@ -397,7 +397,10 @@ _y      lda #1
 
 ; chiamata ogni frame dopo update_monsters
 update_bar:
+        jsr redraw_due          ; (19/11) il testo della barra si costruisce a pezzi: nei fotogrammi di ridisegno il pezzo aspetta
+        bcs +
         jsr bt_step
++
         lda bar_t
         bne _act
         lda lb_boss
@@ -746,7 +749,10 @@ loc_check:
         bne _calc
         lda lc_l
         jmp _have
-_calc   lda ptx
+_calc   jsr redraw_due          ; (19/11) fotogramma di ridisegno: l'etichetta di prima, si ricalcola al prossimo
+        lda lc_l
+        bcs _have
+        lda ptx
         sta lc_x
         lda pty
         sta lc_y

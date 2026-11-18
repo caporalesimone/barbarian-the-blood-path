@@ -334,3 +334,24 @@ piano, segmento, fotogrammi del gioco nell'ultimo secondo (50 = nessuna perdita)
 definizione dei test: un giro del ciclo principale più lungo di 1,5 fotogrammi). Segmenti: camminata, camminata fra i mostri,
 Frenzy con la corsa a +25/+50/+100%; piani 1 e 14. Uscita: `out/work/video/perf_level01.mp4`, `perf_level14.mp4`,
 `perf_summary.txt`. Misure del 19/11 (v1.401, 8 s per segmento): nel [TODO](../../TODO.md) D5.
+
+## Villaggi: vaganti e ridisegno (19/11)
+
+Segnalazione del committente: cali di fotogrammi vicino agli NPC vaganti. Misura (VICE, ogni villaggio, partenza a 3 caselle da
+ogni NPC, 100 fotogrammi camminando e girando appena l'eroe si ferma; stessa camminata senza NPC per confronto):
+
+| Villaggio | Prima, con NPC | Prima, senza NPC | Dopo, con NPC |
+|---|---|---|---|
+| 1 | 3,3% | 0,3% | 0,1-0,2% |
+| 2 | 1,8% | 0,5% | 0,1-0,4% |
+| 3 | 4,4% | 0,2% | 0,7-1,0% |
+| 4 | 3,5% | 0,4% | 0,1% |
+| 5 | 2,7% | 0,5% | 0,0-0,1% |
+
+Causa: i fotogrammi persi sono quelli del **ridisegno completo** (`maybe_redraw`, ~13-15k cicli quando il pre-rendering non
+ha indovinato: l'eroe si ferma contro un NPC o gira). Da soli stanno nel fotogramma; con il passo degli NPC (`npc_tick`, fino
+a 4,6k cicli a fotogrammi alterni), i loro sprite (`npc_draw`, ~2,2k), il ricalcolo dell'etichetta del luogo e il testo della
+barra (~1,4k) no. Correzioni: metà degli NPC per fotogramma (picco 4,6k → 2,5-3k, stessa velocità); `npc_tick` e
+`update_bar` dopo `update_camera` e saltati nei fotogrammi di ridisegno (`redraw_due`); nel ridisegno completo gli NPC tengono
+gli sprite del fotogramma prima (`rd_sync`: al più 1-2 pixel di scarto per un fotogramma). Test `PERF-24` (soglia 1,5%;
+con il codice di prima 2,9-4,0%). Le perdite che restano sono i ridisegni completi da soli (come senza NPC).

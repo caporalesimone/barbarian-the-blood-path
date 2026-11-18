@@ -88,13 +88,20 @@ flowchart TD
     UP --> UA["update_attack<br/>tick_timers; Fire = abilita' scelta"]
     UA --> UM["update_monsters<br/>IA, i 4 piu' vicini si muovono, attacchi"]
     UM --> DT["drops_tick<br/>a fine combattimento un baule in coda"]
-    DT --> UB["update_bar<br/>barra in alto: luogo o bersaglio"]
-    UB --> UW["update_world<br/>orologio, boss finale, tile sotto il PG,<br/>esplorazione, Fire su scale/porte/bauli, morte"]
+    DT --> UW["update_world<br/>orologio, boss finale, tile sotto il PG,<br/>esplorazione, Fire su scale/porte/bauli, morte"]
     UW --> UC["update_camera<br/>scorrimento a passi di tile"]
-    UC --> MR["maybe_redraw<br/>ridisegno del buffer nascosto"]
+    UC --> UB["update_bar<br/>barra in alto: luogo o bersaglio"]
+    UB --> NT["npc_tick<br/>villaggio: passo dei vaganti"]
+    NT --> MR["maybe_redraw<br/>ridisegno del buffer nascosto"]
     MR --> BS["build_sprites<br/>PG, mostri visibili (multiplex), effetti"]
     BS --> W
 ```
+
+(19/11) `update_bar` e `npc_tick` vengono **dopo** `update_camera`: con `redraw_due` (C=1 se in questo fotogramma
+`maybe_redraw` cambia cella o ridisegna tutto) il lavoro che può aspettare un fotogramma salta: il passo degli NPC, il
+ricalcolo dell'etichetta del luogo (`loc_check`), il pezzo del testo della barra (`bt_step`); e nel fotogramma di un
+ridisegno completo (`rd_sync`) gli NPC tengono gli sprite del fotogramma prima (`npc_draw`). Vicino ai vaganti del villaggio
+il ridisegno più questi lavori sforava il fotogramma (persi 3-4% camminando fra gli NPC, test `PERF-24`).
 
 Le schermate (inventario, mappa, menu, negozi...) si aprono **dentro** uno di questi passi (`handle_keys`, `act_tick`)
 e girano il loro ciclo finché non si chiudono ([14](#14-schermate-motore-dei-menu)); poi il ciclo principale riprende.

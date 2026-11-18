@@ -19,11 +19,12 @@ npc_tick6:
         bne +
         lda #$ff                ; (18/11) ogni 16 fotogrammi l'etichetta del luogo si ricalcola (bar.asm, loc_check): un NPC
         sta lc_x                ; arrivato accanto al PG fermo, o la quest appena presa
-+       lda frame
-        and #1
-        beq +
-        rts
-+       ldx #NPC_N-1
++       lda frame               ; (19/11) meta' degli NPC per fotogramma (pari / dispari, alternati): ognuno fa un passo ogni
+        and #1                  ; 2 fotogrammi come prima, ma il costo di un giro e' la meta' (con 15 NPC fino a 4,6k cicli)
+        eor #$ff
+        clc
+        adc #NPC_N              ; X = NPC_N - 1 - (frame & 1): 16, 14 .. 0 oppure 15, 13 .. 1
+        tax
 _l      lda npc_xh,x
         cmp #$ff
         bne +
@@ -116,6 +117,7 @@ _ok     lda ent_x
 _stop   lda #0
         sta npc_mv,x
 _n      dex
+        dex
         bmi +
         jmp _l
 +       rts

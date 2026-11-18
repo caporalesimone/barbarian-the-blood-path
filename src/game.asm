@@ -206,6 +206,9 @@ pf_n2      .byte ?
 rc_cnt     .byte ?
 pf_tx      .byte ?
 pf_ty      .byte ?
+rd_sync    .byte ?          ; (19/11) maybe_redraw: ridisegno completo in questo fotogramma (npc_draw, quest.asm)
+npc_enm    .byte ?          ; (19/11) sprite e bit alti degli NPC dell'ultimo npc_draw completo
+npc_msbm   .byte ?
 main_vend
         .endv
         .cerror main_vend > $9100, "variabili di main.asm oltre $90FF"
@@ -1095,15 +1098,15 @@ main_loop:
         jsr update_player
         jsr update_attack
         jsr update_monsters
-        jsr npc_tick            ; (17/11) NPC del villaggio (quest.asm)
         jsr drops_tick
-        jsr update_bar
 .if (TESTUI == 9) || (TESTUI == 11)
         lda #$ff
         sta bar_t
 .endif
         jsr update_world
         jsr update_camera
+        jsr update_bar          ; (19/11) dopo la camera: l'etichetta del luogo non si ricalcola nei fotogrammi di ridisegno
+        jsr npc_tick            ; (17/11) NPC del villaggio (quest.asm); (19/11) dopo la camera: salta i fotogrammi di ridisegno
         jsr maybe_redraw
         jsr build_sprites
 .if TMDBG
@@ -1409,7 +1412,25 @@ tmark   .macro v
 
 ; ridisegno della finestra di gioco: completo se force_redraw, altrimenti solo se la camera ha cambiato casella
 ; (scorrimento a righe/colonne nel buffer nascosto, poi pend_flip)
+; (19/11) C=1 se maybe_redraw in questo fotogramma cambia cella o ridisegna tutto (dopo update_camera): il lavoro che puo'
+; aspettare un fotogramma (passo degli NPC, etichetta del luogo) salta, il ridisegno da solo sta nel fotogramma
+redraw_due:
+        lda force_redraw
+        bne _y
+        lda cam_cx
+        cmp drawn_cx
+        bne _y
+        lda cam_cy
+        cmp drawn_cy
+        bne _y
+        clc
+        rts
+_y      sec
+        rts
+
 maybe_redraw:
+        lda #0                  ; (19/11) 1 = ridisegno completo in questo fotogramma (npc_draw tiene gli sprite di prima)
+        sta rd_sync
         lda force_redraw
         beq _nf
         lda #0
@@ -1437,6 +1458,7 @@ _chg    lda pf_valid
         jmp _flip
 _sync
         #tmark 2
+        inc rd_sync
         lda cam_cx
         sta pf_tx
         lda cam_cy
