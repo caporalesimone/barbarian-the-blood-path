@@ -447,7 +447,7 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   Da rivedere con il committente in gioco: forma (macchie e gallerie), colori delle palette 9 e 10, tempo di generazione
   (0,8-0,95 s contro 0,3 s delle stanze).
 - **Palude** (capitolo 2, prototipo del 18/11 pomeriggio: [dungeon](docs/wiki/dungeon.md) "Palude"): piani 6-9 affiancati lungo un
-  percorso a caso (uscita su un lato qualsiasi), cancelli sui bordi al posto delle scale (il caricamento resta), isole, passerelle, palette 12 unica. Da rivedere con il
+  percorso a caso (uscita su un lato qualsiasi), cancelli sui bordi al posto delle scale (il caricamento resta), isole, passerelle, palette 12 unica. (19/11) cancelli dello stesso piano ad almeno 40 caselle, `gate_hash` da tutto il seed. Da rivedere con il
   committente in gioco: colori dell'acqua, cancelli, isole; restano facoltativi le pozze che rallentano e i mostri sull'acqua.
 - **Cittadella** (capitolo 4, BSP simmetrico): da fare dopo la palude.
 - **Attenzione**: ogni stile cambia i piani salvati di quel capitolo (`GVER`, `test_gen`).
