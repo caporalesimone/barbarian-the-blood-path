@@ -324,3 +324,13 @@ corre meno): da decidere (TODO D3).
 | 4 | **Branchi** (proposta del committente): ogni mostro con il suo branco (la stanza in cui nasce); il test "lontano" si fa sul riquadro del branco, i mostri di un branco lontano non si guardano uno per uno; i mostri esistono solo vicino alla finestra o se inseguono | `update_monsters` −0,5/−1 mila cicli (oggi i lontani costano già poco: 1 giro su 16) | M | spawn/despawn per branco tocca il salvataggio del piano (REL) e il bottino dei mostri: rischio alto per poco guadagno oggi |
 | 5 | Camera a casella (16 px) solo in Frenzy / combattimento affollato | dimezza i giri persi in Frenzy (prova del 10/11) | M | cambia la resa visiva dello scorrimento |
 | 6 | Scorrimento rifatto (preparazione distribuita meglio, ridisegno per colonne/righe invece di `_sync` completo) | Frenzy vicino a 50 fps | L | il cuore del motore grafico |
+
+## Video in tempo reale (19/11, TODO D5)
+
+`lab64 run python3 tools/vice/video_perf.py [--seconds S]`: VICE si ferma all'IRQ della riga 250 (`irq_h`, fase 2: il
+fotogramma sullo schermo è completo) e salva uno screenshot per ogni fotogramma PAL; ffmpeg li unisce a 50 fps, quindi il video
+va alla velocità di un C64 vero e un fotogramma perso si vede come uno scatto (l'immagine resta ferma). Sotto l'immagine:
+piano, segmento, fotogrammi del gioco nell'ultimo secondo (50 = nessuna perdita) e fotogrammi persi del segmento (stessa
+definizione dei test: un giro del ciclo principale più lungo di 1,5 fotogrammi). Segmenti: camminata, camminata fra i mostri,
+Frenzy con la corsa a +25/+50/+100%; piani 1 e 14. Uscita: `out/work/video/perf_level01.mp4`, `perf_level14.mp4`,
+`perf_summary.txt`. Misure del 19/11 (v1.401, 8 s per segmento): nel [TODO](../../TODO.md) D5.

@@ -215,7 +215,11 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - Misurare cosa si legge (tema, brano, piano) col cronometro; il precaricamento del tema parte dopo N caselle e forse non
   finisce prima della cripta. Legato a J1 (prefetch nuovo). La taglia del rimedio dipende dalla misura.
 
-### D5 (ex P5) Piani pesanti: piano 14 al 14,5% di fotogrammi persi camminando (PERF-21), piano 15 al 3,8% — M
+### D5 (ex P5) Piani pesanti: fotogrammi persi con i mostri svegli e con la Frenzy — M
+- (19/11) Con le grotte del capitolo 3 il piano 14 è cambiato: PERF-21 (camminata dalle scale, 160 fotogrammi) dà 1,3% (era 14,5%
+  con le stanze); il più pesante ora è il 13 (8,2%). Video in tempo reale (`tools/vice/video_perf.py`, un fotogramma del video =
+  un fotogramma PAL, 8 s per segmento): piano 1 camminata 2,1%, Frenzy +25/+50/+100% 4,5 / 10,5 / 25,1%; piano 14 camminata
+  6,7%, fra i mostri 13,8%, Frenzy +25/+50/+100% 14,3 / 12,4 / 15,3%. La perdita dipende dai mostri svegli vicini più che dal piano.
 - Più mostri svegli: stesso lavoro di D3.
 
 ### D7 (ex 6.1) Spawn dei mostri nella RAM sotto l'I/O — M
