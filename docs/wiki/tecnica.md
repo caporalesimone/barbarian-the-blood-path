@@ -19,7 +19,7 @@ Mappe dettagliate e sempre aggiornate (rigenerate a ogni build, Lab64): [indice]
 | `$A000`–`$BFFF` | VIC banco 2: sprite, charset del gioco `$A800`, schermi A `$B400` e B `$BC00`, font della UI `$B800`; negli slot sprite 28–31 (`$A700`–`$A7FF`) la **zona 3 del modulo MENU** |
 | `$C000`–`$C8FF` | `MAP` 48 × 48 (nel menu: modulo `LOBBY`, fino a `$CBFF`) |
 | `$C900`–`$CFFF` | **modulo MENU, zona 1** (locanda e negozi, caricato all'ingresso nel villaggio, resta fino al LOBBY); arena: modulo a `$C900` |
-| `$D000`–`$DFFF` | sotto l'I/O: STASH del piano lasciato (portale/morte) `$D000`–`$D47F`; **generatore dei piani** `$D480`– (`src/game/gen_io.asm`, ~1,1 KB, copiato all'avvio, eseguito con `$01=$34` da `gen_call`: [Dungeon](dungeon.md)); il resto libero |
+| `$D000`–`$DFFF` | sotto l'I/O: STASH del piano lasciato (portale/morte: boss, 5 mostri, 10 bauli) `$D000`–`$D07F`; **generatore dei piani** `$D080`–`$DD04` (`src/game/gen_io.asm`, ~3,2 KB, copiato all'avvio, eseguito con `$01=$34` da `gen_call`: [Dungeon](dungeon.md)); il resto libero |
 | `$E000`–`$FFFF` | sotto il KERNAL: cache della grafica (villaggio `$E000`, tema da `GFX_DUN_AT` = `$EC6D` a `$F4DF`: 15/11, comincia nella coda del villaggio), **modulo MENU, zona 2** `$F4E0`–`$FCFF`, mappa della sala del trono `FMAP` in fondo (`$FD00`, dal 10/11) |
 
 Margine del codice: controllato a ogni build (`.cerror`, avviso sotto 1 KB sotto `$8720`). Al 07/11: **~1,9 KB** sotto

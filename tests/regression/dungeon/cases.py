@@ -243,6 +243,44 @@ def portal_change(ctx):
     fire_to(g, *find(g, L["T_STAIRSU"])[0]); g.wait_main()
 
 
+
+@test("PORTAL-11", "portal out of level 2 and back: a wounded monster keeps HP and tile, a dropped chest is still there; "
+      "stairs away and back: the monster is healed (STASH only for portal and death)")
+def portal_stash(ctx):
+    g, L = ctx["g"], ctx["g"].L
+    go_level(g, 2)
+    su = find(g, L["T_STAIRSU"])[0]
+    far = max(alive(g), key=lambda i: abs(mpos(g, i)[0] - su[0]) + abs(mpos(g, i)[1] - su[1]))
+    m = (g.b(L["mix"] + far), g.b(L["miy"] + far))
+    hm = g.b(L["mhm"] + far) + 256 * g.b(L["mhmh"] + far)
+    hp = max(1, hm // 2)
+    g.poke(L["mhp"] + far, hp & 255); g.poke(L["mhph"] + far, hp >> 8); g.poke(L["mwake"] + far, 0)
+    t = L["ch_t"]
+    k = [i for i in range(L["CH_MAX"]) if g.b(t + i) == 0][0]
+    fl = [(x, y) for x in range(2, 46) for y in range(2, 46) if g.tile(x, y) in FLOOR_D
+          and abs(x - su[0]) + abs(y - su[1]) > 8 and (x, y) != m]
+    cx, cy = fl[len(fl) // 2]
+    g.poke(t + k, 0x09); g.poke(L["cx_x"] + k, cx); g.poke(L["cx_y"] + k, cy)
+    g.poke(L["ch_i"] + 4 * k, 3); g.poke(L["ch_b"] + 4 * k, 7)
+    g.poke(L["MAP"] + cy * 48 + cx, L["T_CHEST"])
+    read_scroll(g)
+    fire_to(g, *find(g, L["T_PORTAL"])[0]); g.wait_main()
+    check(g.b(L["cur_level"]) == 0, "the portal does not lead to the village")
+    fire_to(g, *find(g, L["T_PORTAL"])[0]); g.wait_main()
+    check(g.b(L["cur_level"]) == 2, "back through the portal: level %d (expected 2)" % g.b(L["cur_level"]))
+    hp2 = g.b(L["mhp"] + far) + 256 * g.b(L["mhph"] + far)
+    m2 = (g.b(L["mix"] + far), g.b(L["miy"] + far))
+    check(g.b(L["malive"] + far) and hp2 == hp and m2 == m,
+          "monster %d: alive %d, HP %d (expected %d), tile %s (expected %s)" % (far, g.b(L["malive"] + far), hp2, hp, m2, m))
+    ks = [i for i in range(L["CH_MAX"]) if g.b(t + i) == 0x09 and (g.b(L["cx_x"] + i), g.b(L["cx_y"] + i)) == (cx, cy)]
+    check(ks and g.tile(cx, cy) == L["T_CHEST"], "the dropped chest at %d,%d is gone" % (cx, cy))
+    check(g.b(L["ch_i"] + 4 * ks[0]) == 3 and g.b(L["ch_b"] + 4 * ks[0]) == 7, "the dropped chest lost its content")
+    go_level(g, 3)
+    fire_to(g, *find(g, L["T_STAIRSU"])[0]); g.wait_main()
+    hp3 = g.b(L["mhp"] + far) + 256 * g.b(L["mhph"] + far)
+    check(g.b(L["cur_level"]) == 2 and hp3 == hm, "stairs away and back: monster HP %d (expected full %d)" % (hp3, hm))
+    fire_to(g, *find(g, L["T_STAIRSU"])[0]); g.wait_main()
+
 def skill_ready(g, x):
     g.poke(g.L["sk_cdl"] + x, 0); g.poke(g.L["sk_cdh"] + x, 0)
 

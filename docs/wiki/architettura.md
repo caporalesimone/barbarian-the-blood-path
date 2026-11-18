@@ -86,7 +86,7 @@ flowchart TB
     end
     DB["out/work/db.asm<br/>(generato: oggetti, mostri, regole)"]
     DUN["dungeon.asm<br/>seed_level, gen_call, sala del trono"]
-    GENIO["gen_io.asm<br/>generatore SOTTO L'I/O ($D480)"]
+    GENIO["gen_io.asm<br/>generatore SOTTO L'I/O ($D080)"]
     GG["game/game.asm<br/>oggetti, bottino, bauli, mostri e IA,<br/>abilita', tasti, mondo, suoni"]
     CB["combat.asm<br/>regole d20, PG, mostri del piano,<br/>attacchi, tempi, pozioni"]
     LV["levels.asm<br/>luoghi, cambio piano, STASH,<br/>nuovo eroe, game_start"]
@@ -182,8 +182,8 @@ flowchart TB
         Z1["$C900-$CFFF MENU zona 1"]
     end
     subgraph R4["$D000-$DFFF RAM sotto l'I/O"]
-        STA["$D000-$D47F STASH del piano lasciato"]
-        GEN["$D480-$D8D9 generatore dei piani"]
+        STA["$D000-$D07F STASH del piano lasciato"]
+        GEN["$D080-$DD04 generatore dei piani"]
         SLT["$D8DA-$DAAA slot dei piani del capitolo<br/>(5 x 93 B, LVRAM)"]
     end
     subgraph R5["$E000-$FFFF RAM sotto il KERNAL"]
@@ -200,14 +200,14 @@ flowchart TB
 | `MAP` `$C000`–`$C8FF` | `gfx_install` (villaggio: RLE dalla cache) / `gen_dungeon` (dal seed) / `fin_load` | cambio di luogo | nel menu iniziale la copre il LOBBY |
 | LOBBY `$C000`–`$CBFF` | `START` la prima volta, poi `load_menu` | inizio della partita | copre anche `$C900`–`$CBFF`: per questo `ovl_cur` = 0 |
 | MENU zona 1/2/3 | `ovl_town` a **ogni** ingresso nel villaggio (`enter_gfx` azzera `ovl_cur`) | uscita dal villaggio | dentro una visita al villaggio restano |
-| STASH `$D000`–`$D47F` | `stash_level` (portale, morte) | rientro nel piano o cambio | stato del piano lasciato senza salvarlo |
-| generatore `$D480`– | avvio (`gen_install`) | sempre | eseguito con `$01 = $34` |
+| STASH `$D000`–`$D07F` | `st_out` (portale, morte) | rientro nel piano (`st_in`) o cambio | boss, 5 mostri caldi e 10 bauli lasciati del piano lasciato (19/11) |
+| generatore `$D080`– | avvio (`gen_install`) | sempre | eseguito con `$01 = $34` |
 | file del villaggio `$E000` | `load_gfx 0` | `gfx_install` lo usa subito; poi il file MENU ci si appoggia (18/11) | (11/11) nessuna cache: si rilegge a ogni ingresso; dal 18/11 non si rilegge dopo un salvataggio |
 | immagine del salvataggio `$E000`, buffer del plugin `$ECA0` | `sv_read` / plugin di save | fine del salvataggio | solo durante un salvataggio (`$01 = $35`) |
 | buffer del tema `GFX_DUN_AT` (`$EC6D`)–`$F4DF` | `load_gfx n` | `gfx_install` (poi dato morto: un salvataggio lo copre) | (15/11) i primi 147 B sono la coda del buffer del villaggio: villaggio e dungeon non sono mai in RAM insieme |
 | colori e nomi dei mostri `NM_AT` (`$8F6D`–`$8FFF`) | `gfx_install` (blocco info del tema) | tema successivo | (15/11) `build_sprites` (colore), `bar_name` (nome) |
 | FMAP `$FD00` | `fin_load` | ingresso successivo | mappa di base del piano 20, riletta a ogni ingresso |
-| slot dei piani `$D8DA`–`$DAAA` (`LVRAM`) | `save_level` / `pend_save` (scale, rientro dopo un portale), `chap_ensure` (dal file) | cambio di capitolo | stato compatto dei 5 piani del capitolo (11/11 sera): sul disco solo con save game e al cambio di capitolo |
+| slot dei piani `$DD05`–`$DED5` (`LVRAM`) | `save_level` (scale, portale, morte), `chap_ensure` (dal file) | cambio di capitolo | stato compatto dei 5 piani del capitolo (11/11 sera): sul disco solo con save game e al cambio di capitolo |
 | `hl`, `save-0N` (disco) | `sv_all` (save game, cambio di capitolo), `save_char` (nuovo eroe), `hdr_write` | — | file riscritti interi dal plugin di Krill, la directory non cambia mai |
 
 ## 4. Regole trasversali
@@ -223,7 +223,7 @@ stateDiagram-v2
     S32: $01 = $32 ROM dei caratteri<br/>(barra: 8 letture)
     S36 --> S35: gfx_install (cache -> charset), fin_load (FMAP -> MAP),<br/>ovl_town (ZX0), menu del villaggio (mk_off)
     S35 --> S36: fine copia / mk_exit / uscita dalla locanda
-    S36 --> S34: gen_call (generatore), stash_both (STASH),<br/>copy_gfx all'avvio (generatore -> $D480)
+    S36 --> S34: gen_call (generatore), st_out/st_in (STASH),<br/>copy_gfx all'avvio (generatore -> $D080)
     S34 --> S36: fine della chiamata o della copia
     S36 --> S32: bar.asm (glifi dalla ROM)
     S32 --> S36

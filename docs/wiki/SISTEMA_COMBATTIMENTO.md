@@ -154,7 +154,7 @@ medio (misura con l'arena).
 Abisso: crescita fino al piano `void_cap`, poi ferma (sezione 10).
 
 Casualità (già così oggi, verificato): con le scale i mostri si rigenerano dal seed (vita piena, stessi valori);
-con portale o morte restano esattamente come lasciati (STASH).
+con portale o morte il boss e 5 mostri "caldi" (feriti, poi svegli) restano come lasciati, gli altri ripartono dal seed (STASH, 19/11).
 
 ## 9. Esperienza
 - 24 bit; curva: tabella dei livelli 1–20 come oggi, poi incremento lineare fino al 255 (≈ 16,7 milioni).

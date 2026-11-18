@@ -554,18 +554,16 @@ _x      rts
         .cerror CH_LV != 5, "chap_copy: primo piano del capitolo calcolato per CH_LV = 5"
 
 ; cambio di capitolo (change_level, prima di cambiare piano): eroe + piani del capitolo sul disco; gli slot si
-; rileggono all'ingresso nel piano nuovo (chap_ensure). Il piano lasciato per portale o morte (STASH) va prima nel suo slot
+; rileggono all'ingresso nel piano nuovo (chap_ensure). Il piano lasciato per portale o morte e' gia' nel suo slot (19/11):
+; i mostri caldi e i bauli lasciati della STASH si perdono
 chap_save:
         lda cur_chap
         bne chap_savef
         rts
 chap_savef:                     ; (12/11) anche con cur_chap = 0: passaggio di capitolo (chapter.asm, chap_travel)
-        lda pend_lvl
-        beq +
-        jsr pend_save
         lda #0
         sta pend_lvl
-+       jsr sv_all
+        jsr sv_all
         lda #0
         sta cur_chap
 _x      rts

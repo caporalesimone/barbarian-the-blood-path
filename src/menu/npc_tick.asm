@@ -1,7 +1,7 @@
 ; ===================================================================
 ;  menu/npc_tick.asm - (18/11, revisione R11) il passo degli NPC del villaggio, nel modulo MENU: zona 6 = MRT ($9600, le
 ;  tabelle dei mostri in gioco, che nel villaggio non servono: lb_cnt = 0, e che ogni ingresso nel dungeon riscrive:
-;  init_monsters_rt, oppure STASHM per il ritorno dal portale). Spostato da GAME (src/game/quest.asm, che chiama MR6_AT ogni
+;  init_monsters_rt; dal 19/11 anche al ritorno dal portale, poi st_in di gen_io.asm). Spostato da GAME (src/game/quest.asm, che chiama MR6_AT ogni
 ;  giro nel villaggio con il modulo in memoria). Al primo giro piazza gli NPC (npc_init, zona 5).
 ; ===================================================================
 NPC_R    = 10                   ; i vaganti si muovono solo con il PG a meno di 10 caselle (su entrambi gli assi)

@@ -34,7 +34,7 @@ LIM = {
     # first level of the chapter, for 5 from the village as chap_travel does), themeC = load_gfx 2C-1, stairsC = change_level level
     # 1 -> 2 of the chapter, bossC = change_level to the boss level of the chapter (GFX 2C + BOSSCHC)
     "twn1": 2.0, "twn2": 2.5, "twn3": 2.1, "twn4": 2.8, "twn5": 1.6,         # layout hubchap, measured: 0.68, 1.63, 1.56, 2.14, 1.20; (17/11) twn1 1.76 s in every layout (the bigger GAME): limit 2.0 (owner)
-    "in1": 6.6, "in2": 5.3, "in3": 5.0, "in4": 5.0, "in5": 4.6,              # the time depends on the disk phase (rotation, head position): slowest seen on
+    "in1": 6.6, "in2": 5.3, "in3": 5.0, "in4": 5.0, "in5": 5.2,              # the time depends on the disk phase (rotation, head position): slowest seen on
                                                                              # 10 phases 4.93, 3.86, 3.84, 3.84, 3.94 (means 4.17, 3.47, 3.49, 3.45, 2.96); in2 4.37 in the suite order
     "theme1": 1.1, "theme2": 1.2, "theme3": 1.4, "theme4": 1.1,              # 0.72, 0.77, 1.04, 0.46
     "stairs1": 3.2, "stairs2": 3.2, "stairs3": 3.2, "stairs4": 3.2,          # 1.5-1.7 s, up to 2.54 s depending on the disk phase
@@ -47,6 +47,8 @@ LIM = {
     # boss1-3 2.71 1.22 1.12, in1-5 5.66 3.31 3.58 3.57 3.93.
     # (18/11, PERF-12) directory with interleave 2 and GFX1/SND1 also right after the save files (tools/build/mkdisk.sh; 19 disks
     # measured, docs/wiki/FastLoader.md 7.2): theme2 1.1 -> 1.2 (1.04 s), theme4 0.8 -> 1.1 (0.89 s), the rest within the limits.
+    # (19/11) GAME 107 -> 109 blocks (generator: caves, swamp, reduced STASH): the files after it moved by 1-8 sectors; in5
+    # (village 4 -> village 5, TWN5 28/1 -> 28/4) 3.93 -> 4.45 s: limit 4.6 -> 5.2 with the rule above, the rest within the limits.
 }
 T = {}
 

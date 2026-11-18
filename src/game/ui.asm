@@ -2987,11 +2987,7 @@ gm_save:
         lda cur_level
         beq _tw
         jsr save_level
-        jmp _sc
-_tw     lda pend_lvl            ; nel villaggio: il piano lasciato per portale resta anche in memoria
-        beq _sc
-        jsr pend_save
-        jsr clear_lvlblk        ; (il baule di casa e' nel blocco dell'eroe: clear_lvlblk non lo tocca)
+_tw                             ; (19/11) nel villaggio il piano lasciato per portale e' gia' nel suo slot (change_level)
 _sc     jsr tod_tick            ; minuti giocati aggiornati
         jmp sv_all
 

@@ -3,7 +3,7 @@
 ; ===================================================================
 
 ; ---- runtime mostri (non salvato)
-;@map $9600+384 "MRT: mostri in gioco (12 tabelle x 32: posizione fine, vita, ricarica, stordimento...), copiati in STASHM"
+;@map $9600+384 "MRT: mostri in gioco (12 tabelle x 32: posizione fine, vita, ricarica, stordimento...)"
         .virtual $9600
 mxl     .fill 32
 mxh     .fill 32
@@ -207,7 +207,7 @@ gf_t       .byte ?
 fb_wave    .byte ?              ; ondate di evocazione gia' fatte dal boss finale (0..3)
 gl_start   .byte ?
 st_hold    .byte ?
-pend_lvl    .byte ?              ; piano lasciato per portale/morte: stato in STASH, non salvato (0 = nessuno)
+pend_lvl    .byte ?              ; piano lasciato per portale/morte: boss, mostri caldi e bauli lasciati in STASH (0 = nessuno)
 sk_t        .byte ?              ; frame residui di visualizzazione del nome dell'abilita' nell'HUD
 ch_blk      .byte ?              ; 1 = Fire su baule rifiutato (mostro vicino)
 cb_i        .byte ?
@@ -226,7 +226,7 @@ cs_cu      .byte ?
 cs_k       .byte ?
 cs_end
         .endv
-GVER       = 6              ; (18/11) 6: grotte nel capitolo 3 (gen_io.asm); da 5 a 6 si rigenerano solo i piani (migrate_char)
+GVER       = 7              ; 6 (18/11): grotte nel capitolo 3; 7 (19/11): cancelli della palude distanti (gen_io.asm); da 5 in su si rigenerano solo i piani (migrate_char)
 
 
 ; categorie, id oggetti e tutte le tabelle di bilanciamento: vedi db.asm (generato)

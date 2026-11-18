@@ -21,7 +21,7 @@ Dall'11/11 (ramo `fast-loader`, scelta del committente: pochi file sul disco) **
 
 **Quando si scrive il disco** (11/11 sera, decisione del committente): **solo** con "save game" (menu RUN/STOP), alla
 creazione dell'eroe e al **cambio di capitolo**. Gli stati dei piani del capitolo corrente stanno in RAM negli **slot**
-`LVRAM` (5 × 93 B = 465 B, RAM sotto l'I/O dopo il generatore, `$D8DA`–`$DAAA`): scale, portale, morte, locanda e scheda
+`LVRAM` (5 × 93 B = 465 B, RAM sotto l'I/O dopo il generatore, `$DD05`–`$DED5`): scale, portale, morte, locanda e scheda
 del personaggio **non** scrivono il disco. "Quit game" torna al menu **senza salvare** ("unsaved progress will be lost"):
 vale l'ultimo salvataggio. Spegnendo senza salvare si perde tutto ciò che è successo dopo (eroe e piani insieme: niente
 duplicati).
@@ -137,20 +137,31 @@ sequenceDiagram
     participant R as STASH ($D000, RAM)
     participant D as Disco (save-0N)
     G->>S: scale nello stesso capitolo: save_level del piano lasciato (lv_put nel suo slot)
-    G->>R: portale o morte: stash_level (LVLBLK + tabelle dei mostri, posizioni esatte)
-    G->>G: rientro nello stesso piano (portale): pend_enter riprende da STASH
-    R->>S: si entra in un altro piano: pend_save copia lo STASH nel suo slot
-    G->>D: RUN/STOP "save game": piano attuale (o STASH) nello slot, poi eroe + slot (sv_all)
+    G->>S: portale o morte: save_level come per le scale
+    G->>R: portale o morte: st_out (boss, 5 mostri "caldi", 10 bauli lasciati)
+    R->>G: rientro nello stesso piano: st_in li rimette dopo la rigenerazione
+    G->>D: RUN/STOP "save game": piano attuale nello slot, poi eroe + slot (sv_all)
     G->>D: piano di un altro capitolo: chap_save (eroe + slot), poi chap_ensure legge gli slot nuovi
     G->>D: creazione dell'eroe: eroe + elenco eroi
 ```
 
 - **Scale**: il piano lasciato va nel suo slot (`save_level` → `save_lvlblk`, nessun disco), l'eroe no.
-- **Portale e morte**: il piano resta in RAM sotto l'I/O (`STASH` a `$D000`, `STASHM` = copia delle 12 tabelle
-  dei mostri), con le posizioni esatte dei mostri e i tesori; tornando con il portale si ritrova tutto com'era.
+- **Portale e morte** (19/11, decisione del committente): il piano va nel suo slot come per le scale (mostri morti, bauli
+  aperti, baule del boss, nebbia) e in più, nella `STASH` (`$D000`–`$D07F`, RAM sotto l'I/O, ~101 B usati), resta
+  lo stato "caldo" (`st_out` in `gen_io.asm`, `GEN_STOUT`):
+  - il **boss** (se c'è ed è vivo) e fino a **5 mostri** scelti così: prima i **feriti** (più vita mancante prima), poi
+    gli **svegli** (più vicini all'eroe prima); per ognuno indice, casella, vita, vita massima, sveglio (8 B);
+  - fino a **10 bauli lasciati dai mostri** non ancora aperti (`ch_t` con il bit 3, escluso il baule del boss che è
+    già nello slot): casella, `ch_t`, numero di oggetti, livello del bottino (5 B).
+  Rientrando **nello stesso piano** (`pend_lvl` = piano), dopo la rigenerazione dal seed e lo slot `st_in` (`GEN_STIN`)
+  rimette vita e posizione di quei mostri e i bauli. Gli altri mostri vivi ripartono dalla casella del seed con la vita
+  piena, gli altri bauli lasciati si perdono. Entrando in un altro piano la STASH non vale più (`pend_lvl` = 0).
+  Scenario tipico: portale per curarsi al villaggio e rientro, il boss ferito resta ferito. Prima del 19/11 la STASH era
+  una copia intera del piano (`LVLBLK` + 12 tabelle dei mostri, 971 B): ridotta per liberare ~1 KB sotto l'I/O.
 - **Salvataggio completo** (menu RUN/STOP "save game"): un'unica riscrittura del file per eroe + piani del capitolo.
 - **Quit, locanda, scheda del personaggio** (punti statistica, respec): nessun salvataggio (11/11 sera).
 - I tesori in coda (`flush_drops`) si piazzano prima di ogni salvataggio o STASH.
+- Test: `PORTAL-11` (`tests/regression/dungeon`: mostro ferito e baule lasciato ritrovati dopo il portale, vita piena dopo le scale).
 - Test: `CHAP-SAVE-10`..`13` (`tests/sanity/chapters`), `PERF-DISK-13` (scale), `PG-LOAD-01` (quit senza salvare).
 
 ## Versione

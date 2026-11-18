@@ -12,10 +12,10 @@ le differenze ([Salvataggi](salvataggi.md)).
 ## Dove gira il generatore (dal 07/11)
 
 Il generatore vero (`src/game/gen_io.asm`: stile del piano, `gen_rooms`, `gen_links`, `carve_*`, `gen_stairs`,
-`post_walls`, `gen_final`) sta nella **RAM sotto l'I/O** a `GEN_AT` = `$D480` (dopo lo `STASH`), ~1,1 KB:
+`post_walls`, `gen_final`) sta nella **RAM sotto l'I/O** a `GEN_AT` = `$D080` (dopo lo `STASH`), ~3,2 KB (19/11, con grotte e palude):
 
 - nel PRG `GAME` è assemblato con `.logical GEN_AT` dopo la grafica fissa (dato morto dopo l'avvio); `copy_gfx`
-  lo copia a `$D480` come prima cosa (`$01` = `$34`, interrupt spenti);
+  lo copia a `$D080` come prima cosa (`$01` = `$34`, interrupt spenti);
 - si chiama solo con `gen_call` (`dungeon.asm`, residente): `$01` = `$34` (I/O e KERNAL spenti) e `sei` per tutta la
   generazione, poi `$36` e flag ripristinati. Ingressi: `GEN_MAIN` (il piano `cur_level`) e `GEN_WALLS`
   (`post_walls`, usato dall'arena);
@@ -102,6 +102,12 @@ cancello del piano vicino, **sul lato opposto e nello stesso punto**: la palude 
 - Punto del cancello sul lato = (somma delle 6 cifre del seed + `gr_tab[confine mod 8]`) mod 36 + 6, dove il confine è il
   numero del piano da cui si esce: i due piani vicini lo calcolano uguale (`gate_row`). Cancello sul bordo a x o y = 1 o 46,
   con la passerella fino al centro dell'isola della sua fascia su quel lato (`gate_put`; `st_s`, `st_e`).
+- **Cancelli lontani** (19/11, segnalazione del committente: piano 9 del seed `ANOANO` con ingresso e uscita quasi
+  accanto, una passerella sola li univa): l'uscita deve stare ad almeno `SW_DMIN` = 40 caselle (|dx| + |dy|) dal
+  cancello d'ingresso. Se il punto `gate_row` non basta si prova lo stesso lato spostato di 12 e di 24 caselle (sempre in
+  6..41); se nessuno basta si prende il più lontano (`sw_adj`). Il piano dopo riparte dal punto scelto (catena dal primo
+  piano del capitolo: `sw_sin`, `sw_sout`), così i due cancelli del confine restano uno di fronte all'altro. I lati non
+  sono forzati opposti: va bene anche un angolo, purché lontano. `GVER` = 7 (i piani salvati della palude si rigenerano).
 - Isole: le macchie delle grotte (`carve_blob` + `cave_smooth`), tutte e 16 (`lv_drop` = 0); acqua = muro (tile 0, solido),
   riva = facciata del muro (`post_walls`).
 - `carve_plank` al posto dei corridoi: **passerelle** di assi larghe 1, a L fra i centri delle isole dell'albero di
@@ -111,7 +117,7 @@ cancello del piano vicino, **sul lato opposto e nello stesso punto**: la palude 
 - Etichette: "gate to level N", "gate back to level N", "gate back to town" (`loc_id`, `gate_id`).
 - Grafica: `tools/build/swamp_gfx.py` nel tema `GFX3` (acqua verde scura con riflessi, riva con le canne, fango ed erba,
   passerelle, cancelli); il file del boss (`GFX4`) resta com'era.
-- Misure (VICE, 18/11): generazione fino a 0,89 s. Test `GEN-12` (8 seed × piani 6-9: cancelli su due lati diversi del bordo,
+- Misure (VICE, 18/11): generazione fino a 0,89 s. Test `GEN-12` (8 seed × piani 6-9: cancelli su due lati diversi del bordo e ad almeno 34 caselle (19/11: minimo misurato 38),
   uscita di un piano di fronte all'ingresso del seguente, almeno 3 lati usati dalle uscite, tutto raggiungibile, tempo) e
   `GEN-10` (piani 6 e 9 di riferimento).
 

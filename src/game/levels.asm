@@ -187,8 +187,6 @@ _dun    ldx #63                 ; mostri: nessun percorso in corso (mslide, mslc
         jsr floor_types         ; statistiche dei tipi di mostro per questo piano (combat.asm)
         jsr gen_dungeon
         jsr chap_ensure         ; (11/11 sera) piani del capitolo negli slot in RAM (letti dal file se si cambia capitolo)
-        jsr pend_enter          ; stato lasciato in memoria (portale/morte)? mostri come li si era lasciati
-        bcs _mem
         jsr clear_lvlblk        ; piano rigenerato dal seed (sempre)...
         lda cur_level
         sta lb_lvl
@@ -206,6 +204,14 @@ _pb     jsr place_boss
         beq _ok
         jsr load_level
 _ok     jsr init_monsters_rt        ; scale: mostri rimasti ricalcolati (vita piena)
+        lda pend_lvl            ; (19/11) piano lasciato per portale o morte: se e' questo, boss, mostri caldi e bauli
+        beq _mem                ; lasciati come erano (STASH); se e' un altro, quella STASH non serve piu'
+        cmp cur_level
+        bne +
+        lda #GEN_STIN
+        jsr gen_call
++       lda #0
+        sta pend_lvl
 _mem
         jsr final_init
         jsr apply_chests
@@ -316,12 +322,14 @@ change_level:
         jsr scr_black
         lda cur_level
         beq _ns
+        jsr save_level          ; scale, portale e morte: lo stato compatto nello slot del piano
         lda spawn_mode
         cmp #2
-        bcs _st                 ; portale (2) o morte (3)
-        jsr save_level
-        jmp _ns
-_st     jsr stash_level
+        bcc _ns
+        lda #GEN_STOUT          ; (19/11) portale (2) o morte (3): boss, mostri caldi e bauli lasciati nella STASH
+        jsr gen_call
+        lda cur_level
+        sta pend_lvl
 _ns     lda new_lvl         ; (11/11 sera) piano di un altro capitolo: eroe + piani del capitolo sul disco, prima di
         beq _nc                 ; cambiare luogo (l'eroe resta registrato dove era: c_loc e posizione di adesso)
         jsr lv_grp
@@ -361,101 +369,29 @@ snd_mute:
         sta $d418               ; volume 0
         rts
 
-; ---- stato del piano in memoria (STASH: RAM sotto l'I/O)
-; Uscendo per portale o morte si conservano LVLBLK e lo stato dei mostri in gioco (MRT: posizione
-; fine, vita attuale e massima a 16 bit, ricariche... 384 B): tornando, i mostri sono esattamente come li si era lasciati.
-; Cambiando piano per le scale invece si salva solo lo stato compatto e i mostri rimasti si ricalcolano.
+; ---- stato del piano lasciato per portale o morte (19/11, committente: "ridurre quel KB" mantenendo il ritorno con il
+; portale per curarsi; docs/wiki/salvataggi.md). Uscendo per portale o morte il piano si salva nel suo slot come con le
+; scale (save_level: mostri morti, bauli aperti, baule del boss, nebbia) e in piu' nella STASH, sotto l'I/O, solo cio' che
+; le scale perderebbero e che conta per chi torna: il boss e fino a 5 mostri "caldi" (feriti, poi svegli vicini all'eroe:
+; casella, vita attuale e massima, sveglio) e fino a 10 bauli lasciati dai mostri non ancora aperti (gen_io.asm st_out /
+; st_in). Rientrando nello stesso piano il piano si rigenera come con le scale e poi si rimettono quei mostri e bauli;
+; entrando in un altro piano si perdono (lo slot ha gia' lo stato compatto). Prima del 19/11: copia completa di LVLBLK
+; (587 B) e delle tabelle dei mostri (384 B) in $D000-$D47F.
 STASH  = $d000                  ; libera dopo il primo menu (salvataggi letti dal loader)
-MRT    = $9600                  ; mxl .. mdmg (game.asm): 12 tabelle x 32 mostri
+MRT    = $9600                  ; mxl .. mhmh (game.asm): 12 tabelle x 32 mostri
 MRT_N  = 12*32
-STASHM = STASH + $300           ; copia di MRT
-;@map STASH..STASHM "STASH: copia di LVLBLK (piano lasciato per portale o morte)" scenario=villaggio,dungeon,salvataggio
-;@map STASHM..GEN_AT "STASHM: copia dei mostri in gioco (MRT, 384 B)" scenario=villaggio,dungeon,salvataggio
+SX_MAXM = 6                     ; mostri conservati: il boss + 5
+SX_MAXC = 10                    ; bauli lasciati dai mostri conservati (committente, 19/11)
+SX_LVL = STASH                  ; piano
+SX_NM  = STASH+1                ; mostri conservati
+SX_NC  = STASH+2                ; bauli conservati
+SX_MON = STASH+3                ; SX_MAXM x 8: indice, casella x, y, vita (2), vita massima (2), sveglio
+SX_CH  = SX_MON + SX_MAXM*8     ; SX_MAXC x 5: casella x, y, ch_t, oggetti (ch_i), livello del bottino (ch_b)
+SX_END = SX_CH + SX_MAXC*5
+STASH_END = STASH + $80
+        .cerror SX_END > STASH_END, "STASH: mostri e bauli conservati oltre STASH_END"
+;@map STASH..STASH_END "STASH: boss, mostri caldi e bauli lasciati del piano lasciato per portale o morte (gen_io.asm st_out)" scenario=villaggio,dungeon,salvataggio
         .cerror mxl != MRT || mhmh + 32 != MRT + MRT_N, "tabelle dei mostri in gioco non contigue a $9600"
-        .cerror STASHM < STASH + (LVLEND-LVLBLK), "STASHM sovrapposto a LVLBLK in STASH"
-
-; piano attuale -> STASH (uscita per portale o morte)
-stash_level:
-        jsr flush_drops
-        jsr sync_monsters
-        lda cur_level
-        sta lb_lvl
-        sta pend_lvl
-        lda #0                  ; LVLBLK -> STASH, MRT -> STASHM
-        beq stash_both
-; STASH -> LVLBLK, STASHM -> MRT
-stash_get:
-        lda #1
-; tmp5 = 0 salva, 1 ripristina: copia LVLBLK e MRT del piano nella STASH (RAM sotto l'I/O) o viceversa
-stash_both:
-        ldx #1                  ; blocchi 1 (MRT) e 0 (LVLBLK)
-stash_x:                        ; (18/11, R11) X = 0: solo LVLBLK
-        sta tmp5
-_b      stx tmp4
-        lda sb_lo,x             ; blocco x: 0 = LVLBLK, 1 = MRT
-        sta ptr0
-        sta ptr1
-        lda sb_hi,x
-        sta ptr0+1
-        sta ptr1+1
-        lda sb_slo,x
-        ldy tmp5
-        bne _g
-        sta ptr1                ; salva: memoria -> STASH
-        lda sb_shi,x
-        sta ptr1+1
-        jmp _n
-_g      sta ptr0                ; riprende: STASH -> memoria
-        lda sb_shi,x
-        sta ptr0+1
-_n      lda sb_nlo,x
-        sta tmp6
-        lda sb_nhi,x
-        sta tmp7
-        sei
-        lda #$34
-        sta $01
-        jsr cp_n
-        lda #$36
-        sta $01
-        cli
-        ldx tmp4
-        dex
-        bpl _b
-        rts
-sb_lo   .byte <LVLBLK, <MRT
-sb_hi   .byte >LVLBLK, >MRT
-sb_slo  .byte <STASH, <STASHM
-sb_shi  .byte >STASH, >STASHM
-sb_nlo  .byte <(LVLEND-LVLBLK), <MRT_N
-sb_nhi  .byte >(LVLEND-LVLBLK), >MRT_N
-
-; entrando in un piano: C=1 se il suo stato e' in STASH (ripreso). Se STASH contiene un altro
-; piano, prima lo si salva su disco.
-pend_enter:
-        lda pend_lvl
-        beq _no
-        cmp cur_level
-        bne _fl
-        jsr stash_get
-        lda #0
-        sta pend_lvl
-        sec
-        rts
-_fl     jsr pend_save
-        lda #0
-        sta pend_lvl
-_no     clc
-        rts
-
-; STASH -> slot del piano in RAM (LVLBLK viene sovrascritto: il chiamante lo ricostruisce). (18/11, R11) Solo LVLBLK: lo
-; stato compatto (lv_put) non usa MRT, e nel villaggio ("save game") MRT e' la zona 6 del MENU (il passo degli NPC)
-pend_save:
-        lda #1
-        ldx #0
-        jsr stash_x
-        lda pend_lvl
-        jmp save_lvlblk
 
 ; ---- avvio
 ; (11/11, O12) il PG sulla casella A (x), X (y): px/py in pixel (portale, scale, morte, varianti di prova)

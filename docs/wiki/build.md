@@ -186,7 +186,7 @@ assembla con il listato (`-L` in `tools/build/asm.sh`): senza, la sua mappa cono
 **Annotazioni nei sorgenti (15/11, Lab64 1.5)**: cio' che l'analisi statica non vede lo dicono commenti nei sorgenti, vicino alle
 costanti che definiscono le zone (sintassi ed esempi: `docs/memory-maps.md` di Lab64):
 - `;@map` = zona scritta solo con puntatori o copie, conta come usata: righe dell'HUD, puntatori e sprite di `$8720-$8FFF`, banco VIC
-  `$A000-$BFFF` e `MAP` (`src/game.asm`), `SND_LBUF`/`SND_FBUF` (`src/game/music.asm`, coppie `..._end`), `STASH`/`STASHM`
+  `$A000-$BFFF` e `MAP` (`src/game.asm`), `SND_LBUF`/`SND_FBUF` (`src/game/music.asm`, coppie `..._end`), `STASH`
   (`src/game/levels.asm`), slot dei piani `LVRAM` e buffer del plugin di save (`src/game/rel.asm`), `MRT`; `free-after=start` per
   `gfx_data..$8720` e `$87E8-$87F7` (grafica fissa del PRG, dato morto dopo `copy_gfx`); `scenario=` per le zone usate solo in
   alcune fasi (`MAP`, `CHRBUF`, `STASH`, buffer del save); `layout` su `CHRBLK` e `LVLBLK`: la mappa ne fa la **tabella dei campi**

@@ -8,9 +8,13 @@
 ; ===================================================================
 GEN_MAIN  = <GEN_AT             ; punti d'ingresso (byte basso, per gen_call)
 GEN_WALLS = <GEN_AT + 3
+GEN_STOUT = <GEN_AT + 6         ; (19/11) portale o morte: boss, mostri caldi e bauli lasciati -> STASH
+GEN_STIN  = <GEN_AT + 9         ; (19/11) rientro nello stesso piano: STASH -> mostri e bauli
 gen_jtab:
         jmp gen_dmain
         jmp post_walls
+        jmp st_out
+        jmp st_in
 ; GEN_MAIN: genera il piano cur_level in MAP (sala del trono e piani dei boss dei capitoli: mappe fisse); dopo
 ; stanze, corridoi e scale, i muri (post_walls)
 gen_dmain:
@@ -1052,41 +1056,45 @@ _w      asl
         ldx sw_c
         rts
 
-; cancelli d'ingresso e d'uscita del piano
+; cancelli d'ingresso e d'uscita del piano. (19/11, committente: piano 9 del seed ANOANO con i due cancelli vicinissimi)
+; I due cancelli di un piano devono stare ad almeno SW_DMIN caselle (|dx| + |dy|): se il punto del cancello d'uscita e' troppo
+; vicino a quello d'ingresso si prova lo stesso lato 12 o 24 caselle piu' in la' (sw_adj), poi si tiene il piu' lontano.
+; Il punto d'ingresso di un piano e' quello d'uscita del piano prima, quindi si calcola la catena dal primo piano del capitolo
+; (ingresso dal villaggio: gate_row senza correzione): i due piani vicini trovano sempre lo stesso punto.
+SW_DMIN = 40
 swamp_gates:
         lda cur_level           ; primo piano generato del capitolo
         jsr lv_grp
-        stx sw_loc
         txa
         eor #$ff
         sec
         adc cur_level
         sta sw_first
-        ; ingresso: lato opposto a d(L-1); nel primo piano a caso, diverso dall'uscita d(L)
-        lda sw_loc
-        bne +
-        lda cur_level
-        jsr dir_of
-        sta sw_n
-        lda cur_level
+        clc
+        adc #CH_LV-2
+        sta sw_last
+        lda sw_first            ; catena dei punti: ingresso del primo piano dal villaggio
         sec
         sbc #1
-        jsr gate_hd
-        cmp sw_n
-        bne _in
-        adc #0                  ; (C = 1) +1
-        and #3
-        bpl _in
-+       lda cur_level
-        sec
-        sbc #1
-        jsr dir_of
-        eor #2
-_in     sta sw_in
-        lda cur_level
-        sec
-        sbc #1
-        jsr gate_row            ; (gate_row usa X)
+        jsr gate_row
+        sta sw_pin
+        lda sw_first
+        sta sw_kk
+_k      lda sw_kk
+        jsr sw_sin
+        sta sw_in
+        lda sw_kk
+        jsr sw_sout
+        sta sw_out
+        jsr sw_adj              ; sw_pout
+        lda sw_kk
+        cmp cur_level
+        beq +
+        inc sw_kk
+        lda sw_pout
+        sta sw_pin
+        jmp _k
++       lda sw_pin              ; ingresso (scale su)
         ldx sw_in
         jsr gate_put
         stx st_s
@@ -1098,22 +1106,7 @@ _in     sta sw_in
         sta ty
         lda #T_STAIRSU
         jsr set_tile
-        ; uscita: d(L); nell'ultimo piano generato (locale CH_LV-2) a caso, diverso dall'ingresso
-        lda sw_loc
-        cmp #CH_LV-2
-        bne +
-        lda cur_level
-        jsr gate_hd
-        cmp sw_in
-        bne _out
-        adc #0
-        and #3
-        bpl _out
-+       lda cur_level
-        jsr dir_of
-_out    sta sw_out
-        lda cur_level
-        jsr gate_row
+        lda sw_pout             ; uscita (scale giu')
         ldx sw_out
         jsr gate_put
         stx st_e
@@ -1126,8 +1119,138 @@ _out    sta sw_out
         lda #T_STAIRSD
         jmp set_tile
 
+; A = piano k -> lato del cancello d'ingresso: opposto a d(k-1); nel primo piano a caso, diverso dall'uscita d(k)
+sw_sin:
+        sta sw_q
+        cmp sw_first
+        bne +
+        jsr dir_of
+        sta sw_n2
+        lda sw_q
+        sec
+        sbc #1
+        jsr gate_hd
+        cmp sw_n2
+        bne _r
+        adc #0                  ; (C = 1) +1
+        and #3
+_r      rts
++       sec
+        sbc #1
+        jsr dir_of
+        eor #2
+        rts
+
+; A = piano k -> lato del cancello d'uscita: d(k); nell'ultimo piano generato a caso, diverso dall'ingresso
+sw_sout:
+        cmp sw_last
+        beq +
+        jmp dir_of
++       sta sw_q
+        jsr sw_sin
+        sta sw_n2
+        lda sw_q
+        jsr gate_hd
+        cmp sw_n2
+        bne _r
+        adc #0
+        and #3
+_r      rts
+
+; A = punto, X = lato -> sw_cx, sw_cy = casella del cancello (come gate_put)
+sw_xy:
+        cpx #1
+        beq _e
+        cpx #3
+        beq _w
+        sta sw_cx               ; nord / sud
+        lda #1
+        cpx #2
+        bne +
+        lda #MAPH-2
++       sta sw_cy
+        rts
+_e      sta sw_cy
+        lda #MAPW-2
+        sta sw_cx
+        rts
+_w      sta sw_cy
+        lda #1
+        sta sw_cx
+        rts
+
+; sw_pout = punto d'uscita del piano sw_kk: gate_row(sw_kk), o 12 / 24 piu' in la' (nel giro 6..41) se il primo e' a meno di
+; SW_DMIN caselle dal cancello d'ingresso (sw_pin, sw_in); se nessuno basta, il piu' lontano
+sw_adj:
+        lda sw_pin
+        ldx sw_in
+        jsr sw_xy
+        lda sw_cx
+        sta sw_ix
+        lda sw_cy
+        sta sw_iy
+        lda sw_kk
+        jsr gate_row
+        sta sw_p0
+        lda #0
+        sta sw_bd
+        sta sw_t2
+_t      lda sw_p0
+        ldx sw_out
+        jsr sw_xy
+        lda sw_cx               ; distanza = |dx| + |dy|
+        sec
+        sbc sw_ix
+        bcs +
+        eor #$ff
+        adc #1
++       sta sw_dd
+        lda sw_cy
+        sec
+        sbc sw_iy
+        bcs +
+        eor #$ff
+        adc #1
++       clc
+        adc sw_dd
+        cmp sw_bd
+        bcc +
+        sta sw_bd
+        ldx sw_p0
+        stx sw_pout
++       cmp #SW_DMIN
+        bcs _ok
+        inc sw_t2
+        lda sw_t2
+        cmp #3
+        bcs _x
+        lda sw_p0               ; 12 piu' in la' nel giro 6..41
+        clc
+        adc #12
+        cmp #42
+        bcc +
+        sbc #36
++       sta sw_p0
+        jmp _t
+_ok     lda sw_p0
+        sta sw_pout
+_x      rts
+
+sw_last  .byte 0
+sw_pin   .byte 0                ; punto d'ingresso e d'uscita del piano sw_kk
+sw_pout  .byte 0
+sw_kk    .byte 0
+sw_q     .byte 0
+sw_n2    .byte 0
+sw_cx    .byte 0
+sw_cy    .byte 0
+sw_ix    .byte 0
+sw_iy    .byte 0
+sw_p0    .byte 0
+sw_bd    .byte 0
+sw_t2    .byte 0
+sw_dd    .byte 0
 sw_first .byte 0                ; primo piano generato del capitolo
-sw_loc  .byte 0                 ; indice del piano nel capitolo (lv_grp)
 sw_t    .byte 0
 sw_k    .byte 0
 sw_d    .byte 0
@@ -1137,3 +1260,277 @@ sw_p    .byte 0
 sw_c    .byte 0
 gx      .byte 0                 ; cancello
 gy      .byte 0
+
+; ---------------------------------------------------------------------------------------------------------------------
+; (19/11) PIANO LASCIATO PER PORTALE O MORTE (levels.asm "stato del piano lasciato"; docs/wiki/salvataggi.md). Lo stato
+; compatto e' gia' nello slot (save_level); qui solo cio' che le scale perderebbero:
+;  - mostri: il boss (lb_boss) se vivo, poi fino a SX_MAXM in tutto scelti uno alla volta per chiave (so_best): prima i
+;    feriti (vita massima - attuale, il piu' ferito prima), poi i svegli (mwake) dal piu' vicino all'eroe; gli altri
+;    tornano come con le scale (al loro posto, vita piena, addormentati);
+;  - bauli lasciati dai mostri e non ancora aperti (ch_t: bit 3 si', bit 7 no; non il baule del boss, che sta nello slot):
+;    fino a SX_MAXC, con casella, numero di oggetti e livello del bottino (il contenuto si genera all'apertura, come prima).
+; ---------------------------------------------------------------------------------------------------------------------
+so_sel  .fill 32                ; mostri gia' scelti
+so_hx   .byte 0                 ; casella dell'eroe
+so_hy   .byte 0
+so_i    .byte 0
+so_bh   .byte 0                 ; chiave migliore (16 bit) e suo mostro
+so_bl   .byte 0
+so_bx   .byte 0
+so_kh   .byte 0
+so_kl   .byte 0
+
+st_out:
+        lda cur_level
+        sta SX_LVL
+        lda #0
+        sta SX_NM
+        sta SX_NC
+        ldx #31
+-       sta so_sel,x
+        dex
+        bpl -
+        lda px
+        ldx px+1
+        jsr pix2tile
+        sta so_hx
+        lda py
+        ldx py+1
+        jsr pix2tile
+        sta so_hy
+        ldx lb_boss             ; il boss del piano, se vivo, sempre
+        beq _l
+        dex
+        lda malive,x
+        beq _l
+        jsr so_add
+_l      lda SX_NM
+        cmp #SX_MAXM
+        bcs _ch
+        jsr so_best
+        bmi _ch                 ; X = $FF: nessun altro mostro ferito o sveglio
+        jsr so_add
+        jmp _l
+_ch     ldx #0                  ; bauli lasciati dai mostri, non aperti
+_c      lda ch_t,x
+        and #$88
+        cmp #$08
+        bne _cn
+        inx                     ; il baule del boss (lb_bch = posto + 1) e' gia' nello slot
+        cpx lb_bch
+        php
+        dex
+        plp
+        beq _cn
+        lda SX_NC
+        cmp #SX_MAXC
+        bcs _d
+        asl                     ; Y = SX_NC * 5
+        asl
+        adc SX_NC
+        tay
+        lda cx_x,x
+        sta SX_CH,y
+        lda cx_y,x
+        sta SX_CH+1,y
+        lda ch_t,x
+        sta SX_CH+2,y
+        stx so_i
+        txa
+        asl
+        asl
+        tax
+        lda ch_i,x
+        sta SX_CH+3,y
+        lda ch_b,x
+        sta SX_CH+4,y
+        ldx so_i
+        inc SX_NC
+_cn     inx
+        cpx #CH_MAX
+        bne _c
+_d      rts
+
+; mostro X nella STASH (SX_MON + SX_NM * 8)
+so_add:
+        stx so_i
+        lda #1
+        sta so_sel,x
+        lda SX_NM
+        asl
+        asl
+        asl
+        tay
+        txa
+        sta SX_MON,y
+        lda mix,x
+        sta SX_MON+1,y
+        lda miy,x
+        sta SX_MON+2,y
+        lda mhp,x
+        sta SX_MON+3,y
+        lda mhph,x
+        sta SX_MON+4,y
+        lda mhm,x
+        sta SX_MON+5,y
+        lda mhmh,x
+        sta SX_MON+6,y
+        lda mwake,x
+        sta SX_MON+7,y
+        inc SX_NM
+        ldx so_i
+        rts
+
+; X = mostro vivo, non ancora scelto, con la chiave piu' alta (> 0), $FF se nessuno (N = 1). Chiave: ferito = $8000 +
+; vita mancante; sveglio = $4000 + 255 - distanza dall'eroe (|dx| + |dy|); altrimenti 0 (non si conserva).
+so_best:
+        lda #0
+        sta so_bh
+        sta so_bl
+        lda #$ff
+        sta so_bx
+        ldx #0
+_m      cpx lb_cnt
+        bcc +
+        jmp _r
++       lda malive,x
+        beq _n
+        lda so_sel,x
+        bne _n
+        lda mhm,x               ; vita mancante = massima - attuale
+        sec
+        sbc mhp,x
+        sta so_kl
+        lda mhmh,x
+        sbc mhph,x
+        sta so_kh
+        ora so_kl
+        beq _w
+        lda so_kh
+        ora #$80
+        sta so_kh
+        bne _cmp
+_w      lda mwake,x
+        beq _n
+        lda mix,x               ; distanza dall'eroe
+        sec
+        sbc so_hx
+        bcs +
+        eor #$ff
+        adc #1
++       sta so_kl
+        lda miy,x
+        sec
+        sbc so_hy
+        bcs +
+        eor #$ff
+        adc #1
++       clc
+        adc so_kl
+        eor #$ff                ; 255 - distanza
+        sta so_kl
+        lda #$40
+        sta so_kh
+_cmp    lda so_kh               ; chiave > migliore?
+        cmp so_bh
+        bcc _n
+        bne _b
+        lda so_kl
+        cmp so_bl
+        bcc _n
+        beq _n
+_b      lda so_kh
+        sta so_bh
+        lda so_kl
+        sta so_bl
+        stx so_bx
+_n      inx
+        jmp _m
+_r      ldx so_bx
+        rts
+
+; rientro nello stesso piano: dopo la rigenerazione (scale) i mostri e i bauli della STASH tornano come erano
+st_in:
+        ldy #0
+_m      cpy SX_NM
+        bcs _ch
+        sty so_i
+        tya
+        asl
+        asl
+        asl
+        tay
+        ldx SX_MON,y
+        cpx lb_cnt
+        bcs _mn
+        lda malive,x
+        beq _mn
+        lda SX_MON+1,y
+        sta mix,x
+        lda SX_MON+2,y
+        sta miy,x
+        lda SX_MON+3,y
+        sta mhp,x
+        lda SX_MON+4,y
+        sta mhph,x
+        lda SX_MON+5,y
+        sta mhm,x
+        lda SX_MON+6,y
+        sta mhmh,x
+        lda SX_MON+7,y
+        sta mwake,x
+        stx so_bx
+        lda mix,x               ; posizione fine dalla casella (come init_monsters_rt)
+        jsr tile_to_pix
+        ldx so_bx
+        lda tmp0
+        sta mxl,x
+        lda tmp1
+        sta mxh,x
+        lda miy,x
+        jsr tile_to_pix
+        ldx so_bx
+        lda tmp0
+        sta myl,x
+        lda tmp1
+        sta myh,x
+_mn     ldy so_i
+        iny
+        bne _m
+_ch     lda tp_on               ; set_tile di chest_add: niente ridisegno (VIC spento qui)
+        pha
+        lda #0
+        sta tp_on
+        ldy #0
+_c      cpy SX_NC
+        bcs _d
+        sty so_i
+        tya
+        asl
+        asl
+        adc so_i
+        tay
+        lda SX_CH,y
+        sta loot_x
+        lda SX_CH+1,y
+        sta loot_y
+        sty so_bl
+        lda SX_CH+2,y
+        jsr chest_add           ; X = posto
+        bcs _d                  ; bauli pieni
+        txa
+        asl
+        asl
+        tax
+        ldy so_bl
+        lda SX_CH+3,y
+        sta ch_i,x
+        lda SX_CH+4,y
+        sta ch_b,x
+        ldy so_i
+        iny
+        bne _c
+_d      pla
+        sta tp_on
+        rts
+

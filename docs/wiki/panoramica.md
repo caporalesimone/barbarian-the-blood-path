@@ -46,13 +46,13 @@ flowchart TD
     T --> M["music_dungeon: brano a caso dei livelli (diverso dal precedente;<br/>al piano 20 il boss) + motivetto di combattimento,<br/>letti dal disco, un brano alla volta (file SNDn)"]
     M --> FT["floor_types: statistiche dei 9 tipi di mostro al piano"]
     FT --> G["gen_dungeon: mappa dal seed (seed_level)"]
-    G --> P{"pend_enter: piano in STASH?<br/>(portale o morte)"}
-    P -->|sì| R["stato ripreso dalla RAM:<br/>mostri dove li si era lasciati"]
-    P -->|no| C["clear_lvlblk → spawn_monsters →<br/>place_chests (o fin_chests al piano 20) → place_boss"]
+    G --> C["clear_lvlblk → spawn_monsters →<br/>place_chests (o fin_chests al piano 20) → place_boss"]
     C --> V{"bit del piano in c_vis?"}
     V -->|sì| LL["load_level: differenze salvate<br/>(mostri morti, bauli aperti, baule del boss, nebbia)"]
     V -->|no| IR
     LL --> IR["init_monsters_rt: vita ±25%, posizioni in pixel"]
+    IR --> P{"pend_lvl = piano?<br/>(portale o morte)"}
+    P -->|sì| R["st_in: boss, 5 mostri caldi e<br/>10 bauli lasciati dalla STASH"]
     R --> FI
     IR --> FI["final_init, apply_items, apply_chests, portale"]
     FI --> RND["generatore casuale di nuovo libero (raster, CIA)"]
@@ -87,7 +87,7 @@ Il ciclo dura al massimo un fotogramma PAL (19 656 cicli): i mostri lontani sono
 
 | Modulo | Dove | Quando |
 |---|---|---|
-| `GAME` | `$0400` … | sempre in memoria (il generatore dei piani, in coda al PRG, si copia sotto l'I/O a `$D480`) |
+| `GAME` | `$0400` … | sempre in memoria (il generatore dei piani, in coda al PRG, si copia sotto l'I/O a `$D080`) |
 | `LOBBY` | `$C000` (RAM della mappa) | menu iniziale, scheda dell'eroe |
 | `MENU` | zone `$C900`, `$F4E0`, `$A700` (11/11) | locanda e negozi: all'ingresso nel villaggio se manca (dopo l'avvio o il LOBBY), poi resta ([Tecnica](tecnica.md#moduli-su-disco)) |
 | `GFX0` | cache `$E000` | grafica del villaggio |

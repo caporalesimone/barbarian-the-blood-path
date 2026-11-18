@@ -159,8 +159,8 @@ Riparazione dal fabbro: [Villaggio](villaggio.md#negozi). Simulazione: `tools/si
 ## Morte del PG (`player_die`)
 
 Vita 0 → schermata "you have died", **metà dell'oro addosso** persa (`c_gold`; l'oro nel baule della locanda, `c_sgold`, resta: 07/11 sera), contatore delle morti +1 (`c_deaths`), vita piena,
-risveglio nel villaggio (`spawn_mode` 3). Il piano lasciato resta in memoria (STASH) con mostri e tesori com'erano: tornando con il
-portale si ritrova uguale ([Salvataggi](salvataggi.md)).
+risveglio nel villaggio (`spawn_mode` 3). Del piano lasciato restano in memoria (STASH, 19/11) il boss, 5 mostri "caldi" (feriti, poi svegli) e fino a 10
+bauli lasciati: tornando con il portale si ritrovano com'erano, gli altri mostri ripartono dal seed ([Salvataggi](salvataggi.md)).
 
 ## Fontana
 

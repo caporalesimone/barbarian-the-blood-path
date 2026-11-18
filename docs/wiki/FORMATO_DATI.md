@@ -115,11 +115,11 @@ scesi di 1 perché i pugni non esistono più):
 Totale 82 o 93 byte (11/11: con i 2 byte della partita; prima scritto "81 o 92", sbagliato di 1): sta nel suo posto
 da `LV_SLOT` = 93 byte. Regole:
 - **posizioni dei mostri non salvate**: tornando nel piano (scale o caricamento) i vivi ripartono dalla
-  casella di partenza del seed, con la vita piena. Con il portale o alla morte invece lo stato resta in
-  memoria (STASH, sotto) con le posizioni esatte;
+  casella di partenza del seed, con la vita piena. Con il portale o alla morte il boss e 5 mostri "caldi"
+  (feriti, poi svegli) restano in memoria con vita e casella (STASH, sotto; [salvataggi](salvataggi.md));
 - i **bauli aperti spariscono** cambiando piano, anche se non vuoti (bit 5 di `ch_t`);
 - i **tesori lasciati dai mostri non si salvano**: spariscono cambiando piano (con le scale, salvando o
-  uscendo); il baule del boss invece resta finché non è aperto;
+  uscendo; con il portale o alla morte se ne conservano fino a 10 in memoria per il rientro); il baule del boss invece resta finché non è aperto;
 - la nebbia in memoria resta a caselle (`EXPL`, 288 byte): solo quella salvata è a settori.
 
 Bauli: al massimo 4 generati con il piano (`CH_GEN_MAX`, posti 0..3, bit 4 di `ch_t`: prima quello d'oro,
@@ -176,7 +176,7 @@ sala del trono e lo slot della porta della locanda la leva.
 | `$E000`–`$E57F` | villaggio (`GFX0`), riletto a ogni ingresso (11/11; il primo lo carica START) |
 | `$EC6D`–`$F4DF` | tema del piano attuale (`GFXn`), riletto a ogni ingresso (11/11: precaricamento e cache tolti; 15/11: comincia `GFX_INFO` byte prima di `$ED00`, nella coda del villaggio) |
 | `$F4E0`–`$FCFF` | (11/11) zona 2 del modulo MENU (fino all'11/11: tema precaricato in background, ora scritto direttamente nel buffer del tema) |
-| `$D000`–`$DFFF` | sotto l'I/O: all'avvio villaggio e sprite del loader, poi i salvataggi letti dal loader (fino al primo menu); in gioco `STASH` `$D000`–`$D47F` e il generatore dei piani da `$D480` (copiato dal PRG `GAME` all'avvio) |
+| `$D000`–`$DFFF` | sotto l'I/O: all'avvio villaggio e sprite del loader, poi i salvataggi letti dal loader (fino al primo menu); in gioco `STASH` `$D000`–`$D07F` (19/11) e il generatore dei piani da `$D080`, poi gli slot dei piani `LVRAM` (copiato dal PRG `GAME` all'avvio) |
 
 ### Precaricamento in background (tolto)
 Tolto l'11/11 nel ramo `fast-loader` (con le cache `gfx_town`, `gfx_theme`, `fin_ok`): vedi [Flussi](flussi.md#8-precaricamento-del-tema-tolto).
@@ -225,7 +225,7 @@ villaggi. `src/menu.asm` è assemblato in sei zone di RAM (le parti in `src/menu
 | 3 | `MR3_AT` `$A700`–`$A7FF` (slot sprite 28–31, liberi nel gioco) | negozi: riparazione e tetto dell'oro (`menu/shop_fix.asm`); aspetto degli NPC (`menu/npc_look.asm`, 17/11) |
 | 4 | `MR4_AT` `$A300`–`$A4FF` (slot sprite 12–19: mostri del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (17/11) sprite degli NPC del villaggio: 4 disegni × 2 fotogrammi (`tools/build/npc_gfx.py`), solo dati |
 | 5 | `MR5_AT` `$8C00`–`$8E7F` (sprite forti e boss del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (18/11) sprite del "!" (`$8C00`, puntatore `$30`), tabella dei salti `NPC_JT` (`$8C40`: `npc_init`, `npc_draw5`, `npc_talk5`), capitoli delle quest `q_ch`, piazzamento e sprite degli NPC (`menu/npc.asm`) |
-| 6 | `MR6_AT` = `MRT` `$9600`–`$977F` (tabelle dei mostri del piano: nel villaggio non servono, `lb_cnt` = 0; entrando in un piano le riscrivono `init_monsters_rt` o la STASH) | (18/11, revisione R11) passo dei vaganti `npc_tick6` (`menu/npc_tick.asm`), chiamato da `npc_tick` di GAME a `MR6_AT`. Per questo `pend_save` (salvataggio nel villaggio) copia dalla STASH solo `LVLBLK`, non `MRT` |
+| 6 | `MR6_AT` = `MRT` `$9600`–`$977F` (tabelle dei mostri del piano: nel villaggio non servono, `lb_cnt` = 0; entrando in un piano le riscrivono `init_monsters_rt` e `st_in`) | (18/11, revisione R11) passo dei vaganti `npc_tick6` (`menu/npc_tick.asm`), chiamato da `npc_tick` di GAME a `MR6_AT`. Dal 19/11 la STASH non contiene più copie di `MRT` |
 
 File **`MENU`** (18/11, revisione R2: **un file solo**; dall'11/11 era un file per zona, `MENU1`…`MENU5`, e ogni file in più
 costava ~0,4 s a ogni ingresso nel villaggio). Struttura (`tools/build/pack_menu.py`):
@@ -292,10 +292,9 @@ Krill invece permette sprite, IRQ e badline durante i caricamenti.
 - **Stato del piano** (`SAVE-0N`, offset 210 + (piano − 1) × 93):
   - lasciandolo per le **scale**: copiato nel suo **slot in RAM** (`LVRAM`, 5 slot del capitolo, RAM sotto l'I/O);
     sul disco va con "save game" o al cambio di capitolo, insieme all'eroe;
-  - lasciandolo per **portale o morte**: copiato in memoria (`STASH`, `$D000`, RAM sotto l'I/O),
-    nessun accesso al disco. Tornando in quel piano si riprende dalla memoria;
-  - entrando in un **altro** piano con uno stato ancora in memoria: prima lo si copia nel suo slot;
-  - menu RUN/STOP: piano attuale (o quello in memoria, se si è nel villaggio) + personaggio.
+  - lasciandolo per **portale o morte**: nel suo slot come per le scale, e in più boss, 5 mostri caldi e 10 bauli
+    lasciati in memoria (`STASH`, `$D000`–`$D07F`), nessun accesso al disco. Tornando in quel piano si rimettono;
+  - menu RUN/STOP: piano attuale + personaggio.
 - Il bit di `c_vis` dice che il piano ha uno stato su `SAVE-0N`; finisce sul disco col personaggio, quindi un
   piano salvato dopo l'ultimo salvataggio del personaggio si rigenera da zero alla ripresa.
 - Cambio piano: 1) salva/conserva lo stato del piano attuale, 2) grafica del nuovo piano (cache o

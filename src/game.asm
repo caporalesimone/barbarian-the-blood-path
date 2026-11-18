@@ -2001,7 +2001,7 @@ gd_font .binary "../out/work/gfx/uifont.bin"
 gfx_end:
 
 ; generatore dei piani: nel PRG dopo la grafica (anche lui dato morto dopo l'avvio), eseguito sotto l'I/O
-GEN_AT = STASHM + MRT_N             ; $D480: RAM sotto l'I/O dopo lo stato del piano in memoria (levels.asm)
+GEN_AT = STASH_END                  ; $D080: RAM sotto l'I/O dopo la STASH (levels.asm; fino al 18/11 $D480)
 gen_img:
         .logical GEN_AT
         .include "gen_io.asm"

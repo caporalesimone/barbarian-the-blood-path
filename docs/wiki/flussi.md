@@ -46,7 +46,7 @@ sequenceDiagram
     S->>D: loadraw LOBBY -> $C000 (LDFLAGS $8E = 1)
     S->>D: loadraw hl: elenco eroi -> CHRTMP, poi in RAM sotto l'I/O (CHRPRE $8F = 1)
     S->>G: sei, jmp $0400 (GAME_ENTRY)
-    Note over G: start: copy_gfx (coda del PRG -> $8000-$9FFF,<br/>generatore -> $D480), CIA spente, irq_init,<br/>NMI su nmi_stub, banco VIC 2, init_vic
+    Note over G: start: copy_gfx (coda del PRG -> $8000-$9FFF,<br/>generatore -> $D080), CIA spente, irq_init,<br/>NMI su nmi_stub, banco VIC 2, init_vic
     G->>G: game_start
 ```
 
@@ -154,11 +154,12 @@ flowchart TD
     CL["change_level"] --> FD["snd_fade, irq_off, schermo nero,<br/>music_fadeout, snd_mute"]
     FD --> WH{"luogo lasciato"}
     WH -->|villaggio| NS
-    WH -->|"piano, scale"| SL["save_level: stato compatto nel suo slot in RAM (LVRAM)"]
-    WH -->|"piano, portale o morte"| ST["stash_level: stato in STASH ($D000, sotto l'I/O),<br/>pend_lvl = piano"]
-    SL --> CH{"piano nuovo di un altro capitolo?"}
+    WH -->|piano| SL["save_level: stato compatto nel suo slot in RAM (LVRAM)"]
+    SL --> PM{"portale o morte?"}
+    PM -->|"si'"| ST["st_out (GEN_STOUT): boss, 5 mostri caldi,<br/>10 bauli lasciati in STASH ($D000), pend_lvl = piano"]
+    PM -->|no| CH{"piano nuovo di un altro capitolo?"}
     ST --> CH
-    CH -->|"si'"| CS["chap_save: STASH nel suo slot,<br/>eroe + slot sul disco (sv_all)"]
+    CH -->|"si'"| CS["chap_save: eroe + slot sul disco (sv_all), pend_lvl = 0"]
     CH -->|no| NS["cur_level = piano nuovo, c_maxd"]
     CS --> NS
     NS --> LL["load_location"]
@@ -181,14 +182,13 @@ flowchart TD
     W2 -->|si'| TP["town_post (portale), clear_lvlblk, music_town"]
     W2 -->|no| DG["music_dungeon, floor_types, gen_dungeon (sezione 7)"]
     DG --> CE["chap_ensure: se il capitolo cambia,<br/>slot del capitolo letti dal file dell'eroe"]
-    CE --> PE{"pend_enter:<br/>piano in STASH?"}
-    PE -->|si'| MEM["stato ripreso dalla RAM"]
-    PE -->|no| CLR["clear_lvlblk, spawn_monsters,<br/>place_chests / fin_chests, place_boss"]
+    CE --> CLR["clear_lvlblk, spawn_monsters,<br/>place_chests / fin_chests, place_boss"]
     CLR --> VB{"piano visitato<br/>(c_vis)?"}
     VB -->|si'| LDL["load_level: differenze dallo slot in RAM"] --> IR
     VB -->|no| IR["init_monsters_rt"]
-    MEM --> FI
-    IR --> FI["final_init, apply_chests, place_portal_tile"]
+    IR --> PE{"pend_lvl = piano?<br/>(portale o morte)"}
+    PE -->|"si'"| MEM["st_in (GEN_STIN): boss, mostri caldi<br/>e bauli lasciati dalla STASH"] --> FI
+    PE -->|no| FI["final_init, apply_chests, place_portal_tile"]
 ```
 
 ## 7. Generazione di un piano
@@ -202,7 +202,7 @@ sequenceDiagram
     participant D as gen_dungeon (GAME)
     participant F as fin_load (CODE2)
     participant C as gen_call
-    participant G as generatore ($D480, $01 = $34)
+    participant G as generatore ($D080, $01 = $34)
     L->>D: cur_level
     alt piano 20 (sala del trono)
         D->>F: FMAP: cache $FD00 (dal disco la prima volta)
