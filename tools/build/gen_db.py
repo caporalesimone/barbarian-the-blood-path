@@ -133,6 +133,30 @@ def main():
         """piano L (1..maxl) -> gradino 1..nst delle tabelle spawn (l'ultimo piano = ultimo gradino)"""
         return nst if L == maxl else max(1, min(nst - 1, round(L * (nst - 1) / (maxl - 1))))
 
+    # (18/11) aspetto dei piani generati (data/chapters.yaml, campo map): un byte per piano 0..MAXLEVEL, bit 0-3 palette
+    # (0 = quella casuale di pal_for_level), bit 4-5 stile della mappa (0 stanze, 1 grotte: gen_io.asm). Il piano del boss
+    # del capitolo (l'ultimo) ha la sua mappa fissa e resta 0.
+    import chapters_db
+    STYLES = {"rooms": 0, "caves": 1}
+    look = [0] * (maxl + 1)
+    for ch in chapters_db.load()["chapters"]:
+        mp = ch.get("map") or {}
+        st = STYLES.get(mp.get("style", "rooms"))
+        chk(st is not None, f"chapters.yaml: capitolo {ch['id']}: map.style {mp.get('style')!r} sconosciuto")
+        pals = mp.get("palettes") or []
+        chk(len(pals) <= ch["n_levels"] - 1, f"chapters.yaml: capitolo {ch['id']}: piu' palette che piani generati")
+        for loc in range(1, ch["n_levels"]):
+            d = ch["first_depth"] + loc - 1
+            if d >= maxl:
+                break
+            pl = pals[loc - 1] if loc <= len(pals) else 0
+            chk(0 <= pl <= 15, f"chapters.yaml: capitolo {ch['id']}: palette {pl}")
+            look[d] = pl | st << 4
+    o("; ---- aspetto dei piani generati (data/chapters.yaml map): bit 0-3 palette (0 = casuale), bit 4-5 stile (1 = grotte)")
+    o.bytes("lv_look", look)
+    o("LK_CAVE     = $10")
+    o()
+
     P = R["player"]
     plmax = P["max_level_before_boss"]
     chk(plmax == maxl, "player.max_level_before_boss deve essere = dungeon.floors (un livello per piano)")

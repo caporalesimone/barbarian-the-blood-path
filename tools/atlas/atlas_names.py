@@ -10,6 +10,12 @@ stops with an error (the build fails)."""
 TILE = {
     # dungeon (files GFX1/GFX2, slots 0..26)
     "WALL": ("wall", "dungeon wall seen from above (solid)"),
+    # (18/11, TODO M11) grotte (capitolo 3, tools/build/cave_gfx.py): stessi posti, roccia al posto dei mattoni
+    "CAVE:WALL": ("rock", "cave rock seen from above (solid); snow flecks on level 11 (palette 9)"),
+    "CAVE:WALLFACE": ("rock face", "rock face above a floor: snowy (palette 9) or pale crest, strata, shade at the bottom"),
+    "CAVE:FLOOR": ("cave floor", "dark earth with gravel"),
+    "CAVE:FLOORB": ("cave floor, stone", "cave floor with a stone (random variant set by post_walls, 1/8)"),
+    "CAVE:FLOORC": ("cave floor, pebbles", "cave floor with pebbles (random variant set by post_walls, 1/8)"),
     "WALLFACE": ("wall face", "wall with its face showing: post_walls puts it above a floor"),
     "FLOOR": ("floor", "dungeon floor"),
     "FLOORB": ("floor B", "cracked floor (random variant set by post_walls, 1/8)"),

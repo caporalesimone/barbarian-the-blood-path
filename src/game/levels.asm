@@ -31,7 +31,11 @@ pal_for_level:
         beq +
 _red    lda #4
         rts
-+       lda cur_level
++       ldx cur_level           ; (18/11) palette fissa del piano (data/chapters.yaml map.palettes): bit 0-3 di lv_look
+        lda lv_look,x
+        and #$0f
+        bne _r
+        lda cur_level
         asl
         clc
         adc cur_level
@@ -42,7 +46,7 @@ _red    lda #4
         and #7
         clc
         adc #1
-        rts
+_r      rts
 _t      lda #0
         rts
 
@@ -1063,6 +1067,8 @@ migrate_char:
         lda c_gver
         cmp #GVER
         beq _ok
+        cmp #5                  ; (18/11) dalla versione 5 il seed di 6 cifre c'e' gia': solo i piani si rigenerano
+        bcs _vis
         lda c_seed
         sta tmp0
         lda c_seed+1
@@ -1086,6 +1092,7 @@ _n      dex
         lda #0
         sta c_seedt
         sta c_seedt+1
+_vis    lda #0
         sta c_vis               ; i piani vengono rigenerati col nuovo generatore
         sta c_vis+1
         sta c_vis+2

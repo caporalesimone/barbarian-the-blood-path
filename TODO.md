@@ -437,13 +437,15 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - (12/11, committente) **Confermato**: un tema grafico dei livelli per capitolo (`GFX1..8`) va bene così.
 
 ### M11 (18/11) Stile delle mappe per capitolo — L
-- **Obiettivo**: piani diversi per capitolo (oggi un solo generatore). Decisioni del committente (18/11): capitolo 1 dungeon
-  di oggi, capitolo 3 grotte (piano 11 roccia innevata, 12-14 roccia), capitolo 4 cittadella; capitolo 2 palude: proposta
-  in [quests](docs/wiki/quests.md) 9bis (cantine allagate al 6, isole e passerelle 7-9), **da confermare**.
-- **Cosa serve**: stili dentro `gen_io` (~1,3 KB liberi sotto l'I/O dopo `LVRAM`); tile di roccia, neve, acqua, riva, assi
-  nei temi 3-6 (27 posti per tema); `post_walls` e la sua copia nell'atlante; bauli con più tentativi; `test_gen` per
-  capitolo e `c_gver`. Ordine proposto: grotte (capitolo 3), poi palude, poi cittadella.
-- **Attenzione**: cambia la generazione dei capitoli 2-4 degli eroi salvati; stime di codice e tempi non misurate.
+- **Fatto (18/11)**: grotte nel capitolo 3 (piano 11 roccia innevata, 12-14 roccia): [dungeon](docs/wiki/dungeon.md) "Grotte".
+  Da rivedere con il committente in gioco: forma (macchie e gallerie), colori delle palette 9 e 10, tempo di generazione
+  (0,8-0,95 s contro 0,3 s delle stanze).
+- **Palude** (capitolo 2, decisa il 18/11: [quests](docs/wiki/quests.md) 9bis): piani 6-9 affiancati 2 × 2 in un'unica mappa,
+  si passa camminando oltre il bordo (niente scale), acqua verde scura, isole, passerelle. Serve: varchi sul bordo dal seed
+  del capitolo, modo di arrivo "dal bordo" in `change_level`, tile acqua/riva/assi nel tema 3, passaggio veloce (sotto 1 s:
+  tema non riletto se uguale, niente dissolvenza). Da decidere: minimappa, varchi per lato, piano 6.
+- **Cittadella** (capitolo 4, BSP simmetrico): da fare dopo la palude.
+- **Attenzione**: ogni stile cambia i piani salvati di quel capitolo (`GVER`, `test_gen`).
 
 ### H5 (ex 5.4) Due build: inglese e italiano (dopo H4) — L
 - Intro e testi delle quest nelle due lingue con gli stessi limiti di buffer e disco; con E7 (manuale) ed E9 (stringhe).

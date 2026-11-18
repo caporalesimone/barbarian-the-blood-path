@@ -51,14 +51,276 @@ gen_dmain:
         adc #3
         sta lv_xl               ; 1 collegamento extra ogni 3..6
         jsr clear_map
+        ldx cur_level           ; (18/11) stile della mappa del piano (data/chapters.yaml map.style, tabella lv_look)
+        lda lv_look,x
+        and #LK_CAVE
+        sta lv_cave
         jsr gen_rooms
         jsr gen_links
         jsr carve_rooms
-        jsr gen_stairs
+        lda lv_cave
+        beq +
+        jsr cave_smooth
++       jsr gen_stairs
         jsr post_walls
         rts
 
 minsz_tab .byte 4, 5, 6, 4
+
+; ---------------------------------------------------------------------------------------------------------------------
+; (18/11, TODO M11) GROTTE (capitolo 3, docs/wiki/dungeon.md): stesso contratto delle stanze (16 celle, vis, rx/ry/rw/rh
+; come rettangolo della stanza per mostri e bauli, rcx/rcy pavimento, albero di gen_links), ma
+;  - carve_blob: al posto del rettangolo pieno una macchia: passeggiata casuale di (rw+rh)*8 passi dal centro, pennello
+;    2x2, sempre dentro il rettangolo della stanza;
+;  - carve_worm: al posto del corridoio a L una galleria tortuosa larga 2 dal centro di cc_a a quello di cc_b (3 passi su
+;    4 verso la meta, 1 di lato: arriva sempre, ogni passo la tocca);
+;  - cave_smooth: un passo di automa cellulare sui muri (un muro con al massimo SM_MAX muri fra gli 8 vicini diventa
+;    pavimento: niente spuntoni). Si segnano prima ($80, conta ancora come muro) e si cambiano dopo, cosi' il risultato
+;    non dipende dall'ordine di visita.
+; Il centro di ogni stanza resta pavimento (primo colpo di pennello) e ogni galleria passa per i due centri: la mappa e'
+; collegata come quella delle stanze. Bordo della mappa sempre muro (pennello entro le colonne/righe 1..46).
+; ---------------------------------------------------------------------------------------------------------------------
+SM_MAX   = 2
+WORM_LAT = 64                   ; rand < 64: passo di lato (1 su 4)
+lv_cave .byte 0                 ; LK_CAVE se il piano e' a grotte
+wx      .byte 0                 ; posizione del pennello (angolo in alto a sinistra del 2x2)
+wy      .byte 0
+wtx     .byte 0                 ; meta della galleria
+wty     .byte 0
+bl_x0   .byte 0                 ; limiti del pennello nella stanza
+bl_x1   .byte 0
+bl_y0   .byte 0
+bl_y1   .byte 0
+bl_n    .byte 0                 ; passi che restano
+cv_k    .byte 0                 ; muri contati fra i vicini
+
+; pavimento 2x2 con l'angolo in (wx, wy)
+brush:
+        ldy wy
+        lda maprow_lo,y
+        clc
+        adc wx
+        sta ptr0
+        lda maprow_hi,y
+        adc #0
+        sta ptr0+1
+        lda #T_FLOOR
+        ldy #0
+        sta (ptr0),y
+        iny
+        sta (ptr0),y
+        ldy #MAPW
+        sta (ptr0),y
+        iny
+        sta (ptr0),y
+        rts
+
+; macchia della stanza cur (vis = 1)
+carve_blob:
+        ldx cur
+        lda rx,x
+        sta bl_x0
+        clc
+        adc rw,x
+        sbc #1                  ; (C = 0) rx + rw - 2
+        sta bl_x1
+        lda ry,x
+        sta bl_y0
+        clc
+        adc rh,x
+        sbc #1
+        sta bl_y1
+        lda rw,x
+        clc
+        adc rh,x
+        asl
+        asl
+        asl
+        sta bl_n
+        lda rcx,x               ; rcx = rx + rw/2 <= rx + rw - 2 perche' rw >= 4
+        sta wx
+        lda rcy,x
+        sta wy
+_l      jsr brush
+        dec bl_n
+        beq _d
+        jsr rand
+        lsr                     ; C = verso, bit 0 di A = asse
+        tay
+        bcc _neg
+        tya
+        lsr
+        bcs _yp
+        lda wx
+        cmp bl_x1
+        bcs _l
+        inc wx
+        bne _l
+_yp     lda wy
+        cmp bl_y1
+        bcs _l
+        inc wy
+        bne _l
+_neg    tya
+        lsr
+        bcs _ym
+        lda wx
+        cmp bl_x0
+        beq _l
+        dec wx
+        bne _l
+_ym     lda wy
+        cmp bl_y0
+        beq _l
+        dec wy
+        bne _l
+_d      rts
+
+; galleria tortuosa larga 2 dal centro della stanza cc_a a quello di cc_b
+carve_worm:
+        ldx cc_a
+        lda rcx,x
+        sta wx
+        lda rcy,x
+        sta wy
+        ldx cc_b
+        lda rcx,x
+        sta wtx
+        lda rcy,x
+        sta wty
+_l      jsr brush
+        lda wx
+        cmp wtx
+        bne _go
+        lda wy
+        cmp wty
+        beq _d
+_go     jsr rand
+        cmp #WORM_LAT
+        bcc _lat
+        tay                     ; verso la meta: su x o su y (bit 0 a caso se mancano tutti e due)
+        lda wx
+        cmp wtx
+        beq _ty
+        lda wy
+        cmp wty
+        beq _tx
+        tya
+        lsr
+        bcc _tx
+_ty     lda wy
+        cmp wty
+        bcc _yi
+        dec wy
+        bpl _l
+_yi     inc wy
+        bpl _l
+_tx     lda wx
+        cmp wtx
+        bcc _xi
+        dec wx
+        bpl _l
+_xi     inc wx
+        bpl _l
+_lj     jmp _l
+_lat    lsr                     ; di lato: bit 0 asse, bit 1 verso; mai fuori dalle colonne/righe 1..MAPW-3
+        bcs _sy
+        lsr
+        bcs _sxp
+        lda wx
+        cmp #2
+        bcc _lj
+        dec wx
+        bpl _lj
+_sxp    lda wx
+        cmp #MAPW-3
+        bcs _lj
+        inc wx
+        bpl _lj
+_sy     lsr
+        bcs _syp
+        lda wy
+        cmp #2
+        bcc _lj
+        dec wy
+        bpl _lj
+_syp    lda wy
+        cmp #MAPH-3
+        bcs _lj
+        inc wy
+        bpl _lj
+_d      rts
+
+; un muro vicino (A = tile) conta se e' muro (0) o muro segnato ($80)
+cnt     .macro
+        lda (\1),y
+        and #$7f
+        bne +
+        inc cv_k
++
+        .endm
+
+; un passo di automa cellulare sui muri interni (righe e colonne 1..46): segna, poi cambia
+cave_smooth:
+        ldx #1
+_ry     lda maprow_lo-1,x
+        sta ptr0
+        lda maprow_hi-1,x
+        sta ptr0+1
+        lda maprow_lo,x
+        sta ptr1
+        lda maprow_hi,x
+        sta ptr1+1
+        lda maprow_lo+1,x
+        sta ptr2
+        lda maprow_hi+1,x
+        sta ptr2+1
+        ldy #1
+_rx     lda (ptr1),y
+        bne _nx
+        lda #0
+        sta cv_k
+        dey
+        #cnt ptr0
+        #cnt ptr1
+        #cnt ptr2
+        iny
+        #cnt ptr0
+        #cnt ptr2
+        iny
+        #cnt ptr0
+        #cnt ptr1
+        #cnt ptr2
+        dey
+        lda cv_k
+        cmp #SM_MAX+1
+        bcs _nx
+        lda #$80
+        sta (ptr1),y
+_nx     iny
+        cpy #MAPW-1
+        bne _rx
+        inx
+        cpx #MAPH-1
+        beq +
+        jmp _ry
++       lda #<MAP               ; i segnati diventano pavimento
+        sta ptr0
+        lda #>MAP
+        sta ptr0+1
+        ldy #0
+        ldx #9                  ; 9 pagine: 2304 = 48 x 48
+_cv     lda (ptr0),y
+        cmp #$80
+        bne +
+        lda #T_FLOOR
+        sta (ptr0),y
++       iny
+        bne _cv
+        inc ptr0+1
+        dex
+        bne _cv
+        rts
 
 
 ; sala del trono (piano MAXLEVEL): mappa fissa (FMAP), scale e posizioni del boss; stanze laterali aperte se c_won
@@ -200,7 +462,11 @@ _cell   stx cur
         lda vis,x
         cmp #1
         bne _skipr
-        lda rx,x
+        lda lv_cave             ; (18/11) grotte: macchia al posto del rettangolo
+        beq +
+        jsr carve_blob
+        jmp _skipr
++       lda rx,x
         sta tmp2
         lda ry,x
         sta tmp3
@@ -384,7 +650,10 @@ _nex2   ldx cur
 
 ; corridoio largo 2 fra le stanze cc_a e cc_b: un tratto orizzontale e uno verticale (carve_h, carve_v)
 carve_corr:
-        ldx cc_a
+        lda lv_cave             ; (18/11) grotte: galleria tortuosa
+        beq +
+        jmp carve_worm
++       ldx cc_a
         ldy cc_b
         lda rcx,x
         cmp rcx,y

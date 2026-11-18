@@ -49,7 +49,7 @@ flowchart TD
     CK -->|no| NA["rigenera senza stanze assenti"] --> GL
     CK -->|sì| EX["corridoi extra fra celle vicine<br/>(1 su lv_xl)"]
     EX --> CR["carve_rooms: scava le stanze raggiunte"]
-    CR --> GS["gen_stairs: scale su e giù"]
+    CR --> SM["(grotte) cave_smooth"] --> GS["gen_stairs: scale su e giù"]
     GS --> PW["post_walls: facciate dei muri,<br/>pavimento variato (2 su 8)"]
 ```
 
@@ -63,6 +63,29 @@ flowchart TD
   assenti.
 - Collegamenti extra: per ogni coppia di stanze vicine (destra e sotto) già raggiunte, un corridoio in più con
   probabilità 1/`lv_xl` (anelli nella mappa).
+
+### Grotte (capitolo 3, dal 18/11)
+Lo **stile della mappa** è per capitolo (`data/chapters.yaml`, campo `map`: `style: rooms|caves`, `palettes` per piano locale),
+compilato da `tools/build/gen_db.py` nella tabella **`lv_look`** (un byte per piano: bit 0-3 palette, 0 = quella casuale di
+`pal_for_level`; bit 4 = grotte). Oggi: capitolo 3 a grotte, piano 11 palette 9 (roccia innevata), 12-14 palette 10 (roccia);
+gli altri capitoli come prima. Con le grotte (`lv_cave`) cambiano tre passi, tutto il resto (stile, celle, `vis`, albero, anelli,
+scale, `post_walls`) resta uguale:
+- `carve_blob` al posto di `carve_rooms`: nella stanza una **macchia** = passeggiata casuale di (larghezza + altezza) × 8 passi
+  dal centro con un pennello 2 × 2, sempre dentro il rettangolo della stanza (che resta in `rx`/`ry`/`rw`/`rh` per mostri e
+  bauli). Il primo colpo è sul centro: (`rcx`, `rcy`) è sempre pavimento.
+- `carve_worm` al posto del corridoio a L: **galleria tortuosa** larga 2 dal centro di una stanza a quello dell'altra, 3 passi
+  su 4 verso la meta e 1 di lato (mai oltre le colonne/righe 1..45): arriva sempre e passa per i due centri, quindi la mappa è
+  collegata come quella a stanze.
+- `cave_smooth` dopo lo scavo: un passo di **automa cellulare** sui muri interni (un muro con al massimo 2 muri fra gli 8 vicini
+  diventa pavimento: niente spuntoni); i muri si segnano prima e si cambiano dopo, così il risultato non dipende dall'ordine.
+- Grafica: nel file del tema dei piani del capitolo (`GFX5`) muro, parete e pavimenti sono di **roccia**
+  (`tools/build/cave_gfx.py`): parete con la cresta nel colore `pal_c2` (bianco = neve nella palette 9, grigio chiaro nella 10),
+  strati e crepe neri. Il file del boss (`GFX6`) resta quello di prima.
+- Costi (misurati in VICE, 18/11): generazione 0,76-0,95 s (stanze ~0,3 s); codice +567 B sotto l'I/O (`gen_io_end` `$DB5D`,
+  `LVRAM` fino a `$DD2E`, 722 B liberi fino a `$E000`). Bauli: `chest_in_room` prova fino a 4 caselle del rettangolo (prima 1).
+- Test: `GEN-10` (mappe di riferimento, anche i piani 11 e 13) e `GEN-11` (6 seed × piani 11-14: tutto il pavimento
+  raggiungibile dalle scale, bordo di muro, almeno 300 caselle di pavimento, generazione sotto 1,2 s, palette 9/10).
+- Versione del generatore `GVER` 6: un eroe salvato con la 5 tiene il seed e rigenera i piani (`migrate_char`).
 
 ### Scale
 - `gen_stairs`: scale **su** al centro di una stanza a caso (`st_s`), scale **giù** al centro di un'altra (`st_e`)
@@ -79,7 +102,7 @@ flowchart TD
 `lvl_theme` (12/11, un file di grafica per capitolo): capitolo *c* = `lv_grp(piano)`; piani del dungeon → `GFX(2c−1)`,
 piano del boss del capitolo (5, 10, 15) → `GFX(2c)`, piano 20 → `GFX(2·CHAPTERS)`. Per ogni capitolo due file, **tile + sprite dei mostri del capitolo**: `GFX(2c−1)` per i piani del dungeon,
 `GFX(2c)` per il piano del boss (sala del trono: piani 5, 10, 15 e 20; i file dei capitoli 2–4 sono copie segnaposto,
-pronte da modificare). Niente più deduplica: 8 file `GFX1`…`GFX8` (8 blocchi ciascuno). La palette per piano resta
+pronte da modificare; dal 18/11 `GFX5` ha muri e pavimenti di roccia: grotte). Niente più deduplica: 8 file `GFX1`…`GFX8` (8 blocchi ciascuno). La palette per piano resta
 `pal_for_level`.
 Il tema del piano successivo si precarica in background ([Tecnica](tecnica.md)).
 

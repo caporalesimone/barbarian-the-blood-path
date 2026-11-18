@@ -1269,6 +1269,16 @@ def main():
         return dt
     files = []
     dun_t, boss_t = theme_tiles(False), theme_tiles(True)   # una volta sola: lever_tile() usa il PRNG (byte diversi a ogni chiamata)
+    # (18/11, TODO M11) capitoli a grotte (data/chapters.yaml map.style): nel file del tema dei piani muro, parete e
+    # pavimenti di roccia (tools/build/cave_gfx.py) al posto dei mattoni; il file del boss resta com'e'
+    import cave_gfx, chapters_db
+    cave_t = bytearray(dun_t)
+    for n_, gr in cave_gfx.tiles().items():
+        for q, ch in enumerate(tile_chars(gr)):
+            o = (q * DN + TID[n_]) * 8
+            cave_t[o:o + 8] = bytes(ch)
+    cave_t = bytes(cave_t)
+    caves = {ch["id"] for ch in chapters_db.load()["chapters"] if (ch.get("map") or {}).get("style") == "caves"}
     sets = chapter_sets()                                   # GFX(2c-1) dungeon, GFX(2c) boss del capitolo c
     raws = [info_raw(m) for _, _, _, m in sets]
     INFO = max(info_len(r) for r in raws)
@@ -1285,7 +1295,8 @@ def main():
         assert [r["name"].lower() for r in exp] == M_names(m), "GFX%d: nomi %s, bestiario %s" % (n, M_names(m), [r["name"] for r in exp])
         assert [r["color"] for r in exp] == M_cols(m), "GFX%d: colori %s, bestiario %s" % (n, M_cols(m), [r["color"] for r in exp])
     for (n, c, boss, m), r in zip(sets, raws):
-        files.append((dun_t, boss_t)[boss] + b"".join(mon_bytes(m)) + info_bytes(r, INFO))
+        tl = boss_t if boss else cave_t if c in caves else dun_t
+        files.append(tl + b"".join(mon_bytes(m)) + info_bytes(r, INFO))
     global GFX_DUN_AT
     GFX_DUN_AT = GFX_DUN_END - len(files[0])
     assert all(len(f) == len(files[0]) for f in files)

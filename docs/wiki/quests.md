@@ -826,35 +826,56 @@ flowchart LR
 
 ### 9bis. Revisione del 18/11 (design, non implementato): uno stile per capitolo
 
-Stato del codice il 18/11: **un solo generatore** (stanze rettangolari, corridoi a L larghi 2) per tutti i capitoli; per
+Stato del codice il 18/11 mattina: **un solo generatore** (stanze rettangolari, corridoi a L larghi 2) per tutti i capitoli; per
 capitolo cambiano solo grafica, palette e mostri, per piano i parametri dello "stile" dal seed. Il disegno qui sopra (tre
 file `GENn` per tratto) è superato dai capitoli: decisioni del committente del 18/11:
 
 | Capitolo | Piani | Stile | Grafica |
 |---|---|---|---|
 | 1 Aldric's Crossing | 1–5 | **dungeon di oggi** (stanze e corridoi) | mattoni (temi 1, 2) |
-| 2 Blackwater Mill | 6–10 | **palude** (proposta sotto, da confermare) | acqua nera, fango, assi |
+| 2 Blackwater Mill | 6–10 | **palude** a mappa unica 2 × 2 (design sotto) | acqua verde scura, fango, assi |
 | 3 The Last Camp | 11–15 | **grotte**: il piano 11 in una grotta di roccia **innevata**, 12–14 grotte di roccia | roccia con la neve sulle creste (11), roccia nuda (12–14) |
 | 4 The Throne of Ruin | 16–20 | **cittadella** (BSP simmetrico, come sopra) | pietra squadrata, colonne |
 
-**Grotte** (capitolo 3; prototipo Python del 18/11): in ogni cella una macchia irregolare (passeggiata casuale dal centro,
+**Grotte** (capitolo 3; **implementate il 18/11**, [dungeon](dungeon.md) "Grotte"; qui il disegno di partenza): in ogni cella una macchia irregolare (passeggiata casuale dal centro,
 40–90 passi), gallerie tortuose larghe 2 fra le celle dell'albero (passi verso la meta con deviazioni), un passo di automa
 cellulare per arrotondare le pareti. Il centro di ogni cella resta pavimento (contratto `rcx`/`rcy`). Stima **non misurata**:
 ~250–300 B di codice, ~0,35 s in più di generazione per il passo dell'automa. La neve del piano 11 senza un file in più: gli
 stessi tile della roccia con la "cresta" disegnata in un colore condiviso del multicolor, bianco al piano 11 e grigio/marrone
 ai piani 12–14 (un byte di palette per piano; da verificare con la grafica del tema).
 
-**Palude** (capitolo 2, proposta): si entra dalla botola della cantina allagata del mulino.
-- Piano 6, **cantine allagate**: le stanze di oggi (mattoni) con pozze d'acqua dentro e corridoi in parte allagati: il
-  passaggio fra il villaggio e la palude.
-- Piani 7–9, **isole e passerelle**: isole di fango e erba (le macchie delle grotte, lisciate) nell'acqua nera, unite da
-  passerelle di assi dritte larghe 1–2 al posto dei corridoi; canne e radici sul bordo delle isole, qualche pozza bassa.
-  Al posto dei muri c'è l'**acqua**: non si cammina, ma si vede oltre (niente facciate dei muri: riva al posto della facciata).
-- Piano 10, **il mulino allagato** (boss, mappa fissa come oggi).
-- Va con i mostri del capitolo già pensati (bestiario): il Drowned lascia una pozza che rallenta, il Will-o'-Wisp
-  galleggia sull'acqua, il Bog Crawler arriva in branco lungo le passerelle (strette: si combatte uno alla volta).
-- Costi e dubbi: tile nuovi per riva, assi, canne (il tema ha 27 posti); `post_walls` deve distinguere acqua e roccia;
-  le pozze che rallentano sarebbero una meccanica nuova (facoltativa).
+**Palude** (capitolo 2; idea del committente del 18/11, **design**, non implementato): la palude è **un'unica mappa**. Nel
+codice restano piani (6-9, uno stato per piano in `LVRAM` come oggi), ma **senza scale fra un piano e l'altro**: i quattro piani
+sono **affiancati** in un quadrato 2 × 2 (96 × 96 caselle in tutto) e si passa da uno all'altro **camminando oltre il bordo**.
+
+```mermaid
+flowchart LR
+    V["villaggio: botola<br/>della cantina del mulino"] -->|scale| P6
+    subgraph Palude["la palude (un'unica mappa 96 x 96)"]
+        P6["piano 6<br/>nord-ovest"] <-->|bordo est / ovest| P7["piano 7<br/>nord-est"]
+        P6 <-->|bordo sud / nord| P8["piano 8<br/>sud-ovest"]
+        P7 <-->|bordo sud / nord| P9["piano 9<br/>sud-est"]
+        P8 <-->|bordo est / ovest| P9
+    end
+    P9 -->|porta del mulino| B["piano 10: il mulino allagato<br/>(boss, mappa fissa)"]
+```
+
+- **Passaggi sul bordo**: ogni lato in comune ha 1-2 varchi (una passerella che arriva al bordo). La posizione del varco si
+  ricava dal seed del capitolo e dal numero del lato, quindi i due piani vicini la calcolano uguale senza leggersi a vicenda.
+- **Cambio di piano**: quando l'eroe entra in una casella di varco sul bordo, `change_level` va al piano vicino con un modo di
+  arrivo nuovo ("dal bordo"): l'eroe compare sul bordo opposto alla stessa coordinata, una casella dentro. Si arriva con le
+  scale solo nel piano 6 (botola della cantina, verso il villaggio); il piano 10 si apre da una porta del mulino nel piano 9.
+- **Grafica** (palette della palude): **acqua nera-verde** (liquame: verde scuro con increspature nere) al posto dei muri: non
+  si cammina, si vede oltre; **riva** al posto della facciata del muro; **isole** di fango ed erba (le macchie delle grotte);
+  **passerelle** di assi (tile nuovo calpestabile) al posto dei corridoi, dritte, larghe 1-2; canne e radici sul bordo delle isole.
+- **Mostri**: restano nel loro piano (non passano il bordo); il Will-o'-Wisp galleggia sull'acqua, il Bog Crawler arriva in
+  fila sulle passerelle, il Drowned lascia pozze che rallentano (facoltativo: meccanica nuova).
+- **Rischio principale: il tempo del passaggio**. Oggi un cambio di piano nello stesso capitolo costa 1,4-1,9 s (dissolvenza,
+  tema riletto, generazione): attraversare un bordo con una pausa di quasi 2 s rompe l'idea della mappa unica. Da fare con la
+  palude: non rileggere il tema quando è lo stesso file, niente dissolvenza al bordo (solo lo scorrimento), generazione delle
+  isole veloce. Obiettivo da misurare: sotto 1 s.
+- Da decidere: minimappa (`M`) del piano o di tutta la palude 2 × 2; varchi 1 o 2 per lato; se il piano 6 tiene le cantine
+  allagate (stanze di mattoni con pozze) come passaggio dal villaggio o è già palude.
 
 **Contratto e memoria**: tutti gli stili dentro `gen_io` (scelta per capitolo), non in file separati: niente letture in
 più e niente file nuovi (la directory è già lunga, [FastLoader.md](FastLoader.md) 7.2). Spazio: dopo gli slot `LVRAM`

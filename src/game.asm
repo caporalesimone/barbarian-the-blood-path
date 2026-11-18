@@ -146,6 +146,7 @@ sp_        .byte ?
 ncand      .byte ?
 cur        .byte ?
 cc_a       .byte ?
+ci_try     .byte ?          ; (18/11) tentativi del baule in una stanza (chest_in_room)
 cc_b       .byte ?
 ch_y       .byte ?
 ch_x0      .byte ?
@@ -580,10 +581,12 @@ col_fill:
         bne -
         rts
 
-pal_bg  .byte 5, 0, 0, 0, 0, 0, 0, 0, 0
-pal_c1  .byte 9, 11, 11, 6, 2, 9, 5, 4, 11
-pal_c2  .byte 15, 9, 8, 14, 10, 7, 13, 10, 12
-pal_ram .byte 11, 15, 15, 11, 15, 15, 15, 15, 15
+; palette 0 villaggio, 1-8 dungeon (scelte da pal_for_level), (18/11) 9 grotta innevata e 10 grotta di roccia (capitolo 3:
+; data/chapters.yaml map.palettes, tabella lv_look). Coppie di bit: 01 = pal_c1, 10 = pal_c2, 11 = colore della RAM (0-7)
+pal_bg  .byte 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+pal_c1  .byte 9, 11, 11, 6, 2, 9, 5, 4, 11, 12, 9
+pal_c2  .byte 15, 9, 8, 14, 10, 7, 13, 10, 12, 1, 15
+pal_ram .byte 11, 15, 15, 11, 15, 15, 15, 15, 15, 14, 8
 
 ; ------------------------------------------------------------------ PRNG xorshift16
 ; ritorna A casuale (hi)

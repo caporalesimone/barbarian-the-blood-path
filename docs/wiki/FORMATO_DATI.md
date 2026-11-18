@@ -64,7 +64,8 @@ Dal formato **$C6** (11/11, branch `feature/stat-points`): dopo `c_sgold` **`c_s
 DES, COS) e **`c_resp`** (gettoni respec, 0..255), prima del baule della locanda. Blocco da 206 a 210 byte.
 Dal formato **$C7** (12/11, branch `capitoli`): dopo `c_resp` **`c_chap`** (capitolo in cui si gioca, 1..4) e **`c_unl`**
 (capitolo più alto sbloccato): blocco da 212 byte, file `SAVE-0N` da 2072 byte (sempre 9 blocchi). Il generatore passa alla
-versione `GVER` 5 (i piani 5, 10, 15 sono mappe fisse).
+versione `GVER` 5 (i piani 5, 10, 15 sono mappe fisse). (18/11) `GVER` 6: grotte nel capitolo 3; un eroe salvato con la 5 tiene il seed (6 cifre) e rigenera i piani
+(`c_vis` azzerato, `migrate_char`); solo dalle versioni prima della 5 si ricava ancora il seed da quello a 16 bit.
 Dal formato **$C8** (17/11, concept delle quest): in fondo al blocco, dopo il baule della locanda, **`c_qst`**: blocco da 213
 byte. (18/11) `c_qst` è una **maschera** delle quest prese (bit *n*-1 = quest *n*, al massimo 8); i valori di prima (0 nessuna,
 1 = quest 1) restano validi, quindi il formato non cambia. File delle quest (`data/quests.yaml`, `tools/build/gen_quests.py`):

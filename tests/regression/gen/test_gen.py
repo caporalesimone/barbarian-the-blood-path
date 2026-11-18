@@ -10,7 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(
 import test_saves as T  # noqa: E402
 REF = os.path.join(os.path.dirname(os.path.abspath(__file__)), "gen_ref.json")
 SEED = [10, 23, 24, 10, 23, 24]          # "ANOANO" (digits 0-35)
-CASES = [(1, 0, 0), (2, 0, 0), (5, 0, 0), (9, 0, 0), (13, 0, 0), (19, 0, 0), (20, 0, 0), (20, 1, 0), (20, 1, 1)]
+CASES = [(1, 0, 0), (2, 0, 0), (5, 0, 0), (9, 0, 0), (11, 0, 0), (13, 0, 0), (19, 0, 0), (20, 0, 0), (20, 1, 0), (20, 1, 1)]   # (18/11) 11, 13: grotte
 
 
 def main():

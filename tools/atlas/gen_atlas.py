@@ -110,6 +110,8 @@ DUN_LET = {G.TID[n]: c for n, c in G.DUN_LEGEND.items()}
 town_map = read_map("data/town_map.txt", {c: G.TTID[n] for c, n in M.inv_legend().items()})
 dmap = read_map("data/atlas_dungeon.txt", {c: G.TID[n] for n, c in G.DUN_LEGEND.items()})
 post_walls(dmap, random.Random(7))
+cmap = read_map("data/atlas_cave.txt", {c: G.TID[n] for n, c in G.DUN_LEGEND.items()})   # (18/11) grotte del capitolo 3
+post_walls(cmap, random.Random(7))
 fm = [[G.TID[n] for n in r] for r in F.final_map()]
 post_walls(fm, random.Random(7))
 star, circ, chests = F.final_figures()
@@ -176,6 +178,14 @@ for _c, _v in sorted(VIL.VILLAGES.items()):
 for k in range(1, 9):
     add_set("DUNG" + "ABCDEFGH"[k - 1], "Dungeon, palette %d (GFX1)" % k, dun_t, {i: G.TILES[i] for i in range(DN)}, DUN_LET,
             k, dmap, {G.TID[n] for n in G.DUN_USED}, G.SOLID, False)
+# (18/11, TODO M11) grotte: tile di roccia del tema dei piani del capitolo 3 (tools/build/cave_gfx.py, file GFX5), con le due
+# palette dei piani (data/chapters.yaml map.palettes): 9 roccia innevata (piano 11), 10 roccia (piani 12-14)
+import cave_gfx as CG  # noqa: E402
+cave_t = tiles_from(rd("out/work/gfx/gfx5.prg")[2:], DN)
+cave_names = {i: ("CAVE:" + G.TILES[i] if G.TILES[i] in CG.tiles() else G.TILES[i]) for i in range(DN)}
+for _code, _pi, _what in (("CAVSN", 9, "snowy rock, level 11"), ("CAVRK", 10, "rock, levels 12-14")):
+    add_set(_code, "Caves, %s (GFX5, palette %d)" % (_what, _pi), cave_t, cave_names, DUN_LET, _pi, cmap,
+            {G.TID[n] for n in G.DUN_USED}, G.SOLID, False, mapsrc="data/atlas_cave.txt")
 add_set("TRONO", "Throne room, level 20 (GFX2, palette 4)", trono_t,
         {i: G.TRONO_NAMES.get(G.TILES[i], G.TILES[i]) for i in range(DN)}, DUN_LET, 4, fm,
         {G.TID[n] for n in G.TRONO_USED}, G.SOLID, False)
@@ -423,11 +433,13 @@ for g in groups:
 # ------------------------------------------------------------------ spazio: posti liberi utilizzabili e % di utilizzo
 space = []
 for s in SETS:
-    if (s["code"].startswith("DUNG") and s["code"] != "DUNGA") or (s["code"].startswith("VILL") and s["code"] != "VILLG"):
+    if (s["code"].startswith("DUNG") and s["code"] != "DUNGA") or (s["code"].startswith("VILL") and s["code"] != "VILLG") \
+            or s["code"] == "CAVRK":                       # (18/11) stessi posti di CAVSN
         continue
     cap = len(s["tiles"])
     free = [i for i in range(cap) if i not in s["used"]]
-    nm = {"VILLG": "Village tiles (GFX0)", "DUNGA": "Dungeon tiles (GFX1, every theme 1-7)", "TRONO": "Throne room tiles (GFX2)"}[s["code"]]
+    nm = {"VILLG": "Village tiles (GFX0)", "DUNGA": "Dungeon tiles (GFX1, every theme 1-7 but 5: caves)", "TRONO": "Throne room tiles (GFX2)",
+          "CAVSN": "Cave tiles (GFX5, chapter 3: rock instead of bricks)"}[s["code"]]
     note = ("every slot of the charset (45 = 64 codes of the quarter minus the 19 fixed HUD characters) is used by the village"
             if s["code"] == "VILLG" else
             "slots in the file: %d (DUN_NT). The free ones hold village leftovers or nothing: a new tile replaces them in the "

@@ -243,6 +243,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `EMU-15` | vc64web: kill a monster in the crypt, read the portal scroll, take the portal back to the village |
 | `EMU-16` | vc64web: reset and boot again from the same disk copy: the hero saved at creation is in the LOBBY list |
 | `GEN-10` | reference maps, throne room from FMAP and from the cache |
+| `GEN-11` | caves of chapter 3 (levels 11-14, 6 seeds): connected, border of wall, enough floor, generation under 1.2 s, palettes 9/10 |
 | `INN-GOLD-10` | inn chest: deposit in tens (remainder kept, chest full, purse full) |
 | `GOLD-CAP-10` | gold picked up: GOLD_MAX cap on the hero (add_gold16) |
 | `SHOP-PAY-10` | payment: carried gold first, then the chest in tens, change back on the hero (gold_need/gold_pay) |

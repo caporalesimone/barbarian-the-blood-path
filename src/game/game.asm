@@ -226,7 +226,7 @@ cs_cu      .byte ?
 cs_k       .byte ?
 cs_end
         .endv
-GVER       = 5
+GVER       = 6              ; (18/11) 6: grotte nel capitolo 3 (gen_io.asm); da 5 a 6 si rigenerano solo i piani (migrate_char)
 
 
 ; categorie, id oggetti e tutte le tabelle di bilanciamento: vedi db.asm (generato)
@@ -906,10 +906,13 @@ _n      inx
         bne _l
         rts
 
-; baule in una stanza casuale: A = tipo, cur = stanza
+; baule in una stanza casuale: A = tipo, cur = stanza. (18/11) fino a 4 caselle a caso nel rettangolo della stanza:
+; nelle grotte la stanza non lo riempie (prima un tentativo solo; con le stanze rettangolari il primo va quasi sempre)
 chest_in_room:
         sta tmp4
-        ldx cur
+        lda #4
+        sta ci_try
+_t      ldx cur
         lda rw,x
         sec
         sbc #2
@@ -932,8 +935,11 @@ chest_in_room:
         lda loot_x
         sta tx
         jsr floor_ok
-        bcs _r
-        lda tmp4
+        bcc +
+        dec ci_try
+        bne _t
+        rts
++       lda tmp4
         jsr chest_add
         jsr ch_gen
         bcs _r

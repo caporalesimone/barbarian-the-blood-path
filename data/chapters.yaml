@@ -9,6 +9,9 @@
 # Fields: id, name, implemented (in the game code), village (name, gfx file, map, pf_n, atlas_set), levels (how many,
 # the last one is the final map), themes (dungeon palettes GFXn), atlas_sets, final (final map: name, file, generator,
 # atlas_set, boss = id in the bestiary).
+# (18/11) map (optional): look of the generated levels of the chapter (not the final map). style: rooms (default: rooms and
+# corridors) or caves (docs/wiki/dungeon.md); palettes: palette of each generated level, local level 1, 2, ... (0 or missing =
+# the random palette of today, from seed and level). Compiled by tools/build/gen_db.py into lv_look (one byte per level).
 
 global_max: 255
 today: {levels: 20, note: "one village (Aldric's Crossing), levels 1-19 generated + the throne room on level 20 = depth 1-20"}
@@ -38,7 +41,8 @@ chapters:
     village: {name: "The Last Camp", gfx: TWN3, map: data/town_map3.txt, pf_n: null, atlas_set: VILL3}
     levels: 5
     themes: [5, 6]
-    atlas_sets: [DUNGE, DUNGF]
+    map: {style: caves, palettes: [9, 10, 10, 10]}      # (18/11, owner) level 11 cave of snowy rock, 12-14 caves of rock
+    atlas_sets: [CAVSN, CAVRK]
     final: {name: "The Broken Bastion", file: null, generator: null, atlas_set: null, boss: varok_oathbreaker}
 
   - id: 4
