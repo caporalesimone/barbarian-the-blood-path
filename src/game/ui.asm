@@ -2798,16 +2798,15 @@ _ld     #msg "loading "
 _w      lda io_what
         bne _lv
         #msg "barbarian"
-        jmp _pw
+        jmp ui_pwait
 _lv     cmp #2
-        beq _pw                 ; "loading" e basta (modulo MENU)
+        beq ui_pwait            ; "loading" e basta (modulo MENU)
         #msg "level "
         lda io_lvl              ; (12/11, committente) il piano del capitolo: "loading level 3"
         jsr lv_grp
         inx
         txa
-        jsr ui_n2
-_pw     jmp ui_pwait
+        jsr ui_n2               ; (18/11) e prosegue in ui_pwait (prima un jmp alla riga dopo)
 
 ; "please wait" centrato in riga 15 (09/11): sotto il titolo di io_screen e nelle attese ("deleting ...")
 ui_pwait:

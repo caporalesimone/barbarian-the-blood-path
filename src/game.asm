@@ -1235,14 +1235,7 @@ _dx2    sta pdx
 _dy1    lda #$ff
 _dy2    sta pdy
 _dn     jsr fz_move             ; Frenzy: corsa piu' veloce (combat.asm)
-        lda px
-        sta ent_x
-        lda px+1
-        sta ent_x+1
-        lda py
-        sta ent_y
-        lda py+1
-        sta ent_y+1
+        jsr ent_pl
         jsr ent_tile            ; casella attuale: il PG non entra nella casella di un mostro
         lda nt_x
         sta ot_x

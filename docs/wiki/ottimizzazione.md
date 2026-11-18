@@ -34,6 +34,14 @@ le altre sono **da valutare** dal committente. Le stime in byte non marcate "mis
 
 Totale GAME: **+331 B** di margine (1434 → 1765 B, misurato), sopra la soglia di 1 KB richiesta da 5.1.
 
+## Revisione del 18/11 (richiesta del committente: rivedere tutto il codice, commenti, ripetizioni, zone di memoria)
+
+Un commit per blocco, smoke + sanity a ogni blocco, regression a più riprese. Comportamento invariato.
+
+| Blocco | Cosa | Effetto |
+|---|---|---|
+| R1 | spioncino: `io_screen` prosegue in `ui_pwait` (era un `jmp` alla riga dopo), `mon_path` salta direttamente a `mon_put` (4 salti a un `jmp`); `ent_pl` (posizione del PG in `ent_x/ent_y`) al posto di due copie uguali in `update_player` e `bs_body` | +12 B di margine di GAME (690 → 702 B) |
+
 ## Da valutare: codice e generalizzazioni
 
 In ordine di resa stimata. "Rischio" = cosa può rompersi; tutte le aree hanno test (indicati).

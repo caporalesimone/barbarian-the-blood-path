@@ -60,7 +60,7 @@ _cpx    lda #0
 _cmx    lda #1
 _cross  jsr mon_try_d
         bcs +                  ; allineamento riuscito
-        jmp _put
+        jmp mon_put             ; (18/11) diretto (prima un jmp a _put, che saltava a mon_put)
 +
 _main   lda mf_d
         jsr mon_try_d
@@ -94,7 +94,7 @@ _ch     beq +
         lda tmpv
         cmp #8
         bcs _pop
-        jmp _put
+        jmp mon_put             ; (18/11) diretto (prima un jmp a _put, che saltava a mon_put)
 _neg    lda tmpv
         cmp #9
         bcs _put
@@ -120,17 +120,17 @@ _pop    lsr mslide,x            ; mossa successiva: registro a 10 bit (mslide bi
         asl
         ora tmpv
         sta mslide,x
-        jmp _put
+        jmp mon_put             ; (18/11) diretto (prima un jmp a _put, che saltava a mon_put)
 _clr    lda tmpv                ; fine del percorso: resta solo "esplora" (mon_step rifa' subito la ricerca)
         sta mslide,x
         lda #0
         sta mslc,x
-        jmp _put
+        jmp mon_put             ; (18/11) diretto (prima un jmp a _put, che saltava a mon_put)
 _stop   lda #0
         sta mslide,x
         sta mslc,x
         jsr mon_undo
-_put    jmp mon_put
+_put    jmp mon_put             ; (anche le uscite bpl/bcs _put di sopra: un salto relativo non arriva a mon_put)
 
 pz_ax   .byte 0, 0, ent_y-ent_x, ent_y-ent_x   ; asse della mossa: scarto da ent_x (0 = x, 2 = y)
 

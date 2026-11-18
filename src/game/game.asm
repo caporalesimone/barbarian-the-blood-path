@@ -3852,6 +3852,17 @@ sfx_update:
 ; costruisce le shadow degli sprite in bs_en/bs_msb e le pubblica tutte insieme alla fine:
 ; l'IRQ (riga 70 con la barra, riga 250) copia le shadow e non deve mai vederle a meta'
 ; (sh_en azzerato a inizio costruzione = mostri spariti per un frame: lampeggio).
+; (18/11) ent_x/ent_y = posizione del PG (px, py): update_player e bs_body (prima due copie uguali)
+ent_pl: lda px
+        sta ent_x
+        lda px+1
+        sta ent_x+1
+        lda py
+        sta ent_y
+        lda py+1
+        sta ent_y+1
+        rts
+
 build_sprites:
         jsr bs_body
         sei
@@ -3875,14 +3886,7 @@ bs_body:
         sta sh_xexp
         sta sh_yexp
         ; giocatore (sprite 0)
-        lda px
-        sta ent_x
-        lda px+1
-        sta ent_x+1
-        lda py
-        sta ent_y
-        lda py+1
-        sta ent_y+1
+        jsr ent_pl
         ldx #0
         jsr spr_pos
         bcc _hud
