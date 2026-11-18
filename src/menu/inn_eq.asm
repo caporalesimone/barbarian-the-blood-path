@@ -165,12 +165,7 @@ _r      rts
 
 ; posto dell'equipaggiamento h_eqi (o X con h_zeq2) vuoto
 h_zeq:  ldx h_eqi
-h_zeq2: lda #0
-        sta c_pack,x
-        sta c_packb,x
-        sta c_packd,x
-        sta c_packm,x
-        rts
+h_zeq2: jmp pk_zero             ; (18/11, R5) la stessa routine di GAME (ui.asm: i quattro byte del posto X a 0)
 
 
 ; ---- aiuti della schermata della casa (08/11: nel gioco per far stare il modulo OVLT in 1792 B)
