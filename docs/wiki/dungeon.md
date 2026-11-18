@@ -88,26 +88,32 @@ scale, `post_walls`) resta uguale:
 - Versione del generatore `GVER` 6: un eroe salvato con la 5 tiene il seed e rigenera i piani (`migrate_char`).
 
 ### Palude (capitolo 2, dal 18/11)
-Piani 6-9 (`map: {style: swamp}`, palette 12 per tutti): una **palude unica** fatta di quattro piani **affiancati da ovest a
-est**. Si passa da un piano all'altro con un **cancello** sul bordo (il caricamento resta, decisione del committente del 18/11):
-il cancello ovest prende il posto delle scale su (verso il piano prima; dal piano 6 verso il villaggio, "gate back to town"),
-quello est delle scale giù (verso il piano dopo; dal piano 9 verso il mulino del boss, piano 10). Fire sul cancello come sulle
-scale; si arriva accanto al cancello corrispondente del piano vicino, **sulla stessa riga**: la palude continua oltre il bordo.
+Piani 6-9 (`map: {style: swamp}`, palette 12 per tutti): una **palude unica** fatta di quattro piani **affiancati lungo un
+percorso a caso** (dal seed del capitolo): dal piano *L* al piano *L*+1 si va in una direzione *d(L)* (nord, est, sud, ovest),
+mai indietro (*d(L+1)* ≠ opposto di *d(L)*: in tre passi il percorso non torna su un pezzo già usato). Così l'uscita non sta
+sempre dalla stessa parte (decisione del committente del 18/11 pomeriggio: il giocatore non deve sapere dove andare).
+Si passa da un piano all'altro con un **cancello** sul bordo (il caricamento resta): il cancello d'**ingresso** prende il posto
+delle scale su (verso il piano prima; dal piano 6 verso il villaggio, "gate back to town"), quello d'**uscita** delle scale giù
+(verso il piano dopo; dal piano 9 verso il mulino del boss, piano 10). Fire sul cancello come sulle scale; si arriva accanto al
+cancello del piano vicino, **sul lato opposto e nello stesso punto**: la palude continua oltre il bordo.
+- Lati: ingresso = opposto di *d(L−1)*, uscita = *d(L)*; nel primo piano l'ingresso è su un lato a caso diverso dall'uscita,
+  nell'ultimo l'uscita è su un lato a caso diverso dall'ingresso (`swamp_gates`, `dir_of`, `gate_hd`). I lati restano in
+  `sw_in` / `sw_out` (RAM di GAME): `place_player` mette l'eroe una casella verso l'interno (`sw_dxt` / `sw_dyt`).
+- Punto del cancello sul lato = (somma delle 6 cifre del seed + `gr_tab[confine mod 8]`) mod 36 + 6, dove il confine è il
+  numero del piano da cui si esce: i due piani vicini lo calcolano uguale (`gate_row`). Cancello sul bordo a x o y = 1 o 46,
+  con la passerella fino al centro dell'isola della sua fascia su quel lato (`gate_put`; `st_s`, `st_e`).
 - Isole: le macchie delle grotte (`carve_blob` + `cave_smooth`), tutte e 16 (`lv_drop` = 0); acqua = muro (tile 0, solido),
   riva = facciata del muro (`post_walls`).
 - `carve_plank` al posto dei corridoi: **passerelle** di assi larghe 1, a L fra i centri delle isole dell'albero di
   `gen_links` (anelli compresi), solo sull'acqua; tile `PATH` (posto 14: calpestabile e mai usato nei dungeon).
-- `swamp_gates`: riga del cancello = (somma delle 6 cifre del seed + `gr_tab[confine mod 8]`) mod 36 + 6, dove il confine è il
-  numero del piano a ovest: il cancello est del piano *L* e quello ovest del piano *L*+1 la calcolano uguale. Il cancello
-  ovest sta a x = 1, quello est a x = 46, ciascuno con la passerella fino al centro dell'isola della sua fascia (colonna 0 o 3:
-  `st_s`, `st_e`). Arrivando dal piano dopo l'eroe compare a ovest del cancello est (`place_player`).
+- Differenza dal disegno del mattino (quadrato 2 × 2) e dal primo prototipo (fila ovest → est): il percorso a caso ha sempre
+  due soli vicini per piano, quindi bastano i due cancelli al posto delle scale, ma l'uscita può stare su qualunque lato.
 - Etichette: "gate to level N", "gate back to level N", "gate back to town" (`loc_id`, `gate_id`).
 - Grafica: `tools/build/swamp_gfx.py` nel tema `GFX3` (acqua verde scura con riflessi, riva con le canne, fango ed erba,
   passerelle, cancelli); il file del boss (`GFX4`) resta com'era.
-- Misure (VICE, 18/11): generazione 0,84-0,87 s; codice +326 B sotto l'I/O. Test `GEN-12` (5 seed × piani 6-9: cancelli sui
-  bordi, righe uguali fra piani vicini, tutto raggiungibile, tempo) e `GEN-10` (piani 6 e 9 di riferimento).
-- Differenza dal disegno del mattino (quadrato 2 × 2): i piani sono in fila (1 × 4), così ogni piano ha due soli vicini e
-  bastano i due cancelli che prendono il posto delle scale, senza modi di arrivo nuovi.
+- Misure (VICE, 18/11): generazione fino a 0,89 s. Test `GEN-12` (8 seed × piani 6-9: cancelli su due lati diversi del bordo,
+  uscita di un piano di fronte all'ingresso del seguente, almeno 3 lati usati dalle uscite, tutto raggiungibile, tempo) e
+  `GEN-10` (piani 6 e 9 di riferimento).
 
 ### Scale
 - `gen_stairs`: scale **su** al centro di una stanza a caso (`st_s`), scale **giù** al centro di un'altra (`st_e`)

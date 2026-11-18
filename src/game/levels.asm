@@ -247,25 +247,37 @@ _dun    lda spawn_mode
         beq _ret
         cmp #1
         beq _dn
-        lda st_up_x
-        clc
-        adc #1
-        ldx st_up_y
-        jmp _put
-_dn     ldy cur_level           ; (18/11) palude: il cancello est sta sul bordo, l'eroe compare a ovest del cancello
-        lda lv_look,y
+        lda sw_in
+        ldx st_up_x
+        ldy st_up_y
+        jmp _arr
+_dn     lda sw_out
+        ldx st_dn_x
+        ldy st_dn_y
+_arr    sta tmp0                ; lato del cancello (palude)
+        stx tmp1
+        ldx cur_level
+        lda lv_look,x
         and #LK_SWAMP
-        beq +
-        lda st_dn_x
-        sec
-        sbc #1
-        ldx st_dn_y
-        jmp _put
-+       lda st_dn_x
+        bne _sw
+        tya                     ; scale: la casella a destra
+        tax
+        lda tmp1
         clc
         adc #1
-        ldx st_dn_y
         jmp _put
+_sw     ldx tmp0                ; (18/11) palude: il cancello sta sul bordo, l'eroe compare una casella verso l'interno
+        tya
+        clc
+        adc sw_dyt,x
+        sta tmp2
+        lda tmp1
+        clc
+        adc sw_dxt,x
+        ldx tmp2
+        jmp _put
+sw_dxt  .byte 0, $ff, 0, 1      ; lato del cancello: 0 nord, 1 est, 2 sud, 3 ovest -> passo verso l'interno
+sw_dyt  .byte 1, 0, $ff, 0
 _ret    lda c_retx
         ldx c_rety
 _put    jsr put_hero            ; (11/11, O12)

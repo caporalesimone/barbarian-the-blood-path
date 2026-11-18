@@ -1,6 +1,6 @@
 ; (18/11) Palude di esempio per l'atlante (sezione SWAMP): la mappa del piano 7 generata dal gioco (seed ANOANO, capitolo 2,
 ; src/game/gen_io.asm carve_blob/carve_plank/swamp_gates) con il portale aggiunto a mano. Lettere di DUN_LEGEND: # acqua (muro),
-; . fango, : passerella (PATH), < cancello ovest, > cancello est; rive e fango variato li mette post_walls.
+; . fango, : passerella (PATH), < cancello d'ingresso, > cancello d'uscita; rive e fango variato li mette post_walls.
 ################################################
 #############################......####....#####
 #....#.....##################......###.......###

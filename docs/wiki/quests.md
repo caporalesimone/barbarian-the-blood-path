@@ -844,7 +844,7 @@ cellulare per arrotondare le pareti. Il centro di ogni cella resta pavimento (co
 stessi tile della roccia con la "cresta" disegnata in un colore condiviso del multicolor, bianco al piano 11 e grigio/marrone
 ai piani 12–14 (un byte di palette per piano; da verificare con la grafica del tema).
 
-**Palude** (capitolo 2; **prototipo nel gioco dal 18/11 pomeriggio**, [dungeon](dungeon.md) "Palude": piani in fila 1 × 4 con cancelli al posto delle scale e una palette unica; qui sotto il disegno di partenza). La palude è **un'unica mappa**. Nel
+**Palude** (capitolo 2; **prototipo nel gioco dal 18/11 pomeriggio**, [dungeon](dungeon.md) "Palude": piani affiancati lungo un percorso a caso, con cancelli sul bordo al posto delle scale e una palette unica; qui sotto il disegno di partenza). La palude è **un'unica mappa**. Nel
 codice restano piani (6-9, uno stato per piano in `LVRAM` come oggi), ma **senza scale fra un piano e l'altro**: i quattro piani
 sono **affiancati** in un quadrato 2 × 2 (96 × 96 caselle in tutto) e si passa da uno all'altro **camminando oltre il bordo**.
 

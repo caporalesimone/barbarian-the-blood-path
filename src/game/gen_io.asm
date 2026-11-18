@@ -846,13 +846,15 @@ _pn     iny
         rts
 
 ; ---------------------------------------------------------------------------------------------------------------------
-; (18/11, TODO M11) PALUDE (capitolo 2, docs/wiki/dungeon.md "Palude"): i piani 6-9 sono AFFIANCATI da ovest a est in
-; un'unica palude. Le isole sono le macchie delle grotte (carve_blob + cave_smooth), l'acqua e' il muro (tile 0, solido),
-; le stanze sono collegate da passerelle di assi larghe 1 (carve_plank: a L, solo sull'acqua). Al posto delle scale due
-; CANCELLI (swamp_gates): quello delle scale su sul bordo ovest (x = 1, verso il piano prima o il villaggio), quello delle
-; scale giu' sul bordo est (x = MAPW-2, verso il piano dopo). La riga di un cancello dipende solo dal seed del capitolo e
-; dal confine (gate_row): il cancello est del piano L e quello ovest del piano L+1 stanno sulla stessa riga, quindi
-; passando si arriva allo stesso punto del bordo.
+; (18/11, TODO M11) PALUDE (capitolo 2, docs/wiki/dungeon.md "Palude"): i piani generati del capitolo (6-9) sono pezzi
+; AFFIANCATI di un'unica palude, in un percorso a caso dal seed del capitolo: dal piano L al piano L+1 si va nella direzione
+; d(L) (nord, est, sud, ovest), mai indietro (d(L+1) != opposto di d(L): in 3 passi il percorso non torna su se stesso).
+; Le isole sono le macchie delle grotte (carve_blob + cave_smooth), l'acqua e' il muro (tile 0, solido), le passerelle di
+; assi larghe 1 uniscono le isole (carve_plank, solo sull'acqua). Al posto delle scale due CANCELLI sul bordo
+; (swamp_gates): quello d'ingresso (scale su: verso il piano prima o il villaggio) sul lato opposto a d(L-1), quello
+; d'uscita (scale giu': verso il piano dopo o il boss) sul lato d(L). Il primo piano ha l'ingresso su un lato a caso diverso
+; dall'uscita, l'ultimo l'uscita su un lato a caso diverso dall'ingresso. Il punto del cancello sul lato (6..41) dipende dal
+; seed e dal confine (gate_row), quindi i due piani vicini lo trovano nello stesso punto e si arriva dove si era usciti.
 ; ---------------------------------------------------------------------------------------------------------------------
 T_PLANK = T_PATH                ; passerella: posto 14, calpestabile, mai usato nei dungeon (tools/build/swamp_gfx.py)
 lv_swamp .byte 0                ; LK_SWAMP se il piano e' di palude
@@ -923,22 +925,21 @@ mod36:
         bcs -
 +       rts
 
-; A = confine (numero del piano a ovest) -> A = riga del cancello 6..41: (somma delle 6 cifre del seed + gr_tab[confine
-; mod 8]) mod 36 + 6 (tabella irregolare: i cancelli non scendono a scala da un piano all'altro)
-gate_row:
+; A = confine (numero del piano da cui si esce) -> A = somma delle 6 cifre del seed + gr_tab[confine mod 8] (mod 256)
+gate_hash:
         and #7
         tax
         lda gr_tab,x
-        sta gr_b
         ldx #5
-        lda #0
 -       clc
         adc c_seedt,x
         dex
         bpl -
-        jsr mod36
-        clc
-        adc gr_b
+        rts
+
+; A = confine -> A = punto del cancello sul lato, 6..41
+gate_row:
+        jsr gate_hash
         jsr mod36
         clc
         adc #6
@@ -946,67 +947,193 @@ gate_row:
 
 gr_tab  .byte 0, 17, 5, 29, 11, 23, 2, 31
 
-; A = riga -> X = cella della colonna 0 nella fascia di quella riga ((riga / 12) * 4)
-row_cell:
-        ldx #0
+; A = confine -> A = direzione a caso 0..3 (senza vincoli)
+gate_hd:
+        jsr gate_hash
+        sta gr_b
+        lsr
+        lsr
+        lsr
+        clc
+        adc gr_b
+        and #3
+        rts
+
+; A = piano L (>= sw_first) -> A = d(L), direzione dal piano L al piano L+1, mai l'opposto di d(L-1)
+dir_of:
+        sta sw_t
+        lda sw_first
+        sta sw_k
+        jsr gate_hd
+        sta sw_d
+_l      lda sw_k
+        cmp sw_t
+        beq _d
+        inc sw_k
+        lda sw_k
+        jsr gate_hd
+        sta sw_n
+        lda sw_d
+        eor #2
+        cmp sw_n
+        bne +
+        inc sw_n
++       lda sw_n
+        and #3
+        sta sw_d
+        jmp _l
+_d      lda sw_d
+        rts
+
+; A = punto, X = lato (0 nord, 1 est, 2 sud, 3 ovest): cancello in (gx, gy) sul bordo, passerella fino al centro dell'isola
+; della sua fascia sul quel lato; ritorna X = stanza
+gate_put:
+        stx sw_s
+        sta sw_p
+        ldx #0                  ; fascia = punto / 12
 -       cmp #12
         bcc +
         sbc #12
         inx
-        inx
-        inx
-        inx
         bne -
-+       rts
-
-; cancelli ovest ed est con la passerella fino al centro della stanza della loro fascia (colonna 0 e colonna 3)
-swamp_gates:
-        lda cur_level           ; ovest: confine con il piano prima
-        sec
-        sbc #1
-        jsr gate_row
-        sta ty
-        sta st_up_y
-        jsr row_cell
-        stx st_s
-        lda #1
++       txa                     ; X = fascia
+        ldy sw_s
+        cpy #1
+        beq _e
+        cpy #3
+        beq _w
+        cpy #2                  ; nord / sud: cella = fascia (+12 a sud), cancello in (punto, 1) o (punto, 46)
+        bne +
+        adc #11                 ; (C = 1) + 12
++       sta sw_c
+        lda sw_p
         sta tx
-        sta st_up_x
-        lda rcx,x
-        sta pk_e
-        jsr pk_h
-        ldx st_s
+        sta gx
+        lda #1
+        cpy #2
+        bne +
+        lda #MAPH-2
++       sta ty
+        sta gy
+        ldx sw_c
         lda rcy,x
         sta pk_e
         jsr pk_v
-        lda st_up_x
+        ldx sw_c
+        lda rcx,x
+        sta pk_e
+        jsr pk_h
+        ldx sw_c
+        rts
+_e      asl                     ; est / ovest: cella = fascia * 4 (+3 a est), cancello in (46, punto) o (1, punto)
+        asl
+        ora #3
+        bne +
+_w      asl
+        asl
++       sta sw_c
+        lda sw_p
+        sta ty
+        sta gy
+        lda #1
+        cpy #3
+        beq +
+        lda #MAPW-2
++       sta tx
+        sta gx
+        ldx sw_c
+        lda rcx,x
+        sta pk_e
+        jsr pk_h
+        ldx sw_c
+        lda rcy,x
+        sta pk_e
+        jsr pk_v
+        ldx sw_c
+        rts
+
+; cancelli d'ingresso e d'uscita del piano
+swamp_gates:
+        lda cur_level           ; primo piano generato del capitolo
+        jsr lv_grp
+        stx sw_loc
+        txa
+        eor #$ff
+        sec
+        adc cur_level
+        sta sw_first
+        ; ingresso: lato opposto a d(L-1); nel primo piano a caso, diverso dall'uscita d(L)
+        lda sw_loc
+        bne +
+        lda cur_level
+        jsr dir_of
+        sta sw_n
+        lda cur_level
+        sec
+        sbc #1
+        jsr gate_hd
+        cmp sw_n
+        bne _in
+        adc #0                  ; (C = 1) +1
+        and #3
+        bpl _in
++       lda cur_level
+        sec
+        sbc #1
+        jsr dir_of
+        eor #2
+_in     sta sw_in
+        lda cur_level
+        sec
+        sbc #1
+        jsr gate_row            ; (gate_row usa X)
+        ldx sw_in
+        jsr gate_put
+        stx st_s
+        lda gx
+        sta st_up_x
         sta tx
-        lda st_up_y
+        lda gy
+        sta st_up_y
         sta ty
         lda #T_STAIRSU
         jsr set_tile
-        lda cur_level           ; est: confine con il piano dopo
+        ; uscita: d(L); nell'ultimo piano generato (locale CH_LV-2) a caso, diverso dall'ingresso
+        lda sw_loc
+        cmp #CH_LV-2
+        bne +
+        lda cur_level
+        jsr gate_hd
+        cmp sw_in
+        bne _out
+        adc #0
+        and #3
+        bpl _out
++       lda cur_level
+        jsr dir_of
+_out    sta sw_out
+        lda cur_level
         jsr gate_row
-        sta ty
-        sta st_dn_y
-        jsr row_cell
-        inx
-        inx
-        inx
+        ldx sw_out
+        jsr gate_put
         stx st_e
-        lda #MAPW-2
-        sta tx
+        lda gx
         sta st_dn_x
-        lda rcx,x
-        sta pk_e
-        jsr pk_h
-        ldx st_e
-        lda rcy,x
-        sta pk_e
-        jsr pk_v
-        lda st_dn_x
         sta tx
-        lda st_dn_y
+        lda gy
+        sta st_dn_y
         sta ty
         lda #T_STAIRSD
         jmp set_tile
+
+sw_first .byte 0                ; primo piano generato del capitolo
+sw_loc  .byte 0                 ; indice del piano nel capitolo (lv_grp)
+sw_t    .byte 0
+sw_k    .byte 0
+sw_d    .byte 0
+sw_n    .byte 0
+sw_s    .byte 0                 ; gate_put: lato, punto, cella
+sw_p    .byte 0
+sw_c    .byte 0
+gx      .byte 0                 ; cancello
+gy      .byte 0

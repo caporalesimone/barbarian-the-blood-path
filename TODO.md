@@ -88,6 +88,11 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 - **I3** — S. Test manuale 019 (locanda): spostare un oggetto, spegnere senza RUN/STOP, riaccendere.
 - **I4** — S. B2 minimappa corrotta nel dungeon (05/11, mai riprodotto): servono screenshot e passi.
 - **I5** — S. RUN/STOP fantasma nelle build NOKEYS in VICE (solo strumenti di test).
+- **I6** — M. (18/11) **`LORE-10` a volte si blocca** (~200 s e 3 errori, o fino al timeout): dopo RUN/STOP in LORE
+  il menu di BARBARIAN ricaricato gira in `wait_frame` e non arriva mai a `GETIN` (schermo con il logo, `$01` = `$36`, IRQ
+  `tm_irq`, `$D01A` = 0). Succede anche alla build `f05ecfa` (1 su 4) e alla build attuale (5 su 9); da solo o dopo
+  `ASM-10` cambia poco. Da capire se e' un difetto vero (un giocatore che esce dalla leggenda con RUN/STOP) o del test (i
+  `go` del test hanno tempi reali). Prima: rifare il caso in VICE senza il test e guardare se il menu risponde.
 - **I6** — S. Glitch del brano del villaggio (hard restart): da riascoltare.
 - **I8** — S. (13/11) Segnalazioni al team dell'emulatore da riprovare a ogni nuova build: `runLoop` non esatto con un caricamento
   da disco dentro il ciclo (`framesActual` 490 su 480 nel passo del portale, `docs/wiki/emulatore.md`); il pacchetto dichiara quel caso
@@ -441,8 +446,8 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - **Fatto (18/11)**: grotte nel capitolo 3 (piano 11 innevato, 12 ghiaccio azzurrino, 13-14 roccia grigia): [dungeon](docs/wiki/dungeon.md) "Grotte".
   Da rivedere con il committente in gioco: forma (macchie e gallerie), colori delle palette 9 e 10, tempo di generazione
   (0,8-0,95 s contro 0,3 s delle stanze).
-- **Palude** (capitolo 2, prototipo del 18/11 pomeriggio: [dungeon](docs/wiki/dungeon.md) "Palude"): piani 6-9 in fila da ovest a
-  est, cancelli sui bordi al posto delle scale (il caricamento resta), isole, passerelle, palette 12 unica. Da rivedere con il
+- **Palude** (capitolo 2, prototipo del 18/11 pomeriggio: [dungeon](docs/wiki/dungeon.md) "Palude"): piani 6-9 affiancati lungo un
+  percorso a caso (uscita su un lato qualsiasi), cancelli sui bordi al posto delle scale (il caricamento resta), isole, passerelle, palette 12 unica. Da rivedere con il
   committente in gioco: colori dell'acqua, cancelli, isole; restano facoltativi le pozze che rallentano e i mostri sull'acqua.
 - **Cittadella** (capitolo 4, BSP simmetrico): da fare dopo la palude.
 - **Attenzione**: ogni stile cambia i piani salvati di quel capitolo (`GVER`, `test_gen`).

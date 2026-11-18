@@ -147,6 +147,8 @@ ncand      .byte ?
 cur        .byte ?
 cc_a       .byte ?
 ci_try     .byte ?          ; (18/11) tentativi del baule in una stanza (chest_in_room)
+sw_in      .byte ?          ; (18/11) palude: lato del cancello d'ingresso (0 nord, 1 est, 2 sud, 3 ovest; gen_io.asm swamp_gates)
+sw_out     .byte ?          ; lato del cancello d'uscita
 cc_b       .byte ?
 ch_y       .byte ?
 ch_x0      .byte ?

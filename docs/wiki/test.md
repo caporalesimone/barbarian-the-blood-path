@@ -244,7 +244,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `EMU-16` | vc64web: reset and boot again from the same disk copy: the hero saved at creation is in the LOBBY list |
 | `GEN-10` | reference maps, throne room from FMAP and from the cache |
 | `GEN-11` | caves of chapter 3 (levels 11-14, 6 seeds): connected, border of wall, enough floor, generation under 1.2 s, palettes 9/11/10 |
-| `GEN-12` | swamp of chapter 2 (levels 6-9, 5 seeds): gates on the west and east borders, the east gate of a level on the row of the west gate of the next one, all reachable, generation under 1.2 s, palette 12 |
+| `GEN-12` | swamp of chapter 2 (levels 6-9, 8 seeds): entry and exit gates on two sides of the border, the exit of a level facing the entry of the next one (random path, at least 3 sides used), all reachable, generation under 1.2 s, palette 12 |
 | `INN-GOLD-10` | inn chest: deposit in tens (remainder kept, chest full, purse full) |
 | `GOLD-CAP-10` | gold picked up: GOLD_MAX cap on the hero (add_gold16) |
 | `SHOP-PAY-10` | payment: carried gold first, then the chest in tens, change back on the hero (gold_need/gold_pay) |

@@ -7,5 +7,5 @@ PY = sys.executable
 script("GEN-10", "reference maps, throne room from FMAP and from the cache", [PY, os.path.join(H, "test_gen.py")])
 script("GEN-11", "caves of chapter 3 (levels 11-14, 6 seeds): connected, border of wall, enough floor, generation under 1.2 s, palettes 9/11/10",
        [PY, os.path.join(H, "test_caves.py")])
-script("GEN-12", "swamp of chapter 2 (levels 6-9, 5 seeds): gates on the west and east borders, the east gate of a level on the row of the west gate of the next one, all reachable, generation under 1.2 s, palette 12",
+script("GEN-12", "swamp of chapter 2 (levels 6-9, 8 seeds): entry and exit gates on two sides of the border, the exit of a level facing the entry of the next one (random path, at least 3 sides used), all reachable, generation under 1.2 s, palette 12",
        [PY, os.path.join(H, "test_swamp.py")])
