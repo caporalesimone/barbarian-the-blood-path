@@ -383,7 +383,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MENU-10` | out/work/menu.prg (one file since 18/11): header (parts, source and destination), parts ZX0(zone k), ends at MR2_END, above ML_LO; shops out of GAME; the disks have MENU, no MENU1/OVLT/OVL2 |
 | `MENU-11` | ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
-| `VIL-TWN-11` | village 1 (Aldric's Crossing): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-11` | village 1 (Aldric's Hollow): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-12` | village 2 (Bad Water): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-13` | village 3 (The Last Camp): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-14` | village 4 (Ruin's Gate): header in town_k, solid tiles, colours, map, hero at the entry |

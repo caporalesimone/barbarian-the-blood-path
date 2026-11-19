@@ -172,7 +172,7 @@ riscuote.
 - **Una sola quest attiva.** Un NPC con una quest nuova ha un segno sopra la testa (un `!` nella barra in alto quando
   gli si è davanti, non uno sprite in più: costa zero). Finché una quest è attiva gli altri NPC dicono una riga
   sola e non ne danno altre.
-- **Catena principale** (11 quest): è la trama. Porta dal cimitero di Aldric's Crossing fino al Lord of Ruin e
+- **Catena principale** (11 quest): è la trama. Porta dal cimitero di Aldric's Hollow fino al Lord of Ruin e
   **sblocca le abilità del barbaro**: oggi arrivano con il livello (Whirlwind 3, Battle Cry 6, Rage 9, Smash 12,
   Frenzy 15); con le quest servono **entrambe** le cose, il livello e la quest che la insegna. Chi fa solo la catena
   principale al ritmo normale le trova nello stesso ordine di oggi; chi corre nei piani senza fare le quest si
@@ -180,7 +180,7 @@ riscuote.
 - **Il dungeon è in tre tratti**, con tre ingressi:
   | Tratto | Piani | Ingresso | Villaggio |
   |---|---|---|---|
-  | The Crypt | 1–7 | porta della cripta nel cimitero | Aldric's Crossing (il villaggio attuale) |
+  | The Crypt | 1–7 | porta della cripta nel cimitero | Aldric's Hollow (il villaggio attuale) |
   | The Iron Deep | 8–14 | il pozzo della miniera | Bad Water |
   | The Red Stair | 15–20 | la breccia nelle mura | The Last Camp |
   Le scale in fondo al piano 7 e al piano 14 sono **chiuse da un cancello** finché la quest del tratto non è compiuta;
@@ -222,14 +222,14 @@ Senza quest attiva: `no quest. talk to the people in the villages.` Il testo vie
 ### La trama principale
 
 > Nota (09/11): l'intro (LORE) attuale va adattata a questa trama a fine sviluppo delle quest (vedi sez. 10, LORE, e TODO H4).
-Da secoli sotto il cimitero di Aldric's Crossing si scende verso una sala del trono dove siede il **Lord of Ruin**.
+Da secoli sotto il cimitero di Aldric's Hollow si scende verso una sala del trono dove siede il **Lord of Ruin**.
 Non è un re: è un demone che si nutre del sangue dei clan delle montagne. I suoi razziatori (fallen, skeleton,
 zombie, demon: le quattro famiglie dei mostri) salgono dalla cripta, prendono prigionieri e li portano giù, un piano
 alla volta, lungo quello che i villaggi chiamano **The Blood Path**, il sentiero di sangue: le scale che
 collegano i venti piani, macchiate dal sangue di chi è stato trascinato giù. Saint Aldric, il santo della fontana,
 secoli fa sigillò il sentiero con due cancelli di ferro (ai piani 7 e 14) e con il proprio sangue. I sigilli si stanno
 rompendo. Uccidere il Lord of Ruin chiude il sentiero per sempre; non ucciderlo significa che il prossimo villaggio
-a finire laggiù è Aldric's Crossing.
+a finire laggiù è Aldric's Hollow.
 
 ### La sottotrama: perché il barbaro, perché "The Blood Path"
 Il barbaro è l'ultimo del **clan della Mano Rossa** (Red Hand), un clan delle montagne che il Lord of Ruin ha
@@ -260,7 +260,7 @@ villaggio, al piano finale e cambiando capitolo.
 
 | Villaggio | Aspetto | Contenuto | NPC |
 |---|---|---|---|
-| **Aldric's Crossing** (c'è già) | il villaggio di oggi (mappa del 10/11): torrente con due ponti e un laghetto, cimitero con la cripta a nord-ovest, chiesa con il campanile | fabbro, alchimista, locanda con il baule (sud-est, opposta alla cripta), fontana, portale (l'armaiolo è stato tolto il 09/11) | Father Osric (prete, davanti alla chiesa o alla fontana), Hilde (vedova, davanti a una casa a ovest), Grom (fabbro, davanti alla bottega: dal 09/11 a est del ponte nord) |
+| **Aldric's Hollow** (c'è già) | il villaggio di oggi (mappa del 10/11): torrente con due ponti e un laghetto, cimitero con la cripta a nord-ovest, chiesa con il campanile | fabbro, alchimista, locanda con il baule (sud-est, opposta alla cripta), fontana, portale (l'armaiolo è stato tolto il 09/11) | Father Osric (prete, davanti alla chiesa o alla fontana), Hilde (vedova, davanti a una casa a ovest), Grom (fabbro, davanti alla bottega: dal 09/11 a est del ponte nord) |
 | **Bad Water** | villaggio di mugnai sul fiume: ruota del mulino, moli di legno, magazzini; palette scura (notte o pioggia: stessi 4 colori, tonalità diverse) | fabbro, alchimista, il **pozzo della miniera** (ingresso del tratto 2, tile `T_TSTAIRS` ridisegnato come bocca di pozzo con argano), portale, fontana; niente casa | Captain Rook (comandante della guarnigione, sulla piazza), the Hermit (eremita, in una capanna fuori dal villaggio), Mirra (alchimista, davanti alla bottega) |
 | **The Last Camp** | accampamento assediato davanti alle mura della cittadella sotterranea: palizzata, tende, fuochi, carri; palette rossa (tema 4, quello della copertina) | fabbro da campo, alchimista da campo (merce alta), la **breccia nelle mura** (ingresso del tratto 3), portale, fontana (un altare dell'ordine); niente casa | Sister Ingrid (ordine di Saint Aldric, all'altare), the Dying Knight (cavaliere ferito davanti a una tenda) |
 
@@ -302,7 +302,7 @@ probabilità 1/4 per piano una stanza riceve un "arredo":
 Numerazione `Q1`…`Q11` catena principale, `S1`…`S3` secondarie, `A1` Abisso. Per ogni quest: NPC, lore (quello che
 dice), obiettivo, cosa fare in pratica, premio, quest seguente. I testi tra virgolette sono in inglese (bozza).
 
-**Q1 — Blood on the Steps** (Father Osric, Aldric's Crossing)
+**Q1 — Blood on the Steps** (Father Osric, Aldric's Hollow)
 - Lore: "They took the gravedigger last night. The crypt door was open. You carry a sword: go down and show me the
   steps are not ours anymore."
 - Obiettivo: uccidere 5 fallen nel piano 1.
@@ -319,7 +319,7 @@ dice), obiettivo, cosa fare in pratica, premio, quest seguente. I testi tra virg
 - Premio: **Whirlwind** (sblocco) + 100 oro.
 - Seguente: Q3.
 
-**Q3 — Words of Return** (Grom il fabbro, che manda dall'alchimista: Aldric's Crossing)
+**Q3 — Words of Return** (Grom il fabbro, che manda dall'alchimista: Aldric's Hollow)
 - Lore (Grom): "You come back up the stairs every time? Mirra's cousin sells a scroll that tears a hole in the
   world. Learn to use it, or the stairs will bury you."
 - Obiettivo: ricevere una portal scroll (data dall'alchimista alla prima visita con la quest attiva) e **usarla dal
@@ -331,12 +331,12 @@ dice), obiettivo, cosa fare in pratica, premio, quest seguente. I testi tra virg
   fatta").
 - Seguente: Q4.
 
-**Q4 — The Widow's Son** (Hilde, Aldric's Crossing)
+**Q4 — The Widow's Son** (Hilde, Aldric's Hollow)
 - Lore: "Torvald scouts for the garrison. He went down to count them. That was nine days ago. The priest says the
   fifth floor is where they keep the ones they don't eat."
 - Obiettivo: raggiungere la sala delle torture al piano 5 e liberare Torvald (Fire sulla gabbia).
 - Premio: **Battle Cry** (Torvald: "They sang it over the prisoners. I know every word. Your clan's war-cry.") +
-  120 oro; Torvald compare a Aldric's Crossing da ora (NPC in più davanti alla casa di Hilde).
+  120 oro; Torvald compare a Aldric's Hollow da ora (NPC in più davanti alla casa di Hilde).
 - Seguente: Q5.
 
 **Q5 — The Iron Gate** (Torvald)
@@ -344,7 +344,7 @@ dice), obiettivo, cosa fare in pratica, premio, quest seguente. I testi tra virg
   ribs. I saw it."
 - Obiettivo: uccidere il boss del piano 7 (**forzato** skeleton king) e prendere la chiave del cancello (oggetto
   di quest: non entra nello zaino, è un flag).
-- Premio: il cancello del piano 7 si apre; **Bad Water** raggiungibile (strada a est di Aldric's Crossing, e
+- Premio: il cancello del piano 7 si apre; **Bad Water** raggiungibile (strada a est di Aldric's Hollow, e
   il pozzo della miniera porta al piano 8); 200 oro.
 - Seguente: Q6 (a Bad Water).
 
@@ -513,14 +513,14 @@ Sono stime per analogia con il codice esistente (`ov_stash` 407 B, `menu_help` 1
   nel tema del piano, oppure il messaggio "the iron gate is sealed" sulla barra e il PG non scende).
 
 ### 3.6 Villaggi multipli
-- `cur_level` 0 = Aldric's Crossing, 21 = Bad Water, 22 = The Last Camp (oltre `MAXLEVEL`, prima dell'Abisso
+- `cur_level` 0 = Aldric's Hollow, 21 = Bad Water, 22 = The Last Camp (oltre `MAXLEVEL`, prima dell'Abisso
   se l'Abisso userà 21+: da coordinare con quel progetto). `c_loc` salva il luogo, `c_vil` il villaggio "di casa"
   del tratto (dove riportano il portale e la morte).
 - La cache a `$E000` ospita **un villaggio alla volta**: cambiare villaggio = rileggere `GFXn` (11 blocchi, ~3 s).
   Con i 1830 B sotto l'I/O e i 794 B in fondo alla cache non c'è spazio per due villaggi in cache (2,7 KB l'uno).
 - **Locanda e baule in ogni villaggio** (decisione del committente, 09/11): ogni villaggio ha una locanda e in ognuna c'è
   **lo stesso baule** (24 posti e l'oro, nel record dell'eroe: il modulo MENU e il formato non cambiano). Prima il progetto lo
-  prevedeva solo ad Aldric's Crossing. Da verificare quando si fanno i villaggi: `ovl_town` carica il modulo MENU (zona 1 a
+  prevedeva solo ad Aldric's Hollow. Da verificare quando si fanno i villaggi: `ovl_town` carica il modulo MENU (zona 1 a
   `$C900`) in ogni villaggio (la mappa del villaggio nuovo non deve usare quella zona) e il tile `DHOME` deve esserci in ogni mappa.
 - **Regole per ogni villaggio (09/11, regola del committente: da non dimenticare)**:
   1. **Una locanda** in ogni villaggio (tile `DHOME`; in inglese *inn*; ex "casa del PG").
@@ -529,7 +529,7 @@ Sono stime per analogia con il codice esistente (`ov_stash` 407 B, `menu_help` 1
      distanze ([Villaggio](villaggio.md#menu-del-villaggio-modulo-menu-1111)).
   3. **Per ogni villaggio nuovo**: la mappa non usa `$C900-$CFFF` (zona 1 del MENU).
   4. Misura finale: `lab64 test regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
-- Le scale del piano 1 portano ad Aldric's Crossing; le scale su del piano 8 al pozzo di Bad Water; quelle
+- Le scale del piano 1 portano ad Aldric's Hollow; le scale su del piano 8 al pozzo di Bad Water; quelle
   del piano 15 alla breccia del Last Camp. Dal piano 7 al piano 8 e dal 14 al 15 si continua con le scale normali
   (il dungeon resta contiguo; i tre ingressi sono scorciatoie).
 
@@ -841,7 +841,7 @@ file `GENn` per tratto) è superato dai capitoli: decisioni del committente del 
 
 | Capitolo | Piani | Stile | Grafica |
 |---|---|---|---|
-| 1 Aldric's Crossing | 1–5 | **dungeon di oggi** (stanze e corridoi) | mattoni (temi 1, 2) |
+| 1 Aldric's Hollow | 1–5 | **dungeon di oggi** (stanze e corridoi) | mattoni (temi 1, 2) |
 | 2 Bad Water | 6–10 | **palude** a mappa unica 2 × 2 (design sotto) | acqua verde scura, fango, assi |
 | 3 The Last Camp | 11–15 | **grotte**: il piano 11 in una grotta di roccia **innevata**, 12–14 grotte di roccia | roccia con la neve sulle creste (11), roccia nuda (12–14) |
 | 4 The Throne of Ruin | 16–20 | **cittadella** (BSP simmetrico, come sopra) | pietra squadrata, colonne |
@@ -1220,7 +1220,7 @@ blocchi, su 347 liberi.
 
 ## 13. Decisioni del 07/11 (fine mattina)
 
-- **Tre villaggi** (Aldric's Crossing, Bad Water, The Last Camp). **Tre generatori** (`GEN1` stanze, `GEN2`
+- **Tre villaggi** (Aldric's Hollow, Bad Water, The Last Camp). **Tre generatori** (`GEN1` stanze, `GEN2`
   grotte, `GEN3` cittadella).
 - **Il compagno (Torvald) non cammina** durante il gioco: posizione fissa (accanto alle scale di arrivo del piano e
   in un punto fisso del villaggio del tratto).

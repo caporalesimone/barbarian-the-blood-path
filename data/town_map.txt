@@ -5,7 +5,7 @@
 ; S=dsmith L=dalch H=dhome D=hdoor 5=signs 7=signl A=spire ~=fountain 1-4=fount0-3 O=portal T=tree
 ; >=tstairs (porta della cripta) /=crypta @=cryptb \=cryptc [=cryptl ]=cryptr t=grave Y=grave2
 ; %=water (=waterl )=waterr *=flowers w=well |=fence v=fencev i=lamp B=bush s=stall
-; Aldric's Crossing (10/11, concept v3 approvato dal committente; prima: 06/11 con ritocchi del 09/11). Il torrente scende da
+; Aldric's Hollow (10/11, concept v3 approvato dal committente; prima: 06/11 con ritocchi del 09/11). Il torrente scende da
 ; nord a sud con un percorso irregolare (esce dalla mappa in alto e in basso) e due ponti alti 3 caselle; a sud un laghetto
 ; alimentato da un ramo del torrente. Ovest: cimitero con la cripta (nord-ovest, lapidi in file con la terra davanti), chiesa
 ; con il campanile, piazza con la fontana, alchimista (sud-ovest). Est: fabbro, piazzetta tonda del portale, orto, locanda

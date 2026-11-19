@@ -5,7 +5,7 @@ Stile: mappa del mondo di un gioco di ruolo a 16/32 bit disegnata a mano. Colori
 ogni trama fatta di piccoli segni ripetuti definiti qui (ciuffi d'erba, onde, canne, ombre sulla neve). Niente rumore,
 sfumature, ombreggiature, interpolazioni di colore, trasparenze, antialias (anche il testo: font bitmap 5x7 definito qui).
 Geografia: l'angolo sud-ovest di un continente. Il mare sta a ovest e a sud, la terra esce dal quadro in alto e a destra.
-Zone: 1 Aldric's Crossing (valle verde e fiume, sud-ovest), 2 Bad Water (lago nero e palude, nord-ovest), 3 The Last
+Zone: 1 Aldric's Hollow (valle verde e fiume, sud-ovest), 2 Bad Water (lago nero e palude, nord-ovest), 3 The Last
 Camp (montagne innevate, centro-est), 4 Ruin's Gate (terra di cenere, mura, cratere dell'Abisso, cittadella, nord-est).
 La strada segue il gioco: dal villaggio 1 a nord fino alla palude, lungo la riva sud del lago, a est fino al campo, a nord dal passo,
 nel 4 si scende nel cratere.
@@ -135,7 +135,7 @@ SERPENT = (360, 286)
 COMPASS = (40, 256)
 
 # targhe: (x, y in alto a sinistra, numero o None, testo)
-LABELS = [(66, 276, 1, "ALDRIC'S CROSSING"), (84, 36, 2, "BAD WATER"), (300, 222, 3, "THE LAST CAMP"),
+LABELS = [(66, 276, 1, "ALDRIC'S HOLLOW"), (84, 36, 2, "BAD WATER"), (300, 222, 3, "THE LAST CAMP"),
           (264, 30, 4, "RUIN'S GATE")]
 ABYSS_LABEL = (404, 104)
 ABYSS_POINT = ((410, 104), (402, 87))

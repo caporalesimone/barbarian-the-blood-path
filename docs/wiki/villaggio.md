@@ -2,13 +2,13 @@
 
 **Dal 15/11 ogni capitolo ha il SUO villaggio** (TODO Z2, richiesta del committente: villaggi diversi, non lo stesso con altri
 colori). Questa pagina descrive prima [i villaggi dei capitoli](#i-villaggi-dei-capitoli-1511) e il formato comune, poi il
-villaggio 1 (Aldric's Crossing) in dettaglio; negozi, locanda e modulo MENU sono uguali in tutti.
+villaggio 1 (Aldric's Hollow) in dettaglio; negozi, locanda e modulo MENU sono uguali in tutti.
 
 ## I villaggi dei capitoli (15/11)
 
 | # | Villaggio | Struttura | Cura (`~`) | Ingresso del sotterraneo (`>`) | Entrata → uscita | Colori (sfondo, 1, 2, accento) |
 |---|---|---|---|---|---|---|
-| 1 | **Aldric's Crossing** | due rive di un torrente con due ponti, piazza, chiesa, cimitero | fountain of saint aldric | la **cripta** nel cimitero | strada a sud → sentiero a nord | verde, marrone, grigio chiaro, ciano |
+| 1 | **Aldric's Hollow** | due rive di un torrente con due ponti, piazza, chiesa, cimitero | fountain of saint aldric | la **cripta** nel cimitero | strada a sud → sentiero a nord | verde, marrone, grigio chiaro, ciano |
 | 2 | **Bad Water** (19/11: tema voodoo) | **palafitte su un lago nero**: piattaforme di assi su pali unite da passerelle; mangrovie, ninfee, pali con i teschi, lanterne-teschio, tamburi, rastrelliere di amuleti; **due traghetti** sotto le piattaforme (vedi sotto) | the bottle tree (un albero morto con le bottiglie appese; si guarisce sui moccoli) | il **cancello d'ossa** nel muro della casa degli spiriti (isolotto a nord-est, con il grande idolo) | riva a sud-ovest → fondo del pontile est | nero, marrone, arancio, verde |
 | 3 | **The Last Camp** | **campo di guerra su tre terrazze** di una montagna innevata: pareti di roccia, scale di legno, tende, palizzata e torri | the great bonfire (ci si siede sui tronchi attorno) | la **bocca di una grotta** nella parete nord | cancello a ovest (terrazza bassa) → passo a nord-ovest (terrazza alta) | bianco, grigio scuro, marrone, rosso |
 | 4 | **Ruin's Gate** | **città in rovina attorno a un cratere**: strada ad anello, quattro raggi, mura con le brecce, colonne, case sventrate | the weeping angel (una statua; le candele ai suoi piedi) | la **saracinesca delle segrete** nel corpo di guardia a nord | strada a sud → **scala di tavole che scende nel cratere** | grigio scuro, nero, grigio chiaro, rosso |
@@ -64,7 +64,7 @@ non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview
 disegno: nel villaggio 4 il cratere esce blu); l'etichetta dell'ingresso dice sempre "stairs down to level N"; nel villaggio 5
 la Bocca non fa nulla; hardware reale e vc64web non provati con i villaggi nuovi.
 
-# Villaggio 1: Aldric's Crossing
+# Villaggio 1: Aldric's Hollow
 
 Sorgenti: `data/town_map.txt` (mappa 48 × 48, una lettera per casella), `tools/build/gen_maps.py` (intestazione e RLE nel file
 `TWN1`), `src/game/levels.asm` (`town_post`, `place_player`), `src/game/game.asm` (`act_tick`, `tile_trigger`),
@@ -288,7 +288,7 @@ Schermata rifatta l'08/11 (progetto con il committente, concept ASCII in [Refact
 - il precaricamento del tema in sottofondo non c'è più (tolto l'11/11, [Flussi](flussi.md#8-precaricamento-del-tema-tolto)).
 
 **Storia**: dal 09/11 al 11/11 il modulo della locanda OVL2 stava nel posto del precaricamento (`$F500`) e il
-precaricamento nel villaggio partiva solo dopo **N caselle** (`TOWN_PF_N` = 8 per Aldric's Crossing, con l'audit delle
+precaricamento nel villaggio partiva solo dopo **N caselle** (`TOWN_PF_N` = 8 per Aldric's Hollow, con l'audit delle
 distanze `tools/village_audit.py`) per non sovrascriverlo; ogni ingresso nella locanda dopo un precaricamento costava
 3,0–4,8 s. Con il modulo MENU residente N, il contatore `pf_wait` e l'audit non servono più (tolti l'11/11).
 

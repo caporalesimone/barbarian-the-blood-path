@@ -11,7 +11,7 @@ SEED = [10, 11, 12, 1, 2, 3]                                # "abc123"
 SOLID_V = {i for i, n in enumerate(GG.TILES) if n in GG.SOLID}
 FLOOR_D = (2, 3, 4)                                         # T_FLOOR, T_FLOORB, T_FLOORC
 U, D, LF, RT = 1, 2, 4, 8
-INN_DOOR = (40, 43)                                         # below the inn's door (Aldric's Crossing)
+INN_DOOR = (40, 43)                                         # below the inn's door (Aldric's Hollow)
 SMITH_DOOR = (39, 12)                                       # below the smith's door
 # keys: (row of keynew, mask) - C64 keyboard matrix
 K_RUNSTOP, K_1, K_2, K_3, K_4, K_5 = (7, 0x80), (7, 0x01), (7, 0x08), (1, 0x01), (1, 0x08), (2, 0x01)

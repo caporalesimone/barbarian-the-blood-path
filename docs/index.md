@@ -23,7 +23,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | [Combattimento](wiki/combattimento.md) | Regole d20: PG, attacco, difesa, danni, abilità, Rage/Frenzy, pozioni, esperienza e livelli, morte |
 | [Oggetti](wiki/oggetti.md) | Catalogo (armi, armature, scudi, anelli, pozioni, pergamena), equipaggiamento, zaino, cintura, baule della locanda |
 | [Bottino e bauli](wiki/bottino.md) | Cosa lasciano i mostri, bauli del piano, tesori, generazione degli oggetti, oro, chiavi |
-| [Villaggio](wiki/villaggio.md) | (15/11) I cinque villaggi dei capitoli (tile, mappa, colori e posizioni propri, file `TWNc`), poi Aldric's Crossing: mappa, negozi, fontana, baule della locanda, portale, leva della sala del trono |
+| [Villaggio](wiki/villaggio.md) | (15/11) I cinque villaggi dei capitoli (tile, mappa, colori e posizioni propri, file `TWNc`), poi Aldric's Hollow: mappa, negozi, fontana, baule della locanda, portale, leva della sala del trono |
 | [Interfaccia](wiki/interfaccia.md) | Comandi, HUD, schermate (inventario, negozi, baule, mappa, menu) |
 | [Help](wiki/help.md) | Il manuale nel loader (programma `HELP`): pagine, ritaglio dell'HUD, come si aggiorna |
 | [Refactor dei tasti](wiki/refactor-tasti.md) | **Progetto, non nel codice** (07/11 sera): analisi di tasti e menu di ogni schermata, sistema standard a voci e linguette, piano per schermata |

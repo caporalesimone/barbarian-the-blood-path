@@ -84,7 +84,7 @@ Colonne (README in `data/monsters/README.md`): `id`, `chapter`, `tier` (`base`, 
 
 | Capitolo (profondità) | Comuni | Forti (stesso sprite con un'aggiunta, altro colore) | Boss |
 |---|---|---|---|
-| 1 — Aldric's Crossing (1–5) | Fallen, Skeleton, Zombie, Demon (**oggi**) | Fallen Warchief, Skeleton King, Lich, Balrog (oggi) | **The Hollow Abbot** (nuovo) |
+| 1 — Aldric's Hollow (1–5) | Fallen, Skeleton, Zombie, Demon (**oggi**) | Fallen Warchief, Skeleton King, Lich, Balrog (oggi) | **The Hollow Abbot** (nuovo) |
 | 2 — Bad Water (6–10) | Drowned, Bog Crawler, Mire Witchling, Will-o'-Wisp (15/11) | Drowned Hulk, Crawler Queen, Hag of the Mere, Corpse Light | **Mother Stitch, the Dollmaker** (19/11; prima The Miller) |
 | 3 — The Last Camp (11–15) | Ash Ghoul, Bone Archer, Hellhound, Frost Wight (15/11) | Pyre Ghoul, Bone Marksman, Hellhound Alpha, Wight Lord | **Varok the Oathbreaker** |
 | 4 — The Throne of Ruin (16–20) | Imp, Blood Knight, Gargoyle, Cultist (15/11) | Imp Overseer, Blood Champion, Stone Gargoyle, High Cultist | **Lord of Ruin** (il boss finale di oggi, spostato qui) |
@@ -94,7 +94,7 @@ Nota: con il capitolo 1 di 5 piani (regola dell'11/11 sera: 5 piani per capitolo
 o passano al capitolo 2 (che oggi ha tre concept propri) o si abbassa la loro profondità. Da decidere con B11.
 
 ### Concept dei boss
-- **The Hollow Abbot** (capitolo 1, mappa finale del capitolo): l'abate della cripta sotto Aldric's Crossing, uno scheletro
+- **The Hollow Abbot** (capitolo 1, mappa finale del capitolo): l'abate della cripta sotto Aldric's Hollow, uno scheletro
   in una tonaca marcia con un turibolo di fuoco verde. Al 66% e al 33% della vita rialza 2 scheletri. Immune al blocco.
 - **Mother Stitch, the Dollmaker** (capitolo 2, 19/11, decisione del committente: tema voodoo al posto del mulino e del
   mugnaio): la bambolaia della palude, cappello a tesa larga con le piume, viso pallido cucito, veste viola con le toppe, un

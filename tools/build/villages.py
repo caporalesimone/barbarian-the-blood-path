@@ -30,7 +30,7 @@ def _v(mod, n):
 
 
 VILLAGES = {
-    1: dict(name="Aldric's Crossing", pal=(5, 9, 15, 3), heal="fountain of saint aldric", map="data/town_map.txt", tiles={}),
+    1: dict(name="Aldric's Hollow", pal=(5, 9, 15, 3), heal="fountain of saint aldric", map="data/town_map.txt", tiles={}),
     2: _v(vil2_badwater, 2),
     3: _v(vil3_lastcamp, 3),
     4: _v(vil4_ruinsgate, 4),
