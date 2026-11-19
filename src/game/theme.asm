@@ -52,22 +52,35 @@ OVP_END  = $d000
 OVJ_INIT = 0
 OVJ_TICK = 3
 OVJ_FIRE = 6
-OVJ_DMG  = 9                    ; (19/11) colpo del PG a un mostro: il danno si puo' cambiare (scudo di Varok, mugnaio scoperto)
+OVJ_DMG  = 9                    ; (19/11) colpo del PG a un mostro: il danno si puo' cambiare (scudo di Varok, Mother Stitch)
+OVJ_KILL = 12                   ; (19/11) mostro X ucciso: C=1 = niente bottino (piano 20, feticci di Mother Stitch)
+OVJ_DECOR = 15                  ; (19/11) arredi del piano, subito dopo la generazione (ovl_decor.asm)
+OVJ_GEN  = 18                   ; (19/11) fine della generazione sotto l'I/O (cittadella, gen_citadel.asm)
+OVJ_N    = 21                   ; lunghezza della tabella dei salti
 ovp_ok  .byte 0
 ovp_tint .byte 0                ; (19/11) colore del boss del capitolo deciso dal codice del piano (0 = il suo), build_sprites
 .if OVP_RES
 ovp_init = final_init
 ovp_tick = final_tick
 ovp_dmg rts
+ovp_kill                        ; build ARENA / TESTUI 36: niente bottino nel piano 20 (come final.asm): C=1 solo li'
+        lda cur_level
+        cmp #MAXLEVEL
+        beq +
+        clc
++       rts
 .if ARENA
 ovp_fire rts
 .else
 ovp_fire = ui_lever
 .endif
 .else
+ovp_kill:                       ; X = mostro ucciso -> C=1 niente bottino (senza codice del piano: C=0)
+        lda #OVJ_KILL
+        .byte $2c               ; (bit $xxA9: salta il lda dopo)
 ovp_tick:
         lda #OVJ_TICK
-        .byte $2c               ; (bit $xxA9: salta il lda dopo)
+        .byte $2c
 ovp_init:
         lda #OVJ_INIT
         .byte $2c
@@ -77,6 +90,7 @@ ovp_fire:
 ovp_dmg:                        ; X = mostro colpito, cb_dl/cb_dh = danno (si puo' cambiare); X conservato
         lda #OVJ_DMG
         ldy ovp_ok
+        clc
         beq +
         sta _j+1
 _j      jmp OVP_AT

@@ -181,7 +181,7 @@ resta nella sala del trono a stella):
 | Capitolo | Piano | Luogo | Forma | Tile (`GFX(2c)`) | Palette |
 |---|---|---|---|---|---|
 | 1 | 5 | **The Crypt of the Abbot**: cripta | croce latina verso nord: discesa dalle scale con le candele, nartece con le ossa, navata con colonne, sarcofagi e tappeto processionale, transetto (ossario a ovest, camera dei sarcofagi con le lastre incise a est), abside con altare e candelabri; l'abate davanti all'altare | mattoni del capitolo 1 + sarcofago, colonna, candelabro, altare, mucchio d'ossa (solidi), ossa sparse, tappeto, lastra tombale (calpestabili) | 8 (grigia, fiamme gialle) |
-| 2 | 10 | **The Flooded Mill**: isola al centro della palude | acqua tutt'intorno (il muro della palude), arrivo dal cancello su un isolotto a sud, isolotti con alberi morti uniti da passerelle e da un guado di pietre; sull'isola centrale il mulino in rovina (muri spezzati, assi marce, macina, ruota sulla riva ovest); il mugnaio nella radura a sud del mulino | palude del capitolo 2 + muro del mulino, macina, ruota, canne, albero morto (solidi), assi marce, pietre del guado (calpestabili), passerelle | 12 (palude) |
+| 2 | 10 | **The Dollmaker's Isle** (19/11; prima The Flooded Mill): isola al centro della palude | acqua tutt'intorno (il muro della palude), arrivo dal cancello su un isolotto a sud, isolotti con gli alberi degli impiccati uniti da passerelle e da un guado di pietre; sull'isola centrale la capanna in rovina della bambolaia (muri di graticcio, totem, il calderone 3 caselle sopra il boss); Mother Stitch nella radura di fango a sud della capanna (attorno solo fango: i feticci nascono sul pavimento) | palude del capitolo 2 + muro di graticcio, totem, calderone, canne, albero degli impiccati (solidi), assi marce, pietre del guado (calpestabili), passerelle | 12 (palude) |
 | 3 | 15 | **The Broken Bastion**: grotta semi crollata | galleria d'arrivo da sud-ovest con i puntelli, sala ovest, salita alla galleria nord con le mura cadute del bastione, frana di macerie fra la sala ovest e la sala del boss (varchi di ghiaia), volta crollata a nord-est della sala del boss; stalagmiti come ripari (la carica di Varok, [bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)) | grotte del capitolo 3 + macerie, masso, stalagmite, puntello, conci del bastione (solidi), ghiaia, pavimento crepato (calpestabili) | 10 (roccia grigia) |
 
 - **Lettere delle mappe**: `#` muro (nel capitolo 2 l'acqua), `.` pavimento, `<` scale di arrivo, `B` boss, più gli arredi del
@@ -222,8 +222,12 @@ comunque `ovl_cur` = 0. Nessuna lettura di disco in più (il tema si legge comun
   di `GFX2`, `GFX4`, `GFX6`, prima della mappa del boss ([bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)).
   Ingressi in più: `ovp_dmg` (colpo del PG a un mostro, `hit_one`: il danno si può cambiare) e `ovp_tint` (colore del boss del
   capitolo in `build_sprites`, 0 = il suo; azzerato da `gfx_tail`).
+- **Tabella dei salti** (21 B, `OVJ_*` in `theme.asm`): `OVJ_INIT` 0, `OVJ_TICK` 3, `OVJ_FIRE` 6, `OVJ_DMG` 9, (19/11) `OVJ_KILL` 12
+  (`ovp_kill` in `kill_monster`, X = mostro ucciso: C=1 = niente bottino; piano 20: sempre, prima era un confronto con `MAXLEVEL`
+  in GAME; piano 10: i feticci), `OVJ_DECOR` 15 e `OVJ_GEN` 18 (arredi dei piani e fine della generazione: sotto). Senza codice
+  del piano gli ingressi fanno `rts` con C=0. Ogni file `ovl_*.asm` ha tutte le voci (`clc / rts / nop` se non servono).
 - Test: `OVP-10` (copia a `$C900`, ondata del boss finale dal codice copiato, `ovp_ok` = 0 al piano 19, MENU di nuovo a `$C900` nel
-  villaggio), `OVP-11..13` (abate, mugnaio, Varok), `THRONE-10` (la leva).
+  villaggio), `OVP-11..13` (abate, Mother Stitch, Varok), `THRONE-10` (la leva).
 
 ## Piano 20: la sala del trono (`gen_final`)
 

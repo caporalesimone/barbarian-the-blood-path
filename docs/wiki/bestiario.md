@@ -85,7 +85,7 @@ Colonne (README in `data/monsters/README.md`): `id`, `chapter`, `tier` (`base`, 
 | Capitolo (profondità) | Comuni | Forti (stesso sprite con un'aggiunta, altro colore) | Boss |
 |---|---|---|---|
 | 1 — Aldric's Crossing (1–5) | Fallen, Skeleton, Zombie, Demon (**oggi**) | Fallen Warchief, Skeleton King, Lich, Balrog (oggi) | **The Hollow Abbot** (nuovo) |
-| 2 — Bad Water (6–10) | Drowned, Bog Crawler, Mire Witchling, Will-o'-Wisp (15/11) | Drowned Hulk, Crawler Queen, Hag of the Mere, Corpse Light | **The Miller of Bad Water** |
+| 2 — Bad Water (6–10) | Drowned, Bog Crawler, Mire Witchling, Will-o'-Wisp (15/11) | Drowned Hulk, Crawler Queen, Hag of the Mere, Corpse Light | **Mother Stitch, the Dollmaker** (19/11; prima The Miller) |
 | 3 — The Last Camp (11–15) | Ash Ghoul, Bone Archer, Hellhound, Frost Wight (15/11) | Pyre Ghoul, Bone Marksman, Hellhound Alpha, Wight Lord | **Varok the Oathbreaker** |
 | 4 — The Throne of Ruin (16–20) | Imp, Blood Knight, Gargoyle, Cultist (15/11) | Imp Overseer, Blood Champion, Stone Gargoyle, High Cultist | **Lord of Ruin** (il boss finale di oggi, spostato qui) |
 | Abisso (21–255) | tutti i bestiari precedenti, mescolati (proposta) | idem | boss con nome a ogni piano; nessun boss di capitolo (D-CAP-4) |
@@ -96,8 +96,10 @@ o passano al capitolo 2 (che oggi ha tre concept propri) o si abbassa la loro pr
 ### Concept dei boss
 - **The Hollow Abbot** (capitolo 1, mappa finale del capitolo): l'abate della cripta sotto Aldric's Crossing, uno scheletro
   in una tonaca marcia con un turibolo di fuoco verde. Al 66% e al 33% della vita rialza 2 scheletri. Immune al blocco.
-- **The Miller of Bad Water** (capitolo 2): un mugnaio gigante posseduto; il mulino allagato è la mappa finale. Mena una
-  macina legata a una catena (colpo ad area come Whirlwind) e chiama 2 Drowned.
+- **Mother Stitch, the Dollmaker** (capitolo 2, 19/11, decisione del committente: tema voodoo al posto del mulino e del
+  mugnaio): la bambolaia della palude, cappello a tesa larga con le piume, viso pallido cucito, veste viola con le toppe, un
+  ago enorme. Pianta **feticci** (bambole di paglia su un palo) che la proteggono. Nel gioco il nome è "mother stitch" (i nomi
+  dei mostri sono al massimo 24 caratteri, senza virgola).
 - **Varok the Oathbreaker** (capitolo 3): il cavaliere che ha tradito l'ultimo accampamento. Carica (scatto verso il PG) e
   colpo di scudo (stordisce); chiama 2 Ash Ghoul.
 - **Lord of Ruin** (capitolo 4): invariato (sala del trono, evocazioni a ondate, leva verso l'Abisso).
@@ -106,13 +108,13 @@ o passano al capitolo 2 (che oggi ha tre concept propri) o si abbassa la loro pr
 
 Richiesta del committente (15/11, TODO Z2): decidere quale meccanica di gioco ha ogni boss di capitolo. **Decise qui, non nel
 codice**: oggi il boss di capitolo è il boss con nome del piano (statistiche del piano, l'IA di tutti: inseguimento e mischia)
-con il **suo sprite** (15/11: `tools/build/monsters.py`, `ABBOT`, `MILLER`, `VAROK`; colori 14, 8, 7). Ogni meccanica insegna una
+con il **suo sprite** (15/11: `tools/build/monsters.py`, `ABBOT`, `STITCH` dal 19/11, `VAROK`; colori 14, 4, 7). Ogni meccanica insegna una
 cosa sola e si legge dallo schermo (un avviso prima del colpo). Le stime sono a occhio, non misurate.
 
 | Boss | Capitolo | Meccanica | Cosa insegna | Come si vede | Cosa serve nel codice (stima) |
 |---|---|---|---|---|---|
 | **The Hollow Abbot** | 1 | **Evoca i morti**: al 66% e al 33% della vita si ferma, agita il turibolo e fa alzare 2 scheletri. Finché uno scheletro evocato è vivo, l'abate **si rigenera** (1 punto vita ogni mezzo secondo) | scegliere il bersaglio: prima gli evocati | l'abate lampeggia verde per 1 s, bordo verde; gli scheletri compaiono accanto a lui | soglie di vita (2 byte), `spawn` di 2 mostri a piano avviato, rigenerazione a tempo: ~120 B |
-| **The Miller of Bad Water** | 2 | **Il giro della macina**: ogni 4 s carica il colpo (1 s fermo), poi colpisce **tutto attorno a sé** entro 2 caselle (danno doppio); dopo il colpo resta **scoperto** 1,5 s (subisce danno doppio). Al 50% chiama 2 Drowned | entrare e uscire a tempo: colpire nella finestra, scappare durante la carica | il mugnaio lampeggia bianco mentre carica; un anello (lo sprite del Whirlwind) al colpo | stato a tempo (carica / colpo / scoperto), colpo ad area riusando `fz_*` del Whirlwind: ~150 B |
+| ~~The Miller of Bad Water~~ (sostituito il 19/11 da Mother Stitch) | 2 | **Il giro della macina**: ogni 4 s carica il colpo (1 s fermo), poi colpisce **tutto attorno a sé** entro 2 caselle (danno doppio); dopo il colpo resta **scoperto** 1,5 s (subisce danno doppio). Al 50% chiama 2 Drowned | entrare e uscire a tempo: colpire nella finestra, scappare durante la carica | il mugnaio lampeggia bianco mentre carica; un anello (lo sprite del Whirlwind) al colpo | stato a tempo (carica / colpo / scoperto), colpo ad area riusando `fz_*` del Whirlwind: ~150 B |
 | **Varok the Oathbreaker** | 3 | **La carica**: quando è allineato con l'eroe (stessa riga o colonna) parte in linea retta a velocità doppia finché non urta; se urta **un muro** resta stordito 2 s (unico momento in cui lo scudo è giù). Fuori dallo stordimento lo **scudo** dimezza i danni | usare la sala: mettersi davanti a un muro e scansarsi | Varok lampeggia giallo e si ferma mezzo secondo prima di partire; da stordito è grigio | movimento in linea con velocità propria, urto, stato stordito, riduzione del danno: ~180 B |
 | **Lord of Ruin** | 4 | **Il pentacolo brucia** (in più a quello che fa oggi): al 75%, 50% e 25% le linee della stella sul pavimento si accendono per 3 s e chi ci sta sopra prende danno; all'ultimo quarto di vita è più veloce | leggere il pavimento, non solo il boss | le linee della stella cambiano colore (già tile propri: `T_FSTAR`) prima di bruciare | soglie, timer, danno sulla casella (il tile è già riconoscibile): ~100 B |
 
@@ -130,7 +132,7 @@ in gioco e da tarare**):
 | Boss | Come è fatta | Scelte mie (19/11) |
 |---|---|---|
 | The Hollow Abbot | sotto **2/3** e **1/3** della vita: fermo 50 fotogrammi (1 s), lampeggia verde, bordo verde, suono del portale; poi 2 **Skeleton** (tipo 2) sulle caselle di pavimento accanto, svegli. Finché uno è vivo: +1 vita ogni **25** fotogrammi (verde a tratti), mai oltre il massimo. Al rientro le soglie già superate non si ripetono | nessun limite al numero di rigenerazioni; gli scheletri sono mostri normali del piano 5 |
-| The Miller of Bad Water | sveglio: **200** fotogrammi di attesa, **50** di carica (fermo, lampeggia bianco), il colpo: se il PG è entro **36 px** (2 caselle + mezzo corpo) **due attacchi** normali (`mon_attack`: tiro per colpire e danno del mostro), lampo bianco del bordo; poi **75** fotogrammi scoperto (fermo, lampeggia azzurro, colpi del PG ×2). Sotto metà vita **2 Drowned** (tipo 1), una volta | "danno doppio" = due attacchi con il loro tiro per colpire (non un colpo sicuro); niente anello del Whirlwind: solo il lampo del bordo |
+| **Mother Stitch** (19/11, al posto del mugnaio) | tre **riti**: appena sveglia, sotto **2/3** e sotto **1/3** della vita; ognuno: ferma **50** fotogrammi, lampeggia bianco, bordo bianco, suono del portale, poi **2 feticci** (tipo 8 del file `GFX4`: nome "fetish", arancio) sulle caselle di pavimento accanto. I feticci sono **fermi** e non attaccano (stordimento rinnovato a ogni fotogramma, riconosciuti dal **tipo**: anche quelli rimessi dalla STASH dopo il portale), vita = vita massima del boss / **16**. **Protetta** finché un feticcio è in piedi: colpi del PG **dimezzati** (almeno 1), +1 vita ogni **25** fotogrammi, colore **giallo**. Caduto l'ultimo feticcio: **scoperta 100** fotogrammi (ferma, lampeggia azzurro, lampo del bordo, colpi ×2). I feticci danno **esperienza ma niente bottino** (committente, 19/11: `ovp_kill`). Al rientro i riti già fatti non si ripetono | colori senza verde (committente: si confonde con la palude); se attorno non c'è pavimento libero il rito non pianta niente e non c'è fase "scoperta" |
 | Varok the Oathbreaker | sveglio, libero: allineato con il PG (scarto < 8 px su un asse) a **32–143 px**: avviso **25** fotogrammi (fermo, lampeggia giallo), poi carica a **4 px** per fotogramma nella direzione del PG (massimo 60 fotogrammi): contro un muro **stordito 100** fotogrammi (grigio, lampo del bordo), se raggiunge il PG **due attacchi** e si ferma; dopo ogni carica **75** fotogrammi di pausa. Lo scudo dimezza i colpi del PG (almeno 1), non da stordito | la carica non passa sugli spigoli (nessuno scivolamento); gli altri mostri non la fermano |
 
 Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco** (19/11): leggibilità degli avvisi, difficoltà.
@@ -151,7 +153,7 @@ Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco**
 
 Ogni capitolo coi suoi mostri alla sua profondità globale (PG di riferimento, numeri provvisori dei concept): i comuni
 si vincono sempre; i boss di capitolo con 4 pozioni della zona sono **sbilanciati**: The Hollow Abbot (profondità 6)
-**13%** (troppo forte), The Miller of Bad Water (11) **97%**, Varok the Oathbreaker (16) **100%** (troppo deboli), Lord of
+**13%** (troppo forte), The Miller of Bad Water (11, oggi Mother Stitch con le stesse statistiche) **97%**, Varok the Oathbreaker (16) **100%** (troppo deboli), Lord of
 Ruin (20) 93%. Da tarare con `tools/simulators/fit_rules.py` (obiettivo dei boss: ~65–75%, `docs/wiki/balancing-guide.md`) prima di
 disegnarli.
 

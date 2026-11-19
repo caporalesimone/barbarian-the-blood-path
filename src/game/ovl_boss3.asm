@@ -16,6 +16,15 @@
         nop
         nop
         jmp va_dmg              ; OVJ_DMG
+        clc                     ; OVJ_KILL: bottino come sempre
+        rts
+        nop
+        clc                     ; OVJ_DECOR (piani del boss: arredi gia' nella mappa)
+        rts
+        nop
+        clc                     ; OVJ_GEN
+        rts
+        nop
 
 VA_WARN  = 25                   ; avviso: mezzo secondo fermo
 VA_STUN  = 100                  ; stordito: 2 s

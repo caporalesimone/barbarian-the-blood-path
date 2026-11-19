@@ -2037,9 +2037,9 @@ _nb     lda lv_cboss            ; (12/11) boss del capitolo ucciso: il capitolo 
         cmp lb_boss
         bne _nb2
         jsr chap_won
-_nb2    lda cur_level           ; ultimo piano: ne' il boss ne' i mostri evocati lasciano bottino
-        cmp #MAXLEVEL
-        beq _nl
+_nb2    ldx km_i                ; (19/11) il codice del piano decide (piano 20: ne' il boss ne' i mostri evocati lasciano
+        jsr ovp_kill            ; bottino; feticci di Mother Stitch: solo esperienza)
+        bcs _nl
         lda km_nl               ; mostro troppo debole: niente bottino
         bne _nl
         jsr roll_loot

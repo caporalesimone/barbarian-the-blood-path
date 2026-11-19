@@ -1,7 +1,7 @@
-; Mappa del piano del boss del capitolo 2 (tools/build/gen_bossmap.py, 19/11): isola al centro della palude (The Flooded Mill).
-; acqua tutt'intorno, isolotti con alberi morti, passerelle e un guado di pietre;
-; sull'isola centrale il mulino in rovina (muri spezzati, macina, ruota sulla riva ovest); il boss nella radura a sud del mulino.
-; Legenda: '#' acqua (il muro della palude), '.' pavimento, '<' scale di arrivo, 'B' boss (pavimento), 'M' mill wall, 'O' millstone, 'W' water wheel, 'R' reeds, 'T' dead tree, 'h' rotten boards, 'k' stepping stone, '=' boardwalk.
+; Mappa del piano del boss del capitolo 2 (tools/build/gen_bossmap.py, 19/11): isola al centro della palude (The Dollmaker's Isle).
+; acqua tutt'intorno, isolotti con gli alberi degli impiccati, passerelle e un guado di pietre; sull'isola centrale la capanna
+; in rovina della bambolaia (muri di graticcio, totem, il calderone); Mother Stitch nella radura a sud della capanna, fango tutt'attorno.
+; Legenda: '#' acqua (il muro della palude), '.' pavimento, '<' scale di arrivo, 'B' boss (pavimento), 'M' hut wall, 'O' totem, 'C' cauldron, 'R' reeds, 'T' hanging tree, 'h' rotten boards, 'k' stepping stone, '=' boardwalk
 ################################################
 ################################################
 ############R#####################R#############
@@ -16,15 +16,15 @@
 #####R#kRR#######=###R#R##R#RR########R##..##R##
 #######k#########=#MMMMRhRMM#M###########=######
 ######Rk#########=.Mhhhhhhhh#M##R########=######
-######RkR######W...Mhhhhhhhhhh.##########=######
-######RkR######W...hhhhOOhhhhM.===========######
-#######k#####R#W...hhhhhhhhhhM..R###############
+######RkR######R...Mhhhhhhhhhh.##########=######
+######RkR######R...hhhhOOhhhhM.===========######
+#######k#####R#R...hhhhhhhhhhM..R###############
 #####R#.R#####.....Mhhhhhhhhhh....#R############
 ####R...R#####R....MMMhhhhhMMM.....R############
 #####...####RR...................T...R##########
 ####R=#RR####.......................############
 #####=#########.......................##########
-#####=#######.......................RR##########
+#####=#######...........C...........RR##########
 ####R=########.......................###########
 #####=#######........................##..R######
 #####=######R#=.........B..........#RR...R#R####

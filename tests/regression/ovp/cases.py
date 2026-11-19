@@ -99,33 +99,55 @@ def ovp_abbot(ctx):
     g.poke(L["godmode"], 0)
 
 
-@test("OVP-12", "level 10, The Miller of Bad Water (GFX4): awake, every 4 s a 1 s charge, the blow, 1.5 s uncovered (hits x2); "
-      "under half life 2 Drowned once")
-def ovp_miller(ctx):
+@test("OVP-12", "level 10, Mother Stitch (GFX4): awake, a rite (1 s still) plants 2 fetishes (type 8, still, life = her max / 16); "
+      "while one stands the hero's hits are halved and she regenerates; the last one down leaves her open (hits x2); "
+      "under 2/3 a second rite; a fetish killed gives no loot")
+def ovp_stitch(ctx):
     g = ctx["g"]; L = g.L
     O, b, (bx, by) = boss_level(g, 2)
     g.poke(L["godmode"], 1)
-    g.teleport(bx, by + 2); g.frames(4)
-    for _ in range(260):
-        if g.b(O["mi_s"]) == 1: break
-        g.frames(1)
-    check(g.b(O["mi_s"]) == 1, "no charge within 260 frames (mi_s %d, mi_t %d)" % (g.b(O["mi_s"]), g.b(O["mi_t"])))
+    g.teleport(bx, by + 3); g.frames(4)
     for _ in range(60):
-        if g.b(O["mi_s"]) == 2: break
+        if g.b(O["dm_t"]): break
         g.frames(1)
-    check(g.b(O["mi_s"]) == 2, "not uncovered after the charge (mi_s %d)" % g.b(O["mi_s"]))
+    check(g.b(O["dm_t"]) > 0 and g.b(O["dm_wave"]) == 1, "no first rite once awake (ms_t %d, ms_wave %d)" % (g.b(O["dm_t"]), g.b(O["dm_wave"])))
+    n0 = g.b(L["lb_cnt"])
+    g.frames(60)
+    n1 = g.b(L["lb_cnt"])
+    fets = list(range(n0, n1))
+    check(len(fets) == 2 and all(g.b(L["mtype"] + i) == O["DM_TYPE"] for i in fets), "fetishes planted: %d" % len(fets))
+    _, mx = hp(g, b)
+    check(all(hp(g, i) == (max(1, mx // 16),) * 2 for i in fets), "fetish life %s, expected %d" % ([hp(g, i) for i in fets], mx // 16))
+    pos = [(g.b(L["mxl"] + i), g.b(L["myl"] + i)) for i in fets]
+    os.makedirs(os.path.join(ROOT, "out", "work", "ovp"), exist_ok=True)
+    g.screenshot(os.path.join(ROOT, "out", "work", "ovp", "stitch_fetishes.png"))   # to look at, not compared
+    g.frames(40)
+    check([(g.b(L["mxl"] + i), g.b(L["myl"] + i)) for i in fets] == pos, "the fetishes moved")
+    check(g.b(O["dm_sh"]) == 1, "not protected with the fetishes standing")
+    g.poke(L["cb_dl"], 10, 0)
+    g.call_keep(L["ovp_dmg"], regs="x=%02x" % b)
+    check(g.b(L["cb_dl"]) == 5, "protected: damage 10 -> %d (expected 5)" % g.b(L["cb_dl"]))
+    set_hp(g, b, mx * 3 // 4)
+    h0, _ = hp(g, b)
+    g.frames(60)
+    h1, _ = hp(g, b)
+    check(h1 >= h0 + 2, "no regeneration while protected: %d -> %d" % (h0, h1))
+    k = L["ovp_kill"]                                     # carry of ovp_kill in A: jsr ovp_kill / lda #0 / rol / rts
+    g.poke(0x0350, 0x20, k & 255, k >> 8, 0xA9, 0, 0x2A, 0x60)
+    check(g.call_keep(0x0350, regs="x=%02x" % fets[0])["a"] == 1, "a fetish killed: loot not suppressed (ovp_kill C=0)")
+    check(g.call_keep(0x0350, regs="x=%02x" % b)["a"] == 0, "the boss killed: loot suppressed (ovp_kill C=1)")
+    for i in fets:                                        # the last one down: open
+        g.poke(L["malive"] + i, 0)
+    g.frames(3)
+    check(g.b(O["dm_open"]) > 0, "not open after the last fetish (ms_open %d)" % g.b(O["dm_open"]))
     g.poke(L["cb_dl"], 7, 0)
     g.call_keep(L["ovp_dmg"], regs="x=%02x" % b)
-    check((g.b(L["cb_dl"]), g.b(L["cb_dh"])) == (14, 0), "uncovered: damage 7 -> %d (expected 14)" % g.b(L["cb_dl"]))
-    n0 = g.b(L["lb_cnt"])
-    _, mx = hp(g, b)
-    set_hp(g, b, mx // 2 - 1)
-    g.frames(4)
-    n1 = g.b(L["lb_cnt"])
-    check(n1 == n0 + 2 and all(g.b(L["mtype"] + i) == O["MI_DROWN"] for i in range(n0, n1)), "Drowned called: %d" % (n1 - n0))
-    set_hp(g, b, mx // 3)
-    g.frames(4)
-    check(g.b(L["lb_cnt"]) == n1, "Drowned called twice")
+    check((g.b(L["cb_dl"]), g.b(L["cb_dh"])) == (14, 0), "open: damage 7 -> %d (expected 14)" % g.b(L["cb_dl"]))
+    g.frames(110)
+    check(g.b(O["dm_open"]) == 0, "still open after 2 s")
+    set_hp(g, b, mx * 2 // 3 - 1)
+    g.frames(3)
+    check(g.b(O["dm_wave"]) == 2 and g.b(O["dm_t"]) > 0, "no second rite under 2/3 (ms_wave %d)" % g.b(O["dm_wave"]))
     g.poke(L["godmode"], 0)
 
 

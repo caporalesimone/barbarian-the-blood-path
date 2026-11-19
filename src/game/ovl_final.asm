@@ -16,6 +16,15 @@
         rts                     ; OVJ_DMG: nessun cambio del danno
         nop
         nop
+        sec                     ; OVJ_KILL: piano 20, ne' il boss ne' i mostri evocati lasciano bottino
+        rts
+        nop
+        clc                     ; OVJ_DECOR (sala del trono: mappa fissa)
+        rts
+        nop
+        clc                     ; OVJ_GEN
+        rts
+        nop
         .include "final.asm"
 .endif
 ovf_end

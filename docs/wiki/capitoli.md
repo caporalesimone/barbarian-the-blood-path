@@ -105,7 +105,7 @@ tiene in RAM gli stati dei 5 piani del capitolo ([salvataggi](salvataggi.md)) e 
 | Capitolo | Villaggio | Piani (l'ultimo = mappa finale) | Profondità globale | Boss ([bestiario](bestiario.md)) |
 |---|---|---|---|---|
 | 1 | Aldric's Crossing | 5 | 1–5 | The Hollow Abbot (nuovo) |
-| 2 | Bad Water | 5 | 6–10 | The Miller of Bad Water |
+| 2 | Bad Water | 5 | 6–10 | Mother Stitch, the Dollmaker (19/11) |
 | 3 | The Last Camp | 5 | 11–15 | Varok the Oathbreaker |
 | 4 | (cittadella: The Throne of Ruin) | 5 | 16–20 | Lord of Ruin (la sala del trono di oggi, profondità 20 come oggi) |
 | Abisso | la città dell'Abisso | 1–235 | 21–255 | boss con nome a ogni piano |

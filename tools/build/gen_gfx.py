@@ -1301,8 +1301,13 @@ def main():
         exp = [r for r in rs if r["tier"] == "base"] + [r for r in rs if r["tier"] == "strong"]
         exp.append(next(r for r in best if r["tier"] == ("boss" if boss and c < CHAPTERS else "final") and
                         (r["chapter"] == c or r["tier"] == "final")))
-        assert [r["name"].lower() for r in exp] == M_names(m), "GFX%d: nomi %s, bestiario %s" % (n, M_names(m), [r["name"] for r in exp])
-        assert [r["color"] for r in exp] == M_cols(m), "GFX%d: colori %s, bestiario %s" % (n, M_cols(m), [r["color"] for r in exp])
+        nm_, cl_ = M_names(m), M_cols(m)
+        import monsters as _M
+        if boss and c in _M.SUMMONS:                        # (19/11) il mostro evocato dal boss (feticcio): non e' nel bestiario
+            t_ = _M.SUMMONS[c][0] - 1
+            exp = exp[:t_] + exp[t_ + 1:]; nm_ = nm_[:t_] + nm_[t_ + 1:]; cl_ = cl_[:t_] + cl_[t_ + 1:]
+        assert [r["name"].lower() for r in exp] == nm_, "GFX%d: nomi %s, bestiario %s" % (n, nm_, [r["name"] for r in exp])
+        assert [r["color"] for r in exp] == cl_, "GFX%d: colori %s, bestiario %s" % (n, cl_, [r["color"] for r in exp])
     # (19/11) piani del boss dei capitoli 1-3 (richiesta del committente: tema e forma propri): i tile del tema dei piani del
     # capitolo (mattoni, palude, grotte) piu' gli arredi del piano (tools/build/boss_gfx.py: sarcofagi, mulino, macerie...);
     # il boss finale (ultimo capitolo, GFX8) resta nella sala del trono

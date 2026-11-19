@@ -19,7 +19,7 @@ W, H = 8, 16
 # lettera della mappa -> nome del tile (oltre a '#' muro, '.' pavimento, '<' scale di arrivo, 'B' boss sul pavimento)
 LEGEND = {
     1: {"S": "FREE9", "P": "FREE10", "C": "FREE11", "A": "FREE25", "N": "FREE26", "b": "GRASSA", "r": "GRASSB", "g": "PATH"},
-    2: {"M": "FREE9", "O": "FREE10", "W": "FREE11", "R": "FREE25", "T": "FREE26", "h": "GRASSA", "k": "GRASSB", "=": "PATH"},
+    2: {"M": "FREE9", "O": "FREE10", "C": "FREE11", "R": "FREE25", "T": "FREE26", "h": "GRASSA", "k": "GRASSB", "=": "PATH"},
     3: {"R": "FREE9", "Q": "FREE10", "K": "FREE11", "X": "FREE25", "F": "FREE26", "g": "GRASSA", "c": "GRASSB"},
 }
 # nome per l'atlante (tools/atlas/atlas_names.py: chiave "<SET>:<tile>") e descrizione
@@ -32,12 +32,12 @@ NAMES = {
         "GRASSA": ("scattered bones", "crypt floor with bones and a skull (walkable)"),
         "GRASSB": ("carpet", "processional carpet with a golden border, down the nave to the altar (walkable)"),
         "PATH": ("tomb slab", "engraved grave slab in the floor (walkable)")},
-    2: {"FREE9": ("mill wall", "broken masonry of the mill with moss (solid)"),
-        "FREE10": ("millstone", "round millstone with its hole and grooves (solid)"),
-        "FREE11": ("water wheel", "paddles of the mill wheel in the water (solid; stacked vertically)"),
+    2: {"FREE9": ("hut wall", "wattle wall of the dollmaker's hut (solid)"),
+        "FREE10": ("totem", "carved totem with two faces (solid)"),
+        "FREE11": ("cauldron", "black cauldron with a green brew (solid)"),
         "FREE25": ("reeds", "reeds and bulrushes in the water (solid)"),
-        "FREE26": ("dead tree", "dead tree on the mud (solid)"),
-        "GRASSA": ("rotten boards", "rotten floorboards inside the mill, with holes and moss (walkable)"),
+        "FREE26": ("hanging tree", "dead tree hung with straw dolls (solid)"),
+        "GRASSA": ("rotten boards", "rotten floorboards of the hut, with holes and moss (walkable)"),
         "GRASSB": ("stepping stone", "flat stone in the water: the ford (walkable)"),
         "PATH": ("boardwalk", "planks over the water (as in the swamp levels, walkable)")},
     3: {"FREE9": ("rubble", "pile of fallen rock (solid)"),
@@ -262,55 +262,58 @@ def _mud(r):
 
 def island(r):
     out = {}
-    out["FREE9"] = _art(_g(0), [                       # muro del mulino: grossi conci con il bordo nero e il muschio
+    out["FREE9"] = _art(_g(1), [                       # (19/11) muro della capanna della bambolaia: graticcio di rami
         "00000000",
-        "02210221",
-        "02110211",
-        "01110111",
+        "12121212",
+        "21212121",
         "00000000",
-        "21022102",
-        "11021102",
-        "11011101",
+        "12121212",
+        "21212121",
         "00000000",
-        "02210221",
-        "01110211",
-        "01110111",
+        "12121212",
+        "21212121",
         "00000000",
-        "22102210",
-        "11101110",
+        "12121212",
+        "21212121",
+        "00000000",
+        "10100101",
+        "00000000",
         "00000000",
     ])
-    out["FREE10"] = _art(_mud(r), [                    # macina: disco con le scanalature e il foro
-        "..1111..",
-        ".111111.",
-        "11011011",
-        "11101111",
-        "10110101",
-        "11100111",
-        "11100111",
-        "10110101",
-        "11101111",
-        "11011011",
-        ".111111.",
-        "..1111..",
-    ], 2)
-    out["FREE11"] = _art(_water(r), [                  # ruota del mulino: cerchione, asse e pale spesse (si ripete in verticale)
-        "11.11.11",
-        "1111.111",
-        "0.1111.0",
-        "0..11..0",
-        "11111111",
-        "11111111",
-        "0..11..0",
-        "0.1111.0",
-        "1111.111",
-        "11.11.11",
-        "0..11..0",
-        "11111111",
-        "11111111",
-        "0..11..0",
-        "0.1111.0",
-        "1111.111",
+    out["FREE10"] = _art(_mud(r), [                    # totem intagliato con due facce
+        "00....00",
+        "01000010",
+        "01111110",
+        "01211210",
+        "01111110",
+        "00100100",
+        "01111110",
+        ".011110.",
+        "01111110",
+        "01211210",
+        "01111110",
+        "00100100",
+        "01111110",
+        ".011110.",
+        ".022220.",
+        ".000000.",
+    ])
+    out["FREE11"] = _art(_mud(r), [                    # calderone nero con l'intruglio che bolle
+        "..2.....",
+        "...2.2..",
+        "..2..2..",
+        "...22...",
+        ".222222.",
+        "00000000",
+        "02222220",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        ".000000.",
+        "..0000..",
+        ".0.22.0.",
+        "0.2222.0",
     ])
     g = _water(r)                                      # canne e tife nell'acqua
     for x in (0, 2, 3, 5, 7):
@@ -321,22 +324,24 @@ def island(r):
     for x in range(W):
         g[H - 1][x] = 1 if r.random() < 0.6 else 0
     out["FREE25"] = g
-    out["FREE26"] = _art(_mud(r), [                    # albero morto: tronco nero e rami contorti, ciuffi di muschio
-        "0..2..0.",
-        "00.0.00.",
+    out["FREE26"] = _art(_mud(r), [                    # (19/11) albero degli impiccati: rami neri con le bambole appese
+        "0..0..0.",
+        "0..0.0..",
         ".0.0.0.0",
-        "0.000.0.",
-        ".0.00.0.",
-        "..0000..",
+        ".0.000.0",
+        "2.000.0.",
+        "2..00.2.",
+        "22.00.2.",
+        "2..00222",
+        "...00.2.",
         "...00...",
-        "..200...",
-        "...002..",
         "...00...",
+        "...000..",
         "..0000..",
-        ".00.000.",
-        "00...0.0",
-    ], 1)
-    g = _g(1)                                          # assi marce del mulino: fughe, buchi, muschio
+        ".000000.",
+        "00.00.00",
+    ])
+    g = _g(1)                                          # assi marce della capanna: fughe, buchi, muschio
     for y in (3, 7, 11, 15):
         for x in range(W):
             g[y][x] = 0

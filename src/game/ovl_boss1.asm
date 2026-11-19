@@ -15,6 +15,15 @@
         rts                     ; OVJ_DMG
         nop
         nop
+        clc                     ; OVJ_KILL: bottino come sempre
+        rts
+        nop
+        clc                     ; OVJ_DECOR (piani del boss: arredi gia' nella mappa)
+        rts
+        nop
+        clc                     ; OVJ_GEN
+        rts
+        nop
 
 AB_SKEL  = 2                    ; tipo evocato: Skeleton
 AB_STOP  = 50                   ; fotogrammi fermo prima dell'evocazione (1 s)

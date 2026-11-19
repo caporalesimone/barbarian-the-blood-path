@@ -474,7 +474,7 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   **Da fare nel codice**: **statistiche proprie** per capitolo (le tabelle `mt_*`/`mon_spd`/`mon_llb` da caricare col tema,
   come i nomi: ~120 B per file; oggi le righe dei capitoli 2–4 nel bestiario sono concept); **IA nuove** (distanza per Bone
   Archer e Cultist, carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per Drowned e
-  Frost Wight: da scegliere); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97%,
+  Frost Wight: da scegliere); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97% (19/11: oggi Mother Stitch, stesse statistiche, meccanica nuova),
   Varok 100%: da rifare con `fit_rules.py` e `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).
 - **Da decidere con il committente** (15/11): i colori dei disegni (Hellhound e Blood Knight sono rossi, 2, come il Lord of Ruin:
   nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema

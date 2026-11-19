@@ -297,36 +297,86 @@ ABBOT_L1 = [
     ".cccccccccc.",
     ".ccc.cc.ccc.",
 ]
-# The Miller of Bad Water (capitolo 2): un mugnaio enorme, cappello, grembiule, la mazza con la macina.
-MILLER = [
-    "...bbbbbb...",
+# Mother Stitch, the Dollmaker (capitolo 2, 19/11): la bambolaia della palude, cappello a tesa larga con le piume, viso
+# pallido cucito, veste lunga con le toppe, l'ago enorme nella mano destra. Colore 4 (viola).
+STITCH = [
+    "...g.gg.g...",
     "..bbbbbbbb..",
-    "...cccccc...",
-    "..cgccccgc..",
+    ".bbbbbbbbbb.",
+    "...gggggg...",
+    "..gbggggbg..",
+    "...gggggg..g",
+    "...gbgbgg..g",
+    "..cccccccc.g",
+    ".cccbccbccbg",
+    "ccccccccccbg",
+    "cc.cbccbc..g",
+    "gc.cccccc..g",
+    "b..ccbccc...",
+    "bb.cccccc...",
+    "b..cbccbc...",
     "..cccccccc..",
-    "..ccbbbbcc..",
-    "...cccccc..g",
-    ".bbbggggbbbg",
-    "bbbggggggbbb",
-    "cbbggggggbbc",
-    "cc.gggggg.cc",
-    "cc.gggggg.cb",
-    "gg.gggggg.bb",
-    "...gggggg.bg",
-    "..bbbbbbbbgg",
-    "..bbb..bbbgg",
-    "..bbb..bbb..",
-    "..bbb..bbb..",
-    "..bbb..bbb..",
-    "..bbb..bbb..",
-    ".gggg..gggg.",
+    "..ccbccccc..",
+    ".cccccccbcc.",
+    ".cccccccccc.",
+    ".ccbccccccc.",
+    "..bb....bb..",
 ]
-MILLER_L1 = [
-    "..bbb..bbb..",
-    ".bbb....bbb.",
-    ".bbb....bbb.",
-    "bbb......bbb",
-    "gggg....gggg",
+STITCH_L1 = [                       # fotogramma 1: la gonna oscilla, un piede avanti
+    "..cccbcccc..",
+    ".ccbccccccc.",
+    ".cccccccccc.",
+    "..cccccbcc..",
+    ".bb.....bb..",
+]
+# Il feticcio di Mother Stitch (19/11): bambola di paglia piantata su un palo, spilli in testa, il cuore cucito. Fermo, non
+# attacca; nel file del piano del boss del capitolo 2 (GFX4) prende il posto del tipo 8 (FETISH_SLOT): li' i mostri normali
+# non nascono mai (spawn_monsters esce subito nei piani del boss dei capitoli). Colore 8 (arancio, la paglia).
+FETISH = [
+    "............",
+    "....g..g....",
+    ".....gg.....",
+    "...cccccc...",
+    "..cccccccc..",
+    "..cbbccbbc..",
+    "..cccccccc..",
+    "..cbcbcbcc..",
+    "...cccccc...",
+    "....bbbb....",
+    "g..cccccc..g",
+    ".gccccccccg.",
+    "...cccccc...",
+    "...ccggcc...",
+    "...cccccc...",
+    "...ccbbcc...",
+    "....cccc....",
+    ".....bb.....",
+    ".....bb.....",
+    "....bbbb....",
+    "..bbbbbbbb..",
+]
+FETISH_X = [                        # fotogramma 1 (sovrapposto): gli spilli si muovono, il cuore pulsa
+    "            ",
+    "...g....g...",
+    "....g..g....",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    ".g        g.",
+    "..cccccccc..",
+    "            ",
+    "...cggggc...",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
+    "            ",
 ]
 # Varok the Oathbreaker (capitolo 3): il comandante caduto, elmo con le corna, spadone, lo scudo con la croce.
 VAROK = [
@@ -383,7 +433,7 @@ STRONG = [
 FINAL = ("lord of ruin", frames(LORD, LORD_L1), 2)
 # boss dei capitoli 1-3 (15/11): nel posto del boss finale del file del piano del boss del loro capitolo
 CBOSS = {1: ("the hollow abbot", frames(ABBOT, ABBOT_L1), 14),
-         2: ("the miller of bad water", frames(MILLER, MILLER_L1), 8),
+         2: ("mother stitch", frames(STITCH, STITCH_L1), 4),
          3: ("varok the oathbreaker", frames(VAROK, VAROK_L1), 7)}
 
 # ------------------------------------------------------------------ set di mostri per capitolo (07/11 sera, 15/11)
@@ -408,10 +458,20 @@ def chapter_monsters(c):
     return base, strong
 
 
+# (19/11) mostri evocati dal boss di un capitolo: nel file del piano del boss prendono il posto di un tipo forte (tipo 1..8),
+# che li' non nasce mai. Capitolo -> (tipo, (nome, frame, colore)); tools/build/gen_gfx.py non li confronta con il bestiario.
+SUMMONS = {2: (8, ("fetish", None, 8))}
+
+
 def chapter_set(c, boss=False):
     """set del file del capitolo c: (base, strong, posto del boss); boss=True: file del piano del boss GFX(2c)"""
     base, strong = chapter_monsters(c)
     slot = CBOSS[c] if boss and c in CBOSS else FINAL
+    if boss and c in SUMMONS:
+        t, (n, _, col) = SUMMONS[c]
+        assert 5 <= t <= 8, "il mostro evocato prende il posto di un tipo forte"
+        strong = list(strong)
+        strong[t - 5] = (n, [grid(FETISH), grid(overlay(FETISH, FETISH_X))], col)
     return base, strong, slot
 
 
