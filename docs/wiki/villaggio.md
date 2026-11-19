@@ -9,7 +9,7 @@ villaggio 1 (Aldric's Crossing) in dettaglio; negozi, locanda e modulo MENU sono
 | # | Villaggio | Struttura | Cura (`~`) | Ingresso del sotterraneo (`>`) | Entrata → uscita | Colori (sfondo, 1, 2, accento) |
 |---|---|---|---|---|---|---|
 | 1 | **Aldric's Crossing** | due rive di un torrente con due ponti, piazza, chiesa, cimitero | fountain of saint aldric | la **cripta** nel cimitero | strada a sud → sentiero a nord | verde, marrone, grigio chiaro, ciano |
-| 2 | **Bad Water** | **palafitte su un lago nero**: piattaforme di assi su pali unite da passerelle; barche, mangrovie, ninfee | the drowned bell (una campana di bronzo verde; si guarisce sui moccoli) | la **botola della cantina allagata del mulino** (isolotto a nord-est, con la ruota) | riva a sud-ovest → fondo del pontile est (il traghetto) | nero, marrone, arancio, verde |
+| 2 | **Bad Water** (19/11: tema voodoo) | **palafitte su un lago nero**: piattaforme di assi su pali unite da passerelle; mangrovie, ninfee, pali con i teschi, lanterne-teschio, tamburi, rastrelliere di amuleti; **due traghetti** sotto le piattaforme (vedi sotto) | the bottle tree (un albero morto con le bottiglie appese; si guarisce sui moccoli) | il **cancello d'ossa** nel muro della casa degli spiriti (isolotto a nord-est, con il grande idolo) | riva a sud-ovest → fondo del pontile est | nero, marrone, arancio, verde |
 | 3 | **The Last Camp** | **campo di guerra su tre terrazze** di una montagna innevata: pareti di roccia, scale di legno, tende, palizzata e torri | the great bonfire (ci si siede sui tronchi attorno) | la **bocca di una grotta** nella parete nord | cancello a ovest (terrazza bassa) → passo a nord-ovest (terrazza alta) | bianco, grigio scuro, marrone, rosso |
 | 4 | **Ruin's Gate** | **città in rovina attorno a un cratere**: strada ad anello, quattro raggi, mura con le brecce, colonne, case sventrate | the weeping angel (una statua; le candele ai suoi piedi) | la **saracinesca delle segrete** nel corpo di guardia a nord | strada a sud → **scala di tavole che scende nel cratere** | grigio scuro, nero, grigio chiaro, rosso |
 | 5 | **The City of the Abyss** (prototipo) | **isole di pietra sospese nel vuoto** unite da ponti di luce; case a cupola, cristalli, obelischi | the heart of the abyss (un cristallo che galleggia; le rune attorno) | **la Bocca**, sull'isola a nord (oggi non porta da nessuna parte) | ponte dal nulla a sud → isola a nord-est (le caselle ci sono ma non si aprono) | nero, blu, azzurro, viola |
@@ -29,8 +29,18 @@ non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview
   posti 5, 6, 8–11, 24–26 devono essere solidi (`tools/build/villages.py`, che lo controlla).
 - **Mappa**: testo 48 × 48 in `data/town_mapN.txt` con le lettere di `LEGEND` (una per posto: in ogni villaggio la stessa lettera
   disegna il tile di quel villaggio; la legenda con i nomi è in testa al file). Lettere speciali: `E` ingresso, `P` posto del
-  portale (la casella sotto è l'arrivo), `=` uscita del capitolo (2 caselle). Le prime stesure vengono da
+  portale (la casella sotto è l'arrivo), `=` uscita del capitolo (2 caselle), `F` (19/11) **traghetto** (0 o 2 caselle, posto
+  `BRIDGE`). Le prime stesure vengono da
   `lab/villaggi/concept_maps.py`; da lì in poi la fonte è il testo.
+- **Traghetto** (19/11, richiesta del committente; oggi solo Bad Water): due barche grandi (3 caselle: prua e poppa solide,
+  in mezzo la casella `F` calpestabile con la tettoia e la lanterna) ormeggiate **sotto** due piattaforme ai lati opposti del
+  villaggio (sotto l'alchimista a ovest, sotto il portale a sud-est). **Salendo su una barca si arriva sull'altra**:
+  `tile_trigger` (`src/game/game.asm`) confronta la casella del PG con `tk_boat` (4 byte dell'intestazione: x1, y1, x2, y2;
+  tutti 0 = nessun traghetto), mette il PG sull'altra (`put_hero`, ridisegno completo, suono del portale, lampo ciano del
+  bordo) e segna la casella d'arrivo come già raggiunta (`lptx`/`lpty`): niente ritorno subito; per ripartire si scende e si
+  risale. Il tile ha la **barriera per gli NPC** (`solidtab` bit 1: calpestabile per il PG, mai per chi vaga, `npc_free`;
+  nel modulo del villaggio il campo "solido" vale `"npc"`). Le altre barche del villaggio sono state tolte: le uniche barche
+  sono i traghetti. Test `VIL-FERRY-10`.
 - **Settori degli NPC** (17/11): ogni villaggio ha fino a 16 rettangoli (`SECTORS` in `tools/build/villages.py`, nell'intestazione
   del file) dove vivono gli NPC che vagano; vedi [quest](quests.md). `gen_maps.py` controlla misure e caselle percorribili e stampa
   il massimo di settori in una finestra di gioco (oltre 5 NPC visibili non si disegna).

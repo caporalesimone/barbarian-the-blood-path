@@ -20,7 +20,9 @@ CH = {c: G.TTID[n] for n, c in LEGEND.items()}
 # (12/11, TODO M1; 15/11 Z2) caselle speciali generiche: una lettera in piu' che nella mappa diventa un tile normale ma la
 # cui posizione va nell'intestazione del file del villaggio (town_k, src/game/levels.asm): "=" = uscita del capitolo
 # (sentiero, 2 caselle), "E" = ingresso (sentiero), "P" = posto del portale (selciato; la casella sotto e' l'arrivo).
-ALIASES = {"=": "PATH", "E": "PATH", "P": "COBBLE"}
+# (19/11) "F" = traghetto (posto BRIDGE, calpestabile): 0 o 2 caselle; salendo su una si arriva sull'altra (tile_trigger,
+# tk_boat). Il tile ha la barriera per gli NPC (solidtab bit 1, campo "solido" = "npc" in vilN_*.py): mai un NPC sopra.
+ALIASES = {"=": "PATH", "E": "PATH", "P": "COBBLE", "F": "BRIDGE"}
 EXITS = "="
 CH.update({c: G.TTID[n] for c, n in ALIASES.items()})
 def inv_legend():
@@ -30,7 +32,7 @@ def inv_legend():
     return d
 TK_NAME = 25                     # nome del luogo di cura con lo 0 finale
 NSEC = 16                        # (17/11) settori degli NPC vaganti per villaggio (x, y, larghezza, altezza: 4 byte l'uno)
-TK_LEN = 20 + TK_NAME + 4 * NSEC + 2           # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
+TK_LEN = 20 + TK_NAME + 4 * NSEC + 2 + 4       # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
 
 def rle(data):
     out, i = bytearray(), 0
@@ -115,7 +117,8 @@ def giver(c, m, walk, seen, pl, need):
     sbarra niente) e lontana almeno 3 caselle dalle porte, dal portale e dall'ingresso del sotterraneo."""
     F = [(i % W, i // W) for i in range(W * H) if m[i] == G.TTID["FOUNTAIN"]]
     cx, cy = sum(x for x, _ in F) / len(F), sum(y for _, y in F) / len(F)
-    avoid = [(i % W, i // W + 1) for i in pl] + [need["arrivo dal portale"], need["cripta"], need["uscita"], need["uscita 2"]]
+    avoid = [(i % W, i // W + 1) for i in pl] + [need["arrivo dal portale"], need["cripta"], need["uscita"], need["uscita 2"]] + \
+        [q for n, q in need.items() if n.startswith("traghetto")]
     for dmin in (3, 2, 1):
         cand = [(max(abs(x - cx), abs(y - cy)), x, y) for y in range(H) for x in range(W)
                 if (x, y) in seen and m[y * W + x] != G.TTID["FOUNTAIN"] and max(abs(x - cx), abs(y - cy)) >= dmin
@@ -137,7 +140,7 @@ def build(c, v):
     where = lambda ch: [(x, y) for y, r in enumerate(rows) for x, t in enumerate(r) if t == ch]
     one = lambda ch, what: (where(ch) if len(where(ch)) == 1 else sys.exit("%s: serve una sola casella %s (%s)" % (path, ch, what)))[0]
     sol = V.solid(c, G.TOWN_TILES, G.SOLID)
-    walk = {i for i in range(len(G.TOWN_TILES)) if not sol[i]}
+    walk = {i for i in range(len(G.TOWN_TILES)) if not sol[i] & 1}
     for n in ("DSMITH", "DALCH", "DHOME"):
         assert m.count(G.TTID[n]) == 1, "%s: serve una sola porta %s" % (path, n)
         i = m.index(G.TTID[n]); dx, dy = i % W, i // W
@@ -165,6 +168,11 @@ def build(c, v):
     for n in ("DSMITH", "DALCH", "DHOME"):
         i = m.index(G.TTID[n]); need["davanti a " + n] = (i % W, i // W + 1)
     need["fontana"] = next((i % W, i // W) for i in range(W * H) if m[i] == G.TTID["FOUNTAIN"])
+    boats = where("F")
+    assert len(boats) in (0, 2), "%s: traghetto: 0 o 2 caselle F" % path
+    for k, q in enumerate(boats):
+        need["traghetto %d" % (k + 1)] = q
+        assert sol[G.TTID["BRIDGE"]] == 2, "%s: il tile del traghetto (BRIDGE) deve avere la barriera per gli NPC" % path
     for what, q in need.items():
         assert q in seen, "%s: %s %s non raggiungibile dall'ingresso" % (path, what, q)
     lost = [(i % W, i // W) for i in range(W * H) if m[i] in walk and (i % W, i // W) not in seen]
@@ -177,6 +185,7 @@ def build(c, v):
     k = bytes([px, py, sx, sy, nx, ny, bg, c1, c2, 8 | acc] + [t for i in pl for t in (i % W, i // W)]
               + [ex[0][0], ex[1][0], ex[0][1], ex[1][1]]) + text(heal).ljust(TK_NAME, b"\0")
     k += sectors(c, m, walk) + giver(c, m, walk, seen, pl, need)
+    k += bytes([t for q in boats for t in q]).ljust(4, b"\0")    # (19/11) tk_boat: x1, y1, x2, y2 (0 = nessun traghetto)
     assert len(k) == TK_LEN
     k += bytes(sol + [0] * (TK_SOLID - len(sol)))          # tile solidi del villaggio (solidtab)
     r = rle(m)

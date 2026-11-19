@@ -142,7 +142,7 @@ npc_px  ldy #0                  ; A = casella -> A/Y = 16 * A + 8
         ldy tmp7
         rts
 
-; C=0 se la casella (tx,ty) e' dentro la mappa, calpestabile e non e' quella del PG. X conservato.
+; C=0 se la casella (tx,ty) e' dentro la mappa, calpestabile per gli NPC e non e' quella del PG. X conservato.
 npc_free:
         lda tx
         cmp #MAPW
@@ -158,8 +158,8 @@ npc_free:
         beq _s
 +       jsr get_tile
         tay
-        lda solidtab,y
-        lsr
+        lda solidtab,y          ; (19/11) bit 0 solido, bit 1 barriera per gli NPC (il traghetto): C=1 se uno dei due
+        cmp #1
         rts
 _s      sec
         rts

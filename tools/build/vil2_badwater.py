@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Villaggio del capitolo 2: BAD WATER, un villaggio di palafitte su un lago nero (15/11, TODO Z2).
-Niente piazza, niente fiume, niente fontana: pontili e passerelle sull'acqua, capanne su pali, barche, il grande mulino con
-la ruota (l'ingresso del sotterraneo e' la botola della sua cantina allagata), la campana degli annegati (cura).
+"""Villaggio del capitolo 2: BAD WATER, un villaggio di palafitte su un lago nero (15/11, TODO Z2; 19/11 tema voodoo).
+Niente piazza, niente fiume, niente fontana: pontili e passerelle sull'acqua, capanne su pali, la casa degli spiriti con il
+grande idolo (l'ingresso della palude e' il cancello d'ossa nel suo muro), l'albero delle bottiglie (cura), lanterne-teschio,
+tamburi, rastrelliere di amuleti, i due traghetti sotto le piattaforme (caselle F di data/town_map2.txt).
 Colori: 0 nero (l'acqua), 1 marrone (legno scuro, fango), 2 arancio (legno illuminato), 3 verde (alghe, canne, lumi)."""
 from tileart import A, grid, put, hline, vline, noise, over, canvas, cut, rnd
 
 PAL = (0, 9, 8, 5)
 NAME = "Bad Water"
-HEAL = "the drowned bell"
+HEAL = "the bottle tree"
 
 DECK = A("22212222", "22212222", "22212222", "11111111", "22222122", "22222122", "22222122", "11111111",
          "21222222", "21222222", "21222222", "11111111", "22221222", "22221222", "22221222", "11111111")
@@ -25,77 +26,69 @@ def mud(key, tufts=()):
     return g
 
 
-WHEEL = canvas(                      # ruota del mulino 2x2 (16x32): cerchio, raggi, pale, l'acqua in basso
-    "......1111......",
-    "....11222211....",
-    "...1221111221...",
-    "..122111.11221..",
-    "..1211.1..1121..",
-    ".1211..1...1121.",
-    ".121...1....121.",
-    "1221...1....1221",
-    "121.1..1..1..121",
-    "121..1.1.1...121",
-    "121...111....121",
-    "1211111211111121",
-    "1211111211111121",
-    "121...111....121",
-    "121..1.1.1...121",
-    "121.1..1..1..121",
-    "1221...1....1221",
-    ".121...1....121.",
-    ".1211..1...1121.",
-    "..1211.1..1121..",
-    "..122111.11221..",
-    "...1221111221...",
-    "....11222211....",
-    "......1111......",
-    "......1221......",
-    ".3....1221...3..",
-    "3.3..312213.3.3.",
-    "..33.3.11.3.33..",
-    ".3..3......3..3.",
-    "......33........",
-    "..11.......11...",
-    "................")
-
-BELL = canvas(                       # la campana degli annegati 2x2: telaio di travi, tettuccio, campana di bronzo verde
-    "9999999229999999",
-    "9999992112999999",
-    "9999221111229999",
-    "9922111111112299",
-    "2211111111111122",
-    "0000000000000000",
-    "9910999009990199",
-    "9910990330990199",
-    "9910903333090199",
-    "9910033233300199",
-    "9910032333300199",
-    "9910332333330199",
-    "9910332333330199",
-    "9910332333330199",
-    "9910333333330199",
-    "9910333333330199",
-    "9900333333330099",
-    "9903333333333099",
-    "9900000000000099",
-    "9910999009990199",
-    "9910999339990199",
-    "9910999009990199",
-    "9910999999990199",
-    "9910999999990199",
-    "9310999999990139",
-    "9310999999990139",
-    "9110999999990119",
-    "9111111111111119",
-    "0000000000000000",
-    "9999999999999999",
-    "9999999999999999",
-    "9999999999999999")
+def _sym(*left):
+    """disegno largo 16 simmetrico dalle meta' sinistre (8 cifre)"""
+    assert all(len(r) == 8 for r in left), [r for r in left if len(r) != 8]
+    return [[0 if c == "." else int(c) for c in r + r[::-1]] for r in left]
 
 
-def bell(tx, ty):
-    return cut(BELL, tx, ty, DECK)
+# (19/11, tema voodoo) il grande idolo 2x2 nell'acqua accanto alla casa degli spiriti: maschera-teschio con le corna su un palo
+IDOL = _sym("1.......", "11....11", ".11.1122", "..111222", "...12222", "..122222", "..123322", "..123322",
+            "..122222", "..122221", "..122211", "...12222", "...12121", "...12121", "....1222", "....1111",
+            ".....122", ".....122", "..2..122", "..2..122", ".222.122", "..2..122", ".....122", ".....122",
+            ".....122", "...3.122", "..3.3122", ".3..3112", "3.3.3.11", "..3.....", ".11.....", "........")
+
+
+def _bottle_tree():
+    """l'albero delle bottiglie 2x2 (luogo di cura): albero morto nero con le bottiglie verdi appese; '9' = l'assito"""
+    cv = [[9] * 16 for _ in range(32)]
+
+    def P(x, y, c):
+        if 0 <= x < 16 and 0 <= y < 32:
+            cv[y][x] = c
+    for y in range(7, 28):
+        P(7, y, 0); P(8, y, 0)
+        if y > 20:
+            P(6, y, 0)
+    for i in range(6):
+        P(6 - i, 8 - i, 0); P(9 + i, 8 - i, 0); P(6 - i, 9 - i, 0); P(9 + i, 9 - i, 0)
+    for i in range(5):
+        P(7 - i // 2, 6 - i, 0); P(8 + i // 2, 6 - i, 0)
+    for x, y in ((6, 14), (5, 13), (4, 13), (3, 12), (2, 12), (6, 20), (5, 19), (4, 19), (3, 18)):
+        P(x, y, 0); P(15 - x, y, 0)
+    for x in (5, 6, 9, 10):
+        P(x, 27, 0)
+    for x in (4, 6, 9, 11):
+        P(x, 28, 0)
+    for x, y in ((1, 4), (4, 6), (10, 6), (13, 4), (2, 13), (12, 13), (3, 19), (11, 19)):
+        P(x, y, 0); P(x, y + 1, 0); P(x, y + 2, 3); P(x, y + 3, 3); P(x, y + 4, 3); P(x + 1, y + 3, 3); P(x + 1, y + 4, 3)
+    for x in (2, 13):                                   # moccoli ai piedi
+        P(x, 26, 3); P(x, 27, 2); P(x, 28, 2)
+    return cv
+
+
+BTREE = _bottle_tree()
+
+# (19/11) il traghetto: una barca grande 3x1 ormeggiata sotto una piattaforma (prua, casella su cui si sale, poppa), con la
+# tettoia e la lanterna verde in mezzo. Le altre barche del villaggio non ci sono piu': le uniche barche sono i due traghetti.
+FERRY = canvas(
+    "..........2..3333..2....",
+    "..........2.322223.2....",
+    "........2222333322222...",
+    ".......222222222222222..",
+    "......11111111111111111.",
+    "..........1...33...1....",
+    "1.........1..3223..1...1",
+    "21........1...33...1..12",
+    "221.......1........1.122",
+    "2221111111111111111111122",
+    ".22222222222222222222222.",
+    ".2212222122221222212222..",
+    "..222222222222222222222..",
+    "...1111111111111111111...",
+    "..3..33.......33....3...",
+    "........................")
+FERRY = [r[:24] for r in FERRY]
 
 
 TILES = {
@@ -112,15 +105,11 @@ TILES = {
     "FLOWERS": ("Water lilies", "lily pads on the black water", True,
                 A("........", "..333...", ".33333..", ".333.3..", "..333...", "........", ".....33.", "....3333",
                   ".11.3323", "....3333", ".....33.", ".33.....", "3333....", "3323..11", ".33.....", "........")),
-    "CRYPTB": ("Mooring post", "a post standing in the water", True,
-               A("........", "........", "........", "...22...", "..2221..", "..2221..", "..2121..", "..2221..",
-                 "..2221..", "..2121..", "..2221..", ".332213.", "3.2221.3", "..1111..", ".3....3.", "........")),
-    "GRAVE": ("Boat (bow)", "a moored boat, bow", True,
-              A("........", "........", "........", "........", "......11", "....1122", "..112222", ".1222222",
-                "12222122", ".1111111", "..333...", "........", "........", ".11.....", "........", "........")),
-    "GRAVE2": ("Boat (stern)", "a moored boat, stern with the oar", True,
-               A("........", "........", "....1...", "....1...", "11..1...", "2211121.", "22222221", "22122221",
-                 "22222221", "1111111.", "....333.", "........", "........", "......11", "........", "........")),
+    "CRYPTB": ("Skull pole", "a post in the water with a skull on top", True,
+               A("........", "..2222..", ".222222.", ".202202.", ".222222.", "..2020..", "...22...", "...21...",
+                 "..2221..", "...21...", "...21...", ".332213.", "3..21..3", "..1111..", ".3....3.", "........")),
+    "GRAVE": ("Ferry (bow)", "the bow of the ferry", True, cut(FERRY, 0, 0)),
+    "GRAVE2": ("Ferry (stern)", "the stern of the ferry", True, cut(FERRY, 2, 0)),
     "TREE": ("Mangrove", "a mangrove with its roots in the water", True,
              A("..3333..", ".333333.", "33313333", "33333313", "31333333", "33331333", ".333333.", "3.3113.3",
                "3..11..3", "...11...", "...11..3", "3..11...", "..1111..", ".11..11.", "11....11", "1......1")),
@@ -141,16 +130,14 @@ TILES = {
              A("12222221", "11111111", "12222221", "12222221", "11111111", "12222221", "12221221", "11111111",
                "12222221", "12222221", "11111111", "12222221", "12122221", "11111111", "12222221", "12222221")),
     "COBBLE": ("Deck", "the deck of a platform", False, DECK),
-    "BRIDGE": ("Rope bridge", "a narrow rope bridge", False,
-               A("1......1", "12222221", "11111111", "1.2222.1", "12222221", "11111111", "1.2222.1", "12222221",
-                 "11111111", "1.2222.1", "12222221", "11111111", "1.2222.1", "12222221", "11111111", "1......1")),
+    "BRIDGE": ("Ferry", "the ferry under the platform: stepping in takes you to the other landing", "npc", cut(FERRY, 1, 0)),
     "FOUNTAIN": ("Votive candles", "candles for the drowned: standing here heals", False,
                  over(DECK, "        ", "  3     ", "  3     ", " 121    ", " 121  3 ", " 111  3 ", "     121", "     121",
                       "     111", "   3    ", "   3    ", "  121   ", "  121   ", "  111   ", "        ", "        ")),
-    "FOUNT0": ("Drowned bell NW", "the bell of the drowned, frame and little roof", True, bell(0, 0)),
-    "FOUNT1": ("Drowned bell NE", "the bell of the drowned", True, bell(1, 0)),
-    "FOUNT2": ("Drowned bell SW", "the bell of the drowned, the clapper", True, bell(0, 1)),
-    "FOUNT3": ("Drowned bell SE", "the bell of the drowned", True, bell(1, 1)),
+    "FOUNT0": ("Bottle tree NW", "the bottle tree: a dead tree hung with bottles that trap the spirits", True, cut(BTREE, 0, 0, DECK)),
+    "FOUNT1": ("Bottle tree NE", "the bottle tree: a dead tree hung with bottles that trap the spirits", True, cut(BTREE, 1, 0, DECK)),
+    "FOUNT2": ("Bottle tree SW", "the bottle tree: a dead tree hung with bottles that trap the spirits", True, cut(BTREE, 0, 1, DECK)),
+    "FOUNT3": ("Bottle tree SE", "the bottle tree: a dead tree hung with bottles that trap the spirits", True, cut(BTREE, 1, 1, DECK)),
     # ---- arredi dei pontili
     "FENCE": ("Railing", "the railing of a platform, over the water", True,
               A("........", "........", "1..1..1.", "1..1..1.", "22222222", "1..1..1.", "1..1..1.", "22222222",
@@ -158,15 +145,15 @@ TILES = {
     "FENCEV": ("Post line", "posts and a rope, north-south", True,
                A("...21...", "...21...", "..2221..", "...21...", "...21...", "...21...", "...21...", "..2221..",
                  "...21...", "...21...", "...21...", "...21...", "..2221..", "...21...", "...21...", "...21...")),
-    "LAMP": ("Marsh light", "a lantern with a green flame", True,
-             over(DECK, "  1111  ", " 133331 ", " 133331 ", " 132231 ", " 133331 ", "  1111  ", "   11   ", "   11   ",
-                  "   11   ", "   11   ", "   11   ", "   11   ", "   11   ", "  1111  ", " 111111 ", "        ")),
-    "WELL": ("Barrels", "a barrel and a crate", True,
-             over(DECK, "        ", " 1111   ", "122221  ", "111111  ", "122221  ", "122221  ", "111111  ", "12222111",
-                  " 1111221", "    1212", "    1122", "    1212", "    1221", "    1111", "        ", "        ")),
-    "STALL": ("Drying rack", "fish hung to dry", True,
-              over(DECK, "1      1", "11111111", "1 2  2 1", "1 2  2 1", "1 3  3 1", "1 3  3 1", "1 2  2 1", "1      1",
-                   "1  2   1", "1  3   1", "1 333  1", "1  3   1", "1      1", "1      1", "11    11", "        ")),
+    "LAMP": ("Skull lantern", "a skull on a post, green light in its eyes", True,
+             over(DECK, "  0000  ", " 033330 ", "03333330", "03033030", "03333330", " 030030 ", "  0000  ", "   00   ",
+                  "   00   ", "   00   ", "   00   ", "   00   ", "   00   ", "  0000  ", " 000000 ", "        ")),
+    "WELL": ("Drums", "two hide drums", True,
+             over(DECK, "        ", "  0000  ", " 011110 ", "01111110", "01111110", "00111100", "02000020", "02022020",
+                  "02200220", "02022020", "02200220", "02022020", "00222200", " 000000 ", "        ", "        ")),
+    "STALL": ("Charm rack", "dolls and bottles hung on a frame", True,
+              over(DECK, "0      0", "00000000", "0 0  0 0", "0 1  0 0", "0111 3 0", "0 1 3330", "0 1 3330", "01 1 3 0",
+                   "0      0", "0  0   0", "0  1   0", "0 111  0", "0  1   0", "0 1 1  0", "00    00", "        ")),
     # ---- capanne su pali, mulino
     "BROOFA": ("Thatch ridge", "the ridge of a thatched roof", True,
                A("........", "........", "........", "22222222", "12121212", "21212121", "11211121", "12111211",
@@ -174,7 +161,7 @@ TILES = {
     "BROOF": ("Thatch eaves", "the lower edge of a thatched roof", True,
               over(ROOF, "        ", "        ", "        ", "        ", "        ", "        ", "        ", "        ",
                    "        ", "        ", "        ", "        ", "22222222", "11111111", "1.1.1.1.", "........")),
-    "BROOFL": ("Mossy shingles", "the roof of the mill", True,
+    "BROOFL": ("Spirit house roof", "the mossy roof of the spirit house", True,
                A("21112111", "21112111", "21312111", "11111111", "11211121", "11211121", "11211321", "11111111",
                  "21112111", "23112111", "21112111", "11111111", "11211121", "11211123", "11211121", "11111111")),
     "CHIMNEY": ("Smoke hole", "a clay chimney on the thatch", True,
@@ -196,11 +183,11 @@ TILES = {
     "SIGNL": ("Alchemist's sign", "a flask on a board", True,
               over(WALL, "   11   ", "   11   ", " 111111 ", " 1....1 ", " 1.33.1 ", " 1.33.1 ", " 133331 ", " 13..31 ",
                    " 133331 ", " 1....1 ", " 111111 ", "        ", "        ", "        ", "        ", "        ")),
-    "TSTAIRS": ("Mill cellar", "the hatch of the flooded cellar of the mill: the way down", False,
-                over(WALL, "        ", " 111111 ", "11222211", "12....21", "12....21", "12.22.21", "12....21", "12.22221",
-                     "12....21", "1..222.1", "1......1", "1.222231", "1......1", "1.3..3.1", "1..33..1", "11111111")),
-    "CRYPTL": ("Mill wheel NW", "the great wheel of the mill", True, cut(WHEEL, 0, 0)),
-    "CRYPTR": ("Mill wheel NE", "the great wheel of the mill", True, cut(WHEEL, 1, 0)),
-    "CRYPTA": ("Mill wheel SW", "the wheel in the water", True, cut(WHEEL, 0, 1)),
-    "CRYPTC": ("Mill wheel SE", "the wheel in the water", True, cut(WHEEL, 1, 1)),
+    "TSTAIRS": ("Bone gate", "an arch of bones in the wall of the spirit house: the way into the marsh", False,
+                over(WALL, "        ", "  2222  ", " 232232 ", " 222222 ", "  2002  ", " 200002 ", "22000022", "20000002",
+                     "20000002", "22000022", "20000002", "20000002", "22000022", "20000002", "20033002", "11111111")),
+    "CRYPTL": ("Great idol NW", "the great idol of the spirit house: a horned skull mask on a post", True, cut(IDOL, 0, 0)),
+    "CRYPTR": ("Great idol NE", "the great idol of the spirit house: a horned skull mask on a post", True, cut(IDOL, 1, 0)),
+    "CRYPTA": ("Great idol SW", "the great idol of the spirit house: a horned skull mask on a post", True, cut(IDOL, 0, 1)),
+    "CRYPTC": ("Great idol SE", "the great idol of the spirit house: a horned skull mask on a post", True, cut(IDOL, 1, 1)),
 }

@@ -176,7 +176,7 @@ for _c, _v in sorted(VIL.VILLAGES.items()):
     _sol = VIL.solid(_c, G.TOWN_TILES, G.SOLID)
     add_set("VILL%d" % _c, "%s (TWN%d, its own colours)" % (_v["name"], _c), tiles_from(rd("out/work/gfx/twn%d.prg" % _c)[2:], NT),
             _names, TOWN_LET, 0, _map, {t for r in _map for t in r} | {G.TTID["PORTAL"]}, G.SOLID, True,
-            pal=list(_v["pal"]), solid_list=[i for i in range(NT) if _sol[i]], mapsrc=_v["map"])
+            pal=list(_v["pal"]), solid_list=[i for i in range(NT) if _sol[i] & 1], mapsrc=_v["map"])
 for k in range(1, 9):
     add_set("DUNG" + "ABCDEFGH"[k - 1], "Dungeon, palette %d (GFX1)" % k, dun_t, {i: G.TILES[i] for i in range(DN)}, DUN_LET,
             k, dmap, {G.TID[n] for n in G.DUN_USED}, G.SOLID, False)

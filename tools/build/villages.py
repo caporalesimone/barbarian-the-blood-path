@@ -60,13 +60,14 @@ SECTORS = {
 
 
 def solid(c, town_tiles, base_solid):
-    """lista 0/1 dei tile solidi del villaggio c (indice = posto)"""
+    """lista dei tile solidi del villaggio c (indice = posto): bit 0 = solido, bit 1 (19/11) = barriera per gli NPC
+    (calpestabile per l'eroe, mai per gli NPC che vagano: il traghetto; nel modulo TILES il campo "solido" vale "npc")"""
     t = VILLAGES[c]["tiles"]
-    out = [int(t[n][2] if n in t else n in base_solid) for n in town_tiles]
+    out = [(2 if t[n][2] == "npc" else int(t[n][2])) if n in t else int(n in base_solid) for n in town_tiles]
     for n in MUST_SOLID:
         assert out[town_tiles.index(n)], "villaggio %d: il posto %s deve essere solido" % (c, n)
     for n in MUST_WALK:
-        assert not out[town_tiles.index(n)], "villaggio %d: il posto %s deve essere percorribile" % (c, n)
+        assert not out[town_tiles.index(n)] & 1, "villaggio %d: il posto %s deve essere percorribile" % (c, n)
     return out
 
 

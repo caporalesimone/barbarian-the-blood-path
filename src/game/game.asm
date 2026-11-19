@@ -3480,7 +3480,36 @@ me_rm   .byte $01, $03, $07, $0f, $1f, $3f, $7f, $ff     ; colonne da 0 a x del 
 
 ; tile sotto il PG appena raggiunto: solo la fontana fa qualcosa da sola (cura); il resto aspetta il Fire (act_tick)
 tile_trigger:
-        lda ptx
+        lda cur_level           ; (19/11) traghetto del villaggio (caselle F, tk_boat): salendo su una barca si arriva sull'altra
+        bne _nf
+        ldx #2
+_fb     lda tk_boat,x           ; x della barca (0 = nessuna: la colonna 0 e' sempre acqua)
+        beq _fn
+        cmp ptx
+        bne _fn
+        lda tk_boat+1,x
+        cmp pty
+        bne _fn
+        txa                     ; l'altra barca
+        eor #2
+        tay
+        lda tk_boat+1,y
+        sta lpty                ; la casella d'arrivo conta gia' come "raggiunta": niente ritorno subito (ping-pong)
+        tax
+        lda tk_boat,y
+        sta lptx
+        jsr put_hero            ; A = x, X = y; la camera segue px/py, force_redraw ridisegna tutto
+        lda #1
+        sta force_redraw
+        lda #SFX_PORTAL
+        jsr sfx_play
+        lda #3
+        ldx #6
+        jmp set_flash
+_fn     dex
+        dex
+        bpl _fb
+_nf     lda ptx
         sta tx
         lda pty
         sta ty

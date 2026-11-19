@@ -143,3 +143,30 @@ def to_abyss(ctx):
     g.poke(L["c_chap"], 9)
     g.call_keep(L["load_char"], tmax=60)
     check(g.b(L["c_chap"]) == 5, "hero on the disk: c_chap %d" % g.b(L["c_chap"]))
+
+
+@test("VIL-FERRY-10", "village 2 (Bad Water): stepping on one ferry (tile F) brings the hero onto the other one and he stays "
+      "there; stepping off and on again brings him back; the ferry tile is walkable for the hero, never for the NPCs; "
+      "village 1 has no ferry")
+def ferry(ctx):
+    g = ctx["g"]; L = g.L
+    rows = GM.rows_of(os.path.join(ROOT, V.VILLAGES[2]["map"]))
+    boats = [(x, y) for y, r in enumerate(rows) for x, ch in enumerate(r) if ch == "F"]
+    check(len(boats) == 2, "village 2: %d ferry tiles in the map" % len(boats))
+    village(g, 2)
+    check(list(g.mem(L["tk_boat"], 4)) == [t for q in boats for t in q], "tk_boat %s, map %s" % (list(g.mem(L["tk_boat"], 4)), boats))
+    t = g.tile(*boats[0])
+    check(g.b(L["solidtab"] + t) == 2, "ferry tile %d: solidtab %d (expected 2: walkable, NPC barrier)" % (t, g.b(L["solidtab"] + t)))
+    (ax, ay), (bx, by) = boats
+    g.teleport(ax, ay - 1); g.frames(3)                 # on the deck above the first ferry
+    check(g.ptile() == (ax, ay - 1), "hero not on the deck above the ferry: %s" % (g.ptile(),))
+    g.teleport(ax, ay); g.frames(3)
+    check(g.ptile() == (bx, by), "stepping on the ferry %s: hero at %s, expected the other ferry %s" % ((ax, ay), g.ptile(), (bx, by)))
+    g.frames(20)
+    check(g.ptile() == (bx, by), "the hero did not stay on the ferry he arrived on: %s" % (g.ptile(),))
+    g.teleport(bx, by - 1); g.frames(3)
+    g.teleport(bx, by); g.frames(3)
+    check(g.ptile() == (ax, ay), "back: hero at %s, expected %s" % (g.ptile(), (ax, ay)))
+    g.screenshot(os.path.join(SHOTS, "ferry.png"))
+    village(g, 1)
+    check(list(g.mem(L["tk_boat"], 4)) == [0, 0, 0, 0], "village 1: tk_boat %s" % list(g.mem(L["tk_boat"], 4)))

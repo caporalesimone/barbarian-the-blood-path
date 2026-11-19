@@ -391,6 +391,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `VIL-TWN-21` | village 5 (City of the Abyss, prototype): the Maw does not lead anywhere yet |
 | `VIL-BOSS-10` | boss levels of chapters 1-3: the boss is drawn with its own sprite colour (set of the chapter), in the slot of the final boss |
 | `VIL-TWN-22` | villages 2-5: fire one tile below the doors opens smith, alchemist and inn; RUN/STOP closes them |
+| `VIL-FERRY-10` | village 2 (Bad Water): stepping on one ferry brings the hero onto the other one and he stays there; off and on again: back; the ferry tile is walkable for the hero, never for the NPCs; village 1 has no ferry |
 | `VIL-TWN-23` | village 4 with chapter 5 unlocked (final boss killed): the exit in the crater leads to the City of the Abyss, hero saved at its entry |
 
 ## Bug trovati dalla ristrutturazione

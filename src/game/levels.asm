@@ -19,6 +19,7 @@ tx_exit_y .fill TX_EXIT_N
 ls_fount .fill TK_NAME          ; nome del luogo di cura (etichetta della barra in alto, con lo 0 finale)
 tk_sec  .fill 4*NSEC            ; (17/11) settori degli NPC vaganti: x, y, larghezza, altezza (larghezza 0 = voce non usata); NPC n usa la voce n-1
 tk_g    .fill 2                 ; (17/11) casella di chi da' la quest: nella piazza della fontana (x, y)
+tk_boat .fill 4                 ; (19/11) traghetto: caselle F della mappa (x1, y1, x2, y2; 0 = nessuno): tile_trigger
         .cerror * - town_k != TK_LEN, "town_k: lunghezza diversa da TK_LEN (tools/build/gen_maps.py)"
 
 ; set di tile (palette) 1..8 per piano: dipende da seed e piano
