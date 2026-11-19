@@ -7,8 +7,8 @@ text-shadow). Dall'host: ./build.sh --manual (o lab64 manual, C64_MANUAL in lab6
 Sorgente editabile: manual/manuale_src.html. Stile (15/11): il tema base "c64" di Lab64 (containers/pdf-gen/themes/c64.css) +
 manual/tema.css (solo le regole del gioco). Questo script fa le parti del gioco:
   1. ritaglia gli screenshot grezzi (manual/shots/*.png) in out/work/manual/img/*.png (area utile 320x200 senza bordo);
-  1b. la mappa del mondo (fan art, tools/art/world_map.py, Pillow, deterministica) si genera qui, nello stesso container:
-     out/work/art/world_map*.png poi out/work/manual/img/world_map.png (480x300, ingrandita a scatti dal CSS: pixel nitidi); non e' in git;
+  1b. la mappa del mondo (fan art, tools/art/world_map.py, numpy + Pillow, deterministica; 19/11 la genera ./build.sh in
+     lab64-tools prima del manuale): out/work/art/world_map_1x.png -> out/work/manual/img/world_map.png (960x600); non e' in git;
   2. prepara i dati di data/rules.yaml e data/balance.yaml per i segnaposto {{MONSTER_ROWS}} {{STEP_HDR}} {{MIN_ROW}} {{MAX_ROW}};
   3. il resto lo fa c64manual.build di Lab64: segnaposto, tema, tasti <kbd> disegnati, numeri di pagina, manuale.html, PDF
      (WeasyPrint) e avviso per le pagine che traboccano.
@@ -55,9 +55,16 @@ for f in sorted(os.listdir(os.path.join(M, "shots"))):
         im = im.crop((0, 0, 320, 120))
     im.save(os.path.join(R, "img", f))
 
-# (16/11) mappa del mondo: generata dal manuale stesso (Pillow c'e' in lab64-pdf-gen), mai salvata in git
-import runpy  # noqa: E402
-runpy.run_path(os.path.join(ROOT, "tools", "art", "world_map.py"), run_name="world_map")
+# (16/11) mappa del mondo, mai salvata in git. (19/11) la v3 usa numpy, che lab64-pdf-gen non ha: la genera ./build.sh nel
+# container lab64-tools prima del manuale (lab64 run python3 tools/art/world_map.py); qui si genera solo se numpy c'e'
+WM = os.path.join(ROOT, "out", "work", "art", "world_map_1x.png")
+try:
+    import numpy  # noqa: F401
+    import runpy
+    runpy.run_path(os.path.join(ROOT, "tools", "art", "world_map.py"), run_name="world_map")
+except ImportError:
+    if not os.path.exists(WM):
+        sys.exit("manuale: manca out/work/art/world_map_1x.png: lab64 run python3 tools/art/world_map.py (o ./build.sh --manual)")
 Image.open(os.path.join(ROOT, "out", "work", "art", "world_map_1x.png")).convert("RGB").save(os.path.join(R, "img", "world_map.png"))
 
 # ------------------------------------------------------------------ 2. dati dinamici

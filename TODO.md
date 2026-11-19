@@ -431,8 +431,9 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   (15/11, disposizione `hubchap`, soglie per villaggio: [FastLoader](docs/wiki/FastLoader.md) 7.1); la **città dell'Abisso** oggi si raggiunge
   dall'uscita del villaggio 4 dopo il boss finale e la Bocca non fa nulla (da rifare con H3; la leva della sala del trono resta).
 - **Fan art della mappa del mondo** (15/11): `tools/art/world_map.py` (`out/work/art/world_map.png`); dal 16/11 sta nel
-  **manuale italiano** (pagina "IL MONDO", prima del capitolo 4; la genera la build del manuale, non e' in git). Restano da decidere
-  la wiki e la scatola, e se la geografia (4 zone + Abisso sotto il cratere) va bene; il testo del manuale non racconta la trama
+  **manuale italiano** (pagina "IL MONDO", prima del capitolo 4; la genera la build del manuale, non e' in git). (19/11) v3
+  approvata dal committente: 1920x1200, tono crepuscolo, neve a nord, capitolo 4 a est in basso, cittadella e poi l'Abisso al
+  centro del cratere di lava, cammino rosso. Restano da decidere la wiki e la scatola; il testo del manuale non racconta la trama
   (in revisione): da rivedere con E6, e da tradurre con E7.
 - **Boss veri** (le **mappe vere** dei piani del boss dei capitoli 1–3 sono fatte il 19/11: cripta, isola nella palude, grotta
   crollata, [dungeon](docs/wiki/dungeon.md#piani-del-boss-dei-capitoli-13-5-10-15-gen_cboss-1211-mappe-vere-dal-1911); da

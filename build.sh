@@ -57,6 +57,7 @@ export RELEASE=$REL BUILD_ATLAS=$ATLAS BUILD_MAPS=$MAPS
 
 if [ $MANUAL = 1 ]; then
     phase manuale
+    lab64 run python3 tools/art/world_map.py             # (19/11) mappa del mondo: numpy, che lab64-pdf-gen non ha
     lab64 manual
     lab64 run python3 tools/build/publish.py --keep "$KEEP" --only-manual; exit 0
 fi
@@ -89,6 +90,7 @@ fi
 PUB="$PUB --tests"
 if [ $REL = 1 ] || [ $MANUALDEF = 1 ]; then
     phase manuale
+    lab64 run python3 tools/art/world_map.py
     if [ $REL = 1 ]; then lab64 manual --strict; else lab64 manual; fi   # release: pagina che trabocca = errore
     PUB="$PUB --manual"
 fi

@@ -17,7 +17,7 @@ villaggio 1 (Aldric's Hollow) in dettaglio; negozi, locanda e modulo MENU sono u
 Ogni villaggio ha fabbro, alchimista, locanda (con lo stesso baule), luogo di cura, posto del portale, ingresso e uscita. Il
 villaggio 5 è un **prototipo**: ci si arriva dall'uscita del villaggio 4 dopo il boss finale (`c_unl` = 5), i piani dell'Abisso
 non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview.py` (`out/work/villages/twnN_map.png`,
-`twnN_tiles.png`); atlante: set `VILLG`, `VILL2`…`VILL5`. Mappa del mondo (fan art): `tools/art/world_map.py`; dal 16/11 è nel manuale (pagina "Il mondo"), generata dalla build del manuale (`tools/manual/gen_manual.py`, nessun file in git).
+`twnN_tiles.png`); atlante: set `VILLG`, `VILL2`…`VILL5`. Mappa del mondo (fan art): `tools/art/world_map.py` (v3 del 19/11: 960x600 e x2, numpy, generata da `./build.sh` in `lab64-tools` prima del manuale); dal 16/11 è nel manuale (pagina "Il mondo", `tools/manual/gen_manual.py`, nessun file in git).
 
 ### Come è fatto un villaggio
 
