@@ -4,16 +4,16 @@ cambiando luogo porta in fondo i dati che servono subito dopo, cosi' il gioco no
 ricerca costa 0,1-1,4 s, leggere un blocco ~65 ms). L'ultimo byte del file e' il segno (src/game/disk.asm gfx_tail):
   0..SND_N-1  il brano (dati del file SNDn senza indirizzo, snd_llo/hi byte) sta subito prima del segno;
   $80         la mappa del piano del boss (file BOSSCHc senza indirizzo) comincia a GFX_DUN_END, subito dopo il tema.
-(19/11) Nel file del tema dei piani di un capitolo a cittadella (data/chapters.yaml map.style citadel, oggi GFX7) fra il tema e
-il brano c'e' il codice della cittadella (out/work/gen_cit.bin, src/game/gen_citadel.asm), assemblato per GFX_DUN_END: il brano
-si trova contando dal segno all'indietro, quindi i byte in mezzo non lo spostano.
+(19/11) Nei file del tema dei piani (GFX1, 3, 5, 7) il codice del piano degli arredi (out/work/ovl_decor{c}.bin,
+src/game/ovl_decor.asm; nel capitolo 4 con dentro la cittadella, src/game/gen_citadel.asm, prima assemblata da sola per
+GFX_DUN_END e messa qui fra il tema e il brano).
 Code: TWNc = brano del villaggio (snd_town_c), GFX(2c-1) = brano dei piani del capitolo (snd_lvl_c), GFX(2c) per c = 1-3 = mappa
 del boss, GFX(2*CHAPTERS) = brano del boss finale (SND_BOSS). Scrive out/work/bundle/twnC.prg e gfxN.prg (quelli che vanno sul
 disco, tools/build/mkdisk.sh); i file di partenza in out/work e out/work/gfx restano come sono (atlante, strumenti).
 I file SNDn restano sul disco (JUKEBOX, LOBBY e riserva); i BOSSCHc no (tools/build/mkdisk.sh).
 (19/11) CODICE DEL PIANO (src/game/theme.asm, src/game/ovl_*.asm, assemblato a OVP_AT = $C900): nei file di OVL subito dopo il
 tema, a GFX_DUN_END, 2 byte di lunghezza e il codice; il resto della coda (mappa del boss, brano) dopo; segno | $40. gfx_tail
-lo copia a OVP_AT. Mai nei file con il codice della cittadella (assemblato proprio a GFX_DUN_END)."""
+lo copia a OVP_AT."""
 import os, re
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -43,14 +43,14 @@ def main():
     import sys
     sys.path.insert(0, os.path.join(ROOT, "tools", "build"))
     import chapters_db
-    cit = {2 * ch["id"] - 1 for ch in chapters_db.load()["chapters"] if (ch.get("map") or {}).get("style") == "citadel"}
-    citcode = rd("gen_cit.bin")
     gfx_end = int(re.search(r"^GFX_DUN_END\s*=\s*\$([0-9a-f]+)", open(os.path.join(W, "game.lbl")).read(), re.M | re.I).group(1), 16)
     ovl = {2 * len(lvl): "ovl_final.bin"}             # (19/11) GFX8: sala del trono
     for c in range(1, len(lvl)):                      # GFX2, GFX4, GFX6: meccaniche dei boss dei capitoli 1-3 (ovl_bossC)
         if os.path.exists(os.path.join(W, "ovl_boss%d.bin" % c)):
             ovl[2 * c] = "ovl_boss%d.bin" % c
-    assert not set(ovl) & cit, "codice del piano e cittadella nello stesso file"
+    for c in range(1, len(lvl) + 1):                  # (19/11) GFX1, 3, 5, 7: arredi dei piani (capitolo 4: anche la cittadella)
+        if os.path.exists(os.path.join(W, "ovl_decor%d.bin" % c)):
+            ovl[2 * c - 1] = "ovl_decor%d.bin" % c
     rep = []
     for c, k in enumerate(town, 1):
         f = "twn%d.prg" % c
@@ -68,8 +68,6 @@ def main():
             d += bytes([len(oc) & 255, len(oc) >> 8]) + oc; flag = 0x40
             rep.append("gfx%d+%s(%d B)" % (n, ovl[n][:-4], len(oc)))
         if n % 2:
-            if n in cit:
-                d += citcode; rep.append("gfx%d+citadel(%d B)" % (n, len(citcode)))
             d += song(lvl[n // 2]); rep.append("gfx%d+snd%d" % (n, lvl[n // 2]))
         elif n < ngfx:
             m = rd("bossch%d.prg" % (n // 2))[2:]

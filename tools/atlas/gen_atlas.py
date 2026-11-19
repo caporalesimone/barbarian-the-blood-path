@@ -114,6 +114,30 @@ cmap = read_map("data/atlas_cave.txt", {c: G.TID[n] for n, c in G.DUN_LEGEND.ite
 post_walls(cmap, random.Random(7))
 smap = read_map("data/atlas_swamp.txt", {c: G.TID[n] for n, c in G.DUN_LEGEND.items()})  # (18/11) palude del capitolo 2
 post_walls(smap, random.Random(7))
+# (19/11) arredi dei piani (tools/build/decor_gfx.py: la stessa passata del gioco, ovl_decor.asm) sulle mappe d'esempio, con
+# un seme fisso; nomi "DECc:<posto>" (capitolo c)
+import decor_gfx as DG  # noqa: E402
+
+
+def decorated(mp, c):
+    flat = [t for r in mp for t in r]
+    DG.decorate(flat, c, (0x5a, 0x43), G.TID)
+    return [flat[y * 48:(y + 1) * 48] for y in range(len(mp))]
+
+
+def decor_names(c, base):
+    out = dict(base)
+    for n_, nd in DG.names(c).items():
+        AN.TILE["DEC%d:%s" % (c, n_)] = (nd[0], nd[1])
+        out[G.TID[n_]] = "DEC%d:%s" % (c, n_)
+    return out
+
+
+DEC_USED = {G.TID[n] for n in ("FREE9", "FREE10", "FREE11", "GRASSA", "GRASSB")}
+dmap_ch4 = decorated(dmap, 4)
+dmap = decorated(dmap, 1)
+cmap = decorated(cmap, 3)
+smap = decorated(smap, 2)
 fm = [[G.TID[n] for n in r] for r in F.final_map()]
 post_walls(fm, random.Random(7))
 star, circ, chests = F.final_figures()
@@ -177,24 +201,27 @@ for _c, _v in sorted(VIL.VILLAGES.items()):
     add_set("VILL%d" % _c, "%s (TWN%d, its own colours)" % (_v["name"], _c), tiles_from(rd("out/work/gfx/twn%d.prg" % _c)[2:], NT),
             _names, TOWN_LET, 0, _map, {t for r in _map for t in r} | {G.TTID["PORTAL"]}, G.SOLID, True,
             pal=list(_v["pal"]), solid_list=[i for i in range(NT) if _sol[i] & 1], mapsrc=_v["map"])
+cit_t = tiles_from(rd("out/work/gfx/gfx7.prg")[2:], DN)    # (19/11) capitolo 4: i suoi arredi (DUNGG, DUNGH)
 for k in range(1, 9):
-    add_set("DUNG" + "ABCDEFGH"[k - 1], "Dungeon, palette %d (GFX1)" % k, dun_t, {i: G.TILES[i] for i in range(DN)}, DUN_LET,
-            k, dmap, {G.TID[n] for n in G.DUN_USED}, G.SOLID, False)
+    _c4 = k >= 7
+    add_set("DUNG" + "ABCDEFGH"[k - 1], "Dungeon, palette %d (%s)" % (k, "GFX7, chapter 4 furniture" if _c4 else "GFX1"),
+            cit_t if _c4 else dun_t, decor_names(4 if _c4 else 1, {i: G.TILES[i] for i in range(DN)}), DUN_LET,
+            k, dmap_ch4 if _c4 else dmap, {G.TID[n] for n in G.DUN_USED} | DEC_USED, G.SOLID, False)
 # (18/11, TODO M11) grotte: tile di roccia del tema dei piani del capitolo 3 (tools/build/cave_gfx.py, file GFX5), con le due
 # palette dei piani (data/chapters.yaml map.palettes): 9 innevata (piano 11), 11 ghiaccio (12), 10 roccia grigia (13-14)
 import cave_gfx as CG  # noqa: E402
 cave_t = tiles_from(rd("out/work/gfx/gfx5.prg")[2:], DN)
-cave_names = {i: ("CAVE:" + G.TILES[i] if G.TILES[i] in CG.tiles() else G.TILES[i]) for i in range(DN)}
+cave_names = decor_names(3, {i: ("CAVE:" + G.TILES[i] if G.TILES[i] in CG.tiles() else G.TILES[i]) for i in range(DN)})
 for _code, _pi, _what in (("CAVSN", 9, "snow, level 11"), ("CAVIC", 11, "ice, level 12"), ("CAVRK", 10, "grey rock, levels 13-14")):
     add_set(_code, "Caves, %s (GFX5, palette %d)" % (_what, _pi), cave_t, cave_names, DUN_LET, _pi, cmap,
-            {G.TID[n] for n in G.DUN_USED}, G.SOLID, False, mapsrc="data/atlas_cave.txt")
+            {G.TID[n] for n in G.DUN_USED} | DEC_USED, G.SOLID, False, mapsrc="data/atlas_cave.txt")
 # (18/11) palude: acqua, riva, fango, passerelle (PATH) e cancelli (STAIRSU/D) del tema dei piani del capitolo 2 (GFX3,
 # tools/build/swamp_gfx.py), palette 12 per tutti i piani
 import swamp_gfx as SG  # noqa: E402
 swamp_t = tiles_from(rd("out/work/gfx/gfx3.prg")[2:], DN)
 add_set("SWAMP", "Swamp, levels 6-9 (GFX3, palette 12)", swamp_t,
-        {i: ("SWAMP:" + G.TILES[i] if G.TILES[i] in SG.tiles() else G.TILES[i]) for i in range(DN)}, DUN_LET, 12, smap,
-        {G.TID[n] for n in G.DUN_USED} | {G.TID["PATH"]}, G.SOLID, False, mapsrc="data/atlas_swamp.txt")
+        decor_names(2, {i: ("SWAMP:" + G.TILES[i] if G.TILES[i] in SG.tiles() else G.TILES[i]) for i in range(DN)}), DUN_LET, 12, smap,
+        {G.TID[n] for n in G.DUN_USED} | {G.TID["PATH"]} | DEC_USED, G.SOLID, False, mapsrc="data/atlas_swamp.txt")
 add_set("TRONO", "Throne room, level 20 (GFX8, palette 4)", trono_t,
         {i: G.TRONO_NAMES.get(G.TILES[i], G.TILES[i]) for i in range(DN)}, DUN_LET, 4, fm,
         {G.TID[n] for n in G.TRONO_USED}, G.SOLID, False)

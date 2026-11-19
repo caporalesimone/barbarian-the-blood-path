@@ -142,9 +142,10 @@ si specchia (`cit_finish` in `gen_io.asm`, ~250 B). Stesso contratto delle stanz
   corridoi larghi 2 restano sull'asse della sala gemella). Poi `gen_stairs` (le scale sono l'unica cosa non simmetrica) e
   `post_walls`.
 - Memoria: il codice (`src/game/gen_citadel.asm`, ~258 B) **non** sta nel PRG `GAME` né sotto l'I/O (pieni: il PRG deve
-  finire prima di `$9C00` anche nelle build di test, che hanno ~300 B in più): è assemblato per `GFX_DUN_END` (`$F4E0`) e sta
-  nella **coda del file del tema** `GFX7` fra il tema e il brano (`tools/build/bundle.py`, [FORMATO_DATI](FORMATO_DATI.md)):
-  entrando in un piano della cittadella il tema si legge sempre prima della generazione. Le variabili di grotte e cittadella
+  finire prima di `$9C00` anche nelle build di test, che hanno ~300 B in più): (19/11) è parte del **codice del piano** del
+  capitolo 4 (`src/game/ovl_decor.asm` con `DK_CHAP` = 4, coda di `GFX7`, copiato a `$C900`; il generatore chiama
+  `cit_finish = OVP_AT + OVJ_GEN` con `$01 = $34`); fino al 19/11 era assemblato da solo per `GFX_DUN_END`.
+  Entrando in un piano della cittadella il tema si legge sempre prima della generazione. Le variabili di grotte e cittadella
   (`$87E8`-`$87F4`) e della palude (`$A5E3`-`$A5FA`) sono passate nelle zone libere annotate di GAME (`.virtual`). Restano
   ~260 B sotto l'I/O dopo gli slot dei piani e ~128 B prima di `$9C00` nella build di test più grande (`TESTUI=28`).
 - Misure (VICE, 19/11): generazione fino a 0,62 s; almeno 70 colonne e 1044 caselle calpestabili per piano. Test `GEN-13`
@@ -194,7 +195,7 @@ resta nella sala del trono a stella):
   i posti degli arredi; il file `GFX8` (sala del trono) non cambia.
 - **Palette**: `data/chapters.yaml` `final.palette` → `lv_look` del piano del boss (`tools/build/gen_db.py`); `pal_for_level`
   guarda `lv_look` prima del rosso dei piani del boss (rosso solo se la palette manca).
-- **Generatore**: `GVER` 10 (i piani salvati con le mappe segnaposto si rigenerano, `migrate_char`).
+- **Generatore**: `GVER` 10 (i piani salvati con le mappe segnaposto si rigenerano, `migrate_char`); 11 dal 19/11 (arredi dei piani).
 - **Atlante**: set `BOSS1`, `BOSS2`, `BOSS3` con la mappa intera. Test: `BOSSMAP-10` (mappa uguale al file dopo `post_walls`,
   arredi presenti, boss raggiungibile dalle scale, palette, tile del file uguali a `boss_gfx.py`; screenshot in
   `out/work/bossmaps/`), `CHAP-SEQ-11`, `VIL-BOSS-10`, `GEN-10` (mappe di riferimento).
@@ -226,8 +227,46 @@ comunque `ovl_cur` = 0. Nessuna lettura di disco in più (il tema si legge comun
   (`ovp_kill` in `kill_monster`, X = mostro ucciso: C=1 = niente bottino; piano 20: sempre, prima era un confronto con `MAXLEVEL`
   in GAME; piano 10: i feticci), `OVJ_DECOR` 15 e `OVJ_GEN` 18 (arredi dei piani e fine della generazione: sotto). Senza codice
   del piano gli ingressi fanno `rts` con C=0. Ogni file `ovl_*.asm` ha tutte le voci (`clc / rts / nop` se non servono).
-- Test: `OVP-10` (copia a `$C900`, ondata del boss finale dal codice copiato, `ovp_ok` = 0 al piano 19, MENU di nuovo a `$C900` nel
-  villaggio), `OVP-11..13` (abate, Mother Stitch, Varok), `THRONE-10` (la leva).
+- Test: `OVP-10` (copia a `$C900`, ondata del boss finale dal codice copiato, al piano 19 il codice degli arredi del capitolo 4,
+  MENU di nuovo a `$C900` nel villaggio), `OVP-11..13` (abate, Mother Stitch, Varok), `THRONE-10` (la leva), `DECOR-10` (arredi).
+
+## Arredi dei piani (19/11)
+
+Richiesta del committente: **elementi decorativi a tema in tutti i dungeon**. I piani generati dei capitoli 1–4 ricevono arredi
+del loro tema: 3 solidi e 2 calpestabili per capitolo (`tools/build/decor_gfx.py`, grafica nei posti liberi del file del tema
+dei piani `GFX(2c−1)`: solidi `FREE9`, `FREE10`, `FREE11`; calpestabili `GRASSA`, `GRASSB`; restano liberi `FREE25`, `FREE26` e,
+fuori dalla palude, `PATH`). I piani del boss e la sala del trono no: le loro mappe sono fatte a mano.
+
+| Capitolo | Solidi contro il muro (regola A) | Solidi isolati (regola B) | Calpestabili |
+|---|---|---|---|
+| 1 sotterraneo | urna, bara in piedi | braciere | ossa, lastra incrinata |
+| 2 palude | canne fitte (sulla riva) | ceppo marcio, palo dei feticci | pozza nera, funghi |
+| 3 grotte | cristalli, stalagmite | stalagmite, masso | ghiaione, ossa vecchie |
+| 4 cittadella | stendardo del Lord of Ruin, rastrelliera | armatura vuota | sigillo nel pavimento, scudo spezzato |
+
+- **Dove**: codice del piano dei file `GFX1`, `GFX3`, `GFX5`, `GFX7` (`src/game/ovl_decor.asm`, assemblato una volta per capitolo
+  con `-D DK_CHAP`; 247 B, nel capitolo 4 524 B con la cittadella). Costo per GAME: lo stub `ovp_decor` e la chiamata.
+- **Quando**: `load_location`, **subito dopo `gen_dungeon`** (`ovp_decor`, voce `OVJ_DECOR`), prima di `spawn_monsters`,
+  `place_chests` e degli altri piazzamenti: usano `floor_ok` (`FLOOR..FLOORC`), quindi mostri, bauli ed evocazioni non
+  nascono mai su un arredo.
+- **Algoritmo** (uguale in Python: `decor_gfx.decorate`, usata dall'atlante): `rnd` si salva (e con `rnd+1 | $80`); per ogni casella
+  di pavimento con y e x da 1 a 46, in ordine, `h = rand()`; se `h < DK_ANY` (40; capitolo 4: 48): `h < DK_W` (12; 4: 6) =
+  arredo calpestabile (`h & 1` sceglie quale); altrimenti un solido solo se la casella è sicura: **regola B** le 8 vicine sono
+  pavimento (isolato), **regola A** a nord un muro (tile < `FLOOR`: muro, parete, nella palude l'acqua) e O, E, SO, S, SE
+  pavimento (contro il muro). Alla fine `rnd` torna com'era: la sequenza di mostri e bauli è quella di prima (cambia solo dove
+  un arredo ha preso il pavimento). Deterministico: il piano rientrando è identico.
+- **Perché non chiude passaggi**: con la regola B i vicini restano uniti girandogli attorno; con la regola A i vicini
+  percorribili sono O, E, S e la catena O-SO-S-SE-E resta di pavimento. Ogni arredo guarda la mappa già cambiata dai precedenti.
+  Nei corridoi larghi 1-2 nessuna regola vale. Scale, cancelli, portale, bauli non sono pavimento: un solido non sta mai in croce
+  accanto a loro (l'eroe arriva sempre su una casella libera).
+- **Cittadella**: colonne 1..22 e la stessa `h` sulla casella specchiata (`47 − x`); le colonne dell'asse (23, 24) restano libere,
+  così gli arredi sono simmetrici come il piano (tranne accanto alle scale).
+- **Misure** (prototipo sui piani veri, 19/11): 16–35 solidi e 34–55 calpestabili per piano, ~5% del pavimento; 0 caselle
+  percorribili perse. Tempo della passata non misurato (stima < 0,1 s).
+- **Note**: la minimappa mostra gli arredi solidi come buchi nelle sale; un baule lasciato da un mostro morto su un arredo
+  calpestabile lo sostituisce (la casella torna pavimento dopo l'apertura) — non verificato in gioco.
+- `GVER` 11 (i piani salvati si rigenerano), mappe di riferimento di `GEN-10` aggiornate. Atlante: i set dei piani mostrano gli
+  arredi del loro capitolo (`DECc:<posto>`; `DUNGG` e `DUNGH` con il file `GFX7` del capitolo 4). Test `DECOR-10`.
 
 ## Piano 20: la sala del trono (`gen_final`)
 

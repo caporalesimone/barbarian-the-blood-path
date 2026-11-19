@@ -26,7 +26,8 @@ def go(g, lvl, chap):
 
 
 @test("OVP-10", "level 20: the code of the throne room is copied from the tail of GFX8 to $C900 (ovp_ok = 1); the boss below "
-      "3/4 of its life calls a wave of SUM_WAVE monsters; level 19: no level code; village: the MENU module is read again at $C900")
+      "3/4 of its life calls a wave of SUM_WAVE monsters; level 19: the decor code of chapter 4 (with the citadel); village: the MENU "
+      "module is read again at $C900")
 def ovp_final(ctx):
     g = ctx["g"]; L = g.L
     code = open(os.path.join(ROOT, "out", "work", "ovl_final.bin"), "rb").read()
@@ -44,8 +45,9 @@ def ovp_final(ctx):
     check(g.b(L["lb_cnt"]) == n0 + L["SUM_WAVE"], "wave: monsters %d -> %d (expected +%d)" % (n0, g.b(L["lb_cnt"]), L["SUM_WAVE"]))
     check(g.b(L["fb_wave"]) == 1, "fb_wave %d" % g.b(L["fb_wave"]))
     g.poke(L["godmode"], 0)
-    go(g, L["MAXLEVEL"] - 1, 4)
-    check(g.b(L["ovp_ok"]) == 0, "level 19: ovp_ok %d" % g.b(L["ovp_ok"]))
+    go(g, L["MAXLEVEL"] - 1, 4)                           # (19/11) piani generati: il codice degli arredi (capitolo 4 + cittadella)
+    dec = open(os.path.join(ROOT, "out", "work", "ovl_decor4.bin"), "rb").read()
+    check(g.b(L["ovp_ok"]) == 1 and bytes(g.mem(0xC900, 21)) == dec[:21], "level 19: the decor code of chapter 4 is not at $C900")
     g.call_keep(L["change_level"], regs="a=00,x=00", tmax=150); g.frames(3)
     check(g.b(L["ovp_ok"]) == 0 and g.b(L["ovl_cur"]) == 1, "village: ovp_ok %d, ovl_cur %d" % (g.b(L["ovp_ok"]), g.b(L["ovl_cur"])))
     menu = open(os.path.join(ROOT, "out", "work", "menu.bin"), "rb").read()     # flat image from the lowest zone (pack_menu.py)

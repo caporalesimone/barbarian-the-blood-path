@@ -36,7 +36,7 @@ LIM = {
     "twn1": 2.0, "twn2": 2.5, "twn3": 2.1, "twn4": 2.8, "twn5": 1.6,         # layout hubchap, measured: 0.68, 1.63, 1.56, 2.14, 1.20; (17/11) twn1 1.76 s in every layout (the bigger GAME): limit 2.0 (owner)
     "in1": 6.6, "in2": 5.3, "in3": 5.0, "in4": 5.0, "in5": 5.2,              # the time depends on the disk phase (rotation, head position): slowest seen on
                                                                              # 10 phases 4.93, 3.86, 3.84, 3.84, 3.94 (means 4.17, 3.47, 3.49, 3.45, 2.96); in2 4.37 in the suite order
-    "theme1": 1.1, "theme2": 1.2, "theme3": 1.4, "theme4": 1.1,              # 0.72, 0.77, 1.04, 0.46
+    "theme1": 1.2, "theme2": 1.2, "theme3": 1.4, "theme4": 1.1,              # 0.72, 0.77, 1.04, 0.46
     "stairs1": 3.2, "stairs2": 3.2, "stairs3": 3.2, "stairs4": 3.2,          # 1.5-1.7 s, up to 2.54 s depending on the disk phase
     "boss1": 3.2, "boss2": 3.0, "boss3": 3.0,                                # 1.40-2.42, 2.24, 2.34 (disk phase)
     # (18/11) measures now the slowest of PHASES disk phases (see timed) and a failure no longer changes the sequence (see FAILS):
@@ -49,6 +49,8 @@ LIM = {
     # measured, docs/wiki/FastLoader.md 7.2): theme2 1.1 -> 1.2 (1.04 s), theme4 0.8 -> 1.1 (0.89 s), the rest within the limits.
     # (19/11) GAME 107 -> 109 blocks (generator: caves, swamp, reduced STASH): the files after it moved by 1-8 sectors; in5
     # (village 4 -> village 5, TWN5 28/1 -> 28/4) 3.93 -> 4.45 s: limit 4.6 -> 5.2 with the rule above, the rest within the limits.
+    # (19/11) decorations of the levels (level code in the tail of GFX1, 3, 5, 7: GFX1 10 -> 11 blocks): theme1 0.90-1.00 s (two
+    # runs), over 90% of 1.1: limit 1.1 -> 1.2 with the rule above; theme3 0.66, theme4 0.77 (GFX7 +1 block), the rest unchanged.
 }
 T = {}
 

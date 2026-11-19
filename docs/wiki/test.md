@@ -236,7 +236,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SKILL-10` | Frenzy (O): level 15 needed; 5 s; two attacks per Fire; run +100% = 4 px per frame; normal run after |
 | `SKILL-11` | Rage (U): level 9 needed; 6 s; damage taken halved (min 1), full damage without Rage |
 | `DEATH-10` | death on level 20 (throne room): village, half gold, deepest level 20 kept |
-| `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900; a wave of the final boss from that code; level 19 no level code; village: MENU again at $C900 (19/11) |
+| `DECOR-10` | levels 2, 7, 12, 17 (chapters 1-4), 3 seeds: solid and walkable furniture; every walkable tile reachable from the stairs; no monster on a solid tile; same map entering again; chapter 4 mirrored; screenshots in out/work/decor/ |
+| `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900; a wave of the final boss from that code; level 19: the decor code of chapter 4 (jump table); village: MENU again at $C900 (19/11) |
 | `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 a stop and 2 Skeletons; regeneration while they live |
 | `OVP-12` | level 10, Mother Stitch (GFX4): rite when awake, 2 still fetishes (type 8, life = her max / 16), protected (hits /2, regeneration), open after the last one (hits x2), second rite under 2/3, no loot from a fetish (ovp_kill); screenshot out/work/ovp/stitch_fetishes.png |
 | `OVP-13` | level 15, Varok the Oathbreaker (GFX6): warning and charge along the row; the shield halves the hits, not when stunned |

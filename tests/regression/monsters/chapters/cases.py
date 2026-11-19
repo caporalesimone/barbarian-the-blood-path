@@ -28,19 +28,28 @@ def teardown(ctx):
     if "g" in ctx: ctx["g"].close()
 
 
-def names(c):
-    """the 8 names of chapter c straight from the drawings (base 1..4, strong 5..8)"""
+def names(c, boss=False):
+    """the 8 names of chapter c straight from the drawings (base 1..4, strong 5..8); boss file: the boss's summon
+    (19/11, MO.SUMMONS: the fetish of Mother Stitch) in the place of its type"""
     if c == 1:
-        return [m[0] for m in MO.BASE + MO.STRONG]
-    fam = MC.CHAPTER_MONSTERS[c]
-    return [f[0] for f in fam] + [f[4] for f in fam]
+        out = [m[0] for m in MO.BASE + MO.STRONG]
+    else:
+        fam = MC.CHAPTER_MONSTERS[c]
+        out = [f[0] for f in fam] + [f[4] for f in fam]
+    if boss and c in MO.SUMMONS:
+        out[MO.SUMMONS[c][0] - 1] = MO.SUMMONS[c][1][0]
+    return out
 
 
-def colors(c):
+def colors(c, boss=False):
     if c == 1:
-        return [m[2] for m in MO.BASE + MO.STRONG]
-    fam = MC.CHAPTER_MONSTERS[c]
-    return [f[3] for f in fam] + [f[6] for f in fam]
+        out = [m[2] for m in MO.BASE + MO.STRONG]
+    else:
+        fam = MC.CHAPTER_MONSTERS[c]
+        out = [f[3] for f in fam] + [f[6] for f in fam]
+    if boss and c in MO.SUMMONS:
+        out[MO.SUMMONS[c][0] - 1] = MO.SUMMONS[c][1][2]
+    return out
 
 
 def enter(g, c, lvl):
@@ -61,10 +70,10 @@ def check_set(g, c, boss):
     check(bytes(g.mem(0x8c00, len(strong))) == strong, "chapter %d: strong + boss sprites ($8C00) differ" % c)
     check(bytes(g.mem(L["NM_AT"], len(info))) == info, "chapter %d: info block at NM_AT differs" % c)
     got_cols = g.mem(L["NM_AT"], 9)
-    check(got_cols[:8] == colors(c), "chapter %d: colours %s, drawings %s" % (c, got_cols[:8], colors(c)))
+    check(got_cols[:8] == colors(c, boss), "chapter %d: colours %s, drawings %s" % (c, got_cols[:8], colors(c, boss)))
     slot = (MO.CBOSS[c] if boss and c in MO.CBOSS else MO.FINAL)
     check(got_cols[8] == slot[2], "chapter %d: boss slot colour %d, expected %d (%s)" % (c, got_cols[8], slot[2], slot[0]))
-    for t, n in enumerate(names(c) + [slot[0]], 1):        # every name, as bar_name finds it (NM_AT+8+type: low byte)
+    for t, n in enumerate(names(c, boss) + [slot[0]], 1):        # every name, as bar_name finds it (NM_AT+8+type: low byte)
         a = (L["NM_AT"] & 0xff00) | g.b(L["NM_AT"] + 8 + t)
         s = bytes(g.mem(a, 25)).split(b"\0")[0]
         check(s == bytes(GG.scr_text(n)), "chapter %d type %d: name %r, expected %r" % (c, t, s, n))

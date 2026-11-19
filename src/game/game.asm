@@ -226,7 +226,7 @@ cs_cu      .byte ?
 cs_k       .byte ?
 cs_end
         .endv
-GVER       = 10             ; 6 (18/11): grotte nel capitolo 3; 7 (19/11): cancelli della palude distanti; 8: gate_hash da tutto il seed; 9: cittadella nel capitolo 4, mostri solo sul pavimento (gen_io.asm); 10: mappe vere dei piani del boss dei capitoli 1-3 (tools/build/gen_bossmap.py); da 5 in su si rigenerano solo i piani (migrate_char)
+GVER       = 11             ; 6 (18/11): grotte nel capitolo 3; 7 (19/11): cancelli della palude distanti; 8: gate_hash da tutto il seed; 9: cittadella nel capitolo 4, mostri solo sul pavimento (gen_io.asm); 10: mappe vere dei piani del boss dei capitoli 1-3 (tools/build/gen_bossmap.py); 11: arredi dei piani (ovl_decor.asm); da 5 in su si rigenerano solo i piani (migrate_char)
 
 
 ; categorie, id oggetti e tutte le tabelle di bilanciamento: vedi db.asm (generato)

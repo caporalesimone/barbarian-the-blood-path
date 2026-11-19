@@ -910,11 +910,11 @@ lv_swamp .byte 0                ; LK_SWAMP se il piano e' di palude
 ;  - specchio: colonne 24..47 della mappa = colonne 23..0; celle 2-3 = specchio delle 1-0 (rx' = 48 - rx - rw,
 ;    rcx' = 46 - rcx: i corridoi larghi 2 in rcx, rcx+1 restano sull'asse della sala gemella).
 ; Le scale (gen_stairs) vengono dopo lo specchio: l'unica cosa non simmetrica.
-; Il codice (cit_finish) NON sta qui: e' in src/game/gen_citadel.asm, nella coda del file del tema dei piani del capitolo
-; (GFX7, tools/build/bundle.py) a GFX_DUN_END, sotto il KERNAL: c'e' solo quando servono i piani della cittadella.
+; Il codice (cit_finish) NON sta qui: e' in src/game/gen_citadel.asm, parte del codice del piano del capitolo 4
+; (src/game/ovl_decor.asm, coda di GFX7, a OVP_AT): c'e' solo quando servono i piani della cittadella.
 ; ---------------------------------------------------------------------------------------------------------------------
 lv_cit  .byte 0                 ; LK_CIT se il piano e' una cittadella
-cit_finish = GFX_DUN_END        ; (gen_citadel.asm, coda di GFX7)
+cit_finish = OVP_AT+OVJ_GEN     ; (19/11) gen_citadel.asm nel codice del piano del capitolo 4 (ovl_decor.asm)
 
 pk_e    .byte 0                 ; fine del tratto di passerella
 gr_b    .byte 0                 ; confine (piano a ovest) per gate_row

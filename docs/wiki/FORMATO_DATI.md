@@ -32,10 +32,10 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `$80` | la mappa del piano del boss (byte di `BOSSCHc` senza indirizzo) da `GFX_DUN_END` (`$F4E0`, subito dopo il tema) | `bm_tail` = `$80`: `bmap_load` la scompatta da lì (`bm_at`) |
 | bit 6 (`$40`, 19/11) insieme a uno dei due sopra | a `GFX_DUN_END` il **codice del piano**: 2 byte di lunghezza *L*, poi *L* byte assemblati per `OVP_AT` = `$C900` (`src/game/ovl_*.asm`); il resto della coda (mappa del boss) comincia dopo | `ovp_copy` lo copia a `$C900`, `ovp_ok` = 1, `bm_at` = dopo il codice ([dungeon](dungeon.md#codice-del-piano-1911)). Oggi `GFX8` (sala del trono) e `GFX2`, `GFX4`, `GFX6` (meccaniche dei boss dei capitoli, prima della mappa del boss) |
 
-(19/11) Nel file del tema dei piani di un capitolo a **cittadella** (`map.style: citadel`, oggi `GFX7`) fra il tema e il brano
-c'è il **codice della cittadella** (`out/work/gen_cit.bin`, ~258 B, da `src/game/gen_citadel.asm` assemblato per
-`GFX_DUN_END`): il generatore lo chiama lì (`cit_finish`, sotto il KERNAL, `$01 = $34`). Il brano si trova contando
-all'indietro dal segno, quindi quei byte non lo spostano.
+(19/11) Anche i file del tema dei **piani** `GFX1`, `GFX3`, `GFX5`, `GFX7` hanno il codice del piano (segno `| $40`): la passata
+degli **arredi** (`src/game/ovl_decor.asm` → `out/work/ovl_decor{c}.bin`, 247 B; nel capitolo 4 con dentro la **cittadella**,
+`src/game/gen_citadel.asm`, 524 B in tutto). Fino al 19/11 il codice della cittadella era assemblato da solo per `GFX_DUN_END`
+e stava fra il tema e il brano di `GFX7` (`gen_cit.bin`): oggi il generatore lo chiama a `$C900` (`cit_finish = OVP_AT + OVJ_GEN`).
 
 Le code arrivano al massimo a `$FD00` (FMAP); nel villaggio stanno nell'appoggio sotto il KERNAL che poi riceve il MENU.
 I file `SND0`…`SND7` restano sul disco: li leggono `JUKEBOX`, `LOBBY` (brano del menu), il motivetto di combattimento e i casi
@@ -83,7 +83,8 @@ DES, COS) e **`c_resp`** (gettoni respec, 0..255), prima del baule della locanda
 Dal formato **$C7** (12/11, branch `capitoli`): dopo `c_resp` **`c_chap`** (capitolo in cui si gioca, 1..4) e **`c_unl`**
 (capitolo più alto sbloccato): blocco da 212 byte, file `SAVE-0N` da 2072 byte (sempre 9 blocchi). Il generatore passa alla
 versione `GVER` 5 (i piani 5, 10, 15 sono mappe fisse). (18/11) `GVER` 6: grotte nel capitolo 3; un eroe salvato con la 5 tiene il seed (6 cifre) e rigenera i piani
-(`c_vis` azzerato, `migrate_char`); solo dalle versioni prima della 5 si ricava ancora il seed da quello a 16 bit.
+(`c_vis` azzerato, `migrate_char`); solo dalle versioni prima della 5 si ricava ancora il seed da quello a 16 bit. (19/11) `GVER` 11: arredi dei
+piani ([dungeon](dungeon.md)): i piani salvati si rigenerano allo stesso modo.
 Dal formato **$C8** (17/11, concept delle quest): in fondo al blocco, dopo il baule della locanda, **`c_qst`**: blocco da 213
 byte. (18/11) `c_qst` è una **maschera** delle quest prese (bit *n*-1 = quest *n*, al massimo 8); i valori di prima (0 nessuna,
 1 = quest 1) restano validi, quindi il formato non cambia. File delle quest (`data/quests.yaml`, `tools/build/gen_quests.py`):

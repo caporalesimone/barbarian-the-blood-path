@@ -1320,11 +1320,34 @@ def main():
                 o = (q * DN + TID[n_]) * 8
                 bt[o:o + 8] = bytes(ch)
         return bytes(bt)
+    # (19/11) arredi dei piani generati (tools/build/decor_gfx.py): nei file del tema dei piani GFX(2c-1), sul pavimento del tema
+    import decor_gfx
+
+    def theme_grid(tl, i):
+        """griglia 8x16 del tile i di un tema (4 strisce di DN caratteri)"""
+        g = [[0] * 8 for _ in range(16)]
+        for q, (y0, x0) in enumerate(((0, 0), (0, 4), (8, 0), (8, 4))):
+            for y in range(8):
+                v = tl[(q * DN + i) * 8 + y]
+                for x in range(4):
+                    g[y0 + y][x0 + x] = (v >> (6 - 2 * x)) & 3
+        return g
+
+    def decor_tiles(c, tl):
+        bt = bytearray(tl)
+        for n_, gr in decor_gfx.tiles(c, theme_grid(tl, TID["FLOOR"])).items():
+            for q, ch in enumerate(tile_chars(gr)):
+                o = (q * DN + TID[n_]) * 8
+                bt[o:o + 8] = bytes(ch)
+        return bytes(bt)
+    decor_gfx.write_inc(os.path.join(ROOT, "out", "work", "decor.inc"), TID)
     for (n, c, boss, m), r in zip(sets, raws):
         if boss and c < CHAPTERS:
             tl = cboss_tiles(c)
         else:
             tl = boss_t if boss else cave_t if c in caves else swamp_t if c in swamps else dun_t
+        if not boss and c in decor_gfx.CHAPTERS:
+            tl = decor_tiles(c, tl)
         files.append(tl + b"".join(mon_bytes(m)) + info_bytes(r, INFO))
     global GFX_DUN_AT
     GFX_DUN_AT = GFX_DUN_END - len(files[0])

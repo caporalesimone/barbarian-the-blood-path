@@ -44,7 +44,10 @@ for c in 1 2 3; do                  # (19/11) meccaniche dei boss dei capitoli 1
     64tass -a -b $INC src/game/ovl_boss$c.asm -o out/work/ovl_boss$c.bin -l out/work/ovl_boss$c.lbl -L out/work/ovl_boss$c.lst > out/work/ovl_boss$c.log 2>&1 || { grep -v '^$' out/work/ovl_boss$c.log | head -20; exit 1; }
 done
 64tass -a -b $INC src/game/ovl_final.asm -o out/work/ovl_final.bin -l out/work/ovl_final.lbl -L out/work/ovl_final.lst > out/work/ovl_final.log 2>&1 || { grep -v '^$' out/work/ovl_final.log | head -20; exit 1; }   # (19/11) codice del piano 20: coda di GFX8 (bundle.py)
-64tass -a -b $INC src/game/gen_citadel.asm -o out/work/gen_cit.bin -l out/work/gen_cit.lbl -L out/work/gen_cit.lst > out/work/gen_cit.log 2>&1 || { grep -v '^$' out/work/gen_cit.log | head -20; exit 1; }   # (19/11) cittadella: coda di GFX7 (bundle.py)
+for c in 1 2 3 4; do                # (19/11) arredi dei piani generati (capitolo 4: anche la cittadella): code di GFX1, 3, 5, 7
+    64tass -a -b $INC -D DK_CHAP=$c src/game/ovl_decor.asm -o out/work/ovl_decor$c.bin -l out/work/ovl_decor$c.lbl -L out/work/ovl_decor$c.lst > out/work/ovl_decor$c.log 2>&1 || { grep -v '^$' out/work/ovl_decor$c.log | head -20; exit 1; }
+done
+rm -f out/work/gen_cit.bin out/work/gen_cit.lbl out/work/gen_cit.lst out/work/gen_cit.log
 if [ "$CHEATS" = 1 ]; then          # (17/11) menu dei trucchi: modulo CHEATS sul disco (solo debug e test)
     64tass -a $INC src/cheats.asm -o out/work/cheats.prg -l out/work/cheats.lbl -L out/work/cheats.lst > out/work/cheats.log 2>&1 || { grep -v '^$' out/work/cheats.log | head -20; exit 1; }
 else

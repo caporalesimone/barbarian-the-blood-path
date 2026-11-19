@@ -187,6 +187,7 @@ _dun    ldx #63                 ; mostri: nessun percorso in corso (mslide, mslc
         jsr music_dungeon
         jsr floor_types         ; statistiche dei tipi di mostro per questo piano (combat.asm)
         jsr gen_dungeon
+        jsr ovp_decor           ; (19/11) arredi del piano (codice del piano, ovl_decor.asm): prima di mostri e bauli
         jsr chap_ensure         ; (11/11 sera) piani del capitolo negli slot in RAM (letti dal file se si cambia capitolo)
         jsr clear_lvlblk        ; piano rigenerato dal seed (sempre)...
         lda cur_level

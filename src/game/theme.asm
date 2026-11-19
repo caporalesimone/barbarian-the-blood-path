@@ -62,6 +62,8 @@ ovp_tint .byte 0                ; (19/11) colore del boss del capitolo deciso da
 .if OVP_RES
 ovp_init = final_init
 ovp_tick = final_tick
+;(nelle build ARENA e TESTUI 36 niente arredi: le mappe restano quelle del generatore)
+ovp_decor
 ovp_dmg rts
 ovp_kill                        ; build ARENA / TESTUI 36: niente bottino nel piano 20 (come final.asm): C=1 solo li'
         lda cur_level
@@ -75,9 +77,12 @@ ovp_fire rts
 ovp_fire = ui_lever
 .endif
 .else
+ovp_decor:                      ; (19/11) arredi del piano, subito dopo gen_dungeon (ovl_decor.asm)
+        lda #OVJ_DECOR
+        .byte $2c               ; (bit $xxA9: salta il lda dopo)
 ovp_kill:                       ; X = mostro ucciso -> C=1 niente bottino (senza codice del piano: C=0)
         lda #OVJ_KILL
-        .byte $2c               ; (bit $xxA9: salta il lda dopo)
+        .byte $2c
 ovp_tick:
         lda #OVJ_TICK
         .byte $2c

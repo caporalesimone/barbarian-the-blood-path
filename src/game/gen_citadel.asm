@@ -1,14 +1,10 @@
 ; ===================================================================
 ;  gen_citadel.asm - (19/11, TODO M11) passo della CITTADELLA del generatore (capitolo 4; descrizione in gen_io.asm e in
-;  docs/wiki/dungeon.md "Cittadella"). Non sta nel PRG GAME (il programma e il generatore sotto l'I/O sono pieni): e'
-;  assemblato a parte con le etichette del gioco (out/work/game.lbl, tools/build/asm.sh) a GFX_DUN_END e va nella coda del
-;  file del tema dei piani del capitolo (GFX7, tools/build/bundle.py), fra il tema e il brano: entrando in un piano della
-;  cittadella il tema e' sempre letto prima di gen_dungeon, quindi il codice e' in RAM (sotto il KERNAL: gira con $01 = $34
-;  come il generatore, gen_call). Si chiama da gen_dmain (gen_io.asm: jsr cit_finish = GFX_DUN_END).
+;  docs/wiki/dungeon.md "Cittadella"). Non sta nel PRG GAME (il programma e il generatore sotto l'I/O sono pieni): dal 19/11
+;  e' parte del CODICE DEL PIANO del capitolo 4 (src/game/ovl_decor.asm con DK_CHAP = 4, coda di GFX7, copiato a OVP_AT da
+;  gfx_tail prima di gen_dungeon). Gira con $01 = $34 come il generatore (gen_call): $C900 e' RAM anche li'. Si chiama da
+;  gen_dmain (gen_io.asm: jsr cit_finish = OVP_AT + OVJ_GEN). Prima del 19/11 era assemblato da solo per GFX_DUN_END.
 ; ===================================================================
-        .include "../out/work/game.lbl"
-        * = GFX_DUN_END
-        .cerror * != cit_finish, "cittadella: cit_finish (gen_io.asm) diverso da GFX_DUN_END"
 cit_main:
         ldx #44                 ; colonne
 _pr     stx cit_py
@@ -128,5 +124,3 @@ _mn     dex
         rts
 
 cit_9    .byte 0, 1, 2, MAPW, MAPW+1, MAPW+2, 2*MAPW, 2*MAPW+1, 2*MAPW+2    ; quadrato 3x3 dall'angolo in alto a sinistra
-cit_end
-        .cerror cit_end > $fd00, "cittadella: codice oltre $FCFF (FMAP)"
