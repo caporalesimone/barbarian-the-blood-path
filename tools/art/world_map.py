@@ -102,7 +102,8 @@ HUTS = [(112, 104), (128, 96), (140, 114), (120, 118)]
 BELL = (126, 108)
 MILL = (167, 99)                     # centro in basso dell'edificio
 PIER_E = ((187, 110), (197, 110))
-PIER_S = ((138, 131), (138, 126))
+PIER_S = ((150, 128), (150, 104))
+FERRY_GAP = (111, 119)               # (19/11) il tratto del pontile sud che manca: una barca a ogni capo
 # zona 3: cime (x apice, y base, larghezza); fila nord-est, fila sud-ovest e cime di mezzo
 PEAKS = [(272, 68, 16), (288, 78, 20), (306, 86, 18), (323, 94, 22), (339, 99, 18),
          (370, 122, 18), (384, 134, 22), (395, 150, 20), (404, 168, 22), (411, 188, 18), (417, 208, 20),
@@ -340,13 +341,15 @@ FOUNTAIN = [".SSS.", "SScSS", ".SSS."]
 BRIDGE_S = ["kkkkkkkkkkkkk", "sssssssssssss", "SSSSSSSSSSSSS", "SDDSSDDSSSDDS", "D..DD..DSD..D"]
 HUT = ["...kkk...", "..kTTtk..", ".kTTTttk.", "kTTTTtttk", "kkkkkkkkk", ".klBlnlk.", ".klBlnlk.",
        ".kkkkkkk.", "..B...B..", "..B...B.."]
-BELLF = ["BBBBB", "B.a.B", "BaaaB", "B...B", "B...B"]
-MILL_S = ["....kkkkkkkk...", "...kmmmmmmMMk..", "..kmmMmmmmmMMk.", ".kmmmmmmMmmmMMk", "kmmmmmmmmmmmmMk",
-          "kkkkkkkkkkkkkkk", ".kpppBpppBpppk.", ".kpyyBpppBpyyk.", ".kpppBpppBpppk.", ".kpppBpBBBpppk.",
-          ".kpppBpBkBpppk.", ".kkkkkkkkkkkkk."]
-WHEEL = ["..BBBBB..", ".B..b..B.", "B.b.b.b.B", "B..bbb..B", "Bbbbbbbb.", "B..bbb..B", "B.b.b.b.B",
-         ".B..b..B.", "..BBBBB.."]
-BOAT = ["...B....", "...B....", "lllllll.", "kbbbbbbk", ".kkkkkk."]
+# (19/11, tema voodoo del capitolo 2) l'albero delle bottiglie (cura), la casa degli spiriti (al posto del mulino) con la
+# maschera-teschio cornuta sulla porta, il grande idolo nell'acqua, il traghetto (due barche ai capi del pontile spezzato)
+BTREE = ["B..B..B", ".B.B.B.", "nB.B.Bn", "n.BBB.n", "..BlB..", "n..l..n", "...l...", "..BlB.."]
+MILL_S = ["......k........", ".....kMk.......", "....kMMMk......", "...kMmMMMk.....", "..kMMmmMMMk....",
+          ".kMmmMMmMMMk...", "kMmMMmMMmMMMk..", "kkkkkkkkkkkkk..", ".kbBbbBbbBbk...", ".kbbsWWsbbBk...",
+          ".kbBsuusBbbk...", ".kbbbkkbbBbk...", ".kbBbkkbbbbk...", ".kkkkkkkkkkk..."]
+WHEEL = ["s.....s", "ss...ss", ".sWWWs.", ".WuWuW.", ".WWWWW.", "..WkW..", "...b...", "...b...", "...b...",
+         "...b...", "..BbB.."]
+BOAT = ["...n....", "..lll...", "ll.l.ll.", "kbbbbbbk", ".kkkkkk."]
 SHIP = [".....e.....", ".....k.....", "...WWkW....", "..WWWkWW...", "..WWWkWWW..", ".WWWWkWWWh.",
         ".hhhhkhhhh.", ".....k.....", "bbbbbbbbbbb", ".bBBBBBBBk.", "..kkkkkkk.."]
 TENT = ["....kee..", "....k....", "...klk...", "..kllbk..", ".klllbbk.", "kllBlbbbk", "kkkkkkkkk"]
@@ -648,7 +651,7 @@ def obj(by, fn):
     objs.append((by, fn))
 
 
-# --- zona 2: lago, palafitte, mulino, pontili
+# --- zona 2: lago, palafitte, casa degli spiriti e idolo, pontili, traghetto
 def walkways():
     for a, b in zip(HUTS, HUTS[1:] + HUTS[:1]):
         for x, y in line((a[0], a[1] + 1), (b[0], b[1] + 1)):
@@ -660,7 +663,7 @@ obj(0, walkways)
 for hx, hy in HUTS:
     obj(hy, lambda hx=hx, hy=hy: stamp_cb(hx, hy + 3, HUT))
     block_rect(hx - 5, hy - 7, hx + 5, hy + 4)
-obj(BELL[1], lambda: stamp_cb(BELL[0], BELL[1] + 2, BELLF))
+obj(BELL[1], lambda: stamp_cb(BELL[0], BELL[1] + 2, BTREE))
 mx, my = MILL
 obj(my, lambda: stamp_cb(mx, my, MILL_S))
 obj(my + 1, lambda: stamp_cb(mx - 10, my - 1, WHEEL))
@@ -670,6 +673,8 @@ block_rect(mx - 15, my - 12, mx + 8, my + 1)
 def piers():
     for (a, b) in (PIER_E, PIER_S):
         for x, y in line(a, b):
+            if a == PIER_S[0] and FERRY_GAP[0] <= y <= FERRY_GAP[1]:
+                continue                     # il pontile spezzato: si passa con il traghetto
             put(x, y, "LBRN")
             if a[1] == b[1]:
                 put(x, y + 1, "DBRN")
@@ -678,7 +683,8 @@ def piers():
 
 
 obj(1, piers)
-obj(113, lambda: stamp(PIER_E[0][0] + 1, 110, BOAT))
+obj(FERRY_GAP[1] + 2, lambda: stamp(PIER_S[0][0] - 3, FERRY_GAP[1] - 2, BOAT))
+obj(FERRY_GAP[0] + 2, lambda: stamp(PIER_S[0][0] - 3, FERRY_GAP[0] - 2, BOAT))
 
 # --- zona 1: villaggio
 gx0, gy0, gx1, gy1 = GRAVEYARD

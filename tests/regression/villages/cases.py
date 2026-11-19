@@ -158,13 +158,17 @@ def ferry(ctx):
     t = g.tile(*boats[0])
     check(g.b(L["solidtab"] + t) == 2, "ferry tile %d: solidtab %d (expected 2: walkable, NPC barrier)" % (t, g.b(L["solidtab"] + t)))
     (ax, ay), (bx, by) = boats
-    g.teleport(ax, ay - 1); g.frames(3)                 # on the deck above the first ferry
-    check(g.ptile() == (ax, ay - 1), "hero not on the deck above the ferry: %s" % (g.ptile(),))
+
+    def landing(x, y):                                  # the walkway tile next to a ferry (north or south)
+        return next((x, y + d) for d in (-1, 1) if rows[y + d][x] in "d:+")
+    la, lb = landing(ax, ay), landing(bx, by)
+    g.teleport(*la); g.frames(3)
+    check(g.ptile() == la, "hero not on the walkway next to the ferry: %s" % (g.ptile(),))
     g.teleport(ax, ay); g.frames(3)
     check(g.ptile() == (bx, by), "stepping on the ferry %s: hero at %s, expected the other ferry %s" % ((ax, ay), g.ptile(), (bx, by)))
     g.frames(20)
     check(g.ptile() == (bx, by), "the hero did not stay on the ferry he arrived on: %s" % (g.ptile(),))
-    g.teleport(bx, by - 1); g.frames(3)
+    g.teleport(*lb); g.frames(3)
     g.teleport(bx, by); g.frames(3)
     check(g.ptile() == (ax, ay), "back: hero at %s, expected %s" % (g.ptile(), (ax, ay)))
     g.screenshot(os.path.join(SHOTS, "ferry.png"))

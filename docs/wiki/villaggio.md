@@ -33,14 +33,15 @@ non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview
   `BRIDGE`). Le prime stesure vengono da
   `lab/villaggi/concept_maps.py`; da lì in poi la fonte è il testo.
 - **Traghetto** (19/11, richiesta del committente; oggi solo Bad Water): due barche grandi (3 caselle: prua e poppa solide,
-  in mezzo la casella `F` calpestabile con la tettoia e la lanterna) ormeggiate **sotto** due piattaforme ai lati opposti del
-  villaggio (sotto l'alchimista a ovest, sotto il portale a sud-est). **Salendo su una barca si arriva sull'altra**:
+  in mezzo la casella `F` calpestabile con la tettoia e la lanterna) ai due capi del **lungo pontile che parte dalla riva**
+  (colonna 12), **spezzato** (righe 31-37 acqua): appena entrato nel villaggio il PG prende la barca per arrivare alle
+  palafitte (prima stesura del 19/11: barche sotto l'alchimista e sotto il portale). **Salendo su una barca si arriva sull'altra**:
   `tile_trigger` (`src/game/game.asm`) confronta la casella del PG con `tk_boat` (4 byte dell'intestazione: x1, y1, x2, y2;
   tutti 0 = nessun traghetto), mette il PG sull'altra (`put_hero`, ridisegno completo, suono del portale, lampo ciano del
   bordo) e segna la casella d'arrivo come già raggiunta (`lptx`/`lpty`): niente ritorno subito; per ripartire si scende e si
   risale. Il tile ha la **barriera per gli NPC** (`solidtab` bit 1: calpestabile per il PG, mai per chi vaga, `npc_free`;
   nel modulo del villaggio il campo "solido" vale `"npc"`). Le altre barche del villaggio sono state tolte: le uniche barche
-  sono i traghetti. Test `VIL-FERRY-10`.
+  sono i traghetti. La raggiungibilità di `gen_maps.py` conta il salto fra le due caselle `F`. Test `VIL-FERRY-10`.
 - **Settori degli NPC** (17/11): ogni villaggio ha fino a 16 rettangoli (`SECTORS` in `tools/build/villages.py`, nell'intestazione
   del file) dove vivono gli NPC che vagano; vedi [quest](quests.md). `gen_maps.py` controlla misure e caselle percorribili e stampa
   il massimo di settori in una finestra di gioco (oltre 5 NPC visibili non si disegna).

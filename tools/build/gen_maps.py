@@ -158,17 +158,19 @@ def build(c, v):
     assert len(ex) == 2, "%s: uscita del capitolo: 2 caselle (=)" % path
     assert m.count(G.TTID["FOUNTAIN"]) >= 1, "%s: manca la fontana" % path
     # (15/11) tutto raggiungibile dall'ingresso: porte (dalla casella davanti), cripta, fontana, uscita, portale e il suo arrivo
+    # (19/11) anche con il traghetto: dalla casella F di una barca si arriva su quella dell'altra
+    boats = where("F")
+    hop = {boats[0]: boats[1], boats[1]: boats[0]} if len(boats) == 2 else {}
     seen, todo = {(nx, ny)}, [(nx, ny)]
     while todo:
         x, y = todo.pop()
-        for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+        for q in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)) + ((hop[(x, y)],) if (x, y) in hop else ()):
             if q not in seen and 0 <= q[0] < W and 0 <= q[1] < H and m[q[1] * W + q[0]] in walk:
                 seen.add(q); todo.append(q)
     need = {"portale": (px, py), "arrivo dal portale": (px, py + 1), "cripta": (sx, sy), "uscita": ex[0], "uscita 2": ex[1]}
     for n in ("DSMITH", "DALCH", "DHOME"):
         i = m.index(G.TTID[n]); need["davanti a " + n] = (i % W, i // W + 1)
     need["fontana"] = next((i % W, i // W) for i in range(W * H) if m[i] == G.TTID["FOUNTAIN"])
-    boats = where("F")
     assert len(boats) in (0, 2), "%s: traghetto: 0 o 2 caselle F" % path
     for k, q in enumerate(boats):
         need["traghetto %d" % (k + 1)] = q

@@ -12,8 +12,9 @@
 ; bordo sud) unite da passerelle (: est-ovest, d nord-sud). Centro: l'albero delle bottiglie (cura: i moccoli ~).
 ; Nord-ovest il fabbro, ovest l'alchimista, sud-est la locanda, due capanne. Nord-est, su un isolotto di fango, la casa
 ; degli spiriti con il grande idolo: il cancello d'ossa (>) e' l'ingresso della palude. Ingresso del villaggio dalla riva
-; a sud-ovest; uscita in fondo al pontile est; portale sulla piattaforma a sud-est. I due traghetti sono ormeggiati SOTTO
-; le piattaforme dell'alchimista (ovest) e del portale (sud-est): si sale dall'assito, la casella F sotto.
+; a sud-ovest; uscita in fondo al pontile est; portale sulla piattaforma a sud-est. Il lungo pontile che parte dalla riva
+; (colonna 12) e' SPEZZATO (righe 31-37 acqua): ai due capi le barche del traghetto (F). Appena entrato nel villaggio il PG
+; prende la barca per arrivare alle palafitte (19/11, richiesta del committente).
 ; Prima stesura: lab/villaggi/concept_maps.py (15/11); da qui in poi la fonte e' questo file.
 %%TTT%TTTTTTT%%*%T%%TT%)%TTT%%TTTT)%T(TT)%%%)T%T
 %TT%TTTTT)%*TTTTTTT%TTT%T*%%%TTT)%T%(%%%%TTTT)TT
@@ -44,19 +45,19 @@ T(*rcrrr))%%d%%%%%((%%d%%%%%%%%%%)%%%)))%%%d%%%T
 %%%W7LWW%)%%d%T)%%%%%%d%%T%%(%%%%(%%%%%%%%%d@%%T
 T)%+++++i%%@d%%%(%%%%%d%%%%%%%%%%%%%%%%T%%%d%%TT
 %%@++++++:::d@%%*%%(%%::::::d%%%%%%%%%%%*%(d%)%T
-TT)AtFYAA%%%d%%%%%%%%@%%%%%%drcrrrrrrr%%%%%d@%%%
-T*%%%%%%%T)%d%(%%%%%%%%%%%%%dRRRRRRRRR%%%%%d%TTT
-TT)%%%%%%%%%d%%%)%)%%%%%%*%%dWoWWHWWoW%%%%@d%)TT
-TT%%*%%%%%%(d(%)*%%%%%%%%%%@w+++++++++i%%%%d%%%%
-TT%%%%%%%%%%d%rrrrr%%%%)%%%%+++++++++++:::(d%%T)
-%T%%%%%%%%%%d%RRRRR%%%%%%%%@+i+++++++s+%%d%d%)%T
-%T%%%%%%%%%%d%WoDoW%%%%%%%%%AAAAAAAAAAA%%d(d%%TT
-%T%%%%%%%%%%d%+++++w%%%*()%%%%*(%%%%%%%||d|d|%%T
-%T%%(%*%**%%d%++++++%(%%%%%(%%T)%%%%%%%i+++++%TT
-T%%%%%*%%%%%d%AAdAAA%%%%%%%(*%T)%%%%%%%+++P++%T%
+TT)AAAAAA%%%d%%%%%%%%@%%%%%%drcrrrrrrr%%%%%d@%%%
+T*%%%%%%%T)tFY(%%%%%%%%%%%%%dRRRRRRRRR%%%%%d%TTT
+TT)%%%%%%%%%%%%%)%)%%%%%%*%%dWoWWHWWoW%%%%@d%)TT
+TT%%*%%%%%%(%(%)*%%%%%%%%%%@w+++++++++i%%%%d%%%%
+TT%%%%%%%%%%%%rrrrr%%%%)%%%%+++++++++++:::(d%%T)
+%T%%%%%%%%%%%%RRRRR%%%%%%%%@+i+++++++s+%%d%d%)%T
+%T%%%%%%%%%%%%WoDoW%%%%%%%%%AAAAAAAAAAA%%d(d%%TT
+%T%%%%%%%%%%%%+++++w%%%*()%%%%*(%%%%%%%||d|d|%%T
+%T%%(%*%**%%%%++++++%(%%%%%(%%T)%%%%%%%i+++++%TT
+T%%%%%*%%%%tFYAAdAAA%%%%%%%(*%T)%%%%%%%+++P++%T%
 TT%%%%%%%%)%d%%%d%%)%%%%T%%%%%%%%%%%%%%++++++%%T
 T%%%%)%(%)%%d%%.d....`)%)%%%%%%%%%%%%%%+++++w%*T
-%%%%BB.B``B%d%...`....%%)%,%T)%%)%%)T*%AtFYAA%%%
+%%%%BB.B``B%d%...`....%%)%,%T)%%)%%)T*%AAAAAA%%%
 ,..B,...B...d.B,...`B.,`.,.%%%%)%T))(%%(%%%%%%%%
 ,.`,.`.``..,d...`..,,..,.,`.B`..,)%%%%)%%%%%%%%%
 ...BB.:::::::.`.`,.,,.B.B......,..`,.%%%%%T%%%)%
