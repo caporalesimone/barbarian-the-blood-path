@@ -6,6 +6,14 @@ Copyright © 2026 - Simone Caporale
 semplificato, villaggi o livelli statici in più, trama principale e sottotrama del titolo. Nessun codice, nessuna
 simulazione: in fondo l'elenco degli open point da verificare (sezione 6, "per Opus").
 
+> **Nota del 19/11 (committente): la storia va rivista per intero.** Dopo questa analisi sono cambiati luoghi e nemici:
+> il villaggio del capitolo 2 si chiama **Bad Water** (non più "Blackwater Mill"), il tema del mulino e del mugnaio è
+> abbandonato per un tema **voodoo** (il boss del capitolo 2 diventa *Mother Stitch, the Dollmaker*, con i suoi feticci),
+> i piani del boss dei capitoli 1–3 hanno luogo e forma propri (cripta, isola nella palude, grotta semi crollata) e i boss
+> hanno meccaniche proprie. I passi di questo documento che parlano del mulino e del mugnaio **non valgono più** e non sono
+> stati riscritti. **Trama, quest e intro (LORE, `data/lore.txt`) si rivedono in toto quando questi sviluppi sono pronti**
+> (TODO H1, H4), non prima.
+
 Fonti lette per il contesto: `docs/wiki/villaggio.md`, `docs/wiki/dungeon.md`, `docs/wiki/mostri.md`, `docs/wiki/oggetti.md`,
 `docs/wiki/combattimento.md`, `docs/wiki/FORMATO_DATI.md`, `docs/wiki/tecnica.md`, `out/work/memory-map/program-game.html`, `src/lobby.asm`
 (`menu_help`), `src/ovlt.asm`, `src/game/prefetch.asm`, `tools/build/gen_gfx.py`.

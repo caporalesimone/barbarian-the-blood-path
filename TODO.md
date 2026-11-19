@@ -414,6 +414,10 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   (15/11, committente) **Fatto**: interlinea fra le righe di testo (una riga vuota; due fra i paragrafi: `LINE_GAP`/`PARA_GAP` in
   `gen_lore.py`) e **fire del joystick 2 tenuto = velocità doppia** ([intro](docs/wiki/intro.md)). La storia passa da 220 a 292 righe
   (4 min 13 s a velocità normale): **il 4% di accelerazione di sopra non è stato fatto** (non richiesto): resta da decidere.
+- (19/11, committente) **Storia e intro da rivedere in toto quando gli sviluppi del capitolo 2 sono pronti**: Bad Water al
+  posto di "Blackwater Mill", tema voodoo, boss *Mother Stitch, the Dollmaker* al posto del mugnaio, piani dei boss con luogo
+  proprio. `docs/wiki/quests.md` ha una nota in testa: i suoi passi sul mulino non valgono più e non sono stati riscritti;
+  `data/lore.txt` cita ancora il mulino.
 
 ### M1 Sequenza dei capitoli: cosa resta ([capitoli](docs/wiki/capitoli.md)) — L
 - **Effetto grafico del passaggio** di capitolo (oggi: schermo nero, poi le schermate di salvataggio e caricamento): tbd.
