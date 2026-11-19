@@ -181,7 +181,7 @@ riscuote.
   | Tratto | Piani | Ingresso | Villaggio |
   |---|---|---|---|
   | The Crypt | 1–7 | porta della cripta nel cimitero | Aldric's Crossing (il villaggio attuale) |
-  | The Iron Deep | 8–14 | il pozzo della miniera | BadWater Mill |
+  | The Iron Deep | 8–14 | il pozzo della miniera | Bad Water |
   | The Red Stair | 15–20 | la breccia nelle mura | The Last Camp |
   Le scale in fondo al piano 7 e al piano 14 sono **chiuse da un cancello** finché la quest del tratto non è compiuta;
   poi si apre e, in più, si sblocca l'ingresso diretto dal villaggio seguente. I tre villaggi sono **tre mappe
@@ -236,7 +236,7 @@ Il barbaro è l'ultimo del **clan della Mano Rossa** (Red Hand), un clan delle m
 preso quasi per intero una generazione fa: i prigionieri sono stati portati giù per il sentiero. Il barbaro era un
 bambino, nascosto in un pozzo. Nel suo clan "the blood path" ha un secondo significato: il **giuramento di sangue**,
 la strada che un guerriero deve percorrere fino in fondo per vendicare i suoi. Il titolo è tutte e due le cose: il
-sentiero fisico (le scale) e il giuramento. La sottotrama si scopre a pezzi: a BadWater Mill il capitano
+sentiero fisico (le scale) e il giuramento. La sottotrama si scopre a pezzi: a Bad Water il capitano
 riconosce il marchio del clan sul braccio del barbaro; nella grotta nascosta al piano 10 c'è il vessillo della Mano
 Rossa, lasciato dai prigionieri; al Last Camp, la monaca dell'ordine di Aldric rivela che il sangue del clan era il
 cibo preferito del demone e che il barbaro è **l'ultimo pasto che gli manca**: il demone lo aspetta, e la via per il
@@ -261,12 +261,12 @@ villaggio, al piano finale e cambiando capitolo.
 | Villaggio | Aspetto | Contenuto | NPC |
 |---|---|---|---|
 | **Aldric's Crossing** (c'è già) | il villaggio di oggi (mappa del 10/11): torrente con due ponti e un laghetto, cimitero con la cripta a nord-ovest, chiesa con il campanile | fabbro, alchimista, locanda con il baule (sud-est, opposta alla cripta), fontana, portale (l'armaiolo è stato tolto il 09/11) | Father Osric (prete, davanti alla chiesa o alla fontana), Hilde (vedova, davanti a una casa a ovest), Grom (fabbro, davanti alla bottega: dal 09/11 a est del ponte nord) |
-| **BadWater Mill** | villaggio di mugnai sul fiume: ruota del mulino, moli di legno, magazzini; palette scura (notte o pioggia: stessi 4 colori, tonalità diverse) | fabbro, alchimista, il **pozzo della miniera** (ingresso del tratto 2, tile `T_TSTAIRS` ridisegnato come bocca di pozzo con argano), portale, fontana; niente casa | Captain Rook (comandante della guarnigione, sulla piazza), the Hermit (eremita, in una capanna fuori dal villaggio), Mirra (alchimista, davanti alla bottega) |
+| **Bad Water** | villaggio di mugnai sul fiume: ruota del mulino, moli di legno, magazzini; palette scura (notte o pioggia: stessi 4 colori, tonalità diverse) | fabbro, alchimista, il **pozzo della miniera** (ingresso del tratto 2, tile `T_TSTAIRS` ridisegnato come bocca di pozzo con argano), portale, fontana; niente casa | Captain Rook (comandante della guarnigione, sulla piazza), the Hermit (eremita, in una capanna fuori dal villaggio), Mirra (alchimista, davanti alla bottega) |
 | **The Last Camp** | accampamento assediato davanti alle mura della cittadella sotterranea: palizzata, tende, fuochi, carri; palette rossa (tema 4, quello della copertina) | fabbro da campo, alchimista da campo (merce alta), la **breccia nelle mura** (ingresso del tratto 3), portale, fontana (un altare dell'ordine); niente casa | Sister Ingrid (ordine di Saint Aldric, all'altare), the Dying Knight (cavaliere ferito davanti a una tenda) |
 
 Costruzione: stessi 45 tile del set villaggio **rinumerati per file**: i tile con un ruolo nel codice (porte `S L H`,
 `T_TSTAIRS`, fontana, portale, erba, strade, acqua, ponte) tengono il numero; i tile decorativi (lapidi, croce,
-cripta, fieno, botti, bancarelle) in BadWater Mill diventano ruota, moli, casse, reti; nel Last Camp tende,
+cripta, fieno, botti, bancarelle) in Bad Water diventano ruota, moli, casse, reti; nel Last Camp tende,
 palizzata, fuoco, carri. Niente charset nuovo: il set del villaggio è pieno e ogni villaggio ha il suo file, quindi
 si ridisegnano gli stessi codici. Le mappe si generano come l'attuale (`tools/build/gen_maps.py` con uno script di strade
 per villaggio) con i controlli di raggiungibilità che ci sono già.
@@ -344,11 +344,11 @@ dice), obiettivo, cosa fare in pratica, premio, quest seguente. I testi tra virg
   ribs. I saw it."
 - Obiettivo: uccidere il boss del piano 7 (**forzato** skeleton king) e prendere la chiave del cancello (oggetto
   di quest: non entra nello zaino, è un flag).
-- Premio: il cancello del piano 7 si apre; **BadWater Mill** raggiungibile (strada a est di Aldric's Crossing, e
+- Premio: il cancello del piano 7 si apre; **Bad Water** raggiungibile (strada a est di Aldric's Crossing, e
   il pozzo della miniera porta al piano 8); 200 oro.
-- Seguente: Q6 (a BadWater Mill).
+- Seguente: Q6 (a Bad Water).
 
-**Q6 — Ashes of the Red Hand** (Captain Rook, BadWater Mill)
+**Q6 — Ashes of the Red Hand** (Captain Rook, Bad Water)
 - Lore: "That mark on your arm. Red Hand. We buried what was left of them, thirty winters ago, a day's march from
   here. The ones they took went down the path. Some scratched their names on the walls of the tenth floor."
 - Obiettivo: trovare la grotta nascosta al piano 10 (muro crepato in una stanza: con la quest attiva, Fire lo apre)
@@ -356,14 +356,14 @@ dice), obiettivo, cosa fare in pratica, premio, quest seguente. I testi tra virg
 - Premio: **Rage** ("the fury of the Red Hand") + copper ring.
 - Seguente: Q7.
 
-**Q7 — Bone Harvest** (the Hermit, BadWater Mill)
+**Q7 — Bone Harvest** (the Hermit, Bad Water)
 - Lore: "The dead walk because something below keeps calling. Put twenty of them down and the calling gets
   quieter. I can hear it, you know."
 - Obiettivo: uccidere 20 mostri della famiglia zombie (zombie e lich) in qualunque piano.
 - Premio: 3 healing potion (yellow) + 250 oro; l'eremita da ora cura gratis (sua capanna = fontana).
 - Seguente: Q8.
 
-**Q8 — The Demon's Forge** (Grom, che è venuto a BadWater Mill con il PG; oppure il fabbro locale)
+**Q8 — The Demon's Forge** (Grom, che è venuto a Bad Water con il PG; oppure il fabbro locale)
 - Lore: "Below the twelfth floor a demon keeps a forge. The clan's hammers came from down there, before. Bring me
   his heart and I'll make the blade that goes with your smash."
 - Obiettivo: uccidere Khargul the Smith (boss forzato del piano 12, famiglia demon).
@@ -410,7 +410,7 @@ dice), obiettivo, cosa fare in pratica, premio, quest seguente. I testi tra virg
 **S2 — Grave Robbers** (Hilde, dopo Q4)
 - Obiettivo: uccidere 10 fallen warchief. Premio: medium shield +1 e 150 oro.
 
-**S3 — The Miller's Debt** (Mirra, BadWater Mill)
+**S3 — The Miller's Debt** (Mirra, Bad Water)
 - Obiettivo: portare 500 oro (la quest toglie l'oro). Premio: chain mail +1 e l'alchimista vende greater healing
   da subito. (Quest "a pagamento": un modo di spendere l'oro, che oggi avanza: `BILANCIAMENTO.md` sez. 12.)
 
@@ -513,7 +513,7 @@ Sono stime per analogia con il codice esistente (`ov_stash` 407 B, `menu_help` 1
   nel tema del piano, oppure il messaggio "the iron gate is sealed" sulla barra e il PG non scende).
 
 ### 3.6 Villaggi multipli
-- `cur_level` 0 = Aldric's Crossing, 21 = BadWater Mill, 22 = The Last Camp (oltre `MAXLEVEL`, prima dell'Abisso
+- `cur_level` 0 = Aldric's Crossing, 21 = Bad Water, 22 = The Last Camp (oltre `MAXLEVEL`, prima dell'Abisso
   se l'Abisso userà 21+: da coordinare con quel progetto). `c_loc` salva il luogo, `c_vil` il villaggio "di casa"
   del tratto (dove riportano il portale e la morte).
 - La cache a `$E000` ospita **un villaggio alla volta**: cambiare villaggio = rileggere `GFXn` (11 blocchi, ~3 s).
@@ -529,7 +529,7 @@ Sono stime per analogia con il codice esistente (`ov_stash` 407 B, `menu_help` 1
      distanze ([Villaggio](villaggio.md#menu-del-villaggio-modulo-menu-1111)).
   3. **Per ogni villaggio nuovo**: la mappa non usa `$C900-$CFFF` (zona 1 del MENU).
   4. Misura finale: `lab64 test regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
-- Le scale del piano 1 portano ad Aldric's Crossing; le scale su del piano 8 al pozzo di BadWater Mill; quelle
+- Le scale del piano 1 portano ad Aldric's Crossing; le scale su del piano 8 al pozzo di Bad Water; quelle
   del piano 15 alla breccia del Last Camp. Dal piano 7 al piano 8 e dal 14 al 15 si continua con le scale normali
   (il dungeon resta contiguo; i tre ingressi sono scorciatoie).
 
@@ -583,7 +583,7 @@ Sono stime per analogia con il codice esistente (`ov_stash` 407 B, `menu_help` 1
 | 6 | Cancelli ai piani 7 e 14, boss forzati (7, 12, 14) | ~80 B | — | piccolo | 1 |
 | 7 | Stanze fisse (4 modelli) in `gen_io` + 2–4 tile + `c_gver` + `test_gen` | ~350 B sotto l'I/O | — | medio-grande | 6 |
 | 8 | Stanze dal seed (4 arredi) | ~200 B sotto l'I/O | — | medio | 7 |
-| 9 | Villaggio 2 BadWater Mill: mappa, tile ridisegnati, NPC, brano | ~150 B (cambio villaggio) | 11 blocchi + brano 2 | grande (grafica e mappa) | 4 |
+| 9 | Villaggio 2 Bad Water: mappa, tile ridisegnati, NPC, brano | ~150 B (cambio villaggio) | 11 blocchi + brano 2 | grande (grafica e mappa) | 4 |
 | 10 | Villaggio 3 The Last Camp | — (stesso codice) | 11 blocchi + brano 2 | grande (grafica) | 9 |
 | 11 | ~~Spostamento di `FMAP`~~ fatto il 10/11 (`$FD00`); lo spazio per gli sprite NPC resta da trovare (178 B liberi dopo GFX0) | 0 | — | piccolo | 4 |
 | 12 | Testi delle 15 quest (inglese), manuale, wiki | — | — | medio | tutto |
@@ -598,7 +598,7 @@ Ordine proposto (ogni tappa lascia il gioco funzionante e consegnabile):
    Con **le quest fattibili nel villaggio attuale**: Q1, Q2, Q3, S2 e una Q4 provvisoria senza la stanza fissa
    (Torvald in una stanza normale del piano 5 scelta dal seed). Il sistema si vede in gioco presto.
 2. Passi 6, 7 (cancelli, boss forzati, stanze fisse: Q4 definitiva, Q6, Q8) e 8 (stanze dal seed, S1).
-3. Passi 9 e 11 (BadWater Mill: Q5–Q9), poi 10 (The Last Camp: Q10, Q11, A1).
+3. Passi 9 e 11 (Bad Water: Q5–Q9), poi 10 (The Last Camp: Q10, Q11, A1).
 4. Passi 12 e 13 dentro ogni tappa (regola della wiki); il manuale alla fine.
 
 ---
@@ -606,7 +606,7 @@ Ordine proposto (ogni tappa lascia il gioco funzionante e consegnabile):
 ## 5. Decisioni da prendere (committente)
 1. Abilità **solo** via quest (con il livello come minimo) o quest facoltativa con l'abilità che arriva comunque al
    livello (più permissivo, trama meno obbligata)? La proposta è "solo via quest".
-2. Tre villaggi (proposta) o due? Con due: tratti 1–10 e 11–20, BadWater Mill diventa il campo; si risparmia un
+2. Tre villaggi (proposta) o due? Con due: tratti 1–10 e 11–20, Bad Water diventa il campo; si risparmia un
    villaggio (grafica, 11 blocchi, un brano) e due quest si fondono.
 3. Numero delle quest: 11 + 3 + 1. Si può scendere a 10 togliendo S3 e fondendo Q7 in Q6.
 4. Q3 (la pergamena): la quest dà le prime pergamene e **sblocca la vendita**; oggi la pergamena è in vendita dal
@@ -842,7 +842,7 @@ file `GENn` per tratto) è superato dai capitoli: decisioni del committente del 
 | Capitolo | Piani | Stile | Grafica |
 |---|---|---|---|
 | 1 Aldric's Crossing | 1–5 | **dungeon di oggi** (stanze e corridoi) | mattoni (temi 1, 2) |
-| 2 BadWater Mill | 6–10 | **palude** a mappa unica 2 × 2 (design sotto) | acqua verde scura, fango, assi |
+| 2 Bad Water | 6–10 | **palude** a mappa unica 2 × 2 (design sotto) | acqua verde scura, fango, assi |
 | 3 The Last Camp | 11–15 | **grotte**: il piano 11 in una grotta di roccia **innevata**, 12–14 grotte di roccia | roccia con la neve sulle creste (11), roccia nuda (12–14) |
 | 4 The Throne of Ruin | 16–20 | **cittadella** (BSP simmetrico, come sopra) | pietra squadrata, colonne |
 
@@ -1220,7 +1220,7 @@ blocchi, su 347 liberi.
 
 ## 13. Decisioni del 07/11 (fine mattina)
 
-- **Tre villaggi** (Aldric's Crossing, BadWater Mill, The Last Camp). **Tre generatori** (`GEN1` stanze, `GEN2`
+- **Tre villaggi** (Aldric's Crossing, Bad Water, The Last Camp). **Tre generatori** (`GEN1` stanze, `GEN2`
   grotte, `GEN3` cittadella).
 - **Il compagno (Torvald) non cammina** durante il gioco: posizione fissa (accanto alle scale di arrivo del piano e
   in un punto fisso del villaggio del tratto).
@@ -1319,7 +1319,7 @@ in X e Y** con `$D017`/`$D01D`: costo 0 B, un mostro diventa 48 × 42 px):
 | 6 | Il cancello di ferro | "two iron gates" | `FENCE` + `WALL` (3 × 2), disegno più grande |
 | 7 | **La mano rossa** | capitolo "the red hand" | forma nuova, 5 × 5 celle, colore rosso |
 | 8 | Il bambino nel pozzo | "a boy hid in a well" | pozzo (tile `FOUNT` senza acqua) + sprite piccolo |
-| 9 | Il mulino di BadWater | secondo villaggio | caratteri nuovi (4 × 4) |
+| 9 | Il mulino di Bad Water | secondo villaggio | caratteri nuovi (4 × 4) |
 | 10 | L'ingresso della miniera | "through the mine" | caratteri nuovi (4 × 3) |
 | 11 | Le scale con il sangue | "the last of them" | `STAIRSD` su `FLOORB` (3 × 2) |
 | 12 | Il barbaro, di spalle, davanti alla porta | chiusura | sprite del PG ×2 + porta in caratteri |

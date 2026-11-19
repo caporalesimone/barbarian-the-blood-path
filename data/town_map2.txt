@@ -1,4 +1,4 @@
-; Mappa del villaggio del capitolo 2 (48x48): BadWater Mill, palafitte su un lago nero. Una lettera per casella (tools/build/gen_maps.py).
+; Mappa del villaggio del capitolo 2 (48x48): Bad Water, palafitte su un lago nero. Una lettera per casella (tools/build/gen_maps.py).
 ; Le lettere sono i POSTI dei tile (gli stessi del villaggio 1); qui disegnano i tile di questo villaggio
 ; (tools/build/vil2_*.py). E=ingresso  P=posto del portale  ==uscita del capitolo (2 caselle). Legenda:
 ;  `=Puddle  d=Gangway  D=Hut door  %=Black water  (=Scum  )=Reeds  H=dhome  t=Boat (bow)  Y=Boat (stern)

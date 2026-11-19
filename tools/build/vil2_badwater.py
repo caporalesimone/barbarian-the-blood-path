@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Villaggio del capitolo 2: BADWATER MILL, un villaggio di palafitte su un lago nero (15/11, TODO Z2).
+"""Villaggio del capitolo 2: BAD WATER, un villaggio di palafitte su un lago nero (15/11, TODO Z2).
 Niente piazza, niente fiume, niente fontana: pontili e passerelle sull'acqua, capanne su pali, barche, il grande mulino con
 la ruota (l'ingresso del sotterraneo e' la botola della sua cantina allagata), la campana degli annegati (cura).
 Colori: 0 nero (l'acqua), 1 marrone (legno scuro, fango), 2 arancio (legno illuminato), 3 verde (alghe, canne, lumi)."""
 from tileart import A, grid, put, hline, vline, noise, over, canvas, cut, rnd
 
 PAL = (0, 9, 8, 5)
-NAME = "BadWater Mill"
+NAME = "Bad Water"
 HEAL = "the drowned bell"
 
 DECK = A("22212222", "22212222", "22212222", "11111111", "22222122", "22222122", "22222122", "11111111",

@@ -238,7 +238,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `DEATH-10` | death on level 20 (throne room): village, half gold, deepest level 20 kept |
 | `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900; a wave of the final boss from that code; level 19 no level code; village: MENU again at $C900 (19/11) |
 | `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 a stop and 2 Skeletons; regeneration while they live |
-| `OVP-12` | level 10, The Miller of BadWater (GFX4): charge, blow, uncovered (hits x2); 2 Drowned under half life, once |
+| `OVP-12` | level 10, The Miller of Bad Water (GFX4): charge, blow, uncovered (hits x2); 2 Drowned under half life, once |
 | `OVP-13` | level 15, Varok the Oathbreaker (GFX6): warning and charge along the row; the shield halves the hits, not when stunned |
 | `THRONE-10` | throne room: north wall closed, boss killed -> wall open, epic chest without key, lever -> portal |
 | `EMU-10` | vc64web: real boot from the disk (LOAD, POKE 1020,1, RUN): START with Krill, GAME and LOBBY loaded, menu shown |
@@ -383,7 +383,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MENU-11` | ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
 | `VIL-TWN-11` | village 1 (Aldric's Crossing): header in town_k, solid tiles, colours, map, hero at the entry |
-| `VIL-TWN-12` | village 2 (BadWater Mill): header in town_k, solid tiles, colours, map, hero at the entry |
+| `VIL-TWN-12` | village 2 (Bad Water): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-13` | village 3 (The Last Camp): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-14` | village 4 (Ruin's Gate): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-15` | village 5 (The City of the Abyss): header in town_k, solid tiles, colours, map, hero at the entry |

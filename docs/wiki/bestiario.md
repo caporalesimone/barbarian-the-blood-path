@@ -21,7 +21,7 @@ Richiesta del committente (15/11): "disegna i mostri per capitolo oltre che i bo
 | Capitolo | Tipo 1 (stat. Fallen) | 2 (Skeleton) | 3 (Zombie) | 4 (Demon) | 5 (Fallen Warchief) | 6 (Skeleton King) | 7 (Lich) | 8 (Balrog) | Posto del boss (9) |
 |---|---|---|---|---|---|---|---|---|---|
 | 1 | Fallen (10) | Skeleton (1) | Zombie (13) | Demon (4) | Fallen Warchief (3) | Skeleton King (7) | Lich (14) | Balrog (8) | dungeon: Lord of Ruin (2); piano 5: The Hollow Abbot (14) |
-| 2 | Drowned (3) | Bog Crawler (5) | Mire Witchling (4) | Will-o'-Wisp (13) | Drowned Hulk (14) | Crawler Queen (13) | Hag of the Mere (10) | Corpse Light (7) | dungeon: Lord of Ruin; piano 10: The Miller of BadWater (8) |
+| 2 | Drowned (3) | Bog Crawler (5) | Mire Witchling (4) | Will-o'-Wisp (13) | Drowned Hulk (14) | Crawler Queen (13) | Hag of the Mere (10) | Corpse Light (7) | dungeon: Lord of Ruin; piano 10: The Miller of Bad Water (8) |
 | 3 | Ash Ghoul (12) | Bone Archer (1) | Hellhound (2) | Frost Wight (14) | Pyre Ghoul (8) | Bone Marksman (7) | Hellhound Alpha (10) | Wight Lord (3) | dungeon: Lord of Ruin; piano 15: Varok the Oathbreaker (7) |
 | 4 | Imp (10) | Blood Knight (2) | Gargoyle (12) | Cultist (4) | Imp Overseer (8) | Blood Champion (4) | Stone Gargoyle (15) | High Cultist (7) | Lord of Ruin (2) (piano 20, sala del trono) |
 
@@ -85,7 +85,7 @@ Colonne (README in `data/monsters/README.md`): `id`, `chapter`, `tier` (`base`, 
 | Capitolo (profondità) | Comuni | Forti (stesso sprite con un'aggiunta, altro colore) | Boss |
 |---|---|---|---|
 | 1 — Aldric's Crossing (1–5) | Fallen, Skeleton, Zombie, Demon (**oggi**) | Fallen Warchief, Skeleton King, Lich, Balrog (oggi) | **The Hollow Abbot** (nuovo) |
-| 2 — BadWater Mill (6–10) | Drowned, Bog Crawler, Mire Witchling, Will-o'-Wisp (15/11) | Drowned Hulk, Crawler Queen, Hag of the Mere, Corpse Light | **The Miller of BadWater** |
+| 2 — Bad Water (6–10) | Drowned, Bog Crawler, Mire Witchling, Will-o'-Wisp (15/11) | Drowned Hulk, Crawler Queen, Hag of the Mere, Corpse Light | **The Miller of Bad Water** |
 | 3 — The Last Camp (11–15) | Ash Ghoul, Bone Archer, Hellhound, Frost Wight (15/11) | Pyre Ghoul, Bone Marksman, Hellhound Alpha, Wight Lord | **Varok the Oathbreaker** |
 | 4 — The Throne of Ruin (16–20) | Imp, Blood Knight, Gargoyle, Cultist (15/11) | Imp Overseer, Blood Champion, Stone Gargoyle, High Cultist | **Lord of Ruin** (il boss finale di oggi, spostato qui) |
 | Abisso (21–255) | tutti i bestiari precedenti, mescolati (proposta) | idem | boss con nome a ogni piano; nessun boss di capitolo (D-CAP-4) |
@@ -96,7 +96,7 @@ o passano al capitolo 2 (che oggi ha tre concept propri) o si abbassa la loro pr
 ### Concept dei boss
 - **The Hollow Abbot** (capitolo 1, mappa finale del capitolo): l'abate della cripta sotto Aldric's Crossing, uno scheletro
   in una tonaca marcia con un turibolo di fuoco verde. Al 66% e al 33% della vita rialza 2 scheletri. Immune al blocco.
-- **The Miller of BadWater** (capitolo 2): un mugnaio gigante posseduto; il mulino allagato è la mappa finale. Mena una
+- **The Miller of Bad Water** (capitolo 2): un mugnaio gigante posseduto; il mulino allagato è la mappa finale. Mena una
   macina legata a una catena (colpo ad area come Whirlwind) e chiama 2 Drowned.
 - **Varok the Oathbreaker** (capitolo 3): il cavaliere che ha tradito l'ultimo accampamento. Carica (scatto verso il PG) e
   colpo di scudo (stordisce); chiama 2 Ash Ghoul.
@@ -112,7 +112,7 @@ cosa sola e si legge dallo schermo (un avviso prima del colpo). Le stime sono a 
 | Boss | Capitolo | Meccanica | Cosa insegna | Come si vede | Cosa serve nel codice (stima) |
 |---|---|---|---|---|---|
 | **The Hollow Abbot** | 1 | **Evoca i morti**: al 66% e al 33% della vita si ferma, agita il turibolo e fa alzare 2 scheletri. Finché uno scheletro evocato è vivo, l'abate **si rigenera** (1 punto vita ogni mezzo secondo) | scegliere il bersaglio: prima gli evocati | l'abate lampeggia verde per 1 s, bordo verde; gli scheletri compaiono accanto a lui | soglie di vita (2 byte), `spawn` di 2 mostri a piano avviato, rigenerazione a tempo: ~120 B |
-| **The Miller of BadWater** | 2 | **Il giro della macina**: ogni 4 s carica il colpo (1 s fermo), poi colpisce **tutto attorno a sé** entro 2 caselle (danno doppio); dopo il colpo resta **scoperto** 1,5 s (subisce danno doppio). Al 50% chiama 2 Drowned | entrare e uscire a tempo: colpire nella finestra, scappare durante la carica | il mugnaio lampeggia bianco mentre carica; un anello (lo sprite del Whirlwind) al colpo | stato a tempo (carica / colpo / scoperto), colpo ad area riusando `fz_*` del Whirlwind: ~150 B |
+| **The Miller of Bad Water** | 2 | **Il giro della macina**: ogni 4 s carica il colpo (1 s fermo), poi colpisce **tutto attorno a sé** entro 2 caselle (danno doppio); dopo il colpo resta **scoperto** 1,5 s (subisce danno doppio). Al 50% chiama 2 Drowned | entrare e uscire a tempo: colpire nella finestra, scappare durante la carica | il mugnaio lampeggia bianco mentre carica; un anello (lo sprite del Whirlwind) al colpo | stato a tempo (carica / colpo / scoperto), colpo ad area riusando `fz_*` del Whirlwind: ~150 B |
 | **Varok the Oathbreaker** | 3 | **La carica**: quando è allineato con l'eroe (stessa riga o colonna) parte in linea retta a velocità doppia finché non urta; se urta **un muro** resta stordito 2 s (unico momento in cui lo scudo è giù). Fuori dallo stordimento lo **scudo** dimezza i danni | usare la sala: mettersi davanti a un muro e scansarsi | Varok lampeggia giallo e si ferma mezzo secondo prima di partire; da stordito è grigio | movimento in linea con velocità propria, urto, stato stordito, riduzione del danno: ~180 B |
 | **Lord of Ruin** | 4 | **Il pentacolo brucia** (in più a quello che fa oggi): al 75%, 50% e 25% le linee della stella sul pavimento si accendono per 3 s e chi ci sta sopra prende danno; all'ultimo quarto di vita è più veloce | leggere il pavimento, non solo il boss | le linee della stella cambiano colore (già tile propri: `T_FSTAR`) prima di bruciare | soglie, timer, danno sulla casella (il tile è già riconoscibile): ~100 B |
 
@@ -130,7 +130,7 @@ in gioco e da tarare**):
 | Boss | Come è fatta | Scelte mie (19/11) |
 |---|---|---|
 | The Hollow Abbot | sotto **2/3** e **1/3** della vita: fermo 50 fotogrammi (1 s), lampeggia verde, bordo verde, suono del portale; poi 2 **Skeleton** (tipo 2) sulle caselle di pavimento accanto, svegli. Finché uno è vivo: +1 vita ogni **25** fotogrammi (verde a tratti), mai oltre il massimo. Al rientro le soglie già superate non si ripetono | nessun limite al numero di rigenerazioni; gli scheletri sono mostri normali del piano 5 |
-| The Miller of BadWater | sveglio: **200** fotogrammi di attesa, **50** di carica (fermo, lampeggia bianco), il colpo: se il PG è entro **36 px** (2 caselle + mezzo corpo) **due attacchi** normali (`mon_attack`: tiro per colpire e danno del mostro), lampo bianco del bordo; poi **75** fotogrammi scoperto (fermo, lampeggia azzurro, colpi del PG ×2). Sotto metà vita **2 Drowned** (tipo 1), una volta | "danno doppio" = due attacchi con il loro tiro per colpire (non un colpo sicuro); niente anello del Whirlwind: solo il lampo del bordo |
+| The Miller of Bad Water | sveglio: **200** fotogrammi di attesa, **50** di carica (fermo, lampeggia bianco), il colpo: se il PG è entro **36 px** (2 caselle + mezzo corpo) **due attacchi** normali (`mon_attack`: tiro per colpire e danno del mostro), lampo bianco del bordo; poi **75** fotogrammi scoperto (fermo, lampeggia azzurro, colpi del PG ×2). Sotto metà vita **2 Drowned** (tipo 1), una volta | "danno doppio" = due attacchi con il loro tiro per colpire (non un colpo sicuro); niente anello del Whirlwind: solo il lampo del bordo |
 | Varok the Oathbreaker | sveglio, libero: allineato con il PG (scarto < 8 px su un asse) a **32–143 px**: avviso **25** fotogrammi (fermo, lampeggia giallo), poi carica a **4 px** per fotogramma nella direzione del PG (massimo 60 fotogrammi): contro un muro **stordito 100** fotogrammi (grigio, lampo del bordo), se raggiunge il PG **due attacchi** e si ferma; dopo ogni carica **75** fotogrammi di pausa. Lo scudo dimezza i colpi del PG (almeno 1), non da stordito | la carica non passa sugli spigoli (nessuno scivolamento); gli altri mostri non la fermano |
 
 Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco** (19/11): leggibilità degli avvisi, difficoltà.
@@ -151,7 +151,7 @@ Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco**
 
 Ogni capitolo coi suoi mostri alla sua profondità globale (PG di riferimento, numeri provvisori dei concept): i comuni
 si vincono sempre; i boss di capitolo con 4 pozioni della zona sono **sbilanciati**: The Hollow Abbot (profondità 6)
-**13%** (troppo forte), The Miller of BadWater (11) **97%**, Varok the Oathbreaker (16) **100%** (troppo deboli), Lord of
+**13%** (troppo forte), The Miller of Bad Water (11) **97%**, Varok the Oathbreaker (16) **100%** (troppo deboli), Lord of
 Ruin (20) 93%. Da tarare con `tools/simulators/fit_rules.py` (obiettivo dei boss: ~65–75%, `docs/wiki/balancing-guide.md`) prima di
 disegnarli.
 
