@@ -12,7 +12,7 @@ e `data/chapters.yaml` (capitoli).
 | `cmp_rules.py` | confronti fra configurazioni |
 | `sim_durability.py` | durabilità generata e vita utile degli oggetti |
 | `sim_chest.py` | chestLevel e probabilità di ogni oggetto per piano |
-| `sim_gold.py` | oro raccoglibile nel dungeon e oro dei bauli epici |
+| `sim_gold.py` | oro trovato e valore di vendita per piano (Monte Carlo sul censimento `data/floor_census.json` dei piani veri, fatto da `tools/vice/floor_census.py`), bauli epici, borsello |
 | `chapters.py` | (11/11) bilanciamento **per capitolo** (`data/chapters.yaml`): per ogni piano del capitolo, alla profondità globale, vittorie del PG di riferimento, chestLevel, oro; boss della mappa finale; Abisso a campione fino al piano 255 (`--chapter N --fights N --step N --csv f`) |
 
 Il codice vero si misura con l'arena (`tools/vice/arena.py` + `src/test/arena.asm`, in VICE). `tests/test_balance.py`

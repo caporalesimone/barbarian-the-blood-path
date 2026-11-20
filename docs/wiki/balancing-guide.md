@@ -34,7 +34,7 @@ progetto che valgono sempre sono in `CLAUDE.md`; i numeri correnti e le decision
 | `tools/simulators/fit_rules.py` | **taratura automatica** delle curve dei mostri (`growth.*`, `final_boss_hp_mult`, tabella dell'Abisso) sugli obiettivi del § 3 | 10–25 min | dopo un cambio che sposta la forza del PG (nuova arma, abilità, pozioni) |
 | `tools/simulators/cmp_rules.py` | confronto A/B di due set di regole sugli stessi combattimenti | minuti | per decidere fra due varianti |
 | `tools/simulators/sim_chest.py` | chestLevel e probabilità di ogni oggetto per piano (riproduce `gen_item`) | secondi | bottino, livelli oggetto, magia |
-| `tools/simulators/sim_gold.py` | oro raccoglibile per piano (mostri + bauli) e oro dei bauli epici | secondi | prezzi, oro iniziale, premi |
+| `tools/simulators/sim_gold.py` | oro trovato e vendita per piano (Monte Carlo sul censimento dei piani veri, 20/11), bauli epici, borsello | secondi | prezzi, oro iniziale, premi |
 | `tools/simulators/sim_durability.py` | durabilità generata, usura per piano, piani per riparazione, rottura contro i boss | ~1 min | durabilità, usura, soglia degli avvisi |
 | `tools/vice/arena.py` | **il codice vero in VICE**: una stanza, PG configurabile, 1–8 mostri, N combattimenti; vittorie, durata, vita, danni, pozioni, xp, usura (`--dur`) | 10–60 s per serie | per verificare che il simulatore non menta su un caso preciso |
 | `tests/regression/balance/test_balance.py` | guardia di regressione (PG di riferimento vince ai piani 1–19, PG di livello 1 perde al piano 10, vita crescente) | 2 s | in ogni build |
@@ -171,8 +171,9 @@ parametri, poi arena/test per confermare che codice e simulatore coincidono.
 - `sim_chest.py --n 20000`: per ogni piano, probabilità di ogni oggetto e della magia; gli obiettivi sono "quasi
   solo base, ogni tanto il salto". Parametri: `chest_level` (per piano, bonus del tipo, forte, vita), `loot`
   (pesi delle categorie, `bonus.per_loot_level`), `boss.loot_level_add`.
-- `sim_gold.py`: oro raccoglibile per piano e totale; `final_gold` = 10% del totale / 4 (bauli epici).
-  Dopo un cambio a `spawn` o `drops` rilanciarlo.
+- `sim_gold.py` (20/11): oro trovato e valore di vendita per piano, Monte Carlo sul censimento dei piani veri
+  (`tools/vice/floor_census.py`); `final_gold` = 10% del totale / 4 (bauli epici); borsello a gradini. Dopo un cambio a `drops`,
+  `chests` o ai prezzi rilanciarlo; dopo un cambio a `spawn` o al generatore (`GVER`) rifare prima il censimento.
 - Attenzione al **ritmo dei tesori** (uno su cinque mostri, max 15 bauli per piano): non è simulato; si
   giudica giocando.
 

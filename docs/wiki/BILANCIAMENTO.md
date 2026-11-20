@@ -307,8 +307,8 @@ Cosa è cambiato rispetto al progetto e come il simulatore lo segue (`tools/simu
   del piano 20 (il codice usa `floor_types` del piano attuale): così anche nel simulatore.
 - **Equipaggiamento di riferimento** riallineato al bottino reale (`tools/simulators/sim_chest.py`): magia 0 fino al
   piano 4, +1 dal 5 al 13, +2 dal 14 (prima: +1 dal 3, +2 dal 9, +3 dal 14). L'acquisto delle armi grosse
-  (vichinga 2400, piastre 3600) è dettato dall'oro (`tools/simulators/sim_gold.py`: ~3 400 oro raccolti entro il piano 8,
-  ~17 000 in tutto il dungeon), i tesori danno quasi solo oggetti base e magia.
+  (vichinga 2400, piastre 3600) è dettato dall'oro (`tools/simulators/sim_gold.py`, 20/11: ~3 000 oro trovati entro il piano 8,
+  ~14 300 nei piani 1–19), i tesori danno quasi solo oggetti base e magia.
 - **Durabilità** (`tools/simulators/sim_durability.py`): un'arma media dura ~3–4 piani di combattimento prima di una
   riparazione (25% del prezzo); le armature il doppio. Non entra nei combattimenti simulati (un oggetto rotto
   è un caso raro che il giocatore ripara in città).
@@ -337,7 +337,17 @@ piano 19 (11–22 mostri + boss), chestLevel = 8 × piano, tutto raccolto: 1962 
 23 321 in tutto sui 10 piani (nei piani normali: 178 al piano 1, 862 al 10, 1798 al 19). Con il tetto di 10 000 addosso il
 primo piano che non ci sta è il 25.
 
-**Oro piano per piano, 1–100 (10/11, `python3 tools/simulators/sim_gold.py --floors 100 [file.csv]`, Abisso = ipotesi)**: piani 1–19 come
+**Simulazione dell'oro rifatta (20/11, `python3 tools/simulators/sim_gold.py`, report in `out/work/simulators/sim_gold.txt`)**:
+non più medie ma il **censimento dei piani veri** (`tools/vice/floor_census.py`: 24 semi, piani 1–20, tipi dei mostri, boss e bauli
+letti in VICE; `tools/simulators/data/floor_census.json`) e un Monte Carlo delle regole del codice (chiavi disponibili per i bauli,
+vendita del bottino). Oro **trovato**: 915 nel capitolo 1, 3 000 nel 2, 4 300 nel 3, 7 850 nel 4 (di cui 1 720 dei bauli epici);
+cumulato 14 345 ai piani 1–19, 16 065 con il piano 20. Per piano normale: ~220 (cap. 1), ~735 (2), ~1 055 (3), ~1 540 (4); i
+piani dei boss di capitolo (5, 10, 15) danno solo il bottino del boss (35–85 oro). La **vendita** del bottino (a metà prezzo,
+oggi) vale più dell'oro trovato dal capitolo 2 (cumulato con la vendita: 68 800 al piano 20, di cui 23 700 gli oggetti epici):
+per questo la vendita passa a un quarto (decisione del 20/11, [oggetti](oggetti.md#progetto-affissi-unici-e-memoria-2011)).
+Il 10% dell'oro dei piani 1–19 vale ~360 a baule epico (oggi 430). I numeri del 10/11 qui sotto sono superati.
+
+**(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel
 saturo a 255) e poi resta a 3 093 (anche l'oro dei mostri satura a 255); cumulato 257 241 al piano 100. Sono medie con tutto
 raccolto e nessuna spesa; i mostri dell'Abisso sono assunti come quelli del piano 19.
