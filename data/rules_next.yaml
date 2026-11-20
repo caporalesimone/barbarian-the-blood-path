@@ -1,0 +1,45 @@
+# PROPOSTA (20/11): sistema di caratteristiche e difficolta' "next". Il gioco NON lo usa: lo usa solo il simulatore dei profili
+# (tools/simulators/sim_builds.py) per confrontarlo con le regole di oggi (data/rules.yaml). Decisioni del committente (20/11):
+#   FOR = solo danno; DES = probabilita' di colpire (+ CA con il tetto dell'armatura, + cadenza); COS = vita, pozioni piu'
+#   efficaci, danno subito leggermente ridotto; molti piu' punti (4 a livello, anche al livello 1: 80 al livello 20);
+#   caratteristiche iniziali piu' basse; mostri dei primi piani piu' facili, seconda meta' piu' dura; cura delle pozioni in
+#   percentuale della vita massima con un tetto. Tutti i numeri qui sotto sono PUNTI DI PARTENZA da tarare, non decisi.
+#
+# Scala: x = valore - 10 (punti sopra la base). Oltre soft_from punti in una caratteristica ogni punto vale meta' (rendimento
+# decrescente: conviene distribuire). Ogni effetto e' "1 ogni N punti" (divisione per difetto, come sul C64).
+stats:
+  start: {str: 12, dex: 11, con: 12}         # oggi 16/13/15
+  points: {per_level: 4, first: 1, last: 20}  # 4 al livello 1 (creazione) + 4 a ogni livello: 80 al 20
+  soft_from: 30
+  ring_points: 4                             # un anello +N vale N x 4 punti nella caratteristica (oggi +N al modificatore = 2N)
+  str: {dmg_per: 4, dc_per: 4}               # +1 danno ogni 4 punti; CD del Battle Cry +1 ogni 4
+  dex: {att_per: 5, ac_per: 8, speed_per: 2} # +1 ATT ogni 5; +1 CA ogni 8 (tetto dell'armatura: rules.yaml dex_cap); -1 fotogramma
+                                             # di rallentamento ogni 2 (rallentamento iniziale: rules.yaml attack_speed.slow)
+  con: {hp_per_point: 3, potion_pct: 1, potion_max: 30, dr_pct: 0.4, dr_max: 20}
+                                             # +3 vita a punto; pozioni +1% a punto (max +30%); danno subito -0,4% a punto (max -20%)
+  hp: {base: 20, per_level: 6}               # vita = 20 + (livello-1) x 6 + 3 x COS(x)
+
+# Cura delle pozioni: percentuale della vita massima con un tetto (oggi: 20 / 50 / 4xL+40 fissi)
+potions:
+  red:    {pct: 25, max: 30}
+  yellow: {pct: 35, max: 90}
+  violet: {pct: 45, max: 180}
+
+# Mostri: le statistiche del bestiario vengono riportate sul profilo "bilanciato" (stesso tempo per uccidere e stesso danno
+# relativo di oggi), poi spostate da questi obiettivi per piano (indice = piano 0..20, interpolati fra i punti dati).
+# m_hit: probabilita' che il mostro piu' forte del piano colpisca il bilanciato; pg_hit: probabilita' che il bilanciato lo colpisca;
+# hp / dmg: moltiplicatori di difficolta' (1 = come oggi). Primi piani piu' facili, seconda meta' piu' dura.
+monsters:
+  m_hit:  {1: 0.30, 5: 0.35, 10: 0.40, 15: 0.45, 20: 0.50}
+  pg_hit: {1: 0.75, 5: 0.70, 10: 0.65, 15: 0.62, 20: 0.60}
+  hp:     {1: 0.75, 4: 0.85, 8: 1.0, 12: 1.15, 16: 1.3, 20: 1.4}
+  dmg:    {1: 0.70, 4: 0.85, 8: 1.0, 12: 1.15, 16: 1.3, 20: 1.4}
+
+# Profili di PG: quota dei punti per caratteristica (i punti vanno assegnati uno alla volta seguendo le quote), armatura piu'
+# pesante che il profilo indossa (light/medium/heavy) e arma (one: spada a una mano e scudo; ref: quella del riferimento).
+# L'anello del riferimento va sulla caratteristica principale del profilo.
+profiles:
+  forza:        {share: {str: 60, dex: 20, con: 20}, armor: heavy,  weapon: ref, ring: str}
+  destrezza:    {share: {str: 20, dex: 60, con: 20}, armor: light,  weapon: one, ring: dex}
+  costituzione: {share: {str: 20, dex: 20, con: 60}, armor: heavy,  weapon: ref, ring: con}
+  bilanciato:   {share: {str: 34, dex: 33, con: 33}, armor: medium, weapon: ref, ring: str}

@@ -81,7 +81,7 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
 - Regole del combattimento: `data/rules.yaml`; mondo, bottino, negozi: `data/balance.yaml`. Il gioco usa i dati
   generati da `tools/build/gen_db.py` (`out/work/db.asm`).
 - `tools/simulators/` contiene TUTTI gli script di simulazione delle partite (`sim_rules.py` combattimenti e progressione,
-  `fit_rules.py` taratura, `cmp_rules.py` confronti, `rules.py` modello condiviso, `sim_durability.py`, `sim_gold.py`, `sim_floor.py`,
+  `fit_rules.py` taratura, `cmp_rules.py` confronti, `rules.py` modello condiviso, `sim_durability.py`, `sim_gold.py`, `sim_floor.py`, `sim_builds.py` (profili di PG, proposta `data/rules_next.yaml`),
   `sim_chest.py`; report in `out/work/simulators/`). **Ogni cambio di regola nel codice o negli yaml va riportato nello stesso
   lavoro nei simulatori**: il simulatore deve riprodurre il gioco com'è (differenze note: `docs/wiki/BILANCIAMENTO.md`,
   sezione "Differenze tra simulatore e codice").

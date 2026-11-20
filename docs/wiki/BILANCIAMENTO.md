@@ -358,6 +358,28 @@ dipendono dai gruppi forti, non dalle pozioni). Quindi la cintura a 8 conta nei 
 o all'inizio del 3 (decisione P3) toglie i ritorni del capitolo 3. Limiti: politica di ritorno semplice (`--return-below`),
 nessuna cura fra i combattimenti (da verificare nel gioco), pozioni dei bauli contate a fine piano.
 
+**Profili di PG e proposta "next" (20/11, `python3 tools/simulators/sim_builds.py --runs 100`, TODO B18)**: gli stessi giri di
+piano di `sim_floor.py` (cintura 4) per cinque PG: il riferimento e quattro profili di `data/rules_next.yaml` (forza, destrezza,
+costituzione 60/20/20 dei punti, bilanciato 34/33/33; il destrezza porta armatura leggera e spada con scudo). Metrica: morti +
+ritorni in città per piano, media per capitolo.
+
+| regole | riferimento | forza | destrezza | costituzione | bilanciato |
+|---|---|---|---|---|---|
+| oggi, cap. 1 / 2 / 3 / 4 | 0,49 / 0,46 / 0,39 / 0,17 | 0,38 / 0,44 / 0,28 / 0,06 | 0,38 / 0,84 / 1,02 / 1,30 | 0,61 / 0,83 / 1,35 / 2,06 | 0,40 / 0,58 / 0,58 / 0,11 |
+| oggi, boss finale vinto | 100% | 100% | 74% | 32% | 98% |
+| next, cap. 1 / 2 / 3 / 4 | — | 0,61 / 0,92 / 1,38 / 1,46 | 0,54 / 0,73 / 0,79 / 0,65 | 0,41 / 0,80 / 1,12 / 1,76 | 0,56 / 0,60 / 0,89 / 0,69 |
+| next, boss finale vinto | — | 14% | 66% | 6% | 47% |
+
+Con le regole di oggi la difficoltà **cala** dal capitolo 3 e il PG forza è il migliore (il riferimento è quasi un PG forza):
+FOR dà attacco e danno, i profili destrezza e costituzione restano indietro e peggiorano verso la fine. I mostri dei piani 15–19
+colpiscono il riferimento l'80–90% delle volte (non calano: misura del 20/11), ma il danno è basso rispetto alla vita e alle cure.
+La proposta (primo giro, numeri da tarare) tiene il bilanciato fra 0,56 e 0,89 per tutto il gioco, ma: i primi piani non sono
+ancora più facili di oggi (la cura in % della vita dà alla rossa 7 punti al livello 1 contro 20); forza e costituzione puri
+restano indietro e la destrezza è il profilo migliore (tre effetti: colpire, CA, cadenza). Modello dei mostri della proposta:
+attacco e CA spostati in modo che i colpi a segno medi sul bilanciato siano gli obiettivi per piano, vita e danno scalati per
+avere lo stesso tempo per uccidere e lo stesso danno relativo di oggi, poi per i moltiplicatori di difficoltà. Limiti: un solo
+equipaggiamento per piano (il riferimento, adattato), niente affissi, combattimento fermo (niente arco né movimento).
+
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel
 saturo a 255) e poi resta a 3 093 (anche l'oro dei mostri satura a 255); cumulato 257 241 al piano 100. Sono medie con tutto

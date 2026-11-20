@@ -134,6 +134,7 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                     d = int(m.st["dmg"].roll(rng, times=2 if r == 2 else 1) * m.st["dmg_mult"])
                     if t < rage_until:
                         d //= 2
+                    d = d * (1000 - getattr(hero, "dr10", 0)) // 1000    # (20/11) COS: danno subito ridotto (rules_next.yaml)
                     d = max(1, d)
                     hp -= d
                     st["taken"] += d
@@ -146,7 +147,8 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
         if nxt <= t and alive:
             if pots and hp < pc["drink_below"] * hero.hpmax and t >= pot_ready:
                 kind = pots.pop(0)
-                h = min(hero.hpmax - hp, potion_heal(pc[kind], hero))
+                heal = hero.heal(kind) if hasattr(hero, "heal") else potion_heal(pc[kind], hero)   # (20/11) rules_next
+                h = min(hero.hpmax - hp, heal)
                 hp += h
                 st["healed"] += h
                 st["pots"] += 1

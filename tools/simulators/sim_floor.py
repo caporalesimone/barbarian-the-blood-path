@@ -67,10 +67,12 @@ def encounters(comp, rng):
     return out
 
 
-def run(floor, size, rng):
-    """one floor run: (deaths, returns, potions drunk)"""
+def run(floor, size, rng, hero=None, mon=None, stats=None):
+    """one floor run: (deaths, returns, potions drunk). hero: the hero (default: reference hero of the floor); mon(name, floor,
+    boss) -> monster stats (default rules.monster); stats: dict filled by sim_rules.fight (20/11, sim_builds.py)"""
     lv = RU.R["reference"][floor].get("level", floor)
-    hero = S.ref_hero(floor, lv)
+    hero = hero or S.ref_hero(floor, lv)
+    mon = mon or (lambda n, f, boss: RU.monster(n, f, boss=boss))
     comp = CENSUS["seeds"][rng.choice(list(CENSUS["seeds"]))][str(floor)]
     full = belt(floor, size)
     pots = list(full)
@@ -80,10 +82,10 @@ def run(floor, size, rng):
     found_per_kill = B["drops"]["outcome"]["chest"] / 100 * POT_W
     enc = encounters(comp, rng)
     for names, boss_idx in enc:
-        mons = [RU.monster(n, floor, boss=(i == boss_idx)) for i, n in enumerate(names)]
+        mons = [mon(n, floor, i == boss_idx) for i, n in enumerate(names)]
         left = []
         before = len(pots)
-        r, _, hp = S.fight(hero, mons, rng, potions=pots, hp0=hp, left=left)
+        r, _, hp = S.fight(hero, mons, rng, potions=pots, hp0=hp, left=left, stats=stats)
         drunk += before - len(left)
         pots = left
         if r != "win":
