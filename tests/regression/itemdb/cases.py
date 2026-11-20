@@ -132,3 +132,11 @@ def inn_two(ctx):
     pk = g.mem(L["c_pack"], 8)
     check(L["I_SMALL_SHIELD"] in pk and L["I_SWORD"] in pk, "pack %s (expected the shield and the sword)" % pk)
     inn_close(g)
+
+
+@test("ITEMDB-NEXT-10", "next item database (data/items/next, proposal of 20/11): full names <= 37, unique names <= 16, affix values fit a byte, ids fit the record")
+def next_db(ctx):
+    import items_model as M
+    bad = M.check()
+    check(not bad, "; ".join(bad[:4]) + (" (+%d)" % (len(bad) - 4) if len(bad) > 4 else ""))
+    check(len(M.BASES) == 31, "%d bases (expected 31, decision O1)" % len(M.BASES))

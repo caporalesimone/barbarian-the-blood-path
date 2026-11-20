@@ -214,7 +214,13 @@ dal livello del PG ([Villaggio](villaggio.md#negozi-enter_shop-sh_draw)). Prezzi
 ## Progetto: affissi, unici e memoria (20/11)
 
 **Progetto, non ancora nel codice** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
-database proposto andrà in `data/items/` e il modello nei simulatori (fase 1 del piano delle quest). Quest e premi: [Quest](quests.md).
+database proposto sta in `data/items/next/` (il gioco non lo legge ancora): `bases.tsv` (31 basi, colonna `status`: `today` o
+`new`), `prefixes.tsv` (19), `suffixes.tsv` (32), `uniques.tsv` (16, con la finestra `min_level`..`max_level`: prima stesura da
+approvare, chiarimento C5) e `affix_rules.yaml` (qualità, scelta degli affissi, formula del valore, anelli, negozi, limiti dei
+nomi). Modello: `tools/simulators/items_model.py` (generazione, nome completo, prezzo, controlli: test `ITEMDB-NEXT-10`).
+Struttura e scala vengono dai file di DevilutionX (Diablo 1: `itemdat.tsv`, `item_prefixes.tsv`, `item_suffixes.tsv`,
+`unique_itemdat.tsv`), riscalate alle nostre regole; i nomi degli affissi sono parole comuni di quelle tabelle, quelli degli
+unici sono nostri. I file di DevilutionX non sono nel repository. Quest e premi: [Quest](quests.md).
 
 ### Regole decise
 | ID | Regola |

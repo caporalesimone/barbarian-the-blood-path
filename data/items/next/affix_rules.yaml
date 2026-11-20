@@ -1,0 +1,41 @@
+# Rules of magic and unique items (20/11, owner's decisions O2, O3, O9, O10, O12, E3: docs/wiki/oggetti.md, "Progetto: affissi,
+# unici e memoria"). PROPOSAL: the game does not read this folder yet; tools/simulators/items_model.py does. First draft
+# numbers, to be tuned with the simulators.
+quality:
+  # O2: magic with probability base + per_t x T (T = chest level / 8), at most max (percent)
+  magic: {base: 8, per_t: 3, max: 60}
+  # among magic items: only a prefix / only a suffix / both (percent)
+  affixes: {prefix: 40, suffix: 40, both: 20}
+  # O3 + O12: a unique inside its level window [min_level, max_level], one item in N (O3 said 200 outside windows: the
+  # random chance now lives only inside the windows, higher; to be tuned)
+  unique_one_in: 60
+affix_choice:
+  # a row can appear if min_level <= item level and min_level >= item level x low_fraction (Diablo 1-like window;
+  # if no row qualifies, every row with min_level <= item level)
+  low_fraction: 0.5
+  # rows exist up to item level 20 (the Abyss rows come with TODO H3): the window uses min(level, top_level)
+  top_level: 20
+value:
+  # O10: value = value1 .. value2 (rolled), times the level scale; fixed for ever once the item is born, saved in the item
+  # (1 byte: at most 255). Scale: 1 up to scale_from, then +per_level for each level above (the Abyss)
+  scale_from: 20
+  per_level: 0.10
+  max: 255
+  # powers that do not grow with the level (percentages, frames, flags)
+  no_scale: [DUR, SPEED, LEECH, INDESTRUCTIBLE]
+  # the check of the data: no value may hit max before this item level
+  check_level: 60
+  # price_add of an affix grows with the rolled value: price_add x value / value1 (value1 = the row's reference)
+rings:
+  # O9: the metal decides the affixes: copper 1 (prefix or suffix), silver 2 (prefix + suffix), gold 2 with at least one
+  # row of the highest min_level available at the item level
+  copper: 1
+  silver: 2
+  gold: 2
+shops:
+  # E3: share of magic goods in the shops, growing with the hero level: base + per_level x level (percent, at most 100)
+  magic: {base: 0, per_level: 6, max: 100}
+names:
+  # O8: the longest full name (prefix + base + suffix) shown on row 22
+  max_full: 37
+  max_unique: 16

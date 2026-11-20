@@ -1,0 +1,33 @@
+name	power	value1	value2	min_level	item_types	chance	price_add	diablo_source	notes
+of strength	STR	1	1	1	weapon,armor,shield,ring	2	200	of strength STR	+N to the STR modifier (like today rings)
+of might	STR	2	2	8	weapon,armor,shield,ring	2	700	of might STR	
+of power	STR	3	3	14	weapon,armor,ring	1	2000	of power STR	
+of dexterity	DEX	1	1	1	weapon,armor,shield,ring	2	200	of dexterity DEX	
+of skill	DEX	2	2	8	weapon,armor,shield,ring	2	700	of skill DEX	
+of accuracy	DEX	3	3	14	weapon,armor,ring	1	2000	of accuracy DEX	
+of vitality	CON	1	1	1	weapon,armor,shield,ring	2	200	of vitality VIT	CON: Diablo vitality
+of zest	CON	2	2	8	weapon,armor,shield,ring	2	700	of zest VIT	
+of vim	CON	3	3	14	armor,shield,ring	1	2000	of vim VIT	
+of the sky	ALL	1	1	10	armor,ring	1	1500	of the sky ATTRIBS	+1 to STR, DEX and CON modifiers
+of the moon	ALL	2	2	18	ring	1	5000	of the moon ATTRIBS	
+of the fox	LIFE	6	6	1	armor,shield,ring	2	150	of the fox LIFE	max HP (flat)
+of the wolf	LIFE	12	12	7	armor,shield,ring	2	500	of the wolf LIFE	
+of the tiger	LIFE	20	20	13	armor,shield,ring	1	1400	of the tiger LIFE	
+of the whale	LIFE	35	35	19	armor	1	3500	of the whale LIFE	
+of health	GETHIT	1	1	2	armor,shield	2	300	of health GETHIT	damage taken -N (min 1)
+of protection	GETHIT	2	2	9	armor,shield	1	900	of protection GETHIT	
+of absorption	GETHIT	3	3	16	armor	1	2500	of absorption GETHIT	
+of piercing	PEN	1	1	1	weapon	2	200	of piercing TARGAC	+N penetration (-AC of the target)
+of puncturing	PEN	2	2	9	weapon	2	800	of puncturing TARGAC	
+of bashing	PEN	3	3	17	weapon	1	2200	of bashing TARGAC	
+of readiness	SPEED	1	1	3	weapon	2	400	of readiness FASTATTACK	rate -N frames
+of swiftness	SPEED	2	2	10	weapon	1	1200	of swiftness FASTATTACK	
+of speed	SPEED	3	3	18	weapon	1	3000	of speed FASTATTACK	
+of sturdiness	DUR	50	50	1	weapon,armor,shield	2	50	of sturdiness DUR	+50% max durability
+of the craft	DUR	100	100	6	weapon,armor,shield	2	150	of craftsmanship DUR	shortened 20/11 (was of craftsmanship)
+of the ages	INDESTRUCTIBLE			18	weapon,armor,shield	1	2000	of the ages INDESTRUCTIBLE	never wears
+of the leech	LEECH	3	3	8	weapon	1	1000	of the leech STEALLIFE	new mechanic: +N% of the damage as HP
+of blood	LEECH	5	5	16	weapon	1	3000	of blood STEALLIFE	new mechanic
+of thorns	THORNS	2	2	4	armor,shield	1	500	of thorns THORNS	new mechanic: attacker takes 2
+of weakness	STR	-1	-1	1	weapon,armor,shield,ring	1	-50	of weakness STR_CURSE	cursed
+of brittleness	DUR	-50	-50	1	weapon,armor,shield	1	-50	of brittleness DUR_CURSE	cursed

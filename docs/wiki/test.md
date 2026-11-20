@@ -269,6 +269,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `ITEMDB-10` | items.tsv: valid table, consumable = potion/scroll, equipment = weapon/armor/shield/ring, weapons 1 or 2 hands |
 | `ITEMDB-11` | the checker refuses a wrong table: shield with hands, duplicate id, missing price, unknown type |
 | `ITEMDB-12` | game data = table: item ids in table order, category, price and the two-handed flag (itfl bit 0) |
+| `ITEMDB-NEXT-10` | next item database (data/items/next, proposal of 20/11): full names <= 37, unique names <= 16, affix values fit a byte, ids fit the record |
 | `INN-2H-10` | inn: shield with a two-handed weapon on: refused (the shield stays in the pack) |
 | `INN-2H-11` | inn: two-handed weapon with a shield on: equipped, the shield and the old weapon go to the pack |
 | `ITEM-10` | 255 generated items, broken weapon, HUD warnings, TOD clock (repair: SHOP-FIX-10) |

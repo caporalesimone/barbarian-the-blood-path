@@ -1,0 +1,20 @@
+name	power	value1	value2	min_level	item_types	chance	price_add	diablo_source	notes
+sharp	ATT_DMG	1	1	1	weapon	3	150	Sharp TOHIT_DAMP	= today magic +1 (weapons)
+fine	ATT_DMG	2	2	6	weapon	3	500	Fine TOHIT_DAMP	= today +2
+warrior's	ATT_DMG	3	3	11	weapon	2	1200	Warrior's TOHIT_DAMP	= today +3 (name 9 chars)
+king's	ATT_DMG	4	4	19	weapon	1	3000	King's TOHIT_DAMP	Abyss / rare
+bronze	ATT	1	1	1	weapon,ring	2	100	Bronze TOHIT	
+iron	ATT	2	2	5	weapon,ring	2	300	Iron TOHIT	
+steel	ATT	3	3	10	weapon,ring	2	800	Steel TOHIT	
+mithril	ATT	4	4	16	weapon,ring	1	2000	Mithril TOHIT	
+jagged	DMG	1	1	2	weapon	2	150	Jagged DAMP	flat damage instead of %
+heavy	DMG	2	2	7	weapon	2	500	Heavy DAMP	
+brutal	DMG	3	3	12	weapon	2	1200	Brutal DAMP	
+savage	DMG	4	4	18	weapon	1	2800	Savage DAMP	
+sturdy	AC	1	1	1	armor,shield	3	150	Fine ACP	= today armor/shield +1
+strong	AC	2	2	6	armor,shield	3	500	Strong ACP	= today +2
+valiant	AC	3	3	11	armor,shield	2	1200	Valiant ACP	= today +3
+holy	AC	4	4	18	armor,shield,ring	1	3000	Holy ACP	also on rings (Diablo: no)
+bent	DMG	-1	-1	1	weapon	1	-50	Bent DAMP_CURSE	cursed: sells for less
+rusted	AC	-1	-1	1	armor,shield	1	-50	Rusted ACP_CURSE	cursed
+dull	ATT_DMG	-1	-1	1	weapon	1	-50	Dull TOHIT_DAMP_CURSE	cursed

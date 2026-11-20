@@ -62,3 +62,9 @@ room). In combat a shield does not count and does not wear with a two-handed wea
 3. `./build.sh`: `gen_db.py` checks name lengths, byte ranges, max 63 items. 4. If it can be sold, add it to a shop pool
 in `data/balance.yaml`; if it is loot, it drops by `ilvl` and the category weights. 5. Run the balancing simulators
 (`docs/wiki/balancing-guide.md`) and update `docs/wiki/oggetti.md`.
+
+## next/ (20/11, proposal)
+The next item database (owner's decisions of 20/11, `docs/wiki/oggetti.md`, "Progetto: affissi, unici e memoria"): 31 bases
+(`bases.tsv`, column `status`: `today` or `new`), prefixes and suffixes (`prefixes.tsv`, `suffixes.tsv`: power, value range,
+minimum level, item types, weight, price added), uniques with their level window (`uniques.tsv`) and the rules
+(`affix_rules.yaml`). **The game does not read this folder yet**: `tools/simulators/items_model.py` does (test `ITEMDB-NEXT-10`).
