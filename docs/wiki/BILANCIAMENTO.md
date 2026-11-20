@@ -389,6 +389,21 @@ Ogni 10 mostri, livello = piano, capitoli 1→4: oggi riferimento 0,71 / 0,43 / 
 0,68 / 0,46. Due livelli in più dimezzano o azzerano la metrica in entrambe le regole (il calo dell'esperienza del gioco ferma il
 farming a ~3 livelli sopra il piano).
 
+**Squilibrio delle caratteristiche (20/11 notte, `tools/simulators/fit_stats.py`)**: con i primi costi della proposta la DES
+valeva fino al 180% del bilanciato (colpire + CA + cadenza) e la FOR il 68% (solo danno, +1 ogni 4 punti). Ricerca su griglia
+(3888 combinazioni, modello analitico, piani 4/8/12/16/19) con l'obiettivo "ogni profilo specializzato ~10% sotto il bilanciato";
+scelti: **FOR +1 danno ogni 2 punti** (era 4), **DES +1 ATT ogni 8** (era 5) e **+1 CA ogni 10** (era 8), cadenza invariata
+(−1 fotogramma ogni 2), **COS +4 vita a punto** (era 3) e **−0,5% di danno subito a punto** (era 0,4, tetto 20%), **rendimento
+dimezzato oltre 24 punti** (era 30). Potenza del profilo / bilanciato (modello): forza 72–99%, destrezza 76–121%,
+costituzione 80–101%. Monte Carlo (`sim_builds.py --runs 100 --rules next`), ogni 10 mostri, capitoli 1→4: forza 0,74 / 0,81 /
+0,90 / 0,88; destrezza 0,90 / 0,89 / 1,02 / 0,90; costituzione 0,59 / 0,80 / 0,90 / 1,19; bilanciato 0,76 / 0,62 / 0,73 / 0,51
+(prima: forza fino a 1,00, destrezza 0,41 al capitolo 4). I tre profili specializzati ora si equivalgono; il bilanciato resta
+avanti (fino a ~2 volte meno morti e ritorni nel capitolo 4) per il rendimento dimezzato: anche senza volerlo (obiettivo "tutti
+uguali", `--margin 0`) la griglia non chiude il divario, quindi dipende dalla regola del rendimento e dagli equipaggiamenti dei
+profili, non dai costi. Le oscillazioni fra piani vengono dai cambi di equipaggiamento (piano 12: spada a due mani per tutti
+tranne la destrezza). Boss rifatti con `--fit-bosses` (vita ×0,68 / ×1,62 / ×0,61 / ×0,4): bilanciato 49 / 58 / 52 / 58%;
+Mother Stitch resta il boss peggiore per i profili specializzati (9–20%: protezione e maledizione tagliano il danno).
+
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel
 saturo a 255) e poi resta a 3 093 (anche l'oro dei mostri satura a 255); cumulato 257 241 al piano 100. Sono medie con tutto
