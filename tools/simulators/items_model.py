@@ -47,15 +47,20 @@ def roll_value(rng, row, level):
         return 1
     v = rng.randint(min(a, b), max(a, b))
     s = 1.0 if row["power"] in RULES["value"]["no_scale"] else scale(level)
-    out = round(v * s) if v > 0 else v
+    out = round(v * s)
     return max(-RULES["value"]["max"], min(RULES["value"]["max"], out))
 
 
 def eligible(rows, cat, level):
     ok = [r for r in rows if cat in r["item_types"].split(",") and _int(r["min_level"]) <= level]
     lo = min(level, RULES["affix_choice"]["top_level"]) * RULES["affix_choice"]["low_fraction"]
-    win = [r for r in ok if _int(r["min_level"]) >= lo]
+    cursed = lambda r: _int(r["value1"]) < 0
+    win = [r for r in ok if _int(r["min_level"]) >= lo or (RULES["affix_choice"].get("cursed_any_level") and cursed(r))]
     return win or ok
+
+
+def eligible_all(rows, cat, level):
+    return [r for r in rows if cat in r["item_types"].split(",") and _int(r["min_level"]) <= level]
 
 
 def pick(rng, rows):
@@ -116,7 +121,13 @@ def gen_item(rng, cl, cat=None, level=None):
             top = max(_int(r["min_level"]) for r in rows)
             if k == "prefix":
                 rows = [r for r in rows if _int(r["min_level"]) == top] or rows
-        row = pick(rng, rows)
+        cur = [r for r in rows if _int(r["value1"]) < 0]
+        pos = [r for r in rows if _int(r["value1"]) >= 0] or \
+            [r for r in eligible_all(PREFIXES if k == "prefix" else SUFFIXES, c, level) if _int(r["value1"]) >= 0]
+        if cur and (not pos or rng.randrange(100) < RULES["affix_choice"]["cursed_share"]):
+            row = pick(rng, cur)
+        else:
+            row = pick(rng, pos)
         if row:
             item[k] = (row, roll_value(rng, row, level))
     if item["prefix"] or item["suffix"]:

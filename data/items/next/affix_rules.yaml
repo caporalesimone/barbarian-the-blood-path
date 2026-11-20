@@ -15,6 +15,10 @@ affix_choice:
   low_fraction: 0.5
   # rows exist up to item level 20 (the Abyss rows come with TODO H3): the window uses min(level, top_level)
   top_level: 20
+  # (20/11, owner) cursed rows (negative value) can appear at every item level: they skip the low_fraction window
+  cursed_any_level: true
+  # share of the affixes that come out cursed (percent), the same at every level
+  cursed_share: 5
 value:
   # O10: value = value1 .. value2 (rolled), times the level scale; fixed for ever once the item is born, saved in the item
   # (1 byte: at most 255). Scale: 1 up to scale_from, then +per_level for each level above (the Abyss)

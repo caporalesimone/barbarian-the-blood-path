@@ -228,7 +228,7 @@ unici sono nostri. I file di DevilutionX non sono nel repository. Quest e premi:
 | O1, O14 | **31 basi**: 13 armi (dagger, sword, viking sword + 7 nuove a una mano + battle axe, maul, great sword a due mani), 11 armature, 4 scudi, 3 anelli; nessuna grafica nuova (le liste mostrano l'icona della categoria) |
 | O2 | Un oggetto è **magico** con probabilità 8% + 3% × T (T = livello del baule / 8), al massimo 60%; fra i magici 40% solo prefisso, 40% solo suffisso, 20% entrambi (da tarare) |
 | O3, O12 | **Unici** con valori fissi (pezzi della storia): garantiti da boss, quest e bauli epici; a caso solo dentro la loro **finestra di livelli**, con probabilità alta; ce ne sono anche a basso livello, utili solo lì |
-| O4 | Affissi **maledetti** rari (peso 1), prezzo ridotto |
+| O4 | Affissi **maledetti** rari (peso 1), prezzo ridotto, **a ogni livello** (20/11: saltano la finestra dei livelli degli affissi) |
 | O5 | Meccaniche nuove subito: vita fissa, danno subito ridotto, cadenza, indistruttibile; **dopo la 2.0**: furto di vita e spine |
 | O6 | **Requisiti** di FOR/DES (`min_str`, `min_dex`): non si equipaggia senza |
 | O7 | Colore del nome: normale bianco, magico azzurro (`UC_MAGIC` = 14, c'è già), unico giallo, maledetto grigio (12: l'11 è "posto vuoto") |
@@ -239,7 +239,7 @@ unici sono nostri. I file di DevilutionX non sono nel repository. Quest e premi:
 | O13 | Basi dell'Abisso con l'Abisso (TODO H3) |
 | E1 | **Vendita a un quarto** del prezzo (come Diablo 1): **fatto il 20/11** (`shop_rules.sell_divisor` = 4 in `balance.yaml`, `SELL_SHIFT` in `db.asm`) |
 | E2, E3 | I negozi comprano tutto; vendono anche oggetti magici, sempre di più con il livello del PG (all'inizio pochi, ai livelli alti solo magici) |
-| E4 | Bauli epici del piano 20: oro casuale in un intervallo ampio, abbastanza per le armi più care e le riparazioni dell'Abisso |
+| E4 | Bauli epici del piano 20: oro casuale **2 000–4 000 a baule** (20/11; abbastanza per l'arma più cara con gli affissi, ~11 600, e qualche riparazione) |
 | E5 | Prezzi dei `.tsv` come prima stesura, poi taratura con il simulatore dell'oro |
 
 ### Memoria e salvataggi (F7, approvato)
