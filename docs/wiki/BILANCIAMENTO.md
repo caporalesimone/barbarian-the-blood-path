@@ -405,23 +405,27 @@ tranne la destrezza). Boss rifatti con `--fit-bosses` (vita ×0,68 / ×1,62 / ×
 Mother Stitch resta il boss peggiore per i profili specializzati (9–20%: protezione e maledizione tagliano il danno).
 
 **PG specializzato (21/11, richieste del committente)**: rendimento più dolce, **2/3 oltre 32 punti** (era 1/2 oltre 24).
-**Attacchi extra della DES** (regola del committente, seconda versione): il k-esimo attacco extra per Slash si sblocca a **6k
-punti** di DES e da lì sale di **10 / 2 / 1,8 / 1,5 / 1 % a punto** fino al **100%**; al massimo **5** nel dungeon (nell'Abisso
-salgono tutti e ne arrivano altri). Ogni attacco extra fa il tiro normale e, se va a segno, un secondo tiro con quella
-probabilità (`sim_rules.fight`: `hero.extra`, `hit(q=...)`; il successivo è indipendente dal precedente, `extra_chain: false`).
-DES del profilo destrezza al livello 20 (51 punti): **100 / 78 / 59 / 40 / 21%**; bilanciato 100 / 32 / 18 / 6%; forza e
-costituzione 100 / 10%. Misure (Monte Carlo): con anche la velocità dalla DES (−1 fotogramma ogni 2 punti) la DES diventa la
-caratteristica migliore (capitolo 4, ogni 10 mostri: destrezza 0,84, forza 1,60, costituzione 1,84); quindi nella proposta
-**la DES non dà più velocità**: cadenza = quella dell'arma per tutti (oggi nel gioco +12 fotogrammi all'inizio, tolti dalla DES).
-Con la DES solo su colpire (+1 ATT ogni 10), CA (+1 ogni 16) e attacchi extra, ogni 10 mostri, capitoli 1→4: forza 0,65 / 0,83 /
-0,81 / 0,69; destrezza 0,74 / 0,63 / 0,59 / 0,50; costituzione 0,59 / 0,80 / 0,81 / 0,86; bilanciato 0,75 / 0,58 / 0,47 / 0,53.
-Senza la CA dalla DES il profilo destrezza porterebbe l'armatura pesante e diventerebbe di gran lunga il migliore (0,10 nel
-capitolo 4). Taratura dei mostri: gli attacchi extra moltiplicano solo gli Slash (`monsters.extra_weight` 0,6 del danno del
-bilanciato; le abilità no). Costi: FOR +1 danno ogni 3 punti, COS +3 vita e −0,4% di danno subito a punto. Il modello
-analitico di `fit_stats.py` sovrastima cadenza e attacchi extra: la DES si è tarata col Monte Carlo. Boss (vita ×0,66 / ×1,64 /
-×0,66 / ×0,33, danno del boss finale ×0,4): bilanciato 61 / 60 / 56 / 61%; la destrezza batte il boss finale il 94%; Mother
-Stitch resta dura per i profili specializzati (21–24%). **Da verificare sul C64**: fino a 6 tiri d'attacco per Slash (12 con la
-Frenzy) nello stesso fotogramma (prestazioni, TODO D5; si possono spalmare su più fotogrammi).
+Le caratteristiche salgono **solo con i punti** che il giocatore assegna (4 a livello, anche nell'Abisso): nessuna crescita
+automatica (oggi nel gioco `epic_every`: +1 ogni 4 livelli oltre il 20). **Requisiti degli oggetti** (`requirements`, scala
+della proposta, anelli compresi): spada FOR 15, spada a due mani 30, cotta di maglia 20, piastre 35, scudo medio 15, scudo torre
+20; chi mette tutto in DES non porta la spada a due mani (profilo destrezza: FOR 28 al livello 20), il profilo costituzione resta
+con spada, scudo e cotta. **Attacchi extra della DES** (regola del committente): il primo si sblocca dopo **16 punti** di DES
+sopra 10 (DES 26), poi uno ogni **6 punti**; ognuno sale di **10 / 2,75 / 2,6 / 2,35 / 1,8 % a punto** fino al **100%**, al
+massimo **5** nel dungeon (nell'Abisso, con i punti dei livelli in più, salgono tutti e ne arrivano altri). Ogni attacco extra fa
+il tiro normale e, se va a segno, un secondo tiro con quella probabilità (`sim_rules.fight`: `hero.extra`, `hit(q=...)`; il
+successivo è indipendente dal precedente, `extra_chain: false`). DES del profilo destrezza al livello 20: **100 / 80 / 60 / 40 /
+20%**; bilanciato 100 / 16%; forza e costituzione 10%. Misure (Monte Carlo, `sim_builds.py`): con anche la velocità o il bonus a
+colpire dalla DES, la DES domina la seconda metà (capitolo 4, ogni 10 mostri: destrezza 0,33, forza 1,05, costituzione 1,23);
+quindi nella proposta **la DES dà solo CA (+1 ogni 16) e gli attacchi extra**: niente velocità (cadenza dell'arma per tutti; oggi
+nel gioco +12 fotogrammi all'inizio, tolti dalla DES) e niente bonus a colpire (l'ATT viene da competenza e magia). Ogni 10 mostri,
+capitoli 1→4: forza 0,67 / 0,67 / 0,67 / 0,88; destrezza 0,93 / 0,81 / 0,45 / 0,55; costituzione 0,59 / 0,75 / 0,62 / 1,02;
+bilanciato 0,78 / 0,69 / 0,62 / 0,50. La destrezza parte piano (gli attacchi extra arrivano dal livello ~7) e diventa la più forte
+dal capitolo 3; la costituzione è la più debole nel capitolo 4 (requisiti: niente spada a due mani né piastre). Taratura dei
+mostri: gli attacchi extra moltiplicano solo gli Slash (`monsters.extra_weight` 0,6). Costi: FOR +1 danno ogni 3 punti, COS +3
+vita e −0,4% di danno subito a punto. Il modello analitico di `fit_stats.py` sovrastima cadenza e attacchi extra: la DES si è
+tarata col Monte Carlo. Boss (vita ×0,57 / ×1,4 / ×0,68 / ×0,28, danno del boss finale ×0,4): bilanciato 60 / 50 / 63 / 62%; tutti
+i profili fra 32% (destrezza contro l'abate, prima degli attacchi extra) e 92%. **Da verificare sul C64**: fino a 6 tiri
+d'attacco per Slash (12 con la Frenzy) nello stesso fotogramma (prestazioni, TODO D5; si possono spalmare su più fotogrammi).
 
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel

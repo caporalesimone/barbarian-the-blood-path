@@ -58,17 +58,27 @@ def alloc(share, n):
     return out
 
 
-def gear(prof, floor):
-    """(weapon, armor, shield, magic, ring kind) of the profile on the floor, from the reference gear"""
+def gear(prof, floor, sc=None):
+    """(weapon, armor, shield, magic, ring kind) of the profile on the floor, from the reference gear. sc: scores of the hero
+    (proposal): items whose requirements (rules_next.yaml requirements) are not met are replaced by the best one that is,
+    among those the reference has by that floor (21/11)"""
     r = R["reference"][floor]
+    req = NX.get("requirements", {}) if sc is not None else {}
+    ok = lambda k: all(sc[st] >= v for st, v in req.get(k, {}).items())
     weapon, shield = r["weapon"], r["shield"]
-    if prof["weapon"] == "one" and R["weapons"][weapon].get("two_handed"):
-        weapon = "sword"
-        shield = shield or max((k for k, v in R["shields"].items() if v["ilvl"] <= floor), key=lambda k: R["shields"][k]["ilvl"])
+    wl = R["weapons"][weapon]["ilvl"]
+    if (prof["weapon"] == "one" and R["weapons"][weapon].get("two_handed")) or not ok(weapon):
+        weapon = max((k for k, v in R["weapons"].items() if not v.get("two_handed") and v["ilvl"] <= wl and ok(k)),
+                     key=lambda k: R["weapons"][k]["ilvl"])
+    if not R["weapons"][weapon].get("two_handed"):
+        sl = max([R["shields"][shield]["ilvl"]] if shield else [v["ilvl"] for v in R["shields"].values() if v["ilvl"] <= floor])
+        cand = [k for k, v in R["shields"].items() if v["ilvl"] <= sl and ok(k)]
+        shield = max(cand, key=lambda k: R["shields"][k]["ac"]) if cand else ""
     armor = r["armor"]
-    ok = [k for k, v in R["armors"].items() if ARMOR_RANK[v["type"]] <= ARMOR_RANK[prof["armor"]] and v["ilvl"] <= floor]
-    if armor and ARMOR_RANK[R["armors"][armor]["type"]] > ARMOR_RANK[prof["armor"]]:
-        armor = max(ok, key=lambda k: R["armors"][k]["ac"])
+    if armor:
+        al = R["armors"][armor]["ilvl"]
+        cand = [k for k, v in R["armors"].items() if ARMOR_RANK[v["type"]] <= ARMOR_RANK[prof["armor"]] and v["ilvl"] <= al and ok(k)]
+        armor = max(cand, key=lambda k: R["armors"][k]["ac"]) if cand else ""
     ring = r.get("ring", "")
     return weapon, armor, shield, r["magic"], (ring.split(":")[1] if ring else "")
 
@@ -117,9 +127,10 @@ class NextHero:
         sc = dict(st["start"])
         for k in alloc(p["share"], next_points(level)):
             sc[k] += 1
-        weapon, armor, shield, magic, kind = gear(p, floor)
-        if kind:
-            sc[p["ring"]] += R["rings"][kind]["bonus"] * st["ring_points"]
+        ring = R["reference"][floor].get("ring", "")              # l'anello conta anche per i requisiti degli oggetti
+        if ring:
+            sc[p["ring"]] += R["rings"][ring.split(":")[1]]["bonus"] * st["ring_points"]
+        weapon, armor, shield, magic, kind = gear(p, floor, sc)
         self.sc = sc
         x = {k: soft(v - 10) for k, v in sc.items()}
         self.x = x
@@ -129,19 +140,20 @@ class NextHero:
         self.dice, self.pen = Dice(w["dice"]), w["pen"]
         slow = st["dex"].get("slow", R["player"]["attack_speed"]["slow"])     # (21/11) la proposta puo' togliere il rallentamento
         self.rate = w["rate"] + max(0, slow - (x["dex"] // st["dex"]["speed_per"] if st["dex"].get("speed_per") else 0))
-        # (21/11, committente) attacchi extra della DES: il k-esimo si sblocca a k x extra_every punti e da li' sale di
+        # (21/11, committente) attacchi extra della DES: il k-esimo si sblocca a extra_first + (k-1) x extra_every punti e da li' sale di
         # extra_slopes[k-1] % a punto fino a extra_max % (probabilita' del secondo tiro, dopo il tiro normale andato a segno);
         # nell'Abisso (punti in piu') salgono tutti e se ne aggiungono altri con l'ultima pendenza
         d = st["dex"]
         self.extra, self.extra_chain = [], bool(d.get("extra_chain"))
         k = 1
         top = d.get("extra_count", 99) if level <= NF else 99      # nel dungeon al massimo extra_count; nell'Abisso di piu'
-        while d.get("extra_every") and x["dex"] >= k * d["extra_every"] and k <= top:
+        at = lambda k: d.get("extra_first", d.get("extra_every", 0)) + (k - 1) * d.get("extra_every", 0)
+        while d.get("extra_every") and x["dex"] >= at(k) and k <= top:
             sl = d["extra_slopes"][min(k, len(d["extra_slopes"])) - 1]
-            self.extra.append(min(d["extra_max"], (x["dex"] - k * d["extra_every"]) * sl) / 100)
+            self.extra.append(min(d["extra_max"], (x["dex"] - at(k)) * sl) / 100)
             k += 1
         self.speed = 1
-        self.att = self.prof + x["dex"] // st["dex"]["att_per"] + magic
+        self.att = self.prof + (x["dex"] // st["dex"]["att_per"] if st["dex"].get("att_per") else 0) + magic
         self.dmg_k = x["str"] // st["str"]["dmg_per"] + magic
         ac, cap = 10, 99
         self.armor, self.shield = armor, "" if self.two_handed else shield
