@@ -25,6 +25,7 @@ sys.path.insert(0, HERE)
 import rules as RU  # noqa: E402
 import sim_rules as S  # noqa: E402
 import sim_floor as SF  # noqa: E402
+import boss_scripts as BS  # noqa: E402
 from rules import R, NF, Dice, hit_chance  # noqa: E402
 
 NX = yaml.safe_load(open(os.path.join(RU.ROOT, "data", "rules_next.yaml")))
@@ -215,30 +216,70 @@ def monster_next(name, floor, boss=False, scale=None):
 
 
 # ------------------------------------------------------------------ runs
-def make(rules, name, floor):
-    return hero_today(name, floor) if rules == "oggi" else NextHero(name, floor)
+BOSS_FLOORS = {5: "abbot", 10: "stitch", 15: "varok", 20: "lord"}
+MECH = ("base", "game", "new")          # no mechanics / as in the game today / game + proposals of 20/11
 
 
-def run_floor(rules, name, floor, belt, runs, rng):
-    S.monster = monster_next if rules == "next" else _monster0       # final boss summons too
+def make(rules, name, floor, off=0):
+    lv = min(NF, floor + off)
+    return hero_today(name, floor, lv) if rules == "oggi" else NextHero(name, floor, lv)
+
+
+def mon_of(rules):
+    return monster_next if rules == "next" else _monster0
+
+
+def run_floor(rules, name, floor, belt, runs, rng, off=0):
+    S.monster = mon_of(rules)                                       # final boss summons too
     mon = (lambda n, f, b: monster_next(n, f, b)) if rules == "next" else None
     st = {}
     d = r = k = 0
     for _ in range(runs):
-        h = make(rules, name, floor)
+        h = make(rules, name, floor, off)
         x, y, z = SF.run(floor, belt, rng, hero=h, mon=mon, stats=st)
         d, r, k = d + x, r + y, k + z
-    return dict(deaths=d / runs, returns=r / runs, drunk=k / runs,
+    nm = max(1, st.get("monsters", 0))
+    return dict(deaths=d / runs, returns=r / runs, drunk=k / runs, per10=10 * (d + r) / nm, mons=nm / runs,
                 m_hit=100 * st["m_hits"] / max(1, st["m_swings"]), pg_hit=100 * st["pg_hits"] / max(1, st["pg_swings"]))
 
 
-def run_final(rules, name, belt, runs, rng):
-    S.monster = monster_next if rules == "next" else _monster0
-    h = make(rules, name, NF)
-    b = (monster_next if rules == "next" else _monster0)("lord_of_ruin", NF)
-    pots = SF.belt(NF, belt)
-    w = sum(S.fight(h, [b], rng, potions=list(pots), final_boss=0)[0] == "win" for _ in range(runs))
-    return 100 * w / runs
+def boss_fight(rules, name, floor, mech, belt, rng, off=0, hp_mult=None):
+    """one chapter boss (floors 5, 10, 15) or final boss (20) fight with a full belt: 'win' / 'lose' / 'time'"""
+    S.monster = mon_of(rules)
+    key = BOSS_FLOORS[floor]
+    cfg = NX["bosses"][key]
+    hm = cfg["hp_mult"] if hp_mult is None else hp_mult
+    mon = mon_of(rules)
+    if floor == NF:
+        b = dict(mon("lord_of_ruin", NF))
+    else:
+        mix = [(n, c) for (n, isb), c in floor_mix(floor).items() if isb]
+        n = rng.choices([x for x, _ in mix], weights=[c for _, c in mix])[0]
+        b = dict(mon(n, floor, True))
+    if rules == "next" and mech != "base":        # taratura della proposta: solo con le regole next e le meccaniche
+        b["hp_mult"] *= hm
+        b["dmg_mult"] *= cfg.get("dmg_mult", 1)
+    script = None
+    if mech != "base":
+        script = BS.SCRIPTS[key](cfg, lambda n_, f_, bb: mon(n_, f_, boss=bb), floor, mech == "new", NX["bosses"]["skill"], rng)
+    h = make(rules, name, floor, off)
+    return S.fight(h, [b], rng, potions=list(SF.belt(floor, belt)), final_boss=(0 if floor == NF else None), script=script)[0]
+
+
+def boss_win(rules, name, floor, mech, belt, n, rng, off=0, hp_mult=None):
+    return 100 * sum(boss_fight(rules, name, floor, mech, belt, rng, off, hp_mult) == "win" for _ in range(n)) / n
+
+
+def fit_boss(floor, belt, n, rng):
+    """hp_mult of the boss (proposal rules, new mechanics) for the 'bilanciato' profile at the floor's level to win
+    bosses.target.level0 of the fights (bisection)"""
+    goal = 100 * NX["bosses"]["target"]["level0"]
+    lo, hi = 0.2, 6.0
+    for _ in range(9):
+        mid = (lo + hi) / 2
+        w = boss_win("next", "bilanciato", floor, "new", belt, n, rng, 0, mid)
+        lo, hi = (mid, hi) if w > goal else (lo, mid)
+    return round((lo + hi) / 2, 2)
 
 
 def sheet(h):
@@ -249,18 +290,28 @@ def sheet(h):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--runs", type=int, default=60)
+    ap.add_argument("--runs", type=int, default=100)
     ap.add_argument("--floors", default="1-19")
     ap.add_argument("--belt", type=int, default=4)
     ap.add_argument("--rules", default="oggi,next")
+    ap.add_argument("--offsets", default="0,1,2", help="hero levels above the floor (farming)")
+    ap.add_argument("--fit-bosses", action="store_true", help="only: hp_mult of each boss for the target (proposal rules)")
     a = ap.parse_args()
+    rng = random.Random(2011)
+    if a.fit_bosses:
+        for f, k in BOSS_FLOORS.items():
+            print("%-7s hp_mult %.2f" % (k, fit_boss(f, a.belt, a.runs, rng)), flush=True)
+        return
     lo, hi = (int(x) for x in a.floors.split("-"))
     sets = a.rules.split(",")
+    offs = [int(x) for x in a.offsets.split(",")]
     names = {"oggi": ["riferimento"] + list(PROFILES), "next": list(PROFILES)}
-    rng = random.Random(2011)
-    L = ["Profili di PG (sim_builds.py, 20/11): %d giri per piano, cintura %d, censimento %s" % (a.runs, a.belt, SF.CENSUS["version"]),
-         "Celle: morti / ritorni in citta' / pozioni bevute per piano. 'mostri' e 'PG' = % di colpi a segno.", ""]
-    res = {}
+    floors = [f for f in range(lo, hi + 1) if f not in BOSS_FLOORS]
+    L = ["Profili di PG (sim_builds.py, 20/11): %d giri per piano, cintura %d, censimento %s, livelli del PG = piano %s"
+         % (a.runs, a.belt, SF.CENSUS["version"], "/".join("%+d" % o for o in offs)),
+         "Piani: (morti + ritorni in citta') ogni 10 mostri, per livello del PG piano%s. Boss: %% di vittorie con la cintura piena."
+         % "/".join("%+d" % o for o in offs), ""]
+    res, bres = {}, {}
     for rs in sets:
         L.append("=" * 20 + " regole: %s " % rs + "=" * 20)
         for n in names[rs]:
@@ -271,28 +322,42 @@ def main():
                 h = make(rs, n, 20)
                 L.append("   caratteristiche al 20: FOR %d  DES %d  COS %d" % (h.sc["str"], h.sc["dex"], h.sc["con"]))
         L.append("")
-        L.append("piano " + "".join("| %-23s" % n for n in names[rs]))
-        for f in range(lo, hi + 1):
-            row = "%5d " % f
+        L.append("piano mostri " + "".join("| %-17s" % n for n in names[rs]))
+        for f in floors:
+            row, mons = "", 0
             for n in names[rs]:
-                x = run_floor(rs, n, f, a.belt, a.runs, rng)
-                res[(rs, n, f)] = x
-                row += "| %4.2f %4.2f %4.1f m%2.0f p%2.0f " % (x["deaths"], x["returns"], x["drunk"], x["m_hit"], x["pg_hit"])
-            L.append(row)
-            print(rs, row, flush=True)
-        row = "boss  "
-        for n in names[rs]:
-            w = run_final(rs, n, a.belt, a.runs * 2, rng)
-            res[(rs, n, "boss")] = w
-            row += "| vinto %3.0f%%              " % w
-        L.append(row)
+                xs = [run_floor(rs, n, f, a.belt, a.runs, rng, o) for o in offs]
+                for o, x in zip(offs, xs):
+                    res[(rs, n, f, o)] = x
+                mons = xs[0]["mons"]
+                row += "| %-17s" % "/".join("%.2f" % x["per10"] for x in xs)
+            L.append("%5d %6.1f " % (f, mons) + row)
+            print(rs, L[-1], flush=True)
         L.append("")
-        L.append("per capitolo (morti+ritorni per piano, media):")
-        for c, (p, q) in enumerate(((1, 5), (6, 10), (11, 15), (16, 19)), 1):
-            fs = [f for f in range(max(p, lo), min(q, hi) + 1)]
+        L.append("per capitolo, livello = piano (ogni 10 mostri; fra parentesi morti+ritorni per piano):")
+        for c, (p, q) in enumerate(((1, 4), (6, 9), (11, 14), (16, 19)), 1):
+            fs = [f for f in floors if p <= f <= q]
             if fs:
-                L.append("  cap %d  " % c + "  ".join("%s %.2f" % (n, sum(res[(rs, n, f)]["deaths"] + res[(rs, n, f)]["returns"] for f in fs) / len(fs))
-                                                    for n in names[rs]))
+                L.append("  cap %d  " % c + "  ".join("%s %.2f (%.2f)" % (
+                    n, sum(res[(rs, n, f, offs[0])]["per10"] for f in fs) / len(fs),
+                    sum(res[(rs, n, f, offs[0])]["deaths"] + res[(rs, n, f, offs[0])]["returns"] for f in fs) / len(fs))
+                    for n in names[rs]))
+        L.append("")
+        L.append("boss (%% vittorie, livello piano%s; meccaniche: base = nessuna, game = come nel gioco, new = gioco + proposte):"
+                 % "/".join("%+d" % o for o in offs))
+        L.append("(vita e danno dei boss x hp_mult / dmg_mult di rules_next.yaml solo con le regole next e le meccaniche; il boss"
+                 " finale e' al piano 20 = livello massimo: +1/+2 non cambiano il PG)")
+        L.append("boss            " + "".join("| %-17s" % n for n in names[rs]))
+        for f, k in BOSS_FLOORS.items():
+            for mech in MECH:
+                row = "%-7s %-6s  " % (k, mech)
+                for n in names[rs]:
+                    ws = [boss_win(rs, n, f, mech, a.belt, a.runs, rng, o) for o in offs]
+                    for o, w in zip(offs, ws):
+                        bres[(rs, n, f, mech, o)] = w
+                    row += "| %-17s" % "/".join("%.0f" % w for w in ws)
+                L.append(row)
+                print(rs, row, flush=True)
         L.append("")
     od = os.path.join(RU.ROOT, "out", "work", "simulators")
     os.makedirs(od, exist_ok=True)
@@ -301,19 +366,32 @@ def main():
         import matplotlib
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
-        fig, axs = plt.subplots(1, len(sets), figsize=(7 * len(sets), 4), squeeze=False)
+        col = {"riferimento": "#888888", "forza": "#c0392b", "destrezza": "#27ae60", "costituzione": "#2471a3", "bilanciato": "#8e44ad"}
+        fig, axs = plt.subplots(2, len(sets), figsize=(7 * len(sets), 8), squeeze=False)
         for i, rs in enumerate(sets):
             ax = axs[0][i]
             for n in names[rs]:
-                fs = list(range(lo, hi + 1))
-                ax.plot(fs, [res[(rs, n, f)]["deaths"] + res[(rs, n, f)]["returns"] for f in fs], marker="o", ms=3, label=n,
-                        color={"riferimento": "#888888", "forza": "#c0392b", "destrezza": "#27ae60", "costituzione": "#2471a3",
-                               "bilanciato": "#8e44ad"}[n])
-            ax.set_title("regole %s: morti + ritorni per piano (cintura %d)" % (rs, a.belt))
-            ax.set_xlabel("piano")
-            ax.set_xticks(range(lo, hi + 1))
+                ax.plot(floors, [res[(rs, n, f, offs[0])]["per10"] for f in floors], marker="o", ms=3, label=n, color=col[n])
+            ax.set_title("regole %s: morti+ritorni ogni 10 mostri (liv = piano)" % rs)
+            ax.set_xlabel("piano (senza i piani dei boss)")
+            ax.set_xticks(floors)
             ax.grid(alpha=.3)
-            ax.legend()
+            ax.legend(fontsize=8)
+            ax = axs[1][i]
+            mech = "game" if rs == "oggi" else "new"
+            xs = list(range(len(BOSS_FLOORS)))
+            for n in names[rs]:
+                for j, o in enumerate(offs):
+                    ax.plot(xs, [bres[(rs, n, f, mech, o)] for f in BOSS_FLOORS], marker="o", ms=4, color=col[n],
+                            ls=["-", "--", ":"][j % 3], label=n if j == 0 else None)
+            ax.axhspan(55, 65, color="#f1c40f", alpha=.25)
+            ax.set_xticks(xs)
+            ax.set_xticklabels(["%s (p%d)" % (k, f) for f, k in BOSS_FLOORS.items()])
+            ax.set_ylim(-3, 103)
+            ax.set_title("regole %s, boss con meccaniche %s: %% vittorie (continua liv=piano, tratteggio +1, punti +2)" % (rs, mech), fontsize=9)
+            ax.grid(alpha=.3)
+            ax.legend(fontsize=8)
+        fig.tight_layout()
         fig.savefig(os.path.join(od, "sim_builds.png"), dpi=110, bbox_inches="tight")
     except ImportError:
         pass

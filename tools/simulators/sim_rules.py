@@ -63,9 +63,11 @@ def potion_heal(p, hero):
     return hero.hpmax * p["heal_percent"] // 100
 
 
-def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=None, hp0=None, left=None):
+def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=None, hp0=None, left=None, script=None):
     """hero: rules.Hero; mons: elenco di statistiche (rules.monster); final_boss: indice del boss finale (evocazioni).
     hp0: vita all'inizio (default piena); left: lista che riceve le pozioni rimaste (20/11, sim_floor.py).
+    script: meccaniche di un boss (20/11, tools/simulators/boss_scripts.py): tick(t, ms, pend, rng, hero) ad ogni evento -> danno al PG,
+    pg_dmg(m, d, t), m_dmg(m, d, t) -> danno, m_rate(m, t) -> fotogrammi fra due attacchi, target(alive) -> bersaglio del PG.
     Ritorna (esito 'win'/'lose'/'time', fotogrammi, vita finale)."""
     pc = pot_cfg or R["potions"]
     hp = hero.hpmax if hp0 is None else hp0
@@ -101,6 +103,8 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
             if t < rage_until:
                 dmg += hero.rage_bonus()
             dmg = max(1, dmg)
+            if script:
+                dmg = script.pg_dmg(m, dmg, t)
             d = min(dmg, m.hp)
             m.hp -= dmg
             st["dealt"] += d
@@ -117,12 +121,28 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
             return "win", t, hp
         # prossimo evento
         times = [nxt] + [max(m.next, m.stun) for m in alive] + [p[0] for p in pend]
+        if script:
+            times.append(max(t + 1, script.wake(t)))       # prossimo istante in cui la meccanica fa qualcosa
         t = max(t, min(times))
         if t >= T["max_frames"]:
             break
         for p in [p for p in pend if p[0] <= t]:
             pend.remove(p)
             ms.append(p[1])
+        if script:
+            env = script.tick(t, ms, pend, rng, hero)        # danno al PG di una meccanica (zona, carica, nube)
+            if env:
+                env = max(1, env * (1000 - getattr(hero, "dr10", 0)) // 1000)
+                hp -= env
+                st["taken"] += env
+                if hp <= 0:
+                    if left is not None:
+                        left[:] = pots
+                    return "lose", t, 0
+            if any(p[0] <= t for p in pend):
+                for p in [p for p in pend if p[0] <= t]:
+                    pend.remove(p)
+                    ms.append(p[1])
         alive = [m for m in ms if m.alive]
         # mostri
         for m in alive:
@@ -132,6 +152,8 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                 if r:
                     st["m_hits"] += 1
                     d = int(m.st["dmg"].roll(rng, times=2 if r == 2 else 1) * m.st["dmg_mult"])
+                    if script:
+                        d = script.m_dmg(m, d, t)
                     if t < rage_until:
                         d //= 2
                     d = d * (1000 - getattr(hero, "dr10", 0)) // 1000    # (20/11) COS: danno subito ridotto (rules_next.yaml)
@@ -142,7 +164,7 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                         if left is not None:
                             left[:] = pots
                         return "lose", t, 0
-                m.next = t + T["monster_attack"]
+                m.next = t + (script.m_rate(m, t) if script else T["monster_attack"])
         # PG
         if nxt <= t and alive:
             if pots and hp < pc["drink_below"] * hero.hpmax and t >= pot_ready:
@@ -154,7 +176,7 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                 st["pots"] += 1
                 pot_ready = t + pc[kind]["cooldown"]
             ready = lambda k: k in avail and cd[k] <= t
-            tgt = alive[0]
+            tgt = script.target(alive) if script else alive[0]
             if ready("rage") and t >= rage_until:
                 rage_until = t + SK["rage"]["duration"]
                 cd["rage"] = t + SK["rage"]["cooldown"]
@@ -184,8 +206,8 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                         a = [m for m in ms if m.alive]
                         if not a:
                             break
-                        hit(a[0], 1)
-                    cd["slash"] = t + hero.rate
+                        hit(script.target(a) if script else a[0], 1)
+                    cd["slash"] = t + (int(hero.rate * script.pg_rate(t)) if script else hero.rate)   # (20/11) maledizione
             # evocazioni del boss finale
             if final_boss is not None and wave < R["final_summons"]["waves"]:
                 b = ms[final_boss]

@@ -137,6 +137,31 @@ in gioco e da tarare**):
 
 Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco** (19/11): leggibilità degli avvisi, difficoltà.
 
+### Proposta del 20/11: più meccaniche e taratura con il simulatore (design, non nel codice)
+
+Richiesta del committente (20/11): boss di capitolo più difficili (oggi i piani 5, 10, 15 sono i più facili, salvo l'abate),
+con più di una meccanica ciascuno. Le meccaniche del codice (tabella sopra) e queste aggiunte sono **simulate** dal 20/11
+(`tools/simulators/boss_scripts.py`, numeri in `data/rules_next.yaml` sezione `bosses`, misure con
+`tools/simulators/sim_builds.py`). Il simulatore non si muove: un attacco annunciato è schivato con probabilità `skill` (0,5),
+le cariche di Varok partono ogni 6 s (nel gioco solo quando è allineato).
+
+| Boss | Già nel gioco | Proposte (20/11) | Cosa chiede al giocatore |
+|---|---|---|---|
+| The Hollow Abbot | 2 scheletri a 2/3 e 1/3, rigenerazione finché vivono | **scheletri che si alzano dai sarcofagi** in punti a caso della cripta ogni 12 s (massimo 3 vivi; camminano fino al PG; niente rigenerazione da questi); **nube d'incenso** ogni 8 s attorno all'abate (avviso 1 s, 3 colpi da 0,5 colpi del boss); rigenerazione dimezzata (1 ogni 50 fotogrammi) | uccidere prima gli evocati senza farsi circondare; uscire dalla nube |
+| Mother Stitch | feticci fermi che la proteggono (colpi dimezzati, rigenerazione), scoperta 2 s quando cadono | **maledizione** ogni 8 s (avviso 0,8 s; se presa: cadenza del PG ×1,6 per 3 s); **feticcio che marcisce**: se resta in piedi 10 s diventa un annegato; feticci più robusti (vita /8 invece di /16), scoperta 1,5 s | abbattere i feticci in fretta, scansare la maledizione |
+| Varok the Oathbreaker | carica (muro = stordito 2 s), scudo che dimezza i colpi | a metà vita **chiama 2 Ash Ghoul** e **getta lo scudo**: niente più dimezzamento, ma attacca 1,5 volte più spesso e carica ogni 5 s; prima della metà cariche ogni 7 s | due fasi: prima usare i muri, poi reggere l'urto |
+| Lord of Ruin | ondate di evocazioni a 3/4, 1/2, 1/4 | **pentacolo che brucia** alle stesse soglie (già deciso il 15/11, non nel codice: 3 colpi da 0,5); **furia** nell'ultimo quarto (attacca 1,5 volte più spesso); **la decima** ogni 12 s (avviso 1,5 s: ruba il 6% della vita massima del PG e si cura del triplo) | leggere il pavimento, stare fuori dal cerchio della decima, chiudere in fretta |
+
+Obiettivo (committente, 20/11): al livello del piano, con la cintura piena, vittorie ~60%; con 2 livelli in più 80–90% (il
+farming come manopola della difficoltà). **Misure (100 combattimenti per caso)**: con le regole di **oggi** e le meccaniche del
+codice il PG di riferimento vince l'abate il 13% (54% con 2 livelli in più), Mother Stitch il 100%, Varok il 39% (79%), il
+boss finale il 100%: difficoltà disordinata. Con la **proposta** (`rules_next.yaml`, regole e mostri nuovi) e le meccaniche
+nuove, vita e danno dei boss tarati sul profilo bilanciato (`--fit-bosses`: vita ×0,73 / ×1,66 / ×0,61 / ×0,5, danno ×0,8 /
+×1 / ×0,65 / ×0,5): il bilanciato vince 55 / 59 / 59 / 52% al livello del piano e 100 / 99 / 95% con 2 livelli in più (il boss
+finale è al livello massimo: niente farming). I profili specializzati restano sotto (forza 20–54%, costituzione 26–53%): è
+lo stesso squilibrio delle caratteristiche (TODO B18). Limiti: niente movimento, schivata a probabilità fissa, statistiche dei
+boss = boss con nome del piano (le schede proprie del bestiario non sono nel gioco).
+
 ### Concept dei comuni (in breve)
 - Capitolo 2 (palude, mulino): **Drowned** (cadavere gonfio, lento e resistente; lascia una pozza che rallenta), **Bog
   Crawler** (scarabeo d'acqua, veloce, in branco), **Mire Witchling** (piccola strega, cugina dei Fallen; sputo a corto raggio).

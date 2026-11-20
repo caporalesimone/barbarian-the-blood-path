@@ -83,6 +83,8 @@ def run(floor, size, rng, hero=None, mon=None, stats=None):
     enc = encounters(comp, rng)
     for names, boss_idx in enc:
         mons = [mon(n, floor, i == boss_idx) for i, n in enumerate(names)]
+        if stats is not None:
+            stats["monsters"] = stats.get("monsters", 0) + len(names)
         left = []
         before = len(pots)
         r, _, hp = S.fight(hero, mons, rng, potions=pots, hp0=hp, left=left, stats=stats)

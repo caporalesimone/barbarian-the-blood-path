@@ -380,6 +380,15 @@ attacco e CA spostati in modo che i colpi a segno medi sul bilanciato siano gli 
 avere lo stesso tempo per uccidere e lo stesso danno relativo di oggi, poi per i moltiplicatori di difficoltà. Limiti: un solo
 equipaggiamento per piano (il riferimento, adattato), niente affissi, combattimento fermo (niente arco né movimento).
 
+**Aggiornamento (20/11 sera)**: `sim_builds.py` ora misura (1) i piani **senza i piani dei boss** e con la metrica **morti +
+ritorni ogni 10 mostri** (un piano del capitolo 3 ha 15–16 mostri, uno del capitolo 1 ne ha 9: i picchi dei piani 4, 6, 11 sono
+mostri forti in più e piani più lunghi, non rumore: con 1000 prove per piano le medie per capitolo si spostano ≤ 0,08); (2) il PG
+a livello piano, +1 e +2 (`--offsets`, il farming); (3) i **boss di capitolo e il boss finale a parte**, senza meccaniche, con
+quelle del codice e con le proposte ([bestiario](bestiario.md#proposta-del-2011-più-meccaniche-e-taratura-con-il-simulatore-design-non-nel-codice)).
+Ogni 10 mostri, livello = piano, capitoli 1→4: oggi riferimento 0,71 / 0,43 / 0,35 / 0,09, proposta bilanciato 0,71 / 0,51 /
+0,68 / 0,46. Due livelli in più dimezzano o azzerano la metrica in entrambe le regole (il calo dell'esperienza del gioco ferma il
+farming a ~3 livelli sopra il piano).
+
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel
 saturo a 255) e poi resta a 3 093 (anche l'oro dei mostri satura a 255); cumulato 257 241 al piano 100. Sono medie con tutto

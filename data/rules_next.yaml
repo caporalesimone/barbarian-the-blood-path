@@ -43,3 +43,46 @@ profiles:
   destrezza:    {share: {str: 20, dex: 60, con: 20}, armor: light,  weapon: one, ring: dex}
   costituzione: {share: {str: 20, dex: 20, con: 60}, armor: heavy,  weapon: ref, ring: con}
   bilanciato:   {share: {str: 34, dex: 33, con: 33}, armor: medium, weapon: ref, ring: str}
+
+# ---------------------------------------------------------------- boss di capitolo (20/11, PROPOSTA)
+# Meccaniche per il simulatore (tools/simulators/boss_scripts.py). "game" = come e' nel codice dal 19/11 (bestiario,
+# src/game/ovl_boss*.asm; il Lord of Ruin: solo evocazioni); "new" = aggiunte proposte il 20/11. Tempi in fotogrammi (50 = 1 s).
+# skill: probabilita' che il giocatore schivi un colpo annunciato (avviso visibile): il simulatore non si muove, la usa cosi'.
+# Danni delle meccaniche: multipli del danno medio di un colpo del boss. hp_mult / dmg_mult: vita e danno del boss in piu'
+# (taratura: dmg_mult a mano, hp_mult da `sim_builds.py --fit-bosses`; si applicano solo con le meccaniche).
+# Obiettivo (committente, 20/11): al livello del piano ~60% di vittorie con la cintura piena, +2 livelli 80-90%.
+bosses:
+  skill: 0.5
+  target: {level0: 0.60, level2: 0.85}
+  abbot:                      # capitolo 1, cripta (piano 5)
+    hp_mult: 0.73
+    dmg_mult: 0.8
+    game: {summon_at: [0.667, 0.333], summon_n: 2, summon_type: skeleton, pause: 50, regen_every: 25}
+    new:
+      changes: {regen_every: 50}                                                # proposta: rigenerazione dimezzata
+      crypt_rise: {every: 600, travel: [50, 150], max_alive: 3, type: skeleton}   # scheletri dai sarcofagi a caso
+      censer: {every: 400, warn: 50, dmg: 0.5, ticks: 3, tick_every: 50}        # nube d'incenso attorno all'abate
+  stitch:                     # capitolo 2, palude (piano 10)
+    hp_mult: 1.66
+    dmg_mult: 1.0
+    game: {rites_at: [1.0, 0.667, 0.333], fetish_n: 2, fetish_hp_div: 16, protect_div: 2, regen_every: 25, exposed: 100, exposed_mult: 2}
+    new:
+      changes: {fetish_hp_div: 8, exposed: 75}                                  # proposta: feticci piu' robusti, scoperta piu' breve
+      hex: {every: 400, warn: 40, slow: 1.6, duration: 150}                     # maledizione: cadenza del PG x1,6 per 3 s
+      fetish_rot: {after: 500, type: zombie}                                    # feticcio non abbattuto in 10 s -> un annegato
+  varok:                      # capitolo 3, grotta (piano 15)
+    hp_mult: 0.61
+    dmg_mult: 0.65
+    game: {charge_every: 300, charge_hits: 2, wall_stun: 100, shield_div: 2}
+    new:
+      changes: {charge_every: 350}                                              # proposta: cariche un po' piu' rade
+      ghouls: {at: 0.5, n: 2, type: zombie}                                     # chiama 2 Ash Ghoul
+      oathbreak: {at: 0.5, rate_mult: 0.67, charge_every: 250}                  # getta lo scudo: niente dimezzamento, piu' veloce
+  lord:                       # capitolo 4, cittadella (piano 20): evocazioni del gioco (final_summons) sempre
+    hp_mult: 0.5
+    dmg_mult: 0.5
+    game: {}
+    new:
+      pentacle: {at: [0.75, 0.5, 0.25], warn: 50, dmg: 0.5, ticks: 3, tick_every: 50}   # le linee della stella bruciano
+      fury: {at: 0.25, rate_mult: 0.67}                                         # ultimo quarto piu' veloce
+      tithe: {every: 600, warn: 75, drain_pct: 6, heal_mult: 3}                # la decima: ruba vita al PG, si cura
