@@ -127,15 +127,18 @@ class NextHero:
         w = R["weapons"][weapon]
         self.weapon, self.two_handed = weapon, bool(w.get("two_handed"))
         self.dice, self.pen = Dice(w["dice"]), w["pen"]
-        slow = R["player"]["attack_speed"]["slow"]
-        self.rate = w["rate"] + max(0, slow - x["dex"] // st["dex"]["speed_per"])
-        # (21/11, committente) attacchi extra della DES: ogni dex.extra_every punti si sblocca un attacco in piu' per Slash; appena
-        # sbloccato va a segno con probabilita' extra_start% (dopo il tiro normale), poi +extra_step% a punto fino a extra_max%
+        slow = st["dex"].get("slow", R["player"]["attack_speed"]["slow"])     # (21/11) la proposta puo' togliere il rallentamento
+        self.rate = w["rate"] + max(0, slow - (x["dex"] // st["dex"]["speed_per"] if st["dex"].get("speed_per") else 0))
+        # (21/11, committente) attacchi extra della DES: il k-esimo si sblocca a k x extra_every punti e da li' sale di
+        # extra_slopes[k-1] % a punto fino a extra_max % (probabilita' del secondo tiro, dopo il tiro normale andato a segno);
+        # nell'Abisso (punti in piu') salgono tutti e se ne aggiungono altri con l'ultima pendenza
         d = st["dex"]
         self.extra, self.extra_chain = [], bool(d.get("extra_chain"))
         k = 1
-        while d.get("extra_every") and x["dex"] >= k * d["extra_every"]:
-            self.extra.append(min(d["extra_max"], d["extra_start"] + (x["dex"] - k * d["extra_every"]) * d["extra_step"]) / 100)
+        top = d.get("extra_count", 99) if level <= NF else 99      # nel dungeon al massimo extra_count; nell'Abisso di piu'
+        while d.get("extra_every") and x["dex"] >= k * d["extra_every"] and k <= top:
+            sl = d["extra_slopes"][min(k, len(d["extra_slopes"])) - 1]
+            self.extra.append(min(d["extra_max"], (x["dex"] - k * d["extra_every"]) * sl) / 100)
             k += 1
         self.speed = 1
         self.att = self.prof + x["dex"] // st["dex"]["att_per"] + magic
@@ -147,7 +150,7 @@ class NextHero:
             cap = R["dex_cap"][R["armors"][armor]["type"]]
         if self.shield:
             ac += R["shields"][self.shield]["ac"] + magic
-        self.ac = ac + min(x["dex"] // st["dex"]["ac_per"], cap)
+        self.ac = ac + (min(x["dex"] // st["dex"]["ac_per"], cap) if st["dex"].get("ac_per") else 0)
         self.dc = 8 + self.prof + x["str"] // st["str"]["dc_per"]
         self.crit = 19 if level >= R["skills"]["brutal_critical_level"] else 20
         c = st["con"]
@@ -209,7 +212,8 @@ def norm(floor):
     pm = mean(lambda m: hit_chance(m["att"] + da, bal.ac))
     pp = mean(lambda m: hit_chance(bal.att, m["ac"] + dc - bal.pen))
     dpr_cur = pp_cur * (ref.dice.avg + ref.dmg_k) / ref.rate
-    dpr_bal = pp * (bal.dice.avg + bal.dmg_k) / bal.rate
+    # (21/11) attacchi extra della DES: contano solo sugli Slash (quota monsters.extra_weight del danno; le abilita' no)
+    dpr_bal = pp * (bal.dice.avg + bal.dmg_k) * (1 + M.get("extra_weight", 1) * sum(bal.extra)) / bal.rate
     hp_x = dpr_bal / dpr_cur * interp(M["hp"], f)
     dmg_x = bal.hpmax * pm_cur / (ref.hpmax * pm * (1 - bal.dr10 / 1000)) * interp(M["dmg"], f)
     _NORM[floor] = dict(att=da, ac=dc, hp=hp_x, dmg=dmg_x, pm_cur=pm_cur, pp_cur=pp_cur)
