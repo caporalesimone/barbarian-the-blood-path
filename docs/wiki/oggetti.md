@@ -152,7 +152,7 @@ flowchart LR
     GI -->|altro| PK["zaino c_pack: 8 posti"]
     PK <-->|Fire nell'inventario| EQ["equipaggiamento c_eq:<br/>arma, armatura, scudo, anello"]
     PK <-->|"baule della locanda (nella locanda)"| ST["baule della locanda: 24 posti<br/>(nel record dell'eroe) + oro (c_sgold)"]
-    PK -->|negozio: vendita a metà prezzo| G["oro"]
+    PK -->|negozio: vendita a un quarto del prezzo| G["oro"]
     EQ -->|"usura a 0"| X["rotto: resta, in rosso,<br/>senza effetto (danno 0, CA 0)"]
 ```
 
@@ -231,7 +231,7 @@ database proposto andrà in `data/items/` e il modello nei simulatori (fase 1 de
 | O10 | Valore dell'affisso = formula alla nascita (intervallo `value1..value2` della riga, scalato con il livello dell'oggetto da una curva di 2–3 parametri, + un tiro), **salvato nell'oggetto** e fisso per sempre: nell'Abisso i valori crescono (es. of might +10..+25) |
 | O11 | Riparazione: 25% del prezzo **con gli affissi** |
 | O13 | Basi dell'Abisso con l'Abisso (TODO H3) |
-| E1 | **Vendita a un quarto** del prezzo (come Diablo 1) |
+| E1 | **Vendita a un quarto** del prezzo (come Diablo 1): **fatto il 20/11** (`shop_rules.sell_divisor` = 4 in `balance.yaml`, `SELL_SHIFT` in `db.asm`) |
 | E2, E3 | I negozi comprano tutto; vendono anche oggetti magici, sempre di più con il livello del PG (all'inizio pochi, ai livelli alti solo magici) |
 | E4 | Bauli epici del piano 20: oro casuale in un intervallo ampio, abbastanza per le armi più care e le riparazioni dell'Abisso |
 | E5 | Prezzi dei `.tsv` come prima stesura, poi taratura con il simulatore dell'oro |

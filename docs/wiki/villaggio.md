@@ -260,7 +260,7 @@ flowchart LR
     N -->|"fire su merce"| BUY{"pozione?"}
     BUY -->|no| ASK["buy for N g? (fire = sì)<br/>give_item, paga"]
     BUY -->|sì| SLOT["'>' sul primo posto libero della cintura<br/>W/S lo spostano · fire paga e la mette · RUN/STOP annulla senza pagare"]
-    N -->|"fire su zaino, cintura, pergamene"| SELL["se il negozio compra quella categoria:<br/>sell for N g? metà prezzo (una pergamena per volta)"]
+    N -->|"fire su zaino, cintura, pergamene"| SELL["se il negozio compra quella categoria:<br/>sell for N g? un quarto del prezzo (una pergamena per volta)"]
     N -->|"fabbro: fire su equipped, R su zaino o equipped"| REP["riparazione: 25% del prezzo,<br/>durabilità al massimo, massimo − 1"]
     N -->|RUN/STOP| X["uscita"]
 ```
@@ -269,7 +269,7 @@ flowchart LR
   pozioni e pergamene. Gli oggetti dello zaino che il negozio non compra sono **grigi** (`pk_name`) e fire dice
   "i don't buy that.". L'equipaggiamento **non si vende mai**. Solo il fabbro ripara.
 - **Riquadro dell'oggetto**: nome, caratteristiche, riga 3 secondo la voce: `buy 25g have 2` (merce: prezzo pieno;
-  pozioni e pergamene: quante se ne hanno), `sell 600g d135/178` (zaino, cintura: metà prezzo; la durabilità solo se
+  pozioni e pergamene: quante se ne hanno), `sell 600g d135/178` (zaino, cintura: un quarto del prezzo dal 20/11, `shop_rules.sell_divisor`; la durabilità solo se
   sta nei 18 caratteri), `fix 45g` (equipaggiamento rovinato, dal fabbro), `val ...` (oggetto che il negozio non compra).
 - Voci del cursore (codici in `ui_lc`): 0-7 zaino, 8-11 equipaggiamento, 12-19 merce, 20-23 cintura, 24 pergamene;
   ordine in `sh_nav`, voci assenti saltate da `sh_fix`.

@@ -1504,16 +1504,18 @@ _p2     lda S4_BUF,y
         rts
 
 ; valore di vendita: "val 1200o d135/178" (08/11: numero e poi la moneta)
-it_val  #msg "val "             ; valore di vendita: meta' del prezzo
-; valore di vendita dell'oggetto ui_sel (meta' del prezzo), allineato a sinistra
+it_val  #msg "val "             ; valore di vendita: prezzo >> SELL_SHIFT (20/11: un quarto)
+; valore di vendita dell'oggetto ui_sel (prezzo >> SELL_SHIFT, balance.yaml shop_rules.sell_divisor), allineato a sinistra
 it_half lda ui_sel
         asl
         tay
         lda itprice+1,y
-        lsr
         sta tmp1
         lda itprice,y
-        ror
+        .rept SELL_SHIFT
+        lsr tmp1
+        ror a
+        .endrept
         ldx tmp1
         jsr ui_n5l              ; (08/11) allineato a sinistra
         jsr ui_coin

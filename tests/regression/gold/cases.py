@@ -128,11 +128,11 @@ def shop_buy(ctx):
     check(not bad, "; ".join(bad[:4]) + (" (+%d)" % (len(bad) - 4) if len(bad) > 4 else ""))
 
 
-@test("SHOP-SELL-10", "sell: half price, GOLD_MAX cap (no sale), category not bought, empty entry")
+@test("SHOP-SELL-10", "sell: price >> SELL_SHIFT, GOLD_MAX cap (no sale), category not bought, empty entry")
 def shop_sell(ctx):
     bad = []
     for p, it in shop_ctx(ctx):
-        half = p // 2
+        half = p >> ctx["L"]["SELL_SHIFT"]
         for g, sg, mask in [(0, 50, 0x7e), (1234, 7, 0x7e), (GOLD_MAX - half, 3, 0x7e), (GOLD_MAX - half + 1, 3, 0x7e),
                             (GOLD_MAX, 65535, 0x7e), (500, 20, 0x00)]:
             gg, ss, pk = shop_call(ctx, "shop_sell", g, sg, [it], 0, mask, 0)

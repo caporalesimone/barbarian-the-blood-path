@@ -91,17 +91,20 @@ shop_sell:
         jsr msg23
         #msg "i don't buy that."
 _r      rts
-_ok     lda ui_sel              ; meta' del prezzo
+_ok     lda ui_sel              ; prezzo >> SELL_SHIFT (20/11: un quarto, balance.yaml shop_rules.sell_divisor)
         asl
         tay
         lda itprice+1,y
-        lsr
         sta tmp3
-        sta shp_price+1
         lda itprice,y
-        ror
+        .rept SELL_SHIFT
+        lsr tmp3
+        ror a
+        .endrept
         sta tmp2
         sta shp_price
+        lda tmp3
+        sta shp_price+1
         jsr purse_room          ; tetto GOLD_MAX addosso: oltre non si vende (07/11 sera)
         bcs _r
         lda #1

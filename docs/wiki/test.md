@@ -127,7 +127,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `VIL-MOVE-01` | village: walk without glitches (tiles, VIC registers, frames) |
 | `MAP-01` | minimap in the village: hero marker on the hero's position |
 | `SHOP-BUY-01` | smith: buy the first ware (gold carried + inn chest) |
-| `SHOP-SELL-01` | smith: sell the bought item at half price |
+| `SHOP-SELL-01` | smith: sell the bought item at price >> SELL_SHIFT (a quarter since 20/11) |
 | `SHOP-REPAIR-01` | smith: repair the worn weapon (durability back to max - 1, gold paid) |
 | `INN-CHEST-01` | inn: an item from the pack to the chest |
 | `INN-CHEST-02` | inn: the item from the chest back to the pack |
@@ -257,7 +257,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `GOLD-CAP-10` | gold picked up: GOLD_MAX cap on the hero (add_gold16) |
 | `SHOP-PAY-10` | payment: carried gold first, then the chest in tens, change back on the hero (gold_need/gold_pay) |
 | `SHOP-BUY-10` | buy: 3 prices x different gold x pack full/empty (gold, chest, pack) |
-| `SHOP-SELL-10` | sell: half price, GOLD_MAX cap (no sale), category not bought, empty entry |
+| `SHOP-SELL-10` | sell: price >> SELL_SHIFT, GOLD_MAX cap (no sale), category not bought, empty entry |
 | `SHOP-FIX-10` | smith repair (shop_repair, confirmation simulated): sword 200, durability 10/100, 1000 gold -> 950, 99/99 |
 | `HELP-Z-10` | out/work/help.zx0 unpacks to out/work/help.prg byte by byte; the packed file is under 55% of the blocks |
 | `HELP-Z-11` | the disk holds the packed HELP (file 'help' equals out/work/helpz.prg) |
@@ -343,7 +343,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BELT-11` | every belt slot: its key drinks only that slot; the key of an empty slot does nothing |
 | `BELT-12` | full hp: the potion is not drunk (stays in the belt, no cooldown) |
 | `SHOP-BELT-10` | alchemist: potion with a full belt refused (gold kept); one free slot: chosen, the potion goes there |
-| `SHOP-SELL-11` | alchemist: sell a belt potion (slot freed) and one scroll of a stack, at half price |
+| `SHOP-SELL-11` | alchemist: sell a belt potion (slot freed) and one scroll of a stack, at price >> SELL_SHIFT |
 | `BELT-13` | save from the game menu, belt wiped in RAM, hero loaded from disk: same belt |
 | `BELT-14` | death keeps the belt (no potion lost) |
 | `POT-10` | pot_heal: dungeon column up to level 20, Abyss column (heal_abyss) from level 21, all potions, Y kept |

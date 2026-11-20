@@ -146,7 +146,7 @@ def shop_belt(ctx):
     check(g.in_game(), "RUN/STOP does not close the shop")
 
 
-@test("SHOP-SELL-11", "alchemist: sell a belt potion (slot freed) and one scroll of a stack, at half price")
+@test("SHOP-SELL-11", "alchemist: sell a belt potion (slot freed) and one scroll of a stack, at price >> SELL_SHIFT")
 def shop_sell_belt(ctx):
     g, L = ctx["g"], ctx["g"].L
     belt(g, 14, 0, 0, 0)
@@ -163,7 +163,8 @@ def shop_sell_belt(ctx):
         item = 14 if want == 20 else L["I_SCROLL"]
         g0 = g.w16(L["c_gold"])
         g.press_fire(); g.press_fire()                              # sell, confirm
-        check(g.w16(L["c_gold"]) == g0 + g.w16(L["itprice"] + 2 * item) // 2, "%s: gold %d (expected %d)" % (what, g.w16(L["c_gold"]), g0 + g.w16(L["itprice"] + 2 * item) // 2))
+        exp = g0 + (g.w16(L["itprice"] + 2 * item) >> L["SELL_SHIFT"])
+        check(g.w16(L["c_gold"]) == exp, "%s: gold %d (expected %d)" % (what, g.w16(L["c_gold"]), exp))
     check(g.b(L["c_beltt"]) == 0, "the belt slot was not freed")
     check(g.b(L["c_packb"]) == 2, "scroll stack %d (expected 2)" % g.b(L["c_packb"]))
     g.run_stop(); g.frames(2)

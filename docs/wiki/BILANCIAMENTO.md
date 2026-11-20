@@ -342,9 +342,11 @@ non più medie ma il **censimento dei piani veri** (`tools/vice/floor_census.py`
 letti in VICE; `tools/simulators/data/floor_census.json`) e un Monte Carlo delle regole del codice (chiavi disponibili per i bauli,
 vendita del bottino). Oro **trovato**: 915 nel capitolo 1, 3 000 nel 2, 4 300 nel 3, 7 850 nel 4 (di cui 1 720 dei bauli epici);
 cumulato 14 345 ai piani 1–19, 16 065 con il piano 20. Per piano normale: ~220 (cap. 1), ~735 (2), ~1 055 (3), ~1 540 (4); i
-piani dei boss di capitolo (5, 10, 15) danno solo il bottino del boss (35–85 oro). La **vendita** del bottino (a metà prezzo,
-oggi) vale più dell'oro trovato dal capitolo 2 (cumulato con la vendita: 68 800 al piano 20, di cui 23 700 gli oggetti epici):
+piani dei boss di capitolo (5, 10, 15) danno solo il bottino del boss (35–85 oro). La **vendita** del bottino (a metà prezzo
+fino al 20/11) vale più dell'oro trovato dal capitolo 2 (cumulato con la vendita: 68 800 al piano 20, di cui 23 700 gli oggetti epici):
 per questo la vendita passa a un quarto (decisione del 20/11, [oggetti](oggetti.md#progetto-affissi-unici-e-memoria-2011)).
+Con la vendita a un quarto (dal 20/11) la vendita vale 600 nel capitolo 1, 2 070 nel 2, 4 000 nel 3, 19 700 nel 4
+(di cui 11 850 gli oggetti epici): sotto l'oro trovato fino al capitolo 3.
 Il 10% dell'oro dei piani 1–19 vale ~360 a baule epico (oggi 430). I numeri del 10/11 qui sotto sono superati.
 
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
@@ -397,6 +399,6 @@ del piano in cui compaiono in negozio: già in linea). Oro iniziale già portato
 
 Effetti da valutare prima di applicarla: la spada raddoppia (con 100 monete iniziali si compra al piano 2–3), gli
 oggetti alti costano molto meno (la gold ring da 8000 a 2350): si comprano 1–2 piani prima di oggi. La vendita
-(metà prezzo) degli oggetti trovati non è nel conto: con la vendita il giocatore ha più oro di quello della
+(metà prezzo fino al 20/11, poi un quarto) degli oggetti trovati non è nel conto: con la vendita il giocatore ha più oro di quello della
 tabella. **Non certo al 100%**: l'oro per piano è una media del simulatore, non misurata in partita.
 Se il committente conferma: `rules.yaml` (`price`), `tools/simulators/` (prezzi letti da `rules.yaml`), manuale cap. 5.

@@ -79,7 +79,7 @@ def shop_buy(ctx):
     ctx["bought"] = (item, price)
 
 
-@test("SHOP-SELL-01", "smith: sell the bought item at half price")
+@test("SHOP-SELL-01", "smith: sell the bought item at price >> SELL_SHIFT (a quarter since 20/11)")
 def shop_sell(ctx):
     g, L = ctx["g"], ctx["L"]
     item, price = ctx["bought"]
@@ -89,7 +89,8 @@ def shop_sell(ctx):
     g0 = g.w16(L["c_gold"])
     g.press_fire(); g.press_fire()
     check(item not in g.mem(L["c_pack"], 8), "the item is still in the pack")
-    check(g.w16(L["c_gold"]) == g0 + price // 2, "gold %d (expected %d)" % (g.w16(L["c_gold"]), g0 + price // 2))
+    exp = g0 + (price >> L["SELL_SHIFT"])
+    check(g.w16(L["c_gold"]) == exp, "gold %d (expected %d)" % (g.w16(L["c_gold"]), exp))
     g.run_stop()
     check(g.b(L["sh_mask"]) == 0 and g.in_game(), "RUN/STOP does not close the shop")
 

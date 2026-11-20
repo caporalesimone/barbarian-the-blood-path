@@ -125,6 +125,8 @@ loot:
 # stock oggetti si mostrano quelli che ci sono.
 shop_rules:
   level_ahead: 3
+  # (20/11, committente, E1) un oggetto si vende al prezzo diviso sell_divisor (potenza di 2: 2 = meta', 4 = un quarto come Diablo 1)
+  sell_divisor: 4
 shops:
   # items = pool; stock = quanti oggetti vengono estratti a caso (senza ripetizioni) a OGNI ingresso nel negozio
   blacksmith:                     # 08/11: anche armature e scudi; 09/11: l'armaiolo non c'e' piu', vende tutto il fabbro

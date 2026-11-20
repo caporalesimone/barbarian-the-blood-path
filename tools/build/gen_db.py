@@ -583,6 +583,9 @@ def main():
     o.bytes("shop_stock", stock)
     o.bytes("shop_items", flat)
     o.bytes("shop_minl", minl)            # livello minimo del PG (parallelo a shop_items)
+    sdiv = B["shop_rules"]["sell_divisor"]
+    chk(sdiv in (1, 2, 4, 8), "shop_rules.sell_divisor: 1, 2, 4 o 8 (potenza di 2: il gioco divide con gli shift)")
+    o(f"SELL_SHIFT  = {sdiv.bit_length() - 1}        ; vendita = prezzo >> SELL_SHIFT (balance.yaml shop_rules.sell_divisor, 20/11)")
     o()
 
     # ------------------------------------------------------------ nomi (codici schermo)
