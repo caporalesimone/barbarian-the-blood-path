@@ -35,6 +35,7 @@ progetto che valgono sempre sono in `CLAUDE.md`; i numeri correnti e le decision
 | `tools/simulators/cmp_rules.py` | confronto A/B di due set di regole sugli stessi combattimenti | minuti | per decidere fra due varianti |
 | `tools/simulators/sim_chest.py` | chestLevel e probabilità di ogni oggetto per piano (riproduce `gen_item`) | secondi | bottino, livelli oggetto, magia |
 | `tools/simulators/sim_gold.py` | oro trovato e vendita per piano (Monte Carlo sul censimento dei piani veri, 20/11), bauli epici, borsello | secondi | prezzi, oro iniziale, premi |
+| `tools/simulators/sim_floor.py` | (20/11) piano intero con la cintura a 4 o a 8 pozioni: morti e ritorni in città per piano | minuti | cintura, pozioni, difficoltà del piano |
 | `tools/simulators/sim_durability.py` | durabilità generata, usura per piano, piani per riparazione, rottura contro i boss | ~1 min | durabilità, usura, soglia degli avvisi |
 | `tools/vice/arena.py` | **il codice vero in VICE**: una stanza, PG configurabile, 1–8 mostri, N combattimenti; vittorie, durata, vita, danni, pozioni, xp, usura (`--dur`) | 10–60 s per serie | per verificare che il simulatore non menta su un caso preciso |
 | `tests/regression/balance/test_balance.py` | guardia di regressione (PG di riferimento vince ai piani 1–19, PG di livello 1 perde al piano 10, vita crescente) | 2 s | in ogni build |

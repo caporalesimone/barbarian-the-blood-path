@@ -14,6 +14,7 @@ e `data/chapters.yaml` (capitoli).
 | `sim_chest.py` | chestLevel e probabilità di ogni oggetto per piano |
 | `sim_gold.py` | oro trovato e valore di vendita per piano (Monte Carlo sul censimento `data/floor_census.json` dei piani veri, fatto da `tools/vice/floor_census.py`), bauli epici, borsello |
 | `items_model.py` | (20/11, proposta) modello del database degli oggetti futuro (`data/items/next/`): generazione con qualità, affissi e unici, nome completo, prezzo, controlli dei dati |
+| `sim_floor.py` | (20/11) piano intero: il PG di riferimento combatte tutti i mostri del piano (censimento) senza tornare in città, con la cintura a 4 o a 8: morti, ritorni, pozioni bevute (per scegliere la quest della cintura a 8) |
 | `chapters.py` | (11/11) bilanciamento **per capitolo** (`data/chapters.yaml`): per ogni piano del capitolo, alla profondità globale, vittorie del PG di riferimento, chestLevel, oro; boss della mappa finale; Abisso a campione fino al piano 255 (`--chapter N --fights N --step N --csv f`) |
 
 Il codice vero si misura con l'arena (`tools/vice/arena.py` + `src/test/arena.asm`, in VICE). `tests/test_balance.py`

@@ -63,11 +63,12 @@ def potion_heal(p, hero):
     return hero.hpmax * p["heal_percent"] // 100
 
 
-def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=None):
+def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=None, hp0=None, left=None):
     """hero: rules.Hero; mons: elenco di statistiche (rules.monster); final_boss: indice del boss finale (evocazioni).
+    hp0: vita all'inizio (default piena); left: lista che riceve le pozioni rimaste (20/11, sim_floor.py).
     Ritorna (esito 'win'/'lose'/'time', fotogrammi, vita finale)."""
     pc = pot_cfg or R["potions"]
-    hp = hero.hpmax
+    hp = hero.hpmax if hp0 is None else hp0
     ms = [Mon(m, rng) for m in mons]
     pend = []                               # evocazioni in arrivo: (tempo, Mon)
     wave = 0
@@ -111,6 +112,8 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
     while t < T["max_frames"]:
         alive = [m for m in ms if m.alive]
         if not alive and not pend:
+            if left is not None:
+                left[:] = pots
             return "win", t, hp
         # prossimo evento
         times = [nxt] + [max(m.next, m.stun) for m in alive] + [p[0] for p in pend]
@@ -135,6 +138,8 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                     hp -= d
                     st["taken"] += d
                     if hp <= 0:
+                        if left is not None:
+                            left[:] = pots
                         return "lose", t, 0
                 m.next = t + T["monster_attack"]
         # PG
@@ -197,6 +202,8 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
             nxt = max(t + T["gcd"], min(ready_times))
         elif nxt <= t:
             nxt = t + 1
+    if left is not None:
+        left[:] = pots
     return "time", T["max_frames"], hp
 
 

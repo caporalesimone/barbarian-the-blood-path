@@ -216,7 +216,7 @@ ruin, the citadel watch.
 | Ripetibili (P5) | oro (~1/4 di un piano del capitolo) + 1–2 pozioni + oggetto magico del capitolo con probabilità 1/4; mai respec, unici o premi speciali |
 | Gettoni respec (P1) | A2.3, A4.3 + boss finale (+ i rari dei bauli dell'Abisso) |
 | Borsello (P2) | 500 → 1000 (passo 1) → 3000 (passo 4) → 5000 (passo 7) → 10 000 (passo 12) |
-| Cintura a 8 (P3) | premio importante, fine capitolo 2 o inizio capitolo 3: quest e momento decisi col simulatore (`sim_rules.py`, pozioni come parametro: dove 4 diventano poche). 8 posti = 4 slot da 2 pozioni, tasti 1–4; il tasto beve la prima fila, la seconda sale (08/11) |
+| Cintura a 8 (P3) | premio importante, fine capitolo 2 o inizio capitolo 3: quest e momento decisi col simulatore del piano intero (`sim_floor.py`, 20/11: con 4 posti 0,25–0,39 ritorni in città per piano dal piano 3 al 14, con 8 quasi nessuno; [bilanciamento](BILANCIAMENTO.md)). 8 posti = 4 slot da 2 pozioni, tasti 1–4; il tasto beve la prima fila, la seconda sale (08/11) |
 | Quest che chiedono oro (P6) | iron for the forge, corbeau's toll, the bonfire vigil, modello "offering" |
 | Oro di riferimento | simulatore dell'oro del 20/11 ([bilanciamento](BILANCIAMENTO.md)): ~220 oro per piano nel capitolo 1, ~735 nel 2, ~1055 nel 3, ~1540 nel 4 (oro trovato, piani normali) |
 

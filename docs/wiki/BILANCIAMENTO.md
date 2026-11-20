@@ -349,6 +349,15 @@ Con la vendita a un quarto (dal 20/11) la vendita vale 600 nel capitolo 1, 2 070
 (di cui 11 850 gli oggetti epici): sotto l'oro trovato fino al capitolo 3.
 Il 10% dell'oro dei piani 1–19 vale ~360 a baule epico (oggi 430). I numeri del 10/11 qui sotto sono superati.
 
+**Cintura a 4 o a 8: piano intero (20/11, `python3 tools/simulators/sim_floor.py --runs 80`)**: il PG di riferimento al suo
+livello combatte tutti i mostri del piano (censimento), in gruppi da 1 a 3 e il boss per ultimo, senza cure fra un gruppo e
+l'altro, raccogliendo le pozioni che trova; torna in città (portale) solo con la cintura vuota e meno di metà vita. Con **4
+posti** torna in città 0,25–0,39 volte per piano dal piano 3 al 14 (0,10–0,14 ai piani 1–2, quasi mai dal 15: cura viola e PG
+più forte); con **8 posti** quasi mai (≤ 0,04). Le morti per piano sono uguali con 4 e con 8 (entro il rumore di 80 prove:
+dipendono dai gruppi forti, non dalle pozioni). Quindi la cintura a 8 conta nei capitoli 1–3; data alla fine del capitolo 2
+o all'inizio del 3 (decisione P3) toglie i ritorni del capitolo 3. Limiti: politica di ritorno semplice (`--return-below`),
+nessuna cura fra i combattimenti (da verificare nel gioco), pozioni dei bauli contate a fine piano.
+
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel
 saturo a 255) e poi resta a 3 093 (anche l'oro dei mostri satura a 255); cumulato 257 241 al piano 100. Sono medie con tutto
