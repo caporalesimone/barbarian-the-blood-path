@@ -99,8 +99,11 @@ def next_points(level):
 
 
 def soft(x):
-    sf = NX["stats"]["soft_from"]
-    return x if x <= sf else sf + (x - sf) // 2
+    """diminishing returns: past soft_from points each point is worth soft_rate (default 1/2; integer maths as on the C64)"""
+    st = NX["stats"]
+    sf = st["soft_from"]
+    num, den = st.get("soft_rate", [1, 2])
+    return x if x <= sf else sf + (x - sf) * num // den
 
 
 class NextHero:
@@ -124,7 +127,16 @@ class NextHero:
         w = R["weapons"][weapon]
         self.weapon, self.two_handed = weapon, bool(w.get("two_handed"))
         self.dice, self.pen = Dice(w["dice"]), w["pen"]
-        self.rate = w["rate"] + max(0, R["player"]["attack_speed"]["slow"] - x["dex"] // st["dex"]["speed_per"])
+        slow = R["player"]["attack_speed"]["slow"]
+        self.rate = w["rate"] + max(0, slow - x["dex"] // st["dex"]["speed_per"])
+        # (21/11, committente) attacchi extra della DES: ogni dex.extra_every punti si sblocca un attacco in piu' per Slash; appena
+        # sbloccato va a segno con probabilita' extra_start% (dopo il tiro normale), poi +extra_step% a punto fino a extra_max%
+        d = st["dex"]
+        self.extra, self.extra_chain = [], bool(d.get("extra_chain"))
+        k = 1
+        while d.get("extra_every") and x["dex"] >= k * d["extra_every"]:
+            self.extra.append(min(d["extra_max"], d["extra_start"] + (x["dex"] - k * d["extra_every"]) * d["extra_step"]) / 100)
+            k += 1
         self.speed = 1
         self.att = self.prof + x["dex"] // st["dex"]["att_per"] + magic
         self.dmg_k = x["str"] // st["str"]["dmg_per"] + magic

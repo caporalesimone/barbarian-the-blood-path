@@ -10,14 +10,19 @@
 stats:
   start: {str: 12, dex: 11, con: 12}         # oggi 16/13/15
   points: {per_level: 4, first: 1, last: 20}  # 4 al livello 1 (creazione) + 4 a ogni livello: 80 al 20
-  soft_from: 24                              # (20/11 sera, fit_stats.py) era 30
+  soft_from: 32                              # (21/11, PG specializzato) oltre 32 punti ogni punto vale soft_rate
+  soft_rate: [2, 3]                          # 2/3 (era 1/2 oltre 24)
   ring_points: 4                             # un anello +N vale N x 4 punti nella caratteristica (oggi +N al modificatore = 2N)
-  str: {dmg_per: 2, dc_per: 4}               # +1 danno ogni 2 punti (era 4); CD del Battle Cry +1 ogni 4
-  dex: {att_per: 8, ac_per: 10, speed_per: 2} # +1 ATT ogni 8 (era 5); +1 CA ogni 10 (era 8; tetto dell'armatura: rules.yaml dex_cap); -1 fotogramma
-                                             # di rallentamento ogni 2 (rallentamento iniziale: rules.yaml attack_speed.slow)
-  con: {hp_per_point: 4, potion_pct: 1, potion_max: 30, dr_pct: 0.5, dr_max: 20}
-                                             # +4 vita a punto (era 3); pozioni +1% a punto (max +30%); danno subito -0,5% a punto (era 0,4; max -20%)
-  hp: {base: 20, per_level: 6}               # vita = 20 + (livello-1) x 6 + 4 x COS(x)
+  str: {dmg_per: 3, dc_per: 4}               # +1 danno ogni 3 punti; CD del Battle Cry +1 ogni 4
+  dex: {att_per: 10, ac_per: 16, speed_per: 2, extra_every: 24, extra_start: 2, extra_step: 2, extra_max: 50, extra_chain: false}
+                                             # +1 ATT ogni 10; +1 CA ogni 16 (tetto dell'armatura: rules.yaml dex_cap); -1 fotogramma
+                                             # di rallentamento ogni 2 (rallentamento iniziale: rules.yaml attack_speed.slow, 12 = 24 punti);
+                                             # (21/11, committente) ogni 24 punti un attacco in piu' per Slash: tiro normale e, se va a
+                                             # segno, un secondo tiro: 2% appena sbloccato, +2% a punto, max 50% (DES del profilo destrezza
+                                             # al 20: secondo 50%, terzo 8%); extra_chain: il terzo solo se il secondo e' andato a segno
+  con: {hp_per_point: 3, potion_pct: 1, potion_max: 30, dr_pct: 0.4, dr_max: 20}
+                                             # +3 vita a punto; pozioni +1% a punto (max +30%); danno subito -0,4% a punto (max -20%)
+  hp: {base: 20, per_level: 6}               # vita = 20 + (livello-1) x 6 + 3 x COS(x)
 
 # Cura delle pozioni: percentuale della vita massima con un tetto (oggi: 20 / 50 / 4xL+40 fissi)
 potions:
@@ -63,7 +68,7 @@ bosses:
       crypt_rise: {every: 600, travel: [50, 150], max_alive: 3, type: skeleton}   # scheletri dai sarcofagi a caso
       censer: {every: 400, warn: 50, dmg: 0.5, ticks: 3, tick_every: 50}        # nube d'incenso attorno all'abate
   stitch:                     # capitolo 2, palude (piano 10)
-    hp_mult: 1.62
+    hp_mult: 1.66
     dmg_mult: 1.0
     game: {rites_at: [1.0, 0.667, 0.333], fetish_n: 2, fetish_hp_div: 16, protect_div: 2, regen_every: 25, exposed: 100, exposed_mult: 2}
     new:
@@ -71,7 +76,7 @@ bosses:
       hex: {every: 400, warn: 40, slow: 1.6, duration: 150}                     # maledizione: cadenza del PG x1,6 per 3 s
       fetish_rot: {after: 500, type: zombie}                                    # feticcio non abbattuto in 10 s -> un annegato
   varok:                      # capitolo 3, grotta (piano 15)
-    hp_mult: 0.61
+    hp_mult: 0.64
     dmg_mult: 0.65
     game: {charge_every: 300, charge_hits: 2, wall_stun: 100, shield_div: 2}
     new:
@@ -79,7 +84,7 @@ bosses:
       ghouls: {at: 0.5, n: 2, type: zombie}                                     # chiama 2 Ash Ghoul
       oathbreak: {at: 0.5, rate_mult: 0.67, charge_every: 250}                  # getta lo scudo: niente dimezzamento, piu' veloce
   lord:                       # capitolo 4, cittadella (piano 20): evocazioni del gioco (final_summons) sempre
-    hp_mult: 0.4
+    hp_mult: 0.49
     dmg_mult: 0.5
     game: {}
     new:

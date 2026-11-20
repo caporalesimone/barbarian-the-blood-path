@@ -86,15 +86,20 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
         st.setdefault(k, 0)
     run = 0                                 # Frenzy: bonus di corsa in % (statistica)
 
-    def hit(m, times=1, adv=False, dice_x=1):
+    def hit(m, times=1, adv=False, dice_x=1, q=1.0):
+        """q < 1: attacco extra della DES (21/11): tiro normale, se va a segno un secondo tiro con probabilita' q"""
         nonlocal t, run
+        landed = False
         for _ in range(times):
             if not m.alive:
-                return
+                return landed
             st["pg_swings"] += 1
             r = attack_roll(rng, hero.att, m.ac - hero.pen, hero.crit, adv)
+            if r and q < 1 and rng.random() >= q:
+                r = 0
             if not r:
                 continue
+            landed = True
             st["pg_hits"] += 1
             if t < frenzy_until:
                 fz = SK["frenzy"]
@@ -112,6 +117,7 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                 m.stun_for(t, T["stun_on_hit"])
             if m.hp <= 0:
                 m.alive = False
+        return landed
 
     while t < T["max_frames"]:
         alive = [m for m in ms if m.alive]
@@ -207,6 +213,12 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                         if not a:
                             break
                         hit(script.target(a) if script else a[0], 1)
+                    for q in getattr(hero, "extra", ()):    # (21/11) attacchi extra della DES: probabilita' ridotta
+                        a = [m for m in ms if m.alive]
+                        if not a:
+                            break
+                        if not hit(script.target(a) if script else a[0], 1, q=q) and getattr(hero, "extra_chain", False):
+                            break                           # variante a catena: il terzo solo se il secondo e' andato a segno
                     cd["slash"] = t + (int(hero.rate * script.pg_rate(t)) if script else hero.rate)   # (20/11) maledizione
             # evocazioni del boss finale
             if final_boss is not None and wave < R["final_summons"]["waves"]:

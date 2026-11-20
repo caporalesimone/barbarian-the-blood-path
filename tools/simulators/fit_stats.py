@@ -13,6 +13,8 @@ R is "how many monsters the hero beats with one belt" up to a constant. Score of
 
 Usage: python3 tools/simulators/fit_stats.py [--top 10] [--floors 4,8,12,16,19] [--margin 0.1]
        python3 tools/simulators/fit_stats.py --show       (power table of the costs in rules_next.yaml)
+Limit (21/11): the model counts all the damage as Slash at the hero's cadence, so it overrates DEX speed and the double strike
+(Smash, Whirlwind and Frenzy have fixed cooldowns): check DEX with sim_builds.py.
 The chosen costs are copied by hand into data/rules_next.yaml and checked with sim_builds.py (Monte Carlo)."""
 import argparse, itertools, math, os, sys
 
@@ -42,7 +44,7 @@ def power(name, floor):
     ttk = din = 0.0
     for m, c in mix:
         p = hit_chance(h.att, m["ac"] - h.pen)
-        dmg = h.dice.avg * (1 + crit) + h.dmg_k
+        dmg = (h.dice.avg * (1 + crit) + h.dmg_k) * (1 + sum(getattr(h, "extra", ())) * 0.85)   # Slash ~85% dei colpi
         dps = max(1e-6, p * dmg / h.rate)
         ttk += c * m["hp"].avg * m["hp_mult"] / dps
         din += c * hit_chance(m["att"], h.ac) * m["dmg"].avg * m["dmg_mult"] * (1 - h.dr10 / 1000) / R["timing"]["monster_attack"]
