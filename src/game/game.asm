@@ -3390,7 +3390,7 @@ _same   jsr act_tick
 .else
         jmp player_die
 .endif
-_alive  rts                     ; (08/11: nessun menu di vittoria; tornera' con il quest system, docs/wiki/quests.md 6ter)
+_alive  rts                     ; (08/11: nessun menu di vittoria; tornera' con il quest system, docs/wiki/quests.md, menu di vittoria)
 
 ; esplorazione per la minimappa: le caselle a 4 o meno dal PG diventano viste (bit per settore)
 mark_explored:

@@ -42,7 +42,7 @@ SV_SCR   = $ece0                ; buffer del plugin ($0800 byte, "drive-code buf
         .cerror SV_LEN + 2 > 9*254, "file dell'eroe oltre 9 blocchi (tools/build/mkdisk.sh)"
 rpt     = $4a                   ; puntatore del flusso rel_put / rel_get (pagina zero libera fuori da Krill: $41-$47)
 ; piani del capitolo in RAM (11/11 sera): CH_LV slot da LV_SLOT byte nella RAM sotto l'I/O, dopo il generatore
-CH_LV    = 5                    ; piani per capitolo (regola del committente, docs/wiki/quests.md 3.8)
+CH_LV    = 5                    ; piani per capitolo (regola del committente, docs/wiki/capitoli.md)
 LVRAM    = gen_io_end           ; slot del piano (L-1) mod CH_LV
 LVRAM_end = LVRAM + CH_LV*LV_SLOT   ; (15/11) coppia di etichette per la mappa automatica (TODO T1)
 ;@free LVRAM_end..$e000 "RAM sotto l'I/O dopo generatore e slot dei piani: codice che gira con $01=$34 e interrupt spenti (come gen_io.asm), o dati" use=code-io-off

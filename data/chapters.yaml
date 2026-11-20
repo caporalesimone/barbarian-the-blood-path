@@ -1,4 +1,4 @@
-# Chapters of the game (11/11, docs/wiki/capitoli.md, docs/wiki/quests.md 3.8). Read by tools/build/chapters_db.py, which computes the
+# Chapters of the game (11/11, docs/wiki/capitoli.md). Read by tools/build/chapters_db.py, which computes the
 # two counters: the LOCAL level (1..levels, restarts in every chapter: what the player sees) and the GLOBAL depth
 # (1..global_max: levels of the previous chapters + local level; it drives the difficulty). The last chapter with
 # `levels: rest` (the Abyss) takes the levels left up to global_max. Users: tools/simulators/chapters.py (balancing per chapter),

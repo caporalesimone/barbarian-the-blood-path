@@ -43,7 +43,7 @@ non ci sono (TODO H3). Anteprime: `lab64 run python3 tools/build/village_preview
   nel modulo del villaggio il campo "solido" vale `"npc"`). Le altre barche del villaggio sono state tolte: le uniche barche
   sono i traghetti. La raggiungibilità di `gen_maps.py` conta il salto fra le due caselle `F`. Test `VIL-FERRY-10`.
 - **Settori degli NPC** (17/11): ogni villaggio ha fino a 16 rettangoli (`SECTORS` in `tools/build/villages.py`, nell'intestazione
-  del file) dove vivono gli NPC che vagano; vedi [quest](quests.md). `gen_maps.py` controlla misure e caselle percorribili e stampa
+  del file) dove vivono gli NPC che vagano; vedi [Abitanti](#abitanti-1718-11-concept). `gen_maps.py` controlla misure e caselle percorribili e stampa
   il massimo di settori in una finestra di gioco (oltre 5 NPC visibili non si disegna).
 - **Controlli della build** (`tools/build/gen_maps.py`): una sola porta per negozio e locanda con **2 caselle libere davanti**;
   porte, cura, ingresso del sotterraneo, uscita, portale e il suo arrivo **raggiungibili dall'ingresso**; **nessuna casella
@@ -181,10 +181,57 @@ il vecchio (anelli concentrici grigio/ciano) si confondeva con l'acqua e la font
 giallo (palette verde/marrone/grigio chiaro + ciano), quindi si distingue per la forma. Nel dungeon prende i colori
 della palette del piano. Atlante: `out/work/atlas/` (`VILLGO`, `DUNGxO`).
 
-## Abitanti (17/11, concept)
-Quattro abitanti per villaggio, figure dell'eroe in altri colori (sprite 3-6): chi dà la quest, fermo vicino all'ingresso (nome nella
-barra quando gli si è accanto, Fire = la sua quest), e tre che vagano piano e solo con il PG vicino. Piazzati a caso su caselle
-libere attorno all'ingresso (`npc_init`, modulo MENU). Dettagli: [Quest](quests.md), "Concept del 17/11".
+## Abitanti (17–18/11, concept)
+
+Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/11). Il progetto delle quest vere è in
+[Quest](quests.md).
+
+- **NPC nel villaggio** (`src/game/quest.asm`, modulo MENU): sprite 3–7 (liberi nel villaggio: `sh_en` ha solo lo sprite 0 e i
+  3–7; gli sprite 1 e 2, fendente ed effetto nel dungeon, servono al "!"). **Disegni** (17/11): 4 figure viste di fronte, 2
+  fotogrammi (fermo / passo): *villager*, *woman*, *elder*, *guard* (`tools/build/npc_gfx.py`), negli slot sprite 12–19
+  (`$A300`, zona 4 del MENU). Il vestito usa il colore dello sprite. **Colore** (`npc_look`, `src/menu/npc_look.asm`): a caso, mai
+  uno dei colori del villaggio (`tk_pal`) né il 9 e il 15 (multicolor degli sprite). Disegno a caso per i vaganti (`npc_g`); chi
+  dà la quest è la *woman*, a partire dal giallo.
+- **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo nella piazza** (casella `tk_g` dell'intestazione del villaggio, scelta da
+  `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e lontana
+  dalle porte): accanto a lei compare il suo nome nella barra; **Fire** = quest presa (bit 0 di `c_qst`) e il suo dettaglio, che
+  poi si riapre con Fire accanto a lei o dall'elenco (Q). I luoghi hanno la precedenza (su una porta o una scala vale il luogo).
+- **"!" sopra chi ha una quest da dare** (18/11): sprite hires a `$8C00` (puntatore `$30`, `BANG` in `npc_gfx.py`, 14 righe),
+  18 righe sopra l'NPC, **ondeggia** di 2 righe e passa dal giallo al bianco ogni 16 fotogrammi. Usa gli sprite 1 e 2 (il 2 solo
+  se l'effetto del colpo non c'è): al massimo due "!" sullo schermo; non sopra la riga 80 (barra in alto). Sparisce quando la
+  quest è presa (`npc_offer`).
+- **Vaganti con una quest** (18/11): all'ingresso ogni vagante, con probabilità **1/4**, offre una quest (`npc_q`, `npc_pick`): la
+  prima fra le 2..8 non ancora presa, non già offerta da un altro NPC in quella visita, del capitolo attuale o di uno prima
+  (`q_ch`). Accanto a lui la barra dice "quest giver" (`QL_GV`); Fire = quest presa e dettaglio, poi torna un NPC qualunque.
+  L'etichetta del luogo si ricalcola ogni 16 fotogrammi (`lc_x` = `$ff` in `npc_tick`).
+- **Vaganti** (fino a 16 per villaggio, 17/11): ogni villaggio ha i suoi **settori** (`SECTORS` in `tools/build/villages.py`:
+  griglia 4×4 nel 1 e nel 4, piattaforme nel 2 (11), terrazze nel 3 (12), isole nel 5 (12); rettangoli di 8–15 caselle per lato
+  con almeno 20 caselle percorribili, 4 B l'uno nell'intestazione `TWNc`, copiati in `tk_sec`). Il vagante *n* vive nel
+  settore *n*: nasce con probabilità 7/8 su una casella libera a caso del settore e non ne esce mai (`npc_in`). Si muove solo
+  con il PG a meno di 10 caselle, a fotogrammi alterni, 1 volta su 16 da fermo: una casella in una direzione a caso, 2 px per
+  passo; si ferma su un muro e non entra nella casella del PG (che li attraversa). Con il PG a 2 caselle o meno non parte per
+  un altro passo (`NPC_STOP`, 18/11: per fare Fire su di lui). **Sprite:** i visibili prendono gli sprite 3..7 in ordine
+  (`npc_draw`, al massimo 5). `gen_maps.py` stampa il massimo di settori in una finestra di gioco (21×13 caselle): 9 nel
+  villaggio 1, 6 nei 2–4, 7 nel 5.
+- **Memoria**: tabelle degli NPC (8 byte per NPC) nella tabella della ricerca di percorso dei mostri (`BFP`, `$A500`), inutile
+  nel villaggio. Zona 5 del MENU (`$8C00-$8E7F`): sprite del "!", tabella dei salti `NPC_JT` (piazzamento `npc_init` con
+  `npc_pick`, sprite `npc_draw5`, Fire `npc_talk5`, `src/menu/npc.asm`). Il passo dei vaganti sta nella zona 6 (`MRT`,
+  `src/menu/npc_tick.asm`, 18/11), chi è accanto al PG (`npc_here1`, `npc_offer`) nella zona 1 (`src/menu/npc_here.asm`,
+  `MENU_NHERE`); in GAME restano i punti d'ingresso (`npc_tick`, `npc_ok`, `npc_here`). (19/11) Il passo tocca metà degli NPC
+  per fotogramma e salta i fotogrammi di ridisegno ([prestazioni](prestazioni.md)).
+- **Pagina Q** (17–18/11, [interfaccia](interfaccia.md)): tasto **Q** ovunque = **elenco** delle quest prese (titolo e "ch. N",
+  W/S per scegliere, Fire = dettaglio, RUN/STOP o Q = di nuovo nel gioco; senza quest "talk to the villagers"). **Dettaglio**:
+  titolo sulla cornice, "chapter N", lo **stato** (righe gialle, oggi segnaposto: campo `status` di `data/quests.yaml`), il testo
+  e il **reward**; il riquadro mostra 14 righe e un testo più lungo scorre con W/S (" up " e " more " sulla cornice). Fire accanto
+  a chi dà una quest apre subito il dettaglio. **File** (`data/quests.yaml` → `tools/build/gen_quests.py`, formato in
+  [FORMATO_DATI](FORMATO_DATI.md)): `QST0` = codice della pagina (`src/qpage.asm`) + **indice**, letto da `ui_quest` a `$BC00`
+  (schermo B) con la schermata di attesa; **pieno** (1021 B su 1024: pagina 849 B + indice 172 B). `QSTn` (n = 1..8) = premio,
+  stato e testo, letto a `QTXT` = `$B000` senza schermata di attesa. In GAME restano ~40 B (`ui_quest`). `c_qst` (salvato con
+  l'eroe) è una **maschera**: bit *n*-1 = quest *n* presa, al massimo 8 quest.
+- **Quest segnaposto** (18/11): la 1 di Hilde (capitolo 1) e 7 "piccole" (2..8, capitoli 1, 1, 2, 2, 3, 4, 5) dei vaganti; la 2
+  ha un testo lungo per provare lo scorrimento. **Lobby**: "active quests:" = quante quest sono prese.
+- **Test**: `tests/sanity/quest/cases.py` (QUEST-10..16: piazzamento e quest offerte, elenco vuoto, Hilde con "!" e dettaglio,
+  vaganti che si fermano, sprite, vagante "quest giver" e scorrimento del testo, cadenza dell'attacco).
 
 ## Armaiolo: tolto (09/11, decisione del committente)
 
@@ -297,7 +344,7 @@ distanze `tools/village_audit.py`) per non sovrascriverlo; ogni ingresso nella l
    il baule è nel record dell'eroe).
 2. La mappa del villaggio (`MAP`, `$C000`–`$C8FF`) non deve usare `$C900`–`$CFFF` (zona 1 del modulo MENU).
 3. `lab64 test regression -k VIL-MENU` (il file MENU non si rilegge mai nel villaggio).
-4. Aggiornare `docs/wiki/quests.md` (sez. 3.6, villaggi multipli) e il `TODO.md` se resta qualcosa.
+4. Aggiornare il `TODO.md` se resta qualcosa.
 5. (15/11) Un modulo `tools/build/vilN_*.py` (tile, colori, nome della cura), la voce in `tools/build/villages.py`, la mappa
    `data/town_mapN.txt` (lettere `E`, `P`, `=`), il file `twnN` in `tools/build/asm.sh` e `tools/build/mkdisk.sh`, il brano in
    `PLAYLIST["town"]` (`tools/build/songs.py`), `data/chapters.yaml`; poi `lab64 test sanity -k VIL-TWN` (i test leggono

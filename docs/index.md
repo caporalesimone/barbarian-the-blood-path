@@ -38,7 +38,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 | [Tecnica](wiki/tecnica.md) | Memoria, disco, loader, moduli, precaricamento, build, test, arena, simulatori (`tools/simulators/`) |
 | [Secondo emulatore](wiki/emulatore.md) | (13/11) **vc64web** in `containers/vc64web` di Lab64: cosa sa fare (con i riferimenti ai suoi documenti), quando usarlo al posto o oltre a VICE, test `EMU-10..16`, trappole misurate |
 | [Fast loader](wiki/FastLoader.md) | (11/11, ramo `fast-loader`) **Krill's Loader r194**: architettura (chi installa, residente, caricamenti, salvataggi con il plugin, memoria), build, misure prima/dopo, compatibilità |
-| [Quest system](wiki/quests.md) | **Progetto, non nel codice** (07/11): quest, NPC, tre villaggi, trama e sottotrama, stanze fisse e dal seed, costi, open point |
+| [Quest system](wiki/quests.md) | **Progetto, non nel codice** (20/11): regole decise, villaggi e NPC, trama The Blood Tithe, catena principale, accessorie, ripetibili, premi, piano di lavoro |
 | [Analisi dell'assembly](../out/work/asm_audit/analisi_assembly.md) | Analisi del codice assemblato (11/11, `tools/build/asm_audit.py`): codice non raggiunto, ripetuto, spioncino, routine più grandi |
 | [Bestiario](wiki/bestiario.md) | Mostri per capitolo (11/11): `data/monsters/bestiary.tsv` (sorgente dei mostri, modello `monstdat.tsv` di Diablo), boss di capitolo e concept di 3 capitoli |
 | [Capitoli](wiki/capitoli.md) | **Analisi, non nel codice** (11/11): gioco diviso in capitoli (villaggio, piani, mappa finale) e Abisso a 255 piani; `data/chapters.yaml` per atlante e simulatori |

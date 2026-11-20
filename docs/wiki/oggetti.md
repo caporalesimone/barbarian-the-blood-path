@@ -210,3 +210,48 @@ Test: `tests/sanity/gold/cases.py` (casi del negozio). Salvataggi della v1.58–
 (formato invariato, niente SAVE_VER). Oro iniziale **100** (`PL_START_GOLD`, dal 06/11 sera; prima 1000). Nei negozi l'assortimento dipende
 dal livello del PG ([Villaggio](villaggio.md#negozi-enter_shop-sh_draw)). Prezzi proporzionali al guadagno:
 **proposta** in [BILANCIAMENTO](BILANCIAMENTO.md) (non applicata, in attesa di conferma).
+
+## Progetto: affissi, unici e memoria (20/11)
+
+**Progetto, non ancora nel codice** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
+database proposto andrà in `data/items/` e il modello nei simulatori (fase 1 del piano delle quest). Quest e premi: [Quest](quests.md).
+
+### Regole decise
+| ID | Regola |
+|---|---|
+| O1, O14 | **31 basi**: 13 armi (dagger, sword, viking sword + 7 nuove a una mano + battle axe, maul, great sword a due mani), 11 armature, 4 scudi, 3 anelli; nessuna grafica nuova (le liste mostrano l'icona della categoria) |
+| O2 | Un oggetto è **magico** con probabilità 8% + 3% × T (T = livello del baule / 8), al massimo 60%; fra i magici 40% solo prefisso, 40% solo suffisso, 20% entrambi (da tarare) |
+| O3, O12 | **Unici** con valori fissi (pezzi della storia): garantiti da boss, quest e bauli epici; a caso solo dentro la loro **finestra di livelli**, con probabilità alta; ce ne sono anche a basso livello, utili solo lì |
+| O4 | Affissi **maledetti** rari (peso 1), prezzo ridotto |
+| O5 | Meccaniche nuove subito: vita fissa, danno subito ridotto, cadenza, indistruttibile; **dopo la 2.0**: furto di vita e spine |
+| O6 | **Requisiti** di FOR/DES (`min_str`, `min_dex`): non si equipaggia senza |
+| O7 | Colore del nome: normale bianco, magico azzurro (`UC_MAGIC` = 14, c'è già), unico giallo, maledetto grigio (12: l'11 è "posto vuoto") |
+| O8 | **Interfaccia "variante D"**: menu di oggi; nella lista il nome dell'oggetto sotto il cursore scorre nella sua colonna da 16; **riga 22** = icona + nome completo centrato nel colore della qualità (nel baule del piano i messaggi passano alla riga 23); il riquadro "selected item" usa le 3 righe per statistiche e prezzo, prefisso, suffisso (e requisito). Nessun nome oltre 37 caratteri ("of craftsmanship" diventa "of the craft") |
+| O9 | Anelli: il metallo decide gli affissi (copper 1, silver 2, gold 2 con almeno uno del livello più alto); il +N alla caratteristica di oggi diventa il suffisso of strength / of dexterity / of vitality |
+| O10 | Valore dell'affisso = formula alla nascita (intervallo `value1..value2` della riga, scalato con il livello dell'oggetto da una curva di 2–3 parametri, + un tiro), **salvato nell'oggetto** e fisso per sempre: nell'Abisso i valori crescono (es. of might +10..+25) |
+| O11 | Riparazione: 25% del prezzo **con gli affissi** |
+| O13 | Basi dell'Abisso con l'Abisso (TODO H3) |
+| E1 | **Vendita a un quarto** del prezzo (come Diablo 1) |
+| E2, E3 | I negozi comprano tutto; vendono anche oggetti magici, sempre di più con il livello del PG (all'inizio pochi, ai livelli alti solo magici) |
+| E4 | Bauli epici del piano 20: oro casuale in un intervallo ampio, abbastanza per le armi più care e le riparazioni dell'Abisso |
+| E5 | Prezzi dei `.tsv` come prima stesura, poi taratura con il simulatore dell'oro |
+
+### Memoria e salvataggi (F7, approvato)
+Misure sulla build v1.437: GAME ha 1345 B di margine, le zone del MENU 223 B; il blocco dell'eroe 11 B liberi; il file di
+salvataggio 7 B (immagine a `$E000`, plugin di Krill a `$E820`). Il database (2451 B di dati, misurati assemblando le tabelle)
+non sta in GAME. Architettura:
+- **`IDAT`** a `$E000` (RAM sotto il KERNAL, libera nel villaggio dopo `gfx_install` e nel dungeon, fuori dai salvataggi):
+  statistiche e nomi degli oggetti, affissi, poteri degli unici, routine del nome completo, del prezzo e di `dur_roll`. ~2470 B su
+  3095 (stima). Si legge entrando nel villaggio, dopo ogni salvataggio e all'avvio della partita (~10 blocchi, ~0,7 s).
+  Budget comune con il file MENU, che si appoggia subito sopra: `$E000-$FCFF` = 7424 B.
+- **`IGEN`** a `$F817` (codice del MENU morto nel dungeon, fuori da tema e salvataggi): generazione degli oggetti e tabelle che
+  servono solo a generare (~730 B su 1257). Si legge scendendo nel dungeon. Prepara anche, uscendo dal dungeon, la **merce
+  dei negozi** (buffer di ~56 B a `$FE96`) e l'**oggetto premio** delle ripetibili.
+- Accesso con `$01 = $35`, interruzioni spente e NMI su `nmi_stub` (come la zona 2 del MENU), solo nelle schermate.
+- **GAME**: escono tabelle, nomi e generatore di oggi, entrano interfaccia, affissi e agganci delle quest: margine ~1250 B (stima).
+- **Bauli del piano**: contenuto **rigenerato** dal seme (seme del mondo, piano, nonce del baule) a ogni apertura, salvando solo
+  quali oggetti sono presi: ~45 B invece dei 120 di `ch_i`/`ch_b` (generatore deterministico per baule: da verificare).
+- **Oggetto** = id + prefisso (id, valore) + suffisso (id, valore) + durabilità + massima = 7 B (oggi 4).
+- **Baule della locanda** sotto l'I/O (168 B nei 260 liberi a `LVRAM_end`); blocco dell'eroe ~189 B nella pagina `$9500`.
+- **File di salvataggio**: solo i 5 piani del capitolo in corso (C1): ~790 B, 4 blocchi invece di 9.
+- Rischi: budget comune MENU + `IDAT`; NPC fissi nelle zone 5–6 del MENU; pagina Q (`QST0` pieno).

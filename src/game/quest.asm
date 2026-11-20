@@ -3,7 +3,7 @@
 ;  delle pagine e i punti d'ingresso; il codice degli NPC sta nel modulo MENU (zona 5, $8C00, src/menu/npc.asm, 18/11).
 ;  Pagine (18/11, committente): tasto Q ovunque = elenco delle quest prese; Fire accanto a chi da' una quest = la si prende
 ;  e si apre il suo dettaglio. Pagina = file QST0 (codice + indice: capitolo e titolo di ogni quest, src/qpage.asm) letto in
-;  QBUF = schermo B del gioco; il testo di una quest (QSTn) lo legge la pagina in QTXT. docs/wiki/quests.md.
+;  QBUF = schermo B del gioco; il testo di una quest (QSTn) lo legge la pagina in QTXT. docs/wiki/villaggio.md (Abitanti), progetto in docs/wiki/quests.md.
 ;  NPC: lo 0 (Hilde, quest 1) fermo nella piazza della fontana; gli altri vagano nel loro settore (tk_sec) e ogni tanto
 ;  offrono una quest (npc_q). Chi ha una quest da dare ha un "!" sopra la testa (sprite 1 e 2).
 ; ===================================================================

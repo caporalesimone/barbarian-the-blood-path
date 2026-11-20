@@ -1,4 +1,4 @@
-"""Chapters (11/11, docs/wiki/capitoli.md, docs/wiki/quests.md 3.8; sanity moved to regression on 11/11): data/chapters.yaml
+"""Chapters (11/11, docs/wiki/capitoli.md; sanity moved to regression on 11/11): data/chapters.yaml
 gives every chapter its LOCAL levels 1..n (they restart in every chapter) and the GLOBAL depth 1..255 that drives the
 difficulty (tools/build/chapters_db.py); the balancing simulators work by chapter (tools/simulators/chapters.py). Pure Python, no VICE."""
 import contextlib, io, os, sys

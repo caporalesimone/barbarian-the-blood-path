@@ -1,4 +1,4 @@
-# Quest (17/11, concept del menu delle quest: docs/wiki/quests.md, "Concept del 17/11"). Testi SEGNAPOSTO (lorem ipsum):
+# Quest (17/11, concept del menu delle quest: docs/wiki/villaggio.md, "Abitanti"). Testi SEGNAPOSTO (lorem ipsum):
 # solo per provare impaginazione, caricamento da disco e menu. tools/build/gen_quests.py ne fa: il file QST0 (la pagina, src/qpage.asm,
 # con l'indice: capitolo e titolo di ogni quest) e un file QSTn per quest (premio, stato, testo), letto quando se ne apre il dettaglio.
 # (18/11, committente) piu' quest prese insieme: elenco (tasto Q) e dettaglio (titolo, capitolo, stato, testo, premio).

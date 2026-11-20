@@ -26,7 +26,7 @@ del personaggio **non** scrivono il disco. "Quit game" torna al menu **senza sal
 vale l'ultimo salvataggio. Spegnendo senza salvare si perde tutto ciò che è successo dopo (eroe e piani insieme: niente
 duplicati).
 
-**Capitoli** (regola del committente: **5 piani per capitolo**, `CH_LV` in `rel.asm`; [quests](quests.md) 3.8): oggi,
+**Capitoli** (regola del committente: **5 piani per capitolo**, `CH_LV` in `rel.asm`; [capitoli](capitoli.md)): oggi,
 con un solo villaggio, i piani 1–5, 6–10, 11–15, 16–20 sono quattro capitoli. Entrando in un piano di un altro capitolo
 (scale 5 → 6, 10 → 11, 15 → 16 o all'indietro, oppure la cripta del villaggio con gli slot di un capitolo più profondo)
 il gioco salva da solo eroe e piani del capitolo lasciato (`chap_save`, eroe registrato **dove era prima** del cambio:

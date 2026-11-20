@@ -63,13 +63,13 @@ non si possono chiudere.
 | ID | Decisione | Blocca |
 |---|---|---|
 | B1 (ex D2) | **Merce dei negozi**: cosa e quanti oggetti vende ciascuno a ogni ingresso (oggi `balance.yaml`: fabbro 6 da armi+armature+scudi, alchimista 4 da pozioni+pergamena+anello; massimo 8). | E2 |
-| B2 (ex D4) | **Cintura a 8 posti**: quale quest la sblocca (da scegliere col simulatore). | F1 |
+| B2 (ex D4) | **Cintura a 8 posti** (20/11, committente): premio importante a fine capitolo 2 o inizio capitolo 3; quest e momento decisi col simulatore ([quests](docs/wiki/quests.md) sez. 7). | F1 |
 | B3 (ex D5) | **Pergamene fuori dallo zaino**: contatore 0..10 addosso (tasto 5), pile da 10 nel baule della locanda, opzione "riga dell'oro nella locanda con `s N`". Cooldown della pergamena ≥ 5 s (08/11). | F2 |
 | B4 (ex D6) | **Anelli e nomi**: formato `ring +N <stat>` e quali nomi accorciare (candidati: leather armor, greater healing, healing potion, minor healing, portal scroll, tower shield, viking sword). | E1 |
 | B6 (ex D9) | **Una pergamena garantita per piano?** | G1 |
 | B7 (ex D10) | **Prezzi proporzionali al guadagno** (`docs/wiki/BILANCIAMENTO.md` sez. 12). | G2 |
-| B8 (ex D11) | **Quest system** (`docs/wiki/quests.md` sez. 5 e 11): villaggi, numero delle quest, pergamena, Torvald, generatori, lore, manuale su disco. | H1 |
-| B9 (ex D14) | **Borsello a gradini**: valori (es. 500 / 1000 / 3000 / 5000, 10 000 al boss finale) e quali tre quest. | H1 |
+| B8 (ex D11) | **Quest system**: decisioni prese il 20/11 ([quests](docs/wiki/quests.md)); restano i chiarimenti C3–C7 della pagina (sez. 8). | H1 |
+| B9 (ex D14) | **Borsello a gradini** (deciso il 20/11): 500 → 1000 → 3000 → 5000 con i passi 1, 4, 7 della catena, 10 000 con il passo 12 (numeri da ricontrollare col simulatore dell'oro). | H1 |
 | B10 (ex D12) | **Abisso**: ripopolamento, prezzi della città, tetto dell'oro oltre i 16 bit. | H3 |
 | B11 (D-CAP-1..5, 11/11) | **Capitoli** (`docs/wiki/capitoli.md`): quanti (i piani sono **5 per capitolo**: `data/chapters.yaml` 5, 5, 5, 5 + Abisso 235 = profondità 255; piano locale da 1 in ogni capitolo, profondità globale per la difficoltà, `docs/wiki/quests.md` 3.8); dove vanno Demon e Balrog (oggi da profondità 8–9: fuori dal capitolo 1 di 5 piani); ritorno ai villaggi precedenti; piani dell'Abisso salvati (anello di K record) o rigenerati; mappe fisse nell'Abisso; difficoltà oltre la profondità 32 e oltre 255. | M9, H3 |
 | B12 (11/11) | **Punti statistica**: conferma delle scelte di A1 (punti per livello, vita retroattiva; l'uscita che confermava in silenzio è stata cambiata il 15/11 dalla richiesta del committente, Z5: ora chiede). | A1 |
@@ -174,7 +174,8 @@ Le voci che cambiano il blocco eroe (C5, F1–F3, G4) vanno fatte insieme per ca
 - Contatore 0..10 nell'eroe, icona col numero nel purse e nell'HUD, pile da 10 nel baule; cooldown ≥ 5 s.
 
 ### F3 (ex 3.3) Campi per quest e Abisso nell'eroe — M
-- Stato quest (8 B), modalità normal/nightmare + eroe morto (1 B): tutti in un colpo (`c_chap` c'è dal 12/11).
+- Stato quest (~32 B, [quests](docs/wiki/quests.md) sez. 4.3), modalità normal/nightmare + eroe morto (1 B). (20/11) Il formato nuovo
+  dell'eroe (oggetti a 7 B, baule della locanda sotto l'I/O, 5 piani nel file) è nel progetto di [oggetti](docs/wiki/oggetti.md#progetto-affissi-unici-e-memoria-2011).
 
 ### C5 (ex 1.8) CRC sui salvataggi — M
 - Controllo di integrità (CRC-8/16 o somma) per eroe, piani, baule, verificato al caricamento; un record corrotto si
@@ -416,8 +417,8 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   (4 min 13 s a velocità normale): **il 4% di accelerazione di sopra non è stato fatto** (non richiesto): resta da decidere.
 - (19/11, committente) **Storia e intro da rivedere in toto quando gli sviluppi del capitolo 2 sono pronti**: Bad Water al
   posto di "Blackwater Mill", tema voodoo, boss *Mother Stitch, the Dollmaker* al posto del mugnaio, piani dei boss con luogo
-  proprio. `docs/wiki/quests.md` ha una nota in testa: i suoi passi sul mulino non valgono più e non sono stati riscritti;
-  `data/lore.txt` cita ancora il mulino.
+  proprio. `data/lore.txt` cita ancora il mulino. (20/11) **Trama nuova decisa**: The Blood Tithe ([quests](docs/wiki/quests.md)
+  sez. 3); il testo dell'intro va scritto e approvato (chiarimento C7).
 
 ### M1 Sequenza dei capitoli: cosa resta ([capitoli](docs/wiki/capitoli.md)) — L
 - **Effetto grafico del passaggio** di capitolo (oggi: schermo nero, poi le schermate di salvataggio e caricamento): tbd.
@@ -442,7 +443,7 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   i numeri sono miei, **da provare in gioco e da tarare** (simulatori: non riproducono le meccaniche); dal 15/11 hanno anche il
   **loro nome** nella barra e i **mostri del capitolo** intorno (solo grafica, colore e nome: M9); statistiche proprie, bottino
   speciale, sala che si chiude, pentacolo che brucia del Lord of Ruin: da fare (decisioni del committente).
-- **Ritorno ai villaggi precedenti** (portale/menu): fuori da questa fase (D-CAP-2).
+- **Ritorno ai villaggi precedenti** (20/11, D-CAP-2 decisa): parzialmente distruttivo, dall'ingresso del villaggio ([quests](docs/wiki/quests.md), C1); fase 3 del piano delle quest.
 - **Tile di accesso al dungeon generico**: la cripta (`T_TSTAIRS`) è già un tile da mettere dove si vuole; più ingressi con
   destinazioni diverse richiederebbero una tabella (utilità da confermare).
 - (12/11, committente) **Confermato**: un tema grafico dei livelli per capitolo (`GFX1..8`) va bene così.
@@ -481,22 +482,13 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema
   grigio del capitolo 3 si legge poco sui muri chiari: screenshot `out/work/villages/monsters3.png` dei test `MON-CHAP-*`); se i boss con nome dei piani normali devono avere nomi per capitolo (oggi `first_names`/`epithets` comuni).
 
-### H1 (ex 5.1) Quest system (dopo B8) — XL
-- (17/11) **Concept fatto** (`docs/wiki/quests.md`, "Concept del 17/11"): pagina Q con file `QSTn` (codice + testo), NPC fermo
-  che dà la quest, tre NPC vaganti, quest nella lobby, `c_qst` nell'eroe. Resta: stati e premi veri, testi, NPC per villaggio,
-  **mini quest** degli NPC minori (es. uccidi 5 mostri di un tipo).
-- (18/11) **Fatto**: elenco e dettaglio delle quest (Q: file `QST0` con l'indice, testo `QSTn` a `$B000`, stato segnaposto
-  giallo, scorrimento), `c_qst` maschera (8 quest al massimo), "!" sopra chi ha una quest, NPC che vagano e offrono quest
-  segnaposto ("quest giver"), NPC fermi con il PG vicino, zona 5 del MENU (`$8C00`) con piazzamento, sprite e Fire degli NPC.
-  **Resta**: cosa mostra lo **stato** (oggi segnaposto giallo, decisione del committente: si decide con il quest system), stati
-  veri, obiettivi, premi, testi; (18/11) `npc_tick` e' nella zona 6 del MENU (`MRT`, R11) e
-  `npc_here` nella zona 1 (R3): margine di GAME 1262 B, file MENU con 3096 B di appoggio libero sopra `ML_LO` (R10); **`QST0` e' pieno** (1021 B su 1024: pagina 849 B + indice
-  172 B): piu' quest o titoli piu' lunghi richiedono l'indice in un file a parte o codice piu' corto.
-- **Versione 2.0** quando è pronto, mai prima (regola del 09/11). **Ogni villaggio nuovo**: locanda con lo stesso baule,
-  la mappa fuori da `$C900-$CFFF` (zona 1 del modulo MENU), `lab64 test regression -k VIL-MENU`.
-- 15 quest (o 10), NPC, abilità solo da quest, tre villaggi, stanze fisse, compagno Torvald, pagine su disco (`QSTn`,
-  tasto Q). Premi: cintura a 8 (F1), borsello a gradini (B9), **un gettone respec** (A1). Costi: ~1,1 KB di GAME (prima
-  D7/D8), ~300 B in OVLT, ~550 B sotto l'I/O, ~60 blocchi. Analisi: `docs/wiki/quests.md`. Da rileggere col modello a capitoli (M9).
+### H1 (ex 5.1) Quest system — XL
+- **Progetto deciso il 20/11** ([quests](docs/wiki/quests.md)): regole, trama The Blood Tithe, catena di 12 passi, 15 accessorie,
+  ripetibili per capitolo, premi, **piano di lavoro in 4 fasi con 3 cancelli** (sez. 8). Il concept del 17–18/11 (NPC, "!",
+  vaganti, pagina Q, `QST0`/`QSTn`, `c_qst` a 8 bit) è descritto in [villaggio](docs/wiki/villaggio.md#abitanti-1718-11-concept).
+- Prima delle quest: oggetti ed economia (fase 2, [oggetti](docs/wiki/oggetti.md#progetto-affissi-unici-e-memoria-2011)).
+- **`QST0` è pieno** (1021 B su 1024): la pagina Q va riprogettata (cancello G2).
+- **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 
 ### H3 (ex 5.2) The Endless Abyss (dopo B10, B11, G6, E5) — XL
 - Piani 21+ (fino a 255) a temi casuali, livello = piano, `void.table`, boss ×1,5, spade dell'Abisso, `chestLevel`

@@ -47,8 +47,8 @@ locale o globale: oggi il globale), boss con statistiche e IA propri (H6/M9).
 | Villaggio | uno, Aldric's Hollow: `cur_level` = 0, file `GFX0`, mappa `data/town_map.txt`, N = 8 | [villaggio](villaggio.md) |
 | Piani | 1–19 generati dal seed (`gen_io.asm`), temi 1–7 a rotazione (`lvl_theme`) | [dungeon](dungeon.md) |
 | Mappa finale | piano 20 = sala del trono (`FMAP`, `tools/build/gen_final.py`), boss finale, leva, portale verso l'Abisso | [dungeon](dungeon.md) |
-| Abisso | solo progetto (TODO): città, piani oltre il 20 | [quests](quests.md) |
-| Quest | progetto: 3 villaggi (`cur_level` 0 / 21 / 22) su un dungeon unico 1–20, tre "tratti" | [quests](quests.md) parte 3.6 |
+| Abisso | solo progetto (TODO H3): città, piani oltre il 20 | questa pagina |
+| Quest | progetto: una catena per tutto il gioco, accessorie e ripetibili per capitolo | [quests](quests.md) |
 | Salvataggi | un file per eroe `save-0N` (11/11, Krill): eroe + 20 piani da 93 B, `c_vis` = 3 byte, un bit per piano | [salvataggi](salvataggi.md) |
 | Disco | 360 blocchi liberi su 664 (build dell'11/11) | [mappa del disco](../../out/work/memory-map/index.html) (sezione "Disk") |
 
@@ -69,7 +69,7 @@ flowchart LR
   capitoli precedenti + piano) regola mostri, `chestLevel` e oro, così il simulatore e il gioco restano coerenti: oggi
   `chestLevel` = 8 × piano satura a 255 al piano 32 (vedi [bottino](bottino.md)): nell'Abisso va ripensata (TODO).
 - **Villaggi**: stessa regola di oggi per ognuno (locanda con lo stesso baule, fabbro, alchimista, fontana, portale,
-  N del villaggio, audit delle distanze). Un villaggio alla volta in cache (`$E000`, 2,7 KB l'uno: [quests](quests.md) 3.6).
+  N del villaggio, audit delle distanze). Un villaggio alla volta in RAM (file `TWNc` letto a ogni ingresso: [villaggio](villaggio.md)).
 - **Mappa finale per capitolo**: un file `FMAPn` (RLE, ~400 B, ~2 blocchi) generato da una descrizione per capitolo
   (`tools/build/gen_final.py` diventa parametrico); boss del capitolo con nome fisso; leva/portale verso il capitolo dopo.
 - **Abisso**: città (una mappa fissa come un villaggio) e 255 piani generati. **Non si possono salvare 255 piani per eroe**
@@ -88,7 +88,7 @@ flowchart LR
 | Passaggio di capitolo | dalla mappa finale (leva/portale) al villaggio del capitolo dopo; ritorno ai villaggi precedenti (portale o menu) | 100–150 B |
 | Abisso | città + 255 piani, salvataggio a anello, difficoltà oltre il piano 32, versione del generatore | grande: è il TODO dell'Abisso |
 | Musica | **un tema per villaggio (tbd) e uno per capitolo**, uguale per i suoi 5 piani; il piano finale ha un tema suo ad hoc (12/11, committente; `PLAYLIST` per capitolo in `tools/build/songs.py`); il cambio piano nello stesso capitolo non rilegge il brano | dati su disco; codice: non rileggere se il brano è lo stesso |
-| Quest | ogni quest appartiene a un capitolo (`docs/wiki/quests.md` va riletta con questo modello) | — |
+| Quest | ogni quest appartiene a un capitolo ([quests](quests.md), 20/11) | — |
 | Test | prestazioni, generatore (mappe di riferimento) e salvataggi per capitolo; Abisso fino al piano 255 (`PERF-20`) | — |
 
 Disco: ogni capitolo in più costa ~11 blocchi (villaggio) + ~2 (mappa finale) + brani; con 360 blocchi liberi ci stanno
@@ -100,7 +100,8 @@ più capitoli, ma i temi dei dungeon (oggi 8 file `GFXn`) vanno condivisi fra ca
 dei capitoli precedenti + piano locale: regola la difficoltà). Esempio del committente: il primo piano sotto il villaggio
 del capitolo 2 è il piano **1** con la difficoltà del piano **6**.
 **Regola del committente (11/11 sera): 5 piani per ogni capitolo** (l'ultimo è la mappa finale), Abisso escluso: il gioco
-tiene in RAM gli stati dei 5 piani del capitolo ([salvataggi](salvataggi.md)) e salva da solo cambiando capitolo. Dettagli: [quests](quests.md) sez. 3.8.
+tiene in RAM gli stati dei 5 piani del capitolo ([salvataggi](salvataggi.md)) e salva da solo cambiando capitolo. Le quest si legano al **piano locale** ("il piano 3 del capitolo 2"), la difficoltà dei premi
+alla profondità globale.
 
 | Capitolo | Villaggio | Piani (l'ultimo = mappa finale) | Profondità globale | Boss ([bestiario](bestiario.md)) |
 |---|---|---|---|---|
@@ -117,7 +118,10 @@ Oggi il codice ha un solo villaggio e i piani 1..20 (= profondità 1..20): i cap
 ## Decisioni da prendere
 
 - **D-CAP-1**: quanti capitoli (i piani sono 5 per capitolo: decisione dell'11/11 sera).
-- **D-CAP-2**: si torna ai villaggi dei capitoli precedenti? (portale tra villaggi, o solo avanti).
+- **D-CAP-2** (**decisa il 20/11**, committente): si torna ai capitoli precedenti in modo **parzialmente distruttivo**: dall'ingresso
+  di ogni villaggio si va al villaggio del capitolo precedente; uscendo da un capitolo il suo dungeon si azzera (stesse mappe dal
+  seme, mostri e bauli di nuovo, mappa esplorata persa); il boss di un capitolo finito non ricompare; i salvataggi tengono solo i
+  5 piani del capitolo in corso ([quests](quests.md), regola C1). Da fare (fase 3 del piano delle quest).
 - **D-CAP-3**: piani dell'Abisso salvati (anello di K record) o rigenerati a ogni ingresso.
 - **D-CAP-4**: mappe fisse nell'Abisso (ogni 50 piani? solo la città?).
 - **D-CAP-5**: difficoltà oltre la profondità 32 (saturazione di `chestLevel` e dello spawn): curva nuova per l'Abisso.

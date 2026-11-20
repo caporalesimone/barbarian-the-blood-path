@@ -130,7 +130,7 @@ cancello del piano vicino, **sul lato opposto e nello stesso punto**: la palude 
 
 ### Cittadella (capitolo 4, prototipo del 19/11)
 Piani 16-19 (`map: {style: citadel}`, palette ancora casuale: da scegliere con il committente). Disegno di
-[quests](quests.md) (`GEN3`): sale grandi con colonne, porte allineate, **simmetria sinistra/destra**; si genera metà mappa e
+sale grandi con colonne, porte allineate, **simmetria sinistra/destra**; si genera metà mappa e
 si specchia (`cit_finish` in `gen_io.asm`, ~250 B). Stesso contratto delle stanze (16 celle, `vis`, rettangoli, centri, albero):
 - sale **7..10 × 7..10**, tutte presenti (`lv_drop` = 0); l'albero di `gen_links` e gli anelli **solo nella metà sinistra**
   (celle delle colonne 2-3 segnate assenti per l'albero, partenza in colonna 0-1);
