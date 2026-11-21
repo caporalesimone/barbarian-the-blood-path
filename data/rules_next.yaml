@@ -15,7 +15,13 @@ stats:
   soft_from: 32                              # (21/11, PG specializzato) oltre 32 punti ogni punto vale soft_rate
   soft_rate: [2, 3]                          # 2/3 (era 1/2 oltre 24)
   ring_points: 4                             # un anello +N vale N x 4 punti nella caratteristica (oggi +N al modificatore = 2N)
-  str: {dmg_per: 3, dc_per: 4}               # +1 danno ogni 3 punti; CD del Battle Cry +1 ogni 4
+  str: {dmg_pct: 4, dmg_per: 3, dc_per: 4, pen_per: 25}
+                                             # (21/11 notte, soluzione finale) FOR = +4% del danno dell'arma a punto (in % e non fisso:
+                                             # con il danno fisso al PG forza conveniva il pugnale, il piu' veloce); +1 penetrazione
+                                             # (CA del mostro -1) ogni 25 punti ("sfondare la guardia"); CD del Battle Cry +1 ogni 4.
+                                             # dmg_per (+1 danno fisso ogni 3) vale solo senza dmg_pct. Provata e scartata la
+                                             # maneggevolezza (FOR sopra il requisito = armi grandi piu' veloci): rinforza il
+                                             # bilanciato, su cui sono tarati i mostri, e peggiora gli altri profili
   dex: {att_per: 20, ac_per: 16, slow: 12, speed_per: 2, extra_first: 20, extra_every: 7, extra_slopes: [7, 2.08, 1.47, 1.0], extra_max: 100, extra_count: 4, extra_chain: false}
                                              # (21/11, committente) la DES aumenta sempre la probabilita' di colpire: +1 ATT ogni 20 punti
                                              # (ogni 10 o 15 la DES domina i capitoli 2-3, sim_builds.py); +1 CA ogni 16 (tetto
@@ -30,8 +36,17 @@ stats:
                                              # +3 vita a punto; pozioni +1% a punto (max +30%); danno subito -0,4% a punto (max -20%)
   hp: {base: 20, per_level: 6}               # vita = 20 + (livello-1) x 6 + 3 x COS(x)
 
-# Requisiti degli oggetti (21/11, committente): un oggetto si usa solo con le caratteristiche richieste (valori assegnati, anelli
-# compresi). Scala della proposta: FOR del profilo bilanciato ~2 livelli prima del livello dell'oggetto. Chi mette tutto in DES
+# Equipaggiamento (21/11 notte): con mode next i profili scelgono fra le basi nuove (data/items/next/bases.tsv: 13 armi con la
+# cadenza che cresce con la grandezza, 11 armature, 4 scudi) quelle con livello oggetto <= piano e requisito rispettato. Requisito
+# nella scala della proposta: FOR del profilo bilanciato req_lag livelli prima del livello dell'oggetto, per le basi che oggi hanno
+# min_str (spada 14, spada larga 19, ascia da guerra 26, spada vichinga 30, ascia da battaglia 32, maglio 39, grande spada 46,
+# cotta 19, scaglie 27, piastre 32, gotica 48, scudo torre 27, ...: sim_builds.next_req). armor_req str_con: armature e scudi si
+# verificano sulla "robustezza" = (FOR + COS) / 2, le armi solo sulla FOR (senza, il profilo costituzione restava con cotta e
+# scudo medio e faceva ~2 volte il bilanciato).
+gear: {mode: next, req_lag: 2, armor_req: str_con}
+
+# Requisiti degli oggetti (21/11, committente; usati solo senza gear.mode next): un oggetto si usa solo con le caratteristiche
+# richieste (valori assegnati, anelli compresi). Scala della proposta: FOR del profilo bilanciato ~2 livelli prima del livello dell'oggetto. Chi mette tutto in DES
 # non porta la spada a due mani (profilo destrezza: FOR 28 al livello 20). Le basi nuove di data/items/next/ avranno i loro.
 requirements:
   sword:         {str: 15}
@@ -78,7 +93,7 @@ bosses:
   skill: 0.5
   target: {level0: 0.60, level2: 0.85}
   abbot:                      # capitolo 1, cripta (piano 5)
-    hp_mult: 0.68
+    hp_mult: 0.69
     dmg_mult: 0.8
     game: {summon_at: [0.667, 0.333], summon_n: 2, summon_type: skeleton, pause: 50, regen_every: 25}
     new:
@@ -86,7 +101,7 @@ bosses:
       crypt_rise: {every: 600, travel: [50, 150], max_alive: 3, type: skeleton}   # scheletri dai sarcofagi a caso
       censer: {every: 400, warn: 50, dmg: 0.5, ticks: 3, tick_every: 50}        # nube d'incenso attorno all'abate
   stitch:                     # capitolo 2, palude (piano 10)
-    hp_mult: 1.66
+    hp_mult: 1.43
     dmg_mult: 1.0
     game: {rites_at: [1.0, 0.667, 0.333], fetish_n: 2, fetish_hp_div: 16, protect_div: 2, regen_every: 25, exposed: 100, exposed_mult: 2}
     new:
@@ -94,7 +109,7 @@ bosses:
       hex: {every: 400, warn: 40, slow: 1.6, duration: 150}                     # maledizione: cadenza del PG x1,6 per 3 s
       fetish_rot: {after: 500, type: zombie}                                    # feticcio non abbattuto in 10 s -> un annegato
   varok:                      # capitolo 3, grotta (piano 15)
-    hp_mult: 0.61
+    hp_mult: 0.7
     dmg_mult: 0.65
     game: {charge_every: 300, charge_hits: 2, wall_stun: 100, shield_div: 2}
     new:
@@ -102,7 +117,7 @@ bosses:
       ghouls: {at: 0.5, n: 2, type: zombie}                                     # chiama 2 Ash Ghoul
       oathbreak: {at: 0.5, rate_mult: 0.67, charge_every: 250}                  # getta lo scudo: niente dimezzamento, piu' veloce
   lord:                       # capitolo 4, cittadella (piano 20): evocazioni del gioco (final_summons) sempre
-    hp_mult: 0.42
+    hp_mult: 0.73
     dmg_mult: 0.4
     game: {}
     new:

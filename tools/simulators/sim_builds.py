@@ -83,6 +83,89 @@ def gear(prof, floor, sc=None):
     return weapon, armor, shield, r["magic"], (ring.split(":")[1] if ring else "")
 
 
+# ------------------------------------------------------------------ next item bases (21/11)
+def _next_bases():
+    """weapons, armors and shields of data/items/next/bases.tsv (the future database: rate grows with the size of the weapon)"""
+    import csv
+    W, A, S_ = {}, {}, {}
+    for r in csv.DictReader(open(os.path.join(RU.ROOT, "data", "items", "next", "bases.tsv")), delimiter="\t"):
+        i = lambda k: int(r[k]) if r[k].strip() else 0
+        if r["type"] == "weapon":
+            W[r["id"]] = dict(dice=r["dice"], rate=i("rate"), pen=i("pen"), two_handed=r["hands"] == "2", ilvl=i("ilvl"), min_str=i("min_str"))
+        elif r["type"] == "armor":
+            A[r["id"]] = dict(ac=i("ac"), type=r["armor_type"], ilvl=i("ilvl"), min_str=i("min_str"))
+        elif r["type"] == "shield":
+            S_[r["id"]] = dict(ac=i("ac"), ilvl=i("ilvl"), min_str=i("min_str"))
+    return W, A, S_
+
+
+NW, NA, NS = _next_bases()
+
+
+def next_req(item):
+    """FOR required by a next base in the proposal's scale: the FOR of the 'bilanciato' profile (points and ring) req_lag levels
+    before the item level, for the bases that have a requirement today (min_str); 0 = none"""
+    b = NW.get(item) or NA.get(item) or NS.get(item)
+    if not b or not b["min_str"]:
+        return 0
+    g = NX.get("gear", {})
+    lv = max(1, b["ilvl"] - g.get("req_lag", 2))
+    sc = dict(NX["stats"]["start"])
+    for k in alloc(PROFILES["bilanciato"]["share"], next_points(lv)):
+        sc[k] += 1
+    ring = R["reference"][min(max(lv, 1), NF)].get("ring", "")
+    if ring:
+        sc[PROFILES["bilanciato"]["ring"]] += R["rings"][ring.split(":")[1]]["bonus"] * NX["stats"]["ring_points"]
+    return sc["str"]
+
+
+def gear_next(prof, floor, sc, x):
+    """best next bases the profile can use on the floor (item level <= floor, FOR requirement met): weapon by damage per frame
+    (two-handed only if 15% better than one-handed, the shield is lost), armor of its type by AC (DEX in the cap), shield by AC"""
+    st = NX["stats"]
+    ok = lambda k: sc["str"] >= next_req(k)
+    # (21/11 proposta) armature e scudi: requisito sulla "robustezza" = media di FOR e COS (gear.armor_req: str_con)
+    tough = (sc["str"] + sc["con"]) // 2 if NX.get("gear", {}).get("armor_req") == "str_con" else sc["str"]
+    oka = lambda k: tough >= next_req(k)
+    def wscore(k):
+        w = NW[k]
+        if st["str"].get("dmg_pct"):
+            return Dice(w["dice"]).avg * (100 + x["str"] * st["str"]["dmg_pct"]) / 100 / rate_of(k, sc, x)
+        return (Dice(w["dice"]).avg + x["str"] // st["str"]["dmg_per"]) / rate_of(k, sc, x)
+    ws = [k for k, w in NW.items() if w["ilvl"] <= floor and ok(k)]
+    one = max((k for k in ws if not NW[k]["two_handed"]), key=wscore)
+    two = [k for k in ws if NW[k]["two_handed"]]
+    weapon = one
+    if prof["weapon"] != "one" and two:
+        t = max(two, key=wscore)
+        if wscore(t) > 1.15 * wscore(one):
+            weapon = t
+    ac_dex = x["dex"] // st["dex"]["ac_per"] if st["dex"].get("ac_per") else 0
+    am = [k for k, a in NA.items() if a["ilvl"] <= floor and oka(k) and ARMOR_RANK[a["type"]] <= ARMOR_RANK[prof["armor"]]]
+    armor = max(am, key=lambda k: NA[k]["ac"] + min(ac_dex, R["dex_cap"][NA[k]["type"]]) - armor_slow(k, sc) * 0.5) if am else ""
+    sh = [k for k, s_ in NS.items() if s_["ilvl"] <= floor and oka(k)]
+    shield = "" if NW[weapon]["two_handed"] or not sh else max(sh, key=lambda k: NS[k]["ac"])
+    return weapon, armor, shield
+
+
+def rate_of(weapon, sc, x):
+    """cadence of a next weapon: its rate, then (21/11 proposal) FOR above the requirement makes big weapons handier:
+    -1 frame every str.handling_per points above the requirement, never under str.handling_floor"""
+    st = NX["stats"]["str"]
+    r = NW[weapon]["rate"]
+    if st.get("handling_per") and r > st.get("handling_floor", 14):
+        r = max(st.get("handling_floor", 14), r - max(0, sc["str"] - next_req(weapon)) // st["handling_per"])
+    return r
+
+
+def armor_slow(armor, sc):
+    """(21/11 proposal) frames added to the cadence by a medium/heavy armor, taken away by FOR above its requirement"""
+    a = NX["stats"].get("armor_slow", {})
+    if not armor or not a.get(NA[armor]["type"]):
+        return 0
+    return max(0, a[NA[armor]["type"]] - max(0, sc["str"] - next_req(armor)) // a.get("str_per", 6))
+
+
 # ------------------------------------------------------------------ rules of today
 def hero_today(name, floor, level=None):
     """a hero with the rules of today; name 'riferimento' = the reference hero (reference_alloc and reference gear)"""
@@ -134,12 +217,20 @@ class NextHero:
         self.sc = sc
         x = {k: soft(v - 10) for k, v in sc.items()}
         self.x = x
+        nextgear = NX.get("gear", {}).get("mode") == "next"            # (21/11) basi nuove: data/items/next/bases.tsv
+        if nextgear:
+            weapon, armor, shield = gear_next(p, floor, sc, x)
         self.prof = RU.prof(level)
-        w = R["weapons"][weapon]
+        w = NW[weapon] if nextgear else R["weapons"][weapon]
         self.weapon, self.two_handed = weapon, bool(w.get("two_handed"))
         self.dice, self.pen = Dice(w["dice"]), w["pen"]
+        if st["str"].get("pen_per"):                                   # (21/11) FOR: sfondare la guardia
+            self.pen += x["str"] // st["str"]["pen_per"]
         slow = st["dex"].get("slow", R["player"]["attack_speed"]["slow"])     # (21/11) la proposta puo' togliere il rallentamento
-        self.rate = w["rate"] + max(0, slow - (x["dex"] // st["dex"]["speed_per"] if st["dex"].get("speed_per") else 0))
+        wrate = rate_of(weapon, sc, x) if nextgear else w["rate"]
+        self.rate = wrate + max(0, slow - (x["dex"] // st["dex"]["speed_per"] if st["dex"].get("speed_per") else 0))
+        if nextgear:
+            self.rate += armor_slow(armor, sc)
         # (21/11, committente) attacchi extra della DES: il k-esimo si sblocca a extra_first + (k-1) x extra_every punti e da li' sale di
         # extra_slopes[k-1] % a punto fino a extra_max % (probabilita' del secondo tiro, dopo il tiro normale andato a segno);
         # nell'Abisso (punti in piu') salgono tutti e se ne aggiungono altri con l'ultima pendenza
@@ -154,14 +245,19 @@ class NextHero:
             k += 1
         self.speed = 1
         self.att = self.prof + (x["dex"] // st["dex"]["att_per"] if st["dex"].get("att_per") else 0) + magic
-        self.dmg_k = x["str"] // st["str"]["dmg_per"] + magic
+        if st["str"].get("dmg_pct"):                                  # (21/11) FOR in % del danno dell'arma (le armi grandi rendono)
+            self.dmg_pct, self.dmg_k = x["str"] * st["str"]["dmg_pct"], magic
+        else:
+            self.dmg_pct, self.dmg_k = 0, x["str"] // st["str"]["dmg_per"] + magic
         ac, cap = 10, 99
         self.armor, self.shield = armor, "" if self.two_handed else shield
+        AR = NA if nextgear else R["armors"]
+        SH = NS if nextgear else R["shields"]
         if armor:
-            ac += R["armors"][armor]["ac"] + magic
-            cap = R["dex_cap"][R["armors"][armor]["type"]]
+            ac += AR[armor]["ac"] + magic
+            cap = R["dex_cap"][AR[armor]["type"]]
         if self.shield:
-            ac += R["shields"][self.shield]["ac"] + magic
+            ac += SH[self.shield]["ac"] + magic
         self.ac = ac + (min(x["dex"] // st["dex"]["ac_per"], cap) if st["dex"].get("ac_per") else 0)
         self.dc = 8 + self.prof + x["str"] // st["str"]["dc_per"]
         self.crit = 19 if level >= R["skills"]["brutal_critical_level"] else 20
@@ -180,7 +276,8 @@ class NextHero:
         return {"prof": self.prof, "strmod": self.m["str"]}.get(d) if isinstance(d, str) else int(d)
 
     def dmg_range(self):
-        return self.dice.min + self.dmg_k, self.dice.max + self.dmg_k
+        p = 100 + getattr(self, "dmg_pct", 0)
+        return self.dice.min * p // 100 + self.dmg_k, self.dice.max * p // 100 + self.dmg_k
 
     def heal(self, kind):
         p = NX["potions"][kind]
@@ -225,7 +322,7 @@ def norm(floor):
     pp = mean(lambda m: hit_chance(bal.att, m["ac"] + dc - bal.pen))
     dpr_cur = pp_cur * (ref.dice.avg + ref.dmg_k) / ref.rate
     # (21/11) attacchi extra della DES: contano solo sugli Slash (quota monsters.extra_weight del danno; le abilita' no)
-    dpr_bal = pp * (bal.dice.avg + bal.dmg_k) * (1 + M.get("extra_weight", 1) * sum(bal.extra)) / bal.rate
+    dpr_bal = pp * (bal.dice.avg * (100 + bal.dmg_pct) / 100 + bal.dmg_k) * (1 + M.get("extra_weight", 1) * sum(bal.extra)) / bal.rate
     hp_x = dpr_bal / dpr_cur * interp(M["hp"], f)
     dmg_x = bal.hpmax * pm_cur / (ref.hpmax * pm * (1 - bal.dr10 / 1000)) * interp(M["dmg"], f)
     _NORM[floor] = dict(att=da, ac=dc, hp=hp_x, dmg=dmg_x, pm_cur=pm_cur, pp_cur=pp_cur)

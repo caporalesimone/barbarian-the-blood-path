@@ -429,6 +429,35 @@ costituzione stanno ~2 volte il bilanciato nel capitolo 4. Taratura dei mostri: 
 **Da verificare sul C64**: fino a 5 tiri d'attacco per Slash (10 con la Frenzy) nello stesso fotogramma (prestazioni, TODO D5; si
 possono spalmare su più fotogrammi).
 
+**Soluzione finale della proposta (21/11 notte, `data/rules_next.yaml`, `sim_builds.py --runs 100`)**: i profili scelgono fra le
+**basi nuove** (`data/items/next/bases.tsv`: 13 armi con la cadenza che cresce con la grandezza, pugnale 12 … maglio 24; 11
+armature; 4 scudi) quelle con livello oggetto ≤ piano e requisito rispettato. **Requisiti** nella scala della proposta: FOR del
+profilo bilanciato 2 livelli prima del livello dell'oggetto (spada 14, spada larga 19, ascia da guerra 26, spada vichinga 30, ascia
+da battaglia 32, maglio 39, grande spada 46; cotta 19, scaglie 27, piastre 32, gotica 48; scudo torre 27, gotico 39). Le armi si
+verificano sulla FOR, **armature e scudi sulla "robustezza" = (FOR + COS) / 2**. **FOR = +4% del danno dell'arma a punto** (non
+più danno fisso: con il fisso al PG forza conveniva il pugnale, il più veloce) e **+1 penetrazione ogni 25 punti**. Varianti
+misurate (60 giri per piano; "dispersione" = rapporto fra il peggiore e il migliore dei tre profili specializzati, capitolo per
+capitolo):
+
+| variante | dispersione | peggiore / bilanciato (cap. 3–4) |
+|---|---|---|
+| basi nuove, FOR 4% | 2,38 | 3,54 (costituzione) |
+| + maneggevolezza (−1 fotogramma ogni 6 punti di FOR sopra il requisito, minimo 14) | 2,55 | 3,70 |
+| + penetrazione ogni 15 | 2,99 | 3,98 |
+| + maneggevolezza e penetrazione (con o senza armature lente 2/4 tolte dalla FOR) | 3,44–3,45 | 4,05–4,59 |
+| COS più forte (5–6 vita, 0,6–0,8% a punto) | 1,89–2,05 | 3,19–3,38 |
+| **robustezza (FOR + COS) / 2 per armature e scudi** | **1,55** | **1,70** |
+| robustezza + penetrazione ogni 25 (scelta: dà alla FOR un vantaggio suo) | 1,74 | 2,08 |
+| robustezza + maneggevolezza ogni 10 | 1,62–1,91 | 2,69–3,50 |
+
+La maneggevolezza è scartata: rinforza anche il bilanciato, su cui sono tarati i mostri, e così peggiora destrezza e costituzione.
+Con la soluzione scelta, ogni 10 mostri, capitoli 1→4: forza 0,80 / 0,60 / 0,72 / 0,77; destrezza 0,84 / 0,57 / 0,80 / 0,89;
+costituzione 0,62 / 0,59 / 1,10 / 1,03; bilanciato 0,73 / 0,64 / 0,65 / 0,52. Al livello 20: forza grande spada e piastre gotiche
+(danno 11–57, cadenza 25); destrezza morning star, armatura borchiata e scudo torre (cadenza 17, 4 attacchi extra); costituzione
+morning star, piastre e scudo gotici (vita 290, CA 28, −20% di danno); bilanciato grande spada e scaglie. Boss (vita ×0,69 /
+×1,43 / ×0,70 / ×0,73): bilanciato 62 / 66 / 54 / 55%; Varok è duro per destrezza (19%) e forza (33%), il boss finale facile per
+la costituzione (84%). Restano da rivedere i boss per profilo e il capitolo 3 della costituzione.
+
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel
 saturo a 255) e poi resta a 3 093 (anche l'oro dei mostri satura a 255); cumulato 257 241 al piano 100. Sono medie con tutto

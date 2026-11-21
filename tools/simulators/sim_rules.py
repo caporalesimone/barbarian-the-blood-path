@@ -104,7 +104,10 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
             if t < frenzy_until:
                 fz = SK["frenzy"]
                 run = min(fz["run_max"], run + (fz["run_step"] if run else fz["run_first"]))
-            dmg = hero.dice.roll(rng, times=dice_x * (2 if r == 2 else 1)) + hero.dmg_k
+            dmg = hero.dice.roll(rng, times=dice_x * (2 if r == 2 else 1))
+            if getattr(hero, "dmg_pct", 0):           # (21/11 proposta) FOR in % del danno dell'arma
+                dmg = dmg * (100 + hero.dmg_pct) // 100
+            dmg += hero.dmg_k
             if t < rage_until:
                 dmg += hero.rage_bonus()
             dmg = max(1, dmg)
