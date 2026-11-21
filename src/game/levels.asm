@@ -664,7 +664,7 @@ tu_nm2  .byte 7,18,5,25,32,23,15,12,6,32,32,32   ; "grey wolf"
         jsr io_screen
         jmp *
 .endif
-.if TESTUI == 36
+.if TESTUI == 36 && !ARENA       ; (21/11 sera) ui_lever sta in final.asm (codice del piano), che l'arena non assembla
         jsr ui_lever
 .endif
 .if TESTUI == 28                ; HUD per il ritaglio dell'help (tools/build/gen_help.py --snap): arma quasi rotta, 2 chiavi
@@ -861,6 +861,8 @@ _e      lda tu_eq-1,x
         ldx #EQ_N-1
 _e2     lda tu_eqb,x
         sta c_eqb,x
+        lda tu_eqs,x
+        sta c_eqs,x
         dex
         bpl _e2
         ldx #PACK_N-1
@@ -868,6 +870,8 @@ _p      lda tu_pack,x
         sta c_pack,x
         lda tu_packb,x
         sta c_packb,x
+        lda tu_packs,x
+        sta c_packs,x
         dex
         bpl _p
         ldx #PACK_N+EQ_N-1      ; durabilita' di prova per tutto (zaino + equipaggiamento)
@@ -914,11 +918,15 @@ _n      lda tu_name,x
 TU_SGOLD = 65535                ; baule di casa pieno al limite (65535 decine = 655350 monete, 10/11) + 2350 addosso = 657700:
                                 ; la scheda passa per il totale a 6 cifre (regola del committente, 08/11: si prova sempre questo caso)
 tu_eq   .byte I_SWORD, I_PLATE_MAIL, I_MEDIUM_SHIELD, I_SILVER, I_GOLD     ; (21/11) due anelli
-tu_eqb  .byte 1, 3, 2, 2, 3
+tu_eqb  .byte MAG_W1, MAG_A3, MAG_A2, 0, 0      ; (21/11 sera) prefissi (prima la magia +1, +3, +2)
         .cerror * - tu_eqb != EQ_N, "tu_eqb: un byte per posto indossato"
+tu_eqs  .byte 0, 0, 0, RSX_22, RSX_33           ; suffissi: anello d'argento di DES, d'oro di COS (prima bonus 2 e 3)
+        .cerror * - tu_eqs != EQ_N, "tu_eqs: un byte per posto indossato"
 tu_pack .byte I_VIKING_SWORD, I_DAGGER, I_CHAIN_MAIL, I_TOWER_SHIELD, I_SCROLL, I_GOLD, I_LEATHER_ARMOR, I_COPPER
-tu_packb .byte 2, 0, 1, 0, 3, 3, 0, 1
+tu_packb .byte MAG_W2, 0, MAG_A1, 0, 3, 0, 0, 0  ; prefissi (pergamene: quantita' 3)
         .cerror * - tu_packb != PACK_N, "tu_packb: un byte per posto dello zaino"
+tu_packs .byte 0, 0, 0, 0, 0, RSX_33, 0, RSX_11  ; suffissi: anello d'oro di COS, di rame di FOR
+        .cerror * - tu_packs != PACK_N, "tu_packs: un byte per posto dello zaino"
 tu_name .byte 2,12,1,3,11,32,20,8,15,18,14,5     ; "black thorne": 12 caratteri con uno spazio (08/11, regola del committente per le prove)
         .cerror * - tu_name != NAME_LEN, "tu_name: NAME_LEN caratteri"
         .fill 11, 32

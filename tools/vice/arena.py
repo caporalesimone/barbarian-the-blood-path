@@ -113,6 +113,11 @@ class Arena:
         assert 1 <= lvl <= MAXLEVEL and 1 <= plvl <= 20 and 1 <= len(monsters) <= 8 and 1 <= fights <= 255
         assert weapon, "the hero always has a weapon"
         eq = [item(weapon), item(armor), item(shield), item(ring)]
+        # (21/11 evening, affixes) magic +N -> prefix id (MAG_W / MAG_A), ring stat (1 STR, 2 DEX, 3 CON) -> suffix id (RSX_)
+        metal = {"copper": 1, "silver": 2, "gold": 3}
+        rname = ring.partition("+")[0]
+        eq = [(i, G["MAG_%s%d" % ("W" if k == 0 else "A", b)] if b and k < 3 else
+               (G["RSX_%d%d" % (b, metal[rname])] if b and k == 3 else 0)) for k, (i, b) in enumerate(eq)]
         bt, bn = [], [0] * 4                # belt: 4 slots, one potion each
         for name, n in (potions or {}).items():
             bt += [item(name)[0]] * n

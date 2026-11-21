@@ -2055,7 +2055,7 @@ CORE_AT = $e000
 core_end:
         .endv
 .endif
-        .cerror core_end > GFX_TOWN_AT || core_end > GFX_DUN_AT, "segmento CORE oltre il file del villaggio o del tema"
+        .cerror core_end > GFX_TOWN_AT || core_end > GFX_DUN_AT, "segmento CORE oltre il file del villaggio o del tema di ", core_end-GFX_TOWN_AT, " B"
 
 FREE_RAM_END   = $9fff              ; il PRG puo' arrivare fino a $9FFF: la coda di gfx_data e' dato morto dopo
                                     ; copy_gfx (prima istruzione utile di `start`) e copre $8000-$9FFF (schermo HUD,

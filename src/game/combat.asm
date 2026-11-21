@@ -171,6 +171,72 @@ _no     clc
 
 ; ------------------------------------------------------------------ PG
 ; caratteristiche, competenza, vita massima, attacco, danno, CA: dal livello e dall'equipaggiamento
+; (21/11 sera, fase 2b) affissi: A = indice nella tabella (0 = niente, 1..AF_NP prefisso, AF_SX0 + s suffisso): somma il
+; valore della riga nei totali af_att, af_dmg, af_ac, af_st (modificatore di FOR, DES, COS). Gli altri poteri (vita, danno
+; subito, cadenza...) con la fase 4. Usa A, X, Y
+af_one: tay
+        beq _r
+        ldx af_pw,y
+        lda af_val,y
+        cpx #PW_ATT_DMG
+        beq _ad
+        cpx #PW_ATT
+        beq _a
+        cpx #PW_DMG
+        beq _d
+        cpx #PW_AC
+        beq _c
+        cpx #PW_ALL
+        beq _all
+        cpx #PW_CON+1
+        bcs _r
+        clc                     ; PW_STR, PW_DEX, PW_CON
+        adc af_st-PW_STR,x
+        sta af_st-PW_STR,x
+_r      rts
+_all    tay
+        ldx #2
+-       tya
+        clc
+        adc af_st,x
+        sta af_st,x
+        dex
+        bpl -
+        rts
+_ad     pha
+        jsr _a
+        pla
+_d      clc
+        adc af_dmg
+        sta af_dmg
+        rts
+_a      clc
+        adc af_att
+        sta af_att
+        rts
+_c      clc
+        adc af_ac
+        sta af_ac
+        rts
+; A = prefisso (id), Y = suffisso (id) di un oggetto -> nei totali
+af_pair:
+        sty af_t
+        jsr af_one
+        lda af_t
+        beq +
+        clc
+        adc #AF_SX0
+        jmp af_one
++       rts
+; totali degli affissi a 0
+af_clr: lda #0
+        ldx #5
+-       sta af_att,x
+        dex
+        bpl -
+        rts
+        .cerror af_dmg != af_att+1 || af_ac != af_att+2 || af_st != af_att+3, "af_att..af_st contigui"
+
 recalc_stats:
         ldx c_lvl
         cpx #PL_MAXLVL+1
@@ -179,9 +245,32 @@ recalc_stats:
 +       stx tmp4
         lda pl_prof,x
         sta s_prof
-        ldx #2                  ; (11/11) caratteristiche = base + punti spesi (c_sadd, schermata C)
--       lda pl_base,x
+        jsr af_clr              ; (21/11 sera) affissi dell'equipaggiamento: non contano un oggetto rotto (durabilita' 0 su un
+        ldx #EQ_N-1             ; massimo > 0) ne' lo scudo con un'arma a due mani
+_af     stx af_i
+        lda c_eq,x
+        beq _an
+        lda c_eqm,x
+        beq +
+        lda c_eqd,x
+        beq _an
++       cpx #2
+        bne +
+        ldy c_eq
+        lda itfl,y
+        and #1
+        bne _an
++       ldy c_eqs,x
+        lda c_eqb,x
+        jsr af_pair
+_an     ldx af_i
+        dex
+        bpl _af
+        ldx #2                  ; (11/11) caratteristiche = base + punti spesi (c_sadd, schermata C) + 2 x modificatore degli affissi
+-       lda af_st,x
+        asl
         clc
+        adc pl_base,x
         adc c_sadd,x
         sta s_str,x
         dex
@@ -209,41 +298,7 @@ recalc_stats:
         inc hpmax+1
         bne -
 _hd
-        ; anelli: +N al modificatore della caratteristica (bonus 1 FOR, 2 DES, 3 COS) = +2N al valore. (21/11) due posti
-        lda #EQ_RING+1
-        sta tmp6
-_rg     ldx tmp6
-        lda c_eqb,x
-        tay
-        lda c_eq,x
-        tax
-        beq _rn
-        cpy #0
-        beq _rn
-        lda itval,x
-        sta tmp5
-        asl
-        clc
-        adc s_str-1,y
-        sta s_str-1,y
-        cpy #3
-        bne _rn
-        ldx tmp4                ; COS: vita + N x (livello + 1)
-        inx
-        lda #0
--       clc
-        adc tmp5
-        dex
-        bne -
-        clc
-        adc hpmax
-        sta hpmax
-        bcc _rn
-        inc hpmax+1
-_rn     dec tmp6
-        ldx tmp6
-        cpx #EQ_RING
-        bcs _rg
+        ; (21/11 sera) anelli: la caratteristica e' il loro suffisso (of strength...), contata con gli affissi sopra
 _nr     lda s_str
         jsr modv
         sta s_mod
@@ -253,11 +308,13 @@ _nr     lda s_str
         sta s_dc
         ldx c_eq                ; arma (08/11: tolto il pugnale "d'ufficio" se c_eq = 0; il caso senza arma non deve
                                 ; esistere. Con c_eq = 0 le tabelle dell'oggetto 0 danno 0: nessun danno). Mod = FOR sempre
+        lda s_mod               ; (21/11 sera) danno fisso e ATT: mod + affissi (prima: + magia dell'arma)
+        clc
+        adc af_dmg
+        sta s_dk
         lda s_mod
         clc
-        adc c_eqb
-        sta s_dk
-        clc
+        adc af_att
         adc s_prof
         sta s_att
         lda itdn,x
@@ -287,7 +344,9 @@ _nr     lda s_str
         lda itpen,x
         sta s_pen
         ; CA = 10 + min(mod DES, limite dell'armatura) + armatura + scudo (magia compresa)
-        lda #10
+        lda #10                 ; (21/11 sera) + CA degli affissi (prima: magia di armatura e scudo)
+        clc
+        adc af_ac
         sta tmp6
         lda #255
         sta tmp7
@@ -301,7 +360,6 @@ _nr     lda s_str
         sta tmp7
         lda itval,x
         clc
-        adc c_eqb+1
         adc tmp6
         sta tmp6
 _na     ldx c_eq+2
@@ -316,7 +374,6 @@ _na     ldx c_eq+2
         bne _ns
         lda itval,x
         clc
-        adc c_eqb+2
         adc tmp6
         sta tmp6
 _ns     lda s_dex

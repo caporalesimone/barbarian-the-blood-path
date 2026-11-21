@@ -19,14 +19,20 @@ def teardown(ctx):
     if "g" in ctx: ctx["g"].close()
 
 
+def sx(g, item, stat):
+    """(21/11 evening, affixes) the suffix of a ring of that metal and stat (1 STR, 2 DEX, 3 CON): ring_sx"""
+    L = g.L
+    return g.b(L["ring_sx"] + (stat - 1) * 3 + g.b(L["itval"] + item) - 1) if item and stat else 0
+
+
 def ring(g, slot, item, stat):
-    g.poke(g.L["c_eq"] + slot, item); g.poke(g.L["c_eqb"] + slot, stat)
+    g.poke(g.L["c_eq"] + slot, item); g.poke(g.L["c_eqb"] + slot, 0); g.poke(g.L["c_eqs"] + slot, sx(g, item, stat))
 
 
 def wear_from_pack(g, item, stat):
     """the ring in pack slot 0, inventory, fire on it, close"""
     L = g.L
-    g.fill(L["c_pack"], L["c_pack"] + 7, 0); g.poke(L["c_pack"], item); g.poke(L["c_packb"], stat)
+    g.fill(L["c_pack"], L["c_pack"] + 7, 0); g.poke(L["c_pack"], item); g.poke(L["c_packb"], 0); g.poke(L["c_packs"], sx(g, item, stat))
     key(g, K_I, 3)
     check(not g.in_game(), "the inventory does not open")
     check(list_to(g, 0, "ui_cur", 0), "cursor not on pack slot 0 (ui_cur %d)" % g.b(L["ui_cur"]))
@@ -62,7 +68,7 @@ def ring_replace(ctx):
     check("replaced" in scr, "no 'replaced' message (row 23: %r)" % scr.strip())
 
 
-@test("RING-12", "alchemist: a ring among the wares has its stat (1..3) and the bought ring keeps it")
+@test("RING-12", "alchemist: a ring among the wares has its stat suffix (ring_sx) and the bought ring keeps it")
 def ring_shop(ctx):
     g = ctx["g"]; L = g.L
     g.fill(L["c_pack"], L["c_pack"] + 7, 0); g.poke16(L["c_gold"], 9000)
@@ -70,16 +76,18 @@ def ring_shop(ctx):
     check(door, "no alchemist door on the map")
     fire_to(g, door[0][0], door[0][1] + 1)
     check(g.b(L["sh_mask"]) != 0, "the alchemist does not open")
-    g.poke(L["l8_id"], L["I_COPPER"]); g.poke(L["l8_b"], 2)          # ware 0: copper ring of DEX (as rolled entering)
-    ids, bs = g.mem(L["l8_id"], 8), g.mem(L["l8_b"], 8)
+    ids, ss = g.mem(L["l8_id"], 8), g.mem(L["l8_s"], 8)
     cat = g.mem(L["itcat"], L["N_ITEMS"])
-    bad = [(i, b) for i, b in zip(ids, bs) if i and cat[i] == L["CAT_RING"] and not 1 <= b <= 3]
-    check(not bad, "rings in the wares without a stat: %s" % bad)
+    rsx = g.mem(L["ring_sx"], 9)
+    bad = [(i, b) for i, b in zip(ids, ss) if i and cat[i] == L["CAT_RING"] and b not in rsx]
+    check(not bad, "rings in the wares without a stat suffix: %s" % bad)
+    want = sx(g, L["I_COPPER"], 2)
+    g.poke(L["l8_id"], L["I_COPPER"]); g.poke(L["l8_b"], 0); g.poke(L["l8_s"], want)   # ware 0: copper ring of dexterity
     check(list_to(g, 0, "ui_lc", 12), "cursor not on ware 0")
     g.press_fire(); g.press_fire()                                     # buy, confirm
     pk = g.mem(L["c_pack"], 8)
     check(L["I_COPPER"] in pk, "the ring is not in the pack %s" % pk)
     k = pk.index(L["I_COPPER"])
-    check(g.b(L["c_packb"] + k) == 2, "bought ring with stat %d (expected 2: DEX)" % g.b(L["c_packb"] + k))
+    check(g.b(L["c_packs"] + k) == want, "bought ring with suffix %d (expected %d: of dexterity)" % (g.b(L["c_packs"] + k), want))
     g.run_stop(); g.frames(2)
     check(g.in_game(), "RUN/STOP does not close the shop")

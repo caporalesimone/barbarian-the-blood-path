@@ -139,9 +139,11 @@ minuscole, cifre, spazio, `'`, `-`, `.` (`asm_str`). Il nome del PG è a parte: 
 ### I byte accanto all'id (`c_eqb`/`c_packb`, `c_eqd`/`c_packd`, `c_eqm`/`c_packm`)
 Ogni oggetto posseduto ha tre byte accanto all'id (le tabelle dello zaino proseguono in quelle
 dell'equipaggiamento: indice `PACK_N`..`PACK_N`+4 = 8..12):
-- **bonus**: armi, armature, scudi = **magia +N** (0..3), sommata ad ATT e danno (armi) o alla CA; anelli = la
-  **caratteristica** (1 FOR, 2 DES, 3 COS, il nome mostra il suffisso `copper ring str`); pergamene = la
-  **quantità** della pila (1..4, `SCR_MAX`); pozioni: non usato;
+- **bonus** = **prefisso** (dal 21/11 sera, formato $CD, fase 2b degli affissi): id della riga di `data/items/next/prefixes.tsv`
+  (0 = nessuno); pergamene = la **quantità** della pila (1..10, `SCR_MAX`); pozioni: non usato. Prima: magia +N di armi, armature,
+  scudi e caratteristica dell'anello. La magia +N del bottino diventa un prefisso (`mag_px`: armi ATT_DMG +N = sharp, fine,
+  warrior's; armature e scudi CA +N = sturdy, strong, valiant); la caratteristica dell'anello diventa il suffisso (`ring_sx`:
+  caratteristica × metallo, of strength / might / power, of dexterity / skill / accuracy, of vitality / zest / vim);
 - **durabilità attuale** e **massima** (armi, armature, scudi; 0 = non si usura).
 - **(21/11 sera, formato $CC, fase 2a degli affissi) suffisso**: `c_packs` / `c_eqs`, `st_sx` (baule della locanda), `ch_s` (bauli del
   piano), `l8_s` (merce e contenuto del baule nelle liste), `it_s` / `ap_s` (oggetto in transito). Oggi sempre 0: lo riempiono gli affissi
@@ -260,7 +262,13 @@ dal livello del PG ([Villaggio](villaggio.md#negozi-enter_shop-sh_draw)). Prezzi
 
 ## Progetto: affissi, unici e memoria (20/11)
 
-**Progetto, non ancora nel codice** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
+**Stato (21/11 sera)**: fatte le fasi 1 (basi complete, requisito di DES), 2a (oggetto a 5 byte, file del capitolo) e 2b (prefisso e
+suffisso nell'oggetto: tabelle `af_pw`/`af_val` in GAME, nomi `af_names` in CORE, `af_one`/`af_pair` in `recalc_stats` per ATT, danno,
+CA, FOR, DES, COS e "all"; la magia +N e la caratteristica degli anelli generate come prima ma registrate come affissi; nomi
+"prefisso nome of suffisso" tagliati a 16 colonne, `ui_item`). Da fare: generazione con tutti gli affissi (fase 3), gli altri poteri
+(fase 4), interfaccia (fase 5), unici (fase 6).
+
+**Progetto** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
 database proposto sta in `data/items/next/` (il gioco non lo legge ancora): `bases.tsv` (31 basi, colonna `status`: `today` o
 `new`), `prefixes.tsv` (19), `suffixes.tsv` (32), `uniques.tsv` (16, con la finestra `min_level`..`max_level`: prima stesura da
 approvare, chiarimento C5) e `affix_rules.yaml` (qualità, scelta degli affissi, formula del valore, anelli, negozi, limiti dei

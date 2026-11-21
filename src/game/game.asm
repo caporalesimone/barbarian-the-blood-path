@@ -139,6 +139,12 @@ solidtab   .fill 48         ; tile solidi del luogo attuale (copia di solid_dun 
 gi_t       .byte ?          ; gen_item: livello oggetto obiettivo (CL / CL_PF)
 gi_l       .byte ?          ; gen_item: livello oggetto tirato (0..MAXLL): candidati e magia
 ap_s       .byte ?          ; (21/11 sera) give_item / add_to_pack: suffisso dell'oggetto (consumato come ap_b)
+af_att     .byte ?          ; (21/11 sera, affissi: combat.asm af_one) totali degli affissi: ATT, danno, CA,
+af_dmg     .byte ?
+af_ac      .byte ?
+af_st      .fill 3          ; ... modificatore di FOR, DES, COS
+af_i       .byte ?          ; recalc_stats: posto dell'equipaggiamento; af_pair: suffisso
+af_t       .byte ?
 ps_n       .byte ?
 gi_cat     .byte ?
 rm_min     .byte ?
@@ -637,7 +643,7 @@ _cap    lda #255
 ; genera un oggetto di livello bottino gi_ll (1..MAXLL): A = id, ap_b = bonus.
 ; Categoria dai pesi loot_cum; pozione: colore secondo il piano (pot_t1/pot_t2); pergamena; altrimenti un
 ; oggetto della categoria: il migliore con livello oggetto <= L (lt_scan, L dal chestLevel: vedi sotto).
-; Magia +N (armi, armature, scudi) fino a bon_tab[gi_ll]; anello: caratteristica 1 FOR, 2 DES, 3 COS.
+; Magia +N (armi, armature, scudi) fino a bon_tab[gi_ll] -> prefisso (mag_px); anello: caratteristica -> suffisso (ring_sx).
 gen_item:
         lda gi_ll               ; chestLevel -> livello oggetto obiettivo T = CL / CL_PF (0..31)
         lsr
@@ -662,10 +668,12 @@ _got    stx gi_cat              ; categoria - 1
         sta ap_b
         sta ap_s                ; (21/11 sera) suffisso: ancora nessuno (affissi, fase 2b)
         cpx #CAT_POTION-1
-        beq _pot
-        cpx #CAT_SCROLL-1
-        beq _scr
-        lda gi_t                ; L = T x u^2 (u = rand / 256): quasi sempre sotto T, a volte vicino
+        bne +
+        jmp _pot
++       cpx #CAT_SCROLL-1
+        bne +
+        jmp _scr
++       lda gi_t                ; L = T x u^2 (u = rand / 256): quasi sempre sotto T, a volte vicino
         ldx gi_force
         bne _lt                 ; bauli epici: L = T
         jsr rand
@@ -701,15 +709,32 @@ _lt     cmp #MAXLL+1
         lda bon_tab,x
         clc
         adc #1
-        jsr rndrange
+        jsr rndrange            ; magia N (0..bon_tab) -> (21/11 sera) prefisso: mag_px[categoria x 4 + N]
+        sta ap_b
+        lda gi_cat
+        asl
+        asl
+        ora ap_b
+        tax
+        lda mag_px,x
         sta ap_b
 _nb     pla
         rts
-_ring   lda #3
+_ring   lda #3                  ; caratteristica 0..2 -> (21/11 sera) suffisso: ring_sx[car. x 3 + metallo - 1]
         jsr rndrange
+        sta ap_s
+        asl
+        adc ap_s
+        sta ap_s
+        pla
+        pha
+        tax
+        lda itval,x             ; metallo: 1 rame, 2 argento, 3 oro
         clc
-        adc #1
-        sta ap_b
+        adc ap_s
+        tax
+        lda ring_sx-1,x
+        sta ap_s
         pla
         rts
 _scr    lda #I_SCROLL

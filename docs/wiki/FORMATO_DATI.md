@@ -116,6 +116,10 @@ Dal formato **$CC** (21/11 sera, fase 2a degli affissi; decisioni del committent
   Gli slot di un altro capitolo hanno un altro numero di piano nel primo byte e `lv_get` li scarta: **cambiando capitolo lo stato
   dei piani del capitolo lasciato si perde** (si rigenerano dal seed). File da 9 a 3 blocchi.
 
+Dal formato **$CD** (21/11 sera, fase 2b): stessi campi, ma il byte bonus (`c_packb`/`c_eqb`, `st_b`, `ch_b`) è l'**id del prefisso**
+(riga di `prefixes.tsv`; pergamene: quantità) e il quinto byte l'**id del suffisso** (riga di `suffixes.tsv`): la magia +N e la
+caratteristica degli anelli dei formati di prima non hanno più lo stesso significato.
+
 ## 3. Stato di un piano — `SAVE-0N`, offset `HERO_LEN` + ((piano − 1) mod 5) × 97 (formato compatto)
 
 In memoria: blocco `LVLBLK` a `$9800`. La **mappa non è salvata**, e nemmeno mostri e bauli

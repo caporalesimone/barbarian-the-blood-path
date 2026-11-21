@@ -51,11 +51,15 @@ _cp     lda #0
         lda itcat,y             ; prima un anello comprato aveva bonus 0 e non dava nulla
         cmp #CAT_RING
         bne +
-        lda #3
+        lda #3                  ; (21/11 sera) caratteristica -> suffisso, come gen_item: ring_sx[car. x 3 + metallo - 1]
         jsr rndrange
-        clc
-        adc #1
-        sta l8_b,x
+        sta l8_s,x
+        asl
+        adc l8_s,x
+        adc itval,y
+        tay
+        lda ring_sx-1,y
+        sta l8_s,x
 +       dex
         bpl _cp
         jsr ui_begin

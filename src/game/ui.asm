@@ -779,6 +779,8 @@ ibox_ld:
         sta ui_sel
         lda c_packb,x
         sta tmp5
+        lda c_packs,x
+        sta ui_sx
         lda c_packd,x
         sta ui_dur
         lda c_packm,x
@@ -864,6 +866,8 @@ _ty     tay
         ldx ui_cur
         lda c_packb,x
         sta ui_ib
+        lda c_packs,x
+        sta ui_is
         lda c_pack,x
         jsr ui_item
         jmp _after
@@ -986,6 +990,45 @@ pk_swap: lda c_pack,x           ; it_* <-> posto X dello zaino
         sta it_m
         rts
 
+; (21/11 sera, in GAME per lo spazio di CORE; af_names sta in CORE: solo dalle schermate) A = indice dell'affisso (1..AF_NP prefisso, AF_SX0 + s suffisso): il suo nome (af_names, CORE) fino a ui_lim
+af_name:
+        tax
+        lda #<af_names
+        sta ptr2
+        lda #>af_names
+        sta ptr2+1
+_w      dex
+        beq _pr
+-       ldy #0
+        lda (ptr2),y
+        inc ptr2
+        bne +
+        inc ptr2+1
++       cmp #0
+        bne -
+        beq _w
+_pr     lda ptr2
+        ldx ptr2+1
+; A/X = stringa (0 finale) stampata fino alla colonna ui_lim esclusa (i nomi lunghi si tagliano)
+ip_puts:
+        sta ptr2
+        stx ptr2+1
+_l      ldy #0
+        lda (ptr2),y
+        beq _r
+        jsr ip_putc
+        inc ptr2
+        bne _l
+        inc ptr2+1
+        bne _l
+_r      rts
+ip_putc:
+        ldy cidx
+        cpy ui_lim
+        bcs +
+        jmp ui_putc
++       rts
+af_of   .text " of ", 0
 ; (21/11, O6) requisito dell'oggetto Y (itreq: bit 7 = DES, s_dex; altrimenti FOR, s_str; valore nei bit 0-6, 0 = nessuno):
 ; C = 1 se non raggiunto. X e Y conservati
 req_chk:

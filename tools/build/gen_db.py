@@ -596,6 +596,66 @@ def main():
     o(f"SELL_SHIFT  = {sdiv.bit_length() - 1}        ; vendita = prezzo >> SELL_SHIFT (balance.yaml shop_rules.sell_divisor, 20/11)")
     o()
 
+    # ------------------------------------------------------------ affissi (21/11 sera, fase 2b; data/items/next/)
+    # Indice nella tabella: 0 = niente, 1..AF_NP prefissi (riga di prefixes.tsv), AF_SX0 + s = suffisso s (riga di suffixes.tsv).
+    # Oggetto: byte "bonus" = id del prefisso (pergamene: quantita'), byte "suffisso" = id del suffisso. Valore dalla riga
+    # (value1 = value2 fino al livello 20: decisione del committente del 21/11, oggetto a 5 byte).
+    import csv as _csv
+    nx = os.path.join(ROOT, "data", "items", "next")
+    def rows(f):
+        return list(_csv.DictReader(open(os.path.join(nx, f)), delimiter="\t"))
+    PX, SX = rows("prefixes.tsv"), rows("suffixes.tsv")
+    PW = ["ATT_DMG", "ATT", "DMG", "AC", "STR", "DEX", "CON", "ALL", "LIFE", "GETHIT", "PEN", "SPEED", "DUR",
+          "INDESTRUCTIBLE", "LEECH", "THORNS"]           # codici 1.. (combat.asm af_one: fino a PW_ALL oggi, il resto con la fase 4)
+    chk(len(PX) < 64 and len(SX) < 64, "affissi: al massimo 63 prefissi e 63 suffissi")
+    o("; ---- affissi (data/items/next/prefixes.tsv, suffixes.tsv; indice 0 = niente, 1..AF_NP prefissi, AF_SX0+s suffissi)")
+    for i, k in enumerate(PW):
+        o(f"PW_{k:<15}= {i + 1}")
+    o(f"AF_NP       = {len(PX)}")
+    o(f"AF_NS       = {len(SX)}")
+    o(f"AF_SX0      = {len(PX)}")
+    pw, val, names = [0], [0], []
+    for r in PX + SX:
+        chk(r["power"] in PW, f"affisso {r['name']}: potere {r['power']} sconosciuto")
+        v = int(r["value1"] or 0)
+        chk(v == int(r["value2"] or 0), f"affisso {r['name']}: value1 != value2 (valore variabile: serve il byte del valore, Abisso)")
+        chk(-128 <= v <= 127, f"affisso {r['name']}: valore {v} fuori da un byte con segno")
+        pw.append(PW.index(r["power"]) + 1); val.append(v & 255)
+    o.bytes("af_pw", pw)                 # potere della riga (PW_*)
+    o.bytes("af_val", val)               # valore della riga (con segno)
+    def find(rs, power, v, typ):
+        for i, r in enumerate(rs, 1):
+            if r["power"] == power and int(r["value1"] or 0) == v and typ in r["item_types"].split(","):
+                return i
+        raise Err(f"affissi: nessuna riga {power} {v} per {typ}")
+    # magia +N di oggi -> prefisso (armi ATT_DMG, armature e scudi AC): indice categoria x 4 + N (gen_item)
+    mag = []
+    for typ, pwn in (("weapon", "ATT_DMG"), ("armor", "AC"), ("shield", "AC")):
+        mag += [0] + [find(PX, pwn, n, typ) for n in (1, 2, 3)]
+    o.bytes("mag_px", mag)
+    chk(mag[4:8] == mag[8:12], "affissi: armature e scudi devono avere gli stessi prefissi di CA +1..+3 (MAG_A)")
+    for n in (1, 2, 3):                  # costanti per le varianti di prova e l'arena (levels.asm, src/test/arena.asm, tools/vice/arena.py)
+        o(f"MAG_W{n}      = {mag[n]}        ; prefisso della magia +{n} di un'arma")
+        o(f"MAG_A{n}      = {mag[4 + n]}        ; ... di armatura e scudo")
+    # anello: caratteristica (FOR, DES, COS) x 3 + metallo (itval 1..3) - 1 -> suffisso (gen_item, negozio)
+    rsx = [find(SX, st, n, "ring") for st in ("STR", "DEX", "CON") for n in (1, 2, 3)]
+    o.bytes("ring_sx", rsx)
+    for i, v in enumerate(rsx):
+        o(f"RSX_{i // 3 + 1}{i % 3 + 1}      = {v}        ; suffisso di un anello: caratteristica {i // 3 + 1} (FOR, DES, COS), metallo {i % 3 + 1}")
+    # nomi in CORE (out/work/afnames.asm): prefissi e suffissi senza "of " (lo stampa af_name), 0 finale
+    for r in PX:
+        names.append(asm_str(r["name"], "prefisso"))
+    for r in SX:
+        chk(r["name"].startswith("of "), f"suffisso {r['name']}: deve cominciare con 'of '")
+        names.append(asm_str(r["name"][3:], "suffisso"))
+    # (senza .enc: si include in src/game/inv.asm, gia' in codifica "screen" come tutto CORE; un .enc "none" qui cambiava il resto)
+    an = ["af_names                        ; (gen_db.py) nomi degli affissi: prefissi, suffissi senza \"of \", 0 finale"]
+    for n in names:
+        an.append(f'        .text "{n}", 0')
+    if "--check" not in sys.argv:
+        open(os.path.join(os.path.dirname(DST), "afnames.asm"), "w").write("\n".join(an) + "\n")
+    o()
+
     # ------------------------------------------------------------ nomi (codici schermo)
     o('        .enc "screen"')
     o.strings("itnm", [asm_str(it["name"], f"nome {k}") for k, _, it in items])

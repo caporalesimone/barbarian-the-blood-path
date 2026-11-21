@@ -3,7 +3,8 @@
 ;  dell'inventario e descrizione degli oggetti (nome, icona, statistiche, valore). Spostate da ui.asm senza cambiarle.
 ;  Si chiamano solo dalle schermate (dopo ui_begin, che si assicura che CORE sia in memoria: core_need).
 ; ===================================================================
-; A = id oggetto, ui_ib = bonus: [+N ]nome riempito a 17 caratteri
+; A = id oggetto, ui_ib = prefisso (pergamene: quantita'), ui_is = suffisso: "[prefisso ]nome[ of suffisso]" tagliato e riempito
+; a 16 colonne (21/11 sera, fase 2b degli affissi: prima "+N nome" e "nome str"). Azzera ui_ib e ui_is
 ui_item:
         tax
         lda ui_col
@@ -12,24 +13,26 @@ ui_item:
         cpx #0
         bne +
         lda #UC_EMPTY
-+       ldy ui_ib
++       cpx #I_SCROLL           ; pila di pergamene: il bonus e' la quantita', non un affisso
         beq +
-        cpx #I_SCROLL           ; pila di pergamene: il bonus e' la quantita', non magia
+        ldy ui_ib
+        bne _mg
+        ldy ui_is
         beq +
-        lda #UC_MAGIC
+_mg     lda #UC_MAGIC
 +       ldy ui_fc
         beq _nfi
         lda ui_fc
 _nfi    sta ui_col
         lda cidx
         pha
+        clc
+        adc #16                 ; 16 colonne (08/11: la colonna prima del nome e' l'icona della categoria, ui_cic)
+        sta ui_lim
+        cpx #I_SCROLL
+        bne _px
         lda ui_ib
         beq _nb
-        ldy itcat,x             ; anello: il bonus e' la caratteristica (nome + " str"/" dex"/" con")
-        cpy #CAT_RING
-        beq _nb
-        cpx #I_SCROLL
-        bne _bo
         cmp #10                 ; "3 portal scroll", "10 portal scroll" (08/11: senza la x, fino a 10)
         bcc +
         sbc #10
@@ -39,34 +42,38 @@ _nfi    sta ui_col
         pla
 +       ora #$30
         jsr ui_putc
-        jmp _bs
-_bo     lda #$2b
+        lda #$20
         jsr ui_putc
-        lda ui_ib
-        clc
-        adc #$30
-        jsr ui_putc
-_bs     lda #$20
-        jsr ui_putc
-_nb     txa
-        pha
+        jmp _nb
+_px     lda ui_ib               ; prefisso
+        beq _nb
+        stx ui_x
+        jsr af_name
+        lda #$20
+        jsr ip_putc
+        ldx ui_x
+_nb     stx ui_x
         lda itnm_lo,x
         pha
         lda itnm_hi,x
         tax
         pla
-        jsr ui_puts
-        pla
-        tax
-        lda itcat,x
-        cmp #CAT_RING
-        bne +
-        jsr ring_stat
+        jsr ip_puts
+        lda ui_is               ; suffisso
+        beq +
+        lda #<af_of
+        ldx #>af_of
+        jsr ip_puts
+        lda ui_is
+        clc
+        adc #AF_SX0
+        jsr af_name
 +       lda #0
         sta ui_ib
+        sta ui_is
         pla
         clc
-        adc #16                 ; 16 colonne (08/11: la colonna prima del nome e' l'icona della categoria, ui_cic)
+        adc #16
         sta tmp6
 _p      lda cidx
         cmp tmp6
@@ -77,6 +84,8 @@ _p      lda cidx
 _d      pla
         sta ui_col
         rts
+
+        .include "../out/work/afnames.asm"
 
 
 iv_main:                        ; (21/11) ingresso da ui_inventory (ui.asm), che prima si assicura che CORE ci sia
@@ -188,18 +197,29 @@ it_prim:
         beq _po
         cmp #CAT_SCROLL
         beq _scr
-        #msg "ac +"             ; armatura / scudo: CA (magia compresa)
+        jsr it_af               ; (21/11 sera) armatura / scudo: CA + affissi
+        #msg "ac +"
         ldx ui_sel
         lda itval,x
         clc
-        adc tmp5
+        adc af_ac
         jmp ui_b3l
-_rg     lda tmp5                ; anello: +N al modificatore della caratteristica (tmp5 prima di ui_b3l, che lo usa)
-        sta ui_ib
+_rg     jsr it_af               ; anello: la prima caratteristica dei suoi affissi, "+N str"
+        ldx #0
+-       lda af_st,x
+        bne +
+        inx
+        cpx #3
+        bne -
+        rts
++       stx tmp7
+        pha
         #msg "+"
-        ldx ui_sel
-        lda itval,x
+        pla
         jsr ui_b3l
+        ldx tmp7
+        inx
+        stx ui_ib
         jsr ring_stat
         lda #0
         sta ui_ib
@@ -211,7 +231,8 @@ _po     #msg "heal "            ; pozione: cura al livello attuale
         jmp ui_n5l
 _scr    #msg "portal"
         rts
-_w      lda tmp5                ; arma: dadi + magia (08/11: tmp5 salvato, ui_b3l lo usa: prima usciva un numero a caso)
+_w      jsr it_af               ; arma: dadi + danno degli affissi (21/11 sera; prima la magia)
+        lda af_dmg
         pha
         #msg "dmg "
         pla
@@ -288,6 +309,12 @@ _ar     lda itfl,x              ; armatura: limite al modificatore di DES
         lda itfl,x
         jmp ui_b3l
 _r      rts
+
+; (21/11 sera) totali degli affissi dell'oggetto mostrato (prefisso tmp5, suffisso ui_sx) in af_att, af_dmg, af_ac, af_st
+it_af:  jsr af_clr
+        lda tmp5
+        ldy ui_sx
+        jmp af_pair
 
 ; anello: " str" / " dex" / " con" secondo ui_ib (1..3)
 ring_stat:
@@ -490,6 +517,8 @@ _cl     ldx #1
 +       jsr ui_cic
         lda tmp5
         sta ui_ib
+        lda ui_sx
+        sta ui_is
         lda ui_sel
         jsr ui_item
         jsr iv_trim             ; (ui_item riempie 16 colonne: la cornice riprende dopo il nome)
@@ -543,6 +572,8 @@ _cmp    ldx ui_sel              ; zaino: "you: " + caratteristica principale del
         sta ui_sel
         lda c_eqb-1,x
         sta tmp5
+        lda c_eqs-1,x
+        sta ui_sx
         lda #UC_LABEL
         sta ui_col
         #msg "you: "

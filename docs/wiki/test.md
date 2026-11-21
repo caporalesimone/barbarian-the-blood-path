@@ -154,19 +154,22 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 | ID | Test |
 |---|---|
-| `SFX-10` | inventory: equipping an armor with suffix 7 puts 7 in c_eqs[1]; the old armor goes to the pack with its suffix 5 |
-| `SFX-11` | sort_pack: the suffix follows its item (5 parallel tables) |
-| `SFX-12` | hero file: HERO_LEN 254, file of HERO_LEN + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx |
+| `AFX-10` | mag_px: magic N of weapons -> an ATT_DMG +N prefix, of armors and shields -> AC +N; ring_sx: stat x metal -> STR/DEX/CON +metal suffix |
+| `AFX-11` | recalc_stats: weapon prefix ATT_DMG +2 -> ATT and damage +2; armor prefix AC +2 -> AC +2; ring suffix STR +2 -> STR +4 |
+| `AFX-12` | inventory: 'fine sword' (prefix, pack) and 'copper ring of s' (suffix, worn, cut at 16 columns) in the list |
 
-### regression (247)
+### regression (250)
 
 | ID | Test |
 |---|---|
+| `SFX-10` | inventory: equipping an armor with suffix 7 puts 7 in c_eqs[1]; the old armor goes to the pack with its suffix 5 |
+| `SFX-11` | sort_pack: the suffix follows its item (5 parallel tables) |
+| `SFX-12` | hero file: HERO_LEN 254, file of HERO_LEN + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx |
 | `BASES-10` | item tables: 11 armors with CA 1..10, 4 shields with CA 1..4 |
 | `BASES-11` | inventory: the studded armor (DEX 14) stays in the pack with s_dex 13 ('dex 14' in its box); with DEX 14 it is equipped |
 | `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
 | `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
-| `RING-12` | alchemist: a ring among the wares has its stat (1..3) and the bought ring keeps it |
+| `RING-12` | alchemist: a ring among the wares has its stat suffix (ring_sx) and the bought ring keeps it |
 | `ASM-10` | tools/build/asm_audit.py: GAME code all reachable (but jump tables), no fill_rect / chst_hold any more |
 | `ASM-11` | generated sources commented: every T_ tile constant with its description, item ids and monster types listed in db.asm |
 | `BAL-10` | d20 rules in the simulator: reference hero, weak hero, curves |

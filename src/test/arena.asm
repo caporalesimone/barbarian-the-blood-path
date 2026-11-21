@@ -21,7 +21,7 @@ PAR      = $cf00                ; parametri (scritti da tools/vice/arena.py)
 PAR_LVL    = PAR+0              ; piano 1..MAXLEVEL (statistiche dei mostri, tema grafico)
 PAR_PLVL   = PAR+1              ; livello del PG 1..20
 PAR_EQ     = PAR+2              ; 4 id: arma, armatura, scudo, anello (0 = niente; l'arma c'e' sempre)
-PAR_EQB    = PAR+6              ; 4 bonus: magia +N (arma, armatura, scudo); anello: 1 FOR, 2 DES, 3 COS
+PAR_EQB    = PAR+6              ; 4 affissi (21/11 sera): prefisso di arma, armatura, scudo (MAG_W/MAG_A); anello: suffisso (RSX_)
 PAR_BELTT  = PAR+10             ; cintura: 4 posti, una pozione ciascuno (id, 0 = vuoto)
 PAR_DUR    = PAR+14             ; durabilita' dell'arma all'inizio della serie (= massimo); 0 = non si usura
 PAR_SADD   = PAR+15             ; (11/11) punti statistica spesi in FOR, DES, COS (c_sadd: PG di riferimento)
@@ -141,7 +141,11 @@ ar_fight:
 _e      lda PAR_EQ,x
         sta c_eq,x
         lda PAR_EQB,x
-        sta c_eqb,x
+        cpx #3                  ; (21/11 sera) anello: il byte e' il suffisso
+        bne +
+        sta c_eqs+3
+        lda #0
++       sta c_eqb,x
         lda PAR_BELTT,x
         sta c_beltt,x
         dex

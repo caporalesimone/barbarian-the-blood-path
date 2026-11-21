@@ -48,6 +48,10 @@ sl_q    .byte ?
 iv_l3   .word ?                 ; (21/11) riga 3 del riquadro dell'oggetto (iv_sel): routine della schermata
 iv_mode .byte ?                 ; 0 = riga 2 con valore e durabilita' (inventario, locanda, baule), 1 = solo durabilita' (negozi)
 l8_s    .fill 8                 ; (21/11 sera) suffisso della merce o del contenuto del baule del piano (accanto a l8_id / l8_b)
+ui_is   .byte ?                 ; (21/11 sera) ui_item: suffisso (come ui_ib per il prefisso)
+ui_sx   .byte ?                 ; suffisso dell'oggetto mostrato (sl_get, ibox_ld: accanto a tmp5 = prefisso)
+ui_lim  .byte ?                 ; ui_item / ip_puts: colonna dopo l'ultima del nome
+ui_x    .byte ?                 ; ui_item: id salvato
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"
@@ -199,6 +203,7 @@ _it     adc sg_a,y              ; (C = 0) posto nella tabella del tipo
         sta ui_dur
         sta ui_durm
         sta tmp5
+        sta ui_sx
         stx sl_r
         cpy #SK_BELT
         bcs _ob
@@ -230,6 +235,8 @@ _ob     lda sk_sl-SK_BELT,y
         sta ui_sel
         lda st_b,x
         sta tmp5
+        lda st_sx,x
+        sta ui_sx
         lda st_du,x
         sta ui_dur
         lda st_m,x
@@ -241,6 +248,8 @@ _wa     lda l8_id,x
         sta ui_sel
         lda l8_b,x
         sta tmp5
+        lda l8_s,x
+        sta ui_sx
         ldx sl_r
         clc
         rts
@@ -464,6 +473,8 @@ _mc     jsr ui_icon
 _it     jsr ui_cic
         lda tmp5
         sta ui_ib
+        lda ui_sx
+        sta ui_is
         lda #0                  ; rotto (durabilita' 0 su un massimo > 0): in rosso
         ldy ui_durm
         beq +
