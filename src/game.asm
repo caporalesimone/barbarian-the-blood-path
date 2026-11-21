@@ -275,23 +275,19 @@ AR_WAIT  = AR_BASE+12           ; al posto di wait_vblank (modalita' veloce)
 ; sopra $A000 (nessuna sovrapposizione col PRG), per ultimo sprites2 -> $8C00, la cui sorgente
 ; e' all'inizio di gfx_data (sotto $8C00), mentre la destinazione puo' coprire sorgenti gia' copiate.
 copy_gfx:
-        lda #<gen_img           ; generatore -> RAM sotto l'I/O (gen_io.asm); prima di tutto: la sorgente sta
-        sta ptr0                ; dove poi andranno le variabili ($9000)
-        lda #>gen_img
-        sta ptr0+1
+        lda #<gen_img           ; (21/11) generatore compresso ZX0 -> RAM sotto l'I/O (gen_io.asm); prima di tutto: la
+        sta zx_src              ; sorgente sta dove poi andranno le variabili ($9000). Compresso da tools/build/gen_imgz.py
+        lda #>gen_img           ; (asm.sh, due passate): il PRG e' ~1 KB piu' corto e GAME resta sotto $9C00 (CODE2)
+        sta zx_src+1
         lda #<GEN_AT
-        sta ptr1
+        sta zx_dst
         lda #>GEN_AT
-        sta ptr1+1
-        lda #<(gen_img_end-gen_img)
-        sta tmp6
-        lda #>(gen_img_end-gen_img)
-        sta tmp7
+        sta zx_dst+1
         php
         sei
         lda #$34
         sta $01
-        jsr cp_n
+        jsr zx0_unpack
         lda #$36
         sta $01
         plp
@@ -2029,21 +2025,31 @@ gd_core .binary "../out/work/gfx/spr_core.bin"   ; sprite 0..11 (eroe, fendenti)
 gd_font .binary "../out/work/gfx/uifont.bin"
 gfx_end:
 
-; generatore dei piani: nel PRG dopo la grafica (anche lui dato morto dopo l'avvio), eseguito sotto l'I/O
+; generatore dei piani: nel PRG dopo la grafica (anche lui dato morto dopo l'avvio), eseguito sotto l'I/O.
+; (21/11) COMPRESSO ZX0, in due passate (tools/build/asm.sh, asm_game): GENPASS=1 mette il codice del generatore dopo CODE2
+; (solo per leggerne i byte: gen_raw..gen_raw_end, tools/build/gen_imgz.py li comprime in out/work/gen_img.zx0); GENPASS=2
+; mette qui i byte compressi e il generatore in un blocco virtuale (solo le etichette). Le etichette sono le stesse nelle due
+; passate (il codice prima di gfx_end non cambia, il generatore e' a GEN_AT); copy_gfx lo decomprime all'avvio.
 GEN_AT = STASH_END                  ; $D080: RAM sotto l'I/O dopo la STASH (levels.asm; fino al 18/11 $D480)
+.if GENPASS == 2
 gen_img:
-        .logical GEN_AT
+        .binary "../out/work/gen_img.zx0"
+gen_img_end:
+        .virtual GEN_AT
         .include "gen_io.asm"
 gen_io_end:
-        .here
-gen_img_end:
+        .endv
+.else
+gen_img = gen_raw
+gen_img_end = gen_raw_end
+.endif
         .cerror gen_io_end > $e000, "generatore sotto l'I/O oltre $DFFF"
 
 FREE_RAM_END   = $9fff              ; il PRG puo' arrivare fino a $9FFF: la coda di gfx_data e' dato morto dopo
                                     ; copy_gfx (prima istruzione utile di `start`) e copre $8000-$9FFF (schermo HUD,
                                     ; sprite barra, sprites2, variabili $9000: tutti scritti DOPO la copia)
         .cerror gfx_data > SCR_H + 800, "codice oltre $8720: le righe HUD (SCR_H+800) lo sovrascriverebbero"
-        .cerror gen_img_end > CODE2, "grafica fissa + generatore oltre $9C00 (secondo blocco di codice)"
+        .cerror GENPASS == 2 && gen_img_end > CODE2, "grafica fissa + generatore (compresso) oltre $9C00 (secondo blocco di codice)"
 
 ; ------------------------------------------------------------------ secondo blocco di codice: $9C00-$9FFF
 ; RAM non toccata a runtime (le variabili finiscono a $9BFF, azzerate da game_start fino a $9BFF).
@@ -2058,3 +2064,12 @@ godmode .byte 0
 code2_end:
 ;@free code2_end..$a000 "Coda di CODE2: piccolo codice residente (disco, caricamenti)" use=code
         .cerror code2_end > FREE_RAM_END + 1, "secondo blocco di codice oltre $9FFF"
+.if GENPASS == 1
+        * = FREE_RAM_END + 1                ; (21/11) prima passata: il generatore non compresso, solo per gen_imgz.py
+gen_raw:
+        .logical GEN_AT
+        .include "gen_io.asm"
+gen_io_end:
+        .here
+gen_raw_end:
+.endif

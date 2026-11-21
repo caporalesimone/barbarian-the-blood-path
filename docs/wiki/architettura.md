@@ -197,7 +197,7 @@ flowchart TB
 
 | Zona | Scritta da | Valida fino a | Note |
 |---|---|---|---|
-| GAME `$0400`–`$9FFF` | `START` (ZX0 sul posto) | sempre | la coda del PRG (grafica fissa, immagine del generatore) è copiata all'avvio e poi è dato morto |
+| GAME `$0400`–`$9FFF` | `START` (ZX0 sul posto) | sempre | la coda del PRG (grafica fissa, immagine del generatore compressa ZX0 dal 21/11) è copiata (il generatore decompresso) all'avvio e poi è dato morto |
 | `MAP` `$C000`–`$C8FF` | `gfx_install` (villaggio: RLE dalla cache) / `gen_dungeon` (dal seed) / `fin_load` | cambio di luogo | nel menu iniziale la copre il LOBBY |
 | LOBBY `$C000`–`$CBFF` | `START` la prima volta, poi `load_menu` | inizio della partita | copre anche `$C900`–`$CBFF`: per questo `ovl_cur` = 0 |
 | MENU zona 1/2/3 | `ovl_town` a **ogni** ingresso nel villaggio (`enter_gfx` azzera `ovl_cur`) | uscita dal villaggio | dentro una visita al villaggio restano |

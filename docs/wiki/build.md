@@ -99,7 +99,7 @@ flowchart TD
     MT --> GAME
     TP --> GAME
     FM --> GAME
-    GAME["64tass src/game.asm<br/>-> out/work/game.prg, game.lbl, game.lst"]
+    GAME["64tass src/game.asm, due passate (21/11):<br/>GENPASS=1 -> gen_imgz.py (generatore ZX0, out/work/gen_img.zx0)<br/>GENPASS=2 -> out/work/game.prg, game.lbl, game.lst"]
     GAME --> ARENA["build arena: ARENA=1<br/>out/work/arena_game.prg + src/test/arena.asm"]
     GAME -->|game.lbl| LOB["src/lobby.asm -> out/work/lobby.prg"]
     GAME -->|game.lbl| MEN["src/menu.asm -> out/work/menu.bin<br/>(immagine piatta, 3 zone)"]
@@ -116,6 +116,11 @@ flowchart TD
     TP --> G0
 ```
 
+- **GAME in due passate** (21/11, `asm_game` in `asm.sh`, per la build normale, l'arena e `release-game`): la prima
+  (`GENPASS=1`) mette il codice del generatore dopo `CODE2` solo per leggerne i byte, `tools/build/gen_imgz.py` li comprime ZX0
+  in `out/work/gen_img.zx0` (3243 → 2177 B), la seconda (`GENPASS=2`) li include dopo la grafica fissa e tiene il generatore in
+  un blocco virtuale (etichette identiche nelle due passate); `copy_gfx` lo decomprime a `GEN_AT` all'avvio. Il PRG di GAME
+  finisce ~1 KB prima (`$96F6` invece di `$9B28`): le varianti di test con più codice restano sotto `$9C00`.
 - **Ordine obbligato**: GAME per primo (le sue etichette `out/work/game.lbl` servono a LOBBY e MENU, che lo chiamano);
   `pack.py` dopo GAME (START deve sapere dove caricare il flusso compresso: `out/work/pack.inc`); START dopo (conosce anche la
   dimensione di GAME + LOBBY + GFX0 per dosare la barra, `OTHERS`).

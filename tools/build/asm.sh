@@ -14,11 +14,21 @@ CH0=${CHEATS:-}
 if [ "$1" = "test" ]; then CHEATS=${CH0:-1}; elif [ "${RELEASE:-0}" = 1 ]; then CHEATS=${CH0:-0}; else CHEATS=${CH0:-1}; fi
 EXTRA="-D NOKEYS=0 -D AUTOY=0 -D TSV=0 -D TESTSELL=0 -D NOMUSIC=0 -D TMDBG=0 -D TESTBUILD=0 -D TESTLVL=${TESTLVL:-1} -D TESTCL=${TESTCL:-1} -D TESTSP=${TESTSP:-1} -D TESTX=${TESTX:-0} -D TESTY=${TESTY:-0} -D TESTUI=${TESTUI:-0} -D TESTFIRE=0 -D TESTSK=0 -D TESTFZ=0 -D TESTFZR=100 -D TESTFZS=0 -D TESTGOD=0 -D CHEATS=$CHEATS"
 if [ "$1" = "test" ]; then EXTRA="-D NOKEYS=${NOKEYS:-0} -D AUTOY=${AUTOY:-0} -D TSV=${TSV:-0} -D NOMUSIC=${NOMUSIC:-0} -D TESTSELL=${TESTSELL:-0} -D TMDBG=${TMDBG:-0} -D TESTBUILD=${TB:-1} -D TESTLVL=${TESTLVL:-1} -D TESTCL=${TESTCL:-1} -D TESTSP=${TESTSP:-1} -D TESTX=${TESTX:-0} -D TESTY=${TESTY:-0} -D TESTUI=${TESTUI:-0} -D TESTFIRE=${TESTFIRE:-0} -D TESTSK=${TESTSK:-0} -D TESTFZ=${TESTFZ:-0} -D TESTFZR=${TESTFZR:-100} -D TESTFZS=${TESTFZS:-0} -D TESTGOD=${TESTGOD:-0} -D CHEATS=$CHEATS"; fi
+# (21/11) GAME in due passate: la prima (GENPASS=1) per i byte del generatore, che gen_imgz.py comprime in out/work/gen_img.zx0;
+# la seconda (GENPASS=2) li include compressi (src/game.asm, copy_gfx). asm_game LOG -o PRG -L LST -l LBL [flag...]
+asm_game() {
+    local log=$1; shift
+    mkdir -p out/tmp
+    64tass -a "$@" -D GENPASS=1 $INC src/game.asm -o out/tmp/genpass1.prg -l out/tmp/genpass1.lbl -L out/tmp/genpass1.lst > "$log" 2>&1 || return 1
+    python3 tools/build/gen_imgz.py out/tmp/genpass1.prg out/tmp/genpass1.lbl >> "$log" 2>&1 || return 1
+    64tass -a "$@" -D GENPASS=2 $INC src/game.asm >> "$log" 2>&1
+}
 if [ "$1" = "release-game" ]; then
     # solo GAME con i flag della release (CHEATS=0) in out/tmp/release_game.*, senza generatori ne' disco (servono i sorgenti
     # generati di una build gia' fatta): il controllo che la release non abbia i trucchi (test CHEAT-22)
     mkdir -p out/tmp
-    exec 64tass -a ${EXTRA/-D CHEATS=$CHEATS/-D CHEATS=0} -L out/tmp/release_game.lst -l out/tmp/release_game.lbl $INC src/game.asm -o out/tmp/release_game.prg
+    asm_game out/tmp/release_game.log ${EXTRA/-D CHEATS=$CHEATS/-D CHEATS=0} -L out/tmp/release_game.lst -l out/tmp/release_game.lbl -o out/tmp/release_game.prg || { cat out/tmp/release_game.log; exit 1; }
+    exit 0
 fi
 python3 tools/build/gen_version.py || exit 1
 tools/build/krill_build.sh > out/work/krill.log || { cat out/work/krill.log; exit 1; }   # (11/11) Krill's Loader: out/work/krill/*.prg + out/work/krill.inc
@@ -29,11 +39,11 @@ python3 tools/build/gen_db.py >/dev/null || exit 1
 python3 tools/build/gen_quests.py >/dev/null || exit 1   # (17/11) quest: file QSTn e quests.inc (concept)
 python3 tools/build/gen_maps.py >/dev/null || exit 1   # prima dell'assemblaggio: scrive town_places.inc (porte per la minimappa)
 rm -f out/work/game.prg
-64tass -a $EXTRA -L out/work/game.lst -l out/work/game.lbl $INC src/game.asm -o out/work/game.prg > out/work/build.log 2>&1 || { grep -v '^$' out/work/build.log | head -${ERRLINES:-40}; exit 1; }
+asm_game out/work/build.log $EXTRA -L out/work/game.lst -l out/work/game.lbl -o out/work/game.prg || { grep -v '^$' out/work/build.log | head -${ERRLINES:-40}; exit 1; }
 tail -3 out/work/build.log
 # build arena (tools/vice/arena.py): gioco con ARENA=1 + modulo src/test/arena.asm a $C900
 ARX=$(echo "$EXTRA" | sed 's/-D NOKEYS=[0-9]*/-D NOKEYS=1/')
-64tass -a $ARX -D ARENA=1 -L out/work/arena_game.lst -l out/work/arena_game.lbl $INC src/game.asm -o out/work/arena_game.prg > out/work/arena.log 2>&1 || { grep -v '^$' out/work/arena.log | head -20; exit 1; }
+asm_game out/work/arena.log $ARX -D ARENA=1 -L out/work/arena_game.lst -l out/work/arena_game.lbl -o out/work/arena_game.prg || { grep -v '^$' out/work/arena.log | head -20; exit 1; }
 64tass -a $INC src/test/arena.asm -o out/work/arena.prg -l out/work/arena.lbl -L out/work/arena.lst >> out/work/arena.log 2>&1 || { grep -v '^$' out/work/arena.log | head -20; exit 1; }
 # moduli su file: assemblati con le etichette del gioco (out/work/game.lbl)
 64tass -a $INC src/lobby.asm -o out/work/lobby.prg -l out/work/lobby.lbl -L out/work/lobby.lst > out/work/ovl.log 2>&1 || { grep -v '^$' out/work/ovl.log | head -20; exit 1; }
