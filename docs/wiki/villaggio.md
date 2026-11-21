@@ -317,7 +317,7 @@ Dal 21/11 (branch `liste-menu`, prototipi approvati dal committente) due liste a
 - **Fire**: zaino → baule, baule → zaino (le pergamene si accumulano fino a 10), indossato → zaino (l'arma no: si sostituisce).
   **E**: indossa l'oggetto dello zaino (o del baule, passando dallo zaino) con le stesse regole dell'inventario (requisito di
   FOR, arma a due mani e scudo). Si esce con RUN/STOP o I.
-- **Oro**: entrando, l'oro addosso va nel baule a decine (le unità restano addosso; `st_gold`). Il prelievo non c'è
+- **Oro**: entrando, l'oro addosso va nel baule a decine (le unità restano addosso; `st_gold`; confermato dal committente il 21/11). Il prelievo non c'è
   (10/11): i negozi pagano anche con l'oro del baule.
 - Non c'è più la modalità di scelta dell'equipaggiamento (`h_sel`, `- remove`) né le pagine del baule.
 - **Ordinamento**: zaino e baule sempre in ordine di categoria (armi, armature, scudi, anelli, pozioni, pergamene;

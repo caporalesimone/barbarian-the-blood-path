@@ -18,7 +18,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | # | Categoria | Voci (in ordine di taglia) |
 |---|---|---|
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
-| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B1–B4, B6–B18 (XS ciascuna) |
+| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B2, B3, B6, B8–B18 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
@@ -42,6 +42,12 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 - **Menu**: la schermata C va **riportata alla stessa logica dei menu del villaggio** (modulo MENU, `$01 = $35`, tabella dei
   salti). Ostacolo: costa ~1 KB e le zone del MENU hanno liberi solo 272 B (170/9/93): serve una zona nuova o più spazio (D14).
   Nel dungeon il MENU potrebbe non essere in memoria (si carica all'ingresso nel villaggio). Finché non si decide resta in GAME.
+  **Prova del 21/11 (modulo su disco)**: la schermata come file `csheet` (1524 B, assemblato con `game.lbl` come CHEATS) letto
+  a `$EC00` col tasto C dopo ogni caricamento: +1440 B in GAME, test verdi, ma il tempo di lettura (VICE, peggiore su 6 fasi del
+  disco) dipende dalla ricerca nella directory di Krill, non dai 6 blocchi. File dopo CORE: villaggio 0,49 s, dungeon 1,31-1,47 s
+  dopo le scale; con due voci-copia nella directory sempre ≤ 0,98 s, ma ingresso nel villaggio 1 da 2,78 a 4,59 s e twn1/twn5
+  oltre i limiti; altre due posizioni peggiori. Criterio del committente: ≤ 1 s. **Decisione del committente (21/11): la
+  schermata resta in GAME**; si sposterà quando servirà davvero spazio (affissi), cercando altro da togliere.
 - **Da verificare a mano** (VICE o hardware): aprire C nel villaggio e nel dungeon (anche con mostri vicini), spendere,
   togliere, spostare fra le caratteristiche, undo, confirm (sì/no), uscita con punti in attesa (sì/no), respec con e senza gettoni,
   ricaricare la partita, CON alzata = vita massima alzata (schermata rifatta il 15/11, Z5: `docs/wiki/interfaccia.md`).
@@ -62,12 +68,9 @@ non si possono chiudere.
 
 | ID | Decisione | Blocca |
 |---|---|---|
-| B1 (ex D2) | **Merce dei negozi**: cosa e quanti oggetti vende ciascuno a ogni ingresso (oggi `balance.yaml`: fabbro 6 da armi+armature+scudi, alchimista 4 da pozioni+pergamena+anello; massimo 8). | E2 |
 | B2 (ex D4) | **Cintura a 8 posti** (20/11, committente): premio importante a fine capitolo 2 o inizio capitolo 3; quest e momento decisi col simulatore ([quests](docs/wiki/quests.md) sez. 7). | F1 |
 | B3 (ex D5) | **Pergamene fuori dallo zaino**: contatore 0..10 addosso (tasto 5), pile da 10 nel baule della locanda, opzione "riga dell'oro nella locanda con `s N`". Cooldown della pergamena ≥ 5 s (08/11). | F2 |
-| B4 (ex D6) | **Anelli e nomi**: formato `ring +N <stat>` e quali nomi accorciare (candidati: leather armor, greater healing, healing potion, minor healing, portal scroll, tower shield, viking sword). | E1 |
 | B6 (ex D9) | **Una pergamena garantita per piano?** | G1 |
-| B7 (ex D10) | **Prezzi proporzionali al guadagno** (`docs/wiki/BILANCIAMENTO.md` sez. 12). | G2 |
 | B8 (ex D11) | **Quest system**: decisioni prese il 20/11 ([quests](docs/wiki/quests.md)); restano i chiarimenti C3–C7 della pagina (sez. 8). | H1 |
 | B9 (ex D14) | **Borsello a gradini** (deciso il 20/11): 500 → 1000 → 3000 → 5000 con i passi 1, 4, 7 della catena, 10 000 con il passo 12 (numeri da ricontrollare col simulatore dell'oro). | H1 |
 | B10 (ex D12) | **Abisso**: ripopolamento, prezzi della città, tetto dell'oro oltre i 16 bit. | H3 |
@@ -110,7 +113,10 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 ### C3 (ex 1.4) Piccole scelte estetiche e audio — S
 - `SFX_LOWHP` provvisorio da riascoltare nel JUKEBOX; tile del trono dietro il boss.
 
-### E2 (ex 2.3) Negozi: merce (dopo B1) — S
+### E2 (ex 2.3) Negozi: merce — S
+- **Deciso (21/11, committente, ex B1)**: a ogni visita fabbro e alchimista vendono un numero **casuale da 3 a 8** oggetti
+  (entrambi); oggetti **bianchi** (non magici) più probabili, soprattutto all'inizio; lo stesso oggetto può comparire più volte.
+  Si fa con gli affissi (la quota di magici cresce col livello, E2/E3 del progetto).
 - Assortimento in `balance.yaml` (pool e `stock`), `docs/wiki/villaggio.md`, manuale.
 
 ### E5 (ex 2.6) HUD: esperienza a 24 bit (per l'Abisso) — S
@@ -120,9 +126,13 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 - Ampolle nei colori della pozione (rossa 2, gialla 7, viola 4) al posto dell'icona generica; in ricarica blu (già fatto).
   **Cavilli**: caratteri hires, colori < 8; i codici liberi dell'HUD sono finiti (`HUD_FREE`); da ripensare con la cintura a 8 (F1).
 
-### E1 (ex 2.2) Anelli `ring +N <stat>` e nomi corti (dopo B4) — S-M
-- Nomi in `data/items/items.tsv`, `NAME_SHOW`, `docs/wiki/oggetti.md`, help, manuale. Gli id non cambiano: nessun `SAVE_VER`.
-  **Cavillo**: la rarità del materiale va spiegata altrove.
+### E1 (ex 2.2) Nomi corti degli oggetti (con gli affissi) — S-M
+- **Deciso (21/11, committente, ex B4)**: gli anelli prendono la caratteristica come suffisso ("of strength", O9); per i nomi
+  lunghi prima si prova ad **accorciare tutti i nomi** (basi e affissi) perché stiano nelle liste (28 colonne nei negozi, 34
+  nelle altre); se non si riesce per tutti, il nome **scorre sulla riga evidenziata**. Il nome intero sta comunque nel titolo
+  del riquadro dell'oggetto (35 colonne).
+- Nomi in `data/items/items.tsv` / `data/items/next/`, `docs/wiki/oggetti.md`, help, manuale. **Cavillo**: la rarità del
+  materiale va spiegata altrove.
 
 ### M2 Temi audio veri dei villaggi — S-M
 - Brano per capitolo fatto il 12/11 ([musica](docs/wiki/musica.md)). **Resta**: scegliere i temi dei villaggi 2–4 (oggi tutti Tavern
@@ -412,7 +422,10 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   (`tools/simulators/rules.py`); il PG di riferimento spende in DES un punto ogni 4 (DES 18 solo verso il livello 16):
   i primi piani diventano piu' duri. Da misurare con il resto di questo punto.
 
-### G2 (ex 4.2) Economia: prezzi, oro, riparazioni (dopo B7) — M
+### G2 (ex 4.2) Economia: prezzi, oro, riparazioni — M
+- **Deciso (21/11, committente, ex B7)**: per ora i prezzi della prima stesura dei `.tsv` (`data/items/next/`); **da fare dopo**:
+  tarare tutti i prezzi con **formule** che dipendono da prefisso, suffisso e livello dell'oggetto (non più la regola "1,5 piani"
+  del 06/11, [BILANCIAMENTO](docs/wiki/BILANCIAMENTO.md) sez. 12, superata), poi verifica col simulatore dell'oro.
 
 ### G5 (ex 4.5) Set di oggetti unici con nome — M
 - Come `unique_itemdat.tsv` di DevilutionX: una tabella nel database degli oggetti; ~8 B a set + 40–60 B di codice.
