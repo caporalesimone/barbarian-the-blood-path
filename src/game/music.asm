@@ -63,11 +63,9 @@ SP_V2   = 14                    ; basso e batteria sulla voce 3
         .include "sid_player.inc"
         .cerror SP_VARS < rel_end || SP_VARS + SP_VSIZE > $9c00, "variabili del player fuori da $9B4E-$9BFF"
 
-        .virtual $95e0          ; (08/11 sera: dopo il blocco dell'eroe, che contiene il baule di casa)
+; (21/11 sera) mfar nel PRG di GAME: a $95E0 ora c'e' il blocco dell'eroe, cresciuto con i suffissi degli oggetti (SAVE_VER $CC)
 mfar    .fill 32                ; 1 = mostro lontano (game.asm: riesame ridotto)
 mfar_end
-        .endv
-        .cerror mfar_end > $9600, "mfar oltre $9600 (mostri)"
 
         .virtual $93b0          ; (08/11 sera: da $95D4) set_tile, mostri che si muovono, scorrimento
 tp_on   .byte ?                 ; 1 = set_tile aggiorna anche lo schermo (solo in gioco)

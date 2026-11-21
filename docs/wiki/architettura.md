@@ -186,7 +186,7 @@ flowchart TB
     subgraph R4["$D000-$DFFF RAM sotto l'I/O"]
         STA["$D000-$D07F STASH del piano lasciato"]
         GEN["$D080-$DD04 generatore dei piani"]
-        SLT["$D8DA-$DAAA slot dei piani del capitolo<br/>(5 x 93 B, LVRAM)"]
+        SLT["$DD2B-$DF0F slot dei piani del capitolo<br/>(5 x 97 B, LVRAM)"]
     end
     subgraph R5["$E000-$FFFF RAM sotto il KERNAL"]
         CORE["$E000-$E99C segmento CORE (21/11): liste,<br/>inventario, descrizione degli oggetti (file core)"]

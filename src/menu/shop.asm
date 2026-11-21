@@ -44,6 +44,7 @@ enter_shop:                     ; (interrupt spenti: tabella dei salti di src/me
         ldx #7
 _cp     lda #0
         sta l8_b,x
+        sta l8_s,x              ; (21/11 sera) suffisso: merce senza affissi (fase 3)
         lda shp_stock,x
         sta l8_id,x
         tay                     ; (21/11) anello: la caratteristica (1 FOR, 2 DES, 3 COS) si tira qui, come nel bottino;

@@ -156,7 +156,7 @@ h_equip:
         lda st_id,x
         jsr h_wear
         bcs _r
-        ldy #3                  ; l'oggetto (st_id, st_b, st_du, st_m: passo STASH_N)
+        ldy #4                  ; l'oggetto (st_id, st_b, st_du, st_m, st_sx: passo STASH_N)
 -       lda st_id,x
         sta kp_i,y
         txa
@@ -171,15 +171,18 @@ h_equip:
         jsr st_move
         ldx #PACK_N-1           ; dov'e' finito nello zaino
 _f      lda c_pack,x
-        cmp kp_i+3
+        cmp kp_i+4
         bne _n
         lda c_packb,x
-        cmp kp_i+2
+        cmp kp_i+3
         bne _n
         lda c_packd,x
-        cmp kp_i+1
+        cmp kp_i+2
         bne _n
         lda c_packm,x
+        cmp kp_i+1
+        bne _n
+        lda c_packs,x
         cmp kp_i
         beq _go
 _n      dex
@@ -201,6 +204,6 @@ _n      sec
         rts
 
 ; (11/11) variabili della locanda in pagina zero ($65-$81, libera nel gioco: docs/wiki/tecnica.md)
-kp_i    = $7e                   ; oggetto preso dal baule per indossarlo (al contrario: massimo, durabilita', bonus, id)
-        .cerror kp_i+4 > $82, "variabili della locanda oltre $81"
-        .cerror st_b != st_id+STASH_N || st_du != st_b+STASH_N || st_m != st_du+STASH_N, "st_id..st_m a passo STASH_N"
+kp_i    = $7d                   ; oggetto preso dal baule per indossarlo (al contrario: suffisso, massimo, durabilita', bonus, id)
+        .cerror kp_i+5 > $82, "variabili della locanda oltre $81"
+        .cerror st_b != st_id+STASH_N || st_du != st_b+STASH_N || st_m != st_du+STASH_N || st_sx != st_m+STASH_N, "st_id..st_sx a passo STASH_N"

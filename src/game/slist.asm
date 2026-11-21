@@ -47,6 +47,7 @@ sl_be   .byte ?
 sl_q    .byte ?
 iv_l3   .word ?                 ; (21/11) riga 3 del riquadro dell'oggetto (iv_sel): routine della schermata
 iv_mode .byte ?                 ; 0 = riga 2 con valore e durabilita' (inventario, locanda, baule), 1 = solo durabilita' (negozi)
+l8_s    .fill 8                 ; (21/11 sera) suffisso della merce o del contenuto del baule del piano (accanto a l8_id / l8_b)
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"

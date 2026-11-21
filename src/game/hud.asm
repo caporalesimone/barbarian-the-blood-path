@@ -58,6 +58,10 @@ irq_init:
         sta $0319
         rts
 
+; (21/11 sera) il beq di irq_entry e il suo bersaglio nella stessa pagina (cicli come nella ROM): 6 byte di riempimento se serve
+        .if (>(*+11)) != (>(*+13)) || (>(*+13)) != (>(*+16))
+        .fill 6, $ea
+        .endif
 ; ingresso dell'IRQ (copia di $FF48-$FF5A della ROM, BRK compreso)
 irq_entry:
         pha

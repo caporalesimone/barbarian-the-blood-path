@@ -57,6 +57,7 @@ ch_t    .fill CH_MAX      ; 0 vuoto, 1 normale, 2 chiave, 3 oro; bit3 = lasciato
                           ; bit4 = generato con il piano, bit5 = aperto, bit6 = epico, bit7 = contenuto generato
 ch_i    .fill CH_MAX*4   ; contenuto dei bauli: id oggetto (4 posti)
 ch_b    .fill CH_MAX*4   ; contenuto dei bauli: bonus (4 posti)
+ch_s    .fill CH_MAX*4   ; (21/11 sera) contenuto dei bauli: suffisso (4 posti)
 EXPL    .fill 288        ; mappa esplorata: 1 bit per tile (48x48)
 LVLEND
         .endv
@@ -115,10 +116,13 @@ st_id   .fill STASH_N    ; baule della locanda: id dei 24 oggetti (0 = vuoto)
 st_b    .fill STASH_N    ; baule della locanda: bonus
 st_du   .fill STASH_N    ; baule della locanda: durabilita' attuale
 st_m    .fill STASH_N    ; baule della locanda: durabilita' massima
+st_sx   .fill STASH_N    ; (21/11 sera, SAVE_VER $CC, affissi) baule della locanda: suffisso (0 = nessuno); st_b = prefisso
+c_packs .fill PACK_N     ; (21/11 sera, SAVE_VER $CC) suffisso degli oggetti nello zaino (0 = nessuno)
+c_eqs   .fill EQ_N       ; ... e dell'equipaggiamento (segue lo zaino come c_packb / c_eqb)
 c_qst   .byte ?          ; (17/11, SAVE_VER $C8, concept) quest prese: (18/11) maschera, bit n-1 = quest n (file QSTn); in fondo al blocco
 CHREND
         .endv
-        .cerror CHREND > mfar, "blocco personaggio sovrapposto a mfar"
+        .cerror CHREND > $9600, "blocco personaggio sovrapposto alle tabelle dei mostri ($9600, MRT)"
 
 ; ---- variabili (non salvate)
         .virtual $9100
@@ -134,6 +138,7 @@ solidtab   .fill 48         ; tile solidi del luogo attuale (copia di solid_dun 
         .virtual gi_force+1
 gi_t       .byte ?          ; gen_item: livello oggetto obiettivo (CL / CL_PF)
 gi_l       .byte ?          ; gen_item: livello oggetto tirato (0..MAXLL): candidati e magia
+ap_s       .byte ?          ; (21/11 sera) give_item / add_to_pack: suffisso dell'oggetto (consumato come ap_b)
 ps_n       .byte ?
 gi_cat     .byte ?
 rm_min     .byte ?
@@ -323,6 +328,8 @@ _put    sta c_pack,y
         jsr dur_roll            ; A = oggetto (08/11: prima riceveva ap_m = 0 e gli oggetti nuovi non si usuravano)
 _d      lda ap_b
         sta c_packb,y
+        lda ap_s
+        sta c_packs,y
         lda ap_d
         sta c_packd,y
         lda ap_m
@@ -330,8 +337,9 @@ _d      lda ap_b
         jsr ap_clr
         clc
         rts
-ap_clr  lda #0                  ; ap_b/ap_d/ap_m consumati
+ap_clr  lda #0                  ; ap_b/ap_s/ap_d/ap_m consumati
         sta ap_b
+        sta ap_s
         sta ap_d
         sta ap_m
         rts
@@ -652,6 +660,7 @@ _fx     dex                     ;  byte di stx gi_cat e la pergamena mandava il 
 _got    stx gi_cat              ; categoria - 1
         lda #0
         sta ap_b
+        sta ap_s                ; (21/11 sera) suffisso: ancora nessuno (affissi, fase 2b)
         cpx #CAT_POTION-1
         beq _pot
         cpx #CAT_SCROLL-1
@@ -847,6 +856,10 @@ _ok     pla
         sta ch_b+1,y
         sta ch_b+2,y
         sta ch_b+3,y
+        sta ch_s,y
+        sta ch_s+1,y
+        sta ch_s+2,y
+        sta ch_s+3,y
         lda loot_x
         sta tx
         lda loot_y
@@ -876,8 +889,11 @@ _l      jsr gen_item
         sta ch_i,x
         lda ap_b
         sta ch_b,x
+        lda ap_s
+        sta ch_s,x
         lda #0
         sta ap_b
+        sta ap_s
         inc tmp5
         lda tmp5
         cmp ch_cnt

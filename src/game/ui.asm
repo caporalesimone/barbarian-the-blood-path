@@ -12,6 +12,7 @@ mmy      .byte ?
 st_i     .byte ?                ; indice salvato (baule di casa, cintura nell'inventario)
 it_i     .byte ?                ; oggetto in transito: id, bonus, durabilita', massimo (eq_get, pk_put...)
 it_b     .byte ?
+it_s     .byte ?                ; (21/11 sera) suffisso
 it_d     .byte ?
 it_m     .byte ?
 ui_dur   .byte ?                ; durabilita' dell'oggetto mostrato (0 = non mostrata): ibox_ld, sl_get
@@ -897,6 +898,8 @@ eq_get: jsr eq_y
         sta it_i
         lda c_eqb,y
         sta it_b
+        lda c_eqs,y
+        sta it_s
         lda c_eqd,y
         sta it_d
         lda c_eqm,y
@@ -915,6 +918,8 @@ eq_put: lda it_i
         sta c_eq,y
         lda it_b
         sta c_eqb,y
+        lda it_s
+        sta c_eqs,y
         lda it_d
         sta c_eqd,y
         lda it_m
@@ -925,6 +930,7 @@ eq_zero: jsr eq_y
         lda #0
         sta c_eq,y
         sta c_eqb,y
+        sta c_eqs,y
         sta c_eqd,y
         sta c_eqm,y
         rts
@@ -933,6 +939,8 @@ pk_put: lda it_i
         sta c_pack,x
         lda it_b
         sta c_packb,x
+        lda it_s
+        sta c_packs,x
         lda it_d
         sta c_packd,x
         lda it_m
@@ -942,6 +950,7 @@ pk_put: lda it_i
 pk_zero: lda #0
         sta c_pack,x
         sta c_packb,x
+        sta c_packs,x
         sta c_packd,x
         sta c_packm,x
         rts
@@ -957,6 +966,12 @@ pk_swap: lda c_pack,x           ; it_* <-> posto X dello zaino
         sta c_packb,x
         pla
         sta it_b
+        lda c_packs,x
+        pha
+        lda it_s
+        sta c_packs,x
+        pla
+        sta it_s
         lda c_packd,x
         pha
         lda it_d
@@ -1065,11 +1080,11 @@ sort_pack:
         ldx #>sd_pack
         jmp sort4
 sd_pack .byte PACK_N
-        .word c_pack, c_packb, c_packd, c_packm
+        .word c_pack, c_packb, c_packd, c_packm, c_packs
 
 ; ordinamento stabile per categoria (armi, armature, scudi, anelli, pozioni, pergamene; i posti vuoti in fondo) di
 ; 4 tabelle parallele: id, bonus, durabilita', massimo (08/11: zaino e baule di casa sempre ordinati).
-; A/X = descrittore: numero di posti (<= 32), poi i 4 indirizzi. Usa $FB-$FE, S4_ORD e S4_BUF (dopo LVLBLK).
+; A/X = descrittore: numero di posti (<= 32), poi i 5 indirizzi (21/11 sera: + il suffisso). Usa $FB-$FE, S4_ORD e S4_BUF (dopo LVLBLK).
 S4_ORD = $9a60
 S4_BUF = $9a80
 sort4:  sta $fd
@@ -1131,7 +1146,7 @@ _p2     lda S4_BUF,y
         cpy s4_n
         bne _p2
         lda s4_t
-        cmp #9
+        cmp #11                 ; (21/11 sera) 5 tabelle: id, bonus (prefisso), durabilita', massimo, suffisso
         bne _tb
         rts
 
@@ -2377,6 +2392,8 @@ _c      lda ch_i,x
         sta l8_id,y
         lda ch_b,x
         sta l8_b,y
+        lda ch_s,x
+        sta l8_s,y
         iny
 +       inx
         dec tmp6
@@ -2405,6 +2422,8 @@ chest_take1:
         beq _ok
         lda ch_b,y
         sta ap_b
+        lda ch_s,y
+        sta ap_s
         lda ch_i,y
         jsr give_item
         bcs _full
@@ -2418,12 +2437,15 @@ _sh     lda tmp3
         sta ch_i,y
         lda ch_b+1,y
         sta ch_b,y
+        lda ch_s+1,y
+        sta ch_s,y
         iny
         inc tmp3
         jmp _sh
 _last   lda #0
         sta ch_i,y
         sta ch_b,y
+        sta ch_s,y
         jsr chest_idx           ; cursore: resta sullo stesso slot (ora l'oggetto dopo);
         lda ch_i,y              ; se e' vuoto torna sull'ultimo oggetto rimasto
         bne _rf

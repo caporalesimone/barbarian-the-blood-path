@@ -143,6 +143,11 @@ dell'equipaggiamento: indice `PACK_N`..`PACK_N`+4 = 8..12):
   **caratteristica** (1 FOR, 2 DES, 3 COS, il nome mostra il suffisso `copper ring str`); pergamene = la
   **quantità** della pila (1..4, `SCR_MAX`); pozioni: non usato;
 - **durabilità attuale** e **massima** (armi, armature, scudi; 0 = non si usura).
+- **(21/11 sera, formato $CC, fase 2a degli affissi) suffisso**: `c_packs` / `c_eqs`, `st_sx` (baule della locanda), `ch_s` (bauli del
+  piano), `l8_s` (merce e contenuto del baule nelle liste), `it_s` / `ap_s` (oggetto in transito). Oggi sempre 0: lo riempiono gli affissi
+  (fase 2b, decisione del committente: oggetto a **5 byte** = id, prefisso, suffisso, durabilità, massima; il valore dell'affisso si
+  legge dalla sua riga, un byte in più arriverà con l'Abisso). Tutte le routine che spostano oggetti (`eq_get`/`eq_put`, `pk_put`/
+  `pk_swap`/`pk_zero`, `sort4` con 5 tabelle, `st_move`, `chest_take1`, negozi) portano il quinto byte.
 
 ### Durabilità
 Generata quando l'oggetto entra nello zaino (`give_item` → `dur_roll`: bottino, acquisto; dal baule della locanda
@@ -299,9 +304,9 @@ non sta in GAME. Architettura:
 - **GAME**: escono tabelle, nomi e generatore di oggi, entrano interfaccia, affissi e agganci delle quest: margine ~1250 B (stima).
 - **Bauli del piano**: contenuto **rigenerato** dal seme (seme del mondo, piano, nonce del baule) a ogni apertura, salvando solo
   quali oggetti sono presi: ~45 B invece dei 120 di `ch_i`/`ch_b` (generatore deterministico per baule: da verificare).
-- **Oggetto** = id + prefisso (id, valore) + suffisso (id, valore) + durabilità + massima = 7 B (oggi 4).
+- **Oggetto** = id + prefisso (id, valore) + suffisso (id, valore) + durabilità + massima = 7 B (oggi 4). **(21/11 sera, decisione del committente) 5 B**: id, prefisso, suffisso, durabilità, massima (valori dalle righe; un byte in più con l'Abisso). Fatto il quinto byte (formato $CC).
 - **Baule della locanda** sotto l'I/O (168 B nei 260 liberi a `LVRAM_end`); blocco dell'eroe ~189 B nella pagina `$9500`.
-- **File di salvataggio**: solo i 5 piani del capitolo in corso (C1): ~790 B, 4 blocchi invece di 9.
+- **File di salvataggio**: solo i 5 piani del capitolo in corso (C1): ~790 B, 4 blocchi invece di 9. **Fatto il 21/11 sera** (formato $CC): 739 B, 3 blocchi.
 - **(21/11, da fare con gli affissi; idea del committente) Database diviso per momento d'uso, generazione da un sottoinsieme.**
   In RAM resta solo la **visualizzazione** (nomi, statistiche delle basi, poteri degli unici: ~1350–1700 B, stima; i nomi sono
   1040 B contati dai `.tsv`). I **prezzi** (~160 B, stima) vanno nel file MENU, che si legge già a ogni ingresso nel villaggio.

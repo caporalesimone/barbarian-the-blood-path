@@ -55,6 +55,8 @@ _put    lda c_pack,x
         sta st_du,y
         lda c_packm,x
         sta st_m,y
+        lda c_packs,x
+        sta st_sx,y
         jsr pk_zero
         jsr sort_pack
 _ok     lda #SFX_PICK
@@ -114,6 +116,8 @@ _tk     stx st_i
         sta ap_d
         lda st_m,x
         sta ap_m
+        lda st_sx,x
+        sta ap_s
         lda st_id,x
         jsr give_item
         ldx st_i
@@ -130,6 +134,8 @@ _sh     lda st_id+1,x
         sta st_du,x
         lda st_m+1,x
         sta st_m,x
+        lda st_sx+1,x
+        sta st_sx,x
         inx
         cpx #STASH_N-1
         bne _sh
@@ -138,5 +144,6 @@ _sz     lda #0
         sta st_b+STASH_N-1
         sta st_du+STASH_N-1
         sta st_m+STASH_N-1
+        sta st_sx+STASH_N-1
         jsr sort_pack
         jmp _ok

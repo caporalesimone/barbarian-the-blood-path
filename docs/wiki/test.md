@@ -150,17 +150,20 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (2)
+### sanity (3)
+
+| ID | Test |
+|---|---|
+| `SFX-10` | inventory: equipping an armor with suffix 7 puts 7 in c_eqs[1]; the old armor goes to the pack with its suffix 5 |
+| `SFX-11` | sort_pack: the suffix follows its item (5 parallel tables) |
+| `SFX-12` | hero file: HERO_LEN 254, file of HERO_LEN + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx |
+
+### regression (247)
 
 | ID | Test |
 |---|---|
 | `BASES-10` | item tables: 11 armors with CA 1..10, 4 shields with CA 1..4 |
 | `BASES-11` | inventory: the studded armor (DEX 14) stays in the pack with s_dex 13 ('dex 14' in its box); with DEX 14 it is equipped |
-
-### regression (245)
-
-| ID | Test |
-|---|---|
 | `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
 | `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
 | `RING-12` | alchemist: a ring among the wares has its stat (1..3) and the bought ring keeps it |

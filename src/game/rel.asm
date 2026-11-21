@@ -32,8 +32,8 @@
         .enc "none"
 HDR_LEN  = 1 + 5 + 5*NAME_LEN
 HERO_LEN = CHREND - CHRBLK
-LV_SLOT  = 93                   ; stato compatto di un piano: 82 o 93 byte (9 + baule del boss 1 o 12 + nebbia 72)
-SV_LEN   = HERO_LEN + MAXLEVEL*LV_SLOT
+LV_SLOT  = 97                   ; stato compatto di un piano: 82 o 97 byte (9 + baule del boss 1 o 16 + nebbia 72; 21/11 sera: + i suffissi)
+SV_LEN   = HERO_LEN + CH_LV*LV_SLOT     ; (21/11 sera, decisione C1 del piano F7) solo i piani del capitolo in corso
 SV_IMG   = $e000                ; immagine del file (RAM sotto il KERNAL)
 SV_ALT   = $ec00                ; (21/11) immagine letta e basta (load_char, chap_ensure): sopra il segmento CORE, nel buffer
         .cerror (<SV_IMG) != 0 || (<SV_ALT) != 0 || SV_ALT < core_end || SV_ALT + SV_LEN > MR2_AT || HERO_LEN - LV_SLOT > 255, "SV_ALT"
@@ -378,9 +378,12 @@ _z      sta slot_valid,x
         jmp hdr_write
 
 ; ---------------------------------------------------------------- piani
-; rpt = SV_IMG (SV_ALT se tmp6 = 1) + HERO_LEN + (A-1)*LV_SLOT (A = piano 1..MAXLEVEL)
+; rpt = SV_IMG (SV_ALT se tmp6 = 1) + HERO_LEN + ((A-1) mod CH_LV)*LV_SLOT (A = piano 1..MAXLEVEL). (21/11 sera, C1) Il file
+; tiene solo i CH_LV piani del capitolo in corso: gli slot di un altro capitolo hanno un altro piano nel primo byte e lv_get
+; li scarta (il piano si rigenera)
 rec_level:
-        tax
+        jsr lv_grp              ; X = (A-1) mod CH_LV
+        inx
         lda #<(SV_IMG+HERO_LEN-LV_SLOT)
         sta rpt
         lda #>SV_IMG            ; (21/11) tmp6 = 1 (immagine -> slot, chap_ensure): l'immagine e' a SV_ALT
@@ -617,7 +620,7 @@ _gm     lda ch_t,x
         bpl _gm
         lda tmp0
         jsr rel_put
-        ; baule del boss non aperto: 1, X, Y, tipo, 4 oggetti, 4 bonus (altrimenti 0)
+        ; baule del boss non aperto: 1, X, Y, tipo, 4 x (oggetto, bonus, suffisso) (altrimenti 0)
         ldx lb_bch
         beq _nb
         dex
@@ -637,13 +640,14 @@ _gm     lda ch_t,x
         asl
         asl
         tay
-        ldx #8
+        ldx #4
 _bi     lda ch_i,y
         jsr rel_put
         lda ch_b,y
         jsr rel_put
+        lda ch_s,y              ; (21/11 sera) suffisso
+        jsr rel_put
         iny
-        dex
         dex
         bne _bi
         beq ex_put
@@ -816,13 +820,14 @@ _bok    jsr rel_get
         asl
         asl
         tay
-        ldx #8
+        ldx #4
 _bi     jsr rel_get
         sta ch_i,y
         jsr rel_get
         sta ch_b,y
+        jsr rel_get
+        sta ch_s,y
         iny
-        dex
         dex
         bne _bi
 _ex     jsr ex_beg              ; nebbia: ogni bit del settore -> 2 x 2 caselle

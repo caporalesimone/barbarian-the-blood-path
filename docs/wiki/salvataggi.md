@@ -11,17 +11,17 @@ La mappa e il contenuto iniziale di ogni piano **non si salvano**: si rigenerano
 
 | Cosa | Dove | Dimensione |
 |---|---|---|
-| L'eroe (`CHRBLK`: livello, xp 24 bit, oro, vita 16 bit, posizione, equipaggiamento e zaino (8) con bonus e durabilità, cintura, chiavi, piani visitati, partita e minuti, morti, oro nel baule della locanda…) **e il baule della locanda** (24 oggetti × 4 byte, dall'08/11 sera) | `save-0N`, offset 0 | 210 B |
-| Le differenze di un piano rispetto al seed | `save-0N`, offset 210 + (piano − 1) × 93 | 82 o 93 B |
+| L'eroe (`CHRBLK`: livello, xp 24 bit, oro, vita 16 bit, posizione, equipaggiamento e zaino (8) con bonus e durabilità, cintura, chiavi, piani visitati, partita e minuti, morti, oro nel baule della locanda…) **e il baule della locanda** (24 oggetti × 5 byte dal 21/11 sera, formato $CC) | `save-0N`, offset 0 | 254 B |
+| Le differenze di un piano del capitolo in corso rispetto al seed | `save-0N`, offset 254 + ((piano − 1) mod 5) × 97 | 82 o 97 B |
 | L'elenco degli eroi (versione, presenti, nomi) | file `hl` | 66 B |
 
 Dall'11/11 (ramo `fast-loader`, scelta del committente: pochi file sul disco) **un file per eroe** (`save-01`..`save-05`,
-2070 B, 9 blocchi) e l'elenco `hl`, già creati dalla build con la lunghezza giusta: il plugin di save di Krill
-**riscrive solo file esistenti con lo stesso numero di blocchi** e la directory non cambia mai. 5 slot di eroi × 20 piani.
+739 B, 3 blocchi dal formato $CC; prima 2070 B, 9 blocchi) e l'elenco `hl`, già creati dalla build con la lunghezza giusta: il plugin di save di Krill
+**riscrive solo file esistenti con lo stesso numero di blocchi** e la directory non cambia mai. 5 slot di eroi × i 5 piani del capitolo in corso (dal 21/11 sera, decisione C1 del piano F7: prima tutti e 20).
 
 **Quando si scrive il disco** (11/11 sera, decisione del committente): **solo** con "save game" (menu RUN/STOP), alla
 creazione dell'eroe e al **cambio di capitolo**. Gli stati dei piani del capitolo corrente stanno in RAM negli **slot**
-`LVRAM` (5 × 93 B = 465 B, RAM sotto l'I/O dopo il generatore, `$DD05`–`$DED5`): scale, portale, morte, locanda e scheda
+`LVRAM` (5 × 97 B = 485 B, RAM sotto l'I/O dopo il generatore, `$DD2B`–`$DF0F`): scale, portale, morte, locanda e scheda
 del personaggio **non** scrivono il disco. "Quit game" torna al menu **senza salvare** ("unsaved progress will be lost"):
 vale l'ultimo salvataggio. Spegnendo senza salvare si perde tutto ciò che è successo dopo (eroe e piani insieme: niente
 duplicati).
@@ -34,9 +34,9 @@ il gioco salva da solo eroe e piani del capitolo lasciato (`chap_save`, eroe reg
 
 Ogni scrittura riscrive **il file intero** (`sv_all`): il gioco legge il file dell'eroe (`sv_read`, Krill, ~0,8 s)
 nell'immagine a `$E000`, ci copia l'eroe e i 5 slot del capitolo (blocco contiguo, `chap_copy`), ricarica il plugin
-(file `ksave`, ~0,5 s: modifica il proprio codice) e riscrive i 9 blocchi (`sv_write`), poi rilegge il segmento CORE (21/11: file `core`, ~0,6 s stimati, che immagine e plugin coprono; anche dopo una lettura dell'eroe `sv_read`, alla prima schermata o al primo giro del ciclo principale). Il file del villaggio (`$EC00` dal 21/11) serve solo fino
+(file `ksave`, ~0,5 s: modifica il proprio codice) e riscrive il file (`sv_write`; 3 blocchi dal 21/11 sera, prima 9), poi rilegge il segmento CORE (21/11: file `core`, ~0,6 s stimati, che immagine e plugin coprono; anche dopo una lettura dell'eroe `sv_read`, alla prima schermata o al primo giro del ciclo principale). Il file del villaggio (`$EC00` dal 21/11) serve solo fino
 all'installazione: dal 18/11 non si rilegge più dopo un salvataggio (`sv_end`, ~0,7-1,7 s, era un resto della cache di
-prima dell'11/11). Gli stati degli altri capitoli restano quelli del file.
+prima dell'11/11). Dal 21/11 sera (formato $CC) il file tiene solo i piani del capitolo in corso: **cambiando capitolo lo stato dei piani del capitolo lasciato si perde** (rientrandoci si rigenerano dal seed; prima restavano quelli del file).
 
 | Evento | Disco | Tempo misurato (VICE, `PERF-DISK`) |
 |---|---|---|
@@ -115,7 +115,7 @@ flowchart LR
   ore 1–12): in VICE funziona.
 
 ### Baule della locanda (dall'08/11 sera, `SAVE_VER` $C3)
-In fondo al blocco dell'eroe (`st_id`, `st_b`, `st_du`, `st_m`: 4 × `STASH_N` = 96 byte dopo `c_sgold`): sempre in RAM,
+In fondo al blocco dell'eroe (`st_id`, `st_b`, `st_du`, `st_m`, `st_sx`: 5 × `STASH_N` = 120 byte dopo `c_sgold`, dal formato $CC): sempre in RAM,
 letto e scritto con l'eroe. Entrare nella locanda non legge il disco e **uscendo non si salva** (11/11 sera; prima si
 salvava l'eroe se si era premuto Fire, `st_dirty`, tolto): il baule va sul disco con l'eroe a "save game" o al cambio di
 capitolo. Spegnendo prima si ritrovano eroe e baule dell'ultimo salvataggio insieme, quindi non si duplica nulla.

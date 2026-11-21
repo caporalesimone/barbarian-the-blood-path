@@ -43,7 +43,7 @@ I file `SND0`…`SND7` restano sul disco: li leggono `JUKEBOX`, `LOBBY` (brano d
 senza coda (piano del boss raggiunto con il portale dal villaggio).
 | `JUKEBOX` | PRG | prova di brani ed effetti (`src/jukebox.asm`) | build |
 | `HL` | PRG, 1 blocco | elenco eroi: versione, 5 byte "eroe presente", 5 nomi (66 B) | creato dalla build (versione attuale, nessun eroe), scritto dal gioco |
-| `SAVE-01` … `SAVE-05` | PRG, 9 blocchi | un file per eroe: blocco dell'eroe + 20 stati dei piani (2070 B) | creati vuoti dalla build, scritti dal gioco |
+| `SAVE-01` … `SAVE-05` | PRG, 3 blocchi | un file per eroe: blocco dell'eroe + i 5 stati dei piani del capitolo in corso (739 B, dal formato $CC) | creati vuoti dalla build, scritti dal gioco |
 | `KSAVE` | PRG | plugin di save di Krill's Loader (`out/work/krill/save.prg`, a `$7D00`): il gioco lo ricarica prima di ogni salvataggio | build (`tools/build/krill_build.sh`) |
 
 Nomi in PETSCII maiuscolo. I file PRG hanno i 2 byte iniziali dell'indirizzo di caricamento. Il disco lo scrive il
@@ -59,8 +59,8 @@ riscrive: [salvataggi.md](salvataggi.md)).
 
 | Offset | Byte | Contenuto |
 |---|---|---|
-| 0 | 217 (`HERO_LEN`, dal formato $CA) | blocco dell'eroe (`CHRBLK`, vedi sotto), con il baule della locanda |
-| 217 + (piano − 1) × 93 | 93 (`LV_SLOT`) | stato compatto del piano 1…20 (82 o 93 byte usati) |
+| 0 | 254 (`HERO_LEN`, dal formato $CC) | blocco dell'eroe (`CHRBLK`, vedi sotto), con il baule della locanda |
+| 254 + ((piano − 1) mod 5) × 97 | 97 (`LV_SLOT`) | stato compatto dei 5 piani del capitolo in corso (82 o 97 byte usati) |
 
 **`HL`** (66 byte): versione (`save_version`), 5 byte "eroe presente", 5 nomi da 12 caratteri (scritto solo creando
 un eroe o cancellandolo; `START` e il menu leggono solo questo file).
@@ -107,7 +107,16 @@ Dal formato **$CA** (21/11, TODO #391): l'equipaggiamento ha **5 posti** (`EQ_N`
 (`c_eq+3` e `c_eq+4`, `EQ_RING`); `c_eq`, `c_eqb`, `c_eqd`, `c_eqm` crescono di un byte ciascuno: blocco da **217** byte
 (`HERO_LEN`; il file dell'eroe resta di 9 blocchi). I piani seguono dall'offset 217.
 
-## 3. Stato di un piano — `SAVE-0N`, offset `HERO_LEN` + (piano − 1) × 93 (formato compatto)
+Dal formato **$CC** (21/11 sera, fase 2a degli affissi; decisioni del committente: oggetto a 5 byte, C1 del piano F7):
+- ogni oggetto ha un quinto byte, il **suffisso** (0 = nessuno; id di riga di `data/items/next/suffixes.tsv` dalla fase 2b): `c_packs` /
+  `c_eqs` (zaino ed equipaggiamento, contigui come le altre tabelle) e `st_sx` (baule della locanda, a passo `STASH_N` dopo `st_m`).
+  Il byte bonus diventerà il prefisso (fase 2b); per le pergamene resta la quantità. Blocco da **254** byte (`HERO_LEN`);
+- `mfar` lascia `$95E0` (ora del blocco dell'eroe) e va nel PRG di GAME;
+- il file dell'eroe tiene **solo i 5 piani del capitolo in corso** (prima tutti e 20): posto del piano = (piano − 1) mod 5.
+  Gli slot di un altro capitolo hanno un altro numero di piano nel primo byte e `lv_get` li scarta: **cambiando capitolo lo stato
+  dei piani del capitolo lasciato si perde** (si rigenerano dal seed). File da 9 a 3 blocchi.
+
+## 3. Stato di un piano — `SAVE-0N`, offset `HERO_LEN` + ((piano − 1) mod 5) × 97 (formato compatto)
 
 In memoria: blocco `LVLBLK` a `$9800`. La **mappa non è salvata**, e nemmeno mostri e bauli
 del piano: entrando nel piano si rigenera tutto dal seed (`seed_level`), poi si applicano le differenze
@@ -123,11 +132,11 @@ pergamene sono cresciuti di 10; $CB dal 21/11 sera: 8 armature e uno scudo nuovi
 | 1 | numero di mostri al salvataggio (informativo) |
 | 4 | 1 bit per mostro: vivo (bit 7 del primo byte = mostro 0) |
 | 1 | bauli del piano tolti: bit *i* = 1 se il baule del piano nel posto *i* (0..3) è stato aperto |
-| 1 o 12 | baule del boss: `0` = nessuno; `1` + X, Y, `ch_t` + 4 × `ch_i` + 4 × `ch_b` se c'è e non è aperto. Il baule non ancora aperto ha il bit 3 di `ch_t` (tesoro di un mostro): `ch_i[0]` = numero di oggetti, `ch_b[0]` = chestLevel; oro e oggetti si generano alla prima apertura |
+| 1 o 16 | baule del boss: `0` = nessuno; `1` + X, Y, `ch_t` + 4 × (`ch_i`, `ch_b`, `ch_s`) se c'è e non è aperto (dal formato $CC con il suffisso). Il baule non ancora aperto ha il bit 3 di `ch_t` (tesoro di un mostro): `ch_i[0]` = numero di oggetti, `ch_b[0]` = chestLevel; oro e oggetti si generano alla prima apertura |
 | 72 | nebbia a settori 2×2 caselle: 24 righe × 3 byte, 1 bit per settore (esplorato se lo è almeno una casella) |
 
-Totale 82 o 93 byte (11/11: con i 2 byte della partita; prima scritto "81 o 92", sbagliato di 1): sta nel suo posto
-da `LV_SLOT` = 93 byte. Regole:
+Totale 82 o 97 byte (dal formato $CC; prima 82 o 93): sta nel suo posto
+da `LV_SLOT` = 97 byte. Regole:
 - **posizioni dei mostri non salvate**: tornando nel piano (scale o caricamento) i vivi ripartono dalla
   casella di partenza del seed, con la vita piena. Con il portale o alla morte il boss e 5 mostri "caldi"
   (feriti, poi svegli) restano in memoria con vita e casella (STASH, sotto; [salvataggi](salvataggi.md));
@@ -305,7 +314,7 @@ Krill invece permette sprite, IRQ e badline durante i caricamenti.
 - **Personaggio** (`SAVE-0N`): solo con "save game" del menu RUN/STOP, una volta alla creazione dell'eroe e al
   **cambio di capitolo** (gruppi di 5 piani, 11/11 sera). "Quit game" **non** salva. Mai alla morte o alla vittoria,
   né uscendo dalla locanda o dalla scheda del personaggio.
-- **Stato del piano** (`SAVE-0N`, offset `HERO_LEN` (217) + (piano − 1) × 93):
+- **Stato del piano** (`SAVE-0N`, offset `HERO_LEN` (254) + ((piano − 1) mod 5) × 97):
   - lasciandolo per le **scale**: copiato nel suo **slot in RAM** (`LVRAM`, 5 slot del capitolo, RAM sotto l'I/O);
     sul disco va con "save game" o al cambio di capitolo, insieme all'eroe;
   - lasciandolo per **portale o morte**: nel suo slot come per le scale, e in più boss, 5 mostri caldi e 10 bauli

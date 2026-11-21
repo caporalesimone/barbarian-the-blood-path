@@ -18,7 +18,7 @@ st_sort lda #<sd_st
         ldx #>sd_st
         jmp sort4
 sd_st   .byte STASH_N
-        .word st_id, st_b, st_du, st_m
+        .word st_id, st_b, st_du, st_m, st_sx
 
 ; ---- modulo MENU (11/11, TODO D6/D13): i menu del villaggio (locanda e negozi, src/menu.asm) in due zone di RAM,
 ;  compressi ZX0. Si carica all'ingresso nel villaggio (enter_gfx) se non c'e' (ovl_cur = 0: lo azzerano game_start, il
