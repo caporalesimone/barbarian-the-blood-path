@@ -143,7 +143,7 @@ fotogrammi invece di 45) e ogni **6 s** (il primo dopo 2 s) agita il **turibolo*
 nube d'incenso (bordo grigio) toglie **1/8 della vita massima** al PG se è a meno di 40 pixel (2,5 caselle) su entrambi gli assi:
 basta allontanarsi durante il lampeggio. Scelta mia (il committente ha lasciato libera la scelta dell'effetto); numeri da provare
 in gioco. Le evocazioni del codice (2/3 e 1/3) restano; i sarcofagi a caso e la nube senza rabbia della proposta (sezione sotto)
-non sono nel codice. Test: `BOSS1-10`, `BOSS1-11` (`tests/sanity/boss1/cases.py`).
+non sono nel codice. Test: `BOSS1-10`, `BOSS1-11` (`tests/sanity/boss1/cases.py`). Nel simulatore dei boss (`boss_scripts.py`, `game`) dal 21/11: con le regole di **oggi** il PG di riferimento al livello 5 batte l'abate il **10%** delle volte (13% senza la rabbia, 22–27% con 1–2 livelli in più): l'abate del gioco di oggi è troppo duro e va tarato (vita, rigenerazione) prima di provarlo a mano.
 
 ### Proposta del 20/11: più meccaniche e taratura con il simulatore (design, non nel codice)
 

@@ -115,6 +115,13 @@ class Abbot(Base):
 
     def step(self, t, ms, pend):
         g = self.g
+        if g.get("rage_at") and self.b.alive and not getattr(self, "rage", False) and self.frac() <= g["rage_at"]:
+            self.rage = True                                  # (21/11, game) rage: faster attacks, the censer
+            self.timers["censer_g"] = t + g["censer_first"]
+        if getattr(self, "rage", False) and self.b.alive and t >= self.timers.get("censer_g", FAR):
+            self.timers["censer_g"] = t + g["censer_every"]
+            if not self.dodge():
+                self.hurt.append((t + g["censer_warn"], self.hero.hpmax // g["censer_hp_div"]))
         while self.th and self.b.alive and self.frac() <= self.th[0]:
             self.th.pop(0)
             self.b.next = max(self.b.next, t + g["pause"])
@@ -132,6 +139,11 @@ class Abbot(Base):
         if t >= self.timers["censer"]:
             self.timers["censer"] = t + n["censer"]["every"]
             self.zone(t, n["censer"])
+
+    def m_rate(self, m, t):
+        if m is self.b and getattr(self, "rage", False):
+            return min(S.T["monster_attack"], self.g["rage_rate"])
+        return S.T["monster_attack"]
 
 
 class Stitch(Base):
