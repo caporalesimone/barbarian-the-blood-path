@@ -366,7 +366,11 @@ def main():
         for nm, x in (("dn", a), ("ds", b_), ("val", v), ("rate", r), ("pen", p), ("fl", f)):
             byte(x, f"{k}.{nm}")
         dn.append(a); ds.append(b_); val.append(v); rate.append(r); pen.append(p); fl.append(f)
-        req.append(byte(it.get("min_str", 0), f"{k}.min_str"))
+        # (21/11, O6) un solo requisito per oggetto: FOR (valore) o DES (valore | $80, min_dex); src/game/ui.asm req_chk
+        ms, md = it.get("min_str", 0) or 0, it.get("min_dex", 0) or 0
+        chk(not (ms and md), f"{k}: min_str e min_dex insieme (il gioco ne tiene uno solo)")
+        chk(ms < 128 and md < 128, f"{k}: requisito oltre 127")
+        req.append(ms or (md | 0x80 if md else 0))
     o.bytes("itcat", cat)
     o.words("itprice", price)
     o.bytes("itilvl", ilvl)
@@ -376,7 +380,7 @@ def main():
     o.bytes("itrate", rate)              # arma: cadenza (fotogrammi); pozione: ricarica / 2
     o.bytes("itpen", pen)
     o.bytes("itfl", fl)                  # arma: bit0 due mani, bit2 senza modificatori; armatura: limite DES; pozione: colore
-    o.bytes("itreq", req)                # (21/11, O6) FOR richiesta per indossarlo (valore, anello compreso: s_str); 0 = nessuna
+    o.bytes("itreq", req)                # (21/11, O6) FOR (valore) o DES (valore | $80) richiesta per indossarlo (anello compreso); 0 = nessuna
     # (15/11, TODO J4) cura delle pozioni nell'Abisso (livello del PG > MAXLEVEL), indice = id - I_POTR (rossa, gialla, viola):
     # cura = pab_val + pab_dn x livello, come itval / itdn nel dungeon (pot_heal, combat.asm)
     chk(ids["yellow"] == ids["red"] + 1 and ids["violet"] == ids["red"] + 2, "pozioni: rossa, gialla, viola devono essere consecutive nella tabella")
@@ -564,7 +568,7 @@ def main():
 
     # ------------------------------------------------------------ negozi
     sh = B["shops"]
-    SHOP_POOL_MAX = 24                    # (21/11) armi nuove: il pool del fabbro passa 16
+    SHOP_POOL_MAX = 28                    # (21/11) armi nuove: il pool del fabbro passa 16; (21/11 sera) armature nuove: 28
     chk(list(sh) == ["blacksmith", "alchemist"], "shops: blacksmith, alchemist (09/11: niente armaiolo)")
     first, count, flat, stock, minl = [], [], [], [], []
     ahead = B["shop_rules"]["level_ahead"]

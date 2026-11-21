@@ -54,7 +54,7 @@ ui_fc   .byte ?                 ; <>0: colore forzato per valori e oggetti (sche
         .endv
 
         .virtual $9400
-shp_stock .fill SHOP_POOL_MAX    ; oggetti in vendita (estratti a caso a ogni ingresso; 21/11: 24, armi nuove)
+shp_stock .fill SHOP_POOL_MAX    ; oggetti in vendita (estratti a caso a ogni ingresso; 21/11: 24, armi nuove; 28, armature nuove)
 sh_mask   .byte ?               ; negozio: categorie comprate (bit 1<<CAT_*), 0 = fuori dal negozio (shop_gold)
         .endv
         .cerror sh_mask >= $9420, "variabili del negozio oltre $941F"
@@ -805,11 +805,9 @@ _pk     lda c_pack,x
         beq _dr
         cmp #CAT_SCROLL
         beq _r1
-        lda itreq,y             ; (21/11, O6) FOR richiesta: con meno FOR non si indossa
-        cmp s_str
-        beq +
+        jsr req_chk             ; (21/11, O6) FOR o DES richiesta: con meno non si indossa
         bcs _no1
-+       lda itcat,y
+        lda itcat,y
         cmp #CAT_SHIELD         ; scudo con un'arma a due mani: no
         bne _ns
         ldx c_eq
@@ -971,6 +969,21 @@ pk_swap: lda c_pack,x           ; it_* <-> posto X dello zaino
         sta c_packm,x
         pla
         sta it_m
+        rts
+
+; (21/11, O6) requisito dell'oggetto Y (itreq: bit 7 = DES, s_dex; altrimenti FOR, s_str; valore nei bit 0-6, 0 = nessuno):
+; C = 1 se non raggiunto. X e Y conservati
+req_chk:
+        lda itreq,y
+        bmi _d
+        cmp s_str
+        beq _ok
+        rts                     ; C = 1 se richiesto > FOR
+_d      and #$7f
+        cmp s_dex
+        beq _ok
+        rts
+_ok     clc
         rts
 
 ; X = posti dello zaino da cercare (PACK_N): X = primo posto libero. C=1 se lo zaino e' pieno

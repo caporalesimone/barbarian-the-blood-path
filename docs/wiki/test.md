@@ -150,18 +150,20 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (3)
+### sanity (2)
+
+| ID | Test |
+|---|---|
+| `BASES-10` | item tables: 11 armors with CA 1..10, 4 shields with CA 1..4 |
+| `BASES-11` | inventory: the studded armor (DEX 14) stays in the pack with s_dex 13 ('dex 14' in its box); with DEX 14 it is equipped |
+
+### regression (245)
 
 | ID | Test |
 |---|---|
 | `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
 | `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
 | `RING-12` | alchemist: a ring among the wares has its stat (1..3) and the bought ring keeps it |
-
-### regression (242)
-
-| ID | Test |
-|---|---|
 | `ASM-10` | tools/build/asm_audit.py: GAME code all reachable (but jump tables), no fill_rect / chst_hold any more |
 | `ASM-11` | generated sources commented: every T_ tile constant with its description, item ids and monster types listed in db.asm |
 | `BAL-10` | d20 rules in the simulator: reference hero, weak hero, curves |

@@ -301,10 +301,10 @@ oggetti del pool con `shop_minl` ≤ livello del PG; per armi, armature, scudi e
 restano meno di `stock` si mostrano tutti. Gli oggetti in vendita non hanno magia; la durabilità si tira
 all'acquisto. Pool e quantità: `balance.yaml shops`.
 
-| Negozio | Livello del PG 1 | dal 2 | dal 4 | dal 5 | dal 7 | dal 9 | dal 11 | dal 12 |
-|---|---|---|---|---|---|---|---|---|
-| Fabbro | dagger, sword, leather, small shield | mid shield | chain mail | | tower shield | viking sword | plate mail | |
-| Alchimista | red, portal scroll | | copper ring | yellow | | | | violet |
+| Negozio | Livello del PG 1 | dal 2 | dal 3 | dal 4 | dal 5 | dal 6 | dal 7 | dal 8 | dal 9 | dal 11 | dal 12 | dal 13 | dal 14 | dal 15 | dal 17 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Fabbro | dagger, short sword, club, sword, hand axe, quilted armor, leather armor, hard leather, small shield | mace, ring mail, mid shield | studded armor | broad sword, chain mail |  | war axe | scale mail, tower shield | morning star | viking sword, splint mail | battle axe, plate mail |  | maul, gothic shield | field plate | great sword | gothic plate |
+| Alchimista | red, portal scroll |  |  | copper ring | yellow |  |  |  |  |  | violet |  |  |  |  |
 
 ## Baule della locanda (`ov_stash`, modulo MENU)
 

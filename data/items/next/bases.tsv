@@ -1,32 +1,32 @@
 id	type	name	hands	dice	rate	pen	ac	armor_type	ilvl	price	min_str	min_dex	dur_base	drop_rate	status	notes
 dagger	weapon	dagger	1	1d4	12	0			0	40			16	4	today	start weapon
-short_sword	weapon	short sword	1	1d6	13	0			1	100			24	3	new	
-club	weapon	club	1	1d6	15	1			1	70			20	3	new	blunt: pen 1
+short_sword	weapon	short sword	1	1d6	13	0			1	100			24	3	today	
+club	weapon	club	1	1d6	15	1			1	70			20	3	today	blunt: pen 1
 sword	weapon	sword	1	1d8	14	0			3	200	13		40	3	today	
-hand_axe	weapon	hand axe	1	1d10	16	0			4	300	14		32	3	new	
-mace	weapon	mace	1	1d8	15	1			5	350	14		32	3	new	blunt: pen 1
-broad_sword	weapon	broad sword	1	1d10	14	0			7	700	15		50	2	new	
-war_axe	weapon	war axe	1	1d12	16	0			9	1100	16		50	2	new	
-morning_star	weapon	morning star	1	2d6	17	1			11	1600	16		40	2	new	blunt: pen 1
+hand_axe	weapon	hand axe	1	1d10	16	0			4	300	14		32	3	today	
+mace	weapon	mace	1	1d8	15	1			5	350	14		32	3	today	blunt: pen 1
+broad_sword	weapon	broad sword	1	1d10	14	0			7	700	15		50	2	today	
+war_axe	weapon	war axe	1	1d12	16	0			9	1100	16		50	2	today	
+morning_star	weapon	morning star	1	2d6	17	1			11	1600	16		40	2	today	blunt: pen 1
 viking_sword	weapon	viking sword	2	2d6	20	1			12	2400	16		60	2	today	two-handed
-battle_axe	weapon	battle axe	2	2d8	22	1			14	3200	17		60	2	new	two-handed
-maul	weapon	maul	2	3d6	24	2			16	4200	18		50	1	new	two-handed, blunt: pen 2
-great_sword	weapon	great sword	2	3d6	21	1			18	5600	18		75	1	new	two-handed
-quilted_armor	armor	quilted armor					1	light	0	30			30	3	new	
+battle_axe	weapon	battle axe	2	2d8	22	1			14	3200	17		60	2	today	two-handed
+maul	weapon	maul	2	3d6	24	2			16	4200	18		50	1	today	two-handed, blunt: pen 2
+great_sword	weapon	great sword	2	3d6	21	1			18	5600	18		75	1	today	two-handed
+quilted_armor	armor	quilted armor					1	light	0	30			30	3	today	
 leather_armor	armor	leather armor					2	light	0	80			35	3	today	
-hard_leather	armor	hard leather					3	light	3	220			40	3	new	
-ring_mail	armor	ring mail					4	medium	5	450	13		50	3	new	
-studded_armor	armor	studded armor					4	light	6	600		14	45	2	new	light: DEX not capped
+hard_leather	armor	hard leather					3	light	3	220			40	3	today	
+ring_mail	armor	ring mail					4	medium	5	450	13		50	3	today	
+studded_armor	armor	studded armor					4	light	6	600		14	45	2	today	light: DEX not capped
 chain_mail	armor	chain mail					5	medium	7	900	14		55	2	today	
-scale_mail	armor	scale mail					6	medium	10	1600	15		60	2	new	
-splint_mail	armor	splint mail					7	heavy	12	2400	16		65	2	new	
+scale_mail	armor	scale mail					6	medium	10	1600	15		60	2	today	
+splint_mail	armor	splint mail					7	heavy	12	2400	16		65	2	today	
 plate_mail	armor	plate mail					8	heavy	14	3600	17		75	1	today	
-field_plate	armor	field plate					9	heavy	17	5000	18		80	1	new	
-gothic_plate	armor	gothic plate					10	heavy	20	7000	19		100	1	new	Abyss from floor 21: also drops there
+field_plate	armor	field plate					9	heavy	17	5000	18		80	1	today	
+gothic_plate	armor	gothic plate					10	heavy	20	7000	19		100	1	today	Abyss from floor 21: also drops there
 small_shield	shield	small shield					1		0	60			24	3	today	
 mid_shield	shield	mid shield					2		5	400	14		32	3	today	
 tower_shield	shield	tower shield					3		10	1800	16		50	2	today	
-gothic_shield	shield	gothic shield					4		16	4000	18		60	1	new	
+gothic_shield	shield	gothic shield					4		16	4000	18		60	1	today	
 copper	ring	copper ring							7	700				2	today	1 affix (prefix or suffix)
 silver	ring	silver ring							12	2500				2	today	2 affixes (prefix + suffix)
 gold	ring	gold ring							17	8000				1	today	2 affixes, at least one of the top tier

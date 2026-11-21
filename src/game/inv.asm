@@ -251,16 +251,20 @@ ui_dice:
 
 ; caratteristica secondaria (al massimo 9 caratteri): "2h pen 1", "dex max 2" o niente
 it_sec:
-        ldx ui_sel
-        lda itreq,x             ; (21/11, O6) FOR richiesta e non raggiunta: "str N" al posto del resto
-        cmp s_str
-        beq _s0
+        ldy ui_sel
+        jsr req_chk             ; (21/11, O6) FOR o DES richiesta e non raggiunta: "str N" / "dex N" al posto del resto
         bcc _s0
+        lda itreq,y
+        bmi _dx
         #msg "str "
-        ldx ui_sel
-        lda itreq,x
+        jmp _rv
+_dx     #msg "dex "
+_rv     ldy ui_sel
+        lda itreq,y
+        and #$7f
         jmp ui_b3l
-_s0     lda itcat,x
+_s0     ldx ui_sel
+        lda itcat,x
         cmp #CAT_ARMOR
         beq _ar
         cmp #CAT_WEAPON

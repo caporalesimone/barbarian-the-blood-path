@@ -12,13 +12,16 @@ indossare, né nell'inventario né alla locanda (test `INV-2H-10/11`, `INN-2H-10
 
 ## Catalogo
 
-Ogni oggetto ha un id (1..26, 0 = niente; ordine di `data/items/items.tsv`: armi, armature, scudi, anelli, pozioni, pergamene) e le
+Ogni oggetto ha un id (1..35, 0 = niente; ordine di `data/items/items.tsv`: armi, armature, scudi, anelli, pozioni, pergamene) e le
 tabelle `itcat` (categoria), `itprice` (16 bit), `itilvl` (livello oggetto; 255 = mai nel bottino), `itdn`/`itds` (dadi), `itval`
 (valore principale), `itrate`, `itpen`, `itfl` (flag). **(21/11) Armi nuove**: le 10 armi delle basi nuove
 (`data/items/next/bases.tsv`, decisione O1) sono nel gioco, con dadi, cadenza e penetrazione delle basi: la **cadenza cresce con la
 grandezza** dell'arma (pugnale 12 … maglio 24). Si trovano nei bauli (per livello oggetto) e dal fabbro (pool di 22 oggetti,
 `SHOP_POOL_MAX` 24 = `shp_stock`). Requisiti di FOR e affissi: non ancora (fase 2 del piano, `rules_next.yaml`). Gli id dopo le armi
-sono cresciuti di 10: `save_version` 0xC9.
+sono cresciuti di 10: `save_version` 0xC9. **(21/11 sera) Armature e scudo nuovi**: le 8 armature e lo scudo gotico delle
+basi (`bases.tsv`) sono nel gioco (11 armature, 4 scudi; pool del fabbro 28 = `SHOP_POOL_MAX`); gli id dopo le armature crescono
+di 8, dopo gli scudi di 9: `save_version` 0xCB. La durabilità resta quella di oggi (formula unica di `rules.yaml`): la colonna
+`dur_base` delle basi non è usata.
 
 **Requisiti di FOR (21/11, decisione O6, scala di oggi)**: colonna `min_str` di `items.tsv` (valori di `bases.tsv`: spada 13,
 ascia 14, mazza 14, spada larga 15, ascia da guerra 16, morning star 16, spada vichinga 16, ascia da battaglia 17, maglio 18, grande
@@ -26,7 +29,10 @@ spada 18; cotta 14, piastre 17; scudo medio 14, scudo torre 16) → tabella `itr
 sotto il requisito l'oggetto **non si indossa**: inventario (`inv_act`, lampo rosso) e locanda (`inn_eq.asm`, lampo rosso: lo spazio della zona 2 del MENU non basta per un messaggio);
 nel riquadro dell'oggetto la riga secondaria mostra "str N" al posto di "2h pen" o "dex max" (`it_sec`). Si può comprare e tenere
 nello zaino. Un respec che abbassa la FOR sotto il requisito di ciò che si indossa **non** lo toglie (da decidere). Il PG nuovo ha
-FOR 16: tutto tranne ascia da battaglia, maglio, grande spada e piastre. Test: `REQ-10`.
+FOR 16: tutto tranne ascia da battaglia, maglio, grande spada e le armature e lo scudo da FOR 17 in su. **(21/11 sera) Requisito di DES**:
+colonna `min_dex` (oggi solo la studded armor, DES 14); un oggetto ha un solo requisito, FOR o DES: `itreq` = valore, con il bit 7
+per la DES (`gen_db.py` lo controlla); `req_chk` (`src/game/ui.asm`) confronta con `s_str` o `s_dex` e il riquadro mostra "str N" o
+"dex N". Test: `REQ-10`, `BASES-10`, `BASES-11`.
 
 | Id | Nome | Categoria | Valore | Altro | Liv. oggetto | Prezzo |
 |---|---|---|---|---|---|---|
@@ -43,19 +49,28 @@ FOR 16: tutto tranne ascia da battaglia, maglio, grande spada e piastre. Test: `
 | 11 | battle axe | arma | 2d8 | cadenza 22, **due mani** (niente scudo), penetrazione 1 | 14 | 3200 |
 | 12 | maul | arma | 3d6 | cadenza 24, **due mani** (niente scudo), penetrazione 2 | 16 | 4200 |
 | 13 | great sword | arma | 3d6 | cadenza 21, **due mani** (niente scudo), penetrazione 1 | 18 | 5600 |
-| 14 | leather armor | armatura | CA 2 | leggera (DES senza limite) | 0 | 80 |
-| 15 | chain mail | armatura | CA 5 | media (DES massimo +2) | 7 | 900 |
-| 16 | plate mail | armatura | CA 8 | pesante (DES non conta) | 14 | 3600 |
-| 17 | small shield | scudo | CA 1 |  | 0 | 60 |
-| 18 | mid shield | scudo | CA 2 |  | 5 | 400 |
-| 19 | tower shield | scudo | CA 3 |  | 10 | 1800 |
-| 20 | copper ring | anello | +1 | al modificatore di FOR, DES o COS | 7 | 700 |
-| 21 | silver ring | anello | +2 |  | 12 | 2500 |
-| 22 | gold ring | anello | +3 |  | 17 | 8000 |
-| 23 | minor healing (red) | pozione | cura 20 (Abisso 30) | ricarica 5 s | — | 25 |
-| 24 | healing potion (yellow) | pozione | cura 50 (Abisso 75) | ricarica 7 s | — | 90 |
-| 25 | greater healing (violet) | pozione | cura 40 + 4 × livello (Abisso 28 + 5 × livello) | ricarica 10 s | — | 250 |
-| 26 | portal scroll | pergamena | portale per il villaggio | pila fino a 10 (08/11, prima 4) | 1 | 60 |
+| 14 | quilted armor | armatura | CA 1 | leggera (DES senza limite) | 0 | 30 |
+| 15 | leather armor | armatura | CA 2 | leggera | 0 | 80 |
+| 16 | hard leather | armatura | CA 3 | leggera | 3 | 220 |
+| 17 | ring mail | armatura | CA 4 | media (DES massimo +2), FOR 13 | 5 | 450 |
+| 18 | studded armor | armatura | CA 4 | leggera, **DES 14** | 6 | 600 |
+| 19 | chain mail | armatura | CA 5 | media, FOR 14 | 7 | 900 |
+| 20 | scale mail | armatura | CA 6 | media, FOR 15 | 10 | 1600 |
+| 21 | splint mail | armatura | CA 7 | pesante (DES non conta), FOR 16 | 12 | 2400 |
+| 22 | plate mail | armatura | CA 8 | pesante, FOR 17 | 14 | 3600 |
+| 23 | field plate | armatura | CA 9 | pesante, FOR 18 | 17 | 5000 |
+| 24 | gothic plate | armatura | CA 10 | pesante, FOR 19 | 20 | 7000 |
+| 25 | small shield | scudo | CA 1 |  | 0 | 60 |
+| 26 | mid shield | scudo | CA 2 | FOR 14 | 5 | 400 |
+| 27 | tower shield | scudo | CA 3 | FOR 16 | 10 | 1800 |
+| 28 | gothic shield | scudo | CA 4 | FOR 18 | 16 | 4000 |
+| 29 | copper ring | anello | +1 | al modificatore di FOR, DES o COS | 7 | 700 |
+| 30 | silver ring | anello | +2 |  | 12 | 2500 |
+| 31 | gold ring | anello | +3 |  | 17 | 8000 |
+| 32 | minor healing (red) | pozione | cura 20 (Abisso 30) | ricarica 5 s | — | 25 |
+| 33 | healing potion (yellow) | pozione | cura 50 (Abisso 75) | ricarica 7 s | — | 90 |
+| 34 | greater healing (violet) | pozione | cura 40 + 4 × livello (Abisso 28 + 5 × livello) | ricarica 10 s | — | 250 |
+| 35 | portal scroll | pergamena | portale per il villaggio | pila fino a 10 (08/11, prima 4) | 1 | 60 |
 
 `itfl`: armi bit 0 = due mani, bit 1 = libero (era finesse, tolto 08/11), bit 2 = senza modificatori (non usato dal 07/11: erano i pugni); armature = limite al
 modificatore di DES (99 = nessuno); pozioni = colore (2 rosso, 7 giallo, 4 viola). `itrate` delle pozioni =

@@ -121,7 +121,7 @@ gli oggetti buoni sono anche quelli con più probabilità di essere magici.
 
 Il boss finale e le sue evocazioni non lasciano nulla: i premi sono i 4 bauli della stanza dei tesori, uno per
 categoria nell'ordine dei posti (armi, armature, scudi, anelli: `gi_force`), chestLevel 255 e L = T (sempre
-l'oggetto migliore: viking sword, plate mail, tower shield, gold ring, magia fino a +3), `EPIC_ITEMS` (3)
+l'oggetto migliore: dal 21/11 great sword, gothic plate, gothic shield, gold ring, magia fino a +3), `EPIC_ITEMS` (3)
 oggetti e `FIN_GOLD` monete ciascuno. `FIN_GOLD` = 430: il 10% dell'oro raccoglibile uccidendo tutti i mostri e
 aprendo tutti i bauli dei piani 1–19 (~17 000 con la stima del 10/11; ~14 300 con il censimento del 20/11,
 `tools/simulators/sim_gold.py`, cioè ~360 a baule: da ritoccare con E4) diviso sui 4 bauli.

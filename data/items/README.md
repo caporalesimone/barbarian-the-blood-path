@@ -31,6 +31,7 @@ read it through `items_db.load_rules()`, which merges the rows into the `data/ru
 | `rate` | weapon | frames between two basic attacks (Slash cooldown) |
 | `pen` | weapon | penetration (−AC of the target) |
 | `min_str` | weapon, armor, shield (optional) | (21/11, decision O6) STR needed to equip it (`s_str`, ring included); empty = none. Game table `itreq` |
+| `min_dex` | weapon, armor, shield (optional) | (21/11) DEX needed to equip it (`s_dex`); one requirement per item (STR or DEX): `itreq` = value, bit 7 set for DEX |
 | `ac` | armor, shield | armor class bonus |
 | `armor_type` | armor | `light`, `medium`, `heavy` (DEX modifier cap: `dex_cap` in `rules.yaml`) |
 | `bonus` | ring | +N to the modifier of STR, DEX or CON (chosen when the ring is created) |

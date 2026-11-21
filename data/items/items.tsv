@@ -1,33 +1,42 @@
-id	category	type	name	hands	dice	rate	pen	min_str	ac	armor_type	bonus	heal	heal_abyss	cooldown	zone	rarity	color	ilvl	price	shop_level	tier	notes
-dagger	equipment	weapon	dagger	1	1d4	12	0											0	40		base	start weapon
-short_sword	equipment	weapon	short sword	1	1d6	13	0											1	100		base	21/11: from data/items/next/bases.tsv
-club	equipment	weapon	club	1	1d6	15	1											1	70		base	21/11: from data/items/next/bases.tsv (blunt: pen 1)
-sword	equipment	weapon	sword	1	1d8	14	0	13										3	200		base	one-handed sword
-hand_axe	equipment	weapon	hand axe	1	1d10	16	0	14										4	300		base	21/11: from data/items/next/bases.tsv
-mace	equipment	weapon	mace	1	1d8	15	1	14										5	350		base	21/11: from data/items/next/bases.tsv (blunt: pen 1)
-broad_sword	equipment	weapon	broad sword	1	1d10	14	0	15										7	700		base	21/11: from data/items/next/bases.tsv
-war_axe	equipment	weapon	war axe	1	1d12	16	0	16										9	1100		base	21/11: from data/items/next/bases.tsv
-morning_star	equipment	weapon	morning star	1	2d6	17	1	16										11	1600		base	21/11: from data/items/next/bases.tsv (blunt: pen 1)
-viking_sword	equipment	weapon	viking sword	2	2d6	20	1	16										12	2400		base	two-handed: no shield, slower, more dice (Smash x2)
-battle_axe	equipment	weapon	battle axe	2	2d8	22	1	17										14	3200		base	21/11: from data/items/next/bases.tsv (two-handed)
-maul	equipment	weapon	maul	2	3d6	24	2	18										16	4200		base	21/11: from data/items/next/bases.tsv (two-handed, blunt: pen 2)
-great_sword	equipment	weapon	great sword	2	3d6	21	1	18										18	5600		base	21/11: from data/items/next/bases.tsv (two-handed)
-leather_armor	equipment	armor	leather armor						2	light								0	80		base	
-chain_mail	equipment	armor	chain mail					14	5	medium								7	900		base	
-plate_mail	equipment	armor	plate mail					17	8	heavy								14	3600		base	
-small_shield	equipment	shield	small shield						1									0	60		base	
-medium_shield	equipment	shield	mid shield					14	2									5	400		base	name shortened 08/11 (was medium shield)
-tower_shield	equipment	shield	tower shield					16	3									10	1800		base	
-copper	equipment	ring	copper ring								1							7	700		base	+N to the modifier of STR, DEX or CON (chosen when the ring is created)
-silver	equipment	ring	silver ring								2							12	2500		base	
-gold	equipment	ring	gold ring								3							17	8000		base	
-red	consumable	potion	minor healing									20	30	250	0	common	2		25	0	base	5 s cooldown
-yellow	consumable	potion	healing potion									50	75	350	1	common	7		90	5	base	7 s cooldown
-violet	consumable	potion	greater healing									4*L+40	5*L+28	500	2	common	4		250	12	base	10 s cooldown; the only potion that drops from Abyss floor 71 on
-portal_scroll	consumable	scroll	portal scroll															1	60	1	base	opens a portal to the village
-viking_sword_2	equipment	weapon		2	3d8	20	2											30			void	Abyss (levels 21+): simulator only
-viking_sword_3	equipment	weapon		2	4d8	20	2											60			void	
-viking_sword_4	equipment	weapon		2	5d8	20	3											100			void	
-viking_sword_5	equipment	weapon		2	6d8	20	3											140			void	
-viking_sword_6	equipment	weapon		2	7d8	20	4											180			void	
-viking_sword_7	equipment	weapon		2	8d8	20	4											220			void	
+id	category	type	name	hands	dice	rate	pen	min_str	min_dex	ac	armor_type	bonus	heal	heal_abyss	cooldown	zone	rarity	color	ilvl	price	shop_level	tier	notes
+dagger	equipment	weapon	dagger	1	1d4	12	0												0	40		base	start weapon
+short_sword	equipment	weapon	short sword	1	1d6	13	0												1	100		base	21/11: from data/items/next/bases.tsv
+club	equipment	weapon	club	1	1d6	15	1												1	70		base	21/11: from data/items/next/bases.tsv (blunt: pen 1)
+sword	equipment	weapon	sword	1	1d8	14	0	13											3	200		base	one-handed sword
+hand_axe	equipment	weapon	hand axe	1	1d10	16	0	14											4	300		base	21/11: from data/items/next/bases.tsv
+mace	equipment	weapon	mace	1	1d8	15	1	14											5	350		base	21/11: from data/items/next/bases.tsv (blunt: pen 1)
+broad_sword	equipment	weapon	broad sword	1	1d10	14	0	15											7	700		base	21/11: from data/items/next/bases.tsv
+war_axe	equipment	weapon	war axe	1	1d12	16	0	16											9	1100		base	21/11: from data/items/next/bases.tsv
+morning_star	equipment	weapon	morning star	1	2d6	17	1	16											11	1600		base	21/11: from data/items/next/bases.tsv (blunt: pen 1)
+viking_sword	equipment	weapon	viking sword	2	2d6	20	1	16											12	2400		base	two-handed: no shield, slower, more dice (Smash x2)
+battle_axe	equipment	weapon	battle axe	2	2d8	22	1	17											14	3200		base	21/11: from data/items/next/bases.tsv (two-handed)
+maul	equipment	weapon	maul	2	3d6	24	2	18											16	4200		base	21/11: from data/items/next/bases.tsv (two-handed, blunt: pen 2)
+great_sword	equipment	weapon	great sword	2	3d6	21	1	18											18	5600		base	21/11: from data/items/next/bases.tsv (two-handed)
+quilted_armor	equipment	armor	quilted armor							1	light								0	30		base	21/11: from data/items/next/bases.tsv
+leather_armor	equipment	armor	leather armor							2	light								0	80		base	
+hard_leather	equipment	armor	hard leather							3	light								3	220		base	21/11: from data/items/next/bases.tsv
+ring_mail	equipment	armor	ring mail					13		4	medium								5	450		base	21/11: from data/items/next/bases.tsv
+studded_armor	equipment	armor	studded armor						14	4	light								6	600		base	21/11: from data/items/next/bases.tsv (light: DEX not capped)
+chain_mail	equipment	armor	chain mail					14		5	medium								7	900		base	
+scale_mail	equipment	armor	scale mail					15		6	medium								10	1600		base	21/11: from data/items/next/bases.tsv
+splint_mail	equipment	armor	splint mail					16		7	heavy								12	2400		base	21/11: from data/items/next/bases.tsv
+plate_mail	equipment	armor	plate mail					17		8	heavy								14	3600		base	
+field_plate	equipment	armor	field plate					18		9	heavy								17	5000		base	21/11: from data/items/next/bases.tsv
+gothic_plate	equipment	armor	gothic plate					19		10	heavy								20	7000		base	21/11: from data/items/next/bases.tsv (Abyss from floor 21: also drops there)
+small_shield	equipment	shield	small shield							1									0	60		base	
+medium_shield	equipment	shield	mid shield					14		2									5	400		base	name shortened 08/11 (was medium shield)
+tower_shield	equipment	shield	tower shield					16		3									10	1800		base	
+gothic_shield	equipment	shield	gothic shield					18		4									16	4000		base	21/11: from data/items/next/bases.tsv
+copper	equipment	ring	copper ring									1							7	700		base	+N to the modifier of STR, DEX or CON (chosen when the ring is created)
+silver	equipment	ring	silver ring									2							12	2500		base	
+gold	equipment	ring	gold ring									3							17	8000		base	
+red	consumable	potion	minor healing										20	30	250	0	common	2		25	0	base	5 s cooldown
+yellow	consumable	potion	healing potion										50	75	350	1	common	7		90	5	base	7 s cooldown
+violet	consumable	potion	greater healing										4*L+40	5*L+28	500	2	common	4		250	12	base	10 s cooldown; the only potion that drops from Abyss floor 71 on
+portal_scroll	consumable	scroll	portal scroll																1	60	1	base	opens a portal to the village
+viking_sword_2	equipment	weapon		2	3d8	20	2												30			void	Abyss (levels 21+): simulator only
+viking_sword_3	equipment	weapon		2	4d8	20	2												60			void	
+viking_sword_4	equipment	weapon		2	5d8	20	3												100			void	
+viking_sword_5	equipment	weapon		2	6d8	20	3												140			void	
+viking_sword_6	equipment	weapon		2	7d8	20	4												180			void	
+viking_sword_7	equipment	weapon		2	8d8	20	4												220			void	
