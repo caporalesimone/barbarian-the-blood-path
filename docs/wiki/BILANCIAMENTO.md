@@ -409,23 +409,25 @@ Le caratteristiche salgono **solo con i punti** che il giocatore assegna (4 a li
 automatica (oggi nel gioco `epic_every`: +1 ogni 4 livelli oltre il 20). **Requisiti degli oggetti** (`requirements`, scala
 della proposta, anelli compresi): spada FOR 15, spada a due mani 30, cotta di maglia 20, piastre 35, scudo medio 15, scudo torre
 20; chi mette tutto in DES non porta la spada a due mani (profilo destrezza: FOR 28 al livello 20), il profilo costituzione resta
-con spada, scudo e cotta. **Attacchi extra della DES** (regola del committente, versione del 21/11 notte): il primo si
-sblocca dopo **16 punti** di DES sopra 10 (DES 26), poi uno ogni **8 punti**; ognuno sale di **10 / 1,85 / 1,3 % a punto** fino al
-**100%**, al massimo **3** nel dungeon (nell'Abisso, con i punti dei livelli in più, salgono tutti e ne arrivano altri). Ogni
-attacco extra fa il tiro normale e, se va a segno, un secondo tiro con quella probabilità (`sim_rules.fight`: `hero.extra`,
-`hit(q=...)`; il successivo indipendente dal precedente, `extra_chain: false`). Profilo destrezza al livello 20: **100 / 50 /
-25%** (il primo arriva al livello ~9); bilanciato 100 / 7%; forza e costituzione 10%. La DES **tiene la velocità** (decisione
-del committente: −1 fotogramma di rallentamento ogni 2 punti, come oggi nel gioco) e la CA (+1 ogni 16), ma **non dà bonus a
-colpire**: con il bonus (+1 ogni 10 o ogni 20) la destrezza domina i capitoli 2–3 (0,24–0,31 ogni 10 mostri). Prima versione,
-scartata: 5 attacchi extra (100 / 80 / 60 / 40 / 20% al 20), con velocità la DES era di gran lunga la migliore. Ogni 10 mostri,
-capitoli 1→4: forza 0,62 / 0,61 / 0,81 / 1,24; destrezza 0,82 / 0,47 / 0,40 / 0,91; costituzione 0,56 / 0,75 / 0,73 / 1,19;
-bilanciato 0,65 / 0,54 / 0,68 / 0,56. Nel capitolo 4 i tre profili specializzati fanno ~2 volte il bilanciato: provati FOR +1
-danno ogni 2 punti e COS +4 vita e −0,5% a punto, non cambia (resta 1,0–1,3): dipende dalla regola del rendimento (2/3 oltre 32),
-dai requisiti e dalla velocità che premia solo la DES, non dai costi. Taratura dei mostri: gli attacchi extra moltiplicano solo
-gli Slash (`monsters.extra_weight` 0,6). Costi: FOR +1 danno ogni 3 punti, COS +3 vita e −0,4% di danno subito a punto. Boss
-(vita ×0,68 / ×1,66 / ×0,56 / ×0,42, danno del boss finale ×0,4): bilanciato 66 / 56 / 51 / 57%; il boss finale è duro per i
-profili specializzati (forza 16%, destrezza 41%, costituzione 45%). **Da verificare sul C64**: fino a 4 tiri d'attacco per Slash
-(8 con la Frenzy) nello stesso fotogramma (prestazioni, TODO D5; si possono spalmare su più fotogrammi).
+con spada, scudo e cotta. **Attacchi extra della DES** (regola del committente, versione del 21/11 notte): fino a **4** nel
+dungeon; il primo si sblocca dopo **20 punti** di DES sopra 10 (DES 30), poi uno ogni **7 punti** (27, 34, 41); ognuno sale di
+**7 / 2,08 / 1,47 / 1 % a punto** fino al **100%** (nell'Abisso, con i punti dei livelli in più, salgono tutti e ne arrivano
+altri). Ogni attacco extra fa il tiro normale e, se va a segno, un secondo tiro con quella probabilità (`sim_rules.fight`:
+`hero.extra`, `hit(q=...)`; il successivo indipendente dal precedente, `extra_chain: false`). Profilo destrezza al livello 20:
+**100 / 50 / 25 / 10%** (il primo arriva al livello ~9); bilanciato 56 / 2%; forza e costituzione nessuno. La DES dà anche la
+**velocità** (−1 fotogramma di rallentamento ogni 2 punti, come oggi nel gioco), la CA (+1 ogni 16) e **sempre** la probabilità
+di colpire (committente): **+1 ATT ogni 20 punti** (ogni 10 o 15 la destrezza domina i capitoli 2–3). Prove (Monte Carlo, 60 giri
+per piano): 3 attacchi extra dal 16° punto e uno ogni 8; 4 dal 16° e uno ogni 6; 4 dal 20° e uno ogni 7 con il secondo che sale
+del 5, 7 o 10% a punto: la soglia più alta del primo attacco (20) aiuta forza e costituzione nel capitolo 4 (i mostri, tarati sul
+bilanciato, sono un po' più deboli perché il bilanciato ha meno attacchi extra). Prima versione, scartata: 5 attacchi extra
+(100 / 80 / 60 / 40 / 20% al 20), con velocità la DES era di gran lunga la migliore. Ogni 10 mostri, capitoli 1→4: forza 0,62 /
+0,62 / 0,74 / 0,97; destrezza 0,82 / 0,62 / 0,28 / 0,40; costituzione 0,56 / 0,74 / 0,66 / 0,94; bilanciato 0,65 / 0,51 / 0,67 /
+0,49. La destrezza parte piano e dal capitolo 3 è la più forte (~2,5 volte meglio di forza e costituzione nel capitolo 3); forza e
+costituzione stanno ~2 volte il bilanciato nel capitolo 4. Taratura dei mostri: gli attacchi extra moltiplicano solo gli Slash
+(`monsters.extra_weight` 0,6). Costi: FOR +1 danno ogni 3 punti, COS +3 vita e −0,4% di danno subito a punto. Boss (vita ×0,68 /
+×1,66 / ×0,61 / ×0,42, danno del boss finale ×0,4): bilanciato 55 / 63 / 57 / 48%; il boss finale è duro per la forza (23%).
+**Da verificare sul C64**: fino a 5 tiri d'attacco per Slash (10 con la Frenzy) nello stesso fotogramma (prestazioni, TODO D5; si
+possono spalmare su più fotogrammi).
 
 **(superato il 20/11) Oro piano per piano, 1–100 (10/11, Abisso = ipotesi)**: piani 1–19 come
 sopra (17 079 cumulati); piano 20 = i 4 bauli epici (1 720); dal 21 l'oro per piano sale da 1 962 a 2 802 al piano 32 (chestLevel
