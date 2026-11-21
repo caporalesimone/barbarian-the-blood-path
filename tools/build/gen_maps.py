@@ -32,7 +32,9 @@ def inv_legend():
     return d
 TK_NAME = 25                     # nome del luogo di cura con lo 0 finale
 NSEC = 16                        # (17/11) settori degli NPC vaganti per villaggio (x, y, larghezza, altezza: 4 byte l'uno)
-TK_LEN = 20 + TK_NAME + 4 * NSEC + 2 + 4       # intestazione del file TWNc (dopo i tile, prima della mappa RLE): town_k in levels.asm
+NFIX = 3                         # (21/11) NPC fissi oltre a quello della piazza: x, y, settore (1..NSEC), disegno
+FIX_NAME = 16                    # (21/11) nome di un NPC fisso (etichetta della barra), con lo 0 finale (tabella fix_nm, GAME)
+TK_LEN = 20 + TK_NAME + 4 * NSEC + 2 + 4 + 2 * NFIX + 1   # intestazione del file TWNc: town_k in levels.asm
 
 def rle(data):
     out, i = bytearray(), 0
@@ -70,9 +72,22 @@ def main():
         msg.append("%d: %d" % (c, len(k) + len(r)))
     with open(os.path.join(ROOT, "out", "work", "town_places.inc"), "w") as f:
         f.write("; generato da tools/build/gen_maps.py: intestazione dei file dei villaggi (TWNc), copiata in town_k\n")
-        f.write("TK_LEN = %d\nTK_NAME = %d\nTK_SOLID = %d\nTX_EXIT_N = 2\nNVIL = %d\nNSEC = %d\n" % (TK_LEN, TK_NAME, TK_SOLID, len(V.VILLAGES), NSEC))
+        f.write("TK_LEN = %d\nTK_NAME = %d\nTK_SOLID = %d\nTX_EXIT_N = 2\nNVIL = %d\nNSEC = %d\nNFIX = %d\n"
+                % (TK_LEN, TK_NAME, TK_SOLID, len(V.VILLAGES), NSEC, NFIX))
+        # (21/11) nomi degli NPC fissi di tutti i villaggi, uno dopo l'altro (codici schermo, 0 finale): l'etichetta della barra
+        # (QL_ID) punta al nome tk_fnb + k (npc_here1, src/menu/npc_here.asm)
+        names = [n for c in sorted(V.FIXED) for n, _, _ in V.FIXED[c]]
+        offs, o = [], 0
+        for n in names:
+            offs.append(o)
+            o += len(n) + 1
+        f.write("fix_nm  .byte " + ", ".join(str(b) for n in names for b in text(n) + b"\0") + "\n")
+        f.write("fix_lo  .byte " + ", ".join("<(fix_nm+%d)" % x for x in offs) + "\n")
+        f.write("fix_hi  .byte " + ", ".join(">(fix_nm+%d)" % x for x in offs) + "\n")
     print("villaggi: intestazione + RLE in byte (max %d): %s" % (TOWN_MAX, ", ".join(msg)))
     print("settori NPC (al massimo in una finestra di gioco; sprite liberi: 5): " + ", ".join("%d: %d (%d)" % (c, n, w) for c, (n, w) in sorted(SEC_REPORT.items())))
+    print("NPC fissi (nome, casella, settore, distanza dal punto): " + "; ".join("%d: %s" % (c, ", ".join("%s (%d,%d) s%d d%d" % e for e in v))
+                                                                            for c, v in sorted(FIX_REPORT.items())))
 
 
 TOWN_MAX = 0x760                 # intestazione + RLE: fino a GFX_DUN_AT (src/game.asm)
@@ -131,6 +146,63 @@ def giver(c, m, walk, seen, pl, need):
     raise AssertionError("villaggio %d: nessuna casella per chi da' la quest" % c)
 
 
+def fixed(c, m, walk, seen, pl, need, g):
+    """(21/11) NPC fissi (villages.FIXED), 2 * NFIX + 1 byte: per ognuno oltre a quello della piazza (casella g) settore (1..NSEC,
+    bit 0-4) + disegno (bit 5-6) e casella dentro il settore (x - x0 nei bit 0-3, y - y0 nei bit 4-7; 0, 0 = voce non usata),
+    poi l'indice del primo nome nella tabella fix_nm (town_places.inc, GAME). Ogni NPC fisso: in un settore (che non ha piu' il
+    suo vagante) diverso da quello degli altri, a meno di 16 caselle dall'angolo del settore, raggiungibile, con le 8 caselle
+    attorno percorribili, ad almeno 3 caselle da porte, portale, sotterraneo, uscite e traghetto, ad almeno 8 caselle dagli altri
+    NPC fissi (pochi sprite e "!" insieme), il piu' vicino possibile al suo punto (al massimo 18 caselle). Per il villaggio 1 lo
+    spazio e' contato: intestazione + mappa RLE al massimo TOWN_MAX."""
+    import villages as V
+    fx = V.FIXED[c]
+    assert 1 <= len(fx) <= 1 + NFIX, "villaggio %d: da 1 a %d NPC fissi" % (c, 1 + NFIX)
+    assert fx[0][1] is None, "villaggio %d: il primo NPC fisso sta nella piazza (punto None)" % c
+    secs = V.SECTORS[c]
+    avoid = [(i % W, i // W) for i in pl] + [(i % W, i // W + 1) for i in pl] + \
+        [need["arrivo dal portale"], need["portale"], need["cripta"], need["uscita"], need["uscita 2"]] + \
+        [q for n, q in need.items() if n.startswith("traghetto")]
+    sec_of = lambda x, y: next((k + 1 for k, (sx, sy, sw, sh) in enumerate(secs)
+                                if sx <= x < sx + min(sw, 16) and sy <= y < sy + min(sh, 16)), 0)
+    placed, used, ent = [(g[0], g[1])], set(), b""
+    for name, anchor, look in fx[1:]:
+        kind = anchor[0]
+        if kind == "tile":
+            T = [(i % W, i // W) for i in range(W * H) if m[i] == G.TTID[anchor[1]]]
+            assert T, "villaggio %d: nessun tile %s per %s" % (c, anchor[1], name)
+            ax, ay = sum(x for x, _ in T) / len(T), sum(y for _, y in T) / len(T)
+        elif kind == "door":
+            ax, ay = need["davanti a " + anchor[1]]
+        elif kind == "crypt":
+            ax, ay = need["cripta"]
+        elif kind == "boat":
+            ax, ay = need["traghetto 1"]
+        else:
+            raise AssertionError("villaggio %d: punto %r sconosciuto" % (c, anchor))
+        cand = [(max(abs(x - ax), abs(y - ay)), x, y) for y in range(1, H - 1) for x in range(1, W - 1)
+                if (x, y) in seen and sec_of(x, y) and sec_of(x, y) not in used
+                and all(m[(y + dy) * W + x + dx] in walk for dx in (-1, 0, 1) for dy in (-1, 0, 1))
+                and all(max(abs(x - a), abs(y - b)) >= 3 for a, b in avoid)
+                and all(max(abs(x - a), abs(y - b)) >= 8 for a, b in placed)]
+        assert cand, "villaggio %d: nessuna casella per %s" % (c, name)
+        d, x, y = min(cand)
+        assert d <= 18, "villaggio %d: %s a %d caselle dal suo punto (max 18)" % (c, name, d)
+        s_ = sec_of(x, y)
+        sx, sy = secs[s_ - 1][:2]
+        assert 1 <= s_ <= 31 and 0 <= look <= 3 and (x - sx, y - sy) != (0, 0)
+        used.add(s_)
+        placed.append((x, y))
+        ent += bytes([s_ | look << 5, (x - sx) | (y - sy) << 4])
+        FIX_REPORT.setdefault(c, []).append((name, x, y, s_, d))
+    for name, _, _ in fx:
+        assert 0 < len(name) < FIX_NAME and name == name.lower() and all(ch in "abcdefghijklmnopqrstuvwxyz '" for ch in name), name
+    first = sum(len(V.FIXED[k]) for k in sorted(V.FIXED) if k < c)
+    return ent.ljust(2 * NFIX, b"\0") + bytes([first])
+
+
+FIX_REPORT = {}
+
+
 def build(c, v):
     import villages as V
     """mappa RLE e intestazione (TK_LEN byte) del villaggio c, con i controlli"""
@@ -186,8 +258,10 @@ def build(c, v):
     assert 0 < len(heal) < TK_NAME and heal == heal.lower() and all(ch in "abcdefghijklmnopqrstuvwxyz '" for ch in heal), heal
     k = bytes([px, py, sx, sy, nx, ny, bg, c1, c2, 8 | acc] + [t for i in pl for t in (i % W, i // W)]
               + [ex[0][0], ex[1][0], ex[0][1], ex[1][1]]) + text(heal).ljust(TK_NAME, b"\0")
-    k += sectors(c, m, walk) + giver(c, m, walk, seen, pl, need)
+    gv = giver(c, m, walk, seen, pl, need)
+    k += sectors(c, m, walk) + gv
     k += bytes([t for q in boats for t in q]).ljust(4, b"\0")    # (19/11) tk_boat: x1, y1, x2, y2 (0 = nessun traghetto)
+    k += fixed(c, m, walk, seen, pl, need, gv)                     # (21/11) tk_fix, tk_fnm
     assert len(k) == TK_LEN
     k += bytes(sol + [0] * (TK_SOLID - len(sol)))          # tile solidi del villaggio (solidtab)
     r = rle(m)

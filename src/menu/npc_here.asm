@@ -15,8 +15,9 @@ npc_here1:
 _l      lda npc_xh,x
         cmp #$ff
         beq _n
+        lda npc_d,x             ; (21/11) NPC fisso (bit 7): sempre, con il suo nome (anche con la quest gia' presa)
+        bmi _t
         txa
-        beq _t                  ; Hilde: sempre (anche con la quest gia' presa: la si rilegge)
         tay
         jsr npc_offer
         bcc _n
@@ -36,8 +37,20 @@ _t      jsr npc_tile
         cmp #3
         bcs _n
         ldy #QL_GV
-        txa
-        bne +
+        lda npc_d,x
+        bpl +
+        lsr                     ; (21/11) nome k = bit 4-5: fix_nm[tk_fnb + k] nell'etichetta QL_ID
+        lsr
+        lsr
+        lsr
+        and #3
+        clc
+        adc tk_fnb
+        tay
+        lda fix_lo,y
+        sta loc_lo+QL_ID
+        lda fix_hi,y
+        sta loc_hi+QL_ID
         ldy #QL_ID
 +       sec
         bcs _x

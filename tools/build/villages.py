@@ -75,3 +75,18 @@ def tile_name(c, n):
     """(nome, descrizione) a tema del posto n nel villaggio c, o None (= quello del villaggio 1)"""
     t = VILLAGES[c]["tiles"]
     return t[n][:2] if n in t else None
+
+
+# (21/11, committente) NPC fissi che danno le quest (docs/wiki/quests.md sez. 2: nomi T6): per villaggio, il primo sta nella
+# piazza della fontana (casella scelta da gen_maps.giver, NPC 0: oggi ha la quest segnaposto 1 nel villaggio 1); gli altri (al
+# massimo NFIX) vicino a un punto della mappa: ("tile", NOME) = baricentro dei tile di quel posto, ("door", DSMITH|DALCH|DHOME) =
+# casella davanti alla porta, ("crypt",) = ingresso del sotterraneo, ("boat",) = primo approdo del traghetto. Un NPC fisso prende
+# il posto del vagante del settore in cui sta (meno NPC nello stesso settore). Disegno: 0 villager, 1 woman, 2 elder, 3 guard
+# (tools/build/npc_gfx.py). Nomi: al massimo FIX_NAME - 1 caratteri (etichetta della barra in alto).
+FIXED = {
+    1: [("hilde", None, 1), ("father osric", ("tile", "SPIRE"), 2), ("grom", ("door", "DSMITH"), 0), ("the gravedigger", ("crypt",), 2)],
+    2: [("mama sabine", None, 1), ("corbeau", ("boat",), 0), ("little pip", ("door", "DALCH"), 0), ("the drummer", ("door", "DHOME"), 3)],
+    3: [("sergeant brenna", None, 3), ("chaplain edric", ("crypt",), 2), ("quartermaster", ("door", "DSMITH"), 3)],
+    4: [("the penitent", None, 2), ("the scavenger", ("door", "DALCH"), 0), ("the gatewarden", ("crypt",), 3)],
+    5: [("the keeper", None, 2)],
+}

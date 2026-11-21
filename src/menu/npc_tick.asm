@@ -31,8 +31,8 @@ _l      lda npc_xh,x
         jmp _n
 +       lda npc_mv,x
         bne _mv
-        cpx #0                  ; chi da' la quest resta fermo
-        bne +
+        lda npc_d,x             ; (21/11) gli NPC fissi (bit 7: lo 0 e quelli di tk_fix) restano fermi
+        bpl +
         jmp _n
 +       jsr npc_tile
         lda tx

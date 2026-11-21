@@ -520,10 +520,10 @@ bar_target:                     ; X = indice mostro (preservato)
 ; ===================================================================
 loc_lo  .byte 0, <ls_down, <ls_up, <ls_tdown, <ls_portal, <ls_chest, <ls_kchest, <ls_gchest
         .byte <ls_smith, <ls_alch, <ls_fount, <ls_uptown, <ls_ptown, <ls_nokey, <ls_home, <ls_near, <ls_abyss
-        .byte <ls_lever, <ls_epic, <ls_travel, <q_gvr1, <ls_qgv, <ls_gdn, <ls_gup, <ls_gtown
+        .byte <ls_lever, <ls_epic, <ls_travel, <fix_nm, <ls_qgv, <ls_gdn, <ls_gup, <ls_gtown
 loc_hi  .byte 0, >ls_down, >ls_up, >ls_tdown, >ls_portal, >ls_chest, >ls_kchest, >ls_gchest
         .byte >ls_smith, >ls_alch, >ls_fount, >ls_uptown, >ls_ptown, >ls_nokey, >ls_home, >ls_near, >ls_abyss
-        .byte >ls_lever, >ls_epic, >ls_travel, >q_gvr1, >ls_qgv, >ls_gdn, >ls_gup, >ls_gtown
+        .byte >ls_lever, >ls_epic, >ls_travel, >fix_nm, >ls_qgv, >ls_gdn, >ls_gup, >ls_gtown
 gate_id .byte 22, 23, 0, 0, 0, 0, 0, 0, 0, 0, 24   ; (18/11) palude: id 1, 2, 11 -> cancelli
 ; numero da accodare: 0 nessuno, 1 = livello+1, 2 = livello-1, 3 = livello di ritorno del portale, 4 = 1
 loc_numk .byte 0, 1, 2, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0

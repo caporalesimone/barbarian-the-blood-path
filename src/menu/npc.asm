@@ -16,6 +16,8 @@ NPC_BMIN = 80                   ; sopra questa riga c'e' la barra in alto (IRQ_B
         jmp npc_init            ; NPC_JINIT
         jmp npc_draw5           ; NPC_JDRAW
         jmp npc_talk5           ; NPC_JTALK
+        jmp npc_px              ; NPC_JPX (21/11, npc_fix in GAME)
+        jmp npc_look            ; NPC_JLOOK
 
         .include "quests_m.inc" ; q_ch: capitolo di ogni quest (tools/build/gen_quests.py)
 
@@ -32,13 +34,15 @@ _i      lda #$ff
         lda #0
         sta npc_mv,x
         sta npc_q,x
+        sta npc_d,x             ; (21/11) bit 7 = NPC fisso (npc_fix): i vaganti partono da 0
         lda #16
         sta npc_k
         cpx #0
         beq _t
         jsr rand                ; presente con probabilita' 7/8 (assente con 0 su 0..7)
         and #7
-        beq _nx
+        bne _t
+        jmp _nx
 _t      txa
         asl
         asl
@@ -79,9 +83,14 @@ _put    lda tx                  ; casella -> pixel (centro)
         jsr npc_look            ; (17/11) disegno e colore (zona 3, npc_look.asm)
         cpx #0
         bne _w
+        lda #$80                ; (21/11) fisso, nome 0 del villaggio (tk_fnb, npc_here1)
+        sta npc_d
+        lda c_chap              ; la quest segnaposto 1 (Hilde) solo nel villaggio 1
+        cmp #1
+        bne +
         lda #Q_CUR              ; Hilde: la quest 1 (il "!" finche' non e' presa)
         sta npc_q
-        lda tx
++       lda tx
         sta npc_tx0
         lda ty
         sta npc_ty0
@@ -94,7 +103,7 @@ _w      jsr rand                ; (18/11) chi vaga: una quest da dare 1 volta su
 _nx     dex
         bmi +
         jmp _i
-+       rts
++       jmp npc_fix             ; (21/11) gli NPC fissi al posto dei vaganti dei loro settori (zona 1, npc_here.asm)
 
 ; A = una quest da offrire (2..Q_N: non presa, non gia' offerta qui, del capitolo attuale o di uno prima), 0 = nessuna. X conservato
 npc_pick:
@@ -271,6 +280,7 @@ _r      rts
 ; (bit in c_qst; chi vaga non la offre piu') e se ne apre il dettaglio (ui_quest)
 npc_talk5:
         lda npc_q,x
+        beq _r                  ; (21/11) NPC fisso senza quest: niente
         tay
         lda bitmask-1,y
         ora c_qst
@@ -281,3 +291,4 @@ npc_talk5:
         sta npc_q,x
 +       tya
         jmp ui_quest
+_r      rts

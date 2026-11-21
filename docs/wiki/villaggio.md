@@ -219,6 +219,22 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   `src/menu/npc_tick.asm`, 18/11), chi è accanto al PG (`npc_here1`, `npc_offer`) nella zona 1 (`src/menu/npc_here.asm`,
   `MENU_NHERE`); in GAME restano i punti d'ingresso (`npc_tick`, `npc_ok`, `npc_here`). (19/11) Il passo tocca metà degli NPC
   per fotogramma e salta i fotogrammi di ridisegno ([prestazioni](prestazioni.md)).
+- **NPC fissi** (21/11, richiesta del committente): ogni villaggio ha i suoi NPC che danno le quest **a posizione fissa**
+  (`FIXED` in `tools/build/villages.py`, nomi di [Quest](quests.md) sez. 2): il primo sta nella piazza della fontana (NPC 0, la
+  casella `tk_g` di prima: Hilde nel villaggio 1, Mama Sabine, Sergeant Brenna, the Penitent, the Keeper), gli altri (al massimo
+  `NFIX` = 3) vicino a un punto della mappa: il baricentro di un tile (la chiesa, `SPIRE`, per father osric), la casella davanti
+  a una porta (Grom al fabbro, Little Pip all'alchimista, the drummer alla locanda, the quartermaster, the scavenger), l'ingresso
+  del sotterraneo (the gravedigger, Chaplain Edric, the gatewarden) o il traghetto (Corbeau). `gen_maps.py` (`fixed`) sceglie la
+  casella più vicina al punto (al massimo 18 caselle) dentro un settore non usato da un altro fisso, raggiungibile, con le 8
+  caselle attorno percorribili, ad almeno 3 caselle da porte, portale, sotterraneo, uscite e traghetto e ad almeno 8 dagli altri
+  fissi; stampa i piazzamenti. **Ogni NPC fisso prende il posto del vagante del suo settore** (l'NPC numero *n* = settore *n*:
+  meno NPC nello stesso settore). Intestazione `TWNc` (`tk_fix`, 2 byte per NPC: settore + disegno << 5, casella dentro il
+  settore; `tk_fnb`, indice del primo nome): il villaggio 1 arriva a 1888 B su 1888 (`TOWN_MAX`). I nomi stanno in GAME
+  (`fix_nm`, `fix_lo`, `fix_hi` in `out/work/town_places.inc`, ~190 B). Nel gioco: `npc_fix` (zona 1 del MENU,
+  `src/menu/npc_here.asm`, chiamato alla fine di `npc_init`) li piazza; `npc_d` bit 7 = fisso (bit 4-5 = numero del nome):
+  non si muovono (`npc_tick6`) e accanto a loro la barra mostra il loro nome (`npc_here1` punta l'etichetta `QL_ID` al nome
+  giusto). Oggi solo Hilde (villaggio 1) ha una quest (la segnaposto 1); Fire accanto a un fisso senza quest non fa niente.
+  Il disegno dell'NPC 0 resta la donna in ogni villaggio. Test: `NPCFIX-10`, `NPCFIX-11` (`tests/sanity/npcfix/cases.py`).
 - **Pagina Q** (17–18/11, [interfaccia](interfaccia.md)): tasto **Q** ovunque = **elenco** delle quest prese (titolo e "ch. N",
   W/S per scegliere, Fire = dettaglio, RUN/STOP o Q = di nuovo nel gioco; senza quest "talk to the villagers"). **Dettaglio**:
   titolo sulla cornice, "chapter N", lo **stato** (righe gialle, oggi segnaposto: campo `status` di `data/quests.yaml`), il testo
@@ -230,7 +246,7 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   l'eroe) è una **maschera**: bit *n*-1 = quest *n* presa, al massimo 8 quest.
 - **Quest segnaposto** (18/11): la 1 di Hilde (capitolo 1) e 7 "piccole" (2..8, capitoli 1, 1, 2, 2, 3, 4, 5) dei vaganti; la 2
   ha un testo lungo per provare lo scorrimento. **Lobby**: "active quests:" = quante quest sono prese.
-- **Test**: `tests/sanity/quest/cases.py` (QUEST-10..16: piazzamento e quest offerte, elenco vuoto, Hilde con "!" e dettaglio,
+- **Test**: `tests/regression/quest/cases.py` (21/11: spostati da sanity; QUEST-10..16: piazzamento e quest offerte, elenco vuoto, Hilde con "!" e dettaglio,
   vaganti che si fermano, sprite, vagante "quest giver" e scorrimento del testo, cadenza dell'attacco).
 
 ## Armaiolo: tolto (09/11, decisione del committente)

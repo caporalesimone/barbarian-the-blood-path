@@ -128,6 +128,74 @@ npc_tick:                       ; (18/11, revisione R11) il passo dei vaganti st
         jmp MR6_AT
 +       rts
 
+; (21/11, committente) NPC fissi 1..NFIX (tk_fix, intestazione del villaggio: tools/build/gen_maps.py fixed): ognuno prende il
+; posto del vagante del suo settore (NPC numero = settore), fermo (npc_d bit 7, nome k nei bit 4-5), senza quest per ora,
+; con il suo disegno e un colore a caso (npc_look). Lo chiama npc_init (zona 5 del MENU) alla fine; sta in GAME perche' le zone del MENU sono piene (usa npc_px della
+; zona 5 e npc_look della zona 3: c'e' solo nel villaggio, con il modulo in memoria).
+npc_fix:
+        lda #NFIX
+        sta npc_k
+_l      lda npc_k
+        asl
+        tay
+        lda tk_fix-2,y
+        beq _n
+        and #31
+        tax                     ; X = NPC = settore
+        lda tk_fix-1,y
+        sta tmp6
+        txa
+        asl
+        asl
+        tay                     ; Y = 4 x settore: tk_sec-4,y = sua voce
+        lda tmp6
+        and #15
+        clc
+        adc tk_sec-4,y
+        sta tx
+        lda tmp6
+        lsr
+        lsr
+        lsr
+        lsr
+        clc
+        adc tk_sec-3,y
+        sta ty
+        lda tx
+        jsr NPC_JPX
+        sta npc_xl,x
+        tya
+        sta npc_xh,x
+        lda ty
+        jsr NPC_JPX
+        sta npc_yl,x
+        tya
+        sta npc_yh,x
+        lda npc_k
+        asl
+        asl
+        asl
+        asl
+        ora #$80
+        sta npc_d,x
+        lda #0
+        sta npc_mv,x
+        sta npc_q,x
+        jsr NPC_JLOOK           ; colore (zona 3); il disegno e' quello di tk_fix
+        lda npc_k
+        asl
+        tay
+        lda tk_fix-2,y
+        lsr
+        lsr
+        lsr
+        lsr
+        lsr
+        sta npc_g,x
+_n      dec npc_k
+        bne _l
+        rts
+
 ; ------------------------------------------------------------------ chi e' accanto al PG
 ; C=1 se il PG e' accanto (a una casella, anche in diagonale) a Hilde o a un NPC con una quest da dare: X = NPC, Y = etichetta
 ; del luogo. (18/11, revisione R3) Il codice sta nel modulo MENU (zona 1, src/menu/npc_here.asm, MENU_NHERE): qui solo il controllo

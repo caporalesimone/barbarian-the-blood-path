@@ -65,7 +65,10 @@ dungeon unico, mulino, Torvald, generatori su disco) è superata e resta solo ne
 | City of the Abyss | — | the Keeper (solo ripetibili) |
 
 Vincoli del codice di oggi (da rispettare nelle mappe): al massimo 5 NPC visibili insieme (sprite 3–7) e 2 "!" (sprite 1–2):
-gli NPC fissi vanno messi lontani fra loro.
+gli NPC fissi vanno messi lontani fra loro. **(21/11) Nel codice**: gli NPC fissi stanno nel villaggio con il loro nome, fermi,
+ognuno al posto del vagante del suo settore ([villaggio](villaggio.md#abitanti-1718-11-concept), `tools/build/villages.py`
+`FIXED`); nomi abbreviati per l'etichetta (15 caratteri): Quartermaster Ulf = "quartermaster". Le quest vere non sono ancora
+collegate (oggi solo la segnaposto 1 di Hilde).
 
 ---
 
