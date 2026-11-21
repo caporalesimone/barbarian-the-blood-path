@@ -38,10 +38,9 @@ dal 18/11 un file solo (`MENU`, cinque zone, letto con Krill: 3,1 s con la decom
   villaggio **resta**. Le porte richiamano `ovl_town` (riprova se il primo
   caricamento era fallito) e saltano alla tabella dei salti: `MENU_INN` (`$C900`, locanda), `MENU_SHOP` (`$C903`,
   negozio A).
-- **Come gira**: tutti i menu del villaggio con `$01 = $35` (KERNAL escluso, interruzioni spente, vettore NMI in RAM su
-  `nmi_stub`: `mk_off` nella zona 1, chiamato **solo dalla zona 1** perché con `$01 = $36` a `$F4E0`– si eseguirebbe la ROM);
-  escono con `$01 = $36` prima di `ui_exit` (`mk_exit`; dall'11/11 sera la locanda non salva più uscendo). Niente
-  KERNAL nei menu; la musica gira con `sfx_update` in `ui_input`.
+- **Come gira**: tutti i menu del villaggio con le interruzioni spente (`mk_off`, nella zona 1) e, come tutto il gioco dal
+  21/11 (TODO D15), con `$01 = $35` (KERNAL escluso: la zona 2 si esegue); escono con `ui_exit` (`mk_exit`; dall'11/11 sera
+  la locanda non salva più uscendo). Niente KERNAL nei menu; la musica gira con `sfx_update` in `ui_input`.
 - **Cosa resta in GAME** dei negozi: le routine usate anche da inventario, baule dei dungeon e locanda (`ui_title`,
   `shop_gold`, `ui_gold`, `ui_coin`, `ui_mark`, `sh_cur1`, `msg23`, `cat_bit`) e il riquadro dell'oggetto del baule dei
   dungeon (`ch_item`, la versione ridotta di `sh_item`). L'oro del baule della locanda (`st_gold`) è in `stash_io.asm`

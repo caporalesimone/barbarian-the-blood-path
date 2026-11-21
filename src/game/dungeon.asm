@@ -100,7 +100,7 @@ gen_call:
         lda #$34
         sta $01
 _j      jsr GEN_AT
-        lda #$36
+        lda #MEMCFG
         sta $01
         plp
         rts

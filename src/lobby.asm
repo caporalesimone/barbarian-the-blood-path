@@ -50,7 +50,7 @@ _cb     lda CHRBUF+1,x
         sta hdrbuf,x
         dex
         bpl _cb
-        lda #$36
+        lda #MEMCFG
         sta $01
         cli
         lda tmp0

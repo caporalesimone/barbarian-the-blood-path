@@ -83,7 +83,7 @@ def menu_file(ctx):
         check("menu" in names and "menu1" not in names and "ovlt" not in names and "ovl2" not in names, "%s: %s" % (os.path.basename(f), names))
 
 
-@test("MENU-11", "ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 back to $36, < 11 s")
+@test("MENU-11", "ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 = $35 (KERNAL always out since 21/11), < 11 s")
 def menu_load(ctx):
     g = game(ctx); L = g.L
     g.poke(L["ovl_cur"], 0)
@@ -95,13 +95,13 @@ def menu_load(ctx):
     bad = zones_ok(g)
     check(not bad, "zones %s differ from out/work/menu_zK.prg" % bad)
     check(g.b(L["ovl_cur"]) == 1, "ovl_cur %d" % g.b(L["ovl_cur"]))
-    check(g.b(1) & 7 == 6, "$01 = %02x after the unpack" % g.b(1))
+    check(g.b(1) & 7 == 5, "$01 = %02x after the unpack (expected $35)" % g.b(1))
     t = (c - c0) / CPS
     print("      ovl_town from the disk: %.2f s" % t)
     check(t < 11.0, "ovl_town took %.2f s (> 11 s)" % t)
 
 
-@test("MENU-13", "smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP")
+@test("MENU-13", "smith, alchemist and inn open from the module in RAM: no read of the file MENU, $01 = $35 and IRQ back after RUN/STOP")
 def menu_open(ctx):
     g = game(ctx); L = g.L
     g.watch(L["ml_read"])
@@ -116,7 +116,7 @@ def menu_open(ctx):
         check(g.b(1) & 7 == 5, "%s: $01 = %02x in the menu (expected $35)" % (name, g.b(1)))
         g.run_stop(); g.frames(3)
         check(g.in_game(), "%s: RUN/STOP does not close the screen" % name)
-        check(g.b(1) & 7 == 6 and g.b(0xd01a) & 1, "%s: after the exit $01 = %02x, raster IRQ %d" % (name, g.b(1), g.b(0xd01a) & 1))
+        check(g.b(1) & 7 == 5 and g.b(0xd01a) & 1, "%s: after the exit $01 = %02x (expected $35), raster IRQ %d" % (name, g.b(1), g.b(0xd01a) & 1))
     n = g.hits.get(L["ml_read"], 0)
     g.unwatch()
     check(n == 0, "file MENU read %d times" % n)

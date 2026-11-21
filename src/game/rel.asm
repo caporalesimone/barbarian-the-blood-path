@@ -196,20 +196,10 @@ sv_save:
         lda #>SV_SCR
         sta sv_par+9
         php
-        sei
-        lda $01                 ; (chi chiama puo' girare sotto il KERNAL, $01 = $35: modulo MENU, zona 2)
-        pha
-        lda #<nmi_stub          ; (RESTORE: vettore NMI nella RAM sotto il KERNAL)
-        sta $fffa
-        lda #>nmi_stub
-        sta $fffb
-        lda #$35                ; KERNAL escluso: buffer e immagine nella RAM sotto il KERNAL
-        sta $01
+        sei                     ; (il plugin vuole gli interrupt spenti; $01 = MEMCFG: buffer e immagine sotto il KERNAL)
         ldx #<sv_par
         ldy #>sv_par
         jsr krill_save
-        pla                     ; (pla non tocca C)
-        sta $01
         bcs _e
         plp
         clc
@@ -219,46 +209,6 @@ _e2     sec
         rts
 nm_ksave .text "ksave"
         .byte 0
-
-; lettura di SV_IMG (RAM sotto il KERNAL): interrupt spenti e KERNAL escluso; img_off rimette tutto (C conservato)
-img_on:
-        pla                     ; (indirizzo di ritorno sotto i valori salvati)
-        sta tmp6
-        pla
-        sta tmp7
-        php
-        sei
-        lda $01
-        pha
-        lda #$35
-        sta $01
-        lda tmp7
-        pha
-        lda tmp6
-        pha
-        rts
-; fine di img_on: $01 e interrupt come prima, C della lettura conservato
-img_off:
-        pla
-        sta tmp6
-        pla
-        sta tmp7
-        pla
-        sta $01
-        pla                     ; P del chiamante (interrupt), ma C di adesso
-        and #$fe
-        sta tmp5
-        php
-        pla
-        and #1
-        ora tmp5
-        pha
-        plp
-        lda tmp7
-        pha
-        lda tmp6
-        pha
-        rts
 
 ; ---------------------------------------------------------------- eroi
 ; solo l'eroe (creazione dell'eroe, prove): le parti dei piani restano quelle del disco
@@ -320,14 +270,12 @@ load_char:
         sta io_what
         jsr sv_read
         bcs _old
-        jsr img_on
-        ldx #0
+        ldx #0                  ; (21/11) SV_IMG e' sotto il KERNAL, sempre escluso (MEMCFG)
 _l      lda SV_IMG,x
         sta CHRBLK,x
         inx
         cpx #HERO_LEN
         bne _l
-        jsr img_off
         lda c_magic
         cmp #SAVE_VER
         beq _ok

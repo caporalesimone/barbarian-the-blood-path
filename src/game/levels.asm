@@ -629,7 +629,7 @@ _n30    lda tu_name,x
         sta $d004
         sta $d005
         sta $d006
-        lda #$36
+        lda #MEMCFG
         sta $01
         lda #1
         sta $02b1

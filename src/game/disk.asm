@@ -140,11 +140,7 @@ fin_unp sta ptr0                ; ptr0 = flusso RLE -> MAP
         lda #>MAP
         sta ptr1+1
         sei
-        lda #$35                ; KERNAL spento: si legge la RAM sottostante
-        sta $01
         jsr rle_unpack
-        lda #$36
-        sta $01
         cli
         rts
 
@@ -174,17 +170,11 @@ _disk   ldy #nm_bch-nm_tab
         ldx #>FIN_AT
 bm_unp  sta ptr2                ; A/X = file della mappa: 4 byte di intestazione (bm_hdr), poi l'RLE
         stx ptr2+1
-        sei
-        lda #$35
-        sta $01
         ldy #3
 -       lda (ptr2),y
         sta bm_hdr,y
         dey
         bpl -
-        lda #$36
-        sta $01
-        cli
         lda ptr2
         clc
         adc #4

@@ -88,9 +88,7 @@ _back   lda h_sel
         beq _x
         jsr h_back              ; RUN/STOP nella scelta: annulla
         jmp _scr
-_x      lda #$36                ; di nuovo il KERNAL (disco)
-        sta $01
-        jmp ui_exit             ; (11/11 sera: niente salvataggio uscendo, lo fa "save game": il baule e' nel blocco dell'eroe)
+_x      jmp ui_exit             ; (11/11 sera: niente salvataggio uscendo, lo fa "save game": il baule e' nel blocco dell'eroe)
 
 ; numero di voci (ui_n) per la modalita' attuale
 h_setn: lda h_sel

@@ -397,8 +397,6 @@ gfx_tail:
         sbc #0
         sta ptr0+1
         sei
-        lda #$35                ; la coda sta sotto il KERNAL
-        sta $01
         ldy #0
         lda (ptr0),y
         sta tmp2
@@ -449,9 +447,7 @@ _c      lda (ptr0),y
         lda tmp0
         ora tmp1
         bne _c
-_x      lda #$36
-        sta $01
-        cli
+_x      cli
         clc
 _r      rts
 bm_tail .byte 0                 ; $80: la mappa del piano del boss e' nella coda del tema, a bm_at

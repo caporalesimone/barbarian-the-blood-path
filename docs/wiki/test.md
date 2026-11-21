@@ -382,7 +382,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `FOUNT-10` | fountain: walking on it heals to full hp |
 | `INN-GOLD-11` | inn: Fire on the chest gold row does nothing (no withdrawal since 10/11), the screen stays open |
 | `MENU-10` | out/work/menu.prg (one file since 18/11): header (parts, source and destination), parts ZX0(zone k), ends at MR2_END, above ML_LO; shops out of GAME; the disks have MENU, no MENU1/OVLT/OVL2 |
-| `MENU-11` | ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 back to $36, < 11 s |
+| `MENU-11` | ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 = $35 (KERNAL always out since 21/11), < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
 | `VIL-TWN-11` | village 1 (Aldric's Hollow): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-12` | village 2 (Bad Water): header in town_k, solid tiles, colours, map, hero at the entry |

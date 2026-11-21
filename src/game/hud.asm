@@ -37,12 +37,49 @@ hw_low     .byte ?              ; 1 = vita bassa (avviso attivo: "HP nnn/nnn" la
         .endv
 
 ; ------------------------------------------------------------------ IRQ
+; (21/11, TODO D15) KERNAL sempre escluso ($01 = MEMCFG = $35): i vettori della CPU sono nella RAM sotto il KERNAL. IRQ ->
+; irq_entry, copia esatta dell'ingresso della ROM ($FF48: stesse istruzioni, stessi cicli, salto da ($0314)); NMI (RESTORE) ->
+; nmi_stub. Anche $0314 resta su irq_h: con il KERNAL visibile (bar.asm, $01 = $32 per 8 letture) l'ingresso della ROM porta
+; allo stesso posto, e l'uscita irq_exit sta in RAM.
 irq_init:
         lda #<irq_h
         sta $0314
         lda #>irq_h
         sta $0315
+        lda #<irq_entry
+        sta $fffe
+        lda #>irq_entry
+        sta $ffff
+        lda #<nmi_stub
+        sta $fffa
+        sta $0318
+        lda #>nmi_stub
+        sta $fffb
+        sta $0319
         rts
+
+; ingresso dell'IRQ (copia di $FF48-$FF5A della ROM, BRK compreso)
+irq_entry:
+        pha
+        txa
+        pha
+        tya
+        pha
+        tsx
+        lda $0104,x
+        and #$10
+        beq _irq
+        jmp ($0316)
+_irq    jmp ($0314)
+        .cerror >(irq_entry+11) != >(irq_entry+13), "irq_entry: il beq non deve cambiare pagina (cicli come nella ROM)"
+; uscita dell'IRQ (copia di $EA81-$EA86 della ROM)
+irq_exit:
+        pla
+        tay
+        pla
+        tax
+        pla
+        rti
 
 ; accende l'IRQ a raster del gioco (fasi irq_ph: barra in alto, HUD, fine HUD), con il vettore su irq_h
 irq_on:
@@ -68,7 +105,7 @@ irq_off:
         rts
 
 ; IRQ a raster, una fase per riga (irq_ph): 0 = inizio dell'HUD (schermo SCR_H, 24 righe), 1 = HUD multicolore,
-; 2 = riga 250, campo di gioco ripristinato (ap_*), 3 = barra in alto e sprite di gioco (bar.asm); esce dal KERNAL ($EA81)
+; 2 = riga 250, campo di gioco ripristinato (ap_*), 3 = barra in alto e sprite di gioco (bar.asm); esce da irq_exit
 irq_h:
         lda #$ff
         sta $d019
@@ -93,7 +130,7 @@ _ph0
         lda #IRQ_L2
         sta $d012
         inc irq_ph
-        jmp $ea81
+        jmp irq_exit
 _p1     lda #$10                ; MCM, 38 col, xscroll 0
         sta $d016
         lda #0
@@ -102,7 +139,7 @@ _p1     lda #$10                ; MCM, 38 col, xscroll 0
         sta $d012
         lda #2
         sta irq_ph
-        jmp $ea81
+        jmp irq_exit
 
 ; riga 250 (fine HUD): ripristina i registri del campo di gioco dell'ultimo apply_frame.
 ; Se il ciclo principale sfora il frame, il frame dopo mostra comunque il campo di gioco
@@ -127,10 +164,10 @@ _p2     lda ap_d018
         lda #3
         sta irq_ph
         jsr sfx_update          ; effetti e musica: una volta per fotogramma, a tempo anche se il ciclo sfora
-        jmp $ea81
+        jmp irq_exit
 _ps     jsr spr_copy
         jsr sfx_update
-        jmp $ea81
+        jmp irq_exit
 
 _top    jsr spr_copy
         lda hy
@@ -142,7 +179,7 @@ _t1     clc
         sta $d012
         lda #0
         sta irq_ph
-        jmp $ea81
+        jmp irq_exit
 
 ; ------------------------------------------------------------------ primitive
 p10l    .byte <10000, <1000, <100, <10, <1

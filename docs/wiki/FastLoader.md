@@ -71,6 +71,9 @@ sequenceDiagram
   `OPEN`, file REL. `quit the game` disinstalla Krill (`krill_uninstall`: il drive salta alla sua ROM) e fa il reset del
   C64; il BASIC rilegge il disco (test `SAVE-15`). Provato in VICE: anche il solo reset del C64 riporta il drive alla ROM
   (il codice di Krill nel drive si disinstalla quando vede ATN). Niente rientro dal BASIC (tolto l'11/11).
+- (21/11, TODO D15) **Il gioco gira con il KERNAL escluso** (`$01 = $35`): Krill carica e salva così (nella nostra
+  configurazione il residente non tocca `$01`: lo farebbe solo con `LOAD_UNDER_D000_DFFF` o `LOAD_VIA_KERNAL_FALLBACK`, entrambi
+  a 0). Provato in VICE con smoke, sanity e regression.
 - `START` mostra una schermata di attesa ("the crypt door creaks open", "please wait"): niente barre (11/11 sera).
 - Il villaggio non si precarica più: lo legge `GAME` entrando (`enter_gfx`).
 - `$DD00`: con Krill installato si scrive **solo il banco VIC** (bit 0-1), i 6 bit alti a 0 (README di Krill,
@@ -151,7 +154,7 @@ Test: `KRILL-20` (l'ingresso nel villaggio: MENU e poi SND0, ogni file giusto al
 - Ogni scrittura riscrive il file intero: `sv_read` (Krill) → si cambia la parte (eroe o piano) → `sv_write` (plugin).
   Con `rel_hold` (menu RUN/STOP, nuovo eroe) più parti vanno in una sola riscrittura (`rel_done`).
 - RAM: immagine del file a `$E000` (`SV_IMG`), plugin a `$E820`, buffer del plugin `$0800` byte a `$ECE0` (`SV_SCR`), tutti sotto il
-  KERNAL: durante il save `$01 = $35` e interrupt spenti; la lettura dell'immagine (`img_on`/`img_off`) idem. Il file
+  KERNAL: durante il save interrupt spenti (dal 21/11 il KERNAL è sempre escluso, `$01 = $35`); la lettura dell'immagine non ha più involucri. Il file
   del villaggio a `$E000` serve solo fino a `gfx_install`: dal 18/11 non si rilegge dopo il salvataggio (`sv_end`, `town_at` tolti).
 - **Il plugin modifica il proprio codice** (17 byte, [MISURATO]: una seconda chiamata senza ricarica si blocca): si
   **carica dal file `KSAVE` prima di ogni save** (~0,5 s) a `$E820`, nella RAM libera durante un salvataggio. Fino

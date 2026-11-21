@@ -17,7 +17,7 @@ Il generatore vero (`src/game/gen_io.asm`: stile del piano, `gen_rooms`, `gen_li
 - nel PRG `GAME` è assemblato con `.logical GEN_AT` dopo la grafica fissa (dato morto dopo l'avvio); `copy_gfx`
   lo copia a `$D080` come prima cosa (`$01` = `$34`, interrupt spenti);
 - si chiama solo con `gen_call` (`dungeon.asm`, residente): `$01` = `$34` (I/O e KERNAL spenti) e `sei` per tutta la
-  generazione, poi `$36` e flag ripristinati. Ingressi: `GEN_MAIN` (il piano `cur_level`) e `GEN_WALLS`
+  generazione, poi `MEMCFG` (`$35`, dal 21/11) e flag ripristinati. Ingressi: `GEN_MAIN` (il piano `cur_level`) e `GEN_WALLS`
   (`post_walls`, usato dall'arena);
 - quel codice **non deve toccare** VIC, SID, CIA, RAM dei colori, KERNAL o il disco; le routine residenti che
   chiama (`rand`, `rndrange`, `set_tile`, `seed_level`, `clear_map`, `fin_doors`) non lo fanno (`set_tile` ridisegna

@@ -205,7 +205,7 @@ flowchart TB
 | STASH `$D000`–`$D07F` | `st_out` (portale, morte) | rientro nel piano (`st_in`) o cambio | boss, 5 mostri caldi e 10 bauli lasciati del piano lasciato (19/11) |
 | generatore `$D080`– | avvio (`gen_install`) | sempre | eseguito con `$01 = $34` |
 | file del villaggio `$E000` | `load_gfx 0` | `gfx_install` lo usa subito; poi il file MENU ci si appoggia (18/11) | (11/11) nessuna cache: si rilegge a ogni ingresso; dal 18/11 non si rilegge dopo un salvataggio |
-| immagine del salvataggio `$E000`, buffer del plugin `$ECA0` | `sv_read` / plugin di save | fine del salvataggio | solo durante un salvataggio (`$01 = $35`) |
+| immagine del salvataggio `$E000`, buffer del plugin `$ECE0` | `sv_read` / plugin di save | fine del salvataggio | solo durante un salvataggio (interrupt spenti) |
 | buffer del tema `GFX_DUN_AT` (`$EC6D`)–`$F4DF` | `load_gfx n` | `gfx_install` (poi dato morto: un salvataggio lo copre) | (15/11) i primi 147 B sono la coda del buffer del villaggio: villaggio e dungeon non sono mai in RAM insieme |
 | colori e nomi dei mostri `NM_AT` (`$8F6D`–`$8FFF`) | `gfx_install` (blocco info del tema) | tema successivo | (15/11) `build_sprites` (colore), `bar_name` (nome) |
 | FMAP `$FD00` | `fin_load` | ingresso successivo | mappa di base del piano 20, riletta a ogni ingresso |
@@ -219,30 +219,34 @@ flowchart TB
 ```mermaid
 stateDiagram-v2
     [*] --> S36: avvio (start)
-    S36: $01 = $36 normale<br/>KERNAL + I/O, BASIC escluso<br/>gioco, disco, IRQ attivo
-    S35: $01 = $35 KERNAL escluso<br/>RAM $E000-$FFFF visibile, I/O presente<br/>sei, NMI su nmi_stub
+    S36: $01 = $36 KERNAL + I/O<br/>solo START, prima di game_start
+    S35: $01 = $35 (MEMCFG) KERNAL escluso<br/>RAM $E000-$FFFF visibile, I/O presente<br/>gioco, disco, IRQ attivo, menu (21/11)
     S34: $01 = $34 tutto RAM<br/>niente I/O ne' KERNAL<br/>sei
     S32: $01 = $32 ROM dei caratteri<br/>(barra: 8 letture)
-    S36 --> S35: gfx_install (cache -> charset), fin_load (FMAP -> MAP),<br/>ovl_town (ZX0), menu del villaggio (mk_off)
-    S35 --> S36: fine copia / mk_exit / uscita dalla locanda
-    S36 --> S34: gen_call (generatore), st_out/st_in (STASH),<br/>copy_gfx all'avvio (generatore -> $D080)
-    S34 --> S36: fine della chiamata o della copia
-    S36 --> S32: bar.asm (glifi dalla ROM)
-    S32 --> S36
+    S36 --> S35: start, dopo irq_init (vettori della CPU in RAM)
+    S35 --> S34: gen_call (generatore), st_out/st_in (STASH),<br/>chap_copy e rel_put/rel_get (slot LVRAM)
+    S34 --> S35: fine della chiamata o della copia
+    S35 --> S32: bar.asm (glifi dalla ROM, interrupt spenti)
+    S32 --> S35
+    S35 --> S37: quit (bb_quit), ritorno a BARBARIAN (bb_menu)
 ```
 
-- **Codice sotto il KERNAL** (MENU zona 2) si esegue solo con `$01 = $35`: si entra sempre dalla zona 1 (`mk_off`), mai
-  direttamente dal gioco.
+- (21/11, TODO D15) **KERNAL sempre escluso**: dopo `start` il gioco gira con `$01 = MEMCFG = $35`. Il KERNAL non serve più
+  (Krill non lo usa, tastiera e IRQ sono del gioco): i vettori della CPU sono nella RAM sotto il KERNAL (`irq_init`: IRQ →
+  `irq_entry`, copia esatta dell'ingresso della ROM `$FF48`, stessi cicli; NMI → `nmi_stub`), l'IRQ esce da `irq_exit` (copia
+  di `$EA81`). La RAM `$E000-$FFF9` è memoria normale: niente cambi di banco per leggerla (cache, MENU zona 2, immagine del
+  salvataggio). `$37` solo per uscire (`bb_quit`, `bb_menu`).
 - **Codice sotto l'I/O** (generatore) si esegue solo con `$01 = $34` e interruzioni spente: non deve toccare VIC, SID, CIA,
   colori, KERNAL, disco (regola di `CLAUDE.md`).
-- **Il disco usa Krill's Loader** (11/11, [FastLoader](FastLoader.md)): `loadraw` con `$01 = $36` e IRQ accesi; il
-  plugin di save con `$01 = $35` e interruzioni spente (immagine e buffer sotto il KERNAL). Prima di ogni operazione
+- **Il disco usa Krill's Loader** (11/11, [FastLoader](FastLoader.md)): `loadraw` con `$01 = $35` (dal 21/11; prima `$36`)
+  e IRQ accesi; il plugin di save con interruzioni spente (immagine e buffer sotto il KERNAL). Prima di ogni operazione
   `snd_io` (musica zitta). Dopo `START` il KERNAL non può più usare il drive. `$DD00`: si scrive solo il banco VIC.
 
 ### Interruzioni
 
-- Solo l'**IRQ raster** (CIA spente all'avvio: `$DC0D`/`$DD0D` = `$7F`); vettore KERNAL `$0314` → `irq_h`, uscita con
-  `jmp $EA81`. NMI (RESTORE) → `nmi_stub` (`rti`), anche nella RAM sotto il KERNAL quando serve.
+- Solo l'**IRQ raster** (CIA spente all'avvio: `$DC0D`/`$DD0D` = `$7F`); (21/11) vettore della CPU `$FFFE` → `irq_entry`
+  (copia dell'ingresso della ROM, poi `jmp ($0314)` → `irq_h`), uscita con `jmp irq_exit` (copia di `$EA81`, in RAM). NMI
+  (RESTORE) → `nmi_stub` (`rti`) da `$FFFA` e da `$0318`.
 - In gioco la catena raster divide lo schermo in campo di gioco e HUD ([Flussi](flussi.md#interrupt-raster)); musica ed
   effetti (`sfx_update`) girano nell'IRQ di fine HUD.
 - Nelle schermate (`ui_begin`) l'IRQ raster è **spento** (`irq_off`, `sei`): la musica gira chiamando `sfx_update` da

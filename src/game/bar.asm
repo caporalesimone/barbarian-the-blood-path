@@ -351,7 +351,7 @@ _gy     lda (ptr0),y
         sta gbuf,y
         dey
         bpl _gy
-        lda #$36
+        lda #MEMCFG
         sta $01
         cli
         ldx bc_i

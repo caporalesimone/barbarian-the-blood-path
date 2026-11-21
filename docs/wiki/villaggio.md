@@ -336,7 +336,7 @@ Schermata rifatta l'08/11 (progetto con il committente, concept ASCII in [Refact
 - **Ordinamento**: zaino e baule sempre in ordine di categoria (armi, armature, scudi, anelli, pozioni, pergamene;
   `sort4`, stabile). Il baule si ordina anche all'apertura.
 - **Memoria**: la locanda sta nel modulo **MENU** con i negozi (`src/menu/inn.asm` zona 1, `src/menu/inn_eq.asm` zona 2;
-  [sotto](#menu-del-villaggio-modulo-menu-1111)). Per tutta la schermata `$01 = $35` (niente KERNAL); uscendo `$01 = $36`
+  [sotto](#menu-del-villaggio-modulo-menu-1111)). Per tutta la schermata interruzioni spente (il KERNAL è escluso in tutto il gioco dal 21/11)
   (dall'11/11 sera niente salvataggio uscendo: il baule va sul disco con "save game"). Apertura 0,14 s (modulo già in memoria dall'ingresso nel villaggio).
 - Il baule sta nel blocco dell'eroe, sempre in RAM: va sul disco con l'eroe a "save game" o al cambio di capitolo ([Salvataggi](salvataggi.md#baule-della-locanda)).
 

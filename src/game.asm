@@ -230,11 +230,9 @@ start:
         lda #0
         sta $d01a
         sta SPR_EN
-        jsr irq_init
-        lda #<nmi_stub
-        sta $0318
-        lda #>nmi_stub
-        sta $0319
+        jsr irq_init            ; (21/11) anche i vettori della CPU sotto il KERNAL (IRQ, NMI), poi il KERNAL esce per sempre
+        lda #MEMCFG
+        sta $01
         lda #$ff
         sta $dc02
         sta $dc00
@@ -248,7 +246,7 @@ start:
         jsr init_vic
         jmp game_start
 
-; NMI (RESTORE) con il KERNAL escluso: nessun effetto (i vettori $FFFA/$FFFB puntano qui nei menu e nei caricamenti)
+; NMI (RESTORE): nessun effetto (vettori $FFFA/$FFFB e $0318, irq_init)
 nmi_stub:
         rti
 
@@ -256,6 +254,9 @@ nmi_stub:
 ; residente di Krill; $41-$57 sono di Krill e del suo plugin): 1 = LOBBY gia' a $C000 (si consuma al primo menu_run).
 ; $8F = CHRPRE (src/lobby.asm).
 LDFLAGS = $8e
+; (21/11, TODO D15) configurazione di memoria del gioco, sempre: KERNAL escluso (RAM a $E000-$FFFF), I/O visibile, BASIC escluso.
+; Il KERNAL non serve piu' dopo START (Krill non lo usa, tastiera e IRQ sono del gioco); $37 solo per "quit" e il ritorno a BARBARIAN
+MEMCFG  = $35
 
 ; build arena (tools/vice/arena.py): ARENA=1 -> out/work/arena_game.prg + modulo out/work/arena.prg a AR_BASE
         .weak
@@ -413,8 +414,6 @@ _adv    inc ptr0                ; un byte di sorgente (preserva A)
 gfx_install:
         sta tmp5
         sei
-        lda #$35                ; KERNAL spento: si legge la RAM sottostante
-        sta $01
         ldx #0
 _q      lda gi_src_lo,x         ; 4 strisce di tile -> charset
         ldy tmp5
@@ -503,9 +502,7 @@ _dn     lda #<SPR_DATA+12*64    ; ptr0 prosegue: mostri base -> slot 12..19
         lda #0
         sta tmp7
         jsr cp_n
-_x      lda #$36
-        sta $01
-        cli
+_x      cli
         rts
 TK_AT = GFX_TOWN_AT+4*GFX_TSTRIP         ; intestazione del villaggio (TK_LEN + TK_SOLID byte), poi la mappa RLE
 gi_pal     .byte 0, pal_c1-pal_bg, pal_c2-pal_bg, pal_ram-pal_bg

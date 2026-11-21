@@ -91,14 +91,8 @@ _ok     lda krill_loadaddrlo
         sta ml_src
         lda krill_loadaddrhi
         sta ml_src+1
-        php                     ; decompressione con il KERNAL escluso (il file e la zona 2 sono nella RAM sotto il KERNAL)
+        php                     ; (il file e la zona 2 sono nella RAM sotto il KERNAL, sempre escluso: MEMCFG)
         sei
-        lda #<nmi_stub          ; (RESTORE: vettore NMI nella RAM sotto il KERNAL)
-        sta $fffa
-        lda #>nmi_stub
-        sta $fffb
-        lda #$35
-        sta $01
         ldy #0
         lda (ml_src),y          ; numero di parti
         sta ml_i
@@ -120,8 +114,6 @@ _u      lda (ml_src),y          ; dati compressi, destinazione
         ldy ml_k
         dec ml_i
         bne _u
-        lda #$36
-        sta $01
         plp
         inc ovl_cur
         clc

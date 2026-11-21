@@ -124,7 +124,7 @@ try:
     SW = dec["I_SWORD"]
     cmd("> %04x %02x" % (lbl["c_pack"], SW), 0.2); cmd("> %04x 02" % lbl["c_packb"], 0.2)
     cmd("> %04x 4d" % lbl["c_packd"], 0.2); cmd("> %04x 96" % lbl["c_packm"], 0.2)
-    code = ("20 %s 78 a9 35 85 01 a9 00 8d %s a2 00 20 %s a9 36 85 01 58 4c 80 03" %
+    code = ("20 %s 78 a9 35 85 01 a9 00 8d %s a2 00 20 %s a9 35 85 01 58 4c 80 03" %
             (w2(lbl["ovl_town"]), w2(lbl["st_col"]), w2(olbl["st_move"])))
     cmd("> 0360 " + code, 0.3); cmd("break 0380", 0.2); cmd("r pc=0360", 0.2); ok1 = go(90); cmd("del", 0.2)
     pk = mem(lbl["c_pack"], 1)[0]

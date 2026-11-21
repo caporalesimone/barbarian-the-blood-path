@@ -230,6 +230,38 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - `spawn_monsters`/`place_monster`/`place_boss`/`floor_types` (~600–800 B, da misurare) accanto al generatore
   (`gen_io.asm`). Attenzione alle annotazioni `@map` / `@free` di `src/game/rel.asm` (RAM sotto l'I/O), arena, `test_gen.py`.
 
+### D15 (21/11) Memoria di GAME: KERNAL escluso e segmento `CORE` sotto il KERNAL — M + M — **proposta, in attesa dell'OK**
+- **Perché**: con il solo inventario nuovo (branch `liste-menu`) GAME sfora di 571 B; il database degli oggetti di oggi pesa
+  637 B, quindi spostare solo quello (F7) non basta. A regime la RAM sotto il KERNAL è quasi vuota (5,3 KB nel villaggio,
+  7,4 KB nel dungeon). Analisi completa e alternative scartate: consegnata il 21/11 (`analisi_memoria_liste.3.md`).
+- **Fatto (21/11), passo 1**: KERNAL sempre escluso (`MEMCFG`, `irq_entry`/`irq_exit`, vettori in RAM): +66 B in GAME, +18 B nel
+  blocco `$9C00`, +27 B nella zona 1 del MENU; regression ed EMU verdi ([architettura](docs/wiki/architettura.md#banchi-di-memoria-01)).
+- **Passi**: (1) KERNAL sempre escluso (`$01=$35`, ingresso e uscita dell'IRQ in RAM con gli stessi cicli della ROM, vettori
+  `$FFFA-$FFFF`); (2) segmento `CORE` a `$E000-$EBD4` (file `core`, ZX0, letto all'avvio della partita e dopo ogni save; il
+  villaggio si legge a `$EC78`); (3) `slist.asm`, inventario, azioni e descrizione degli oggetti in `CORE` (2918 B misurati).
+- **Atteso**: margine di GAME ~+2300 B (misura) e ~+100–150 B dal passo 1 (stima). Avvio e save al massimo +1 s.
+- **Attenzioni**: `CORE` finisce dove comincia l'appoggio del file MENU (`.cerror`); un caricamento di Krill con `$01=$35` non è
+  ancora provato (dal sorgente il residente non tocca `$01`); il disco ha 75 blocchi liberi; con gli affissi (database ~2470 B)
+  servirà una leva di riserva: scheda del personaggio letta all'apertura (+1517 B, tempo da misurare), D10, testo a 5 bit.
+- (21/11, **da fare** con gli affissi) Database degli oggetti diviso per momento d'uso e generazione da un sottoinsieme
+  preparato durante i caricamenti: [oggetti](docs/wiki/oggetti.md#memoria-e-salvataggi-f7-approvato). Non cambia i passi qui sopra.
+- Dopo: menù nuovi (negozi, locanda, baule del piano su `slist`), poi **riportare `liste-menu` su `main`**.
+
+### G10 (21/11) Bauli del piano: seme, farming e bauli aperti a metà — S — **da rivedere più avanti** (decisione del committente)
+- **Oggi** (verificato nel codice): contenuto dal seme del mondo + piano + posizione (`chest_gen_seed`); nel record del piano 1 bit
+  per baule generato ("tolto"): un baule aperto, anche non vuoto, sparisce cambiando piano; il baule del boss si salva intero
+  solo finché non è aperto; i bauli lasciati dai mostri restano solo nella STASH (portale, morte). A ogni "continue" i piani si
+  ripopolano (`c_game`) con **lo stesso contenuto**.
+- **Opzioni**: (a) lasciare così: ogni seme ha i suoi bauli, alcuni semi migliori di altri (preferenza del committente del 21/11);
+  (b) aggiungere `c_game` al seme del baule: contenuti nuovi a ogni partita dopo un save, ricaricare senza salvare non cambia
+  l'oggetto, ~6 B, nessun `SAVE_VER` (da verificare in `rel.asm` che il "continue" non scriva `c_game`); (c) seme del bottino
+  casuale salvato nell'eroe (2 B, `SAVE_VER`): scartata, (b) fa lo stesso senza byte.
+- **Dubbi**: con (a) si "coltiva" un baule buono riaprendolo a ogni partita (copie da vendere): rimedi possibili, baule già
+  aperto che si rigenera solo come oro, o tolto per sempre (1 bit per baule nel record del piano); con (a) rigiocando lo stesso
+  eroe la sorpresa resta solo nel bottino dei mostri (casuale dopo `init_monsters_rt`, dalla wiki); bauli aperti a metà da
+  conservare (1 bit per posto, con il contenuto rigenerato dal seme: ~2 B per piano + baule del boss) o no: regola da decidere.
+- Legata a F7 (rigenerazione dei bauli dal seme, sottoinsieme della generazione deterministico per piano).
+
 ### D10 (ex 6.4) Altri interventi misurati — M
 - `SCR_H` da `$8400` a `$8800` (+224 B); musica sotto il KERNAL (0,8–1,3 KB); codice solo-villaggio su file; variabili sparse (~60 B).
 

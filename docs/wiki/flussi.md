@@ -213,7 +213,7 @@ sequenceDiagram
     L->>D: cur_level
     alt piano 20 (sala del trono)
         D->>F: FMAP: cache $FD00 (dal disco la prima volta)
-        F-->>D: MAP = mappa di base (RLE, $01 = $35)
+        F-->>D: MAP = mappa di base (RLE, dalla RAM sotto il KERNAL)
     end
     D->>C: A = GEN_MAIN
     Note over C: php, sei, $01 = $34
@@ -226,7 +226,7 @@ sequenceDiagram
         G->>G: gen_final (cio' che dipende dalla partita)
     end
     G-->>C: rts
-    Note over C: $01 = $36, plp
+    Note over C: $01 = MEMCFG ($35), plp
     C-->>L: MAP pronta
 ```
 
@@ -294,7 +294,7 @@ flowchart LR
     end
     SC --> GT
     SA --> GT
-    GT["sv_get: file dell'eroe -> SV_IMG $E000<br/>(una volta sola con rel_hold)"] --> PT["sv_put (o rel_done): ricarica KSAVE,<br/>$01 = $35, plugin: 9 blocchi"]  --> SE["fine (18/11: il villaggio non si rilegge piu', sv_end tolta)"]
+    GT["sv_get: file dell'eroe -> SV_IMG $E000<br/>(una volta sola con rel_hold)"] --> PT["sv_put (o rel_done): ricarica KSAVE,<br/>interrupt spenti, plugin: 9 blocchi"]  --> SE["fine (18/11: il villaggio non si rilegge piu', sv_end tolta)"]
 ```
 
 ```mermaid
@@ -427,18 +427,18 @@ sequenceDiagram
     alt ovl_cur = 0 (dopo l'avvio o il LOBBY)
         O->>D: load_file menu (un file, 18/11) - finisce a $FD00, sotto il KERNAL<br/>zone 1, 3, 4, 5 dall'appoggio, zona 2 sul posto
         O->>O: fine del file = fine della zona? altrimenti la parte si rilegge (3 volte, poi C = 1, dal 15/11)
-        O->>O: sei, $01 = $35, zx0_unpack x 3, $01 = $36
+        O->>O: sei, zx0_unpack delle parti (RAM sotto il KERNAL, sempre visibile dal 21/11)
         Note over O: ovl_cur = 1 (2,3 s con Krill, 10,5 s con il KERNAL)
     end
     P->>O: Fire sotto la porta (riprova se mancasse)
     alt locanda
         P->>M: MENU_INN ($C900) -> ov_stash
-        M->>M: mk_off ($01 = $35), schermata, scelta dell'equipaggiamento
-        M->>M: uscita: $01 = $36, ui_exit (11/11 sera: niente salvataggio)
+        M->>M: mk_off (interrupt spenti), schermata, scelta dell'equipaggiamento
+        M->>M: uscita: ui_exit (11/11 sera: niente salvataggio)
     else fabbro / alchimista
         P->>M: MENU_SHOP ($C903, A = negozio): mk_off, enter_shop
         M->>M: shop_roll (merce a caso), compra / vende / ripara
-        M->>M: mk_exit: $01 = $36, ui_exit
+        M->>M: mk_exit = ui_exit
     end
 ```
 

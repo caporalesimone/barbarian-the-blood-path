@@ -250,7 +250,7 @@ sotto il KERNAL fra `$E000` (`ML_LO`: dal 18/11 il villaggio si installa prima d
 `$FCFF`. Il gioco
 (`ovl_town` / `ml_read`, `src/game/stash.asm`) lo legge all'**ingresso nel villaggio** se `ovl_cur` = 0 (lo azzerano
 `game_start`, il caricamento del LOBBY e `enter_gfx`, perché il dungeon copre le zone 4 e 5), controlla che finisca a
-`ml_end` (altrimenti lo rilegge, fino a 3 volte), poi con `$01 = $35`, interruzioni spente e NMI su `nmi_stub` scorre
+`ml_end` (altrimenti lo rilegge, fino a 3 volte), poi con le interruzioni spente (KERNAL escluso: `$01 = $35`, sempre dal 21/11) scorre
 l'intestazione: le zone 1, 3, 4, 5, 6 si decomprimono dall'appoggio nelle loro zone, la zona 2 per ultima **sul posto**.
 `pack_menu.py` simula tutto in 64 KB (nessuna scrittura su dati non ancora letti, ogni zona uguale byte per byte, file
 sopra `ML_LO`) e scrive anche `out/work/menu_zK.prg` (le zone decompresse, per i test). Oggi (18/11, R11): 4328 B (18 blocchi),

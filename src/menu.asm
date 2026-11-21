@@ -9,8 +9,8 @@
 ;    zona 5  MR5_AT $8C00 - $8E7F   (18/11) sprite forti e boss del tema (dungeon): il "!" e il codice degli NPC (menu/npc.asm)
 ;    zona 6  MR6_AT $9600 - $977F   (18/11) tabelle dei mostri in gioco (MRT, dungeon): il passo degli NPC (menu/npc_tick.asm)
 ;  Il gioco lo carica all'ingresso nel villaggio (ovl_town, src/game/stash.asm) se non c'e' e poi resta in memoria.
-;  Tutti i menu girano con $01 = $35 (KERNAL escluso, interruzioni spente, NMI su nmi_stub): il codice della zona 2
-;  si esegue solo cosi'. Escono con $01 = $36 prima di ui_exit (che riaccende l'IRQ).
+;  Tutti i menu girano con le interruzioni spente (mk_off) e, come tutto il gioco dal 21/11, con $01 = MEMCFG = $35
+;  (KERNAL escluso: il codice della zona 2 si esegue). Escono con ui_exit (che riaccende l'IRQ).
 ;  Tabella dei salti fissa all'inizio della zona 1 (MENU_INN, MENU_SHOP in stash.asm).
 ; ===================================================================
         .include "../out/work/game.lbl"
@@ -20,26 +20,16 @@
         * = MR1_AT
         jmp ov_stash            ; MENU_INN: locanda
         jsr mk_off              ; MENU_SHOP: negozio A (0 fabbro, 1 alchimista); enter_shop e' nella zona 2: prima
-        jmp enter_shop          ; il KERNAL va escluso (con $01 = $36 a $F4E0- si eseguirebbe la ROM)
+        jmp enter_shop          ; (interrupt spenti: mk_off)
         jmp npc_here1           ; MENU_NHERE (18/11): chi e' accanto al PG (menu/npc_here.asm)
 
-; KERNAL escluso per tutto il menu (sei, NMI in RAM, $01 = $35). Preserva A, X, Y. Da chiamare SOLO dalla zona 1.
+; interrupt spenti per tutto il menu (dal 21/11 il KERNAL e' sempre escluso, $01 = MEMCFG: la zona 2 si esegue sempre).
+; Preserva A, X, Y.
 mk_off: sei
-        pha
-        lda #<nmi_stub          ; (RESTORE: vettore NMI nella RAM sotto il KERNAL)
-        sta $fffa
-        lda #>nmi_stub
-        sta $fffb
-        lda #$35
-        sta $01
-        pla
         rts
 
-; uscita da un menu: di nuovo il KERNAL ($01 = $36), poi ui_exit
-mk_exit:
-        lda #$36
-        sta $01
-        jmp ui_exit
+; uscita da un menu
+mk_exit = ui_exit
 
         .include "menu/inn.asm"
         .include "menu/shop_act.asm"

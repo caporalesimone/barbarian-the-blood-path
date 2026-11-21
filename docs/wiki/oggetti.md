@@ -275,11 +275,20 @@ non sta in GAME. Architettura:
 - **`IGEN`** a `$F817` (codice del MENU morto nel dungeon, fuori da tema e salvataggi): generazione degli oggetti e tabelle che
   servono solo a generare (~730 B su 1257). Si legge scendendo nel dungeon. Prepara anche, uscendo dal dungeon, la **merce
   dei negozi** (buffer di ~56 B a `$FE96`) e l'**oggetto premio** delle ripetibili.
-- Accesso con `$01 = $35`, interruzioni spente e NMI su `nmi_stub` (come la zona 2 del MENU), solo nelle schermate.
+- Accesso diretto: dal 21/11 il KERNAL è sempre escluso (`$01 = $35`, TODO D15), niente involucri.
 - **GAME**: escono tabelle, nomi e generatore di oggi, entrano interfaccia, affissi e agganci delle quest: margine ~1250 B (stima).
 - **Bauli del piano**: contenuto **rigenerato** dal seme (seme del mondo, piano, nonce del baule) a ogni apertura, salvando solo
   quali oggetti sono presi: ~45 B invece dei 120 di `ch_i`/`ch_b` (generatore deterministico per baule: da verificare).
 - **Oggetto** = id + prefisso (id, valore) + suffisso (id, valore) + durabilità + massima = 7 B (oggi 4).
 - **Baule della locanda** sotto l'I/O (168 B nei 260 liberi a `LVRAM_end`); blocco dell'eroe ~189 B nella pagina `$9500`.
 - **File di salvataggio**: solo i 5 piani del capitolo in corso (C1): ~790 B, 4 blocchi invece di 9.
+- **(21/11, da fare con gli affissi; idea del committente) Database diviso per momento d'uso, generazione da un sottoinsieme.**
+  In RAM resta solo la **visualizzazione** (nomi, statistiche delle basi, poteri degli unici: ~1350–1700 B, stima; i nomi sono
+  1040 B contati dai `.tsv`). I **prezzi** (~160 B, stima) vanno nel file MENU, che si legge già a ogni ingresso nel villaggio.
+  La **generazione** non usa il database intero: durante un caricamento si prepara un **sottoinsieme** di basi e affissi scelto
+  a caso ma pilotato (livello, pesi), e fino al caricamento dopo tutto ciò che è casuale pesca da lì (~150–250 B invece di
+  ~700, stima). La selezione si può fare a build time (`gen_db.py`: un elenco per capitolo o per piano, accodato al tema).
+  Vincoli: sottoinsieme **deterministico** per piano finché i bauli si rigenerano dal seme; unici garantiti (boss, quest,
+  bauli epici) inseriti d'ufficio; in un piano esce solo ciò che è nel sottoinsieme (scelta di gioco); disco con 75 blocchi
+  liberi (21/11); la coda del tema arriva a `$FB16` e sporca `$F817`.
 - Rischi: budget comune MENU + `IDAT`; NPC fissi nelle zone 5–6 del MENU; pagina Q (`QST0` pieno).
