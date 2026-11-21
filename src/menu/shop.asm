@@ -61,12 +61,7 @@ _cp     stx shp_i
         bcc _cl
         lda #MAXLEVEL
 _cl     sta af_l
-        tax
-        jsr rand
-        cmp shm_t,x
-        lda #0
-        rol
-        eor #1
+        lda #2                  ; negozio: af_gen decide se e' magico con shm_t[livello] (tabella sotto l'I/O)
         sta af_m
         lda #31
         sta af_tt

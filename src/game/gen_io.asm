@@ -1601,3 +1601,6 @@ _d      pla
         sta tp_on
         rts
 
+; (21/11 sera, fase 4: spazio di GAME) tabelle di generazione degli affissi (af_min, af_ty, af_ch, mag_t, shm_t): le legge solo
+; af_gen (combat.asm) con $01 = $34 e interrupt spenti
+        .include "../out/work/afgen.asm"

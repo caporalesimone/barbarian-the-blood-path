@@ -260,6 +260,12 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   **(21/11 sera, fase 3 degli affissi fatta senza sottoinsieme)**: le tabelle di generazione (`af_min`, `af_ty`, `af_ch`, `af_pl`/`af_ph`,
   `mag_t`, `shm_t`: ~370 B) e `af_gen`/`af_pick`/`it_cost` stanno in GAME, il cui margine e' sceso a **~950 B** (sotto la soglia di
   avviso di 1 KB). Il sottoinsieme (o una tabella di generazione caricata con il tema / il MENU) e' la prima leva per riprenderli.
+  **(21/11 sera, fase 4)**: i poteri nuovi costano ~180 B; le tabelle di sola generazione (`af_min`, `af_ty`, `af_ch`, `mag_t`, `shm_t`,
+  209 B) sono passate sotto l'I/O con il generatore (`out/work/afgen.asm` in fondo a `gen_io.asm`; `af_gen` le legge con `$01 = $34`):
+  margine **942 B**; sotto l'I/O restano ~30 B (`LVRAM_end` = `$DFE1`). Provato e scartato: `ui_badsave` nel LOBBY (37 B oltre `$CBFF`).
+  Leve rimaste (da decidere): la scheda C (1517 B) nella coda dei file del tema e del villaggio, gia' letti a ogni ingresso
+  (niente accesso in piu' al disco, ~6 blocchi in piu' per file; da rileggere dopo un salvataggio); il sottoinsieme qui sopra;
+  testo a 5 bit (D10).
 - **Fatto (21/11), fase B**: negozi, locanda e baule del piano sulle liste a scorrimento, vecchia interfaccia comune tolta
   (margine di GAME 2437 B, zone 1 e 2 del MENU con 863 e 523 B liberi); branch `liste-menu` unito a `main` il 21/11.
 - (21/11, committente) **Budget del passaggio fra dungeon e villaggio: al massimo 3 s**: entro quel tempo si può caricare

@@ -100,7 +100,7 @@ class Hero:
     Un'arma c'e' sempre (non esiste il PG disarmato). Arma a due mani: lo scudo e' ignorato.
     Attacco e danno: sempre mod FOR (08/11: tolto il "finesse" del pugnale)."""
     def __init__(self, level, weapon="dagger", armor="", shield="", magic=0, wmagic=None, amagic=None, smagic=None,
-                 rings=None, ring="", potions=(), hp_level1=None):
+                 rings=None, ring="", potions=(), hp_level1=None, affixes=None):
         self.level = level
         rings = rings or ring_bonus(ring)
         self.sc = pg_scores(level, rings)
@@ -133,6 +133,12 @@ class Hero:
         self.dc = 8 + self.prof + self.m["str"]
         self.crit = 19 if level >= R["skills"]["brutal_critical_level"] else 20
         self.potions = list(potions)
+        # (21/11 evening, affixes phase 4, as recalc_stats / hurt_player) life, damage taken -N, penetration, speed (frames less, at least 6)
+        af = affixes or {}
+        self.hpmax += af.get("life", 0)
+        self.gethit = af.get("gethit", 0)
+        self.pen += af.get("pen", 0)
+        self.rate = max(6, self.rate - af.get("speed", 0))
 
     def skills(self):
         return [k for k, v in R["skills"].items() if isinstance(v, dict) and v["level"] <= self.level]

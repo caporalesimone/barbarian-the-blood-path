@@ -64,6 +64,8 @@ def eligible_all(rows, cat, level):
 
 
 def pick(rng, rows):
+    # (21/11 evening, phase 4) life leech and thorns come after 2.0 (O5): weight 0 in the game (gen_db.py), here too
+    rows = [r for r in rows if r["power"] not in ("LEECH", "THORNS")]
     w = [_int(r["chance"], 1) for r in rows]
     return rng.choices(rows, weights=w)[0] if rows else None
 

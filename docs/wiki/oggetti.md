@@ -267,8 +267,14 @@ suffisso nell'oggetto: tabelle `af_pw`/`af_val` in GAME, nomi `af_names` in CORE
 CA, FOR, DES, COS e "all"; la magia +N e la caratteristica degli anelli generate come prima ma registrate come affissi; nomi
 "prefisso nome of suffisso" tagliati a 16 colonne, `ui_item`). **Fase 3 (21/11 sera)**: generazione con tutte le righe (`af_gen`,
 `af_pick`: [Bottino](bottino.md)), negozi con 3-8 oggetti e merce magica secondo il livello ([Villaggio](villaggio.md)), prezzi con
-gli affissi (`it_cost`: acquisto, vendita a un quarto, riparazione al 25%); la magia +N di prima non c'e' piu'. Da fare: gli altri
-poteri (fase 4), interfaccia (fase 5), unici (fase 6), sottoinsieme della generazione (TODO D15).
+gli affissi (`it_cost`: acquisto, vendita a un quarto, riparazione al 25%); la magia +N di prima non c'e' piu'. **Fase 4 (21/11
+sera)**: gli altri poteri. In `recalc_stats` (`af_one`): **vita** (LIFE, somma a `hpmax`), **danno subito in meno** (GETHIT, `s_gh`:
+`hurt_player` toglie N a ogni colpo, almeno 1 di danno resta), **penetrazione** (PEN, `s_pen`), **cadenza** (SPEED: fotogrammi in
+meno, almeno `RATE_MIN` = 6). Alla nascita dell'oggetto (`add_to_pack` → `af_dur`, solo per gli oggetti nuovi): **durabilità**
++50 / +100 / −50 (% del massimo tirato: +metà, +tutto fino a 255, −metà) e **indistruttibile** (massimo 0 = non si usura). **Furto
+di vita e spine** (LEECH, THORNS): dopo la 2.0 (O5), le righe hanno peso 0 e non escono. Il simulatore (`rules.py` `Hero(affixes=)`,
+`sim_rules.py`) ha vita, danno subito, penetrazione e cadenza. Le tabelle di sola generazione (`af_min`, `af_ty`, `af_ch`, `mag_t`, `shm_t`) stanno sotto l'I/O, in fondo al generatore (`out/work/afgen.asm` incluso da `gen_io.asm`): `af_gen` le legge con `$01 = $34` e interrupt spenti. Da fare: interfaccia (fase 5), unici (fase 6), sottoinsieme della
+generazione (TODO D15).
 
 **Progetto** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
 database proposto sta in `data/items/next/` (il gioco non lo legge ancora): `bases.tsv` (31 basi, colonna `status`: `today` o

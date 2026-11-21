@@ -143,6 +143,11 @@ af_att     .byte ?          ; (21/11 sera, affissi: combat.asm af_one) totali de
 af_dmg     .byte ?
 af_ac      .byte ?
 af_st      .fill 3          ; ... modificatore di FOR, DES, COS
+af_life    .byte ?          ; (fase 4) ... vita, danno subito in meno, penetrazione, cadenza (fotogrammi in meno)
+af_gh      .byte ?
+af_pen     .byte ?
+af_spd     .byte ?
+s_gh       .byte ?          ; (fase 4) danno subito in meno per colpo (affissi "of health"...: hurt_player), da recalc_stats
 af_i       .byte ?          ; recalc_stats: posto dell'equipaggiamento; af_pair: suffisso
 af_t       .byte ?
 af_l       .byte ?          ; (fase 3) af_gen: livello dell'oggetto, T (chestLevel / 8), 1 = magico d'ufficio (negozio)
@@ -346,6 +351,11 @@ _put    sta c_pack,y
         ldx ap_m                ; durabilita': quella data (baule di casa) o nuova (bottino, negozio)
         bne _d
         jsr dur_roll            ; A = oggetto (08/11: prima riceveva ap_m = 0 e gli oggetti nuovi non si usuravano)
+        tya                     ; (21/11 sera, fase 4) affissi della durabilita' (of sturdiness...) e indistruttibile; Y = posto
+        pha
+        jsr af_dur
+        pla
+        tay
 _d      lda ap_b
         sta c_packb,y
         lda ap_s

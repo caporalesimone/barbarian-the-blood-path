@@ -29,7 +29,7 @@ def sgn16(lo, hi):
 def afg_loot(ctx):
     g = ctx["g"]; L = g.L
     n = L["AF_NP"] + L["AF_NS"] + 1
-    ty, mn = g.mem(L["af_ty"], n), g.mem(L["af_min"], n)
+    g.cmd("bank ram"); ty, mn = g.mem(L["af_ty"], n), g.mem(L["af_min"], n); g.cmd("bank cpu")   # (under the I/O, with the generator)
     cat = g.mem(L["itcat"], L["N_ITEMS"]); val = g.mem(L["itval"], L["N_ITEMS"])
     eq = mag = 0; bad = []; rings = Counter()
     for _ in range(N):
@@ -48,7 +48,7 @@ def afg_loot(ctx):
         else:
             eq += 1; mag += 1 if p or s else 0
     check(not bad, "affixes that do not fit: %s" % bad[:6])
-    want = g.b(L["mag_t"] + 10) / 256
+    g.cmd("bank ram"); want = g.b(L["mag_t"] + 10) / 256; g.cmd("bank cpu")
     share = mag / max(1, eq)
     print("      magic %d / %d = %.2f (mag_t %.2f), rings %s" % (mag, eq, share, want, dict(rings)))
     # (below mag_t: an item of level 0 has no row with min_level <= 0, as in tools/simulators/items_model.py)
@@ -60,7 +60,8 @@ def afg_loot(ctx):
 def afg_cost(ctx):
     g = ctx["g"]; L = g.L
     n = L["AF_NP"] + L["AF_NS"] + 1
-    pl, ph, mn = g.mem(L["af_pl"], n), g.mem(L["af_ph"], n), g.mem(L["af_min"], n)
+    pl, ph = g.mem(L["af_pl"], n), g.mem(L["af_ph"], n)
+    g.cmd("bank ram"); mn = g.mem(L["af_min"], n); g.cmd("bank cpu")
     sw = L["I_SWORD"]
     base = g.b(L["itprice"] + 2 * sw) | g.b(L["itprice"] + 2 * sw + 1) << 8
     p, cur = L["MAG_W2"], next(k for k in range(1, L["AF_NP"] + 1) if mn[k] & 0x80)

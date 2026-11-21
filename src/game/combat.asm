@@ -188,12 +188,18 @@ af_one: tay
         beq _c
         cpx #PW_ALL
         beq _all
-        cpx #PW_CON+1
+        cpx #PW_SPEED+1         ; durabilita' e indistruttibile: alla nascita (af_dur); furto di vita e spine: dopo la 2.0 (O5)
         bcs _r
+        cpx #PW_LIFE
+        bcs _ex
         clc                     ; PW_STR, PW_DEX, PW_CON
         adc af_st-PW_STR,x
         sta af_st-PW_STR,x
 _r      rts
+_ex     clc                     ; (fase 4) PW_LIFE, PW_GETHIT, PW_PEN, PW_SPEED
+        adc af_life-PW_LIFE,x
+        sta af_life-PW_LIFE,x
+        rts
 _all    tay
         ldx #2
 -       tya
@@ -230,19 +236,74 @@ af_pair:
 +       rts
 ; totali degli affissi a 0
 af_clr: lda #0
-        ldx #5
+        ldx #9
 -       sta af_att,x
         dex
         bpl -
         rts
-        .cerror af_dmg != af_att+1 || af_ac != af_att+2 || af_st != af_att+3, "af_att..af_st contigui"
+        .cerror af_dmg != af_att+1 || af_ac != af_att+2 || af_st != af_att+3 || af_life != af_att+6 || af_spd != af_att+9, "af_att..af_spd contigui"
+        .cerror PW_GETHIT != PW_LIFE+1 || PW_PEN != PW_LIFE+2 || PW_SPEED != PW_LIFE+3 || PW_CON != PW_STR+2, "codici dei poteri"
+
+; (fase 4) oggetto nuovo con la durabilita' appena tirata (ap_d = ap_m): affissi del prefisso ap_b e del suffisso ap_s.
+; Indistruttibile: ap_d = ap_m = 0 (non si usura). Durabilita' +50 / +100 / -50 (% del massimo): +meta' / +tutto / -meta'
+af_dur: lda ap_b
+        jsr _one
+        lda ap_s
+        beq _r
+        clc
+        adc #AF_SX0
+_one    tay
+        beq _r
+        lda af_pw,y
+        cmp #PW_INDESTRUCTIBLE
+        bne +
+        lda #0
+        sta ap_d
+        sta ap_m
+_r      rts
++       cmp #PW_DUR
+        bne _r
+        lda ap_m
+        beq _r
+        lsr
+        sta af_t
+        lda af_val,y
+        bmi _neg
+        cmp #100
+        bcc +
+        asl af_t
++       lda ap_m
+        clc
+        adc af_t
+        bcc _st
+        lda #255
+        bne _st
+_neg    lda ap_m
+        sec
+        sbc af_t
+        bne _st
+        lda #1
+_st     sta ap_m
+        sta ap_d
+        rts
 
 ; ---- (21/11 sera, fase 3) generazione degli affissi (data/items/next/affix_rules.yaml; modello: tools/simulators/items_model.py)
-; Y = id dell'oggetto nuovo, af_l = livello dell'oggetto, af_tt = T (chestLevel / 8), af_m = 1 magico d'ufficio (negozio) ->
+; Y = id dell'oggetto nuovo, af_l = livello dell'oggetto, af_tt = T (chestLevel / 8), af_m = 1 magico d'ufficio, 2 negozio
+; (magico con probabilita' shm_t[af_l]) ->
 ; ap_b = prefisso, ap_s = suffisso (0 = nessuno). Pozioni e pergamene: niente. Anelli: rame un affisso a caso, argento e oro
 ; prefisso e suffisso (oro: prefisso del livello piu' alto disponibile). Altri: magico con probabilita' mag_t[T] (o af_m),
 ; poi solo prefisso / solo suffisso / entrambi (AFQ_P, AFQ_S).
 af_gen:
+        php                     ; (fase 4, spazio di GAME) le tabelle di generazione stanno sotto l'I/O (gen_io.asm, afgen.asm)
+        sei
+        lda #$34
+        sta $01
+        jsr af_gen0
+        lda #MEMCFG
+        sta $01
+        plp
+        rts
+af_gen0:
         lda #0
         sta ap_b
         sta ap_s
@@ -268,6 +329,14 @@ _one    jsr rand
         beq _pfx
         bne _sfx
 _nr     lda af_m
+        cmp #2                  ; 2 = negozio: magico con probabilita' shm_t[af_l] (livello del PG)
+        bne +
+        jsr rand
+        ldx af_l
+        cmp shm_t,x
+        bcs _r
+        bcc _mag
++       cmp #0
         bne _mag
         jsr rand
         ldx af_tt
@@ -505,6 +574,14 @@ _an     ldx af_i
         bne -
 _hd
         ; (21/11 sera) anelli: la caratteristica e' il loro suffisso (of strength...), contata con gli affissi sopra
+        lda af_life             ; (fase 4) vita degli affissi (of the fox...); danno subito in meno (of health...)
+        clc
+        adc hpmax
+        sta hpmax
+        bcc +
+        inc hpmax+1
++       lda af_gh
+        sta s_gh
 _nr     lda s_str
         jsr modv
         sta s_mod
@@ -546,8 +623,15 @@ _nr     lda s_str
         lda #0
 +       clc
         adc itrate,x
-        sta s_rate
+        sec                     ; (fase 4) cadenza degli affissi (of readiness...): fotogrammi in meno, almeno RATE_MIN
+        sbc af_spd
+        cmp #RATE_MIN
+        bcs +
+        lda #RATE_MIN
++       sta s_rate
         lda itpen,x
+        clc
+        adc af_pen              ; (fase 4) penetrazione degli affissi (of piercing...)
         sta s_pen
         ; CA = 10 + min(mod DES, limite dell'armatura) + armatura + scudo (magia compresa)
         lda #10                 ; (21/11 sera) + CA degli affissi (prima: magia di armatura e scudo)
@@ -621,7 +705,23 @@ hp_full:
 hurt_player:
         lda godmode
         bne _s
-        lda c_hp
+        lda s_gh                ; (fase 4) danno subito in meno (affissi), almeno 1
+        beq _ng
+        lda cb_dl
+        sec
+        sbc s_gh
+        sta cb_dl
+        lda cb_dh
+        sbc #0
+        sta cb_dh
+        bcc _g1
+        ora cb_dl
+        bne _ng
+_g1     lda #0
+        sta cb_dh
+        lda #1
+        sta cb_dl
+_ng     lda c_hp
         sec
         sbc cb_dl
         sta c_hp

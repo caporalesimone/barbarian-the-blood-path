@@ -166,7 +166,7 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                     if t < rage_until:
                         d //= 2
                     d = d * (1000 - getattr(hero, "dr10", 0)) // 1000    # (20/11) COS: danno subito ridotto (rules_next.yaml)
-                    d = max(1, d)
+                    d = max(1, d - getattr(hero, "gethit", 0))          # (21/11 evening) affixes: damage taken -N (hurt_player, s_gh)
                     hp -= d
                     st["taken"] += d
                     if hp <= 0:

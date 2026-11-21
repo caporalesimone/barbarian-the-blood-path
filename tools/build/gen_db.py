@@ -634,29 +634,38 @@ def main():
         cur = int(r["value1"] or 0) < 0
         amin.append(ml | (0x80 if cur else 0))
         aty.append(sum(TYB[t] for t in r["item_types"].split(",")))
-        ach.append(byte(int(r["chance"]), f"{r['name']}.chance"))
+        # (fase 4) furto di vita e spine: dopo la 2.0 (decisione O5): righe con peso 0, non escono finche' il gioco non le fa
+        ach.append(0 if r["power"] in ("LEECH", "THORNS") else byte(int(r["chance"]), f"{r['name']}.chance"))
+        if r["power"] == "DUR":
+            chk(int(r["value1"]) in (50, 100, -50), f"affisso {r['name']}: DUR solo +50, +100, -50 (af_dur)")
         pa = int(r["price_add"]) & 0xffff
         apl.append(pa & 255); aph.append(pa >> 8)
     chk(sum(ach[1:len(PX) + 1]) < 256 and sum(ach[len(PX) + 1:]) < 256, "affissi: la somma dei pesi deve stare in un byte (af_pick)")
-    o.bytes("af_min", amin)
-    o.bytes("af_ty", aty)
-    o.bytes("af_ch", ach)
+    # (21/11 sera, spazio di GAME) le tabelle che servono solo a generare stanno sotto l'I/O con il generatore (out/work/afgen.asm,
+    # incluso in fondo a src/game/gen_io.asm): af_gen le legge con $01 = $34 e interrupt spenti
+    ag = Out()
+    ag.bytes("af_min", amin)
+    ag.bytes("af_ty", aty)
+    ag.bytes("af_ch", ach)
     o.bytes("af_pl", apl)
     o.bytes("af_ph", aph)
     AR = yaml.safe_load(open(os.path.join(nx, "affix_rules.yaml")))
     q = AR["quality"]
     # magico con probabilita' base + per_t x T (T = chestLevel / 8), al massimo max: soglie su 256 per T = 0..31
-    o.bytes("mag_t", [pct256(min(q["magic"]["max"], q["magic"]["base"] + q["magic"]["per_t"] * t), "magic") for t in range(32)])
+    ag.bytes("mag_t", [pct256(min(q["magic"]["max"], q["magic"]["base"] + q["magic"]["per_t"] * t), "magic") for t in range(32)])
     a = q["affixes"]
     o(f"AFQ_P       = {pct256(a['prefix'], 'affixes.prefix')}       ; fra i magici: solo prefisso sotto AFQ_P, solo suffisso sotto AFQ_S, poi entrambi (su 256)")
     o(f"AFQ_S       = {pct256(a['prefix'] + a['suffix'], 'affixes.suffix')}")
     ac = AR["affix_choice"]
     chk(ac["low_fraction"] == 0.5 and ac.get("cursed_any_level"), "affix_choice: il gioco fa la finestra con 2 x min_level >= livello (low_fraction 0.5) e i maledetti fuori finestra")
     o(f"AF_TOP      = {byte(ac['top_level'], 'top_level')}       ; finestra: livello al massimo AF_TOP")
+    o("RATE_MIN    = 6        ; (fase 4) cadenza minima dell'attacco base con gli affissi (fotogrammi)")
     o(f"CURSE_T     = {pct256(ac['cursed_share'], 'cursed_share')}       ; affisso maledetto con probabilita' CURSE_T / 256")
     chk(AR["rings"] == {"copper": 1, "silver": 2, "gold": 2}, "rings: il gioco fa rame 1, argento e oro 2 (oro: prefisso del livello piu' alto)")
     sm = AR["shops"]["magic"]
-    o.bytes("shm_t", [pct256(min(sm["max"], sm["base"] + sm["per_level"] * l), "shops.magic") for l in range(21)])   # negozi: merce magica per livello del PG
+    ag.bytes("shm_t", [pct256(min(sm["max"], sm["base"] + sm["per_level"] * l), "shops.magic") for l in range(21)])   # negozi: merce magica per livello del PG
+    if "--check" not in sys.argv:
+        open(os.path.join(os.path.dirname(DST), "afgen.asm"), "w").write("; (gen_db.py) tabelle di generazione degli affissi, sotto l'I/O\n" + "\n".join(ag.lines) + "\n")
     def find(rs, power, v, typ):
         for i, r in enumerate(rs, 1):
             if r["power"] == power and int(r["value1"] or 0) == v and typ in r["item_types"].split(","):

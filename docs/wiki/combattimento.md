@@ -107,7 +107,7 @@ Si scelgono con H J K L (`sel_skill`, solo se il livello basta) e si usano tenen
 
 Ogni 45 fotogrammi un mostro a contatto tira d20 + ATT (+2 se boss con nome) contro la CA del PG:
 1 naturale manca, 20 naturale è critico (dadi × 2). Danno = (dadi + K) × `cv_dmg[piano]` / 32, poi metà con
-Rage, minimo 1, sottratto dalla vita a 16 bit (`hurt_player`: lampo rosso, suono). Ogni colpo subito usura
+Rage, minimo 1, meno il **danno subito degli affissi** (`s_gh`, dal 21/11 sera; ne resta almeno 1), sottratto dalla vita a 16 bit (`hurt_player`: lampo rosso, suono). Ogni colpo subito usura
 armatura e scudo (sotto).
 
 ## Durabilità e usura (`wear`, `dur_roll`)

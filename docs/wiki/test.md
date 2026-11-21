@@ -150,18 +150,22 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (3)
+### sanity (4)
+
+| ID | Test |
+|---|---|
+| `AFP-10` | recalc_stats: armor 'of the wolf' -> hpmax +12; shield 'of health' -> s_gh 1; weapon 'of piercing' -> pen +1, 'of readiness' -> rate -1 |
+| `AFP-11` | hurt_player with s_gh 2: 5 damage -> -3 hp, 1 damage -> -1 hp (at least 1) |
+| `AFP-12` | add_to_pack (same random state): durability +50 -> max + max/2, +100 -> max x 2 (at most 255), -50 -> max - max/2, indestructible -> 0 |
+| `AFP-13` | af_ch: life leech and thorns have weight 0 (after 2.0, decision O5), every other row a weight > 0 |
+
+### regression (257)
 
 | ID | Test |
 |---|---|
 | `AFG-10` | gen_item at chestLevel 80 (T 10): magic share of weapons/armors/shields near mag_t[10]; every affix fits the item type; rings always have affixes, silver and gold both |
 | `AFG-11` | it_cost: price = itprice + price_add of prefix and suffix (signed: a cursed row costs less), at least 1; scrolls ignore the quantity |
 | `AFG-12` | blacksmith: 3..8 wares from the filtered pool (repetitions allowed), empty entries after them |
-
-### regression (254)
-
-| ID | Test |
-|---|---|
 | `AFX-10` | MAG_W/MAG_A: the ATT_DMG +N prefix of weapons, the AC +N prefix of armors and shields; RSX_: stat x metal -> STR/DEX/CON +metal suffix |
 | `AFX-11` | recalc_stats: weapon prefix ATT_DMG +2 -> ATT and damage +2; armor prefix AC +2 -> AC +2; ring suffix STR +2 -> STR +4 |
 | `AFX-12` | inventory: 'fine sword' (prefix, pack) and 'copper ring of s' (suffix, worn, cut at 16 columns) in the list |
