@@ -131,7 +131,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SHOP-REPAIR-01` | smith: repair the worn weapon (durability back to max - 1, gold paid) |
 | `INN-CHEST-01` | inn: an item from the pack to the chest |
 | `INN-CHEST-02` | inn: the item from the chest back to the pack |
-| `INN-GOLD-01` | inn: carried gold into the chest (in tens) |
+| `INN-GOLD-01` | inn: entering, the carried gold goes into the chest (in tens) |
 | `LVL-IN-01` | crypt: enter level 1 |
 | `FIGHT-01` | combat: a monster killed, experience gained |
 | `PG-LEVEL-01` | level up: experience over the threshold -> level + 1, more hp, Whirlwind selectable at level 3 |
@@ -380,7 +380,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `VIL-MENU-10` | inn and smith right after the start, again after walking around: no read of the file MENU inside the same village visit |
 | `VIL-MENU-11` | after level 1 and back (the module MENU is read again at the village entry): inn and smith without further reads |
 | `FOUNT-10` | fountain: walking on it heals to full hp |
-| `INN-GOLD-11` | inn: Fire on the chest gold row does nothing (no withdrawal since 10/11), the screen stays open |
+| `INN-GOLD-11` | inn: entering with less than a ten of gold nothing moves; with the chest near full only what fits (21/11) |
 | `MENU-10` | out/work/menu.prg (one file since 18/11): header (parts, source and destination), parts ZX0(zone k), ends at MR2_END, above ML_LO; shops out of GAME; the disks have MENU, no MENU1/OVLT/OVL2 |
 | `MENU-11` | ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 = $35 (KERNAL always out since 21/11), < 11 s |
 | `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |

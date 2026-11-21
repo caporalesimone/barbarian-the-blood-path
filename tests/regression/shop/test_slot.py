@@ -31,7 +31,7 @@ def run():
         if not v.play(1): err.append("slot: game not started"); return
         es = L["MENU_SHOP"]                                                             # (11/11) KERNAL out, then enter_shop
         v.cmd("> 0340 a9 01 20 %02x %02x 4c 45 03" % (es & 255, es >> 8))              # alchemist (shop_id 1; 09/11: no armorer)
-        v.cmd("break %04x" % (L["ui_nav"] + 3)); v.cmd("r pc=0340")
+        v.cmd("break %04x" % (L["sl_nav"] + 3)); v.cmd("r pc=0340")   # (21/11) shops on the scrolling lists
         if not v.go(40): err.append("slot: alchemist not opened"); return
         v.cmd("del")
         sbuy = L["shop_buy"]

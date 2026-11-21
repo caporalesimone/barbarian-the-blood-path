@@ -485,7 +485,7 @@ game_start:
         jsr load_menu
         jsr LOBBY_AT+3           ; scheda eroe salvato
 .endif
-.if (TESTUI == 21) || (TESTUI == 29)       ; 29: casa nella scelta dell'anello (screenshot)
+.if TESTUI == 21                ; locanda con il baule pieno (screenshot)
         jsr ovl_town
         ldx #STASH_N-1          ; baule di casa pieno (24 oggetti, regola del committente 08/11): tutti i tipi di oggetto
 _st     txa                     ; tranne le pergamene, a giro

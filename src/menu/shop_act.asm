@@ -79,6 +79,8 @@ _put    ldx sh_slot
         jmp _pay
 _cn     lda #$ff
         sta sh_slot
+        lda #0                  ; (21/11) il cursore torna nella lista della merce
+        sta sl_l
         rts
 
 ; vende la voce ui_lc (zaino, posto della cintura o una pergamena), se il negozio la compra
@@ -110,15 +112,10 @@ _ok     lda ui_sel              ; prezzo >> SELL_SHIFT (20/11: un quarto, balanc
         lda #1
         jsr shop_ask
         bcc _r
-        ldx ui_lc
+        ldx ui_lc               ; (21/11) zaino 0..7 o cintura 20..23 (le pergamene sono nello zaino, in pila)
         cpx #20
-        bcc _pk
-        cpx #24
-        bne _bt
-        jsr scr_find            ; pergamene: una della pila dello zaino
-        tya
-        tax
-_pk     lda c_pack,x
+        bcs _bt
+        lda c_pack,x
         cmp #I_SCROLL
         bne _z
         dec c_packb,x           ; una pergamena della pila; la pila vuota libera il posto

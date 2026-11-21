@@ -4,15 +4,15 @@
 ;  escluso: parte del codice sta nella zona 2, sotto il KERNAL), come la locanda.
 ; ===================================================================
 ; ------------------------------------------------------------------ negozi
-; negozi (08/11, concept con il committente): una schermata a riquadri uguale per tutti, senza linguette.
-; Voci (codici in ui_lc): 0..7 zaino, 8..11 equipaggiamento, 12..19 merce, 20..23 cintura, 24 pergamene.
-; ui_cur = posizione nell'ordine del cursore (sh_nav): merce, equipaggiamento (solo fabbro), zaino, cintura e
-; pergamene (solo alchimista). Fire: merce = compra, zaino/cintura = vende, equipaggiamento = ripara;
-; R (fabbro) ripara zaino ed equipaggiamento. L'equipaggiamento non si vende mai. Ogni negozio compra solo le
-; categorie di cio' che vende (sh_cats); gli altri oggetti dello zaino sono grigi (pk_name).
-SH_N = 25
+; (21/11, branch liste-menu, prototipi approvati dal committente) due liste a scorrimento (src/game/slist.asm, segmento CORE):
+;   lista 0 "wares": la merce (prezzo pieno a destra);
+;   lista 1 "gear" (fabbro: arma, armatura e scudo indossati, poi armi/armature/scudi dello zaino e i posti liberi) o "yours"
+;   (alchimista: anello indossato, cintura, anelli e pergamene dello zaino e i posti liberi), con il prezzo di vendita a destra.
+; Le azioni lavorano sui codici di prima in ui_lc (sh_cur): 0..7 zaino, 8..11 equipaggiamento, 12..19 merce, 20..23 cintura.
+; Fire: merce = compra, zaino e cintura = vende (l'indossato no: "unequip to sell"); R (fabbro): ripara zaino e indossato.
+; Oro (addosso + baule della locanda) nel titolo della lista 1.
 ; (11/11) variabili dei negozi in pagina zero ($82-$8C, libera nel gioco: docs/wiki/tecnica.md); shp_stock, sh_mask, sh_lc
-; restano a $9400 (src/game/ui.asm: le usano anche inventario e baule)
+; restano a $9400 (src/game/ui.asm)
 shop_id   = $82
 shp_first = $83
 shp_cnt   = $84
@@ -21,13 +21,11 @@ shp_i     = $86
 shp_item  = $87
 shp_price = $88                 ; (2 B)
 sh_slot   = $8a                 ; posto della cintura scelto per la pozione comprata ($FF = nessuna scelta)
-sh_old    = $8b                 ; ui_cur prima di ui_nav (direzione del movimento)
-sh_dir    = $8c                 ; +1 / -1: passo di sh_fix
-sh_nav  .byte 12,13,14,15,16,17,18,19, 8,9,10,11, 0,1,2,3,4,5,6,7, 20,21,22,23,24
+sh_dir    = $8c                 ; +1 / -1: passo nella scelta del posto della cintura
 sh_cats .byte 1<<CAT_WEAPON | 1<<CAT_ARMOR | 1<<CAT_SHIELD          ; 0 fabbro, 1 alchimista (09/11: niente armaiolo)
         .byte 1<<CAT_RING | 1<<CAT_POTION | 1<<CAT_SCROLL
 
-enter_shop:                     ; (KERNAL gia' escluso: tabella dei salti di src/menu.asm)
+enter_shop:                     ; (interrupt spenti: tabella dei salti di src/menu.asm)
         sta shop_id
         tax
         lda shop_first,x
@@ -43,13 +41,11 @@ enter_shop:                     ; (KERNAL gia' escluso: tabella dei salti di src
         jsr sort_pack
         lda shp_k
         sta shp_cnt             ; da qui shp_cnt = oggetti in vendita
-        ldx #7                  ; lista da 8: la merce, poi '-'
+        ldx #7
 _cp     lda #0
         sta l8_b,x
-        cpx shp_cnt
-        bcs +
         lda shp_stock,x
-+       sta l8_id,x
+        sta l8_id,x
         dex
         bpl _cp
         jsr ui_begin
@@ -58,109 +54,299 @@ _cp     lda #0
         sta sh_mask
         lda #$ff
         sta sh_slot
-        lda #SH_N
-        sta ui_n
-        jsr nav_init
         jsr shop_title
-        jsr sec_frames
+        jsr ls2_frame
         jsr ui_labels
         .byte 2,1
         .text " wares "
-        .byte 0,2,17
-        .text " purse "
         .byte 0,$ff
-        lda #19
-        jsr ib_set
-        lda #1
-        bne _fx
-_in     lda ui_cur
-        sta sh_old
-        jsr ui_nav
+        lda shop_id
+        bne +
+        jsr ui_labels
+        .byte 2,9
+        .text " gear "
+        .byte 0,$ff
+        jmp ++
++       jsr ui_labels
+        .byte 2,9
+        .text " yours "
+        .byte 0,$ff
++       lda #1
+        sta iv_mode
+        lda #<sh_l3
+        sta iv_l3
+        lda #>sh_l3
+        sta iv_l3+1
+        lda #<sh_price
+        sta sl_rv
+        lda #>sh_price
+        sta sl_rv+1
+        jsr sh_segs
+        jsr ls2_init
+        jmp _dr
+_rb     jsr sh_segs             ; le voci possono essere cambiate (comprato, venduto)
+        ldx #1
+        jsr sl_reinit
+        dex
+        jsr sl_reinit
+_dr     jsr sh_draw
+_in     jsr sl_nav
         cmp #NAV_BACK
         beq _exit
         cmp #NAV_MOVE
-        bne _nm
-        lda ui_cur              ; direzione: avanti se ui_cur = sh_old + 1 (o giro dall'ultima alla prima)
-        sec
-        sbc sh_old
-        cmp #1
-        beq _f1
-        cmp #$100-(SH_N-1)
-        beq _f1
-        lda #$ff
-        .byte $2c
-_f1     lda #1
-_fx     sta sh_dir
-        jsr sh_fix
-_rd     jsr sh_draw
+        bne +
+        jsr sh_cur
+        jsr iv_sel
+        jsr sh_keys
         jmp _in
-_nm     cmp #NAV_FIRE
++       cmp #NAV_FIRE
         bne _k
+        jsr sh_cur
         jsr sh_fire
-        jmp _ref
+        jmp _rb
 _k      lda keynew+2            ; R: ripara (solo il fabbro; zaino ed equipaggiamento)
         and #$02
         beq _in
         lda shop_id
         bne _in
+        jsr sh_cur
         ldx ui_lc
         cpx #12
         bcs _in
         jsr shop_repair
-_ref    lda #1                  ; la voce puo' essere sparita (pozione, pergamene vendute)
-        sta sh_dir
-        jsr sh_fix
-        jmp _rd
+        jmp _rb
 _exit   lda #0
         sta sh_mask
+        sta sl_rv+1
         jmp mk_exit
 
-; cursore su una voce valida (passo sh_dir, con giro); ui_lc = codice della voce
-sh_fix:
-_l      ldx ui_cur
-        lda sh_nav,x
-        sta ui_lc
-        jsr sh_valid
-        bcc _r
-        lda ui_cur
-        clc
-        adc sh_dir
-        bpl +
-        lda #SH_N-1
-+       cmp #SH_N
-        bcc +
+; segmenti delle due liste (sg_*, sl_s0, sl_sn): merce; equipaggiamento (e cintura), blocco delle categorie del negozio nello
+; zaino (ordinato: un blocco solo), posti liberi dello zaino
+sh_segs:
+        lda #SK_WARE
+        sta sg_k
         lda #0
-+       sta ui_cur
-        jmp _l
-_r      rts
-
-; A = codice: C=0 se la voce esiste in questo negozio
-sh_valid:
-        cmp #8
-        bcc _y                  ; zaino: sempre (anche i posti vuoti, come nell'inventario)
-        cmp #12
-        bcs _w
-        ldx shop_id             ; equipaggiamento: solo dal fabbro (riparazione)
-        bne _n
-        beq _y
-_w      cmp #20
-        bcs _b
-        sbc #11                 ; (C=0) merce: indice < shp_cnt
-        cmp shp_cnt
-        rts
-_b      ldx shop_id             ; cintura e pergamene: solo dall'alchimista
-        cpx #1
-        bne _n
-        cmp #24
-        beq _s
-        tax
-        lda c_beltt-20,x
+        sta sg_a
+        sta sl_s0
+        lda shp_cnt
+        sta sg_c
+        ldy #1
+        sty sl_sn
+        sty sl_s0+1
+        lda #SK_EQ
+        sta sg_k,y
+        ldx shop_id
+        lda sh_eq0,x            ; fabbro: arma, armatura, scudo; alchimista: l'anello
+        sta sg_a,y
+        lda sh_eqn,x
+        sta sg_c,y
+        iny
+        txa
+        beq +
+        lda #SK_BELT|SK_SEP     ; alchimista: la cintura
+        sta sg_k,y
+        lda #0
+        sta sg_a,y
+        lda #4
+        sta sg_c,y
+        iny
++       ldx #0                  ; zaino: tmp6 = primo della categoria, tmp7 = quanti, tmp4 = posti usati
+        stx tmp7
+_l      lda c_pack,x
+        beq _e
+        sty tmp3
+        tay
+        lda itcat,y
+        tay
+        lda cat_bit,y
+        ldy tmp3
+        and sh_mask
         beq _n
-_y      clc
+        lda tmp7
+        bne +
+        stx tmp6
++       inc tmp7
+_n      inx
+        cpx #PACK_N
+        bne _l
+_e      stx tmp4
+        lda #SK_PACK|SK_SEP
+        sta sg_k,y
+        lda tmp6
+        sta sg_a,y
+        lda tmp7
+        sta sg_c,y
+        iny
+        lda tmp7                ; posti liberi: la riga separatrice solo se il blocco prima e' vuoto
+        cmp #1
+        lda #SK_PACK|SK_SEP
+        bcc +
+        lda #SK_PACK
++       sta sg_k,y
+        lda tmp4
+        sta sg_a,y
+        lda #PACK_N
+        sec
+        sbc tmp4
+        sta sg_c,y
+        dey                     ; segmenti della lista 1 = Y (l'ultimo) - 1 + 1
+        sty sl_sn+1
         rts
-_s      jmp scr_find
-_n      sec
+sh_eq0  .byte 0, 3
+sh_eqn  .byte 3, 1
+
+; voce del cursore -> ui_lc (codici di prima: 0..7 zaino, 8..11 equipaggiamento, 12..19 merce, 20..23 cintura)
+sh_cur: jsr sl_sel
+        lda sl_sl
+        cmp #$20
+        bcc _s
+        cmp #$60
+        and #$1f
+        bcs _w
+        adc #20
+        bne _s
+_w      clc
+        adc #12
+_s      sta ui_lc
         rts
+
+; tutta la schermata variabile: oro nel titolo della lista 1, liste, oggetto, tasti. Nella scelta del posto della pozione
+; (sh_slot) il cursore sta sul posto della cintura (lista 1: anello, riga separatrice, poi la cintura)
+sh_draw:
+        lda sh_slot
+        bmi +
+        clc
+        adc #2
+        sta sl_cur+1
+        lda #1
+        sta sl_l
+        tax
+        jsr sl_win
+        jmp ++                  ; (ui_lc resta la merce che si compra)
++       jsr sh_cur
++       ldx #21
+        ldy #9
+        jsr ui_at
+        jsr shop_gold
+        jsr ls2_draw
+; riga 24: i tasti secondo la voce
+sh_keys:
+        jsr row24
+        lda sh_slot
+        bmi +
+        #msg "fire:buy  run/stop:cancel"
+        rts
++       lda ui_lc
+        cmp #8
+        bcc _sl
+        cmp #12
+        bcc _rp
+        cmp #20
+        bcs _sl
+        #msg "fire:buy"
+        jmp _bk
+_sl     #msg "fire:sell"
+        lda ui_lc
+        cmp #8
+        bcs _bk
+        lda shop_id
+        bne _bk
+        #msg "  "
+_rp     lda shop_id
+        bne _b2
+        #msg "r:repair"
+_bk     #msg "  "
+_b2     #msg "run/stop:back"
+        rts
+
+; prezzo a destra della voce (sl_rv, da sl_row: A = sl_sl, ui_sel): merce prezzo pieno, il resto prezzo di vendita
+sh_price:
+        ldx ui_sel
+        beq sh_rts
+        cmp #$60
+        jsr sh_pr
+        lda #32                 ; colonne 33-37 (riga da ui_at 1), moneta in 38
+        sta cidx
+sh_num  jsr ui_num5
+        jmp ui_coin
+sh_rts  rts
+; C = 1 prezzo pieno di ui_sel, C = 0 prezzo di vendita (>> SELL_SHIFT) -> tmp0/tmp1
+sh_pr:  php
+        lda ui_sel
+        asl
+        tay
+        lda itprice,y
+        sta tmp0
+        lda itprice+1,y
+        sta tmp1
+        plp
+        bcs +
+        .rept SELL_SHIFT
+        lsr tmp1
+        ror tmp0
+        .endrept
++       rts
+
+; riga 3 del riquadro dell'oggetto (iv_l3): indossato "unequip to sell" e, dal fabbro, il costo della riparazione; merce
+; "buy"; zaino e cintura "sell"; a destra come nelle liste
+sh_l3:  ldx ui_sel
+        beq _r
+        ldx ui_lc
+        cpx #8
+        bcc _sl
+        cpx #12
+        bcc _eq
+        cpx #20
+        bcs _sl
+        ldx #29
+        jsr _at
+        #msg "buy "
+        sec
+        bcs _pr
+_sl     ldx #28
+        jsr _at
+        #msg "sell "
+        clc
+_pr     jsr sh_pr
+        jmp sh_num
+_eq     lda #CH_EQ
+        ldx #ICOL_EQ
+        jsr ui_icon
+        lda #UC_EMPTY
+        sta ui_col
+        #msg " unequip to sell"
+        lda shop_id
+        bne _r
+        ldx ui_lc
+        jsr rep_cost
+        bcs _r
+        ldx #26
+        jsr _at
+        #msg "repair "
+        lda shp_price
+        sta tmp0
+        lda shp_price+1
+        sta tmp1
+        jmp sh_num
+_r      rts
+_at     ldy #IV_SY+3            ; colonna X della riga 3, colore dei valori
+        jsr ui_at
+        lda #UC_VALUE
+        sta ui_col
+        rts
+
+; Fire sulla voce ui_lc: merce = compra, zaino e cintura = vende, indossato = niente (si vende solo dallo zaino)
+sh_fire:
+        lda ui_lc
+        cmp #8
+        bcc _s
+        cmp #12
+        bcc _r
+        cmp #20
+        bcc _b
+_s      jmp shop_sell
+_b      jmp shop_buy
+_r      rts
 
 ; A = id dell'oggetto della voce ui_lc (0 = niente)
 sh_selid:
@@ -169,28 +355,12 @@ sh_selid:
         bcc _p
         cpx #20
         bcc _w
-        cpx #24
-        beq _s
         lda c_beltt-20,x
-        rts
-_s      lda #I_SCROLL
         rts
 _w      lda l8_id-12,x
         rts
-
 _p      lda c_pack,x            ; zaino e (subito dopo) equipaggiamento
         rts
-
-; bonus della voce ui_lc (lista da 8: l8_b; altre: 0) -> A
-l8_bonus:
-        ldx ui_lc
-        lda #0
-        cpx #12
-        bcc +
-        cpx #20
-        bcs +
-        lda l8_b-12,x
-+       rts
 
 ; C=0 se il negozio compra la categoria di ui_sel
 sh_buys:
@@ -202,161 +372,6 @@ sh_buys:
         bne +
         sec
 +       rts
-
-; negozio: merce, zaino ed equipaggiamento con il '>' sulla voce del cursore (sul posto della cintura nella scelta
-; del posto della pozione, sh_slot), poi il riquadro dell'oggetto scelto
-sh_draw:
-        lda ui_lc               ; nella scelta del posto della pozione il '>' e' sul posto (sh_slot)
-        ldx sh_slot
-        bmi +
-        txa
-        clc
-        adc #20
-+       sta sh_lc
-        jsr list8               ; merce
-        jsr eq_std
-        jsr draw_entries
-        jsr purse_draw
-; riquadro dell'oggetto selezionato (standard, 20,17): nome, caratteristiche, riga 3 secondo la voce
-sh_item:
-        ldx #21                 ; nome nella riga prima di ib_y
-        ldy ib_y
-        dey
-        jsr ui_at
-        lda ui_lc
-        cmp #12
-        bcs _o
-        tax                     ; zaino / equipaggiamento
-        lda c_pack,x
-        jsr ui_cic
-        jsr pk_name
-        ldx ui_lc
-        jsr ibox_ld
-        jmp _t
-_o      jsr sh_selid
-        sta ui_sel
-        jsr l8_bonus
-        sta ui_ib
-        lda ui_sel
-        jsr ui_cic
-        lda ui_sel
-        jsr ui_item
-        jsr l8_bonus            ; dopo ui_item (ui_puts usa tmp5)
-        sta tmp5
-        lda #0
-        sta ui_dur
-        sta ui_durm
-_t      jsr ibox_top
-        bne +
-        jmp sh_help
-+       jsr ib_at1
-        ldx ui_lc
-        cpx #8
-        bcc _pk
-        cpx #12
-        bcc _eq
-        cpx #20
-        bcs _sl
-        lda sh_mask
-        bne +
-        jmp _vl                 ; baule: valore
-+       #msg "buy "             ; merce: prezzo pieno
-        lda ui_sel
-        asl
-        tay
-        lda itprice,y
-        ldx itprice+1,y
-        jsr ui_n5l
-        jsr ui_coin
-        jmp _have
-_eq     jsr rep_cost            ; equipaggiamento: costo della riparazione se serve
-        bcs _vl
-        #msg "fix "
-        lda shp_price
-        ldx shp_price+1
-        jsr ui_n5l
-        jsr ui_coin
-        jsr it_dur
-        jmp sh_help
-_pk     jsr sh_buys             ; zaino: offerta se il negozio lo compra
-        bcs _vl
-_sl     #msg "sell "
-        jsr it_half
-_have   ldx ui_sel              ; pozioni e pergamene: quante se ne hanno
-        lda itcat,x
-        cmp #CAT_SCROLL
-        beq _hs
-        cmp #CAT_POTION
-        bne sh_help
-        ldy #0
-        ldx #3
-_hc     lda c_beltt,x
-        cmp ui_sel
-        bne +
-        iny
-+       dex
-        bpl _hc
-        tya
-        jmp _hp
-_hs     jsr scr_find
-        lda #0
-        bcs _hp
-        lda c_packb,y
-_hp     pha
-        #msg " have "
-        pla
-        jsr ui_b3l
-        jmp sh_help
-_vl     jsr it_val
-; riga 24: i tasti secondo la voce
-sh_help:
-        ldy #24
-        jsr clear_row
-        #at 1,24
-        lda sh_mask
-        bne +
-        #msg "fire:take  run/stop:back"
-        rts
-+       #msg "fire:"
-        lda ui_lc
-        cmp #8
-        bcc _sl
-        cmp #12
-        bcc _rp
-        cmp #20
-        bcs _sl
-        #msg "buy"
-        jmp _bk
-_rp     #msg "repair"
-        jmp _bk
-_sl     #msg "sell"
-        lda ui_lc
-        cmp #8
-        bcs _bk
-        lda shop_id
-        bne _bk
-        #msg "  r:repair"
-_bk     #msg "  run/stop:"
-        lda sh_slot
-        bmi _b
-        #msg "cancel"
-        rts
-_b      #msg "back"
-        rts
-
-; Fire nel negozio sulla voce ui_lc: merce = compra, zaino = vende, equipaggiamento (posti 8-11) = ripara
-sh_fire:
-        lda ui_lc
-        cmp #8
-        bcc _s
-        cmp #12
-        bcs +
-        tax
-        jmp shop_repair
-+       cmp #20
-        bcc _b
-_s      jmp shop_sell
-_b      jmp shop_buy
 
 
 ; copia il pool in shp_stock e ne estrae shp_k a caso (Fisher-Yates parziale)

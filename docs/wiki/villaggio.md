@@ -262,33 +262,36 @@ il disegno sulla porta della locanda (tile `DHOME`) e l'icona della locanda sull
 
 ## Negozi (`enter_shop`, `sh_draw`; modulo MENU dall'11/11)
 
-Dall'08/11 (concept con il committente) una sola schermata a riquadri, uguale per tutti i negozi, senza linguette e
-senza testo descrittivo: **wares** (merce, righe 1-6, 2 colonne da 4: al massimo 8 oggetti, i posti vuoti con `-`),
-**equipped** (righe 7-10, `eq_draw` come nella locanda e nell'inventario), **pack** (righe 11-16), **purse** (in basso a
-sinistra: oro **totale** = addosso + baule della locanda, dal 10/11, da 100 000 in migliaia con `k`; si paga prima
-con l'oro addosso e il resto dal baule, vedi [Oggetti](oggetti.md#prezzi); sotto, la cintura con 4 posti a x 2/5/8/11 e le pergamene `s N` a x 14) e **selected item** (il
-riquadro standard dell'oggetto, come nell'inventario). Riga 23: messaggi e domande; riga 24: i tasti, **secondo la
-voce sotto il cursore** (`sh_help`).
+Dal 21/11 (branch `liste-menu`, prototipi approvati dal committente) due **liste a scorrimento** (`src/game/slist.asm`, nel
+segmento CORE) e il riquadro dell'oggetto, come nell'inventario; A/D passano da una lista all'altra:
+- **wares** (righe 2-7): la merce, una voce per riga, prezzo pieno a destra;
+- **gear** (fabbro) o **yours** (alchimista) (righe 10-16): il fabbro mostra arma, armatura e scudo indossati (spunta), poi
+  armi, armature e scudi dello zaino e i posti liberi `-`; l'alchimista l'anello indossato, la cintura (una pozione per posto),
+  anelli e pergamene dello zaino (la pila: "3 portal scroll") e i posti liberi. A destra il prezzo di vendita. Nel titolo
+  l'**oro totale** (addosso + baule della locanda, da 100 000 in migliaia con `k`; si paga prima con l'oro addosso e il resto
+  dal baule, vedi [Oggetti](oggetti.md#prezzi));
+- **riquadro dell'oggetto** (righe 18-22): icona e nome nel titolo, caratteristiche, durabilità, poi a destra `buy N`,
+  `sell N` o, dal fabbro sull'indossato rovinato, `repair N`; sull'indossato a sinistra "unequip to sell".
+
+Riga 23: messaggi e domande; riga 24: i tasti, **secondo la voce sotto il cursore** (`sh_keys`). Niente più riquadri
+equipped, pack, purse; le chiavi non si mostrano.
 
 ```mermaid
 flowchart LR
-    E["ingresso: shop_roll<br/>(stock a caso dal pool), sort_pack"] --> N["cursore: merce → equipped (solo fabbro)<br/>→ zaino → cintura e pergamene (solo alchimista)"]
+    E["ingresso: shop_roll<br/>(stock a caso dal pool), sort_pack, sh_segs"] --> N["lista wares / lista gear o yours<br/>(A/D)"]
     N -->|"fire su merce"| BUY{"pozione?"}
     BUY -->|no| ASK["buy for N g? (fire = sì)<br/>give_item, paga"]
-    BUY -->|sì| SLOT["'>' sul primo posto libero della cintura<br/>W/S lo spostano · fire paga e la mette · RUN/STOP annulla senza pagare"]
-    N -->|"fire su zaino, cintura, pergamene"| SELL["se il negozio compra quella categoria:<br/>sell for N g? un quarto del prezzo (una pergamena per volta)"]
-    N -->|"fabbro: fire su equipped, R su zaino o equipped"| REP["riparazione: 25% del prezzo,<br/>durabilità al massimo, massimo − 1"]
+    BUY -->|sì| SLOT["cursore sul primo posto libero della cintura<br/>W/S lo spostano · fire paga e la mette · RUN/STOP annulla senza pagare"]
+    N -->|"fire su zaino o cintura"| SELL["sell for N g? un quarto del prezzo<br/>(una pergamena della pila per volta)"]
+    N -->|"fabbro: R su zaino o indossato"| REP["riparazione: 25% del prezzo,<br/>durabilità al massimo, massimo − 1"]
     N -->|RUN/STOP| X["uscita"]
 ```
 
-- **Chi compra cosa** (`sh_cats`, indice = `shop_id`: 0 fabbro, 1 alchimista): il fabbro armi, armature e scudi; l'alchimista anelli,
-  pozioni e pergamene. Gli oggetti dello zaino che il negozio non compra sono **grigi** (`pk_name`) e fire dice
-  "i don't buy that.". L'equipaggiamento **non si vende mai**. Solo il fabbro ripara.
-- **Riquadro dell'oggetto**: nome, caratteristiche, riga 3 secondo la voce: `buy 25g have 2` (merce: prezzo pieno;
-  pozioni e pergamene: quante se ne hanno), `sell 600g d135/178` (zaino, cintura: un quarto del prezzo dal 20/11, `shop_rules.sell_divisor`; la durabilità solo se
-  sta nei 18 caratteri), `fix 45g` (equipaggiamento rovinato, dal fabbro), `val ...` (oggetto che il negozio non compra).
-- Voci del cursore (codici in `ui_lc`): 0-7 zaino, 8-11 equipaggiamento, 12-19 merce, 20-23 cintura, 24 pergamene;
-  ordine in `sh_nav`, voci assenti saltate da `sh_fix`.
+- **Chi compra cosa** (`sh_cats`, indice = `shop_id`: 0 fabbro, 1 alchimista): il fabbro armi, armature e scudi; l'alchimista
+  anelli, pozioni e pergamene. La lista mostra solo cio' che il negozio compra o ripara. L'indossato **non si vende**: prima
+  va tolto. Solo il fabbro ripara (R).
+- Le azioni lavorano sui codici di prima in `ui_lc` (`sh_cur` dalla voce della lista): 0-7 zaino, 8-11 equipaggiamento,
+  12-19 merce, 20-23 cintura.
 - Merce (`balance.yaml shops`, 08/11): fabbro 6 a caso fra armi, armature e scudi; alchimista 4. **Cosa e
   quanto vende ogni negozio è da decidere** (TODO E2).
 
@@ -305,36 +308,20 @@ all'acquisto. Pool e quantità: `balance.yaml shops`.
 
 ## Baule della locanda (`ov_stash`, modulo MENU)
 
-Schermata rifatta l'08/11 (progetto con il committente, concept ASCII in [Refactor dei tasti](refactor-tasti.md)):
+Dal 21/11 (branch `liste-menu`, prototipi approvati dal committente) due liste a scorrimento e il riquadro dell'oggetto:
+- **yours** (righe 2-7): i 4 posti indossati (spunta), riga sottile, lo zaino (8 posti; niente cintura: le pozioni non vanno
+  nel baule); nel titolo l'oro addosso;
+- **chest** (righe 10-16): i 24 posti del baule; nel titolo l'oro del baule;
+- **riquadro dell'oggetto**: caratteristiche, valore e durabilità, poi "equipped" o il confronto "you: ..." con l'indossato.
 
-```
-               o inn o              (il boccale CH_INN ai lati del titolo, 09/11)
-+ conan -----------++ selected item ---+     riquadro del PG (titolo = nome): hp massimo, ac, att | str, dex, con; dmg in fondo
-|hp  125   str 16  ||+2 viking sword   |     oggetto sotto il cursore: nome, caratteristiche, valore e durabilita'
-|ac  22    dex 17  ||dmg 2d6+2 2h pen 1|
-|att +6    con 15  ||val 1200 d 231/231|
-|dmg 2d6+2         ||                  |
-+------------------++------------------+
-+ equipped ----------------------------+     2 colonne con le icone: arma, armatura | scudo, anello
-| % +1 sword         U +2 medium shield|
-| & +3 plate mail    o silver ring dex |
-+--------------------------------------+
-+ pack ------------++ chest ------ 1/3 +     zaino (oro + 8) e baule (oro + 8 della pagina); 1/3 = pulsante pagina
-```
-
-- **Una sola lista** (`ui_nav`): equipped (4) → oro e oggetti dello zaino → numero di pagina → oro e oggetti del baule,
-  con giro. **Destra** (solo qui, solo dallo zaino) porta al baule sulla stessa riga. Si esce con RUN/STOP o I.
-- **Fire**: su zaino/baule sposta l'oggetto dall'altra parte (sull'oro dello zaino: tutto nel baule, a decine; sull'oro del baule niente, dal 10/11 il prelievo non c'è); sul
-  numero di pagina sfoglia 1→2→3→1 (24 posti, 3 pagine da 8); un oggetto che entra nel baule porta la pagina dove
-  è finito.
-- **Fire su un posto di equipped** = **scelta**: cornice di equipped colorata, `>` fermo sul posto, zaino e baule
-  mostrano solo gli oggetti di quella categoria, accorpati (`- remove` in cima, non per l'arma: l'arma si può solo
-  sostituire). Fire su un oggetto lo indossa e quello tolto va al suo posto; `- remove` mette l'oggetto nello zaino (se
-  pieno nel baule); un'arma a due mani fa scendere lo scudo nello zaino (o nel baule; tutto pieno: rifiutato); uno
-  scudo con un'arma a due mani è rifiutato. Rifiuti: bordo rosso per un attimo, suono e messaggio rosso in riga 23.
-  RUN/STOP annulla.
+- **Fire**: zaino → baule, baule → zaino (le pergamene si accumulano fino a 10), indossato → zaino (l'arma no: si sostituisce).
+  **E**: indossa l'oggetto dello zaino (o del baule, passando dallo zaino) con le stesse regole dell'inventario (requisito di
+  FOR, arma a due mani e scudo). Si esce con RUN/STOP o I.
+- **Oro**: entrando, l'oro addosso va nel baule a decine (le unità restano addosso; `st_gold`). Il prelievo non c'è
+  (10/11): i negozi pagano anche con l'oro del baule.
+- Non c'è più la modalità di scelta dell'equipaggiamento (`h_sel`, `- remove`) né le pagine del baule.
 - **Ordinamento**: zaino e baule sempre in ordine di categoria (armi, armature, scudi, anelli, pozioni, pergamene;
-  `sort4`, stabile). Il baule si ordina anche all'apertura.
+  `sort4`, stabile).
 - **Memoria**: la locanda sta nel modulo **MENU** con i negozi (`src/menu/inn.asm` zona 1, `src/menu/inn_eq.asm` zona 2;
   [sotto](#menu-del-villaggio-modulo-menu-1111)). Per tutta la schermata interruzioni spente (il KERNAL è escluso in tutto il gioco dal 21/11)
   (dall'11/11 sera niente salvataggio uscendo: il baule va sul disco con "save game"). Apertura 0,14 s (modulo già in memoria dall'ingresso nel villaggio).

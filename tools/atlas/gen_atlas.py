@@ -548,7 +548,7 @@ MENUS = {"menu_iniziale": ("barbarian menu", "start menu: the heroes, create new
          "badsave": ("bad save", "saves of another version: offer to delete"), "quit": ("quit", "quit the game?"),
          "menu_gioco": ("game menu", "RUN/STOP in the game: resume, save game, quit game"), "inventario": ("backpack", "inventory (I)"),
          "fabbro": ("blacksmith", "shop of the smith"), "alchimista": ("alchemist", "shop of the alchemist"),
-         "locanda": ("inn", "the inn chest (OVLT/OVL2)"), "locanda_scelta": ("inn: choice", "inn: what to wear"),
+         "locanda": ("inn", "the inn: yours and chest (scrolling lists)"),
          "baule": ("chest", "a level chest"), "mappa": ("minimap", "minimap (M)"), "leva": ("lever", "the lever of the throne room"),
          "morte": ("death", "the death screen"), "io_screen": ("loading", "waiting screen while loading or saving"),
          "io_generico": ("loading", "generic loading"), "io_livello": ("level loading", "loading of a level"),

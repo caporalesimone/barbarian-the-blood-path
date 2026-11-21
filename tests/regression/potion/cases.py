@@ -3,7 +3,7 @@ in the HUD, save/load, death, buying with a full belt. One VICE session (develop
 BELT_SLOTS = 4 today: with the 8-slot belt (TODO 3.1) the tests follow the constant and the keys of lib.play."""
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, key, BELT_KEYS, fire_to, find, alive, mpos, floor_next, go_level, go_village, K_RUNSTOP
+from lib.play import new_game, key, BELT_KEYS, fire_to, find, alive, mpos, floor_next, go_level, go_village, K_RUNSTOP, list_to
 
 BELT_SLOTS = 4
 CHAIN = True                                                # (one session: after a failure the game state is unknown)
@@ -156,11 +156,8 @@ def shop_sell_belt(ctx):
     door = find(g, L["T_DALCH"])
     fire_to(g, door[0][0], door[0][1] + 1)
     check(g.b(L["sh_mask"]) != 0, "the alchemist does not open")
-    for want, what in ((20, "belt slot 1"), (24, "scroll")):
-        for _ in range(30):
-            if g.b(L["ui_lc"]) == want: break
-            g.frames(1, joy=2); g.frames(1)
-        check(g.b(L["ui_lc"]) == want, "cursor never on the %s (ui_lc %d)" % (what, g.b(L["ui_lc"])))
+    for want, what in ((20, "belt slot 1"), (0, "scroll")):        # (21/11) list 1 "yours": belt 20..23, pack 0..7
+        check(list_to(g, 1, "ui_lc", want), "cursor never on the %s (ui_lc %d)" % (what, g.b(L["ui_lc"])))
         item = L["I_POTY"] if want == 20 else L["I_SCROLL"]
         g0 = g.w16(L["c_gold"])
         g.press_fire(); g.press_fire()                              # sell, confirm

@@ -35,11 +35,6 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 
 ## 1 — Priorità massima
 
-### A0 (21/11) Riportare il branch `liste-menu` su `main` appena i menù sono implementati — S — **TOP PRIO** (richiesta del committente)
-- Il rifacimento dei menù (liste a scorrimento, segmento CORE, negozi, locanda, baule del piano) si fa sul branch `liste-menu`.
-  Il committente **non vuole continuare a lavorare su un branch**: appena negozi, locanda e baule del piano sono sulle liste
-  nuove, unire a `main` (push solo con il suo OK). Fatto finora: KERNAL sempre escluso, segmento CORE, inventario nuovo (21/11).
-
 ### A1 Punti statistica: rifiniture e verifiche a mano — **TOP PRIO** — S (verifica) + M (spostamento nel MENU)
 - Unito a `main` l'11/11 (schermata C in `src/game/charsheet.asm`, `docs/wiki/interfaccia.md`, `docs/wiki/quests.md`).
 - **Glifo dell'HUD da confermare** (decisione 11/11): oggi la **freccia verde in su** (`LVUP`, colore 5). Le 20 proposte restano
@@ -245,7 +240,8 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   inventario nuovo e descrizione degli oggetti; villaggio letto a `$EC00`; letture dell'eroe senza scrittura a `SV_ALT` (`$EC00`, non
   coprono CORE): CORE si rilegge solo dopo una scrittura (`sv_write`) o se manca (`ui_begin`, `ui_inventory`, `main_loop`).
   Margine di GAME: 1855 B (era −571 con il solo inventario nuovo). Misure in [FastLoader](docs/wiki/FastLoader.md) 7.4: salvataggio
-  +0,4/+1,7 s (rilettura di `core`), ingresso nel villaggio 3 +1,3 s per la posizione dei file. **Da decidere**: PERF-DISK-21/23 a cavallo
+  +0,4/+1,7 s (rilettura di `core`), ingresso nel villaggio 3 +1,3 s per la posizione dei file. **Deciso (21/11, committente)**: i limiti di PERF-DISK restano come sono (niente nuova disposizione per ora); PERF-24 si tratta
+  come test instabile per ora. Erano: PERF-DISK-21/23 a cavallo
   della soglia (in3 4,55 s da sola, 3,34 s nella regression completa; twn1 2,28 s, in1 4,91 s e in2 4,34 s nella completa contro 0,91 / 2,73 / 3,14 da sola; soglie al 90% dei
   limiti): alzare i limiti o cercare un'altra disposizione del disco. PERF-24 (village 1, worst 2,11 contro 2,1) passa da solo (2,02).
 - **Passi**: (1) KERNAL sempre escluso (`$01=$35`, ingresso e uscita dell'IRQ in RAM con gli stessi cicli della ROM, vettori
@@ -257,10 +253,11 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   servirà una leva di riserva: scheda del personaggio letta all'apertura (+1517 B, tempo da misurare), D10, testo a 5 bit.
 - (21/11, **da fare** con gli affissi) Database degli oggetti diviso per momento d'uso e generazione da un sottoinsieme
   preparato durante i caricamenti: [oggetti](docs/wiki/oggetti.md#memoria-e-salvataggi-f7-approvato). Non cambia i passi qui sopra.
-- Dopo: menù nuovi (negozi, locanda, baule del piano su `slist`), poi **riportare `liste-menu` su `main`**.
+- **Fatto (21/11), fase B**: negozi, locanda e baule del piano sulle liste a scorrimento, vecchia interfaccia comune tolta
+  (margine di GAME 2437 B, zone 1 e 2 del MENU con 863 e 523 B liberi); branch `liste-menu` unito a `main` il 21/11.
 - (21/11, committente) **Budget del passaggio fra dungeon e villaggio: al massimo 3 s**: entro quel tempo si può caricare
-  dal disco anche altro codice o dati (es. un modulo del dungeon, leva DNG dell'analisi). Da chiarire: 3 s in tutto o in più di oggi
-  (oggi l'ingresso nel villaggio misura 2,7-4,6 s secondo il capitolo, PERF-DISK: il limite di 3 s è già superato).
+  dal disco anche altro codice o dati (es. un modulo del dungeon, leva DNG dell'analisi). (21/11, chiarito) 3 s **in tutto**, si può salire di poco ma
+  l'attesa non deve diventare noiosa. Oggi l'ingresso nel villaggio misura 2,7-4,6 s secondo il capitolo (PERF-DISK): già sopra.
 
 ### G10 (21/11) Bauli del piano: seme, farming e bauli aperti a metà — S — **da rivedere più avanti** (decisione del committente)
 - **Oggi** (verificato nel codice): contenuto dal seme del mondo + piano + posizione (`chest_gen_seed`); nel record del piano 1 bit

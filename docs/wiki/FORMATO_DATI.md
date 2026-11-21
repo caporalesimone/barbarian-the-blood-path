@@ -231,8 +231,8 @@ villaggi. `src/menu.asm` è assemblato in sei zone di RAM (le parti in `src/menu
 
 | Zona | Indirizzi | Contenuto (oggi) |
 |---|---|---|
-| 1 | `MR1_AT` `$C900`–`$CFFF` (RAM normale; il LOBBY la copre) | tabella dei salti (`MENU_INN` = `$C900`, `MENU_SHOP` = `$C903`), `mk_off`/`mk_exit`, locanda (`menu/inn.asm`), negozi: comprare e vendere (`menu/shop_act.asm`) |
-| 2 | `MR2_AT` `$F4E0`–`$FCFF` (RAM sotto il KERNAL, dopo la cache del tema) | locanda: scelta dell'equipaggiamento (`menu/inn_eq.asm`), negozi: schermata e cursore (`menu/shop.asm`) |
+| 1 | `MR1_AT` `$C900`–`$CFFF` (RAM normale; il LOBBY la copre) | tabella dei salti (`MENU_INN` = `$C900`, `MENU_SHOP` = `$C903`), `mk_off`/`mk_exit`, locanda (`menu/inn.asm`, 21/11: liste a scorrimento), negozi: comprare e vendere (`menu/shop_act.asm`) |
+| 2 | `MR2_AT` `$F4E0`–`$FCFF` (RAM sotto il KERNAL, dopo la cache del tema) | locanda: oro del baule e spostamenti fra zaino e baule (`menu/inn_eq.asm`), negozi: schermata con le liste a scorrimento (`menu/shop.asm`) |
 | 3 | `MR3_AT` `$A700`–`$A7FF` (slot sprite 28–31, liberi nel gioco) | negozi: riparazione e tetto dell'oro (`menu/shop_fix.asm`); aspetto degli NPC (`menu/npc_look.asm`, 17/11) |
 | 4 | `MR4_AT` `$A300`–`$A4FF` (slot sprite 12–19: mostri del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (17/11) sprite degli NPC del villaggio: 4 disegni × 2 fotogrammi (`tools/build/npc_gfx.py`), solo dati |
 | 5 | `MR5_AT` `$8C00`–`$8E7F` (sprite forti e boss del tema nel dungeon, ricopiati da `gfx_install` a ogni ingresso) | (18/11) sprite del "!" (`$8C00`, puntatore `$30`), tabella dei salti `NPC_JT` (`$8C40`: `npc_init`, `npc_draw5`, `npc_talk5`), capitoli delle quest `q_ch`, piazzamento e sprite degli NPC (`menu/npc.asm`) |

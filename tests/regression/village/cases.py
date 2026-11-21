@@ -65,15 +65,14 @@ def fountain(ctx):
     check(g.w16(L["c_hp"]) == hm, "hp %d after the fountain (max %d)" % (g.w16(L["c_hp"]), hm))
 
 
-@test("INN-GOLD-11", "inn: Fire on the chest gold row does nothing (no withdrawal since 10/11), the screen stays open")
+@test("INN-GOLD-11", "inn: entering with less than a ten of gold nothing moves; with the chest near full only what fits (21/11)")
 def inn_gold_row(ctx):
     g, L = ctx["g"], ctx["g"].L
-    g.poke16(L["c_gold"], 1234); g.poke16(L["c_sgold"], 500)
-    g.teleport(*INN_DOOR); g.frames(3); g.press_fire(); g.frames(5, tmax=60)
-    check(not g.in_game(), "the inn did not open")
-    g.poke(L["ui_cur"], 14); g.frames(1)                        # entry 14 = chest gold (src/menu/inn.asm)
-    g.press_fire()
-    check((g.w16(L["c_gold"]), g.w16(L["c_sgold"])) == (1234, 500), "gold %d chest %d (expected 1234, 500)" % (g.w16(L["c_gold"]), g.w16(L["c_sgold"])))
-    check(not g.in_game(), "the inn closed")
-    g.run_stop(); g.frames(3)
-    check(g.in_game(), "RUN/STOP does not close the inn")
+    for gold, sgold, want in ((7, 500, (7, 500)), (1234, 65530, (1184, 65535))):
+        g.poke16(L["c_gold"], gold); g.poke16(L["c_sgold"], sgold)
+        g.teleport(*INN_DOOR); g.frames(3); g.press_fire(); g.frames(5, tmax=60)
+        check(not g.in_game(), "the inn did not open")
+        got = (g.w16(L["c_gold"]), g.w16(L["c_sgold"]))
+        check(got == want, "gold %d chest %d entering (expected %d, %d)" % (got + want))
+        g.run_stop(); g.frames(3)
+        check(g.in_game(), "RUN/STOP does not close the inn")

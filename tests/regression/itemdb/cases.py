@@ -4,7 +4,7 @@ rule (no shield with a two-handed weapon) must hold in the inn too (module OVL2,
 (INV-2H-10/11). The first tests are pure Python; the inn tests share one VICE session in the village."""
 import os, sys, tempfile
 from c64test import test, check
-from lib.play import new_game, INN_DOOR
+from lib.play import new_game, INN_DOOR, list_to, key, K_E
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path[:0] = [os.path.join(ROOT, "tools", d) for d in ("build", "vice", "atlas", "simulators")]
@@ -103,8 +103,6 @@ def inn_open(g):
 
 def inn_close(g):
     g.run_stop(); g.frames(3)
-    if not g.in_game():                                   # from the choice mode: RUN/STOP goes back, then closes
-        g.run_stop(); g.frames(3)
     check(g.in_game(), "RUN/STOP does not close the inn")
 
 
@@ -113,8 +111,8 @@ def inn_shield(ctx):
     g = game(ctx); L = g.L
     equip(g, 0, L["I_VIKING_SWORD"]); equip(g, 2, 0); pack(g, L["I_SMALL_SHIELD"])
     inn_open(g)
-    g.poke(L["ui_cur"], 2); g.frames(1); g.press_fire()   # entry 2 = equipped shield: choice of the shield
-    g.poke(L["ui_cur"], 1); g.frames(1); g.press_fire()   # entry 0 = remove, 1 = the first pack shield
+    check(list_to(g, 0, "ui_cur", 0), "cursor not on the pack shield")   # (21/11) list yours, pack slot 0
+    key(g, K_E, 2)                                        # E: wear
     check(g.b(L["c_eq"] + 2) == 0, "the shield was equipped with a two-handed weapon")
     check(L["I_SMALL_SHIELD"] in g.mem(L["c_pack"], 8), "the shield left the pack: %s" % g.mem(L["c_pack"], 8))
     inn_close(g)
@@ -125,8 +123,8 @@ def inn_two(ctx):
     g = game(ctx); L = g.L
     equip(g, 0, L["I_SWORD"]); equip(g, 2, L["I_SMALL_SHIELD"]); pack(g, L["I_VIKING_SWORD"])
     inn_open(g)
-    g.poke(L["ui_cur"], 0); g.frames(1); g.press_fire()   # entry 0 = equipped weapon: choice of the weapon
-    g.poke(L["ui_cur"], 0); g.frames(1); g.press_fire()   # no remove for the weapon: 0 = the first pack weapon
+    check(list_to(g, 0, "ui_cur", 0), "cursor not on the pack weapon")   # (21/11) list yours, pack slot 0
+    key(g, K_E, 2)                                        # E: wear
     check(g.b(L["c_eq"]) == L["I_VIKING_SWORD"], "weapon %d (expected the viking sword)" % g.b(L["c_eq"]))
     check(g.b(L["c_eq"] + 2) == 0, "shield %d still on with a two-handed weapon" % g.b(L["c_eq"] + 2))
     pk = g.mem(L["c_pack"], 8)

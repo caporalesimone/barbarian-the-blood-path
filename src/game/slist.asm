@@ -45,6 +45,8 @@ sl_w    .byte ?                 ; riga della finestra (sl_draw)
 sl_bs   .byte ?                 ; barra di scorrimento: prima riga del cursore e riga dopo l'ultima
 sl_be   .byte ?
 sl_q    .byte ?
+iv_l3   .word ?                 ; (21/11) riga 3 del riquadro dell'oggetto (iv_sel): routine della schermata
+iv_mode .byte ?                 ; 0 = riga 2 con valore e durabilita' (inventario, locanda, baule), 1 = solo durabilita' (negozi)
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"
@@ -80,6 +82,57 @@ _n      iny
         sta sl_n,x
         rts
 
+
+; L = X: come sl_init, ma dopo un cambiamento delle voci (comprato, venduto, spostato) tiene cursore e finestra: il cursore
+; resta entro le voci e mai sulla riga separatrice (sale di una)
+sl_reinit:
+        lda sl_cur,x
+        pha
+        lda sl_top,x
+        pha
+        jsr sl_init
+        pla
+        sta sl_top,x
+        pla
+        ldy sl_n,x
+        beq _z
+        cmp sl_n,x
+        bcc +
+        tya                     ; oltre l'ultima: l'ultima
+        sbc #1
++       sta sl_cur,x
+_s      lda sl_cur,x
+        jsr sl_get
+        bcc sl_win
+        dec sl_cur,x
+        bpl _s
+_z      lda #0
+        sta sl_cur,x
+        sta sl_top,x
+        rts
+
+; L = X: finestra con il cursore dentro, senza spazio vuoto in fondo se le voci sono piu' delle righe
+sl_win:
+        lda sl_cur,x
+        cmp sl_top,x
+        bcs +
+        sta sl_top,x
++       sec
+        sbc sl_h,x
+        bcc +
+        adc #0                  ; (C = 1) cur - h + 1
+        cmp sl_top,x
+        bcc +
+        sta sl_top,x
++       lda sl_n,x
+        sec
+        sbc sl_h,x
+        bcs +
+        lda #0
++       cmp sl_top,x
+        bcs +
+        sta sl_top,x
++       rts
 
 ; A/X = tabella (numero di segmenti, poi tipo, primo posto, posti per ognuno), Y = primo segmento: copiata in sg_*
 sl_segs:
@@ -496,17 +549,7 @@ _d1     ldy sl_cur,x
 +       sta sl_cur,x
         jsr sl_get
         bcs _d1
-_mv     lda sl_cur,x            ; finestra: il cursore dentro
-        cmp sl_top,x
-        bcs +
-        sta sl_top,x
-+       sec
-        sbc sl_h,x
-        bcc +
-        adc #0                  ; (C = 1) cur - h + 1
-        cmp sl_top,x
-        bcc +
-        sta sl_top,x
-+       jsr sl_draw
+_mv     jsr sl_win              ; finestra: il cursore dentro
+        jsr sl_draw
         lda #NAV_MOVE
         rts

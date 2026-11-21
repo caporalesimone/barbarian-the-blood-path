@@ -27,6 +27,21 @@ def new_game(g, slot=0):
     g.menu_return(1)
 
 
+def list_to(g, lst, var, want, n=40):
+    """(21/11) scrolling lists (src/game/slist.asm): list lst (0/1) active (A/D), then the cursor down until the screen's
+    variable var (shops: ui_lc, inn and inventory: ui_cur) is want. True if reached"""
+    L = g.L
+    if g.b(L["sl_l"]) != lst:
+        g.frames(1, joy=RT if lst else LF); g.frames(1)
+    for _ in range(n):
+        if g.b(L[var]) == want: return True
+        g.frames(1, joy=D); g.frames(1)
+    return g.b(L[var]) == want
+
+
+K_R, K_E = (2, 0x02), (1, 0x40)
+
+
 def key(g, k, settle=1):
     g.frames(1, keys={k[0]: k[1]}); g.frames(settle)
 

@@ -79,36 +79,6 @@ _d      pla
         rts
 
 
-; nome dell'oggetto X delle tabelle dello zaino (PACK_N.. = equipaggiamento) alla posizione corrente: magia, rotto in rosso
-pk_name:
-        lda c_packb,x
-        sta ui_ib
-        lda #0                  ; oggetto rotto (durabilita' 0 su un massimo > 0: le armi, 07/11): in rosso
-        ldy c_packm,x
-        beq +
-        ldy c_packd,x
-        bne +
-        lda #2
-+       sta ui_fc
-        lda sh_mask             ; negozio (08/11): gli oggetti dello zaino che non compra sono grigi
-        beq _n
-        cpx #PACK_N
-        bcs _n
-        ldy c_pack,x
-        lda itcat,y
-        tay
-        lda cat_bit,y
-        and sh_mask
-        bne _n
-        lda #12
-        sta ui_fc
-_n      lda c_pack,x
-        jsr ui_item
-        lda #0
-        sta ui_fc
-        rts
-
-
 iv_main:                        ; (21/11) ingresso da ui_inventory (ui.asm), che prima si assicura che CORE ci sia
         jsr sort_pack           ; (08/11) zaino sempre ordinato anche se il salvataggio e' di prima dell'ordinamento
         jsr ui_begin
@@ -141,6 +111,8 @@ iv_main:                        ; (21/11) ingresso da ui_inventory (ui.asm), che
         sta sl_s0
         sta sl_l
         sta sl_rv+1
+        sta iv_mode
+        jsr iv_std              ; riga 3 del riquadro: provenienza o confronto
         lda #3
         sta sl_sn
         lda #1
@@ -188,9 +160,8 @@ tt_bp   .text "backpack", 0
 
 
 ; valore di vendita: "val 1200o d135/178" (08/11: numero e poi la moneta)
-it_val  #msg "val "             ; valore di vendita: prezzo >> SELL_SHIFT (20/11: un quarto)
-; valore di vendita dell'oggetto ui_sel (prezzo >> SELL_SHIFT, balance.yaml shop_rules.sell_divisor), allineato a sinistra
-it_half lda ui_sel
+it_val  #msg "val "             ; valore di vendita dell'oggetto ui_sel: prezzo >> SELL_SHIFT (20/11: un quarto,
+        lda ui_sel              ; balance.yaml shop_rules.sell_divisor), allineato a sinistra, moneta
         asl
         tay
         lda itprice+1,y
@@ -201,21 +172,8 @@ it_half lda ui_sel
         ror a
         .endrept
         ldx tmp1
-        jsr ui_n5l              ; (08/11) allineato a sinistra
-        jsr ui_coin
-it_dur  lda ui_durm             ; durabilita' " d120/200" (solo oggetti che si usurano), se sta nel riquadro da 18
-        beq _x                  ; (cidx = caratteri gia' scritti dalla riga: " d135/178" sono 9)
-        lda cidx
-        cmp #10
-        bcs _x
-        #msg " d"
-        lda ui_dur
-        jsr ui_b3l
-        lda #$2f
-        jsr ui_putc
-        lda ui_durm
-        jmp ui_b3l
-_x      rts
+        jsr ui_n5l
+        jmp ui_coin
 
 ; caratteristica principale dell'oggetto ui_sel (bonus tmp5), al massimo 9 caratteri:
 ; "dmg 2d6+3", "ac +5", "+2 str", "heal 50", "portal"
@@ -536,24 +494,26 @@ _cl     ldx #1
         lda #$20
         jsr ui_putc
         jsr it_sec
-        #at 2,IV_SY+2           ; valore e durabilita' (it_val senza la sua durabilita' corta)
-        lda ui_durm
-        pha
-        lda #0
-        sta ui_durm
+        #at 2,IV_SY+2           ; valore e durabilita' (negozi: solo la durabilita', il prezzo e' nella riga 3)
+        lda iv_mode
+        bne +
         jsr it_val
-        pla
-        sta ui_durm
+        inc cidx                ; due spazi
+        inc cidx
++       lda ui_durm
         beq +
-        #msg "  dur "
+        #msg "dur "
         lda ui_dur
         jsr ui_b3l
         lda #$2f
         jsr ui_putc
         lda ui_durm
         jsr ui_b3l
-+       #at 2,IV_SY+3           ; provenienza o confronto
-        lda sl_mk
++       #at 2,IV_SY+3           ; riga 3: routine della schermata (iv_std: provenienza o confronto; negozi: prezzi)
+        jmp (iv_l3)
+; riga 3 standard: indossato / in cintura, altrimenti (zaino, baule, merce) il confronto con l'indossato
+iv_l3s  lda sl_mk
+        beq _cmp
         cmp #CH_PACK
         beq _cmp
         tay
@@ -584,6 +544,46 @@ _cmp    ldx ui_sel              ; zaino: "you: " + caratteristica principale del
         #msg "you: "
         jmp it_prim
 _x      rts
+; iv_l3 = iv_l3s (riga 3 standard)
+iv_std  lda #<iv_l3s
+        sta iv_l3
+        lda #>iv_l3s
+        sta iv_l3+1
+        rts
+
+; ---- schermate con due liste (21/11: negozi, locanda, baule del piano): riquadri, righe, disegno
+; riquadri: lista 0 (righe 2-7), lista 1 (righe 10-16), oggetto (righe 18-22)
+ls2_frame:
+        lda #<ls2_box
+        ldx #>ls2_box
+        ldy #12
+        jmp ui_boxes
+ls2_box .byte 0,1,40,8, 0,9,40,9, 0,IV_SY,40,5
+; segmenti gia' in sg_*, sl_s0/sl_sn impostati: righe delle due liste, cursore sulla prima voce della lista 0
+ls2_init:
+        ldx #3
+-       lda ls2_yh,x
+        sta sl_y,x
+        dex
+        bpl -
+        lda #2
+        sta sl_nl
+        lda #0
+        sta sl_l
+        ldx #1
+        jsr sl_init
+        dex
+        jmp sl_init
+ls2_yh  .byte 2, 10, 6, 7               ; sl_y (2 liste), poi sl_h
+        .cerror sl_h != sl_y+2, "sl_y e sl_h contigui"
+; le due liste e il riquadro dell'oggetto sotto il cursore
+ls2_draw:
+        ldx #0
+        jsr sl_draw
+        inx
+        jsr sl_draw
+        jmp iv_sel
+
 ; la cornice del titolo riprende dopo il nome (gli spazi di riempimento di ui_item tornano BOX_H)
 iv_trim:
         ldy cidx

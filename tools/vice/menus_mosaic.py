@@ -6,7 +6,7 @@ from PIL import Image, ImageDraw
 D = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "docs", "screens")
 TITLES = {"menu_iniziale": "Menu iniziale", "nuovo_barbaro": "Nuovo barbaro", "scheda": "Scheda del barbaro salvato",
           "inventario": "Inventario", "baule": "Baule del dungeon", "fabbro": "Fabbro",
-          "alchimista": "Alchimista", "locanda": "Locanda (baule)", "locanda_scelta": "Locanda: scelta dell'anello",
+          "alchimista": "Alchimista", "locanda": "Locanda (baule)",
           "menu_gioco": "Menu di gioco", "quit": "Quit game?", "morte": "Morte", "mappa": "Mappa",
           "badsave": "Salvataggi di un'altra versione", "io_screen": "Caricamento / salvataggio",
           "io_generico": "Caricamento generico (locanda)", "io_livello": "Caricamento di un piano",

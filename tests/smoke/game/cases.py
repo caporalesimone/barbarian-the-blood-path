@@ -5,7 +5,7 @@ CHAIN: if a step fails the following ones are skipped (they depend on the game s
 from lib.c64 import Game
 from c64test import test, check
 from lib.play import (NAME, SEED, SOLID_V, FLOOR_D, U, D, LF, RT, GG, find, mpos, alive, fire_to,  # noqa: F401
-                      minimap, new_game, key, clear_around, floor_next, SMITH_DOOR, K_5)
+                      minimap, new_game, key, clear_around, floor_next, SMITH_DOOR, K_5, list_to, K_R)
 
 CHAIN = True
 
@@ -83,9 +83,7 @@ def shop_buy(ctx):
 def shop_sell(ctx):
     g, L = ctx["g"], ctx["L"]
     item, price = ctx["bought"]
-    for _ in range(16):                                     # cursor down to the first pack slot
-        if g.b(L["ui_lc"]) == 0: break
-        g.frames(1, joy=D); g.frames(1)
+    check(list_to(g, 1, "ui_lc", 0), "cursor not on the first pack slot (ui_lc %d)" % g.b(L["ui_lc"]))   # list 1 = gear
     g0 = g.w16(L["c_gold"])
     g.press_fire(); g.press_fire()
     check(item not in g.mem(L["c_pack"], 8), "the item is still in the pack")
@@ -103,12 +101,9 @@ def shop_repair(ctx):
     g.poke16(L["c_gold"], 1000)
     fire_to(g, *SMITH_DOOR)
     check(g.b(L["sh_mask"]) != 0, "the smith does not open")
-    for _ in range(16):                                             # ui_lc 8 = equipped weapon
-        if g.b(L["ui_lc"]) == 8: break
-        g.frames(1, joy=D); g.frames(1)
-    check(g.b(L["ui_lc"]) == 8, "cursor not on the weapon (ui_lc %d)" % g.b(L["ui_lc"]))
+    check(list_to(g, 1, "ui_lc", 8), "cursor not on the weapon (ui_lc %d)" % g.b(L["ui_lc"]))   # ui_lc 8 = equipped weapon
     cost = g.w16(L["itprice"] + 2 * w) * L["REPAIR_PC"] // 100
-    g.press_fire(); g.press_fire()                                 # repair, confirm
+    key(g, K_R); g.press_fire()                                    # R: repair, fire: confirm
     check(g.b(L["c_packd"] + 8) == 59 and g.b(L["c_packm"] + 8) == 59, "durability %d/%d (expected 59/59)" % (g.b(L["c_packd"] + 8), g.b(L["c_packm"] + 8)))
     check(g.w16(L["c_gold"]) == 1000 - cost, "gold %d (expected %d, cost %d)" % (g.w16(L["c_gold"]), 1000 - cost, cost))
     g.run_stop(); g.frames(2)
@@ -121,22 +116,28 @@ def inn_put(ctx):
     g.poke(L["c_pack"], 2); g.poke(L["c_packd"], 50); g.poke(L["c_packm"], 60)
     fire_to(g, 40, 43); g.frames(5)                         # below the inn's door (OVLT from disk)
     check(not g.in_game(), "the inn chest did not open")
-    g.poke(L["ui_cur"], 5); g.frames(1); g.press_fire()     # entry 5 = first pack slot
+    check(list_to(g, 0, "ui_cur", 0), "cursor not on the first pack slot")   # (21/11) list 0 = yours
+    g.press_fire()
     check(g.b(L["c_pack"]) == 0 and 2 in g.mem(L["st_id"], 24), "pack %s, chest %s" % (g.mem(L["c_pack"], 8), g.mem(L["st_id"], 8)))
 
 
 @test("INN-CHEST-02", "inn: the item from the chest back to the pack")
 def inn_take(ctx):
     g, L = ctx["g"], ctx["L"]
-    g.poke(L["ui_cur"], 15); g.frames(1); g.press_fire()    # entry 15 = first chest slot
+    check(list_to(g, 1, "ui_cur", 0x40), "cursor not on the first chest slot")   # list 1 = chest ($40 + slot)
+    g.press_fire()
     check(2 in g.mem(L["c_pack"], 8) and 2 not in g.mem(L["st_id"], 24), "pack %s, chest %s" % (g.mem(L["c_pack"], 8), g.mem(L["st_id"], 8)))
 
 
-@test("INN-GOLD-01", "inn: carried gold into the chest (in tens)")
+@test("INN-GOLD-01", "inn: entering, the carried gold goes into the chest (in tens)")
 def inn_gold(ctx):
     g, L = ctx["g"], ctx["L"]
+    g.run_stop(); g.frames(3)
+    check(g.in_game(), "RUN/STOP does not close the inn")
+    g.poke16(L["c_gold"], 1234)
     g0, s0 = g.w16(L["c_gold"]), g.w16(L["c_sgold"])
-    g.poke(L["ui_cur"], 4); g.frames(1); g.press_fire()     # entry 4 = pack gold
+    fire_to(g, 40, 43); g.frames(5)                         # (21/11) the deposit is made entering the inn
+    check(not g.in_game(), "the inn does not open again")
     gd, sg = g.w16(L["c_gold"]), g.w16(L["c_sgold"])
     check((gd, sg) == (g0 % 10, s0 + g0 // 10), "carried %d chest %d (expected %d, %d)" % (gd, sg, g0 % 10, s0 + g0 // 10))
     g.run_stop(); g.frames(3)

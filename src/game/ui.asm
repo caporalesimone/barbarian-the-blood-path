@@ -1,5 +1,5 @@
 ; ===================================================================
-;  ui.asm - schermate di testo (font ROM), inventario, negozi, minimappa
+;  ui.asm - schermate di testo (font ROM), ingresso dell'inventario, baule del piano, minimappa, menu di gioco
 ; ===================================================================
         .enc "screen"
 
@@ -14,9 +14,8 @@ it_i     .byte ?                ; oggetto in transito: id, bonus, durabilita', m
 it_b     .byte ?
 it_d     .byte ?
 it_m     .byte ?
-ui_dur   .byte ?                ; ibox_show: durabilita' dell'oggetto mostrato (0 = non mostrata)
+ui_dur   .byte ?                ; durabilita' dell'oggetto mostrato (0 = non mostrata): ibox_ld, sl_get
 ui_durm  .byte ?
-st_top   .byte ?                ; baule di casa: primo oggetto della pagina mostrata (locanda)
 st_col   .byte ?                ; baule di casa: colonna selezionata (0 zaino, 1 baule) (locanda)
 iv_r     .byte ?                ; (21/11) inventario: riga che si pulisce
         .endv
@@ -29,22 +28,13 @@ ui_bc    .byte ?                ; colore delle cornici di ui_box (ui_begin: UC_B
 s4_n     .byte ?                ; sort4: numero di posti, categoria della passata, appoggio
 s4_c     .byte ?
 s4_t     .byte ?
-hg_x     .byte ?                ; h_get / h_put (casa): posto e indice della tabella
-hg_k     .byte ?
-eq_y     .byte ?                ; eq_draw: prima riga, voce del cursore del primo posto, posto fisso ($FF nessuno)
-eq_u0    .byte ?
-eq_fix   .byte ?
-eq_k     .byte ?
 nav_end
         .endv
         .cerror nav_end > $9400, "variabili di ui_nav oltre $93FF"
 
         .virtual $942b          ; (08/11) liste comuni dei menu: lista da 8, righe dei riquadri
-l8_id   .fill 8                 ; list8: oggetti dei posti (0 = '-', $FF = oro del baule: ch_gold)
+l8_id   .fill 8                 ; merce del negozio o contenuto del baule del piano (segmento SK_WARE delle liste)
 l8_b    .fill 8                 ; ... e loro bonus
-l8_y    .byte ?                 ; prima riga della lista da 8
-de_y    .byte ?                 ; prima riga dello zaino (draw_entries)
-pu_y    .byte ?                 ; prima riga del purse (purse_draw)
 ti_row  .byte ?                 ; riga del titolo (ui_title; 0 di base da ui_begin)
 ti_col  .byte ?                 ; colore del titolo e delle sue icone (ui_title; UC_TITLE di base da ui_begin)
 l8_end
@@ -59,17 +49,14 @@ bh      .byte ?
 br      .byte ?
 bend    .byte ?
 ui_nl   .byte ?                 ; 1 = numeri senza spazi iniziali
-ib_y    .byte ?                 ; riquadro oggetto: prima riga di testo e riga finale+1
-ib_ye   .byte ?
 ui_fc   .byte ?                 ; <>0: colore forzato per valori e oggetti (schermate eroe)
         .endv
 
         .virtual $9400
 shp_stock .fill SHOP_POOL_MAX    ; oggetti in vendita (estratti a caso a ogni ingresso; 21/11: 24, armi nuove)
-sh_mask   .byte ?               ; negozio: categorie comprate (bit 1<<CAT_*), 0 = fuori dal negozio (pk_name)
-sh_lc     .byte ?               ; voce con il '>' nella merce e nel purse (ui_lc o il posto scelto)
+sh_mask   .byte ?               ; negozio: categorie comprate (bit 1<<CAT_*), 0 = fuori dal negozio (shop_gold)
         .endv
-        .cerror sh_lc >= $9420, "variabili del negozio oltre $941F"
+        .cerror sh_mask >= $9420, "variabili del negozio oltre $941F"
 
         .include "macros.inc"
 
@@ -101,14 +88,6 @@ ui_begin0:                      ; (io_screen: senza, perche' durante un salvatag
         sta tp_on               ; in UI lo schermo A e' testo: set_tile non deve toccarlo
         lda #UC_BOX
         sta ui_bc
-        lda #2                  ; righe dei riquadri comuni (inventario, negozi); il baule le cambia
-        sta l8_y
-        lda #8
-        sta eq_y
-        lda #12
-        sta de_y
-        lda #18
-        sta pu_y
         lda #0
         sta ti_row
         lda #UC_TITLE
@@ -671,84 +650,9 @@ nav_help:
         #msg "fire:select  run/stop:back"
         rts
 
-; ------------------------------------------------------------------ voci (zaino+equip)
-draw_entries:
-        ldx #0
-_l      stx tmp3
-        txa
-        and #3
-        clc
-        adc de_y
-        tay
-        lda ue_x,x
-        tax
-        jsr ui_at
-        ldx tmp3
-        cpx ui_lc
-        bne _nm
-        lda #$3e
-        bne _pm
-_nm     lda #$20
-_pm     jsr ui_putc
-        ldx tmp3
-        lda c_pack,x            ; icona della categoria al posto dello spazio (08/11)
-        jsr ui_cic
-        jsr pk_name
-        ldx tmp3
-        inx
-        cpx #PACK_N             ; solo lo zaino (l'equipaggiamento con eq_draw)
-        bne _l
-        rts
-
+; (21/11) tolte draw_entries, eq_draw, sec_frames, list8, purse_draw, ibox_show/ibox_top, sh_cur1 e ch_item: la vecchia
+; interfaccia comune di inventario, negozi, locanda e baule (ora le liste a scorrimento, src/game/slist.asm)
 ; (21/11, TODO D15) qui c'era codice ora nel segmento CORE (src/game/inv.asm)
-; equipaggiamento su 2 colonne con le icone (08/11, casa e inventario): arma (1,eq_y), armatura (1,eq_y+1),
-; scudo (20,eq_y), anello (20,eq_y+1). Cursore '>' se eq_u0 + posto = ui_lc, oppure fisso sul posto eq_fix
-eq_draw:
-        ldx #0
-_l      stx eq_k
-        lda eq_x,x
-        tax
-        lda eq_k
-        and #1
-        clc
-        adc eq_y
-        tay
-        jsr ui_at
-        lda eq_k
-        cmp eq_fix
-        beq _gt
-        clc
-        adc eq_u0
-        cmp ui_lc
-        bne _sp
-_gt     lda #$3e
-        .byte $2c
-_sp     lda #$20
-        jsr ui_putc
-        ldy eq_k
-        lda eq_icc,y
-        tax
-        lda eq_ic,y
-        jsr ui_icon
-        lda eq_k
-        clc
-        adc #PACK_N
-        tax
-        jsr pk_name
-        ldx eq_k
-        inx
-        cpx #4
-        bne _l
-        rts
-; equipaggiamento in righe 8-9 con il cursore della lista (inventario, negozi)
-eq_std: lda #PACK_N              ; (riga: eq_y, 8 di base da ui_begin)
-        sta eq_u0
-        lda #$ff
-        sta eq_fix
-        jmp eq_draw
-eq_x    .byte 1, 1, 20, 20
-eq_ic   .byte CH_SWORD, CH_ARMOR, CH_SHLD, CH_RING
-eq_icc  .byte 1, 15, 9, 7       ; bianco, grigio chiaro, marrone, giallo
 
 ; ------------------------------------------------------------------ inventario
 ; inventario (21/11, liste a scorrimento: slist.asm): statistiche (titolo = nome) in 3 righe, lista "items" da 10 righe
@@ -827,24 +731,6 @@ _b2     lda #BOX_H
         jmp ui_putc
 
 
-; i 5 riquadri comuni a inventario e negozi: in alto (statistiche / merce), equipped, pack, in basso a sinistra
-; (belt / purse), selected item (riquadro standard dell'oggetto)
-sec_frames:
-        lda #<sf_box
-        ldx #>sf_box
-        ldy #20
-        jsr ui_boxes
-        jsr ui_labels
-        .byte 2,7
-        .text " equipped "
-        .byte 0,2,11
-        .text " pack "
-        .byte 0,22,17
-        .text " selected item "
-        .byte 0,$ff
-        rts
-sf_box  .byte 0,1,40,6, 0,7,40,4, 0,11,40,6, 0,17,20,5, 20,17,20,5
-
 ; riquadri da una tabella (x, y, larghezza, altezza): A/X = tabella, Y = 4 x numero di riquadri
 ui_boxes:
         sta ptr2
@@ -872,103 +758,6 @@ _b      sty tb_i
         bne _b
         rts
 
-; lista da 8 (08/11, componente comune: merce dei negozi, contenuto dei bauli): 2 colonne da 4 dalla riga l8_y,
-; voci 12..19 (cursore '>' su sh_lc), l8_id/l8_b = oggetti; 0 = '-', $FF = oro del baule ("64o")
-list8:
-        ldx #0
-_w      stx tmp3
-        txa
-        and #3
-        clc
-        adc l8_y
-        tay
-        ldx #1
-        lda tmp3
-        cmp #4
-        bcc +
-        ldx #20
-+       jsr ui_at
-        lda tmp3
-        clc
-        adc #12
-        jsr sh_cur1
-        ldx tmp3
-        lda l8_id,x             ; icona della categoria (spazio per '-' e per l'oro del baule)
-        jsr ui_cic
-        ldx tmp3
-        lda l8_id,x
-        cmp #$ff
-        bne _it
-        lda ch_gold
-        ldx ch_gold+1
-        jsr ui_n5l
-        jsr ui_coin
-        jmp _nx
-_it     ldy l8_b,x
-        sty ui_ib
-        jsr ui_item
-_nx     ldx tmp3
-        inx
-        cpx #8
-        bcc _w
-        rts
-
-; purse (08/11, componente comune: negozi, bauli) dalla riga pu_y: oro (moneta a x 2, sopra la prima pozione) e
-; chiavi (x 11); riga pu_y+1 cintura (posti a x 2, 5, 8, 11; '>' su sh_lc = 20..23) e pergamene (x 14, voce 24);
-; riga pu_y+2 libera: seconda fila della cintura a 8 posti (4 slot da 2, quest; TODO)
-purse_draw:
-        ldx #2
-        ldy pu_y
-        jsr ui_at
-        jsr shop_gold
-        ldx #0
-_bl     stx st_i
-        txa
-        asl
-        adc st_i
-        adc #1
-        tax
-        ldy pu_y
-        iny
-        jsr ui_at
-        lda st_i
-        clc
-        adc #20
-        jsr sh_cur1
-        ldx st_i
-        jsr belt_slot
-        ldx st_i
-        inx
-        cpx #4
-        bne _bl
-        ldx #13
-        ldy pu_y
-        iny
-        jsr ui_at
-        lda #24
-        jsr sh_cur1
-        jsr scr_find
-        bcs _ns
-        lda c_packb,y
-        pha
-        lda #CH_SCR
-        ldx #15
-        jsr ui_icon
-        lda #$20
-        jsr ui_putc
-        pla
-        jsr ui_b3l
-        lda #$20
-        jsr ui_putc
-        jmp _k
-_ns     #msg "-   "
-_k      ldx #11                 ; chiavi accanto all'oro (x 11, sopra il 4o posto della cintura): icona + "n/10"
-        ldy pu_y                ; (la riga pu_y+2 resta per la 2a fila della cintura a 8 posti, quest: TODO)
-        jsr ui_at
-        jsr keys_n
-        lda #$20                ; (le cifre possono calare: pulisce la colonna dopo)
-        jmp ui_putc
-
 ; (11/11, O9) chiavi alla posizione corrente: icona, spazio, "n/10" (purse e inventario)
 keys_n:
         lda #CH_KEY
@@ -982,15 +771,6 @@ keys_n:
         rts
 
 
-; statistiche dell'oggetto selezionato: riquadro in basso a destra (x=21..38, righe 21-22). (21/11) ibox_draw tolta: la usava
-; solo il vecchio inventario
-ibox_show:                      ; ui_sel / tmp5 gia' impostati
-        jsr ibox_top
-        beq +
-        jsr ib_at1              ; riga 2: valore (vendita)
-        jmp it_val
-+       rts
-
 ; oggetto X delle tabelle dello zaino (PACK_N.. = equipaggiamento) -> ui_sel, tmp5, ui_dur, ui_durm
 ibox_ld:
         lda c_pack,x
@@ -1003,67 +783,9 @@ ibox_ld:
         sta ui_durm
         rts
 
-; pulisce le 2 righe del riquadro oggetto e scrive caratteristica principale + secondaria. Z=1 se nessun oggetto
-ibox_top:
-        ldy ib_y
-_cl     tya
-        pha
-        ldx #21
-        jsr ui_at
-        lda #$20
-        ldy #17
-_c2     sta (cp),y
-        dey
-        bpl _c2
-        pla
-        tay
-        iny
-        cpy ib_ye
-        bne _cl
-        ldx ui_sel
-        bne _ok
-        rts
-_ok     jsr ib_at0              ; riga 1: caratteristica principale + secondaria
-        jsr it_prim
-        lda #$20
-        jsr ui_putc
-        jsr it_sec
-        lda ui_sel
-        rts
 
-; posizionamento nel riquadro oggetto
-ib_at0: ldx #21
-        ldy ib_y
-        jmp ui_at
-; cursore alla seconda riga del riquadro dell'oggetto (colonna 21)
-ib_at1: ldx #21
-        ldy ib_y
-        iny
-        jmp ui_at
 
-; A = riga di testo del riquadro oggetto
-ib_set: sta ib_y
-        clc
-        adc #2
-        sta ib_ye
-        rts
-
-; posto X (0..3) della cintura: icona della pozione (nel suo colore) o '-', poi 2 spazi
-belt_slot:
-        ldy c_beltt,x
-        beq _nt
-        ldx itfl,y              ; colore della pozione (rossa, gialla, viola)
-        lda #CH_POT
-        jsr ui_icon
-        jmp _sp
-_nt     lda #$2d
-        jsr ui_putc
-_sp     lda #$20
-        jsr ui_putc
-        lda #$20
-        jmp ui_putc
-
-; Fire nell'inventario sulla voce ui_cur: zaino = usa (pozione, pergamena) o indossa; equipaggiamento = toglie
+; Fire nell'inventario sul posto ui_cur (anche dalla locanda): zaino = usa o indossa, indossato = toglie (non l'arma)
 inv_act:
         ldx ui_cur
         cpx #PACK_N
@@ -1443,15 +1165,6 @@ ui_mark:
 +       lda #$20
         jmp ui_putc
 
-; '>' sulla voce A se e' quella del cursore (sh_lc), altrimenti spazio
-sh_cur1:
-        cmp sh_lc
-        bne +
-        lda #$3e
-        .byte $2c
-+       lda #$20
-        jmp ui_putc
-
 ; titolo di ogni schermata (08/11, routine unica): riga ti_row, centrato, giallo; A/X = testo, Y = icona ai due lati
 ; (gialla; 0 = nessuna): "^ blacksmith ^", "o golden chest o", "backpack"
 ui_title:
@@ -1579,36 +1292,6 @@ shop_msg_clear:
 _c      sta (cp),y
         dey
         bpl _c
-        rts
-
-; riquadro dell'oggetto selezionato del baule di un dungeon (voce ui_lc 12..19 della lista da 8; 11/11: la versione
-; dei negozi, sh_item, e' nel modulo MENU): nome, caratteristiche, valore; riga 24 i tasti
-ch_item:
-        ldx #21                 ; nome nella riga prima di ib_y
-        ldy ib_y
-        dey
-        jsr ui_at
-        ldx ui_lc
-        lda l8_id-12,x
-        sta ui_sel
-        lda l8_b-12,x
-        sta ui_ib
-        lda ui_sel
-        jsr ui_cic
-        lda ui_sel
-        jsr ui_item
-        ldx ui_lc               ; dopo ui_item (ui_puts usa tmp5)
-        lda l8_b-12,x
-        sta tmp5
-        lda #0
-        sta ui_dur
-        sta ui_durm
-        jsr ibox_top
-        beq +
-        jsr ib_at1
-        jsr it_val
-+       jsr row24
-        #msg "fire:take  run/stop:back"
         rts
 
 ; ------------------------------------------------------------------ minimappa
@@ -2536,44 +2219,100 @@ ui_chest:
         #msg "fire or run/stop: close"
         jsr ui_wait_fire
         jmp ui_exit
-_show   jsr sec_frames
+_show   jsr ls2_frame           ; (21/11, liste a scorrimento) contenuto del baule e quello che si ha addosso
         jsr ui_labels
         .byte 2,1
         .text " contents "
-        .byte 0,2,17
-        .text " purse "
+        .byte 0,2,9
+        .text " yours "
         .byte 0,$ff
-        lda #19
-        jsr ib_set
+        lda ch_gold             ; oro trovato aprendolo: nel titolo del contenuto
+        ora ch_gold+1
+        beq +
+        ldx #21
+        ldy #1
+        jsr ui_at
+        jsr ui_gold
+        lda ch_gold
+        ldx ch_gold+1
+        jsr ui_n5l
++       lda #0
+        sta iv_mode
+        sta sl_rv+1
+        jsr iv_std
         jsr sort_pack
+        lda #<iv_sg             ; lista 1 = le voci dell'inventario (segmenti 1-3), lista 0 = il contenuto (segmento 0)
+        ldx #>iv_sg
+        ldy #1
+        jsr sl_segs
+        lda #1
+        sta sl_s0+1
+        sta sl_sn
+        lda #3
+        sta sl_sn+1
+        lda #0
+        sta sl_s0
         jsr ch_fill
-        jsr nav_init
+        jsr ls2_init
 .if NOKEYS
-        jsr ch_fill
-        jsr ch_draw
+        jsr ls2_draw
 _hg     jmp _hg                 ; screenshot: la schermata resta com'e'
 .endif
-_rd     jsr ch_fill
-        jsr ch_draw
-_in     jsr ui_nav
+_rd     jsr ls2_draw
+        jsr ch_keys
+_in     jsr sl_nav
         cmp #NAV_MOVE
-        beq _rd
-        cmp #NAV_BACK
+        bne +
+        jsr iv_sel
+        jsr ch_keys
+        jmp _in
++       cmp #NAV_BACK
         beq _x
         cmp #NAV_FIRE
         bne _in
-        lda ui_n
+        lda sl_l                ; si prende solo dal contenuto
+        bne _in
+        jsr sl_sel
+        lda ui_sel
         beq _in
+        lda ch_cur              ; voce n del contenuto -> posto del baule (n-esimo oggetto dei 4 posti)
+        asl
+        asl
+        tay
+        ldx sl_cur
+        lda #$ff
+        sta ui_cur
+-       inc ui_cur
+        lda ch_i,y
+        iny
+        cmp #0
+        beq -
+        dex
+        bpl -
         jsr msg23
         jsr chest_take1
         bcc _ok
         jsr give_msg            ; "the belt is full." / "pack is full." / "max 10 scrolls.": resta nel baule
         jmp _rd
 _ok     jsr chest_empty
-        bcc _rd
-        jmp ui_exit
+        bcs _e
+        jsr ch_fill
+        ldx #1
+        jsr sl_reinit
+        dex
+        jsr sl_reinit
+        jmp _rd
 _x      jsr chest_empty         ; un baule vuoto sparisce anche uscendo
-        jmp ui_exit
+_e      jmp ui_exit
+
+; riga 24: i tasti (nel contenuto si prende, nell'altra lista si guarda)
+ch_keys:
+        jsr row24
+        lda sl_l
+        bne +
+        #msg "fire:take  "
++       #msg "run/stop:back"
+        rts
 
 ; tipo del baule: ch_t & 3 = 0/1 normale, 2 con chiave, 3 d'oro; $40 epico
 ch_nm_lo .byte <cn_0, <cn_1, <cn_2, <cn_3
@@ -2583,22 +2322,15 @@ cn_1    .text "key chest", 0
 cn_2    .text "golden chest", 0
 cn_3    .text "epic chest", 0
 
-; lista da 8 dal baule: oro preso (se c'e') + oggetti, poi '-'; ui_n = oggetti; ui_lc / sh_lc = voce del cursore
+; (21/11) oggetti del baule ch_cur -> l8_id / l8_b e segmento 0 (merce: SK_WARE) con quanti sono
 ch_fill:
-        ldy #0
-        lda ch_gold
-        ora ch_gold+1
-        beq +
-        lda #$ff
-        sta l8_id
-        iny
-+       sty tmp7                ; 1 = c'e' la riga dell'oro
         lda ch_cur
         asl
         asl
         tax
         lda #4
         sta tmp6
+        ldy #0
 _c      lda ch_i,x
         beq +
         sta l8_id,y
@@ -2608,39 +2340,12 @@ _c      lda ch_i,x
 +       inx
         dec tmp6
         bne _c
-        tya
-        sec
-        sbc tmp7
-        sta ui_n
+        sty sg_c
+        lda #SK_WARE
+        sta sg_k
         lda #0
-_z      cpy #8
-        bcs +
-        sta l8_id,y
-        iny
-        bne _z
-+       ldx #$ff
-        lda ui_n
-        beq +
-        lda ui_cur
-        clc
-        adc tmp7
-        adc #12
-        tax
-+       stx sh_lc
-        txa
-        bpl +
-        lda #12                 ; nessun oggetto: riquadro dell'oggetto vuoto (voce '-' o l'oro)
-        adc tmp7
-+       sta ui_lc
+        sta sg_a
         rts
-
-; baule del piano: zaino, equipaggiamento, contenuto del baule, borsello e oggetto scelto
-ch_draw:
-        jsr list8
-        jsr eq_std
-        jsr draw_entries
-        jsr purse_draw
-        jmp ch_item
 
 ; Y = posto nel contenuto del baule ch_cur (4 posti per baule) della voce ui_cur
 chest_idx:

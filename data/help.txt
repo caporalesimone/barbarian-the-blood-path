@@ -240,6 +240,7 @@
 === inventory (i)
  every screen works the same way:
    [w] [s] or [stick]	move
+   [a] [d]	other list
    [fire]	select
    [run/stop]	back
 
@@ -262,20 +263,17 @@
  <smith, alchemist>
    [fire] on wares	buy (your ¤,
    	then the inn's ¤)
-   [fire] on the pack	sell
-   [fire] on worn gear	repair (smith)
+   [fire] on yours	sell
    [r]	repair (smith)
+   {worn gear: take it off to sell.}
    {a potion: choose its belt slot.}
 
  <inn chest> {(every inn): 24 items}
    [fire]	between pack and
-   	chest
-   [fire] on your ¤	into the chest in
-   	tens (0-9 stay on)
-   [right]	from pack to chest
-   [fire] on a page	next page
-   [fire] on a slot	what to wear
-   	([run/stop] cancels)
+   	chest, or take off
+   [e]	wear it
+   {your ¤ goes into the chest in}
+   {tens when you come in.}
 === menus and saving
  <game menu> [run/stop]
    resume, save game, quit game
