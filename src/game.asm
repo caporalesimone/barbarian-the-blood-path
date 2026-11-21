@@ -1958,7 +1958,6 @@ mod_levels
         .include "levels.asm"
 mod_ui
         .include "ui.asm"
-        .include "charsheet.asm"         ; (11/11) schermata C: punti statistica, respec
         .include "quest.asm"             ; (17/11, concept) pagina della quest (Q) e NPC del villaggio
         .include "stash.asm"
 mod_hud
@@ -2082,6 +2081,7 @@ CODE2 = $9c00
 ; cheat god mode (docs/wiki/cheats.md): diverso da 0 = il PG non perde vita. Byte del PRG in CODE2 (game_start non lo
 ; azzera): lo scrive START dal POKE 1021,1 dato prima del RUN, il monitor di VICE o TESTGOD=1 (11/11)
 godmode .byte 0
+cs_ok   .byte 0                         ; (21/11 sera) 1 = modulo CSHEET a CS_AT in memoria (stash.asm cs_load)
 core_ok .byte 0                         ; (21/11, TODO D15) 1 = segmento CORE in memoria (fuori dalle variabili azzerate da game_start)
 code2_end:
 ;@free code2_end..$a000 "Coda di CODE2: piccolo codice residente (disco, caricamenti)" use=code

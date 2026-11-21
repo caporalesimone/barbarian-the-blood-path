@@ -195,7 +195,8 @@ sv_write:
         rts
 ; plugin di save: nome A/X, gia' scritti da/lunghezza/indirizzo in sv_par+2..+7. C=1 errore
 sv_save:
-        lsr core_ok             ; (21/11) plugin e suo buffer coprono il segmento CORE: da rileggere
+        lsr core_ok             ; (21/11) plugin e suo buffer coprono il segmento CORE e il modulo CSHEET: da rileggere
+        lsr cs_ok
         sta sv_par
         stx sv_par+1
         clc                     ; plugin ricaricato dal disco (file KSAVE) a ogni save: modifica il proprio codice

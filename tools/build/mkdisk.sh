@@ -56,6 +56,7 @@ ARGS+=(-f hl -w out/work/hl.prg -f ksave -w out/work/krill/save.prg)     # ksave
 # (21/11, TODO D15) core: segmento CORE di GAME (src/game/core.asm), riletto dopo ogni salvataggio. Posizione scelta misurando
 # PERF-DISK con 9 posizioni: qui (fra ksave e save-01) la somma dei tempi e' la piu' bassa (81,7 s, senza il file 79,2 s)
 ARGS+=(-f core -w out/work/core.prg)
+ARGS+=(-f csheet -w out/work/csheet.prg)     # (21/11 sera, TODO A1) schermata del personaggio (src/csheet.asm), letta col tasto C
 for s in 1 2 3 4 5; do ARGS+=(-f save-0$s -w out/work/save.prg); done
 # (18/11, PERF-12, docs/wiki/FastLoader.md 7.2) Krill cerca un file in una finestra di 11 voci della directory e, se non c'e',
 # legge i settori della directory successivi in giro (solo in avanti). Dopo un salvataggio la finestra sta sui file di

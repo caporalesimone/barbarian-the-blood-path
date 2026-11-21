@@ -60,6 +60,8 @@ for c in 1 2 3 4; do                # (19/11) arredi dei piani generati (capitol
     64tass -a -b $INC -D DK_CHAP=$c src/game/ovl_decor.asm -o out/work/ovl_decor$c.bin -l out/work/ovl_decor$c.lbl -L out/work/ovl_decor$c.lst > out/work/ovl_decor$c.log 2>&1 || { grep -v '^$' out/work/ovl_decor$c.log | head -20; exit 1; }
 done
 rm -f out/work/gen_cit.bin out/work/gen_cit.lbl out/work/gen_cit.lst out/work/gen_cit.log
+# (21/11 sera, TODO A1) schermata del personaggio: modulo CSHEET sul disco, assemblato con le etichette di GAME
+64tass -a $INC src/csheet.asm -o out/work/csheet.prg -l out/work/csheet.lbl -L out/work/csheet.lst > out/work/csheet.log 2>&1 || { grep -v '^$' out/work/csheet.log | head -20; exit 1; }
 if [ "$CHEATS" = 1 ]; then          # (17/11) menu dei trucchi: modulo CHEATS sul disco (solo debug e test)
     64tass -a $INC src/cheats.asm -o out/work/cheats.prg -l out/work/cheats.lbl -L out/work/cheats.lst > out/work/cheats.log 2>&1 || { grep -v '^$' out/work/cheats.log | head -20; exit 1; }
 else

@@ -1,4 +1,4 @@
-"""Stat points and respec (11/11, branch feature/stat-points, src/game/charsheet.asm): the level-up gives stat points
+"""Stat points and respec (11/11, branch feature/stat-points, src/csheet/charsheet.asm, module CSHEET since 21/11): the level-up gives stat points
 (pl_pts) instead of raising the stats, the HUD shows an arrow + C while there are points to spend, the C screen
 spends them (+/-, confirm with a question, undo; 15/11: nothing is spent without an explicit yes), does not save, and a respec token gives them all back. Respec tokens: +1 for the
 final boss, a low chance in the chests of the Abyss (resp_roll), at most RESP_MAX. One VICE session, the village."""

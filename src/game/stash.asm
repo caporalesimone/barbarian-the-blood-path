@@ -155,5 +155,55 @@ _x      pla
 .endif
 _r      rts
 
+; (21/11 sera, TODO A1 e D15) schermata del personaggio (tasto C): modulo CSHEET a CS_AT, letto se non c'e' (cs_ok = 0: lo
+; azzerano ogni caricamento, load_file / load_raw, e il salvataggio, che possono coprire $EC00-), poi eseguito
+CS_AT   = $ec00
+;@map CS_AT..MR2_AT "CSHEET (schermata del personaggio) mentre e' aperta; prima il file del villaggio o del tema, l'appoggio del MENU o l'immagine SV_ALT" scenario=villaggio,dungeon
+ui_charsheet:
+        jsr cs_load
+        bcs +
+        jmp CS_AT
++       rts
+; cs_load: il modulo in memoria (C = 0) o non leggibile (C = 1: la schermata non si apre). Lettura silenziosa come core_need
+; (fino a 3 tentativi); il file e' intero se finisce dove dice la sua parola CS_AT+3. Misurata da PERF-DISK (csheet, cs1..cs4)
+cs_load:
+        lda cs_ok
+        bne _ok0
+.if !ARENA
+        lda io_quiet
+        pha
+        lda #1
+        sta io_quiet
+        lda #3
+        sta ml_try
+_t      ldy #nm_csh-nm_tab
+        lda #6
+        jsr set_name
+        lda #<CS_AT
+        sta ptr0
+        lda #>CS_AT
+        sta ptr0+1
+        jsr load_raw            ; (azzera cs_ok)
+        bcs _bad
+        lda krill_endaddrlo
+        cmp CS_AT+3
+        bne _bad
+        lda krill_endaddrhi
+        cmp CS_AT+4
+        beq _ok
+_bad    dec ml_try
+        bne _t
+        beq _x
+_ok     inc cs_ok
+_x      pla
+        sta io_quiet
+        lda cs_ok
+        bne _ok0
+.endif
+        sec
+        rts
+_ok0    clc
+        rts
+
 ZX_ZP   = $50                   ; 12 byte della pagina zero del BASIC, liberi nel gioco (come in START, boot.asm)
         .include "zx0.inc"

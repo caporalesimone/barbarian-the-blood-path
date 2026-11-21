@@ -61,6 +61,7 @@ nm_fmap .text "fmap"
 nm_lobby .text "lobby"
 nm_menu .text "menu"                   ; menu del villaggio (locanda), stash.asm
 nm_core .text "core"                   ; (21/11) segmento CORE (src/game/core.asm, stash.asm core_need)
+nm_csh  .text "csheet"                 ; (21/11 sera) schermata del personaggio (src/csheet.asm, stash.asm cs_load)
 nm_twn  .text "twn"                    ; (12/11) villaggio del capitolo: "TWN" + cifra (c_chap)
 nm_bch  .text "bossch"                 ; (12/11) mappa del boss del capitolo: "BOSSCH" + cifra
 nm_qst  .text "qst"                    ; (17/11) testo della quest: "QST" + cifra (quest.asm)
@@ -231,6 +232,8 @@ load_raw:
 ; carica il file all'indirizzo scritto nel file (C=0)
 load_file:
         clc
+        ldx #0                  ; (21/11 sera, anche load_raw passa di qui) un caricamento puo' coprire il modulo CSHEET: da rileggere
+        stx cs_ok
         php
         jsr snd_io              ; SID zittito durante il disco (music.asm)
         jsr io_begin

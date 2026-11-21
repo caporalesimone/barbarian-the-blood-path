@@ -36,18 +36,12 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 ## 1 — Priorità massima
 
 ### A1 Punti statistica: rifiniture e verifiche a mano — **TOP PRIO** — S (verifica) + M (spostamento nel MENU)
-- Unito a `main` l'11/11 (schermata C in `src/game/charsheet.asm`, `docs/wiki/interfaccia.md`, `docs/wiki/quests.md`).
+- Unito a `main` l'11/11 (schermata C in `src/csheet/charsheet.asm` dal 21/11 sera, `docs/wiki/interfaccia.md`, `docs/wiki/quests.md`).
 - **Glifo dell'HUD da confermare** (decisione 11/11): oggi la **freccia verde in su** (`LVUP`, colore 5). Le 20 proposte restano
   in `lab/concept/hud_glyphs/hud_glyphs.png` (+ `glyphs.json`, `make_sheet.py`): il committente deve scegliere il migliore.
-- **Menu**: la schermata C va **riportata alla stessa logica dei menu del villaggio** (modulo MENU, `$01 = $35`, tabella dei
-  salti). Ostacolo: costa ~1 KB e le zone del MENU hanno liberi solo 272 B (170/9/93): serve una zona nuova o più spazio (D14).
-  Nel dungeon il MENU potrebbe non essere in memoria (si carica all'ingresso nel villaggio). Finché non si decide resta in GAME.
-  **Prova del 21/11 (modulo su disco)**: la schermata come file `csheet` (1524 B, assemblato con `game.lbl` come CHEATS) letto
-  a `$EC00` col tasto C dopo ogni caricamento: +1440 B in GAME, test verdi, ma il tempo di lettura (VICE, peggiore su 6 fasi del
-  disco) dipende dalla ricerca nella directory di Krill, non dai 6 blocchi. File dopo CORE: villaggio 0,49 s, dungeon 1,31-1,47 s
-  dopo le scale; con due voci-copia nella directory sempre ≤ 0,98 s, ma ingresso nel villaggio 1 da 2,78 a 4,59 s e twn1/twn5
-  oltre i limiti; altre due posizioni peggiori. Criterio del committente: ≤ 1 s. **Decisione del committente (21/11): la
-  schermata resta in GAME**; si sposterà quando servirà davvero spazio (affissi), cercando altro da togliere.
+- **Fatto (21/11 sera, soglia del committente portata a 2 s)**: la schermata C e' il modulo su disco `csheet`
+  ([interfaccia](docs/wiki/interfaccia.md)), letto a `$EC00` col tasto C se un caricamento o un salvataggio l'hanno coperto
+  (`cs_load`): villaggio 0,50 s, dungeon dopo le scale 0,80-1,41 s (PERF-DISK, peggiore su 6 fasi); margine di GAME 1534 -> 2874 B.
 - **Da verificare a mano** (VICE o hardware): aprire C nel villaggio e nel dungeon (anche con mostri vicini), spendere,
   togliere, spostare fra le caratteristiche, undo, confirm (sì/no), uscita con punti in attesa (sì/no), respec con e senza gettoni,
   ricaricare la partita, CON alzata = vita massima alzata (schermata rifatta il 15/11, Z5: `docs/wiki/interfaccia.md`).
@@ -268,6 +262,9 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   (fatto il 21/11 sera: testo a 5 bit e font compattato, margine 1534 B).
 - **Fatto (21/11), fase B**: negozi, locanda e baule del piano sulle liste a scorrimento, vecchia interfaccia comune tolta
   (margine di GAME 2437 B, zone 1 e 2 del MENU con 863 e 523 B liberi); branch `liste-menu` unito a `main` il 21/11.
+- (21/11 sera, committente) **Budget portato a 5 s, anche per portale e morte** (PERF-DISK: limiti `town_in`, `in1`-`in5`,
+  `portal_in`, `portal_out`, `death` a 5,0 s contro il limite stesso). Misure del 21/11 sera: `town_in` 4,81, `in1` 4,83, `in2` 4,44,
+  `in3`/`in4` 3,04, `in5` 3,73, portale 2,43 / 1,69, morte 2,43 s.
 - (21/11, committente) **Budget del passaggio fra dungeon e villaggio: al massimo 3 s**: entro quel tempo si può caricare
   dal disco anche altro codice o dati (es. un modulo del dungeon, leva DNG dell'analisi). (21/11, chiarito) 3 s **in tutto**, si può salire di poco ma
   l'attesa non deve diventare noiosa. Oggi l'ingresso nel villaggio misura 2,7-4,6 s secondo il capitolo (PERF-DISK): già sopra.

@@ -10,7 +10,10 @@ from lib.play import new_game
 CPS = 985248
 MARGIN = 0.9
 # thresholds fixed by the owner on 12/11 (stairs, saves, village): the measure must stay <= the value itself, no extra 10%
-HARD = {"town", "menu", "stairs", "save_dng", "save_char"}
+HARD = {"town", "menu", "stairs", "save_dng", "save_char", "csheet", "csheet_dng", "cs1", "cs2", "cs3", "cs4",
+        "town_in", "portal_in", "portal_out", "death", "in1", "in2", "in3", "in4", "in5", "twn1", "twn2", "twn3", "twn4", "twn5"}
+# (21/11 evening, owner) the passage between dungeon and village (stairs to the village, portal both ways, death) up to 5 s: limit
+# 5.0 measured against the limit itself (HARD); the village file alone (twnC) is a part of it and keeps its limit, without the 90%
 # limits in seconds (11/11, measured values in the comments)
 LIM = {
     "boot": 16.0,         # START from the monitor -> barbarian menu (install, GAME 25 KB + ZX0 unpacking ~4 s, LOBBY, hl): 13.4 s
@@ -19,10 +22,14 @@ LIM = {
     "theme": 1.5,         # load_gfx 1: a dungeon theme (GFX1, 2 KB): 0.98 s; 1.34 s on 12/11 (42 files on the disk: TWN1-4, BOSSCH1-3)
     "song": 2.0,          # (17/11, owner: measure rounded up to the half second; layouts tried: none better) 1.61 s; snd_get: SND0 right after the theme GFX1, a sequence the game never does (15/11: with the
                           # layout "hubchap" SND0 sits next to MENU, far from GFX1: 1.12 s; it was 0.51 s)
+    "portal_in": 5.0, "portal_out": 5.0, "death": 5.0,                      # (21/11 evening, owner) portal level 1 -> village, back, death
+    "csheet": 2.0,        # (21/11 evening, TODO A1) cs_load: the C screen module (CSHEET) read when C is pressed after a load; owner's limit 2 s
+    "csheet_dng": 2.0,    # the same in a dungeon, right after the stairs (head on the theme file)
+    "cs1": 2.0, "cs2": 2.0, "cs3": 2.0, "cs4": 2.0,                          # the same in the chapters, after the stairs (chapter_measures)
     "hdr": 1.0,           # (17/11, owner: measure rounded up to the half second) up to 0.91 s; hdr_read: the hero list (hl, 1 block): 0.62 s
     "load_char": 3.4,     # load_char in the village: hero file (9 blocks) + the village read again: 2.49 s; 2.71 s on 12/11 (disk layout changed: HELP packed); 3.04 s on 12/11 evening (file sizes of the loader changed, TODO M3)
     "save_char": 9.6,     # save_char in the village: read + plugin + 9 blocks + village again: 8.7-9.1 s; 9.45 s on 12/11 (limit of the owner 9.5 + rule "measure + 0.1")
-    "town_in": 5.6,       # change_level level 1 -> village, the whole entry (fade, GFX0, MENU, install, song): 4.41-4.49 s (12/11)
+    "town_in": 5.0,       # change_level level 1 -> village, the whole entry (fade, GFX0, MENU, install, song): 4.41-4.49 s (12/11)
     "stairs": 4.0,        # change_level to the next level of the same chapter (theme + generation, no disk write): 2.64 s with 30 files, 3.44-3.89 s with 36 files (varies from run to run); limit = max measured + 0.1 (12/11); target of the owner < 2 s (TODO J9)
     "save_dng": 9.4,      # save_char in a dungeon (no village to read again): the "save game": 7.6-8.1 s; 8.26-9.26 s on 12/11 (varies with the head position left by the previous test; limit of the owner 8.5 + rule "measure + 0.1")
     "hdr_write": 6.8,     # hdr_write: plugin + hl (1 block) + village again: 5.20 s; 5.0-5.8 s on 12/11 (varies from run to run)
@@ -34,7 +41,7 @@ LIM = {
     # first level of the chapter, for 5 from the village as chap_travel does), themeC = load_gfx 2C-1, stairsC = change_level level
     # 1 -> 2 of the chapter, bossC = change_level to the boss level of the chapter (GFX 2C + BOSSCHC)
     "twn1": 2.0, "twn2": 2.5, "twn3": 2.1, "twn4": 2.8, "twn5": 1.6,         # layout hubchap, measured: 0.68, 1.63, 1.56, 2.14, 1.20; (17/11) twn1 1.76 s in every layout (the bigger GAME): limit 2.0 (owner)
-    "in1": 6.6, "in2": 5.3, "in3": 5.0, "in4": 5.0, "in5": 5.2,              # the time depends on the disk phase (rotation, head position): slowest seen on
+    "in1": 5.0, "in2": 5.0, "in3": 5.0, "in4": 5.0, "in5": 5.0,              # (21/11 evening, owner: 5 s at most, HARD; were 6.6 5.3 5.0 5.0 5.2)              # the time depends on the disk phase (rotation, head position): slowest seen on
                                                                              # 10 phases 4.93, 3.86, 3.84, 3.84, 3.94 (means 4.17, 3.47, 3.49, 3.45, 2.96); in2 4.37 in the suite order
     "theme1": 1.2, "theme2": 1.2, "theme3": 1.4, "theme4": 1.1,              # 0.72, 0.77, 1.04, 0.46
     "stairs1": 3.2, "stairs2": 3.2, "stairs3": 3.2, "stairs4": 3.2,          # 1.5-1.7 s, up to 2.54 s depending on the disk phase
@@ -145,7 +152,7 @@ def perf_boot(ctx):
     verdict()
 
 
-@test("PERF-DISK-11", "loads with Krill (MENU, village, theme, song, hero list, hero file) <= their limits")
+@test("PERF-DISK-11", "loads with Krill (MENU, village, theme, song, hero list, hero file, C screen module) <= their limits")
 def perf_loads(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["ovl_cur"], 0)
@@ -156,14 +163,16 @@ def perf_loads(ctx):
     limit("song", timed(g, L["snd_get"], "a=00,x=00"))
     limit("hdr", timed(g, L["hdr_read"]))
     limit("load_char", timed(g, L["load_char"]))
+    limit("csheet", timed(g, L["cs_load"]))         # (21/11 evening) load_char cleared cs_ok: the module is read
     verdict()
 
 
-@test("PERF-DISK-13", "stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM) <= its limit")
+@test("PERF-DISK-13", "stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM), then the C screen module <= their limits")
 def perf_stairs(ctx):
     g = ctx["g"]; L = g.L
     g.call(L["change_level"], tmax=150, regs="a=01,x=00")      # level 1: the chapter is read (not measured)
     limit("stairs", timed(g, L["change_level"], "a=02,x=00"))
+    limit("csheet_dng", timed(g, L["cs_load"]))     # (21/11 evening) C pressed right after the stairs
     verdict()
     g.call(L["change_level"], tmax=150, regs="a=00,x=01")      # back to the village (the next tests save there)
 
@@ -173,6 +182,12 @@ def perf_town_in(ctx):
     g = ctx["g"]; L = g.L
     g.call(L["change_level"], tmax=150, regs="a=01,x=00")      # to level 1 (not measured)
     limit("town_in", timed(g, L["change_level"], "a=00,x=01"))
+    # (21/11 evening, owner: the passage between dungeon and village up to 5 s, also with the portal and after death)
+    g.call(L["change_level"], tmax=150, regs="a=01,x=00")      # level 1 again (not measured): the portal comes back here
+    g.poke(L["c_retx"], *g.mem(L["px"], 2)); g.poke(L["c_rety"], *g.mem(L["py"], 2)); g.poke(L["c_retlvl"], 1)
+    limit("portal_in", timed(g, L["change_level"], "a=00,x=02"))
+    limit("portal_out", timed(g, L["change_level"], "a=01,x=02"))
+    limit("death", timed(g, L["change_level"], "a=00,x=03"))
     verdict()
 
 
@@ -203,6 +218,7 @@ def chapter_measures(g, c):
         return
     g.call(L["change_level"], tmax=150, regs="a=%02x,x=00" % (base + 1))      # first level of the chapter (not measured)
     limit("stairs%d" % c, timed(g, L["change_level"], "a=%02x,x=00" % (base + 2)))
+    limit("cs%d" % c, timed(g, L["cs_load"]))                  # (21/11 evening) C screen module right after the stairs
     if c < 4:
         limit("boss%d" % c, timed(g, L["change_level"], "a=%02x,x=00" % (base + 5)))
     g.call(L["change_level"], tmax=150, regs="a=%02x,x=00" % (base + 1))      # back to level 1 (not measured)
@@ -211,7 +227,7 @@ def chapter_measures(g, c):
 
 for _c in (1, 2, 3, 4, 5):
     def _mk(c):
-        what = "file alone, full entry" if c == 5 else "file alone, full entry (from level %d), theme, stairs%s" % (
+        what = "file alone, full entry" if c == 5 else "file alone, full entry (from level %d), theme, stairs, C screen module%s" % (
             5 * (c - 1) + 1, ", boss level" if c < 4 else "")
         @test("PERF-DISK-2%d" % c, "village %d: %s <= their limits" % (c, what))
         def t(ctx):

@@ -1,4 +1,4 @@
-"""C screen reworked on 15/11 (TODO Z5, owner's request; src/game/charsheet.asm): nothing about respec while there are
+"""C screen reworked on 15/11 (TODO Z5, owner's request; src/csheet/charsheet.asm, module CSHEET since 21/11): nothing about respec while there are
 no tokens, pending points movable between the stats until a definitive confirmation ("confirm" asks; RUN/STOP with
 pending points asks and "no" gives them back), preview "current -> new" of the derived stats, hint of the stat under
 the cursor, "next point at level N" when there are no points. One VICE session, the village; the screen memory is

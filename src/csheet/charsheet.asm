@@ -19,7 +19,7 @@ tt_cs   #t5 "character"
 ; (12/11, committente) senza punti da spendere niente voci: si legge e si esce con RUN/STOP ("no points to spend").
 ; Eccezione mia (da confermare): con un gettone respec resta la sola voce "respec" (cs_mode 1), altrimenti il respec
 ; non si potrebbe mai usare quando i punti sono tutti spesi. cs_mode: 0 tutte le voci, 1 solo respec, 2 nessuna.
-ui_charsheet:
+cs_main:
         jsr cs_zero
         sta cs_mode             ; (A = 0)
 .if TESTUI == 39                ; (screenshot, TESTCL=9: 4 punti) nessun punto speso, 2 in attesa su FOR e 1 su COS,
@@ -234,7 +234,7 @@ _conf   jsr cs_psum             ; (15/11, Z5) confirm: domanda, no = si continua
         jsr cs_apply
 _done   lda #SFX_PICK
         jsr sfx_play
-        jmp ui_charsheet        ; da capo: senza punti la schermata passa a "no points to spend"
+        jmp cs_main        ; da capo: senza punti la schermata passa a "no points to spend"
 _back   jsr cs_psum             ; (15/11, Z5) uscita con punti in attesa: si' = spesi, no = tornano da spendere
         beq +
         sec

@@ -202,6 +202,7 @@ del piano del boss del capitolo ([dungeon](dungeon.md#piani-del-boss-dei-capitol
 | Area | Contenuto |
 |---|---|
 | `$E000`–`core_end` | (21/11, TODO D15) segmento CORE (file `core`, PRG a `$E000` non compresso: liste, inventario, descrizione degli oggetti), riletto dopo i salvataggi |
+| `$EC00`– | (21/11 sera) modulo CSHEET (file `csheet`, PRG a `$EC00`: `jmp`, parola con la fine del file, schermata del personaggio), letto col tasto C se un caricamento o un salvataggio l'hanno coperto (`cs_ok`) |
 | `$EC00`– | villaggio (`TWNc`), riletto a ogni ingresso (fino al 21/11 a `$E000`) |
 | `$EC6D`–`$F4DF` | tema del piano attuale (`GFXn`), riletto a ogni ingresso (11/11: precaricamento e cache tolti; 15/11: comincia `GFX_INFO` byte prima di `$ED00`, nella coda del villaggio) |
 | `$F4E0`–`$FCFF` | (11/11) zona 2 del modulo MENU (fino all'11/11: tema precaricato in background, ora scritto direttamente nel buffer del tema) |

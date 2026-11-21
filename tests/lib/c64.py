@@ -26,6 +26,7 @@ class Game(Vice):
         # (15/11) Vice() of Lab64 1.3 hands over the machine stopped in the monitor, commands and answers in step (before,
         # the first answer could come one command late: PERF-DISK setup failed 1 run in 2; Game() worked around it here).
         self.L = labels("game")
+        self.L.update(labels("csheet"))                 # (21/11 evening) C screen: module CSHEET (src/csheet.asm, also has the game labels)
         self.M = labels("lobby")
         self.MN = labels("menu")                        # (11/11) modulo MENU: locanda e negozi (src/menu.asm)
         gl, ml = listing("game"), listing("lobby")
