@@ -278,7 +278,7 @@ equipped, pack, purse; le chiavi non si mostrano.
 
 ```mermaid
 flowchart LR
-    E["ingresso: shop_roll<br/>(stock a caso dal pool), sort_pack, sh_segs"] --> N["lista wares / lista gear o yours<br/>(A/D)"]
+    E["ingresso: shop_roll<br/>(pool filtrato; 3-8 a caso con ripetizioni), sort_pack, sh_segs"] --> N["lista wares / lista gear o yours<br/>(A/D)"]
     N -->|"fire su merce"| BUY{"pozione?"}
     BUY -->|no| ASK["buy for N g? (fire = sì)<br/>give_item, paga"]
     BUY -->|sì| SLOT["cursore sul primo posto libero della cintura<br/>W/S lo spostano · fire paga e la mette · RUN/STOP annulla senza pagare"]
@@ -292,14 +292,18 @@ flowchart LR
   va tolto. Solo il fabbro ripara (R).
 - Le azioni lavorano sui codici di prima in `ui_lc` (`sh_cur` dalla voce della lista): 0-7 zaino, 8-11 equipaggiamento,
   12-19 merce, 20-23 cintura.
-- Merce (`balance.yaml shops`, 08/11): fabbro 6 a caso fra armi, armature e scudi; alchimista 4. **Cosa e
-  quanto vende ogni negozio è da decidere** (TODO E2).
+- Merce (21/11 sera, decisione del committente ex B1/E2): a ogni visita ogni negozio vende **da 3 a 8 oggetti** (`shop_rules.wares`
+  in `balance.yaml`: `SHOP_KMIN`, `SHOP_KN`), estratti a caso **con ripetizioni** dal pool filtrato per livello (`shop_roll` lo
+  filtra, `enter_shop` estrae). Ogni oggetto d'equipaggiamento è **magico** con probabilità `shm_t[livello del PG]` (6% per livello,
+  `affix_rules.yaml shops.magic`: all'inizio quasi tutti bianchi, dal 17 tutti magici), con gli affissi di `af_gen` al livello del
+  PG; gli anelli hanno sempre i loro affissi (rame uno, argento e oro due). Prezzi con gli affissi (`it_cost`, sotto).
 
 L'assortimento cambia **a ogni visita** e **cresce con il livello del PG** (06/11 sera): `shop_roll` tiene solo gli
 oggetti del pool con `shop_minl` ≤ livello del PG; per armi, armature, scudi e anelli `shop_minl` = livello oggetto
 − `level_ahead` (3, `balance.yaml shop_rules`), per pozioni e pergamena il `shop_level` di `rules.yaml`. Se ne
-restano meno di `stock` si mostrano tutti. Gli oggetti in vendita non hanno magia; la durabilità si tira
-all'acquisto. Pool e quantità: `balance.yaml shops`.
+resta un pool vuoto il negozio non vende nulla. La durabilità si tira all'acquisto. **Prezzi** (fase 3 degli affissi, 21/11 sera):
+`it_cost` = `itprice` + `price_add` del prefisso e del suffisso (con segno: i maledetti costano meno), almeno 1; vendita a un
+quarto, riparazione al 25% dello stesso prezzo (O11). Pool: `balance.yaml shops`.
 
 | Negozio | Livello del PG 1 | dal 2 | dal 3 | dal 4 | dal 5 | dal 6 | dal 7 | dal 8 | dal 9 | dal 11 | dal 12 | dal 13 | dal 14 | dal 15 | dal 17 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|

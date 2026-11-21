@@ -117,21 +117,22 @@ loot:
   max_loot_level: 20
   category_weights: {weapon: 34, armor: 20, shield: 16, ring: 10, potion: 15, scroll: 5}
   # magia +N su arma, armatura, scudo: tirata tra 0 e min(max, floor(livello_bottino * per_loot_level))
+  # (21/11 sera, fase 3 degli affissi) non piu' usato dal gioco: la magia la decidono gli affissi (data/items/next/affix_rules.yaml)
   bonus: {min: 0, max: 3, per_loot_level: 0.2, categories: [weapon, armor, shield]}
 
 # ---------------------------------------------------------------- negozi
 # Assortimento legato al livello del PG: un oggetto e' in vendita se livello oggetto <= livello del PG + level_ahead;
-# pozioni e pergamene usano shop_level di rules.yaml (livello minimo del PG). Se il pool filtrato ha meno di
-# stock oggetti si mostrano quelli che ci sono.
+# pozioni e pergamene usano shop_level di rules.yaml (livello minimo del PG).
 shop_rules:
   level_ahead: 3
   # (20/11, committente, E1) un oggetto si vende al prezzo diviso sell_divisor (potenza di 2: 2 = meta', 4 = un quarto come Diablo 1)
   sell_divisor: 4
+  # (21/11 sera, committente, ex B1) a ogni visita ogni negozio vende un numero casuale di oggetti fra min e max, estratti dal
+  # pool filtrato CON ripetizioni; la quota di magici cresce con il livello del PG (data/items/next/affix_rules.yaml shops.magic)
+  wares: {min: 3, max: 8}
 shops:
-  # items = pool; stock = quanti oggetti vengono estratti a caso (senza ripetizioni) a OGNI ingresso nel negozio
+  # items = pool (quanti se ne vendono: shop_rules.wares)
   blacksmith:                     # 08/11: anche armature e scudi; 09/11: l'armaiolo non c'e' piu', vende tutto il fabbro
-    stock: 6                      # al massimo 8 (riquadro merce da 8); quanto e cosa vende: da decidere (TODO)
     items: [dagger, short_sword, club, sword, hand_axe, mace, broad_sword, war_axe, morning_star, viking_sword, battle_axe, maul, great_sword, quilted_armor, leather_armor, hard_leather, ring_mail, studded_armor, chain_mail, scale_mail, splint_mail, plate_mail, field_plate, gothic_plate, small_shield, medium_shield, tower_shield, gothic_shield]
   alchemist:
-    stock: 4
     items: [red, yellow, violet, portal_scroll, copper]

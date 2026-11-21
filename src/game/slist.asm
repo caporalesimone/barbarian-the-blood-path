@@ -49,7 +49,8 @@ iv_l3   .word ?                 ; (21/11) riga 3 del riquadro dell'oggetto (iv_s
 iv_mode .byte ?                 ; 0 = riga 2 con valore e durabilita' (inventario, locanda, baule), 1 = solo durabilita' (negozi)
 l8_s    .fill 8                 ; (21/11 sera) suffisso della merce o del contenuto del baule del piano (accanto a l8_id / l8_b)
 ui_is   .byte ?                 ; (21/11 sera) ui_item: suffisso (come ui_ib per il prefisso)
-ui_sx   .byte ?                 ; suffisso dell'oggetto mostrato (sl_get, ibox_ld: accanto a tmp5 = prefisso)
+ui_sx   .byte ?                 ; suffisso dell'oggetto mostrato (sl_get, ibox_ld)
+ui_px   .byte ?                 ; (fase 3) prefisso dell'oggetto mostrato (prima in tmp5, che e' un temporaneo: prezzi)
 ui_lim  .byte ?                 ; ui_item / ip_puts: colonna dopo l'ultima del nome
 ui_x    .byte ?                 ; ui_item: id salvato
 sl_end
@@ -202,7 +203,7 @@ _it     adc sg_a,y              ; (C = 0) posto nella tabella del tipo
         lda #0
         sta ui_dur
         sta ui_durm
-        sta tmp5
+        sta ui_px
         sta ui_sx
         stx sl_r
         cpy #SK_BELT
@@ -234,7 +235,7 @@ _ob     lda sk_sl-SK_BELT,y
         lda st_id,x
         sta ui_sel
         lda st_b,x
-        sta tmp5
+        sta ui_px
         lda st_sx,x
         sta ui_sx
         lda st_du,x
@@ -247,7 +248,7 @@ _ob     lda sk_sl-SK_BELT,y
 _wa     lda l8_id,x
         sta ui_sel
         lda l8_b,x
-        sta tmp5
+        sta ui_px
         lda l8_s,x
         sta ui_sx
         ldx sl_r
@@ -471,7 +472,7 @@ _mc     jsr ui_icon
         jsr ui_putc
         jmp _v
 _it     jsr ui_cic
-        lda tmp5
+        lda ui_px
         sta ui_ib
         lda ui_sx
         sta ui_is

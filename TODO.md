@@ -20,7 +20,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
 | 2 | [Decisioni del committente](#2--decisioni-del-committente) | B2, B3, B6, B8–B18 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
-| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E2, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
+| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
 | 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M10, M3, M4, M5 |
@@ -112,12 +112,6 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 
 ### C3 (ex 1.4) Piccole scelte estetiche e audio — S
 - `SFX_LOWHP` provvisorio da riascoltare nel JUKEBOX; tile del trono dietro il boss.
-
-### E2 (ex 2.3) Negozi: merce — S
-- **Deciso (21/11, committente, ex B1)**: a ogni visita fabbro e alchimista vendono un numero **casuale da 3 a 8** oggetti
-  (entrambi); oggetti **bianchi** (non magici) più probabili, soprattutto all'inizio; lo stesso oggetto può comparire più volte.
-  Si fa con gli affissi (la quota di magici cresce col livello, E2/E3 del progetto).
-- Assortimento in `balance.yaml` (pool e `stock`), `docs/wiki/villaggio.md`, manuale.
 
 ### E5 (ex 2.6) HUD: esperienza a 24 bit (per l'Abisso) — S
 - Oltre 65535 xp: 3 cifre + K, barra a 24 bit (~100–130 B). Dipende dalle soglie oltre il 20 (H3).
@@ -263,6 +257,9 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   servirà una leva di riserva: scheda del personaggio letta all'apertura (+1517 B, tempo da misurare), D10, testo a 5 bit.
 - (21/11, **da fare** con gli affissi) Database degli oggetti diviso per momento d'uso e generazione da un sottoinsieme
   preparato durante i caricamenti: [oggetti](docs/wiki/oggetti.md#memoria-e-salvataggi-f7-approvato). Non cambia i passi qui sopra.
+  **(21/11 sera, fase 3 degli affissi fatta senza sottoinsieme)**: le tabelle di generazione (`af_min`, `af_ty`, `af_ch`, `af_pl`/`af_ph`,
+  `mag_t`, `shm_t`: ~370 B) e `af_gen`/`af_pick`/`it_cost` stanno in GAME, il cui margine e' sceso a **~950 B** (sotto la soglia di
+  avviso di 1 KB). Il sottoinsieme (o una tabella di generazione caricata con il tema / il MENU) e' la prima leva per riprenderli.
 - **Fatto (21/11), fase B**: negozi, locanda e baule del piano sulle liste a scorrimento, vecchia interfaccia comune tolta
   (margine di GAME 2437 B, zone 1 e 2 del MENU con 863 e 523 B liberi); branch `liste-menu` unito a `main` il 21/11.
 - (21/11, committente) **Budget del passaggio fra dungeon e villaggio: al massimo 3 s**: entro quel tempo si può caricare

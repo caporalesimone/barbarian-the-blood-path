@@ -22,7 +22,7 @@ def teardown(ctx):
 def sx(g, item, stat):
     """(21/11 evening, affixes) the suffix of a ring of that metal and stat (1 STR, 2 DEX, 3 CON): ring_sx"""
     L = g.L
-    return g.b(L["ring_sx"] + (stat - 1) * 3 + g.b(L["itval"] + item) - 1) if item and stat else 0
+    return L["RSX_%d%d" % (stat, g.b(L["itval"] + item))] if item and stat else 0
 
 
 def ring(g, slot, item, stat):
@@ -68,7 +68,7 @@ def ring_replace(ctx):
     check("replaced" in scr, "no 'replaced' message (row 23: %r)" % scr.strip())
 
 
-@test("RING-12", "alchemist: a ring among the wares has its stat suffix (ring_sx) and the bought ring keeps it")
+@test("RING-12", "alchemist: a ring among the wares has affixes (af_gen) and the bought ring keeps its suffix")
 def ring_shop(ctx):
     g = ctx["g"]; L = g.L
     g.fill(L["c_pack"], L["c_pack"] + 7, 0); g.poke16(L["c_gold"], 9000)
@@ -78,9 +78,8 @@ def ring_shop(ctx):
     check(g.b(L["sh_mask"]) != 0, "the alchemist does not open")
     ids, ss = g.mem(L["l8_id"], 8), g.mem(L["l8_s"], 8)
     cat = g.mem(L["itcat"], L["N_ITEMS"])
-    rsx = g.mem(L["ring_sx"], 9)
-    bad = [(i, b) for i, b in zip(ids, ss) if i and cat[i] == L["CAT_RING"] and b not in rsx]
-    check(not bad, "rings in the wares without a stat suffix: %s" % bad)
+    bad = [i for i, b, p in zip(ids, ss, g.mem(L["l8_b"], 8)) if i and cat[i] == L["CAT_RING"] and not (b or p)]
+    check(not bad, "rings in the wares without affixes: %s" % bad)
     want = sx(g, L["I_COPPER"], 2)
     g.poke(L["l8_id"], L["I_COPPER"]); g.poke(L["l8_b"], 0); g.poke(L["l8_s"], want)   # ware 0: copper ring of dexterity
     check(list_to(g, 0, "ui_lc", 12), "cursor not on ware 0")

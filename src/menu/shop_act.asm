@@ -8,11 +8,10 @@
 shop_buy:
         jsr sh_selid
         sta shp_item
-        asl
-        tay
-        lda itprice,y
+        jsr sh_cost             ; (fase 3) prezzo con gli affissi
+        lda tmp0
         sta shp_price
-        lda itprice+1,y
+        lda tmp1
         sta shp_price+1
         jsr gold_need           ; 10/11: si paga con l'oro addosso e poi con il baule della locanda
         bcs _ng
@@ -96,12 +95,10 @@ shop_sell:
         jsr msg23
         #msg "i don't buy that."
 _r      rts
-_ok     lda ui_sel              ; prezzo >> SELL_SHIFT (20/11: un quarto, balance.yaml shop_rules.sell_divisor)
-        asl
-        tay
-        lda itprice+1,y
+_ok     jsr sh_cost             ; prezzo con gli affissi (fase 3) >> SELL_SHIFT (20/11: un quarto, balance.yaml shop_rules.sell_divisor)
+        lda tmp1
         sta tmp3
-        lda itprice,y
+        lda tmp0
         .rept SELL_SHIFT
         lsr tmp3
         ror a

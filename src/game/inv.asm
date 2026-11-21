@@ -170,12 +170,11 @@ tt_bp   .text "backpack", 0
 
 ; valore di vendita: "val 1200o d135/178" (08/11: numero e poi la moneta)
 it_val  #msg "val "             ; valore di vendita dell'oggetto ui_sel: prezzo >> SELL_SHIFT (20/11: un quarto,
-        lda ui_sel              ; balance.yaml shop_rules.sell_divisor), allineato a sinistra, moneta
-        asl
-        tay
-        lda itprice+1,y
-        sta tmp1
-        lda itprice,y
+        lda ui_sel              ; balance.yaml shop_rules.sell_divisor), allineato a sinistra, moneta; (fase 3) con gli affissi
+        ldx ui_px
+        ldy ui_sx
+        jsr it_cost
+        lda tmp0
         .rept SELL_SHIFT
         lsr tmp1
         ror a
@@ -184,7 +183,7 @@ it_val  #msg "val "             ; valore di vendita dell'oggetto ui_sel: prezzo 
         jsr ui_n5l
         jmp ui_coin
 
-; caratteristica principale dell'oggetto ui_sel (bonus tmp5), al massimo 9 caratteri:
+; caratteristica principale dell'oggetto ui_sel (affissi ui_px, ui_sx), al massimo 9 caratteri:
 ; "dmg 2d6+3", "ac +5", "+2 str", "heal 50", "portal"
 it_prim:
         ldx ui_sel
@@ -312,7 +311,7 @@ _r      rts
 
 ; (21/11 sera) totali degli affissi dell'oggetto mostrato (prefisso tmp5, suffisso ui_sx) in af_att, af_dmg, af_ac, af_st
 it_af:  jsr af_clr
-        lda tmp5
+        lda ui_px
         ldy ui_sx
         jmp af_pair
 
@@ -515,7 +514,7 @@ _cl     ldx #1
         bne +
         rts
 +       jsr ui_cic
-        lda tmp5
+        lda ui_px
         sta ui_ib
         lda ui_sx
         sta ui_is
@@ -571,7 +570,7 @@ _cmp    ldx ui_sel              ; zaino: "you: " + caratteristica principale del
         beq _x
         sta ui_sel
         lda c_eqb-1,x
-        sta tmp5
+        sta ui_px
         lda c_eqs-1,x
         sta ui_sx
         lda #UC_LABEL

@@ -27,6 +27,7 @@ ROOT = os.path.dirname(os.path.dirname(HERE))
 sys.path.insert(0, HERE)
 sys.path.insert(1, os.path.join(ROOT, "tools", "build"))
 import bestiary  # noqa: E402
+import items_model as IM  # noqa: E402
 
 B = bestiary.load_balance()
 R = yaml.safe_load(open(os.path.join(ROOT, "data", "rules.yaml")))
@@ -61,11 +62,11 @@ def _items():
             continue
         t = d["type"]
         if t in ("weapon", "armor", "shield", "ring"):
-            cat[t].append((int(d["ilvl"] or 0), int(d["price"])))
+            cat[t].append((int(d["ilvl"] or 0), int(d["price"]), d["id"]))
         elif t == "potion":
             pots[d["id"]] = int(d["price"])
         elif t == "scroll":
-            cat["scroll"].append((0, int(d["price"])))
+            cat["scroll"].append((0, int(d["price"]), d["id"]))
     for c in cat:
         cat[c].sort()
     return cat, [pots.get(k, 0) for k in ("red", "yellow", "violet")]
@@ -115,9 +116,10 @@ def gen_item(rng, cl, floor, force=0):
             return ITEMS["scroll"][0][1] // SELL_DIV
         u = rng.randrange(256) / 256
         lvl = min(MAXLL, t if force else round(t * u * u))
-        best = [p for il, p in ITEMS[c] if il <= lvl]
-        if best:
-            return best[-1] // SELL_DIV
+        best = [(p, k) for il, p, k in ITEMS[c] if il <= lvl]
+        if best:                          # (21/11 evening) with the affixes of the game (af_gen / it_cost: items_model)
+            p, k = best[-1]
+            return max(1, p + IM.affix_price(IM.affix_roll(rng, c, k, lvl, t))) // SELL_DIV
 
 
 def chest_gold(rng, cl):

@@ -80,7 +80,8 @@ def price(item):
         if item.get(k):
             row, val = item[k]
             ref = _int(row["value1"]) or 1
-            p += round(_int(row["price_add"]) * (abs(val) / abs(ref) if row["power"] != "INDESTRUCTIBLE" else 1)) * (1 if val >= 0 else -1)
+            # (21/11 evening, as the game's it_cost) price_add with its sign: a cursed row (negative price_add) costs less
+            p += round(_int(row["price_add"]) * (abs(val) / abs(ref) if row["power"] != "INDESTRUCTIBLE" else 1))
     return max(1, p)
 
 
@@ -105,31 +106,8 @@ def gen_item(rng, cl, cat=None, level=None):
         item["price"] = price(item)
         item["sell"] = item["price"] // SELL_DIV
         return item
-    pm = min(q["magic"]["max"], q["magic"]["base"] + q["magic"]["per_t"] * t)
-    if c == "ring":
-        n = RULES["rings"][b["id"]] if b["id"] in RULES["rings"] else 1
-        want = ["prefix", "suffix"] if n == 2 else [rng.choice(["prefix", "suffix"])]
-    elif rng.randrange(100) < pm:
-        r = rng.randrange(100)
-        a = q["affixes"]
-        want = ["prefix"] if r < a["prefix"] else ["suffix"] if r < a["prefix"] + a["suffix"] else ["prefix", "suffix"]
-    else:
-        want = []
-    for k in want:
-        rows = eligible(PREFIXES if k == "prefix" else SUFFIXES, c, level)
-        if b["id"] == "gold" and rows:
-            top = max(_int(r["min_level"]) for r in rows)
-            if k == "prefix":
-                rows = [r for r in rows if _int(r["min_level"]) == top] or rows
-        cur = [r for r in rows if _int(r["value1"]) < 0]
-        pos = [r for r in rows if _int(r["value1"]) >= 0] or \
-            [r for r in eligible_all(PREFIXES if k == "prefix" else SUFFIXES, c, level) if _int(r["value1"]) >= 0]
-        if cur and (not pos or rng.randrange(100) < RULES["affix_choice"]["cursed_share"]):
-            row = pick(rng, cur)
-        else:
-            row = pick(rng, pos)
-        if row:
-            item[k] = (row, roll_value(rng, row, level))
+    for k, v in affix_roll(rng, c, b["id"], level, t).items():
+        item[k] = v
     if item["prefix"] or item["suffix"]:
         neg = any(v < 0 for _, v in filter(None, (item["prefix"], item["suffix"])))
         item["quality"] = "cursed" if neg else "magic"
@@ -137,6 +115,55 @@ def gen_item(rng, cl, cat=None, level=None):
     item["sell"] = item["price"] // SELL_DIV
     return item
 
+
+
+def affix_roll(rng, cat, base_id, level, t, force_magic=False):
+    """(21/11 evening) the affixes of a new item as the game's af_gen: {"prefix": (row, value) or None, "suffix": ...}.
+    t = chestLevel / 8 (magic chance), force_magic = shop magic item. Used by gen_item and by sim_chest / sim_gold"""
+    q = RULES["quality"]
+    item = {"prefix": None, "suffix": None}
+    c = cat
+    class _B(dict):
+        pass
+    b = {"id": base_id}
+    pm = min(q["magic"]["max"], q["magic"]["base"] + q["magic"]["per_t"] * t)
+    if c == "ring":
+        n = RULES["rings"][b["id"]] if b["id"] in RULES["rings"] else 1
+        want = ["prefix", "suffix"] if n == 2 else [rng.choice(["prefix", "suffix"])]
+    elif force_magic or rng.randrange(100) < pm:
+        r = rng.randrange(100)
+        a = q["affixes"]
+        want = ["prefix"] if r < a["prefix"] else ["suffix"] if r < a["prefix"] + a["suffix"] else ["prefix", "suffix"]
+    else:
+        want = []
+    for k in want:
+        # (21/11 evening) the same steps as the game (src/game/combat.asm af_pick): cursed first with cursed_share %, else the
+        # normal rows inside the window (none: without the window); no cursed row fits: a normal one; gold ring prefix: only
+        # the rows of the highest min_level inside the window
+        allr = eligible_all(PREFIXES if k == "prefix" else SUFFIXES, c, level)
+        lo = min(level, RULES["affix_choice"]["top_level"]) * RULES["affix_choice"]["low_fraction"]
+        cur = [r for r in allr if _int(r["value1"]) < 0]
+        pos = [r for r in allr if _int(r["value1"]) >= 0]
+        win = [r for r in pos if _int(r["min_level"]) >= lo]
+        top = b["id"] == "gold" and k == "prefix"
+        if top and win:
+            mx = max(_int(r["min_level"]) for r in win)
+            win = [r for r in win if _int(r["min_level"]) == mx]
+            pos = [r for r in pos if _int(r["min_level"]) == mx]
+        cursed = not top and rng.randrange(100) < RULES["affix_choice"]["cursed_share"]
+        row = pick(rng, cur) if cursed and cur else pick(rng, win or pos)
+        if row:
+            item[k] = (row, roll_value(rng, row, level))
+    return item
+
+
+def affix_price(aff):
+    """price added by the affixes {"prefix": (row, value), ...} (it_cost: price_add with its sign)"""
+    p = 0
+    for k in ("prefix", "suffix"):
+        if aff.get(k):
+            p += _int(aff[k][0]["price_add"])
+    return p
 
 def full_name(item):
     if item["quality"] == "unique":

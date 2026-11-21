@@ -32,36 +32,58 @@ enter_shop:                     ; (interrupt spenti: tabella dei salti di src/me
         sta shp_first
         lda shop_cnt,x
         sta shp_cnt             ; dimensione del pool
-        lda shop_stock,x
+        lda #SHOP_KN            ; (21/11 sera, committente) da SHOP_KMIN a SHOP_KMIN + SHOP_KN - 1 oggetti, con ripetizioni
+        jsr rndrange
+        clc
+        adc #SHOP_KMIN
         sta shp_k
         lda frame               ; un po' di entropia in piu': ogni visita estrae un assortimento nuovo
         eor rnd
         sta rnd
         jsr shop_roll
         jsr sort_pack
+        ldx #7
+_cp     stx shp_i
+        lda #0
+        sta l8_b,x
+        sta l8_s,x
+        sta l8_id,x
+        cpx shp_k
+        bcs _cz
+        lda shp_cnt             ; (21/11 sera) un oggetto a caso del pool filtrato (ripetizioni ammesse)
+        jsr rndrange
+        tay
+        lda shp_stock,y
+        sta l8_id,x
+        tay
+        lda c_lvl               ; affissi (af_gen): livello = livello del PG; magico con probabilita' shm_t[livello]
+        cmp #MAXLEVEL
+        bcc _cl
+        lda #MAXLEVEL
+_cl     sta af_l
+        tax
+        jsr rand
+        cmp shm_t,x
+        lda #0
+        rol
+        eor #1
+        sta af_m
+        lda #31
+        sta af_tt
+        jsr af_gen
+        ldx shp_i
+        lda ap_b
+        sta l8_b,x
+        lda ap_s
+        sta l8_s,x
+        lda #0
+        sta ap_b
+        sta ap_s
+_cz     ldx shp_i
+        dex
+        bpl _cp
         lda shp_k
         sta shp_cnt             ; da qui shp_cnt = oggetti in vendita
-        ldx #7
-_cp     lda #0
-        sta l8_b,x
-        sta l8_s,x              ; (21/11 sera) suffisso: merce senza affissi (fase 3)
-        lda shp_stock,x
-        sta l8_id,x
-        tay                     ; (21/11) anello: la caratteristica (1 FOR, 2 DES, 3 COS) si tira qui, come nel bottino;
-        lda itcat,y             ; prima un anello comprato aveva bonus 0 e non dava nulla
-        cmp #CAT_RING
-        bne +
-        lda #3                  ; (21/11 sera) caratteristica -> suffisso, come gen_item: ring_sx[car. x 3 + metallo - 1]
-        jsr rndrange
-        sta l8_s,x
-        asl
-        adc l8_s,x
-        adc itval,y
-        tay
-        lda ring_sx-1,y
-        sta l8_s,x
-+       dex
-        bpl _cp
         jsr ui_begin
         ldx shop_id
         lda sh_cats,x
@@ -286,13 +308,10 @@ sh_num  jsr ui_num5
 sh_rts  rts
 ; C = 1 prezzo pieno di ui_sel, C = 0 prezzo di vendita (>> SELL_SHIFT) -> tmp0/tmp1
 sh_pr:  php
-        lda ui_sel
-        asl
-        tay
-        lda itprice,y
-        sta tmp0
-        lda itprice+1,y
-        sta tmp1
+        lda ui_sel              ; (fase 3) con gli affissi della voce (sl_get: ui_px, ui_sx)
+        ldx ui_px
+        ldy ui_sx
+        jsr it_cost
         plp
         bcs +
         .rept SELL_SHIFT
@@ -363,6 +382,30 @@ _b      jmp shop_buy
 _r      rts
 
 ; A = id dell'oggetto della voce ui_lc (0 = niente)
+; (fase 3) prezzo pieno della voce ui_lc con i suoi affissi -> tmp0/tmp1 (it_cost)
+sh_cost:
+        ldx ui_lc
+        cpx #12
+        bcc _p
+        ldy #0
+        cpx #20
+        bcc _w
+        lda c_beltt-20,x
+        ldx #0
+        jmp it_cost
+_w      ldy l8_s-12,x
+        lda l8_id-12,x
+        pha
+        lda l8_b-12,x
+        jmp +
+_p      ldy c_packs,x
+        lda c_pack,x
+        pha
+        lda c_packb,x
++       tax
+        pla
+        jmp it_cost
+
 sh_selid:
         ldx ui_lc
         cpx #12
@@ -388,7 +431,8 @@ sh_buys:
 +       rts
 
 
-; copia il pool in shp_stock e ne estrae shp_k a caso (Fisher-Yates parziale)
+; copia in shp_stock il pool filtrato per il livello del PG (shp_cnt = quanti); (21/11 sera) la merce si estrae con
+; ripetizioni in enter_shop (prima: Fisher-Yates parziale, senza ripetizioni); pool vuoto: niente merce (shp_k = 0)
 shop_roll:
         ldx #0                  ; solo gli oggetti per il livello del PG (shop_minl <= c_lvl)
         ldy shp_first
@@ -403,33 +447,9 @@ _nx     iny
         dec shp_cnt
         bne _c
         stx shp_cnt             ; pool filtrato
-        cpx shp_k
-        bcs +
-        stx shp_k               ; meno oggetti di stock: tutti quelli che ci sono
-+       lda shp_k
         bne +
-        rts
-+       lda #0
-        sta shp_i
-_i      lda shp_cnt
-        sec
-        sbc shp_i
-        jsr rndrange
-        clc
-        adc shp_i
-        tay                     ; j in [i, cnt)
-        ldx shp_i
-        lda shp_stock,x
-        pha
-        lda shp_stock,y
-        sta shp_stock,x
-        pla
-        sta shp_stock,y
-        inc shp_i
-        lda shp_i
-        cmp shp_k
-        bcc _i
-        rts
+        stx shp_k
++       rts
 
 ; chiede conferma: shp_price = prezzo, A = 0 acquisto / 1 vendita. C=1 se Y, C=0 se N
 ; chiede conferma: shp_price = prezzo, A = 0 acquisto / 1 vendita. C=1 se Y, C=0 se N

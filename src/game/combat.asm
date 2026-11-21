@@ -237,6 +237,212 @@ af_clr: lda #0
         rts
         .cerror af_dmg != af_att+1 || af_ac != af_att+2 || af_st != af_att+3, "af_att..af_st contigui"
 
+; ---- (21/11 sera, fase 3) generazione degli affissi (data/items/next/affix_rules.yaml; modello: tools/simulators/items_model.py)
+; Y = id dell'oggetto nuovo, af_l = livello dell'oggetto, af_tt = T (chestLevel / 8), af_m = 1 magico d'ufficio (negozio) ->
+; ap_b = prefisso, ap_s = suffisso (0 = nessuno). Pozioni e pergamene: niente. Anelli: rame un affisso a caso, argento e oro
+; prefisso e suffisso (oro: prefisso del livello piu' alto disponibile). Altri: magico con probabilita' mag_t[T] (o af_m),
+; poi solo prefisso / solo suffisso / entrambi (AFQ_P, AFQ_S).
+af_gen:
+        lda #0
+        sta ap_b
+        sta ap_s
+        sta af_tp
+        lda itcat,y
+        cmp #CAT_RING+1
+        bcs _r
+        tax
+        lda cat_bit,x           ; tipo: af_ty ha i bit di cat_bit spostati di 1
+        lsr
+        sta af_cm
+        cpx #CAT_RING
+        bne _nr
+        lda itval,y             ; metallo: 1 rame, 2 argento, 3 oro
+        cmp #1
+        beq _one
+        cmp #3
+        bne _both
+        inc af_tp
+        bne _both
+_one    jsr rand
+        and #1
+        beq _pfx
+        bne _sfx
+_nr     lda af_m
+        bne _mag
+        jsr rand
+        ldx af_tt
+        cpx #31
+        bcc +
+        ldx #31
++       cmp mag_t,x
+        bcs _r
+_mag    jsr rand
+        cmp #AFQ_P
+        bcc _pfx
+        cmp #AFQ_S
+        bcc _sfx
+_both   jsr _pfx
+        lda #0
+        sta af_tp
+_sfx    lda #AF_SX0+1
+        ldx #AF_SX0+AF_NS
+        jsr af_pick
+        beq _r
+        sec
+        sbc #AF_SX0
+        sta ap_s
+_r      rts
+_pfx    lda #1
+        ldx #AF_NP
+        jsr af_pick
+        sta ap_b
+        rts
+
+; una riga fra gli indici A..X: tipo af_cm, livello af_l, peso af_ch. Prima si decide se maledetta (CURSE_T); le altre stanno
+; nella finestra 2 x min_level >= min(af_l, AF_TOP) (se nessuna, senza finestra); af_tp: solo quelle del livello piu' alto.
+; Se non c'e' nessuna maledetta adatta, una normale. A = indice (0 = nessuna), flag Z di A
+af_pick:
+        sta af_a
+        stx af_b
+        lda af_l
+        cmp #AF_TOP
+        bcc +
+        lda #AF_TOP
++       sta af_lw
+        lda #0
+        sta af_nw
+        sta af_mx
+        jsr rand
+        cmp #CURSE_T
+        lda #0
+        bcs +
+        lda #$80
++       sta af_cu
+        lda af_tp              ; solo il livello piu' alto: prima lo si cerca fra le normali nella finestra
+        beq _try
+        lda #0
+        sta af_cu
+        ldy af_a
+-       jsr _ok
+        bcs +
+        lda af_min,y
+        cmp af_mx
+        bcc +
+        sta af_mx
++       iny
+        cpy af_b
+        bcc -
+        beq -
+_try    lda #0                  ; somma dei pesi delle righe adatte
+        sta af_sum
+        ldy af_a
+-       jsr _ok
+        bcs +
+        lda af_ch,y
+        clc
+        adc af_sum
+        sta af_sum
++       iny
+        cpy af_b
+        bcc -
+        beq -
+        lda af_sum
+        bne _pick
+        lda af_cu               ; nessuna: maledette -> normali; normali nella finestra -> senza finestra
+        beq +
+        lda #0
+        sta af_cu
+        beq _try
++       lda af_nw
+        bne _none
+        inc af_nw
+        bne _try
+_none   lda #0
+        rts
+_pick   jsr rndrange            ; 0 .. somma-1, poi la riga in cui cade
+        sta af_sum
+        ldy af_a
+-       jsr _ok
+        bcs +
+        lda af_sum
+        sec
+        sbc af_ch,y
+        bcc _got
+        sta af_sum
++       iny
+        bne -
+_got    tya
+        rts
+; C = 0 se la riga Y va bene
+_ok     lda af_ty,y
+        and af_cm
+        beq _no
+        lda af_min,y
+        and #$7f
+        cmp af_l
+        beq +
+        bcs _no
++       lda af_min,y
+        and #$80
+        cmp af_cu
+        bne _no
+        lda af_cu
+        bne _yes                ; maledette: a ogni livello
+        lda af_mx               ; af_tp: solo il livello piu' alto
+        beq +
+        cmp af_min,y
+        bne _no
++       lda af_nw
+        bne _yes
+        lda af_min,y
+        asl
+        cmp af_lw
+        bcc _no
+_yes    clc
+        rts
+_no     sec
+        rts
+
+; (fase 3) prezzo dell'oggetto A con prefisso X e suffisso Y -> tmp0/tmp1: itprice + prezzo aggiunto delle righe (con segno:
+; i maledetti costano meno), almeno 1. Pergamene: X e' la quantita', non un prefisso
+it_cost:
+        cmp #I_SCROLL
+        bne +
+        ldx #0
++       sty af_t
+        asl
+        tay
+        lda itprice,y
+        sta tmp0
+        lda itprice+1,y
+        sta tmp1
+        txa
+        jsr _add
+        lda af_t
+        beq _mn
+        clc
+        adc #AF_SX0
+        jsr _add
+_mn     lda tmp1
+        bmi _one
+        ora tmp0
+        bne _r
+_one    lda #1
+        sta tmp0
+        lda #0
+        sta tmp1
+_r      rts
+_add    tay
+        beq +
+        lda tmp0
+        clc
+        adc af_pl,y
+        sta tmp0
+        lda tmp1
+        adc af_ph,y
+        sta tmp1
++       rts
+
 recalc_stats:
         ldx c_lvl
         cpx #PL_MAXLVL+1

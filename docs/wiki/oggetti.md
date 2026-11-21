@@ -246,7 +246,7 @@ flowchart LR
 
 ## Prezzi
 
-Acquisto = `itprice`; vendita = metà di `itprice` (la magia +N non aumenta il prezzo). **Oro addosso al massimo
+Acquisto = `it_cost` (dal 21/11 sera: `itprice` + `price_add` degli affissi, con segno, almeno 1); vendita = un quarto (dal 20/11). **Oro addosso al massimo
 10 000** (`GOLD_MAX`, `player.gold_max` in `data/balance.yaml`, 07/11 sera): oro raccolto (mostri, bauli, bauli epici)
 oltre il tetto **si perde** (`add_gold16`); la **vendita** che lo supererebbe **non fa nulla**
 (`purse_room`, l'oggetto resta nello zaino; dal 10/11 senza messaggio, decisione del committente: caso rarissimo). Oro nel baule della locanda in decine (655 350, dal 10/11).
@@ -265,8 +265,10 @@ dal livello del PG ([Villaggio](villaggio.md#negozi-enter_shop-sh_draw)). Prezzi
 **Stato (21/11 sera)**: fatte le fasi 1 (basi complete, requisito di DES), 2a (oggetto a 5 byte, file del capitolo) e 2b (prefisso e
 suffisso nell'oggetto: tabelle `af_pw`/`af_val` in GAME, nomi `af_names` in CORE, `af_one`/`af_pair` in `recalc_stats` per ATT, danno,
 CA, FOR, DES, COS e "all"; la magia +N e la caratteristica degli anelli generate come prima ma registrate come affissi; nomi
-"prefisso nome of suffisso" tagliati a 16 colonne, `ui_item`). Da fare: generazione con tutti gli affissi (fase 3), gli altri poteri
-(fase 4), interfaccia (fase 5), unici (fase 6).
+"prefisso nome of suffisso" tagliati a 16 colonne, `ui_item`). **Fase 3 (21/11 sera)**: generazione con tutte le righe (`af_gen`,
+`af_pick`: [Bottino](bottino.md)), negozi con 3-8 oggetti e merce magica secondo il livello ([Villaggio](villaggio.md)), prezzi con
+gli affissi (`it_cost`: acquisto, vendita a un quarto, riparazione al 25%); la magia +N di prima non c'e' piu'. Da fare: gli altri
+poteri (fase 4), interfaccia (fase 5), unici (fase 6), sottoinsieme della generazione (TODO D15).
 
 **Progetto** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
 database proposto sta in `data/items/next/` (il gioco non lo legge ancora): `bases.tsv` (31 basi, colonna `status`: `today` o

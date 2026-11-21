@@ -28,18 +28,18 @@ def screen(g):
     return "".join(chr(b + 96) if 1 <= b <= 26 else chr(b) if 32 <= b < 64 else " " for b in g.mem(0xB400, 1000))
 
 
-@test("AFX-10", "mag_px: magic N of weapons -> an ATT_DMG +N prefix, of armors and shields -> AC +N; ring_sx: stat x metal -> STR/DEX/CON +metal suffix")
+@test("AFX-10", "MAG_W/MAG_A: the ATT_DMG +N prefix of weapons, the AC +N prefix of armors and shields; RSX_: stat x metal -> STR/DEX/CON +metal suffix")
 def afx_tables(ctx):
     g = ctx["g"]; L = g.L
     n = L["AF_NP"] + L["AF_NS"] + 1
     pw, val = g.mem(L["af_pw"], n), g.mem(L["af_val"], n)
-    mag = g.mem(L["mag_px"], 12)
+    mag = [0, L["MAG_W1"], L["MAG_W2"], L["MAG_W3"]] + [0, L["MAG_A1"], L["MAG_A2"], L["MAG_A3"]] * 2   # (fase 3: constants)
     for c, want in enumerate(("ATT_DMG", "AC", "AC")):
         check(mag[4 * c] == 0, "mag_px[%d] = %d (expected 0: no magic)" % (4 * c, mag[4 * c]))
         for k in (1, 2, 3):
             i = mag[4 * c + k]
             check(1 <= i <= L["AF_NP"] and pw[i] == L["PW_" + want] and sgn(val[i]) == k, "mag_px[%d]: row %d power %d value %d (expected %s +%d)" % (4 * c + k, i, pw[i], sgn(val[i]), want, k))
-    rs = g.mem(L["ring_sx"], 9)
+    rs = [L["RSX_%d%d" % (a, b)] for a in (1, 2, 3) for b in (1, 2, 3)]
     for st, nm in enumerate(("STR", "DEX", "CON")):
         for m in (1, 2, 3):
             i = rs[st * 3 + m - 1] + L["AF_SX0"]
@@ -55,7 +55,8 @@ def stats(g):
 @test("AFX-11", "recalc_stats: weapon prefix ATT_DMG +2 -> ATT and damage +2; armor prefix AC +2 -> AC +2; ring suffix STR +2 -> STR +4")
 def afx_recalc(ctx):
     g = ctx["g"]; L = g.L
-    mag, rs = g.mem(L["mag_px"], 12), g.mem(L["ring_sx"], 9)
+    mag = [0, L["MAG_W1"], L["MAG_W2"], L["MAG_W3"], 0, L["MAG_A1"], L["MAG_A2"], L["MAG_A3"]]
+    rs = [L["RSX_%d%d" % (a, b)] for a in (1, 2, 3) for b in (1, 2, 3)]
     g.poke(L["c_eqb"], 0, 0, 0, 0, 0); g.poke(L["c_eqs"], 0, 0, 0, 0, 0)
     g.poke(L["c_eq"] + 1, L["I_LEATHER_ARMOR"]); g.poke(L["c_eqd"] + 1, 30); g.poke(L["c_eqm"] + 1, 30)
     g.poke(L["c_eq"] + 3, L["I_SILVER"])
@@ -77,7 +78,8 @@ def afx_recalc(ctx):
 @test("AFX-12", "inventory: 'fine sword' (prefix, pack) and 'copper ring of s' (suffix, worn, cut at 16 columns) in the list")
 def afx_names(ctx):
     g = ctx["g"]; L = g.L
-    mag, rs = g.mem(L["mag_px"], 12), g.mem(L["ring_sx"], 9)
+    mag = [0, L["MAG_W1"], L["MAG_W2"], L["MAG_W3"], 0, L["MAG_A1"], L["MAG_A2"], L["MAG_A3"]]
+    rs = [L["RSX_%d%d" % (a, b)] for a in (1, 2, 3) for b in (1, 2, 3)]
     g.poke(L["c_pack"], L["I_SWORD"], 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["c_packb"], mag[2], 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], 0, 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["c_eq"] + 3, L["I_COPPER"]); g.poke(L["c_eqb"] + 3, 0); g.poke(L["c_eqs"] + 3, rs[0])   # worn: always in view

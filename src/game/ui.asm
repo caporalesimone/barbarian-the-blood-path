@@ -778,7 +778,7 @@ ibox_ld:
         lda c_pack,x
         sta ui_sel
         lda c_packb,x
-        sta tmp5
+        sta ui_px
         lda c_packs,x
         sta ui_sx
         lda c_packd,x

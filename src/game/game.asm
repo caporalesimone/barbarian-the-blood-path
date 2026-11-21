@@ -145,6 +145,19 @@ af_ac      .byte ?
 af_st      .fill 3          ; ... modificatore di FOR, DES, COS
 af_i       .byte ?          ; recalc_stats: posto dell'equipaggiamento; af_pair: suffisso
 af_t       .byte ?
+af_l       .byte ?          ; (fase 3) af_gen: livello dell'oggetto, T (chestLevel / 8), 1 = magico d'ufficio (negozio)
+af_tt      .byte ?
+af_m       .byte ?
+af_cm      .byte ?          ; af_pick: tipo dell'oggetto (af_ty), maledetto voluto, senza finestra, solo il livello piu' alto,
+af_cu      .byte ?          ;  livello piu' alto, livello della finestra, somma dei pesi, primo e ultimo indice, prefisso
+af_nw      .byte ?
+af_tp     .byte ?
+af_mx      .byte ?
+af_lw      .byte ?
+af_sum     .byte ?
+af_a       .byte ?
+af_b       .byte ?
+af_pf      .byte ?
 ps_n       .byte ?
 gi_cat     .byte ?
 rm_min     .byte ?
@@ -239,6 +252,7 @@ cs_cu      .byte ?
 cs_k       .byte ?
 cs_end
         .endv
+        .cerror cs_end > $91a8, "variabili del gioco oltre $91A7 (li_t)"
 GVER       = 11             ; 6 (18/11): grotte nel capitolo 3; 7 (19/11): cancelli della palude distanti; 8: gate_hash da tutto il seed; 9: cittadella nel capitolo 4, mostri solo sul pavimento (gen_io.asm); 10: mappe vere dei piani del boss dei capitoli 1-3 (tools/build/gen_bossmap.py); 11: arredi dei piani (ovl_decor.asm); da 5 in su si rigenerano solo i piani (migrate_char)
 
 
@@ -643,7 +657,7 @@ _cap    lda #255
 ; genera un oggetto di livello bottino gi_ll (1..MAXLL): A = id, ap_b = bonus.
 ; Categoria dai pesi loot_cum; pozione: colore secondo il piano (pot_t1/pot_t2); pergamena; altrimenti un
 ; oggetto della categoria: il migliore con livello oggetto <= L (lt_scan, L dal chestLevel: vedi sotto).
-; Magia +N (armi, armature, scudi) fino a bon_tab[gi_ll] -> prefisso (mag_px); anello: caratteristica -> suffisso (ring_sx).
+; (21/11 sera, fase 3) affissi: af_gen (ap_b prefisso, ap_s suffisso).
 gen_item:
         lda gi_ll               ; chestLevel -> livello oggetto obiettivo T = CL / CL_PF (0..31)
         lsr
@@ -699,42 +713,15 @@ _lt     cmp #MAXLL+1
 +       sta gi_l
         jsr lt_scan             ; A = oggetto migliore con ilvl <= L (0: nessuno -> altra categoria)
         beq _cat
-        pha
-        ldx gi_cat
-        cpx #CAT_RING-1
-        beq _ring
-        lda cat_bonus+1,x
-        beq _nb
-        ldx gi_l
-        lda bon_tab,x
-        clc
-        adc #1
-        jsr rndrange            ; magia N (0..bon_tab) -> (21/11 sera) prefisso: mag_px[categoria x 4 + N]
-        sta ap_b
-        lda gi_cat
-        asl
-        asl
-        ora ap_b
-        tax
-        lda mag_px,x
-        sta ap_b
-_nb     pla
-        rts
-_ring   lda #3                  ; caratteristica 0..2 -> (21/11 sera) suffisso: ring_sx[car. x 3 + metallo - 1]
-        jsr rndrange
-        sta ap_s
-        asl
-        adc ap_s
-        sta ap_s
-        pla
-        pha
-        tax
-        lda itval,x             ; metallo: 1 rame, 2 argento, 3 oro
-        clc
-        adc ap_s
-        tax
-        lda ring_sx-1,x
-        sta ap_s
+        pha                     ; (21/11 sera, fase 3) affissi: livello dell'oggetto gi_l, T = gi_t (af_gen)
+        tay
+        lda gi_l
+        sta af_l
+        lda gi_t
+        sta af_tt
+        lda #0
+        sta af_m
+        jsr af_gen
         pla
         rts
 _scr    lda #I_SCROLL

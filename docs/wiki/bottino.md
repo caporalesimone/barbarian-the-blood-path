@@ -105,8 +105,8 @@ flowchart TD
     W --> E{"ce n'è uno?"}
     E -->|no| S
     E -->|sì| MB{"arma, armatura, scudo?"}
-    MB -->|sì| MG["magia +0 .. +bon_tab[L]<br/>(0 fino a 4, +1 da 5, +2 da 10, +3 da 15)"]
-    MB -->|anello| RS["caratteristica 1..3 (FOR, DES, COS)"]
+    MB -->|sì| MG["magico con probabilità mag_t[T]<br/>(8% + 3% × T, al massimo 60%):<br/>prefisso 40% / suffisso 40% / entrambi 20%"]
+    MB -->|anello| RS["rame: un affisso; argento, oro: due<br/>(oro: prefisso del livello più alto)"]
     C -->|"pozione 15"| P["colore secondo il piano:<br/>rnd < pot_t1 rossa, < pot_t2 gialla, altrimenti viola"]
     C -->|"pergamena 5"| SC["portal scroll"]
 ```
@@ -114,8 +114,11 @@ flowchart TD
 `u²` schiaccia il livello verso il basso: metà degli oggetti ha L ≤ T/4, uno su dieci L ≥ 0,8 T. Così i tesori
 danno quasi sempre roba scarsa (pugnale, cuoio, scudo piccolo: livello oggetto 0) ma ogni tanto l'oggetto che
 permette di scendere (la spada vichinga, livello 12, compare dal piano 11 nei tesori del boss e dal 13 in quelli
-comuni, con il 2–11% dei tiri d'arma; `tools/simulators/sim_chest.py` stampa la tabella per piano). La magia segue L, quindi
-gli oggetti buoni sono anche quelli con più probabilità di essere magici.
+comuni, con il 2–11% dei tiri d'arma; `tools/simulators/sim_chest.py` stampa la tabella per piano). **Affissi** (21/11 sera, fase 3: `af_gen` / `af_pick` in `combat.asm`, regole in
+`data/items/next/affix_rules.yaml`, modello `tools/simulators/items_model.py`): la probabilità di un oggetto magico cresce con T; la riga
+si sceglie fra quelle del tipo dell'oggetto con `min_level` ≤ L, prima decidendo se maledetta (5%, a ogni livello), poi nella
+**finestra** 2 × `min_level` ≥ min(L, 20) (se nessuna, senza finestra), pesata da `chance`. Un oggetto di livello 0 non ha righe
+adatte: resta bianco.
 
 ## Bauli epici della sala del trono
 

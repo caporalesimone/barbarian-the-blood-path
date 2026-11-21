@@ -9,12 +9,18 @@ rep_cost:
         beq _no
         cmp c_packd,x
         beq _no
+        stx shp_i               ; (fase 3, O11) prezzo con gli affissi: it_cost
+        ldy c_packs,x
         lda c_pack,x
-        asl
-        tay
-        lda itprice,y
+        pha
+        lda c_packb,x
+        tax
+        pla
+        jsr it_cost
+        ldx shp_i
+        lda tmp0
         sta mw_l
-        lda itprice+1,y
+        lda tmp1
         sta mw_h
         lda #REPAIR_PC
         sta mw_k

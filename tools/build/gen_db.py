@@ -402,8 +402,6 @@ def main():
     o("; ---- bottino: categorie (soglie su 100), magia +N per livello bottino")
     o(f"MAXLL       = {maxll}")
     o.bytes("loot_cum", cum)
-    o.bytes("cat_bonus", [0] + [1 if k in bon["categories"] else 0 for k in CATS])
-    o.bytes("bon_tab", [min(bon["max"], max(bon["min"], math.floor(ll * bon["per_loot_level"]))) for ll in range(maxll + 1)])
     # lt_scan prende il migliore oggetto con ilvl <= L: ogni categoria con peso deve avere un oggetto di ilvl 0
     for ct in ("weapon", "armor", "shield", "ring"):
         if w.get(ct) and not any(c == ct and it["ilvl"] == 0 for _, c, it in items):
@@ -575,8 +573,8 @@ def main():
     itd = {k: (ct, it) for k, ct, it in items}
     for n, dd in sh.items():
         lst = dd["items"]
-        chk(1 <= len(lst) <= SHOP_POOL_MAX and 1 <= dd["stock"] <= min(8, len(lst)), f"shop {n}: pool 1..{SHOP_POOL_MAX}, stock 1..min(8, pool) (riquadro merce da 8; shp_stock in src/game/ui.asm)")
-        first.append(len(flat)); count.append(len(lst)); stock.append(dd["stock"])
+        chk(1 <= len(lst) <= SHOP_POOL_MAX, f"shop {n}: pool 1..{SHOP_POOL_MAX} (shp_stock in src/game/ui.asm)")
+        first.append(len(flat)); count.append(len(lst))
         for k in lst:
             chk(k in ids, f"shop {n}: oggetto '{k}' sconosciuto")
             flat.append(ids[k])
@@ -588,7 +586,10 @@ def main():
     o(f"SHOP_POOL_MAX = {SHOP_POOL_MAX}     ; posti di shp_stock (src/game/ui.asm): pool filtrato di un negozio")
     o.bytes("shop_first", first)
     o.bytes("shop_cnt", count)
-    o.bytes("shop_stock", stock)
+    wr = B["shop_rules"]["wares"]       # (21/11 sera, decisione del committente ex B1) merce casuale da min a max, con ripetizioni
+    chk(1 <= wr["min"] <= wr["max"] <= 8, "shop_rules.wares: 1 <= min <= max <= 8 (riquadro merce da 8)")
+    o(f"SHOP_KMIN   = {wr['min']}        ; oggetti in vendita: SHOP_KMIN + rndrange(SHOP_KN)")
+    o(f"SHOP_KN     = {wr['max'] - wr['min'] + 1}")
     o.bytes("shop_items", flat)
     o.bytes("shop_minl", minl)            # livello minimo del PG (parallelo a shop_items)
     sdiv = B["shop_rules"]["sell_divisor"]
@@ -623,6 +624,39 @@ def main():
         pw.append(PW.index(r["power"]) + 1); val.append(v & 255)
     o.bytes("af_pw", pw)                 # potere della riga (PW_*)
     o.bytes("af_val", val)               # valore della riga (con segno)
+    # (21/11 sera, fase 3) generazione: livello minimo (bit 7 = maledetto: valore negativo), tipi di oggetto (bit 0 arma, 1 armatura,
+    # 2 scudo, 3 anello: cat_bit >> 1), peso; prezzo aggiunto (con segno, 16 bit: E5, prezzi dei .tsv da tarare)
+    TYB = {"weapon": 1, "armor": 2, "shield": 4, "ring": 8}
+    amin, aty, ach, apl, aph = [0], [0], [0], [0], [0]
+    for r in PX + SX:
+        ml = int(r["min_level"])
+        chk(0 <= ml <= 127, f"affisso {r['name']}: min_level {ml}")
+        cur = int(r["value1"] or 0) < 0
+        amin.append(ml | (0x80 if cur else 0))
+        aty.append(sum(TYB[t] for t in r["item_types"].split(",")))
+        ach.append(byte(int(r["chance"]), f"{r['name']}.chance"))
+        pa = int(r["price_add"]) & 0xffff
+        apl.append(pa & 255); aph.append(pa >> 8)
+    chk(sum(ach[1:len(PX) + 1]) < 256 and sum(ach[len(PX) + 1:]) < 256, "affissi: la somma dei pesi deve stare in un byte (af_pick)")
+    o.bytes("af_min", amin)
+    o.bytes("af_ty", aty)
+    o.bytes("af_ch", ach)
+    o.bytes("af_pl", apl)
+    o.bytes("af_ph", aph)
+    AR = yaml.safe_load(open(os.path.join(nx, "affix_rules.yaml")))
+    q = AR["quality"]
+    # magico con probabilita' base + per_t x T (T = chestLevel / 8), al massimo max: soglie su 256 per T = 0..31
+    o.bytes("mag_t", [pct256(min(q["magic"]["max"], q["magic"]["base"] + q["magic"]["per_t"] * t), "magic") for t in range(32)])
+    a = q["affixes"]
+    o(f"AFQ_P       = {pct256(a['prefix'], 'affixes.prefix')}       ; fra i magici: solo prefisso sotto AFQ_P, solo suffisso sotto AFQ_S, poi entrambi (su 256)")
+    o(f"AFQ_S       = {pct256(a['prefix'] + a['suffix'], 'affixes.suffix')}")
+    ac = AR["affix_choice"]
+    chk(ac["low_fraction"] == 0.5 and ac.get("cursed_any_level"), "affix_choice: il gioco fa la finestra con 2 x min_level >= livello (low_fraction 0.5) e i maledetti fuori finestra")
+    o(f"AF_TOP      = {byte(ac['top_level'], 'top_level')}       ; finestra: livello al massimo AF_TOP")
+    o(f"CURSE_T     = {pct256(ac['cursed_share'], 'cursed_share')}       ; affisso maledetto con probabilita' CURSE_T / 256")
+    chk(AR["rings"] == {"copper": 1, "silver": 2, "gold": 2}, "rings: il gioco fa rame 1, argento e oro 2 (oro: prefisso del livello piu' alto)")
+    sm = AR["shops"]["magic"]
+    o.bytes("shm_t", [pct256(min(sm["max"], sm["base"] + sm["per_level"] * l), "shops.magic") for l in range(21)])   # negozi: merce magica per livello del PG
     def find(rs, power, v, typ):
         for i, r in enumerate(rs, 1):
             if r["power"] == power and int(r["value1"] or 0) == v and typ in r["item_types"].split(","):
@@ -632,14 +666,13 @@ def main():
     mag = []
     for typ, pwn in (("weapon", "ATT_DMG"), ("armor", "AC"), ("shield", "AC")):
         mag += [0] + [find(PX, pwn, n, typ) for n in (1, 2, 3)]
-    o.bytes("mag_px", mag)
+    chk(len(mag) == 12, "mag_px")         # (fase 3: non piu' una tabella del gioco, solo le costanti MAG_*)
     chk(mag[4:8] == mag[8:12], "affissi: armature e scudi devono avere gli stessi prefissi di CA +1..+3 (MAG_A)")
     for n in (1, 2, 3):                  # costanti per le varianti di prova e l'arena (levels.asm, src/test/arena.asm, tools/vice/arena.py)
         o(f"MAG_W{n}      = {mag[n]}        ; prefisso della magia +{n} di un'arma")
         o(f"MAG_A{n}      = {mag[4 + n]}        ; ... di armatura e scudo")
     # anello: caratteristica (FOR, DES, COS) x 3 + metallo (itval 1..3) - 1 -> suffisso (gen_item, negozio)
     rsx = [find(SX, st, n, "ring") for st in ("STR", "DEX", "CON") for n in (1, 2, 3)]
-    o.bytes("ring_sx", rsx)
     for i, v in enumerate(rsx):
         o(f"RSX_{i // 3 + 1}{i % 3 + 1}      = {v}        ; suffisso di un anello: caratteristica {i // 3 + 1} (FOR, DES, COS), metallo {i % 3 + 1}")
     # nomi in CORE (out/work/afnames.asm): prefissi e suffissi senza "of " (lo stampa af_name), 0 finale

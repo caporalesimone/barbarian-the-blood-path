@@ -101,6 +101,7 @@ def shop_ctx(ctx):
 def shop_call(ctx, routine, g, sg, pack, lc, mask, item):
     v, L = ctx["v"], ctx["L"]
     v.fill(L["c_pack"], L["c_eqm"] + 3, 0); v.fill(L["c_beltt"], L["c_beltt"] + 3, 0)
+    v.fill(L["c_packs"], L["c_eqs"] + 4, 0); v.fill(L["l8_b"], L["l8_b"] + 7, 0); v.fill(L["l8_s"], L["l8_s"] + 7, 0)   # (affixes: plain items)
     if pack: v.poke(L["c_pack"], *pack)
     v.poke16(L["c_gold"], g); v.poke16(L["c_sgold"], sg)
     v.poke(L["ui_lc"], lc); v.poke(L["sh_mask"], mask, 0xff); v.poke(L["l8_id"], item)
@@ -154,7 +155,7 @@ def shop_fix(ctx):
     sw = labels("game")["I_SWORD"] if "I_SWORD" in labels("game") else None
     check(sw is not None, "I_SWORD not in game.lbl")
     eq = L["c_eq"]
-    v.poke(eq, sw); v.poke(L["c_eqd"], 10); v.poke(L["c_eqm"], 100)
+    v.poke(eq, sw); v.poke(L["c_eqd"], 10); v.poke(L["c_eqm"], 100); v.poke(L["c_eqb"], 0); v.poke(L["c_eqs"], 0)   # no affixes
     v.poke16(L["c_gold"], 1000); v.poke16(L["c_sgold"], 0)
     v.poke(L["ui_lc"], 8); v.poke(L["sh_mask"], 0x0e)
     v.call(L["shop_repair"], regs="x=08")

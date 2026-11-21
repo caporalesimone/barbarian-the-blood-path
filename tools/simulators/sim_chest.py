@@ -13,6 +13,7 @@ import argparse, math, os, random, sys, yaml
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(1, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "build"))   # (13/11) generatori in tools/build/
 import rules as RU
+import items_model as IM
 
 import bestiary
 B = bestiary.load_balance()       # balance.yaml + mostri (data/monsters/bestiary.tsv, 11/11)
@@ -71,9 +72,9 @@ def gen_item(cl, rng, force=None):
         if not cands:
             continue
         il, k = max(cands)
-        if cat == "ring":
-            return cat, k, rng.randrange(3) + 1, l
-        return cat, k, rng.randrange(bon_tab(l) + 1), l
+        # (21/11 evening) affixes as the game's af_gen (items_model.affix_roll): third value = number of affixes
+        aff = IM.affix_roll(rng, cat, k, l, t)
+        return cat, k, bool(aff["prefix"]) + bool(aff["suffix"]), l
 
 
 def main():
@@ -83,7 +84,7 @@ def main():
     rng = random.Random(7)
     names = [k for c in ("weapon", "armor", "shield", "ring") for _, k in ITEMS[c]]
     print("chestLevel: %d x piano + bonus; oggetti per piano (tesoro di un mostro comune medio / boss), %% per oggetto" % CL["per_floor"])
-    print("%5s %4s %4s " % ("piano", "CL", "CLb") + " ".join("%7s" % n[:7] for n in names) + "  magia")
+    print("%5s %4s %4s " % ("piano", "CL", "CLb") + " ".join("%7s" % n[:7] for n in names) + "  affissi")
     for floor in range(1, 21):
         mon = "zombie" if floor >= 4 else "skeleton"
         for boss in (False, True):
