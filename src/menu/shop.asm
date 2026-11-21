@@ -8,7 +8,7 @@
 ;   lista 0 "wares": la merce (prezzo pieno a destra);
 ;   lista 1 "gear" (fabbro: arma, armatura e scudo indossati, poi armi/armature/scudi dello zaino e i posti liberi) o "yours"
 ;   (alchimista: anello indossato, cintura, anelli e pergamene dello zaino e i posti liberi), con il prezzo di vendita a destra.
-; Le azioni lavorano sui codici di prima in ui_lc (sh_cur): 0..7 zaino, 8..11 equipaggiamento, 12..19 merce, 20..23 cintura.
+; Le azioni lavorano sui codici di prima in ui_lc (sh_cur): 0..7 zaino, 8..12 equipaggiamento, LC_W.. merce, LC_B.. cintura (21/11 sera: prima merce 12 = secondo anello).
 ; Fire: merce = compra, zaino e cintura = vende (l'indossato no: "unequip to sell"); R (fabbro): ripara zaino e indossato.
 ; Oro (addosso + baule della locanda) nel titolo della lista 1.
 ; (11/11) variabili dei negozi in pagina zero ($82-$8C, libera nel gioco: docs/wiki/tecnica.md); shp_stock, sh_mask, sh_lc
@@ -147,7 +147,7 @@ _k      lda keynew+2            ; R: ripara (solo il fabbro; zaino ed equipaggia
         bne _in
         jsr sh_cur
         ldx ui_lc
-        cpx #12
+        cpx #LC_W
         bcs _in
         jsr shop_repair
         jmp _rb
@@ -231,7 +231,7 @@ _e      stx tmp4
 sh_eq0  .byte 0, 3
 sh_eqn  .byte 3, 2              ; (21/11) alchimista: i due anelli
 
-; voce del cursore -> ui_lc (codici di prima: 0..7 zaino, 8..11 equipaggiamento, 12..19 merce, 20..23 cintura)
+; voce del cursore -> ui_lc (codici di prima: 0..7 zaino, 8..12 equipaggiamento, LC_W.. merce, LC_B.. cintura (21/11 sera: prima merce 12 = secondo anello))
 sh_cur: jsr sl_sel
         lda sl_sl
         cmp #$20
@@ -239,10 +239,10 @@ sh_cur: jsr sl_sel
         cmp #$60
         and #$1f
         bcs _w
-        adc #20
+        adc #LC_B
         bne _s
 _w      clc
-        adc #12
+        adc #LC_W
 _s      sta ui_lc
         rts
 
@@ -275,9 +275,9 @@ sh_keys:
 +       lda ui_lc
         cmp #8
         bcc _sl
-        cmp #12
+        cmp #LC_W
         bcc _rp
-        cmp #20
+        cmp #LC_B
         bcs _sl
         #msg "fire:buy"
         jmp _bk
@@ -327,9 +327,9 @@ sh_l3:  ldx ui_sel
         ldx ui_lc
         cpx #8
         bcc _sl
-        cpx #12
+        cpx #LC_W
         bcc _eq
-        cpx #20
+        cpx #LC_B
         bcs _sl
         ldx #29
         jsr _at
@@ -373,9 +373,9 @@ sh_fire:
         lda ui_lc
         cmp #8
         bcc _s
-        cmp #12
+        cmp #LC_W
         bcc _r
-        cmp #20
+        cmp #LC_B
         bcc _b
 _s      jmp shop_sell
 _b      jmp shop_buy
@@ -385,18 +385,18 @@ _r      rts
 ; (fase 3) prezzo pieno della voce ui_lc con i suoi affissi -> tmp0/tmp1 (it_cost)
 sh_cost:
         ldx ui_lc
-        cpx #12
+        cpx #LC_W
         bcc _p
         ldy #0
-        cpx #20
+        cpx #LC_B
         bcc _w
-        lda c_beltt-20,x
+        lda c_beltt-LC_B,x
         ldx #0
         jmp it_cost
-_w      ldy l8_s-12,x
-        lda l8_id-12,x
+_w      ldy l8_s-LC_W,x
+        lda l8_id-LC_W,x
         pha
-        lda l8_b-12,x
+        lda l8_b-LC_W,x
         jmp +
 _p      ldy c_packs,x
         lda c_pack,x
@@ -408,13 +408,13 @@ _p      ldy c_packs,x
 
 sh_selid:
         ldx ui_lc
-        cpx #12
+        cpx #LC_W
         bcc _p
-        cpx #20
+        cpx #LC_B
         bcc _w
-        lda c_beltt-20,x
+        lda c_beltt-LC_B,x
         rts
-_w      lda l8_id-12,x
+_w      lda l8_id-LC_W,x
         rts
 _p      lda c_pack,x            ; zaino e (subito dopo) equipaggiamento
         rts

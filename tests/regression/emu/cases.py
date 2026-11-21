@@ -10,7 +10,7 @@ saved hero is in the list. About 4 minutes. The bots (bots/*.js) run inside the 
 the labels of out/work/game.lbl. SKIP (not FAIL) when the daemon (container lab64-vc64web, EMU_URL) is not running."""
 import os
 from c64test import test, check, Skip
-from lib.c64 import OUT, ROOT
+from lib.c64 import OUT, ROOT, labels
 from lib.emu import Emu
 from lib.play import NAME, SEED
 import sys
@@ -109,7 +109,8 @@ def buy_scroll(e):
     idx = ids.index(scroll)
     for _ in range(idx):                                          # the cursor starts on the first ware: joystick down
         e.run_script("0 JOY2-DOWN 3\nwait 20")
-    check(e.peek("ui_lc") == 12 + idx, "cursor on item %d, expected the ware %d (portal scroll)" % (e.peek("ui_lc"), idx))
+    w = labels("game")["LC_W"]
+    check(e.peek("ui_lc") == w + idx, "cursor on item %d, expected the ware %d (portal scroll)" % (e.peek("ui_lc"), idx))
     e.run_script("\n".join(["0 JOY2-FIRE 3", "wait 60",         # select
                             "0 JOY2-FIRE 3", "wait 120",        # confirm "BUY FOR 60?"
                             "0 RUN/STOP", "wait 60"]))          # leave

@@ -158,7 +158,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `AFG-11` | it_cost: price = itprice + price_add of prefix and suffix (signed: a cursed row costs less), at least 1; scrolls ignore the quantity |
 | `AFG-12` | blacksmith: 3..8 wares from the filtered pool (repetitions allowed), empty entries after them |
 
-### regression (253)
+### regression (254)
 
 | ID | Test |
 |---|---|
@@ -173,6 +173,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
 | `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
 | `RING-12` | alchemist: a ring among the wares has affixes (af_gen) and the bought ring keeps its suffix |
+| `RING-13` | alchemist: the second worn ring has its own ui_lc (PACK_N + 4 = 12, wares from LC_W): Fire on it buys nothing |
 | `ASM-10` | tools/build/asm_audit.py: GAME code all reachable (but jump tables), no fill_rect / chst_hold any more |
 | `ASM-11` | generated sources commented: every T_ tile constant with its description, item ids and monster types listed in db.asm |
 | `BAL-10` | d20 rules in the simulator: reference hero, weak hero, curves |

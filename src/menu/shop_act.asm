@@ -23,9 +23,9 @@ shop_buy:
         jsr shop_ask
         bcc _r
         ldx ui_lc               ; (21/11) bonus della merce (anelli: la caratteristica tirata all'ingresso)
-        lda l8_b-12,x
+        lda l8_b-LC_W,x
         sta ap_b
-        lda l8_s-12,x
+        lda l8_s-LC_W,x
         sta ap_s
         lda shp_item
         jsr give_item
@@ -112,8 +112,8 @@ _ok     jsr sh_cost             ; prezzo con gli affissi (fase 3) >> SELL_SHIFT 
         lda #1
         jsr shop_ask
         bcc _r
-        ldx ui_lc               ; (21/11) zaino 0..7 o cintura 20..23 (le pergamene sono nello zaino, in pila)
-        cpx #20
+        ldx ui_lc               ; (21/11) zaino 0..7 o cintura LC_B.. (le pergamene sono nello zaino, in pila)
+        cpx #LC_B
         bcs _bt
         lda c_pack,x
         cmp #I_SCROLL
@@ -124,7 +124,7 @@ _z      jsr pk_zero
         jsr sort_pack
         jmp _gd
 _bt     lda #0
-        sta c_beltt-20,x
+        sta c_beltt-LC_B,x
 _gd     lda shp_price           ; (18/11, R9) l'oro con add_gold16 di GAME (il tetto lo ha gia' controllato purse_room)
         ldx shp_price+1
         jsr add_gold16

@@ -129,10 +129,11 @@ def shop_belt(ctx):
     if not pot:                                                  # random stock without potions: put one in the first entry
         g.poke(L["l8_id"], L["I_POTY"]); pot = [0]
     k = pot[0]; pid = g.b(L["l8_id"] + k)
-    for _ in range(10):                                          # ui_lc: 12..19 = wares (l8_id), 20..23 belt
-        if g.b(L["ui_lc"]) == 12 + k: break
-        g.frames(1, joy=2 if g.b(L["ui_lc"]) < 12 + k else 1); g.frames(1)
-    check(g.b(L["ui_lc"]) == 12 + k, "cursor on entry %d, not on the potion (%d)" % (g.b(L["ui_lc"]), 12 + k))
+    w = L["LC_W"]                                                # ui_lc: LC_W.. = wares (l8_id), LC_B.. belt (21/11 evening: 16, 24)
+    for _ in range(10):
+        if g.b(L["ui_lc"]) == w + k: break
+        g.frames(1, joy=2 if g.b(L["ui_lc"]) < w + k else 1); g.frames(1)
+    check(g.b(L["ui_lc"]) == w + k, "cursor on entry %d, not on the potion (%d)" % (g.b(L["ui_lc"]), w + k))
     price = g.w16(L["itprice"] + 2 * pid)
     g.press_fire()                                              # buy (potions: no y/n question, shop_buy)
     check(g.w16(L["c_gold"]) == 5000 and g.mem(L["c_beltt"], 4) == [L["I_POTR"]] * 4,
@@ -156,9 +157,9 @@ def shop_sell_belt(ctx):
     door = find(g, L["T_DALCH"])
     fire_to(g, door[0][0], door[0][1] + 1)
     check(g.b(L["sh_mask"]) != 0, "the alchemist does not open")
-    for want, what in ((20, "belt slot 1"), (0, "scroll")):        # (21/11) list 1 "yours": belt 20..23, pack 0..7
+    for want, what in ((L["LC_B"], "belt slot 1"), (0, "scroll")):   # (21/11) list 1 "yours": belt LC_B.., pack 0..7
         check(list_to(g, 1, "ui_lc", want), "cursor never on the %s (ui_lc %d)" % (what, g.b(L["ui_lc"])))
-        item = L["I_POTY"] if want == 20 else L["I_SCROLL"]
+        item = L["I_POTY"] if want == L["LC_B"] else L["I_SCROLL"]
         g0 = g.w16(L["c_gold"])
         g.press_fire(); g.press_fire()                              # sell, confirm
         exp = g0 + (g.w16(L["itprice"] + 2 * item) >> L["SELL_SHIFT"])

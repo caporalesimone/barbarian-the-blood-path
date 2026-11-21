@@ -124,6 +124,12 @@ UC_VALUE = 7                    ; numeri (statistiche, quantita', prezzi): giall
 UC_ITEM  = 1                    ; nome di un oggetto normale (bianco)
 UC_CURSOR = 13
 UC_MAGIC = 14
+; (21/11 sera) codici ui_lc dei negozi (src/menu/shop.asm sh_cur): 0..7 zaino, 8..12 equipaggiamento (PACK_N + posto), LC_W + n merce,
+; LC_B + n cintura. Prima la merce partiva da 12, che e' anche il secondo anello indossato (EQ_N = 5 dal 21/11): Fire sul secondo
+; anello dall'alchimista comprava la prima merce
+LC_W     = 16
+LC_B     = 24
+        .cerror LC_W < PACK_N + EQ_N || LC_B < LC_W + 8, "codici ui_lc dei negozi sovrapposti"
 UC_EMPTY = 11
 UC_BOX   = 11                   ; cornici grigio scuro (08/11, prima 15)
 UC_BTTL  = 15                   ; titoli sulle cornici: grigio chiaro (ui_at li riconosce: iniziano sopra BOX_H)

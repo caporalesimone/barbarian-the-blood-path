@@ -36,7 +36,7 @@ def run():
         v.cmd("del")
         sbuy = L["shop_buy"]
         v.cmd("> 0350 20 %02x %02x 4c 53 03" % (sbuy & 255, sbuy >> 8))                 # shop_buy then stop
-        v.cmd("> %04x %02x" % (L["l8_id"], POT)); v.cmd("> %04x 0c" % L["ui_lc"])       # ware 0 = potion, entry 12
+        v.cmd("> %04x %02x" % (L["l8_id"], POT)); v.cmd("> %04x %02x" % (L["ui_lc"], L["LC_W"]))   # ware 0 = potion, entry LC_W
         v.cmd("> %04x 88 13" % L["c_gold"])                                             # 5000 gold
         v.cmd("> %04x 00 %02x 00 %02x" % (L["c_beltt"], POT, POT))                      # belt: -, P, -, P
         price = None

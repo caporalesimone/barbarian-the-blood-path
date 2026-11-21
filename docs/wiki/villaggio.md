@@ -290,8 +290,9 @@ flowchart LR
 - **Chi compra cosa** (`sh_cats`, indice = `shop_id`: 0 fabbro, 1 alchimista): il fabbro armi, armature e scudi; l'alchimista
   anelli, pozioni e pergamene. La lista mostra solo cio' che il negozio compra o ripara. L'indossato **non si vende**: prima
   va tolto. Solo il fabbro ripara (R).
-- Le azioni lavorano sui codici di prima in `ui_lc` (`sh_cur` dalla voce della lista): 0-7 zaino, 8-11 equipaggiamento,
-  12-19 merce, 20-23 cintura.
+- Le azioni lavorano sui codici di prima in `ui_lc` (`sh_cur` dalla voce della lista): 0-7 zaino, 8-12 equipaggiamento,
+  16-23 merce (`LC_W`), 24-27 cintura (`LC_B`). (21/11 sera) Prima la merce partiva da 12, che con i due anelli e' anche il secondo
+  anello indossato: Fire sul secondo anello dall'alchimista comprava la prima merce (test `RING-13`).
 - Merce (21/11 sera, decisione del committente ex B1/E2): a ogni visita ogni negozio vende **da 3 a 8 oggetti** (`shop_rules.wares`
   in `balance.yaml`: `SHOP_KMIN`, `SHOP_KN`), estratti a caso **con ripetizioni** dal pool filtrato per livello (`shop_roll` lo
   filtra, `enter_shop` estrae). Ogni oggetto d'equipaggiamento è **magico** con probabilità `shm_t[livello del PG]` (6% per livello,

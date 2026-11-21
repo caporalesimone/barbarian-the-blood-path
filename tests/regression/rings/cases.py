@@ -82,11 +82,28 @@ def ring_shop(ctx):
     check(not bad, "rings in the wares without affixes: %s" % bad)
     want = sx(g, L["I_COPPER"], 2)
     g.poke(L["l8_id"], L["I_COPPER"]); g.poke(L["l8_b"], 0); g.poke(L["l8_s"], want)   # ware 0: copper ring of dexterity
-    check(list_to(g, 0, "ui_lc", 12), "cursor not on ware 0")
+    check(list_to(g, 0, "ui_lc", L["LC_W"]), "cursor not on ware 0")
     g.press_fire(); g.press_fire()                                     # buy, confirm
     pk = g.mem(L["c_pack"], 8)
     check(L["I_COPPER"] in pk, "the ring is not in the pack %s" % pk)
     k = pk.index(L["I_COPPER"])
     check(g.b(L["c_packs"] + k) == want, "bought ring with suffix %d (expected %d: of dexterity)" % (g.b(L["c_packs"] + k), want))
+    g.run_stop(); g.frames(2)
+    check(g.in_game(), "RUN/STOP does not close the shop")
+
+
+@test("RING-13", "alchemist: the second worn ring has its own ui_lc (PACK_N + 4 = 12, wares from LC_W): Fire on it buys nothing")
+def ring_shop_second(ctx):
+    g = ctx["g"]; L = g.L
+    check(L["LC_W"] > L["PACK_N"] + 4, "LC_W %d overlaps the second ring slot" % L["LC_W"])
+    ring(g, R1, L["I_SILVER"], 1); ring(g, R1 + 1, L["I_COPPER"], 2)
+    g.fill(L["c_pack"], L["c_pack"] + 7, 0); g.poke16(L["c_gold"], 9000)
+    door = find(g, L["T_DALCH"])
+    fire_to(g, door[0][0], door[0][1] + 1)
+    check(g.b(L["sh_mask"]) != 0, "the alchemist does not open")
+    check(list_to(g, 1, "ui_lc", L["PACK_N"] + 4), "cursor never on the second ring (ui_lc %d)" % g.b(L["ui_lc"]))
+    g0 = g.w16(L["c_gold"])
+    g.press_fire(); g.press_fire()
+    check(g.w16(L["c_gold"]) == g0 and not any(g.mem(L["c_pack"], 8)), "Fire on the second ring bought something (gold %d -> %d, pack %s)" % (g0, g.w16(L["c_gold"]), g.mem(L["c_pack"], 8)))
     g.run_stop(); g.frames(2)
     check(g.in_game(), "RUN/STOP does not close the shop")

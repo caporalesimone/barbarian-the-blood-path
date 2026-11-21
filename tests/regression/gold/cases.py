@@ -124,7 +124,7 @@ def shop_buy(ctx):
             for full in (False, True):
                 pack = [2 if it != 2 else 3] * PACK_N if full else []
                 want = model_buy(g, sg, p)
-                gg, ss, pk = shop_call(ctx, "shop_buy", g, sg, pack, 12, 0x7e, it)
+                gg, ss, pk = shop_call(ctx, "shop_buy", g, sg, pack, ctx["L"]["LC_W"], 0x7e, it)
                 exp = (g, sg, 0) if want is None or full else (want[0], want[1], 1)
                 if (gg, ss, pk.count(it)) != exp:
                     bad.append("price %d, %d/%d%s -> %s (expected %s)" % (p, g, sg, " pack full" if full else "", (gg, ss, pk.count(it)), exp))
