@@ -131,7 +131,7 @@ shops:
   # items = pool; stock = quanti oggetti vengono estratti a caso (senza ripetizioni) a OGNI ingresso nel negozio
   blacksmith:                     # 08/11: anche armature e scudi; 09/11: l'armaiolo non c'e' piu', vende tutto il fabbro
     stock: 6                      # al massimo 8 (riquadro merce da 8); quanto e cosa vende: da decidere (TODO)
-    items: [dagger, sword, viking_sword, leather_armor, chain_mail, plate_mail, small_shield, medium_shield, tower_shield]
+    items: [dagger, short_sword, club, sword, hand_axe, mace, broad_sword, war_axe, morning_star, viking_sword, battle_axe, maul, great_sword, leather_armor, chain_mail, plate_mail, small_shield, medium_shield, tower_shield]
   alchemist:
     stock: 4
     items: [red, yellow, violet, portal_scroll, copper]

@@ -117,7 +117,8 @@
 <figure><img class="shot" src="img/inventory.png"><figcaption>Fig. 11 – Inventario (tasto I)</figcaption></figure>
 <p>In alto: vita, ATT, CA, FOR, DES, COS, danno ed esperienza, sempre aggiornati. Sotto: equipaggiamento (arma, armatura, scudo, anello), zaino (8 posti) e cintura (4 pozioni). A destra la scheda dell'oggetto selezionato: danno o CA, magia, valore di vendita e <b>durabilità</b> (es. <i>d 120/200</i>).</p>
 <ul><li>Fuoco su un oggetto dello zaino: lo equipaggia (quello che portavi torna nello zaino); su una pozione: la beve. Fuoco su un oggetto indossato: lo toglie. <kbd>DEL</kbd> elimina l'oggetto, dopo la conferma (fuoco sì, <kbd>RUN/STOP</kbd> no). Le pergamene di portale si tengono nello zaino, in una pila fino a 10.</li>
-<li>L'arma non si toglie e non si vende: si sostituisce. La <b>viking sword</b> è a due mani: niente scudo.</li>
+<li>L'arma non si toglie e non si vende: si sostituisce. Le armi a due mani (<b>viking sword</b>, <b>battle axe</b>, <b>maul</b>, <b>great sword</b>) non vogliono lo scudo. Le armi più grandi sono più lente.</li>
+<li>Alcune armi, armature e scudi richiedono una FOR minima: con meno FOR non si indossano (nel riquadro dell'oggetto compare "str" e il valore richiesto).</li>
 <li>Le pergamene del portale occupano un solo posto dello zaino (fino a 4 nella pila).</li></ul>
 </div>
 
@@ -125,7 +126,7 @@
 <p>Ogni colpo è un tiro di <b>d20</b>: d20 + <b>ATT</b> contro la <b>CA</b> (classe armatura) del bersaglio. 1 manca sempre, 20 è un <b>critico</b> (dadi del danno raddoppiati; dal livello 17 anche il 19). I mostri tirano allo stesso modo contro la tua CA.</p>
 <table><tr><th>Valore</th><th>Da cosa dipende</th></tr>
 <tr><td>ATT</td><td>competenza (cresce con il livello) + FOR (con il pugnale FOR o DES) + magia dell'arma</td></tr>
-<tr><td>Danno</td><td>dadi dell'arma + FOR + magia (dagger 1d4, sword 1d8, viking sword 2d6)</td></tr>
+<tr><td>Danno</td><td>dadi dell'arma + FOR + magia (dal dagger 1d4 al maul 3d6)</td></tr>
 <tr><td>CA</td><td>10 + DES (limitata dall'armatura) + armatura + scudo + magia</td></tr>
 <tr><td>Anello</td><td>+1/+2/+3 a FOR, DES o COS (rame, argento, oro); COS dà anche vita</td></tr></table></div>
 
@@ -154,7 +155,7 @@
 <table><tr><th>Oggetto</th><th>Si consuma quando</th><th>Probabilità per evento</th></tr>
 <tr><td>Arma</td><td>colpisci un mostro</td><td>1 su 2</td></tr>
 <tr><td>Armatura</td><td>vieni colpito</td><td>sempre</td></tr>
-<tr><td>Scudo</td><td>vieni colpito (non con la viking sword)</td><td>sempre</td></tr></table>
+<tr><td>Scudo</td><td>vieni colpito (non con un'arma a due mani)</td><td>sempre</td></tr></table>
 <p>Un'arma media dura circa <b>3 piani</b> in profondità. Sotto il <b>20%</b> della sua durabilità massima la sua icona lampeggia nell'HUD: passa dal fabbro.</p>
 <p>A 0 l'<b>arma si rompe</b>: resta in mano ma <b>non fa più danni</b> (nome in rosso nell'inventario, icona fissa nell'HUD) finché il fabbro non la ripara o non ne equipaggi un'altra. L'arma non si toglie: si scambia. Lo stesso vale per armatura e scudo: a 0 restano addosso ma non proteggono. Porta un'arma di riserva nello zaino.</p>
 <p><b>Riparazione:</b> 25% del prezzo; la durabilità torna al massimo, che cala di 1.</p>

@@ -86,6 +86,12 @@ _ob     lda h_sel               ; scudo con un'arma a due mani: no
         sta nw_i,x
         dex
         bpl -
+        ldx nw_i                ; (21/11, O6) FOR richiesta: con meno FOR non si indossa
+        lda s_str
+        cmp itreq,x
+        bcs +
+        jmp _nof                ; rifiutato come nell'inventario (lampo rosso; il riquadro dell'oggetto dice "str N")
++
         lda h_sel               ; arma a due mani con lo scudo: posto per lo scudo (zaino, poi baule)
         cmp #CAT_WEAPON
         bne _sw

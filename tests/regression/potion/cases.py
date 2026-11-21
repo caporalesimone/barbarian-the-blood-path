@@ -8,11 +8,11 @@ from lib.play import new_game, key, BELT_KEYS, fire_to, find, alive, mpos, floor
 BELT_SLOTS = 4
 CHAIN = True                                                # (one session: after a failure the game state is unknown)
 HUD_BELT = 0xd800 + 22 * 40 + 29                           # colour of belt slot j: HUD_BELT + 2 j (hud_p3)
-HEAL = {13: (20, 0), 14: (50, 0), 15: (40, 4)}              # potion id -> (fixed, per level): docs/wiki/oggetti.md
-HEAL_ABYSS = {13: (30, 0), 14: (75, 0), 15: (28, 5)}        # same from level 21 (the Abyss), column heal_abyss
+HEAL = {0: (20, 0), 1: (50, 0), 2: (40, 4)}                 # potion id - I_POTR -> (fixed, per level): docs/wiki/oggetti.md
+HEAL_ABYSS = {0: (30, 0), 1: (75, 0), 2: (28, 5)}           # same from level 21 (the Abyss), column heal_abyss
 MAXLEVEL = 20
-COLOUR = {13: 2, 14: 7, 15: 4}                              # red, yellow, violet; 6 (blue) while cooling down
-CD = {13: 250, 14: 350, 15: 500}                            # cooldown in frames (itrate x 2): 5, 7, 10 s
+COLOUR = {0: 2, 1: 7, 2: 4}                                 # red, yellow, violet (id - I_POTR); 6 (blue) while cooling down
+CD = {0: 250, 1: 350, 2: 500}                               # cooldown in frames (itrate x 2): 5, 7, 10 s (id - I_POTR)
 
 
 def setup(ctx):
@@ -45,13 +45,14 @@ def drink_check(g, pid, lvl):
     g.poke(L["c_lvl"], lvl)
     cool_off(g); belt(g, pid); hp_setup(g, 1)
     key(g, BELT_KEYS[0], 3)
-    fixed, per = (HEAL if lvl <= MAXLEVEL else HEAL_ABYSS)[pid]
+    fixed, per = (HEAL if lvl <= MAXLEVEL else HEAL_ABYSS)[pid - L["I_POTR"]]
     want = 1 + fixed + per * lvl
     hp = g.w16(L["c_hp"])
     check(hp == want, "potion %d level %d: hp %d (expected %d)" % (pid, lvl, hp, want))
     check(g.b(L["c_beltt"]) == 0, "potion %d: the belt slot is not freed" % pid)
     cd = g.w16(L["tmr"] + L["T_POT"])
-    check(CD[pid] - 10 <= cd <= CD[pid], "potion %d: cooldown %d frames (expected about %d)" % (pid, cd, CD[pid]))
+    c0 = CD[pid - L["I_POTR"]]
+    check(c0 - 10 <= cd <= c0, "potion %d: cooldown %d frames (expected about %d)" % (pid, cd, c0))
     belt(g, 0, pid); g.poke(L["hud_dirty"], 1); g.frames(6)                                # second potion at once: refused (cooldown), blue in the HUD
     col = g.b(HUD_BELT + 2) & 15
     key(g, BELT_KEYS[1], 2)
@@ -59,7 +60,7 @@ def drink_check(g, pid, lvl):
     check(col == 6, "potion %d: HUD colour %d during the cooldown (expected 6, blue)" % (pid, col))
     cool_off(g); g.poke(L["hud_dirty"], 1); g.frames(6)
     col = g.b(HUD_BELT + 2) & 15
-    check(col == COLOUR[pid], "potion %d: HUD colour %d (expected %d)" % (pid, col, COLOUR[pid]))
+    check(col == COLOUR[pid - g.L["I_POTR"]], "potion %d: HUD colour %d (expected %d)" % (pid, col, COLOUR[pid - g.L["I_POTR"]]))
     hp_setup(g, 990)                                             # cap at the maximum
     key(g, BELT_KEYS[1], 2)
     check(g.w16(L["c_hp"]) == 1000, "potion %d: hp %d over the cap (max 1000)" % (pid, g.w16(L["c_hp"])))
@@ -68,18 +69,18 @@ def drink_check(g, pid, lvl):
 
 @test("POTION-10", "minor healing (red): +20, 5 s cooldown, red in the belt, capped at max hp")
 def potion_red(ctx):
-    drink_check(ctx["g"], 13, 1)
+    drink_check(ctx["g"], ctx["g"].L["I_POTR"], 1)
 
 
 @test("POTION-11", "healing potion (yellow): +50, 7 s cooldown, yellow in the belt, capped at max hp")
 def potion_yellow(ctx):
-    drink_check(ctx["g"], 14, 1)
+    drink_check(ctx["g"], ctx["g"].L["I_POTY"], 1)
 
 
 @test("POTION-12", "greater healing (violet): +40 + 4 x level at levels 1, 10 and +28 + 5 x level (Abyss) at 50, 99; 10 s cooldown, violet")
 def potion_violet(ctx):
     for lvl in (1, 10, 50, 99):
-        drink_check(ctx["g"], 15, lvl)
+        drink_check(ctx["g"], ctx["g"].L["I_POTV"], lvl)
     ctx["g"].poke(ctx["g"].L["c_lvl"], 1)
 
 
@@ -87,13 +88,13 @@ def potion_violet(ctx):
 def belt_slots(ctx):
     g, L = ctx["g"], ctx["g"].L
     for i in range(BELT_SLOTS):
-        ids = [0] * BELT_SLOTS; ids[i] = 13
+        ids = [0] * BELT_SLOTS; ids[i] = L["I_POTR"]
         cool_off(g); belt(g, *ids); hp_setup(g, 1)
         key(g, BELT_KEYS[i], 2)
         check(g.w16(L["c_hp"]) > 1, "key %d: no heal" % (i + 1))
         check(g.mem(L["c_beltt"], BELT_SLOTS) == [0] * BELT_SLOTS, "key %d: belt %s" % (i + 1, g.mem(L["c_beltt"], BELT_SLOTS)))
     for i in range(BELT_SLOTS):                                  # slot i empty, all the others full
-        ids = [14] * BELT_SLOTS; ids[i] = 0
+        ids = [L["I_POTY"]] * BELT_SLOTS; ids[i] = 0
         cool_off(g); belt(g, *ids); hp_setup(g, 1)
         gold = g.w16(L["c_gold"])
         key(g, BELT_KEYS[i], 2)
@@ -106,10 +107,10 @@ def belt_slots(ctx):
 @test("BELT-12", "full hp: the potion is not drunk (stays in the belt, no cooldown)")
 def belt_full_hp(ctx):
     g, L = ctx["g"], ctx["g"].L
-    cool_off(g); belt(g, 13, 14, 15); hp_setup(g, 500, 500)
+    cool_off(g); belt(g, L["I_POTR"], L["I_POTY"], L["I_POTV"]); hp_setup(g, 500, 500)
     for i in range(3):
         key(g, BELT_KEYS[i], 2)
-    check(g.mem(L["c_beltt"], 3) == [13, 14, 15], "belt %s after the keys with full hp" % g.mem(L["c_beltt"], 3))
+    check(g.mem(L["c_beltt"], 3) == [L["I_POTR"], L["I_POTY"], L["I_POTV"]], "belt %s after the keys with full hp" % g.mem(L["c_beltt"], 3))
     check(g.w16(L["tmr"] + L["T_POT"]) == 0, "cooldown started with full hp")
 
 
@@ -118,15 +119,15 @@ def shop_belt(ctx):
     g, L = ctx["g"], ctx["g"].L
     g.poke(L["c_lvl"], 1); g.poke16(L["hpmax"], 100); g.poke16(L["c_hp"], 100)
     g.poke16(L["c_gold"], 5000)
-    belt(g, 13, 13, 13, 13)
+    belt(g, L["I_POTR"], L["I_POTR"], L["I_POTR"], L["I_POTR"])
     door = find(g, L["T_DALCH"])
     check(door, "no alchemist door on the map")
     fire_to(g, door[0][0], door[0][1] + 1)
     check(g.b(L["sh_mask"]) != 0, "the alchemist does not open")
     ids = g.mem(L["l8_id"], 8)
-    pot = [i for i, v in enumerate(ids) if v in (13, 14, 15)]
+    pot = [i for i, v in enumerate(ids) if v in (L["I_POTR"], L["I_POTY"], L["I_POTV"])]
     if not pot:                                                  # random stock without potions: put one in the first entry
-        g.poke(L["l8_id"], 14); pot = [0]
+        g.poke(L["l8_id"], L["I_POTY"]); pot = [0]
     k = pot[0]; pid = g.b(L["l8_id"] + k)
     for _ in range(10):                                          # ui_lc: 12..19 = wares (l8_id), 20..23 belt
         if g.b(L["ui_lc"]) == 12 + k: break
@@ -134,13 +135,13 @@ def shop_belt(ctx):
     check(g.b(L["ui_lc"]) == 12 + k, "cursor on entry %d, not on the potion (%d)" % (g.b(L["ui_lc"]), 12 + k))
     price = g.w16(L["itprice"] + 2 * pid)
     g.press_fire()                                              # buy (potions: no y/n question, shop_buy)
-    check(g.w16(L["c_gold"]) == 5000 and g.mem(L["c_beltt"], 4) == [13] * 4,
+    check(g.w16(L["c_gold"]) == 5000 and g.mem(L["c_beltt"], 4) == [L["I_POTR"]] * 4,
           "full belt: gold %d belt %s" % (g.w16(L["c_gold"]), g.mem(L["c_beltt"], 4)))
-    belt(g, 13, 13, 0, 13)
+    belt(g, L["I_POTR"], L["I_POTR"], 0, L["I_POTR"])
     g.press_fire()                                              # buy -> slot choice ('>' on the free slot)
     check(g.b(g.MN["sh_slot"]) == 2, "slot choice on %d (expected the free slot 2)" % g.b(g.MN["sh_slot"]))
     g.press_fire()                                              # put
-    check(g.mem(L["c_beltt"], 4) == [13, 13, pid, 13], "belt %s (expected the potion in slot 3)" % g.mem(L["c_beltt"], 4))
+    check(g.mem(L["c_beltt"], 4) == [L["I_POTR"], L["I_POTR"], pid, L["I_POTR"]], "belt %s (expected the potion in slot 3)" % g.mem(L["c_beltt"], 4))
     check(g.w16(L["c_gold"]) == 5000 - price, "gold %d (expected %d)" % (g.w16(L["c_gold"]), 5000 - price))
     g.run_stop(); g.frames(2)
     check(g.in_game(), "RUN/STOP does not close the shop")
@@ -149,7 +150,7 @@ def shop_belt(ctx):
 @test("SHOP-SELL-11", "alchemist: sell a belt potion (slot freed) and one scroll of a stack, at price >> SELL_SHIFT")
 def shop_sell_belt(ctx):
     g, L = ctx["g"], ctx["g"].L
-    belt(g, 14, 0, 0, 0)
+    belt(g, L["I_POTY"], 0, 0, 0)
     g.fill(L["c_pack"], L["c_pack"] + 7, 0); g.poke(L["c_pack"], L["I_SCROLL"]); g.poke(L["c_packb"], 3)
     g.poke16(L["c_gold"], 1000)
     door = find(g, L["T_DALCH"])
@@ -160,7 +161,7 @@ def shop_sell_belt(ctx):
             if g.b(L["ui_lc"]) == want: break
             g.frames(1, joy=2); g.frames(1)
         check(g.b(L["ui_lc"]) == want, "cursor never on the %s (ui_lc %d)" % (what, g.b(L["ui_lc"])))
-        item = 14 if want == 20 else L["I_SCROLL"]
+        item = L["I_POTY"] if want == 20 else L["I_SCROLL"]
         g0 = g.w16(L["c_gold"])
         g.press_fire(); g.press_fire()                              # sell, confirm
         exp = g0 + (g.w16(L["itprice"] + 2 * item) >> L["SELL_SHIFT"])
@@ -174,7 +175,7 @@ def shop_sell_belt(ctx):
 @test("BELT-13", "save from the game menu, belt wiped in RAM, hero loaded from disk: same belt")
 def belt_save(ctx):
     g, L = ctx["g"], ctx["g"].L
-    belt(g, 15, 0, 14, 13)
+    belt(g, L["I_POTV"], 0, L["I_POTY"], L["I_POTR"])
     g.run_stop(); g.frames(2)                                   # game menu: resume, save, quit
     g.frames(1, joy=2); g.frames(1)
     g.press_fire(settle=2)                                      # save game
@@ -184,21 +185,21 @@ def belt_save(ctx):
     check(g.in_game(), "after 'save game' the game does not resume")
     belt(g, 0, 0, 0, 0)
     g.call_keep(L["load_char"], tmax=60)
-    check(g.mem(L["c_beltt"], 4) == [15, 0, 14, 13], "belt after loading %s (expected [15, 0, 14, 13])" % g.mem(L["c_beltt"], 4))
+    check(g.mem(L["c_beltt"], 4) == [L["I_POTV"], 0, L["I_POTY"], L["I_POTR"]], "belt after loading %s (expected violet, -, yellow, red)" % g.mem(L["c_beltt"], 4))
 
 
 @test("BELT-14", "death keeps the belt (no potion lost)")
 def belt_death(ctx):
     g, L = ctx["g"], ctx["g"].L
     go_level(g, 1)
-    belt(g, 13, 0, 15, 0)
+    belt(g, L["I_POTR"], 0, L["I_POTV"], 0)
     died = False
     for i in alive(g):
         p = floor_next(g, *mpos(g, i))
         if not p: continue
         g.teleport(p[0], p[1])
         for _ in range(80):
-            g.poke16(L["c_hp"], 1); g.poke(L["c_beltt"], 13); g.poke(L["c_beltt"] + 2, 15)
+            g.poke16(L["c_hp"], 1); g.poke(L["c_beltt"], L["I_POTR"]); g.poke(L["c_beltt"] + 2, L["I_POTV"])
             cool_off(g)
             g.frames(5)
             if not g.in_game(): died = True; break
@@ -206,4 +207,4 @@ def belt_death(ctx):
     check(died, "no death")
     g.press_fire(); g.wait_main()
     check(g.b(L["cur_level"]) == 0, "not in the village after dying")
-    check(g.mem(L["c_beltt"], 4) == [13, 0, 15, 0], "belt after death %s" % g.mem(L["c_beltt"], 4))
+    check(g.mem(L["c_beltt"], 4) == [L["I_POTR"], 0, L["I_POTV"], 0], "belt after death %s" % g.mem(L["c_beltt"], 4))

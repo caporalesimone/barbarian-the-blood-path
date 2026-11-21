@@ -12,28 +12,50 @@ indossare, né nell'inventario né alla locanda (test `INV-2H-10/11`, `INN-2H-10
 
 ## Catalogo
 
-Ogni oggetto ha un id (1..17, 0 = niente) e le tabelle `itcat` (categoria), `itprice` (16 bit), `itilvl`
-(livello oggetto; 255 = mai nel bottino), `itdn`/`itds` (dadi), `itval` (valore principale), `itrate`, `itpen`,
-`itfl` (flag).
+Ogni oggetto ha un id (1..26, 0 = niente; ordine di `data/items/items.tsv`: armi, armature, scudi, anelli, pozioni, pergamene) e le
+tabelle `itcat` (categoria), `itprice` (16 bit), `itilvl` (livello oggetto; 255 = mai nel bottino), `itdn`/`itds` (dadi), `itval`
+(valore principale), `itrate`, `itpen`, `itfl` (flag). **(21/11) Armi nuove**: le 10 armi delle basi nuove
+(`data/items/next/bases.tsv`, decisione O1) sono nel gioco, con dadi, cadenza e penetrazione delle basi: la **cadenza cresce con la
+grandezza** dell'arma (pugnale 12 … maglio 24). Si trovano nei bauli (per livello oggetto) e dal fabbro (pool di 22 oggetti,
+`SHOP_POOL_MAX` 24 = `shp_stock`). Requisiti di FOR e affissi: non ancora (fase 2 del piano, `rules_next.yaml`). Gli id dopo le armi
+sono cresciuti di 10: `save_version` 0xC9.
+
+**Requisiti di FOR (21/11, decisione O6, scala di oggi)**: colonna `min_str` di `items.tsv` (valori di `bases.tsv`: spada 13,
+ascia 14, mazza 14, spada larga 15, ascia da guerra 16, morning star 16, spada vichinga 16, ascia da battaglia 17, maglio 18, grande
+spada 18; cotta 14, piastre 17; scudo medio 14, scudo torre 16) → tabella `itreq` (`gen_db.py`). Con `s_str` (FOR con l'anello)
+sotto il requisito l'oggetto **non si indossa**: inventario (`inv_act`, lampo rosso) e locanda (`inn_eq.asm`, lampo rosso: lo spazio della zona 2 del MENU non basta per un messaggio);
+nel riquadro dell'oggetto la riga secondaria mostra "str N" al posto di "2h pen" o "dex max" (`it_sec`). Si può comprare e tenere
+nello zaino. Un respec che abbassa la FOR sotto il requisito di ciò che si indossa **non** lo toglie (da decidere). Il PG nuovo ha
+FOR 16: tutto tranne ascia da battaglia, maglio, grande spada e piastre. Test: `REQ-10`.
 
 | Id | Nome | Categoria | Valore | Altro | Liv. oggetto | Prezzo |
 |---|---|---|---|---|---|---|
 | 1 | dagger | arma | 1d4 | cadenza 12 | 0 | 40 |
-| 2 | sword | arma | 1d8 | cadenza 14 | 3 | 200 |
-| 3 | viking sword | arma | 2d6 | cadenza 20, **due mani** (niente scudo), penetrazione 1 | 12 | 2400 |
-| 4 | leather armor | armatura | CA 2 | leggera (DES senza limite) | 0 | 80 |
-| 5 | chain mail | armatura | CA 5 | media (DES massimo +2) | 7 | 900 |
-| 6 | plate mail | armatura | CA 8 | pesante (DES non conta) | 14 | 3600 |
-| 7 | small shield | scudo | CA 1 | | 0 | 60 |
-| 8 | mid shield | scudo | CA 2 | | 5 | 400 |
-| 9 | tower shield | scudo | CA 3 | | 10 | 1800 |
-| 10 | copper ring | anello | +1 | al modificatore di FOR, DES o COS | 7 | 700 |
-| 11 | silver ring | anello | +2 | | 12 | 2500 |
-| 12 | gold ring | anello | +3 | | 17 | 8000 |
-| 13 | minor healing (red) | pozione | cura 20 (Abisso 30) | ricarica 5 s | — | 25 |
-| 14 | healing potion (yellow) | pozione | cura 50 (Abisso 75) | ricarica 7 s | — | 90 |
-| 15 | greater healing (violet) | pozione | cura 40 + 4 × livello (Abisso 28 + 5 × livello) | ricarica 10 s | — | 250 |
-| 16 | portal scroll | pergamena | portale per il villaggio | pila fino a 10 (08/11, prima 4) | 1 | 60 |
+| 2 | short sword | arma | 1d6 | cadenza 13 | 1 | 100 |
+| 3 | club | arma | 1d6 | cadenza 15, penetrazione 1 | 1 | 70 |
+| 4 | sword | arma | 1d8 | cadenza 14 | 3 | 200 |
+| 5 | hand axe | arma | 1d10 | cadenza 16 | 4 | 300 |
+| 6 | mace | arma | 1d8 | cadenza 15, penetrazione 1 | 5 | 350 |
+| 7 | broad sword | arma | 1d10 | cadenza 14 | 7 | 700 |
+| 8 | war axe | arma | 1d12 | cadenza 16 | 9 | 1100 |
+| 9 | morning star | arma | 2d6 | cadenza 17, penetrazione 1 | 11 | 1600 |
+| 10 | viking sword | arma | 2d6 | cadenza 20, **due mani** (niente scudo), penetrazione 1 | 12 | 2400 |
+| 11 | battle axe | arma | 2d8 | cadenza 22, **due mani** (niente scudo), penetrazione 1 | 14 | 3200 |
+| 12 | maul | arma | 3d6 | cadenza 24, **due mani** (niente scudo), penetrazione 2 | 16 | 4200 |
+| 13 | great sword | arma | 3d6 | cadenza 21, **due mani** (niente scudo), penetrazione 1 | 18 | 5600 |
+| 14 | leather armor | armatura | CA 2 | leggera (DES senza limite) | 0 | 80 |
+| 15 | chain mail | armatura | CA 5 | media (DES massimo +2) | 7 | 900 |
+| 16 | plate mail | armatura | CA 8 | pesante (DES non conta) | 14 | 3600 |
+| 17 | small shield | scudo | CA 1 |  | 0 | 60 |
+| 18 | mid shield | scudo | CA 2 |  | 5 | 400 |
+| 19 | tower shield | scudo | CA 3 |  | 10 | 1800 |
+| 20 | copper ring | anello | +1 | al modificatore di FOR, DES o COS | 7 | 700 |
+| 21 | silver ring | anello | +2 |  | 12 | 2500 |
+| 22 | gold ring | anello | +3 |  | 17 | 8000 |
+| 23 | minor healing (red) | pozione | cura 20 (Abisso 30) | ricarica 5 s | — | 25 |
+| 24 | healing potion (yellow) | pozione | cura 50 (Abisso 75) | ricarica 7 s | — | 90 |
+| 25 | greater healing (violet) | pozione | cura 40 + 4 × livello (Abisso 28 + 5 × livello) | ricarica 10 s | — | 250 |
+| 26 | portal scroll | pergamena | portale per il villaggio | pila fino a 10 (08/11, prima 4) | 1 | 60 |
 
 `itfl`: armi bit 0 = due mani, bit 1 = libero (era finesse, tolto 08/11), bit 2 = senza modificatori (non usato dal 07/11: erano i pugni); armature = limite al
 modificatore di DES (99 = nessuno); pozioni = colore (2 rosso, 7 giallo, 4 viola). `itrate` delle pozioni =

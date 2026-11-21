@@ -64,7 +64,7 @@ ui_fc   .byte ?                 ; <>0: colore forzato per valori e oggetti (sche
         .endv
 
         .virtual $9400
-shp_stock .fill 16              ; oggetti in vendita (estratti a caso a ogni ingresso)
+shp_stock .fill SHOP_POOL_MAX    ; oggetti in vendita (estratti a caso a ogni ingresso; 21/11: 24, armi nuove)
 sh_mask   .byte ?               ; negozio: categorie comprate (bit 1<<CAT_*), 0 = fuori dal negozio (pk_name)
 sh_lc     .byte ?               ; voce con il '>' nella merce e nel purse (ui_lc o il posto scelto)
         .endv
@@ -1218,6 +1218,11 @@ _pk     lda c_pack,x
         beq _dr
         cmp #CAT_SCROLL
         beq _r1
+        lda itreq,y             ; (21/11, O6) FOR richiesta: con meno FOR non si indossa
+        cmp s_str
+        beq +
+        bcs _no1
++       lda itcat,y
         cmp #CAT_SHIELD         ; scudo con un'arma a due mani: no
         bne _ns
         ldx c_eq
@@ -1610,7 +1615,15 @@ ui_dice:
 ; caratteristica secondaria (al massimo 9 caratteri): "2h pen 1", "dex max 2" o niente
 it_sec:
         ldx ui_sel
-        lda itcat,x
+        lda itreq,x             ; (21/11, O6) FOR richiesta e non raggiunta: "str N" al posto del resto
+        cmp s_str
+        beq _s0
+        bcc _s0
+        #msg "str "
+        ldx ui_sel
+        lda itreq,x
+        jmp ui_b3l
+_s0     lda itcat,x
         cmp #CAT_ARMOR
         beq _ar
         cmp #CAT_WEAPON

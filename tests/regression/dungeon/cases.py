@@ -136,16 +136,16 @@ def loot_belt(ctx):
     ctx["used"].add(i)
     g.poke(L["ch_t"] + i, t & 0xfc | 1)
     chest_with(g, i, [L["I_RED"]])
-    g.poke(L["c_beltt"], 14, 14, 14, 14)
+    g.poke(L["c_beltt"], *[L["I_POTY"]] * 4)
     clear_around(g, x, y, 6)
     fire_to(g, x, y)
     check(not g.in_game(), "the chest does not open")
     g.press_fire()
-    check(g.b(L["ch_i"] + 4 * i) == L["I_RED"] and g.mem(L["c_beltt"], 4) == [14] * 4,
+    check(g.b(L["ch_i"] + 4 * i) == L["I_RED"] and g.mem(L["c_beltt"], 4) == [L["I_POTY"]] * 4,
           "full belt: chest %d belt %s" % (g.b(L["ch_i"] + 4 * i), g.mem(L["c_beltt"], 4)))
     g.poke(L["c_beltt"] + 1, 0)
     g.press_fire()
-    check(g.mem(L["c_beltt"], 4) == [14, L["I_RED"], 14, 14], "belt %s (expected the red potion in slot 2)" % g.mem(L["c_beltt"], 4))
+    check(g.mem(L["c_beltt"], 4) == [L["I_POTY"], L["I_RED"], L["I_POTY"], L["I_POTY"]], "belt %s (expected the red potion in slot 2)" % g.mem(L["c_beltt"], 4))
     check(L["I_RED"] not in g.mem(L["c_pack"], 8), "the potion went to the pack")
     if not g.in_game(): g.run_stop(); g.frames(2)
 

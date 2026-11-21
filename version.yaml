@@ -3,15 +3,15 @@
 # Versione del software: mostrata nel gioco (menu iniziale e RUN/STOP) e nel nome del d64 (blood_path_vX.Y.d64).
 # Cresce da sola (numero minore) a ogni build con cambiamenti ai sorgenti (tools/build/bump_version.py, chiamato da build.sh);
 # per una nuova versione maggiore modificala a mano.
-version: "1.454"
+version: "1.465"
 
 # Impronta dei sorgenti dell'ultima build (tools/build/bump_version.py): non si modifica a mano.
-source_hash: "b2ea8c9cd1627b4a13d59b9c417cd436e165ef5c"
+source_hash: "baea0eced21e2487e18f15bda3436edcc2c0ccd7"
 
 # Versione del formato dei salvataggi (un byte, 1..255; in esadecimale 0x01..0xff).
 # Da cambiare a mano ogni volta che cambia il formato del personaggio o del livello salvato:
 # i salvataggi con un valore diverso vengono scartati dal gioco.
-save_version: 0xc8
+save_version: 0xc9
 
 # Versioni delle build dei branch (tools/build/verinfo.py): tag.n, non bruciano i numeri di main.
 branch_versions:

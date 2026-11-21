@@ -107,7 +107,8 @@ su `CHRBLK`, commenti dei campi) nella mappa automatica: [`program-game.html`](.
 In memoria: blocco `LVLBLK` a `$9800`. La **mappa non è salvata**, e nemmeno mostri e bauli
 del piano: entrando nel piano si rigenera tutto dal seed (`seed_level`), poi si applicano le differenze
 salvate (formato del 06/11, `save_version` $C0; $C1 dal 07/11: stessi campi, ma gli id degli oggetti sono
-scesi di 1 perché i pugni non esistono più):
+scesi di 1 perché i pugni non esistono più; $C9 dal 21/11: 10 armi nuove, gli id di armature, scudi, anelli, pozioni e
+pergamene sono cresciuti di 10, [oggetti](oggetti.md#catalogo)):
 
 | Byte | Contenuto |
 |---|---|

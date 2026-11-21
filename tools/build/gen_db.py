@@ -334,7 +334,7 @@ def main():
     o(f"WARN_MUL    = {100 // pc}       ; (hud.asm: durabilita' x WARN_MUL <= massimo)")
     o(f"REPAIR_PC   = {byte(du['repair_cost_percent'], 'repair_cost_percent')}")
     chk(du["min"] + du["floor_per_ilvl"] * max(it.get("ilvl", 0) for _, ct, it in items if it.get("loot") is not False) < du["max"], "durability: minimo pesato oltre il massimo")
-    cat, price, ilvl, dn, ds, val, rate, pen, fl = ([] for _ in range(9))
+    cat, price, ilvl, dn, ds, val, rate, pen, fl, req = ([] for _ in range(10))
     pab = {}                                  # (15/11, TODO J4) cura nell'Abisso (livello PG > MAXLEVEL): colonna heal_abyss delle pozioni
     for k, ct, it in items:
         cat.append(0 if ct == "none" else CATS.index(ct) + 1)
@@ -366,6 +366,7 @@ def main():
         for nm, x in (("dn", a), ("ds", b_), ("val", v), ("rate", r), ("pen", p), ("fl", f)):
             byte(x, f"{k}.{nm}")
         dn.append(a); ds.append(b_); val.append(v); rate.append(r); pen.append(p); fl.append(f)
+        req.append(byte(it.get("min_str", 0), f"{k}.min_str"))
     o.bytes("itcat", cat)
     o.words("itprice", price)
     o.bytes("itilvl", ilvl)
@@ -375,6 +376,7 @@ def main():
     o.bytes("itrate", rate)              # arma: cadenza (fotogrammi); pozione: ricarica / 2
     o.bytes("itpen", pen)
     o.bytes("itfl", fl)                  # arma: bit0 due mani, bit2 senza modificatori; armatura: limite DES; pozione: colore
+    o.bytes("itreq", req)                # (21/11, O6) FOR richiesta per indossarlo (valore, anello compreso: s_str); 0 = nessuna
     # (15/11, TODO J4) cura delle pozioni nell'Abisso (livello del PG > MAXLEVEL), indice = id - I_POTR (rossa, gialla, viola):
     # cura = pab_val + pab_dn x livello, come itval / itdn nel dungeon (pot_heal, combat.asm)
     chk(ids["yellow"] == ids["red"] + 1 and ids["violet"] == ids["red"] + 2, "pozioni: rossa, gialla, viola devono essere consecutive nella tabella")
@@ -562,13 +564,14 @@ def main():
 
     # ------------------------------------------------------------ negozi
     sh = B["shops"]
+    SHOP_POOL_MAX = 24                    # (21/11) armi nuove: il pool del fabbro passa 16
     chk(list(sh) == ["blacksmith", "alchemist"], "shops: blacksmith, alchemist (09/11: niente armaiolo)")
     first, count, flat, stock, minl = [], [], [], [], []
     ahead = B["shop_rules"]["level_ahead"]
     itd = {k: (ct, it) for k, ct, it in items}
     for n, dd in sh.items():
         lst = dd["items"]
-        chk(1 <= len(lst) <= 16 and 1 <= dd["stock"] <= min(8, len(lst)), f"shop {n}: pool 1..16, stock 1..min(8, pool) (riquadro merce da 8)")
+        chk(1 <= len(lst) <= SHOP_POOL_MAX and 1 <= dd["stock"] <= min(8, len(lst)), f"shop {n}: pool 1..{SHOP_POOL_MAX}, stock 1..min(8, pool) (riquadro merce da 8; shp_stock in src/game/ui.asm)")
         first.append(len(flat)); count.append(len(lst)); stock.append(dd["stock"])
         for k in lst:
             chk(k in ids, f"shop {n}: oggetto '{k}' sconosciuto")
@@ -578,6 +581,7 @@ def main():
             # equipaggiamento livello oggetto - level_ahead
             minl.append(byte(it["shop_level"], f"{k}.shop_level") if "shop_level" in it else max(0, it.get("ilvl", 0) - ahead))
     o("; ---- negozi (0 fabbro, 1 alchimista)")
+    o(f"SHOP_POOL_MAX = {SHOP_POOL_MAX}     ; posti di shp_stock (src/game/ui.asm): pool filtrato di un negozio")
     o.bytes("shop_first", first)
     o.bytes("shop_cnt", count)
     o.bytes("shop_stock", stock)

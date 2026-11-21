@@ -16,7 +16,7 @@ import yaml
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 TSV = os.path.join(ROOT, "data", "items", "items.tsv")
 
-COLUMNS = ["id", "category", "type", "name", "hands", "dice", "rate", "pen", "ac", "armor_type", "bonus", "heal", "heal_abyss",
+COLUMNS = ["id", "category", "type", "name", "hands", "dice", "rate", "pen", "min_str", "ac", "armor_type", "bonus", "heal", "heal_abyss",
            "cooldown", "zone", "rarity", "color", "ilvl", "price", "shop_level", "tier", "notes"]
 TYPES = {"weapon": "equipment", "armor": "equipment", "shield": "equipment", "ring": "equipment",
          "potion": "consumable", "scroll": "consumable"}
@@ -27,7 +27,7 @@ REQUIRED = {"weapon": ["hands", "dice", "rate", "pen", "ilvl"], "armor": ["ac", 
             "shield": ["ac", "ilvl", "name", "price"], "ring": ["bonus", "ilvl", "name", "price"],
             "potion": ["heal", "heal_abyss", "cooldown", "zone", "rarity", "color", "name", "price", "shop_level"],
             "scroll": ["ilvl", "name", "price", "shop_level"]}
-OPTIONAL = {"weapon": ["name", "price"]}
+OPTIONAL = {"weapon": ["name", "price", "min_str"], "armor": ["min_str"], "shield": ["min_str"]}   # (21/11) min_str: FOR richiesta
 COMMON = ["id", "category", "type", "tier", "notes"]
 STRINGS = {"dice", "heal", "heal_abyss", "rarity", "name", "armor_type"}
 KEEP_DICTS = {"abyss_drop"}               # settings of a section that are dicts but not items (potions.abyss_drop)

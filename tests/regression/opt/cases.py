@@ -64,7 +64,7 @@ def pot_heal(ctx):
     """(15/11, TODO J4) dungeon: red 20, yellow 50, violet 4L+40; Abyss (level > 20): 30, 75, 5L+28 (POT-10 reads items.tsv)"""
     g, L = ctx["g"], ctx["g"].L
     lv0 = g.b(L["c_lvl"])
-    for pid, dun, aby in ((13, (20, 0), (30, 0)), (14, (50, 0), (75, 0)), (15, (40, 4), (28, 5))):
+    for pid, dun, aby in ((L["I_POTR"], (20, 0), (30, 0)), (L["I_POTY"], (50, 0), (75, 0)), (L["I_POTV"], (40, 4), (28, 5))):
         for lv in (1, 20, 99):
             k, per = dun if lv <= 20 else aby
             g.poke(L["c_lvl"], lv)
