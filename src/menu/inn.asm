@@ -8,7 +8,7 @@
 ;  per eroe e baule insieme: niente duplicati).
 ; ===================================================================
 ; (21/11, branch liste-menu, prototipi approvati dal committente) due liste a scorrimento (src/game/slist.asm, segmento CORE):
-;   lista 0 "yours": i 4 posti indossati, riga sottile, lo zaino (8 posti; niente cintura: le pozioni non vanno nel baule);
+;   lista 0 "yours": i 5 posti indossati (due anelli), riga sottile, lo zaino (8 posti; niente cintura: le pozioni non vanno nel baule);
 ;   lista 1 "chest": i 24 posti del baule.
 ; Fire: zaino -> baule, baule -> zaino, indossato -> zaino (l'arma no: si sostituisce). E: indossa (dallo zaino, o dal baule
 ; passando dallo zaino). Oro addosso e del baule nei titoli: entrando, l'oro addosso va nel baule (decine, st_gold).
@@ -52,7 +52,7 @@ ov_stash:
         lda #1
         sta sl_sn+1
         jsr ls2_init
-        lda #5                  ; cursore sul primo posto dello zaino (4 indossati + riga)
+        lda #EQ_N+1             ; cursore sul primo posto dello zaino (indossati + riga)
         sta sl_cur
 _dr     jsr h_draw
 .if NOKEYS                      ; (da out/work/game.lbl: build di test per gli screenshot)
@@ -88,7 +88,7 @@ _rb     jsr st_sort             ; le voci possono essere cambiate
 _x      jmp ui_exit             ; (11/11 sera: niente salvataggio uscendo, lo fa "save game": il baule e' nel blocco dell'eroe)
 
 h_tt    .text "inn", 0
-h_sg    .byte 3, SK_EQ,0,4, SK_PACK|SK_SEP,0,PACK_N, SK_CHEST,0,STASH_N
+h_sg    .byte 3, SK_EQ,0,EQ_N, SK_PACK|SK_SEP,0,PACK_N, SK_CHEST,0,STASH_N
 
 ; oro nei titoli (addosso, baule), liste, oggetto, tasti
 h_draw: ldx #21

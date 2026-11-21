@@ -64,7 +64,9 @@ LVLEND
 ; ---- personaggio (salvato su disco)
 NAME_LEN = 12                   ; caratteri del nome dell'eroe
 STASH_N  = 24                   ; oggetti nel baule di casa (07/11 sera: da 48 a 24), nel blocco dell'eroe (08/11 sera)
-PACK_N   = 8                    ; posti dello zaino (07/11 sera: da 16 a 8); l'equipaggiamento segue: indici PACK_N..PACK_N+3
+PACK_N   = 8                    ; posti dello zaino (07/11 sera: da 16 a 8); l'equipaggiamento segue: indici PACK_N..PACK_N+EQ_N-1
+EQ_N     = 5                    ; (21/11, SAVE_VER $CA) posti indossati: arma, armatura, scudo, due anelli (EQ_RING, EQ_RING+1)
+EQ_RING  = 3
 ;@map CHRBLK..CHREND "CHRBLK: eroe e baule della locanda, il blocco salvato nel file save-0N (docs/wiki/FORMATO_DATI.md)" layout
         .virtual $9500
 CHRBLK
@@ -90,16 +92,16 @@ c_name  .fill NAME_LEN   ; nome (NAME_LEN codici schermo)
 c_px    .word ?          ; X dell'eroe (pixel)
 c_py    .word ?          ; Y dell'eroe (pixel)
 c_pack  .fill PACK_N     ; zaino: id oggetto (0 = vuoto), PACK_N posti
-c_eq    .fill 4          ; equipaggiamento: arma, armatura, scudo, cintura
+c_eq    .fill EQ_N       ; equipaggiamento: arma, armatura, scudo, anello, anello (21/11: il secondo anello)
 c_seedt .fill 6          ; seed: 6 cifre in base 36 (0-9, A-Z = 0..35)
 c_gver  .byte ?          ; versione del generatore dungeon
 c_packb .fill PACK_N         ; bonus +N degli oggetti nello zaino (anelli: caratteristica; pergamene: quantita')
-c_eqb   .fill 4          ; bonus +N degli oggetti equipaggiati
+c_eqb   .fill EQ_N       ; bonus +N degli oggetti equipaggiati (anelli: caratteristica)
 c_keys  .byte ?          ; chiavi possedute
 c_packd .fill PACK_N         ; durabilita' attuale degli oggetti nello zaino (armi, armature, scudi; 0 = non si usura)
-c_eqd   .fill 4          ; ... e dell'equipaggiamento (segue lo zaino: indice PACK_N..PACK_N+3 come c_pack/c_eq)
+c_eqd   .fill EQ_N       ; ... e dell'equipaggiamento (segue lo zaino: indice PACK_N..PACK_N+EQ_N-1 come c_pack/c_eq)
 c_packm .fill PACK_N         ; durabilita' massima
-c_eqm   .fill 4          ; durabilita' massima (equipaggiamento)
+c_eqm   .fill EQ_N       ; durabilita' massima (equipaggiamento)
 c_game  .fill 3          ; bit 0..8: numero della partita (1..511); bit 9..23: minuti giocati (0..32767)
 c_deaths .word ?         ; morti (16 bit, si ferma a 65535)
 c_sgold .word ?          ; oro nel baule di casa in DECINE (10/11; 16 bit = 655350 monete): la morte non lo tocca; totale = c_gold + 10 x c_sgold

@@ -23,7 +23,8 @@ shop_buy:
         lda #0
         jsr shop_ask
         bcc _r
-        lda #0
+        ldx ui_lc               ; (21/11) bonus della merce (anelli: la caratteristica tirata all'ingresso)
+        lda l8_b-12,x
         sta ap_b
         lda shp_item
         jsr give_item

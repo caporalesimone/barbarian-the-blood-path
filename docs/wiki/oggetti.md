@@ -123,7 +123,7 @@ minuscole, cifre, spazio, `'`, `-`, `.` (`asm_str`). Il nome del PG è a parte: 
 
 ### I byte accanto all'id (`c_eqb`/`c_packb`, `c_eqd`/`c_packd`, `c_eqm`/`c_packm`)
 Ogni oggetto posseduto ha tre byte accanto all'id (le tabelle dello zaino proseguono in quelle
-dell'equipaggiamento: indice 16..19):
+dell'equipaggiamento: indice `PACK_N`..`PACK_N`+4 = 8..12):
 - **bonus**: armi, armature, scudi = **magia +N** (0..3), sommata ad ATT e danno (armi) o alla CA; anelli = la
   **caratteristica** (1 FOR, 2 DES, 3 COS, il nome mostra il suffisso `copper ring str`); pergamene = la
   **quantità** della pila (1..4, `SCR_MAX`); pozioni: non usato;
@@ -172,13 +172,18 @@ flowchart LR
     GI -->|pozione| BE["cintura c_beltt: 4 posti,<br/>una pozione per posto"]
     GI -->|pergamena| SC["pila nello zaino (max 10)"]
     GI -->|altro| PK["zaino c_pack: 8 posti"]
-    PK <-->|Fire nell'inventario| EQ["equipaggiamento c_eq:<br/>arma, armatura, scudo, anello"]
+    PK <-->|Fire nell'inventario| EQ["equipaggiamento c_eq:<br/>arma, armatura, scudo, due anelli"]
     PK <-->|"baule della locanda (nella locanda)"| ST["baule della locanda: 24 posti<br/>(nel record dell'eroe) + oro (c_sgold)"]
     PK -->|negozio: vendita a un quarto del prezzo| G["oro"]
     EQ -->|"usura a 0"| X["rotto: resta, in rosso,<br/>senza effetto (danno 0, CA 0)"]
 ```
 
-- **Equipaggiamento** (4 posti, indice = categoria − 1): l'arma non si toglie né si vende (si sostituisce:
+- **Anelli** (21/11, TODO #391, formato $CA): **due posti** (`c_eq+3`, `c_eq+4`, `EQ_RING`): un anello indossato va nel
+  primo posto libero; con due anelli sostituisce quello di **valore minore** (`itval`; a pari valore il secondo), che torna
+  nello zaino, con il messaggio "replaced ..." in riga 23. Contano tutti e due (`recalc_stats`). L'anello comprato
+  dall'alchimista ha la sua caratteristica, tirata entrando nel negozio come nel bottino (1..3): fino al 21/11 aveva bonus 0 e
+  non dava nulla.
+- **Equipaggiamento** (5 posti dal 21/11, indice = categoria − 1, gli anelli 3 e 4): l'arma non si toglie né si vende (si sostituisce:
   il PG ha sempre un'arma; rotta resta in mano, con danno 0 e il nome in rosso, finché non si ripara o si scambia); uno scudo con la
   vichinga equipaggiata è rifiutato; equipaggiando la vichinga lo scudo torna nello zaino (se c'è posto). Ogni
   cambio chiama `recalc_stats`. Nella locanda (08/11) l'equipaggiamento si cambia dal riquadro equipped, prendendo

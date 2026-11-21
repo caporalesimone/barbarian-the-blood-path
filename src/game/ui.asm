@@ -18,8 +18,9 @@ ui_dur   .byte ?                ; durabilita' dell'oggetto mostrato (0 = non mos
 ui_durm  .byte ?
 st_col   .byte ?                ; baule di casa: colonna selezionata (0 zaino, 1 baule) (locanda)
 iv_r     .byte ?                ; (21/11) inventario: riga che si pulisce
+iv_rr    .byte ?                ; (21/11) inv_act: 1 = un anello sostituito (messaggio)
         .endv
-        .cerror iv_r >= $9480, "variabili UI oltre $947F"
+        .cerror iv_rr >= $9480, "variabili UI oltre $947F"
 
         .virtual $93e0          ; motore dei menu (ui_nav, 07/11 sera: docs/wiki/refactor-tasti.md)
 tb_n     .byte ?                ; contatore di ui_boxes (11/11: le linguette non ci sono piu')
@@ -790,7 +791,7 @@ inv_act:
         ldx ui_cur
         cpx #PACK_N
         bcc _pk
-        cpx #PACK_N+4           ; (21/11) cintura ($20+n): per ora solo da guardare
+        cpx #PACK_N+EQ_N        ; (21/11) cintura ($20+n): per ora solo da guardare
         bcs _r1
         jmp _unequip
 _no1    jmp _no
@@ -833,15 +834,39 @@ _ns     lda itcat,y
         jsr eq_zero
         ldx ui_cur
         ldy c_pack,x
-_sw     lda itcat,y             ; scambio zaino <-> equipaggiamento (posto = categoria - 1)
+_sw     lda #0
+        sta iv_rr
+        lda itcat,y             ; scambio zaino <-> equipaggiamento (posto = categoria - 1)
         sec
         sbc #1
-        tay
+        cmp #EQ_RING            ; (21/11) anelli: il primo posto libero; con due anelli si sostituisce quello di valore minore
+        bne _ty
+        ldx c_eq+EQ_RING
+        beq _ty
+        lda #EQ_RING+1
+        ldy c_eq+EQ_RING+1
+        beq _ty
+        inc iv_rr
+        lda itval,x
+        cmp itval,y
+        lda #EQ_RING+1
+        bcs _ty
+        lda #EQ_RING
+_ty     tay
         jsr eq_get              ; vecchio equipaggiamento -> it_*
         ldx ui_cur
         jsr pk_swap             ; it_* <-> posto dello zaino
         ldy tmp6
         jsr eq_put              ; nuovo equipaggiamento
+        lda iv_rr
+        beq _after
+        jsr msg23               ; "replaced silver ring dex" (l'anello tolto e' finito nello zaino al posto del nuovo)
+        #msg "replaced "
+        ldx ui_cur
+        lda c_packb,x
+        sta ui_ib
+        lda c_pack,x
+        jsr ui_item
         jmp _after
 _drink  jsr drink               ; Y = pozione (ricarica, vita piena: niente)
         bcs _r
@@ -868,11 +893,8 @@ _no     lda #2                  ; rifiutato: lampo rosso
 _r      rts
 
 ; ---- oggetti: 4 tabelle parallele (id, bonus, durabilita', massimo). it_* = oggetto in transito
-; Y = posto dell'equipaggiamento (0..3, o PACK_N..PACK_N+3: PACK_N multiplo di 4) -> it_*
-eq_get: tya
-        and #3
-        tay
-        sty tmp6
+; Y = posto dell'equipaggiamento (0..EQ_N-1, o PACK_N..PACK_N+EQ_N-1) -> it_*
+eq_get: jsr eq_y
         lda c_eq,y
         sta it_i
         lda c_eqb,y
@@ -881,6 +903,14 @@ eq_get: tya
         sta it_d
         lda c_eqm,y
         sta it_m
+        rts
+; Y = PACK_N.. -> 0.. (posto dell'equipaggiamento); tmp6 = Y
+eq_y:   cpy #PACK_N
+        bcc +
+        tya
+        sbc #PACK_N
+        tay
++       sty tmp6
         rts
 ; it_* -> posto Y dell'equipaggiamento
 eq_put: lda it_i
@@ -892,10 +922,8 @@ eq_put: lda it_i
         lda it_m
         sta c_eqm,y
         rts
-; posto Y (0..3) dell'equipaggiamento vuoto
-eq_zero: tya
-        and #3
-        tay
+; posto Y (0..EQ_N-1, o PACK_N..) dell'equipaggiamento vuoto
+eq_zero: jsr eq_y
         lda #0
         sta c_eq,y
         sta c_eqb,y

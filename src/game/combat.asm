@@ -209,11 +209,17 @@ recalc_stats:
         inc hpmax+1
         bne -
 _hd
-        ; anello: +N al modificatore della caratteristica (bonus 1 FOR, 2 DES, 3 COS) = +2N al valore
-        ldx c_eq+3
-        beq _nr
-        ldy c_eqb+3
-        beq _nr
+        ; anelli: +N al modificatore della caratteristica (bonus 1 FOR, 2 DES, 3 COS) = +2N al valore. (21/11) due posti
+        lda #EQ_RING+1
+        sta tmp6
+_rg     ldx tmp6
+        lda c_eqb,x
+        tay
+        lda c_eq,x
+        tax
+        beq _rn
+        cpy #0
+        beq _rn
         lda itval,x
         sta tmp5
         asl
@@ -221,7 +227,7 @@ _hd
         adc s_str-1,y
         sta s_str-1,y
         cpy #3
-        bne _nr
+        bne _rn
         ldx tmp4                ; COS: vita + N x (livello + 1)
         inx
         lda #0
@@ -232,8 +238,12 @@ _hd
         clc
         adc hpmax
         sta hpmax
-        bcc _nr
+        bcc _rn
         inc hpmax+1
+_rn     dec tmp6
+        ldx tmp6
+        cpx #EQ_RING
+        bcs _rg
 _nr     lda s_str
         jsr modv
         sta s_mod

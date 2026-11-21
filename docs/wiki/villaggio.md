@@ -309,7 +309,7 @@ all'acquisto. Pool e quantità: `balance.yaml shops`.
 ## Baule della locanda (`ov_stash`, modulo MENU)
 
 Dal 21/11 (branch `liste-menu`, prototipi approvati dal committente) due liste a scorrimento e il riquadro dell'oggetto:
-- **yours** (righe 2-7): i 4 posti indossati (spunta), riga sottile, lo zaino (8 posti; niente cintura: le pozioni non vanno
+- **yours** (righe 2-7): i 5 posti indossati (spunta; due anelli dal 21/11), riga sottile, lo zaino (8 posti; niente cintura: le pozioni non vanno
   nel baule); nel titolo l'oro addosso;
 - **chest** (righe 10-16): i 24 posti del baule; nel titolo l'oro del baule;
 - **riquadro dell'oggetto**: caratteristiche, valore e durabilità, poi "equipped" o il confronto "you: ..." con l'indossato.

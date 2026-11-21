@@ -150,19 +150,15 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (7)
+### sanity (3)
 
 | ID | Test |
 |---|---|
-| `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
-| `QUEST-11` | Q with no quest taken: the list (file QST0) says 'talk to the villagers', RUN/STOP goes back to the game |
-| `QUEST-12` | Hilde: '!' over her head, name in the bar; Fire = quest 1 taken and its detail (title, chapter, yellow status, text, reward); back: the list; the '!' is gone |
-| `QUEST-13` | the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop |
-| `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
-| `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |
-| `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
+| `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
+| `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
+| `RING-12` | alchemist: a ring among the wares has its stat (1..3) and the bought ring keeps it |
 
-### regression (221)
+### regression (242)
 
 | ID | Test |
 |---|---|
@@ -182,10 +178,13 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BOOT-13` | BARBARIAN menu: every choice (1 2 3) blanks the screen BEFORE loading; only its phrase (row 10, yellow) and 'please wait' (row 13), as the START wait screen (16/11) |
 | `BOOT-14` | BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), keyboard and screen as at power-on (16/11) |
 | `BOOT-15` | START is silent (no SID player): the menu music stops when the game is chosen and restarts only in the lobby (16/11) |
-| `BOOT-17` | BARBARIAN menu: one loop per frame whatever the phase of the music IRQ (before 19/11 an IRQ over raster line 250 froze the menu, TODO I6) |
 | `BOOT-16` | HELP and LORE exits: wait page (phrase on row 10, 'please wait' on row 13, VIC bank 0, screen on) before the reload of BARBARIAN (16/11) |
 | `TITLEMUSIC-10` | HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
 | `TITLEMUSIC-11` | BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
+| `BOOT-17` | BARBARIAN menu: one loop per frame whatever the phase of the music IRQ (CIA1 timer locked to the frame; before 19/11 an IRQ over raster line 250 froze the menu for ever, TODO I6, LORE-10 hangs) |
+| `BOSS1-10` | level 5: over 30% of its life the Abbot does not rage; under 30% it rages (red border, attack recharge <= AB_RCD) |
+| `BOSS1-11` | raging Abbot: the censer warns (white blinking) and then the cloud takes hpmax/8 from the hero next to it (far away: not checked, the boss walks) |
+| `BOSSMAP-10` | boss levels 5, 10, 15: the map of data/maps/bosschapN.txt (after post_walls), the furniture of the chapter, stairs up to the boss walkable, no stairs down, its own palette (final.palette), the tiles of GFX(2c) from boss_gfx.py |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |
 | `BUILD-12` | variant: Fire on stairs (TESTFIRE) |
@@ -197,7 +196,6 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-10` | chapters.yaml: local levels restart at 1, global depth = previous levels + local, the Abyss fills up to 255 |
 | `CHAP-11` | tools/simulators/chapters.py: every generated level of a chapter at its global depth with the chapter's bestiary, the chapter boss |
 | `CHAP-SEQ-10` | new hero in chapter 1 (c_chap = c_unl = 1); the village exit is closed: no label, the edge stops the hero |
-| `BOSSMAP-10` | boss levels 5, 10, 15: the map of data/maps/bosschapN.txt (after post_walls), the furniture of the chapter, stairs up to the boss walkable, no stairs down, its own palette (final.palette), the tiles of GFX(2c) from boss_gfx.py (19/11) |
 | `CHAP-SEQ-11` | level 5 = boss level of chapter 1: map BOSSCH1 (stairs up, no stairs down), boss drawn as the final boss |
 | `CHAP-SEQ-12` | killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2) |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
@@ -223,6 +221,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHEAT-20` | next level in the throne room (level 20): as the final boss killed (c_won, c_unl 5, respec gift), village 4 |
 | `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
 | `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
+| `DECOR-10` | levels 2, 7, 12, 17 (chapters 1-4), 3 seeds: solid and walkable furniture on every level; every walkable tile still reachable from the stairs; no monster on a solid tile; the same map when the level is entered again; chapter 4: the furniture is mirrored like the citadel (but where the mirrored tile is a stair or a chest) |
 | `DISK-10` | the disk has every file (loader, START, game, LORE, LDAT, TITLE, HELP, JUKEBOX, saves, ...) |
 | `DISK-12` | entry of the tests (11/11, Krill): the real START from the monitor (Krill installed), new game in the village |
 | `DUNG-CHEST-10` | key chest: without a key 'it is locked' (stays closed); with a key it opens, one key used |
@@ -233,14 +232,10 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LOOT-12` | 10 scrolls on the hero: a scroll in a chest stays there (max 10); with 9 it is taken (stack of 10) |
 | `MAP-10` | minimap fog: nothing explored -> nothing far from the hero; all explored -> the level; half -> top half only |
 | `PORTAL-10` | portal on level 1, then a new portal on level 2: the old one on level 1 is gone, the village one leads to 2 |
+| `PORTAL-11` | portal out of level 2 and back: a wounded monster keeps HP and tile, a dropped chest is still there; stairs away and back: the monster is healed (STASH only for portal and death) |
 | `SKILL-10` | Frenzy (O): level 15 needed; 5 s; two attacks per Fire; run +100% = 4 px per frame; normal run after |
 | `SKILL-11` | Rage (U): level 9 needed; 6 s; damage taken halved (min 1), full damage without Rage |
 | `DEATH-10` | death on level 20 (throne room): village, half gold, deepest level 20 kept |
-| `DECOR-10` | levels 2, 7, 12, 17 (chapters 1-4), 3 seeds: solid and walkable furniture; every walkable tile reachable from the stairs; no monster on a solid tile; same map entering again; chapter 4 mirrored; screenshots in out/work/decor/ |
-| `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900; a wave of the final boss from that code; level 19: the decor code of chapter 4 (jump table); village: MENU again at $C900 (19/11) |
-| `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 a stop and 2 Skeletons; regeneration while they live |
-| `OVP-12` | level 10, Mother Stitch (GFX4): rite when awake, 2 still fetishes (type 8, life = her max / 16), protected (hits /2, regeneration), open after the last one (hits x2), second rite under 2/3, no loot from a fetish (ovp_kill); screenshot out/work/ovp/stitch_fetishes.png |
-| `OVP-13` | level 15, Varok the Oathbreaker (GFX6): warning and charge along the row; the shield halves the hits, not when stunned |
 | `THRONE-10` | throne room: north wall closed, boss killed -> wall open, epic chest without key, lever -> portal |
 | `EMU-10` | vc64web: real boot from the disk (LOAD, POKE 1020,1, RUN): START with Krill, GAME and LOBBY loaded, menu shown |
 | `EMU-11` | vc64web: new barbarian from the menu (joystick + keyboard), saved to disk by the Krill plugin, village reached |
@@ -251,7 +246,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `EMU-16` | vc64web: reset and boot again from the same disk copy: the hero saved at creation is in the LOBBY list |
 | `GEN-10` | reference maps, throne room from FMAP and from the cache |
 | `GEN-11` | caves of chapter 3 (levels 11-14, 6 seeds): connected, border of wall, enough floor, generation under 1.2 s, palettes 9/11/10 |
-| `GEN-12` | swamp of chapter 2 (levels 6-9, 8 seeds): entry and exit gates on two sides of the border, the exit of a level facing the entry of the next one (random path, at least 3 sides used), all reachable, generation under 1.2 s, palette 12 |
+| `GEN-12` | swamp of chapter 2 (levels 6-9, 8 seeds + 2 anagram seeds with different gates): entry and exit gates on two sides of the border, the exit of a level facing the entry of the next one (random path, at least 3 sides used), gates of a level at least 34 tiles apart, all reachable, generation under 1.2 s, palette 12 |
 | `GEN-13` | citadel of chapter 4 (levels 16-19, 6 seeds): connected, symmetric left/right (but the stairs), columns, big halls, generation under 1.0 s; no monster born in a wall or in the water on levels 1-19 |
 | `INN-GOLD-10` | inn chest: deposit in tens (remainder kept, chest full, purse full) |
 | `GOLD-CAP-10` | gold picked up: GOLD_MAX cap on the hero (add_gold16) |
@@ -269,9 +264,10 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `ITEMDB-10` | items.tsv: valid table, consumable = potion/scroll, equipment = weapon/armor/shield/ring, weapons 1 or 2 hands |
 | `ITEMDB-11` | the checker refuses a wrong table: shield with hands, duplicate id, missing price, unknown type |
 | `ITEMDB-12` | game data = table: item ids in table order, category, price and the two-handed flag (itfl bit 0) |
-| `ITEMDB-NEXT-10` | next item database (data/items/next, proposal of 20/11): full names <= 37, unique names <= 16, affix values fit a byte, ids fit the record |
 | `INN-2H-10` | inn: shield with a two-handed weapon on: refused (the shield stays in the pack) |
 | `INN-2H-11` | inn: two-handed weapon with a shield on: equipped, the shield and the old weapon go to the pack |
+| `ITEMDB-NEXT-10` | next item database (data/items/next, proposal of 20/11): full names <= 37, unique names <= 16, affix values fit a byte, ids fit the record |
+| `REQ-10` | inventory: a weapon whose STR requirement is above s_str stays in the pack ('str N' in its box); with enough STR it is equipped |
 | `ITEM-10` | 255 generated items, broken weapon, HUD warnings, TOD clock (repair: SHOP-FIX-10) |
 | `BELT-10` | belt (4 potions, the fifth refused), scroll stack, portal |
 | `KRILL-10` | START installs Krill: resident code at $0200 as out/work/krill/loader.prg (but its variables), LDFLAGS used |
@@ -305,12 +301,18 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
 | `MUSIC-10` | songs per level, buffer = SNDn files, combat and resume, copy under I/O |
 | `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
+| `NPCFIX-10` | village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, no quest; nobody else in their sectors |
+| `NPCFIX-11` | next to each fixed NPC the bar shows its name; Fire next to one without a quest opens nothing |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |
 | `OPT-12` | neg16 / sabs: -tmp0:1 and |tmp0:1| saturated at 255 |
 | `OPT-02` | gold_total: c_gold + 10 x c_sgold (24 bit) at the limits |
 | `OPT-05` | pot_heal: itval + itdn x level for the three potions at levels 1 and 20, Abyss values (pab_*) at level 99 |
 | `OPT-03` | set_name4 / set_name: every name of nm_tab in cmdbuf+3.., nlen = length, io_dir = 1, A = 1, X kept |
 | `OPT-12B` | put_hero: the hero on tile (A, X) -> px/py = tile x 16 + 8 (centre) |
+| `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900 (ovp_ok = 1); the boss below 3/4 of its life calls a wave of SUM_WAVE monsters; level 19: the decor code of chapter 4 (with the citadel); village: the MENU module is read again at $C900 |
+| `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 of its life it stops 1 s (green) and raises 2 Skeletons next to itself; while one of them lives it regenerates (1 hp every 25 frames) |
+| `OVP-12` | level 10, Mother Stitch (GFX4): awake, a rite (1 s still) plants 2 fetishes (type 8, still, life = her max / 16); while one stands the hero's hits are halved and she regenerates; the last one down leaves her open (hits x2); under 2/3 a second rite; a fetish killed gives no loot |
+| `OVP-13` | level 15, Varok the Oathbreaker (GFX6): aligned with the hero he stops (warning) and charges along the row; his shield halves the hero's hits, not when stunned |
 | `PERF-10` | village: walking in 8 directions, lost frames <= 2%, worst frame <= 2 |
 | `PERF-11` | inventory open within 0.3 s, minimap within 0.5 s; back in the game within 0.3 s |
 | `PERF-19` | village screens with the module MENU in memory (loaded at the village entry, 11/11): smith, inn, inn again <= 0.5 s, back <= 0.5 s |
@@ -325,7 +327,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PERF-21` | every dungeon level 1..19 (change_level): walking, lost <= 20%, worst <= 3 |
 | `PERF-22` | Abyss levels 21..255: walking (when the Abyss exists) |
 | `PERF-23` | level generator on EVERY level 1..19 and on every Abyss level 21..255: <= 1.5 s each, up stairs present |
-| `PERF-24` | every village 1..5: walking from next to each wandering NPC, lost <= 1.5%, worst <= 2.1 (19/11: before 3-4%) |
+| `PERF-24` | every village 1..5: walking from next to each wandering NPC (they walk too), lost <= 1.5%, worst <= 2.1 (19/11: before 3-4% near the NPCs) |
 | `PERF-DISK-10` | START from the monitor to the barbarian menu (Krill install, GAME, LOBBY, hl) <= its limit |
 | `PERF-DISK-11` | loads with Krill (MENU, village, theme, song, hero list, hero file) <= their limits |
 | `PERF-DISK-13` | stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM) <= its limit |
@@ -348,6 +350,13 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BELT-13` | save from the game menu, belt wiped in RAM, hero loaded from disk: same belt |
 | `BELT-14` | death keeps the belt (no potion lost) |
 | `POT-10` | pot_heal: dungeon column up to level 20, Abyss column (heal_abyss) from level 21, all potions, Y kept |
+| `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
+| `QUEST-11` | Q with no quest taken: the list (file QST0) says 'talk to the villagers', RUN/STOP goes back to the game |
+| `QUEST-12` | Hilde: '!' over her head, name in the bar; Fire = quest 1 taken and its detail (title, chapter, yellow status, text, reward); back: the list; the '!' is gone |
+| `QUEST-13` | the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop |
+| `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
+| `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |
+| `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
 | `SAVE-10` | new disk: menu without error, no heroes |
 | `SAVE-11` | hl (hero list) missing: menu without error, the game starts |
 | `SAVE-12` | hero list zeroed / random / never written: no error, no heroes |
@@ -383,7 +392,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `INN-GOLD-11` | inn: entering with less than a ten of gold nothing moves; with the chest near full only what fits (21/11) |
 | `MENU-10` | out/work/menu.prg (one file since 18/11): header (parts, source and destination), parts ZX0(zone k), ends at MR2_END, above ML_LO; shops out of GAME; the disks have MENU, no MENU1/OVLT/OVL2 |
 | `MENU-11` | ovl_town from the disk (as at the village entry): every zone equal to the module, ovl_cur = 1, $01 = $35 (KERNAL always out since 21/11), < 11 s |
-| `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, KERNAL and IRQ back after RUN/STOP |
+| `MENU-13` | smith, alchemist and inn open from the module in RAM: no read of the file MENU, $01 = $35 and IRQ back after RUN/STOP |
 | `VIL-TWN-11` | village 1 (Aldric's Hollow): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-12` | village 2 (Bad Water): header in town_k, solid tiles, colours, map, hero at the entry |
 | `VIL-TWN-13` | village 3 (The Last Camp): header in town_k, solid tiles, colours, map, hero at the entry |
@@ -393,8 +402,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `VIL-TWN-21` | village 5 (City of the Abyss, prototype): the Maw does not lead anywhere yet |
 | `VIL-BOSS-10` | boss levels of chapters 1-3: the boss is drawn with its own sprite colour (set of the chapter), in the slot of the final boss |
 | `VIL-TWN-22` | villages 2-5: fire one tile below the doors opens smith, alchemist and inn; RUN/STOP closes them |
-| `VIL-FERRY-10` | village 2 (Bad Water): stepping on one ferry brings the hero onto the other one and he stays there; off and on again: back; the ferry tile is walkable for the hero, never for the NPCs; village 1 has no ferry |
 | `VIL-TWN-23` | village 4 with chapter 5 unlocked (final boss killed): the exit in the crater leads to the City of the Abyss, hero saved at its entry |
+| `VIL-FERRY-10` | village 2 (Bad Water): stepping on one ferry (tile F) brings the hero onto the other one and he stays there; stepping off and on again brings him back; the ferry tile is walkable for the hero, never for the NPCs; village 1 has no ferry |
 
 ## Bug trovati dalla ristrutturazione
 

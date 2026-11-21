@@ -46,7 +46,16 @@ _cp     lda #0
         sta l8_b,x
         lda shp_stock,x
         sta l8_id,x
-        dex
+        tay                     ; (21/11) anello: la caratteristica (1 FOR, 2 DES, 3 COS) si tira qui, come nel bottino;
+        lda itcat,y             ; prima un anello comprato aveva bonus 0 e non dava nulla
+        cmp #CAT_RING
+        bne +
+        lda #3
+        jsr rndrange
+        clc
+        adc #1
+        sta l8_b,x
++       dex
         bpl _cp
         jsr ui_begin
         ldx shop_id
@@ -193,7 +202,7 @@ _e      stx tmp4
         sty sl_sn+1
         rts
 sh_eq0  .byte 0, 3
-sh_eqn  .byte 3, 1
+sh_eqn  .byte 3, 2              ; (21/11) alchimista: i due anelli
 
 ; voce del cursore -> ui_lc (codici di prima: 0..7 zaino, 8..11 equipaggiamento, 12..19 merce, 20..23 cintura)
 sh_cur: jsr sl_sel

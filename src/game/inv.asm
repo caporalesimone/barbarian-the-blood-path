@@ -120,7 +120,7 @@ iv_main:                        ; (21/11) ingresso da ui_inventory (ui.asm), che
         tax                     ; (X = 0 dopo il dex sotto)
         dex
         jsr sl_init
-        lda #10                 ; cursore sul primo posto dello zaino (indossati 4 + riga + cintura 4 + riga)
+        lda #EQ_N+6             ; cursore sul primo posto dello zaino (indossati + riga + cintura 4 + riga)
         sta sl_cur
         lda #1
         sta sl_top
@@ -153,8 +153,8 @@ iv_cur  jsr sl_sel
         lda sl_sl
         sta ui_cur
         rts
-; segmenti: indossati (4), cintura (4), zaino (8)
-iv_sg   .byte 3, SK_EQ,0,4, SK_BELT|SK_SEP,0,4, SK_PACK|SK_SEP,0,PACK_N
+; segmenti: indossati (EQ_N), cintura (4), zaino (8)
+iv_sg   .byte 3, SK_EQ,0,EQ_N, SK_BELT|SK_SEP,0,4, SK_PACK|SK_SEP,0,PACK_N
 iv_box  .byte 0,1,40,5, 0,6,40,12, 0,IV_SY,40,5
 tt_bp   .text "backpack", 0
 

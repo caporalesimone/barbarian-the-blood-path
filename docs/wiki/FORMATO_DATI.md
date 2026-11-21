@@ -59,8 +59,8 @@ riscrive: [salvataggi.md](salvataggi.md)).
 
 | Offset | Byte | Contenuto |
 |---|---|---|
-| 0 | 210 (`HERO_LEN`) | blocco dell'eroe (`CHRBLK`, vedi sotto), con il baule della locanda |
-| 210 + (piano − 1) × 93 | 93 (`LV_SLOT`) | stato compatto del piano 1…20 (82 o 93 byte usati) |
+| 0 | 217 (`HERO_LEN`, dal formato $CA) | blocco dell'eroe (`CHRBLK`, vedi sotto), con il baule della locanda |
+| 217 + (piano − 1) × 93 | 93 (`LV_SLOT`) | stato compatto del piano 1…20 (82 o 93 byte usati) |
 
 **`HL`** (66 byte): versione (`save_version`), 5 byte "eroe presente", 5 nomi da 12 caratteri (scritto solo creando
 un eroe o cancellandolo; `START` e il menu leggono solo questo file).
@@ -72,7 +72,7 @@ formato e tempi in `docs/wiki/storico-todo.md` e nella storia di git.
 
 In memoria: blocco `CHRBLK` a `$9500` (`src/game/game.asm`); i primi `HERO_LEN` byte del file sono la copia esatta del blocco.
 Dal formato $BF: esperienza `c_xp` a 24 bit, vita `c_hp` a 16 bit, `c_vis` 3 byte (24 piani); il 4o posto
-dell'equipaggiamento (`c_eq+3`, `c_eqb+3`) è l'anello (bonus = caratteristica: 1 FOR, 2 DES, 3 COS).
+dell'equipaggiamento (`c_eq+3`, `c_eqb+3`; dal formato $CA anche il 5o) è l'anello (bonus = caratteristica: 1 FOR, 2 DES, 3 COS).
 Dal formato $C0: il baule della locanda non è più nel blocco (record a parte); ogni oggetto dello zaino e
 dell'equipaggiamento ha durabilità attuale e massima (`c_packd`/`c_eqd`, `c_packm`/`c_eqm`, contigui come
 `c_pack`/`c_eq`); `c_game` (3 byte: bit 0..8 numero della partita, bit 9..23 minuti giocati); `c_deaths`
@@ -103,7 +103,11 @@ La tabella campo per campo (offset, byte, significato) è generata a ogni build 
 su `CHRBLK`, commenti dei campi) nella mappa automatica: [`program-game.html`](../../out/work/memory-map/program-game.html#layout-CHRBLK),
 "Fields of CHRBLK"; lo stesso per `LVLBLK` (stato del piano in RAM). È sempre allineata al codice.
 
-## 3. Stato di un piano — `SAVE-0N`, offset 210 + (piano − 1) × 93 (formato compatto)
+Dal formato **$CA** (21/11, TODO #391): l'equipaggiamento ha **5 posti** (`EQ_N`): arma, armatura, scudo e **due anelli**
+(`c_eq+3` e `c_eq+4`, `EQ_RING`); `c_eq`, `c_eqb`, `c_eqd`, `c_eqm` crescono di un byte ciascuno: blocco da **217** byte
+(`HERO_LEN`; il file dell'eroe resta di 9 blocchi). I piani seguono dall'offset 217.
+
+## 3. Stato di un piano — `SAVE-0N`, offset `HERO_LEN` + (piano − 1) × 93 (formato compatto)
 
 In memoria: blocco `LVLBLK` a `$9800`. La **mappa non è salvata**, e nemmeno mostri e bauli
 del piano: entrando nel piano si rigenera tutto dal seed (`seed_level`), poi si applicano le differenze
@@ -300,7 +304,7 @@ Krill invece permette sprite, IRQ e badline durante i caricamenti.
 - **Personaggio** (`SAVE-0N`): solo con "save game" del menu RUN/STOP, una volta alla creazione dell'eroe e al
   **cambio di capitolo** (gruppi di 5 piani, 11/11 sera). "Quit game" **non** salva. Mai alla morte o alla vittoria,
   né uscendo dalla locanda o dalla scheda del personaggio.
-- **Stato del piano** (`SAVE-0N`, offset 210 + (piano − 1) × 93):
+- **Stato del piano** (`SAVE-0N`, offset `HERO_LEN` (217) + (piano − 1) × 93):
   - lasciandolo per le **scale**: copiato nel suo **slot in RAM** (`LVRAM`, 5 slot del capitolo, RAM sotto l'I/O);
     sul disco va con "save game" o al cambio di capitolo, insieme all'eroe;
   - lasciandolo per **portale o morte**: nel suo slot come per le scale, e in più boss, 5 mostri caldi e 10 bauli

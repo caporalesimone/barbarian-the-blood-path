@@ -853,12 +853,12 @@ _u10    ldx cur_level         ; nomi dei boss per piano ($0350/$0360,x)
 
 ; (varianti di test TESTUI) eroe di prova: equipaggiamento, zaino, cintura, oro e baule pieni (tests/CLAUDE.md)
 test_ui_fill:
-        ldx #4
+        ldx #EQ_N
 _e      lda tu_eq-1,x
         sta c_eq-1,x
         dex
         bne _e
-        ldx #3
+        ldx #EQ_N-1
 _e2     lda tu_eqb,x
         sta c_eqb,x
         dex
@@ -870,7 +870,7 @@ _p      lda tu_pack,x
         sta c_packb,x
         dex
         bpl _p
-        ldx #PACK_N+3           ; durabilita' di prova per tutto (zaino + equipaggiamento)
+        ldx #PACK_N+EQ_N-1      ; durabilita' di prova per tutto (zaino + equipaggiamento)
 _du     lda c_pack,x
         jsr dur_roll
         lda ap_d
@@ -913,8 +913,9 @@ _n      lda tu_name,x
         jmp recalc_stats
 TU_SGOLD = 65535                ; baule di casa pieno al limite (65535 decine = 655350 monete, 10/11) + 2350 addosso = 657700:
                                 ; la scheda passa per il totale a 6 cifre (regola del committente, 08/11: si prova sempre questo caso)
-tu_eq   .byte I_SWORD, I_PLATE_MAIL, I_MEDIUM_SHIELD, I_SILVER
-tu_eqb  .byte 1, 3, 2, 2
+tu_eq   .byte I_SWORD, I_PLATE_MAIL, I_MEDIUM_SHIELD, I_SILVER, I_GOLD     ; (21/11) due anelli
+tu_eqb  .byte 1, 3, 2, 2, 3
+        .cerror * - tu_eqb != EQ_N, "tu_eqb: un byte per posto indossato"
 tu_pack .byte I_VIKING_SWORD, I_DAGGER, I_CHAIN_MAIL, I_TOWER_SHIELD, I_SCROLL, I_GOLD, I_LEATHER_ARMOR, I_COPPER
 tu_packb .byte 2, 0, 1, 0, 3, 3, 0, 1
         .cerror * - tu_packb != PACK_N, "tu_packb: un byte per posto dello zaino"

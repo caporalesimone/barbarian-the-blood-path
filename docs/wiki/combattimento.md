@@ -44,7 +44,7 @@ per livello. Tetto del livello prima dell'Abisso: 20 (`PL_MAXLVL`).
 | cadenza | (18/11, committente: "con Fire tenuto la velocità dipende dalle stat, all'inizio più lenta") `itrate` dell'arma + max(0, `ATK_SLOW` − `ATK_DEX` × mod DES) fotogrammi fra due Slash (`s_rate`, `recalc_stats`; `data/rules.yaml` `player.attack_speed`: 12 e 3). DES 13 (mod +1): +9 (pugnale 12 → 21, 0,24 → 0,42 s); DES 16-17 (+3): +3; DES 18 (+4) o più: la cadenza dell'arma. Vale per ogni Slash, tenuto o premuto ogni volta |
 | penetrazione | `itpen` dell'arma: si sottrae alla CA del mostro |
 
-L'anello aggiunge +N (rame 1, argento 2, oro 3) al **modificatore** della caratteristica scritta nel suo byte
+(21/11) Si indossano **due anelli** e contano tutti e due. Ogni anello aggiunge +N (rame 1, argento 2, oro 3) al **modificatore** della caratteristica scritta nel suo byte
 bonus (1 FOR, 2 DES, 3 COS), cioè +2N al valore; quello di COS aggiunge anche N × (livello + 1) alla vita.
 Il PG ha **sempre un'arma** equipaggiata (si scambia, non si toglie; 07/11: i pugni non esistono più). Un'arma
 **rotta** (durabilità 0) resta in mano ma `recalc_stats` le dà 0 dadi e 0 danno fisso (vedi Durabilità).
