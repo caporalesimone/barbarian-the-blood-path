@@ -178,9 +178,9 @@ flowchart TD
 flowchart TD
     LL["load_location"] --> EG["enter_gfx"]
     EG --> V{"cur_level"}
-    V -->|"0 villaggio"| LG0["load_gfx 0 (GFX0 -> $E000)"] --> GI0
+    V -->|"0 villaggio"| LG0["load_gfx 0 (TWNc -> $EC00, 21/11)"] --> GI0
     GI0["gfx_install 0: tile + mappa RLE -> MAP"] --> MN
-    MN["ovl_cur = 0, ovl_town: il modulo MENU<br/>si rilegge a ogni ingresso (sezione 15),<br/>appoggio da $E000 (18/11)"]
+    MN["ovl_cur = 0, ovl_town: il modulo MENU<br/>si rilegge a ogni ingresso (sezione 15),<br/>appoggio da core_end (21/11)"]
     V -->|"1..20 dungeon"| LGN["load_gfx n (GFXn -> GFX_DUN_AT $EC6D),<br/>sempre dal disco"]
     LGN --> GI1["gfx_install 1: tile, sprite dei mostri del capitolo,<br/>varianti forti e boss, colori e nomi -> NM_AT"]
     MN --> PAL["palette, tabella dei tile solidi"]
@@ -294,7 +294,7 @@ flowchart LR
     end
     SC --> GT
     SA --> GT
-    GT["sv_get: file dell'eroe -> SV_IMG $E000<br/>(una volta sola con rel_hold)"] --> PT["sv_put (o rel_done): ricarica KSAVE,<br/>interrupt spenti, plugin: 9 blocchi"]  --> SE["fine (18/11: il villaggio non si rilegge piu', sv_end tolta)"]
+    GT["sv_get: file dell'eroe -> SV_IMG $E000<br/>(una volta sola con rel_hold)"] --> PT["sv_put (o rel_done): ricarica KSAVE,<br/>interrupt spenti, plugin: 9 blocchi"]  --> SE["fine: sv_write rilegge il segmento CORE<br/>(file core, 21/11: SV_IMG e plugin lo coprono);<br/>il villaggio non si rilegge piu' (18/11)"]
 ```
 
 ```mermaid

@@ -15,7 +15,7 @@ def boot(dtype):
         g.to_menu()
         new_game(g); g.frames(3)
         L = g.L
-        ok = g.b(L["cur_level"]) == 0 and g.b(L["c_chap"]) == 1 and bytes(g.mem(L["cmdbuf"] + 3, 4)) in (b"SND0", b"TWN1")
+        ok = g.b(L["cur_level"]) == 0 and g.b(L["c_chap"]) == 1 and bytes(g.mem(L["cmdbuf"] + 3, 4)) in (b"SND0", b"TWN1", b"CORE")   # (21/11) CORE: read again after the save of the new hero
         name = bytes(g.mem(L["cmdbuf"] + 3, 8))
     finally:
         g.close()

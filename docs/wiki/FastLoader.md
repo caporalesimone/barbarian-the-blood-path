@@ -154,8 +154,9 @@ Test: `KRILL-20` (l'ingresso nel villaggio: MENU e poi SND0, ogni file giusto al
 - Ogni scrittura riscrive il file intero: `sv_read` (Krill) → si cambia la parte (eroe o piano) → `sv_write` (plugin).
   Con `rel_hold` (menu RUN/STOP, nuovo eroe) più parti vanno in una sola riscrittura (`rel_done`).
 - RAM: immagine del file a `$E000` (`SV_IMG`), plugin a `$E820`, buffer del plugin `$0800` byte a `$ECE0` (`SV_SCR`), tutti sotto il
-  KERNAL: durante il save interrupt spenti (dal 21/11 il KERNAL è sempre escluso, `$01 = $35`); la lettura dell'immagine non ha più involucri. Il file
-  del villaggio a `$E000` serve solo fino a `gfx_install`: dal 18/11 non si rilegge dopo il salvataggio (`sv_end`, `town_at` tolti).
+  KERNAL: durante il save interrupt spenti (dal 21/11 il KERNAL è sempre escluso, `$01 = $35`); la lettura dell'immagine non ha più involucri. Immagine e plugin coprono il
+  segmento CORE (`$E000`-, 21/11): `sv_write` lo rilegge dopo la scrittura (`core_need`, file `core` fra `ksave` e `save-01`). Il file
+  del villaggio (`$EC00` dal 21/11) serve solo fino a `gfx_install`: dal 18/11 non si rilegge dopo il salvataggio (`sv_end`, `town_at` tolti).
 - **Il plugin modifica il proprio codice** (17 byte, [MISURATO]: una seconda chiamata senza ricarica si blocca): si
   **carica dal file `KSAVE` prima di ogni save** (~0,5 s) a `$E820`, nella RAM libera durante un salvataggio. Fino
   all'11/11 sera aveva un posto fisso di 1203 B in GAME: tolto, il margine del codice è tornato a 3193 B.
@@ -289,6 +290,30 @@ costa 0,1-1,4 s, un blocco in più ~65 ms. Misure (somma di `PERF-DISK`, `PERF-1
 
 Le stazioni di gioco con meno ricerche (villaggio, boss, prima discesa) migliorano in modo stabile; il resto dipende ancora
 dalla finestra di Krill (7.2). Restano 50 voci.
+
+### 7.4 Il file `core` (21/11, TODO D15) [MISURATO, tempo emulato, PERF-DISK]
+Il segmento CORE (`src/game/core.asm`, 10 blocchi, non compresso: ZX0 ne toglierebbe solo 2) si legge alla prima schermata e
+dopo ogni salvataggio, perché immagine e plugin lo coprono. Le letture dell'eroe senza scrittura (`load_char`, `chap_ensure`)
+vanno a `SV_ALT` (`$EC00`) e non lo toccano. Posizione scelta misurando tutti i tempi di `PERF-DISK` con il file in 9 posti
+(dopo `menu`, prima di `menu`, prima di `hl`, fra `ksave` e `save-01`, dopo `save-05`, prima di `cheats`, dopo `twn5`, prima di `qst0`,
+in fondo): **fra `ksave` e `save-01`** la somma è la più bassa, 81,7 s contro 79,2 s senza il file.
+
+| Misura (s) | senza `core` | `core` fra `ksave` e `save-01` |
+|---|---|---|
+| save_dng / save_char / hdr_write | 6,91 / 6,60 / 3,62 | 8,59 / 7,02 / 3,54 |
+| ingresso nei villaggi in1..in5 | 3,46 / 3,34 / 3,21 / 3,63 / 3,99 | 2,73 / 3,14 / 4,55 / 3,23 / 3,92 |
+| scale, menu, avvio | 2,03 / 2,30 / 12,00 | 1,84 / 2,49 / 11,97 |
+
+- Il costo della rilettura dopo un salvataggio va da +0,4 a +1,7 s secondo dove stava la testina. L'ingresso nel villaggio 3
+  (in3) sale di 1,3 s **senza leggere `core`** (verificato con i punti di arresto): è l'effetto della posizione dei file sul disco
+  (in ogni posizione provata o in3 o twn3 peggiorano; con il file prima di `menu` in3 3,35 s ma twn3 2,07 s). PERF-DISK-23 è
+  fuori soglia (in3 4,55 s, soglia 4,50 s, limite 5,0 s) nelle prove della sola suite PERF-DISK. Nella regression completa
+  (il disco di lavoro e' gia' stato scritto dai test di prima: salvataggi diversi) i numeri cambiano: in3 3,34 s, save_dng 7,39 s,
+  save_char 7,03 s, ma in1 4,91 s, in2 4,34 s e twn1 2,28 s (soglia 1,80, limite 2,0). Da sola la suite PERF-DISK da' sempre gli
+  stessi numeri della tabella (ripetuta due volte). Le misure dipendono dalla testina e dalla directory piu'
+  che dal codice: **da decidere con il committente** se alzare i limiti o cercare un'altra disposizione (TODO D15).
+- Il budget del committente per il passaggio fra dungeon e villaggio (3 s, 21/11) è già superato oggi in tutti i capitoli
+  (3,2-4,0 s senza il file `core`; con il file 2,7-4,6 s).
 
 ## 8. Compatibilità
 

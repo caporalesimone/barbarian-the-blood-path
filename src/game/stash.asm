@@ -44,7 +44,7 @@ MR5_END = $8e80                 ; ogni ingresso), liberi nel villaggio: lo sprit
 MR6_AT  = MRT                   ; (18/11) zona 6: tabelle dei mostri in gioco ($9600-$977F), inutili nel villaggio (lb_cnt = 0) e
 MR6_END = MRT+MRT_N             ; riscritte a ogni ingresso nel dungeon: il passo degli NPC (src/menu/npc_tick.asm)
 MPARTS  = 6
-ML_LO   = GFX_TOWN_AT           ; (18/11) il file del modulo si appoggia da $E000 (il villaggio e' gia' installato: enter_gfx)
+ML_LO   = core_end              ; (18/11) appoggio del file del modulo sotto il KERNAL; (21/11) dalla fine del segmento CORE in su
 OVL_AT  = MR1_AT                ; tabella dei salti del modulo (src/menu.asm)
 MENU_INN  = OVL_AT              ; locanda
 MENU_SHOP = OVL_AT+3            ; negozio A (0 fabbro, 1 alchimista) (jsr mk_off + jmp enter_shop: 6 B)
@@ -119,6 +119,41 @@ _u      lda (ml_src),y          ; dati compressi, destinazione
         clc
         rts
 ml_end  .word MR2_END           ; fine attesa del file (una variabile: KRILL-22 la cambia per provare le riletture)
+
+; (21/11, TODO D15) segmento CORE (src/game/core.asm) in memoria: se manca (core_ok = 0) si legge dal disco a CORE_AT, senza
+; schermata (io_quiet), fino a 3 volte. Preserva X e Y? no: A, X, Y, ptr0 e i registri del disco cambiano.
+core_need:
+        lda core_ok
+        bne _r
+.if !ARENA                              ; (l'arena parte senza Krill e non apre schermate)
+        lda io_quiet
+        pha
+        lda #1
+        sta io_quiet
+        lda #3
+        sta ml_try
+_t      ldy #nm_core-nm_tab
+        jsr set_name4
+        lda #<CORE_AT
+        sta ptr0
+        lda #>CORE_AT
+        sta ptr0+1
+        jsr load_raw
+        bcs _bad
+        lda krill_endaddrlo     ; letto tutto: il file finisce a core_end
+        cmp #<core_end
+        bne _bad
+        lda krill_endaddrhi
+        cmp #>core_end
+        beq _ok
+_bad    dec ml_try
+        bne _t
+        beq _x
+_ok     inc core_ok
+_x      pla
+        sta io_quiet
+.endif
+_r      rts
 
 ZX_ZP   = $50                   ; 12 byte della pagina zero del BASIC, liberi nel gioco (come in START, boot.asm)
         .include "zx0.inc"

@@ -60,6 +60,7 @@ nm_gfx  .byte $47,$46,$58,$30           ; "GFX" (+ cifra in cmdbuf+6 dal chiaman
 nm_fmap .text "fmap"
 nm_lobby .text "lobby"
 nm_menu .text "menu"                   ; menu del villaggio (locanda), stash.asm
+nm_core .text "core"                   ; (21/11) segmento CORE (src/game/core.asm, stash.asm core_need)
 nm_twn  .text "twn"                    ; (12/11) villaggio del capitolo: "TWN" + cifra (c_chap)
 nm_bch  .text "bossch"                 ; (12/11) mappa del boss del capitolo: "BOSSCH" + cifra
 nm_qst  .text "qst"                    ; (17/11) testo della quest: "QST" + cifra (quest.asm)

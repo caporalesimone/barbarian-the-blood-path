@@ -18,8 +18,9 @@ ui_dur   .byte ?                ; ibox_show: durabilita' dell'oggetto mostrato (
 ui_durm  .byte ?
 st_top   .byte ?                ; baule di casa: primo oggetto della pagina mostrata (locanda)
 st_col   .byte ?                ; baule di casa: colonna selezionata (0 zaino, 1 baule) (locanda)
+iv_r     .byte ?                ; (21/11) inventario: riga che si pulisce
         .endv
-        .cerror st_col >= $9480, "variabili UI oltre $947F"
+        .cerror iv_r >= $9480, "variabili UI oltre $947F"
 
         .virtual $93e0          ; motore dei menu (ui_nav, 07/11 sera: docs/wiki/refactor-tasti.md)
 tb_n     .byte ?                ; contatore di ui_boxes (11/11: le linguette non ci sono piu')
@@ -88,6 +89,8 @@ ue_x    .byte 1,1,1,1, 20,20,20,20
 
 ; ------------------------------------------------------------------ primitive
 ui_begin:
+        jsr core_need           ; (21/11, TODO D15) le schermate usano il segmento CORE: se manca si rilegge
+ui_begin0:                      ; (io_screen: senza, perche' durante un salvataggio CORE e' coperto dall'immagine)
         jsr irq_off
         lda #0
         sta SPR_EN
@@ -162,6 +165,11 @@ CH_RING  = 99
 CH_SKULL = 100                  ; teschio (09/11: titolo della schermata di morte)
 CH_INN   = 101                  ; boccale (09/11: titolo della locanda)
 CH_ARROW = 93                   ; freccia a destra (15/11: schermata C, "valore -> nuovo" dei punti in attesa)
+CH_EQ    = 102                  ; (21/11, liste a scorrimento) spunta: oggetto indossato
+CH_BELT  = 103                  ; posto della cintura
+CH_SEP   = 104                  ; separatore sottile fra i blocchi di una lista
+CH_THUMB = 106                  ; cursore della barra di scorrimento
+CH_PACK  = 107                  ; zaino: oggetto nello zaino
 
 ui_at:
         lda #UC_LABEL
@@ -470,81 +478,7 @@ ui_b3:
         sta tmp1
         jmp ui_num3
 
-; A = id oggetto, ui_ib = bonus: [+N ]nome riempito a 17 caratteri
-ui_item:
-        tax
-        lda ui_col
-        pha
-        lda #UC_ITEM
-        cpx #0
-        bne +
-        lda #UC_EMPTY
-+       ldy ui_ib
-        beq +
-        cpx #I_SCROLL           ; pila di pergamene: il bonus e' la quantita', non magia
-        beq +
-        lda #UC_MAGIC
-+       ldy ui_fc
-        beq _nfi
-        lda ui_fc
-_nfi    sta ui_col
-        lda cidx
-        pha
-        lda ui_ib
-        beq _nb
-        ldy itcat,x             ; anello: il bonus e' la caratteristica (nome + " str"/" dex"/" con")
-        cpy #CAT_RING
-        beq _nb
-        cpx #I_SCROLL
-        bne _bo
-        cmp #10                 ; "3 portal scroll", "10 portal scroll" (08/11: senza la x, fino a 10)
-        bcc +
-        sbc #10
-        pha
-        lda #$31
-        jsr ui_putc
-        pla
-+       ora #$30
-        jsr ui_putc
-        jmp _bs
-_bo     lda #$2b
-        jsr ui_putc
-        lda ui_ib
-        clc
-        adc #$30
-        jsr ui_putc
-_bs     lda #$20
-        jsr ui_putc
-_nb     txa
-        pha
-        lda itnm_lo,x
-        pha
-        lda itnm_hi,x
-        tax
-        pla
-        jsr ui_puts
-        pla
-        tax
-        lda itcat,x
-        cmp #CAT_RING
-        bne +
-        jsr ring_stat
-+       lda #0
-        sta ui_ib
-        pla
-        clc
-        adc #16                 ; 16 colonne (08/11: la colonna prima del nome e' l'icona della categoria, ui_cic)
-        sta tmp6
-_p      lda cidx
-        cmp tmp6
-        bcs _d
-        lda #$20
-        jsr ui_putc
-        jmp _p
-_d      pla
-        sta ui_col
-        rts
-
+; (21/11, TODO D15) qui c'era codice ora nel segmento CORE (src/game/inv.asm)
 ; un fotogramma di una schermata della UI: attesa del vblank, contatore, effetti sonori, lettura di joystick e tastiera
 ui_input:
         jsr wait_vblank
@@ -766,35 +700,7 @@ _pm     jsr ui_putc
         bne _l
         rts
 
-; nome dell'oggetto X delle tabelle dello zaino (PACK_N.. = equipaggiamento) alla posizione corrente: magia, rotto in rosso
-pk_name:
-        lda c_packb,x
-        sta ui_ib
-        lda #0                  ; oggetto rotto (durabilita' 0 su un massimo > 0: le armi, 07/11): in rosso
-        ldy c_packm,x
-        beq +
-        ldy c_packd,x
-        bne +
-        lda #2
-+       sta ui_fc
-        lda sh_mask             ; negozio (08/11): gli oggetti dello zaino che non compra sono grigi
-        beq _n
-        cpx #PACK_N
-        bcs _n
-        ldy c_pack,x
-        lda itcat,y
-        tay
-        lda cat_bit,y
-        and sh_mask
-        bne _n
-        lda #12
-        sta ui_fc
-_n      lda c_pack,x
-        jsr ui_item
-        lda #0
-        sta ui_fc
-        rts
-
+; (21/11, TODO D15) qui c'era codice ora nel segmento CORE (src/game/inv.asm)
 ; equipaggiamento su 2 colonne con le icone (08/11, casa e inventario): arma (1,eq_y), armatura (1,eq_y+1),
 ; scudo (20,eq_y), anello (20,eq_y+1). Cursore '>' se eq_u0 + posto = ui_lc, oppure fisso sul posto eq_fix
 eq_draw:
@@ -845,48 +751,19 @@ eq_ic   .byte CH_SWORD, CH_ARMOR, CH_SHLD, CH_RING
 eq_icc  .byte 1, 15, 9, 7       ; bianco, grigio chiaro, marrone, giallo
 
 ; ------------------------------------------------------------------ inventario
-; inventario (08/11: niente linguette): fire = usa (indossa, togli, bevi, pergamena), DEL = elimina (con conferma),
-; RUN/STOP o I = chiude. Lista: zaino (8, due colonne da 4) poi equipaggiamento (4)
+; inventario (21/11, liste a scorrimento: slist.asm): statistiche (titolo = nome) in 3 righe, lista "items" da 10 righe
+; (indossati con la spunta, riga sottile, cintura, riga sottile, zaino con i posti liberi '-'), riquadro dell'oggetto
+; (titolo = icona e nome). Riga 23 domande e messaggi, 24 tasti. fire = usa (indossa, togli, bevi, pergamena), DEL =
+; elimina (con conferma), RUN/STOP o I = chiude. ui_cur = posto dell'oggetto sotto il cursore (0..PACK_N-1 zaino,
+; PACK_N.. equipaggiamento, $20+n cintura: per ora solo da guardare) per inv_act e inv_delete.
+IV_LY   = 7                     ; prima riga della lista
+IV_LH   = 10                    ; righe della lista
+IV_SY   = 18                    ; riquadro dell'oggetto (riga del titolo)
+; (21/11, TODO D15) qui c'era codice ora nel segmento CORE (src/game/inv.asm)
+; schermata dell'inventario (tasto I): e' nel segmento CORE, che va prima assicurato (chi la apre non e' una schermata)
 ui_inventory:
-        jsr sort_pack           ; (08/11) zaino sempre ordinato anche se il salvataggio e' di prima dell'ordinamento
-        lda #PACK_N+4
-        sta ui_n
-        jsr nav_init
-        jsr ui_begin
-        lda #19
-        jsr ib_set
-        lda #<tt_bp
-        ldx #>tt_bp
-        ldy #0
-        jsr ui_title
-        jsr inv_frames
-        jsr ui_labels
-        .byte 1,24
-        .text "fire:use  del:drop  run/stop:back"
-        .byte 0,$ff
-_dyn    jsr inv_dynamic
-        jsr ibox_draw
-_in     jsr ui_nav
-        cmp #NAV_MOVE
-        beq _dyn
-        cmp #NAV_BACK
-        beq _exit
-        cmp #NAV_FIRE
-        beq _f
-        lda keynew              ; DEL (INST/DEL, riga 0 bit 0): elimina
-        and #$01
-        bne _drop
-        lda keynew+4            ; I: chiude anche (lo stesso tasto che l'ha aperto)
-        and #$02
-        beq _in
-_exit   jmp ui_exit
-_f      jsr inv_act
-        jmp _dyn
-_drop   jsr inv_delete
-        jmp _dyn
-
-tt_bp   .text "backpack", 0
-
+        jsr core_need
+        jmp iv_main
 ; (15/11, TODO D12) glifo A del riquadro in (X,Y) nel colore delle cornici (ui_bc)
 bx_g:   pha
         jsr ui_at
@@ -949,19 +826,6 @@ _b2     lda #BOX_H
         lda #BOX_BR
         jmp ui_putc
 
-
-; cornici e etichette fisse dell'inventario
-; inventario (08/11, concept con il committente): statistiche (titolo = nome), equipped con le icone, zaino,
-; cintura, oggetto selezionato; riga 23 per la domanda, 24 i tasti
-inv_frames:
-        jsr sec_frames
-        jsr ui_labels
-        .byte 2,17
-        .text " belt "
-        .byte 0,2,1,$20,0,$ff
-        jsr ui_cname
-        lda #$20
-        jmp ui_putc
 
 ; i 5 riquadri comuni a inventario e negozi: in alto (statistiche / merce), equipped, pack, in basso a sinistra
 ; (belt / purse), selected item (riquadro standard dell'oggetto)
@@ -1118,10 +982,8 @@ keys_n:
         rts
 
 
-; statistiche dell'oggetto selezionato: riquadro in basso a destra (x=21..38, righe 21-22)
-ibox_draw:
-        ldx ui_cur
-        jsr ibox_ld
+; statistiche dell'oggetto selezionato: riquadro in basso a destra (x=21..38, righe 21-22). (21/11) ibox_draw tolta: la usava
+; solo il vecchio inventario
 ibox_show:                      ; ui_sel / tmp5 gia' impostati
         jsr ibox_top
         beq +
@@ -1206,6 +1068,8 @@ inv_act:
         ldx ui_cur
         cpx #PACK_N
         bcc _pk
+        cpx #PACK_N+4           ; (21/11) cintura ($20+n): per ora solo da guardare
+        bcs _r1
         jmp _unequip
 _no1    jmp _no
 _dr     jmp _drink
@@ -1508,333 +1372,8 @@ _p2     lda S4_BUF,y
         bne _tb
         rts
 
-; valore di vendita: "val 1200o d135/178" (08/11: numero e poi la moneta)
-it_val  #msg "val "             ; valore di vendita: prezzo >> SELL_SHIFT (20/11: un quarto)
-; valore di vendita dell'oggetto ui_sel (prezzo >> SELL_SHIFT, balance.yaml shop_rules.sell_divisor), allineato a sinistra
-it_half lda ui_sel
-        asl
-        tay
-        lda itprice+1,y
-        sta tmp1
-        lda itprice,y
-        .rept SELL_SHIFT
-        lsr tmp1
-        ror a
-        .endrept
-        ldx tmp1
-        jsr ui_n5l              ; (08/11) allineato a sinistra
-        jsr ui_coin
-it_dur  lda ui_durm             ; durabilita' " d120/200" (solo oggetti che si usurano), se sta nel riquadro da 18
-        beq _x                  ; (cidx = caratteri gia' scritti dalla riga: " d135/178" sono 9)
-        lda cidx
-        cmp #10
-        bcs _x
-        #msg " d"
-        lda ui_dur
-        jsr ui_b3l
-        lda #$2f
-        jsr ui_putc
-        lda ui_durm
-        jmp ui_b3l
-_x      rts
-
-; caratteristica principale dell'oggetto ui_sel (bonus tmp5), al massimo 9 caratteri:
-; "dmg 2d6+3", "ac +5", "+2 str", "heal 50", "portal"
-it_prim:
-        ldx ui_sel
-        lda itcat,x
-        cmp #CAT_WEAPON
-        beq _w
-        cmp #CAT_RING
-        beq _rg
-        cmp #CAT_POTION
-        beq _po
-        cmp #CAT_SCROLL
-        beq _scr
-        #msg "ac +"             ; armatura / scudo: CA (magia compresa)
-        ldx ui_sel
-        lda itval,x
-        clc
-        adc tmp5
-        jmp ui_b3l
-_rg     lda tmp5                ; anello: +N al modificatore della caratteristica (tmp5 prima di ui_b3l, che lo usa)
-        sta ui_ib
-        #msg "+"
-        ldx ui_sel
-        lda itval,x
-        jsr ui_b3l
-        jsr ring_stat
-        lda #0
-        sta ui_ib
-        rts
-_po     #msg "heal "            ; pozione: cura al livello attuale
-        ldy ui_sel
-        jsr pot_heal
-        ldx mu1
-        jmp ui_n5l
-_scr    #msg "portal"
-        rts
-_w      lda tmp5                ; arma: dadi + magia (08/11: tmp5 salvato, ui_b3l lo usa: prima usciva un numero a caso)
-        pha
-        #msg "dmg "
-        pla
-        tay
-        ldx ui_sel
-        lda itdn,x
-        pha
-        lda itds,x
-        tax
-        pla
-; dadi "NdS+K" tutti nel colore dei valori (08/11): A = N, X = S, Y = K (0 = senza "+K")
-ui_dice:
-        stx tmp6
-        sty tmp7
-        tay
-        lda ui_col
-        pha
-        lda ui_fc               ; (15/11) colore forzato (schermata C: valore nuovo in verde) anche per 'd' e '+'
-        bne +
-        lda #UC_VALUE
-+       sta ui_col
-        tya
-        jsr ui_b3l
-        lda #4                  ; 'd'
-        jsr ui_putc
-        lda tmp6
-        jsr ui_b3l
-        lda tmp7
-        beq +
-        lda #$2b
-        jsr ui_putc
-        lda tmp7
-        jsr ui_b3l
-+       pla
-        sta ui_col
-        rts
-
-; caratteristica secondaria (al massimo 9 caratteri): "2h pen 1", "dex max 2" o niente
-it_sec:
-        ldx ui_sel
-        lda itreq,x             ; (21/11, O6) FOR richiesta e non raggiunta: "str N" al posto del resto
-        cmp s_str
-        beq _s0
-        bcc _s0
-        #msg "str "
-        ldx ui_sel
-        lda itreq,x
-        jmp ui_b3l
-_s0     lda itcat,x
-        cmp #CAT_ARMOR
-        beq _ar
-        cmp #CAT_WEAPON
-        bne _r
-        lda itfl,x
-        and #1
-        beq _pn
-        #msg "2h "
-_pn     ldx ui_sel
-        lda itpen,x
-        beq _r
-        #msg "pen "
-        ldx ui_sel
-        lda itpen,x
-        jmp ui_b3l
-_ar     lda itfl,x              ; armatura: limite al modificatore di DES
-        cmp #99
-        bcs _r
-        #msg "dex max "
-        ldx ui_sel
-        lda itfl,x
-        jmp ui_b3l
-_r      rts
-
-; anello: " str" / " dex" / " con" secondo ui_ib (1..3)
-ring_stat:
-        lda ui_ib
-        beq _r
-        cmp #4
-        bcs _r
-        sec
-        sbc #1
-        sta tmp7
-        asl
-        adc tmp7                ; x 3
-        tax
-        adc #3
-        sta tmp7                ; fine (ui_putc usa Y: il contatore e' X)
-        lda #$20
-        jsr ui_putc
-_c      lda rs_txt,x
-        jsr ui_putc
-        inx
-        cpx tmp7
-        bne _c
-_r      rts
-rs_txt  .text "strdexcon"
-
-
-; icona: A = codice, X = colore (ui_col preservato)
-ui_icon:
-        ldy ui_col
-        sty tmp6
-        stx ui_col
-        jsr ui_putc
-        lda tmp6
-        sta ui_col
-        rts
-
-; A = id oggetto -> icona della categoria (08/11, TODO 1.3) nel suo colore; spazio se 0 o $FF (oro del baule).
-; Pozioni nel loro colore (itfl). X conservato.
-ui_cic:
-        tay
-        beq _sp
-        iny
-        beq _sp
-        dey
-        txa
-        pha
-        lda itcat,y
-        cmp #CAT_POTION
-        bne +
-        ldx itfl,y
-        bne _c
-+       tay
-        ldx cat_icc,y
-_c      lda cat_ic,y
-        cpy #CAT_POTION         ; (pozione: Y = id, l'icona e' fissa)
-        bcc +
-        lda #CH_POT
-        cpy #CAT_SCROLL
-        bne +
-        lda #CH_SCR
-+       jsr ui_icon
-        pla
-        tax
-        rts
-_sp     lda #$20
-        jmp ui_putc
-cat_ic  .byte $20, CH_SWORD, CH_ARMOR, CH_SHLD, CH_RING
-cat_icc .byte 0, 1, 15, 9, 7, 0, 15
-
-; tabella statistiche (righe 1-3), colonne a x = 1, 12, 24, 31
-inv_dynamic:
-        ldy #2                  ; righe 2-5 pulite (i valori cambiano lunghezza)
-_c      tya
-        pha
-        ldx #1
-        jsr ui_at
-        ldx #38
--       lda #$20
-        jsr ui_putc
-        dex
-        bne -
-        pla
-        tay
-        iny
-        cpy #6
-        bne _c
-        jsr ui_labels           ; 3 colonne: x 2, 15, 29
-        .byte 2,2
-        .text "lvl"
-        .byte 0,15,2
-        .text "xp"
-        .byte 0,2,3
-        .text "hp"
-        .byte 0,15,3
-        .text "att +"
-        .byte 0,29,3
-        .text "ac"
-        .byte 0,2,4
-        .text "str"
-        .byte 0,15,4
-        .text "dex"
-        .byte 0,29,4
-        .text "con"
-        .byte 0,2,5
-        .text "dmg"
-        .byte 0,$ff
-        #at 7,2
-        lda c_lvl
-        jsr ui_b3l
-        #at 19,2                ; xp come nell'HUD (08/11): "9999/27k", da 10000 in migliaia (16 bit bassi)
-        lda c_xp
-        ldx c_xp+1
-        jsr ui_n5k
-        ldx c_lvl
-        cpx #PL_MAXLVL
-        bcs _xm                 ; livello massimo: niente soglia
-        lda #$2f
-        jsr ui_putc
-        lda xp_n1-1,x
-        pha
-        lda xp_n0-1,x
-        tay
-        pla
-        tax
-        tya
-        jsr ui_n5k
-_xm
-        #at 29,2
-        jsr ui_gold
-        #at 33,2                ; cifre nella colonna dei valori (ac, con)
-        lda c_gold
-        ldx c_gold+1
-        jsr ui_n5l
-        #at 7,3
-        lda c_hp
-        ldx c_hp+1
-        jsr ui_n5l
-        lda #$2f
-        jsr ui_putc
-        lda hpmax
-        ldx hpmax+1
-        jsr ui_n5l
-        #at 20,3
-        lda s_att
-        jsr ui_b3l
-        #at 33,3
-        lda s_ac
-        jsr ui_b3l
-        #at 7,4
-        lda s_str
-        jsr ui_b3l
-        #at 19,4
-        lda s_dex
-        jsr ui_b3l
-        #at 33,4
-        lda s_con
-        jsr ui_b3l
-        #at 7,5
-        lda s_dn
-        ldx s_ds
-        ldy s_dk
-        jsr ui_dice
-        #at 15,5                ; chiavi
-        jsr keys_n
-        jsr eq_std              ; equipaggiamento: voci PACK_N.. della lista, righe 8-9
-        jsr draw_entries
-        #at 21,18               ; nome dell'oggetto selezionato, con l'icona della categoria
-        ldx ui_cur
-        lda c_pack,x
-        jsr ui_cic
-        jsr pk_name
-        ; cintura (riquadro in basso a sinistra): 4 pozioni + pergamena, '-' = posto vuoto
-        #at 2,18
-        ldx #0
-_bs     stx st_i
-        jsr belt_slot
-        ldx st_i
-        inx
-        cpx #4
-        bne _bs
-        jsr scr_find
-        bcs _ns
-        lda #CH_SCR
-        ldx #15
-        jmp ui_icon
-_ns     lda #$2d
-        jmp ui_putc
-
+; (21/11, TODO D15) qui c'era codice ora nel segmento CORE (src/game/inv.asm)
+; (21/11, TODO D15) qui c'era codice ora nel segmento CORE (src/game/inv.asm)
 ; ------------------------------------------------------------------ salvataggi di un'altra versione
 ; Y = cancella tutto e prosegue (C=1), N = esce dal gioco (reset)
 ui_badsave:
@@ -2768,7 +2307,7 @@ _nl     pla
 ; ------------------------------------------------------------------ schermata disco
 ; io_dir: 0 salva / 1 carica ; io_what: 0 eroe / 2 generico ("loading") / altro piano (io_lvl)
 io_screen:
-        jsr ui_begin
+        jsr ui_begin0
         ldx #12                 ; titolo centrato (09/11): "saving/loading barbarian" e "loading level 3" da x=12
         lda io_what
         cmp #2

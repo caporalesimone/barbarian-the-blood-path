@@ -16,6 +16,7 @@ Tutti i file stanno sul disco del gioco (`blood_path_vX.Y_1541.d64`, periferica 
 | `GAME` | PRG | il gioco **compresso ZX0** (06/11): indirizzo di caricamento = quello del flusso compresso (`GAME_ZX_AT`, ~`$44B3`), decompresso sul posto dal loader in `$0400` (`GAME_ENTRY`, nessuno stub BASIC). Vedi «Compressione» | build (`tools/build/pack.py`) |
 | `LOBBY` | PRG | modulo del menu iniziale (codice, caricato a `$C000`) | build |
 | `MENU` | PRG | (11/11; 18/11 un file solo, prima `MENU1`…`MENU5`) menu del villaggio e NPC (`src/menu.asm`): intestazione + le cinque zone di RAM compresse ZX0; si legge all'ingresso nel villaggio. Vedi «MENU» | build (`tools/build/pack_menu.py`) |
+| `CORE` | PRG a `$E000` | (21/11, TODO D15) segmento CORE di GAME (`src/game/core.asm`: liste a scorrimento, inventario, descrizione degli oggetti), non compresso; si legge alla prima schermata e dopo ogni salvataggio (`core_need`); sul disco fra `ksave` e `save-01` | build (`asm.sh`, `tools/build/gen_imgz.py`) |
 | `TITLE` | PRG | schermata del titolo: bitmap multicolor + schermo + colore, 10000 byte | build |
 | `TWN1` … `TWN5` | PRG | (12/11; 15/11) villaggio del capitolo *c* (`c_chap`): tile + intestazione + mappa RLE; ognuno con tile, colori e mappa suoi (`tools/build/villages.py`); `TWN5` = città dell'Abisso (prototipo). (18/11) In **coda** il brano del villaggio + il suo numero come ultimo byte (sotto) | build (`tools/build/bundle.py`) |
 | ~~`BOSSCH1` … `BOSSCH3`~~ | — | (18/11) **non più sul disco**: la mappa del piano del boss dei capitoli 1–3 (piani 5, 10, 15: 4 byte = scale x, y; boss x, y + RLE come `FMAP`; `data/maps/bosschapN.txt`, `tools/build/gen_bossmap.py` → `out/work/bosschN.prg`; dal 19/11 le caselle sono anche i tile degli arredi del capitolo, `tools/build/boss_gfx.py`) sta nella coda di `GFX(2c)` | build |
@@ -143,7 +144,7 @@ Non salvati (ricalcolati al caricamento): vita, armatura, danno e posizione dei 
 Prodotti da `tools/build/gen_gfx.py` (cartella `gfx/`). Vengono caricati nella **cache nella RAM sotto il
 KERNAL** e da lì copiati dove il VIC li vede (`gfx_install`).
 
-### `TWNc` (ex `GFX0`) — villaggio (caricato a `$E000`)
+### `TWNc` (ex `GFX0`) — villaggio (caricato a `$EC00`; fino al 21/11 a `$E000`)
 
 | Offset | Byte | Contenuto | Destinazione |
 |---|---|---|---|
@@ -182,7 +183,8 @@ del piano del boss del capitolo ([dungeon](dungeon.md#piani-del-boss-dei-capitol
 
 | Area | Contenuto |
 |---|---|
-| `$E000`–`$E57F` | villaggio (`GFX0`), riletto a ogni ingresso (11/11; il primo lo carica START) |
+| `$E000`–`core_end` | (21/11, TODO D15) segmento CORE (file `core`, PRG a `$E000` non compresso: liste, inventario, descrizione degli oggetti), riletto dopo i salvataggi |
+| `$EC00`– | villaggio (`TWNc`), riletto a ogni ingresso (fino al 21/11 a `$E000`) |
 | `$EC6D`–`$F4DF` | tema del piano attuale (`GFXn`), riletto a ogni ingresso (11/11: precaricamento e cache tolti; 15/11: comincia `GFX_INFO` byte prima di `$ED00`, nella coda del villaggio) |
 | `$F4E0`–`$FCFF` | (11/11) zona 2 del modulo MENU (fino all'11/11: tema precaricato in background, ora scritto direttamente nel buffer del tema) |
 | `$D000`–`$DFFF` | sotto l'I/O: all'avvio villaggio e sprite del loader, poi i salvataggi letti dal loader (fino al primo menu); in gioco `STASH` `$D000`–`$D07F` (19/11) e il generatore dei piani da `$D080`, poi gli slot dei piani `LVRAM` (copiato dal PRG `GAME` all'avvio) |
@@ -246,7 +248,7 @@ costava ~0,4 s a ogni ingresso nel villaggio). Struttura (`tools/build/pack_menu
 | … | le parti compresse ZX0: prima le zone 1, 3, 4, 5, 6, per ultima la zona 2 |
 
 Il file **finisce a `MR2_END`** (`$FD00`, fine della zona 2): Krill lo carica al suo indirizzo (`load_file`, C = 0), nella RAM
-sotto il KERNAL fra `$E000` (`ML_LO`: dal 18/11 il villaggio si installa prima del MENU, quindi il suo file non serve più) e
+sotto il KERNAL fra `ML_LO` (21/11: `core_end`, la fine del segmento CORE; il villaggio si installa prima del MENU, quindi il suo file non serve più) e
 `$FCFF`. Il gioco
 (`ovl_town` / `ml_read`, `src/game/stash.asm`) lo legge all'**ingresso nel villaggio** se `ovl_cur` = 0 (lo azzerano
 `game_start`, il caricamento del LOBBY e `enter_gfx`, perché il dungeon copre le zone 4 e 5), controlla che finisca a

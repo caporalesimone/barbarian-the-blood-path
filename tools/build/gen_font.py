@@ -3,6 +3,7 @@
   0..63   glifi normali (lettere/cifre dal font Reliquia, punteggiatura mancante dalla ROM)
   28,30,31,59,60,0 = cornici (H,V,TL,TR,BL,BR)
   91..95 = icone chiave/oro (una moneta, 08/11)/freccia (93, 15/11)/pozione/pergamena
+  102..107 (21/11) = segni delle liste a scorrimento: spunta, cintura, separatore, (105 libero), barra, zaino
   64..127 versioni invertite (inv = $40 in ui_putc); 124..126 = barre di avanzamento
 Caricato a $B800 da copy_gfx (VIC bank 2, D018=$DE con schermo a $B400)."""
 import os, sys
@@ -59,6 +60,12 @@ ICON.update({
     100: [0x3C, 0x7E, 0xDB, 0xDB, 0x7E, 0x3C, 0x3C, 0x24],  # teschio (09/11, schermata di morte)
     101: [0x6C, 0xFC, 0x87, 0xA5, 0xA5, 0xA7, 0x84, 0xFC],  # boccale (09/11, titolo della locanda)
     93: [0x00, 0x08, 0x0C, 0x7E, 0x0C, 0x08, 0x00, 0x00],   # freccia a destra (15/11, schermata C: "73 -> 81")
+    # (21/11, liste a scorrimento di inventario, negozi e locanda) segni della provenienza, separatore, barra di scorrimento
+    102: [0x00, 0x01, 0x03, 0x06, 0x8C, 0xD8, 0x70, 0x20],  # spunta: oggetto indossato
+    103: [0x00, 0x00, 0xFF, 0x81, 0xBD, 0x81, 0xFF, 0x00],  # cintura: posto della cintura
+    104: [0x00, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00, 0x00],  # separatore sottile fra i blocchi di una lista
+    106: [0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C, 0x3C],  # cursore della barra di scorrimento (sulla cornice destra)
+    107: [0x3C, 0x42, 0xFF, 0xC3, 0xDB, 0xC3, 0xFF, 0x7E],  # zaino: oggetto nello zaino
 })
 for c, g in ICON.items():
     full[c] = g

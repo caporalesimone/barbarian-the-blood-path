@@ -72,7 +72,7 @@ LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM de
 ;@free $fe96..$fffa "Fondo della cache sotto il KERNAL, dopo FMAP (si accorcia se FMAP cresce: lo dice questa verifica)" use=data
 ;@map $a6c0..$a6fc "Minimappa: tabella delle classi dei tile (mm_cls, 48 B) e byte esplorati della riga di celle (mm_ex, 12 B), solo mentre la minimappa e' aperta (ui.asm); il resto dello slot 27 riceve la coda della copia di copy_gfx (byte senza uso)"
 ;@free $a6fc..$a700 "Fine dello slot sprite 27" use=data
-TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile): fino a $ED00
+TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile); (21/11) file da GFX_TOWN_AT = $EC00 fino a $F900
                             ; (il file del tema comincia GFX_INFO byte prima: villaggio e dungeon non sono mai in RAM insieme)
 MAPW       = 48
 MAPH       = 48
@@ -405,7 +405,7 @@ _adv    inc ptr0                ; un byte di sorgente (preserva A)
 
 ; ---- grafica dei luoghi: cache nella RAM sotto il KERNAL ($E000 villaggio, $E600 tema del dungeon)
 ; installa la grafica in cache: A = 0 villaggio, altro = dungeon (tile + sprite, colori e nomi dei mostri del capitolo)
-        .cerror GFX_INFO > 256 || >NM_AT != >(NM_AT+GFX_INFO-1), "blocco info dei mostri (NM_AT) a cavallo di una pagina"
+        .cerror GFX_INFO > 256 || (>NM_AT) != (>(NM_AT+GFX_INFO-1)), "blocco info dei mostri (NM_AT) a cavallo di una pagina"
 ;@free npc_vend..NM_AT-1 "Coda degli slot sprite 58-63 (fino al blocco info dei mostri), dopo le variabili di quest.asm" use=data
 ;@map NM_AT..$9000 "Colori e nomi dei mostri del capitolo: blocco info del file GFXn copiato da gfx_install"
         .cerror SND_FBUF + SND_FMAX > NM_AT || NM_AT + GFX_INFO > $9000, "NM_AT sovrapposto al motivetto di combattimento o oltre $8FFF"
@@ -1045,6 +1045,10 @@ test_done:
 
 ; ------------------------------------------------------------------ loop principale
 main_loop:
+        lda core_ok             ; (21/11, TODO D15) segmento CORE da rileggere (dopo un salvataggio o una lettura dell'eroe)
+        bne +
+        jsr core_need
++
 .if ARENA
         jsr AR_WAIT
 .else
@@ -2042,6 +2046,17 @@ gen_img_end = gen_raw_end
 .endif
         .cerror gen_io_end > $e000, "generatore sotto l'I/O oltre $DFFF"
 
+; (21/11, TODO D15) segmento CORE (src/game/core.asm): nella seconda passata solo le etichette, nella prima i byte dopo il PRG
+CORE_AT = $e000
+;@map CORE_AT..core_end "CORE: liste, inventario e descrizione degli oggetti (file core, src/game/core.asm); lo coprono l'immagine del salvataggio e il plugin di save (si rilegge)" scenario=villaggio,dungeon
+.if GENPASS == 2
+        .virtual CORE_AT
+        .include "core.asm"
+core_end:
+        .endv
+.endif
+        .cerror core_end > GFX_TOWN_AT || core_end > GFX_DUN_AT, "segmento CORE oltre il file del villaggio o del tema"
+
 FREE_RAM_END   = $9fff              ; il PRG puo' arrivare fino a $9FFF: la coda di gfx_data e' dato morto dopo
                                     ; copy_gfx (prima istruzione utile di `start`) e copre $8000-$9FFF (schermo HUD,
                                     ; sprite barra, sprites2, variabili $9000: tutti scritti DOPO la copia)
@@ -2058,6 +2073,7 @@ CODE2 = $9c00
 ; cheat god mode (docs/wiki/cheats.md): diverso da 0 = il PG non perde vita. Byte del PRG in CODE2 (game_start non lo
 ; azzera): lo scrive START dal POKE 1021,1 dato prima del RUN, il monitor di VICE o TESTGOD=1 (11/11)
 godmode .byte 0
+core_ok .byte 0                         ; (21/11, TODO D15) 1 = segmento CORE in memoria (fuori dalle variabili azzerate da game_start)
 code2_end:
 ;@free code2_end..$a000 "Coda di CODE2: piccolo codice residente (disco, caricamenti)" use=code
         .cerror code2_end > FREE_RAM_END + 1, "secondo blocco di codice oltre $9FFF"
@@ -2069,4 +2085,10 @@ gen_raw:
 gen_io_end:
         .here
 gen_raw_end:
+core_raw:                               ; (21/11) segmento CORE: byte per tools/build/gen_imgz.py (file core)
+        .logical CORE_AT
+        .include "core.asm"
+core_end:
+        .here
+core_raw_end:
 .endif

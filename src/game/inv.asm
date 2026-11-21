@@ -1,0 +1,606 @@
+; ===================================================================
+;  inv.asm - (21/11, TODO D15) parte del segmento CORE (src/game/core.asm, RAM sotto il KERNAL da $E000): schermata
+;  dell'inventario e descrizione degli oggetti (nome, icona, statistiche, valore). Spostate da ui.asm senza cambiarle.
+;  Si chiamano solo dalle schermate (dopo ui_begin, che si assicura che CORE sia in memoria: core_need).
+; ===================================================================
+; A = id oggetto, ui_ib = bonus: [+N ]nome riempito a 17 caratteri
+ui_item:
+        tax
+        lda ui_col
+        pha
+        lda #UC_ITEM
+        cpx #0
+        bne +
+        lda #UC_EMPTY
++       ldy ui_ib
+        beq +
+        cpx #I_SCROLL           ; pila di pergamene: il bonus e' la quantita', non magia
+        beq +
+        lda #UC_MAGIC
++       ldy ui_fc
+        beq _nfi
+        lda ui_fc
+_nfi    sta ui_col
+        lda cidx
+        pha
+        lda ui_ib
+        beq _nb
+        ldy itcat,x             ; anello: il bonus e' la caratteristica (nome + " str"/" dex"/" con")
+        cpy #CAT_RING
+        beq _nb
+        cpx #I_SCROLL
+        bne _bo
+        cmp #10                 ; "3 portal scroll", "10 portal scroll" (08/11: senza la x, fino a 10)
+        bcc +
+        sbc #10
+        pha
+        lda #$31
+        jsr ui_putc
+        pla
++       ora #$30
+        jsr ui_putc
+        jmp _bs
+_bo     lda #$2b
+        jsr ui_putc
+        lda ui_ib
+        clc
+        adc #$30
+        jsr ui_putc
+_bs     lda #$20
+        jsr ui_putc
+_nb     txa
+        pha
+        lda itnm_lo,x
+        pha
+        lda itnm_hi,x
+        tax
+        pla
+        jsr ui_puts
+        pla
+        tax
+        lda itcat,x
+        cmp #CAT_RING
+        bne +
+        jsr ring_stat
++       lda #0
+        sta ui_ib
+        pla
+        clc
+        adc #16                 ; 16 colonne (08/11: la colonna prima del nome e' l'icona della categoria, ui_cic)
+        sta tmp6
+_p      lda cidx
+        cmp tmp6
+        bcs _d
+        lda #$20
+        jsr ui_putc
+        jmp _p
+_d      pla
+        sta ui_col
+        rts
+
+
+; nome dell'oggetto X delle tabelle dello zaino (PACK_N.. = equipaggiamento) alla posizione corrente: magia, rotto in rosso
+pk_name:
+        lda c_packb,x
+        sta ui_ib
+        lda #0                  ; oggetto rotto (durabilita' 0 su un massimo > 0: le armi, 07/11): in rosso
+        ldy c_packm,x
+        beq +
+        ldy c_packd,x
+        bne +
+        lda #2
++       sta ui_fc
+        lda sh_mask             ; negozio (08/11): gli oggetti dello zaino che non compra sono grigi
+        beq _n
+        cpx #PACK_N
+        bcs _n
+        ldy c_pack,x
+        lda itcat,y
+        tay
+        lda cat_bit,y
+        and sh_mask
+        bne _n
+        lda #12
+        sta ui_fc
+_n      lda c_pack,x
+        jsr ui_item
+        lda #0
+        sta ui_fc
+        rts
+
+
+iv_main:                        ; (21/11) ingresso da ui_inventory (ui.asm), che prima si assicura che CORE ci sia
+        jsr sort_pack           ; (08/11) zaino sempre ordinato anche se il salvataggio e' di prima dell'ordinamento
+        jsr ui_begin
+        lda #<tt_bp
+        ldx #>tt_bp
+        ldy #0
+        jsr ui_title
+        lda #<iv_box
+        ldx #>iv_box
+        ldy #12
+        jsr ui_boxes
+        jsr ui_labels
+        .byte 2,6
+        .text " items "
+        .byte 0,1,24
+        .text "fire:use  del:drop  run/stop:back"
+        .byte 0,2,1,$20,0,$ff
+        jsr ui_cname
+        lda #$20
+        jsr ui_putc
+        lda #<iv_sg             ; lista: segmenti e righe
+        ldx #>iv_sg
+        ldy #0
+        jsr sl_segs
+        lda #IV_LY
+        sta sl_y
+        lda #IV_LH
+        sta sl_h
+        lda #0
+        sta sl_s0
+        sta sl_l
+        sta sl_rv+1
+        lda #3
+        sta sl_sn
+        lda #1
+        sta sl_nl
+        tax                     ; (X = 0 dopo il dex sotto)
+        dex
+        jsr sl_init
+        lda #10                 ; cursore sul primo posto dello zaino (indossati 4 + riga + cintura 4 + riga)
+        sta sl_cur
+        lda #1
+        sta sl_top
+        jsr nav_init
+        jsr iv_cur
+_dyn    jsr inv_dynamic
+_in     jsr sl_nav
+        cmp #NAV_MOVE
+        bne +
+        jsr iv_cur
+        jsr iv_sel
+        jmp _in
++       cmp #NAV_BACK
+        beq _exit
+        cmp #NAV_FIRE
+        beq _f
+        lda keynew              ; DEL (INST/DEL, riga 0 bit 0): elimina
+        and #$01
+        bne _drop
+        lda keynew+4            ; I: chiude anche (lo stesso tasto che l'ha aperto)
+        and #$02
+        beq _in
+_exit   jmp ui_exit
+_f      jsr inv_act
+        jmp _dyn
+_drop   jsr inv_delete
+        jmp _dyn
+; posto della voce del cursore -> ui_cur (la riga separatrice non e' mai sotto il cursore)
+iv_cur  jsr sl_sel
+        lda sl_sl
+        sta ui_cur
+        rts
+; segmenti: indossati (4), cintura (4), zaino (8)
+iv_sg   .byte 3, SK_EQ,0,4, SK_BELT|SK_SEP,0,4, SK_PACK|SK_SEP,0,PACK_N
+iv_box  .byte 0,1,40,5, 0,6,40,12, 0,IV_SY,40,5
+tt_bp   .text "backpack", 0
+
+
+; valore di vendita: "val 1200o d135/178" (08/11: numero e poi la moneta)
+it_val  #msg "val "             ; valore di vendita: prezzo >> SELL_SHIFT (20/11: un quarto)
+; valore di vendita dell'oggetto ui_sel (prezzo >> SELL_SHIFT, balance.yaml shop_rules.sell_divisor), allineato a sinistra
+it_half lda ui_sel
+        asl
+        tay
+        lda itprice+1,y
+        sta tmp1
+        lda itprice,y
+        .rept SELL_SHIFT
+        lsr tmp1
+        ror a
+        .endrept
+        ldx tmp1
+        jsr ui_n5l              ; (08/11) allineato a sinistra
+        jsr ui_coin
+it_dur  lda ui_durm             ; durabilita' " d120/200" (solo oggetti che si usurano), se sta nel riquadro da 18
+        beq _x                  ; (cidx = caratteri gia' scritti dalla riga: " d135/178" sono 9)
+        lda cidx
+        cmp #10
+        bcs _x
+        #msg " d"
+        lda ui_dur
+        jsr ui_b3l
+        lda #$2f
+        jsr ui_putc
+        lda ui_durm
+        jmp ui_b3l
+_x      rts
+
+; caratteristica principale dell'oggetto ui_sel (bonus tmp5), al massimo 9 caratteri:
+; "dmg 2d6+3", "ac +5", "+2 str", "heal 50", "portal"
+it_prim:
+        ldx ui_sel
+        lda itcat,x
+        cmp #CAT_WEAPON
+        beq _w
+        cmp #CAT_RING
+        beq _rg
+        cmp #CAT_POTION
+        beq _po
+        cmp #CAT_SCROLL
+        beq _scr
+        #msg "ac +"             ; armatura / scudo: CA (magia compresa)
+        ldx ui_sel
+        lda itval,x
+        clc
+        adc tmp5
+        jmp ui_b3l
+_rg     lda tmp5                ; anello: +N al modificatore della caratteristica (tmp5 prima di ui_b3l, che lo usa)
+        sta ui_ib
+        #msg "+"
+        ldx ui_sel
+        lda itval,x
+        jsr ui_b3l
+        jsr ring_stat
+        lda #0
+        sta ui_ib
+        rts
+_po     #msg "heal "            ; pozione: cura al livello attuale
+        ldy ui_sel
+        jsr pot_heal
+        ldx mu1
+        jmp ui_n5l
+_scr    #msg "portal"
+        rts
+_w      lda tmp5                ; arma: dadi + magia (08/11: tmp5 salvato, ui_b3l lo usa: prima usciva un numero a caso)
+        pha
+        #msg "dmg "
+        pla
+        tay
+        ldx ui_sel
+        lda itdn,x
+        pha
+        lda itds,x
+        tax
+        pla
+; dadi "NdS+K" tutti nel colore dei valori (08/11): A = N, X = S, Y = K (0 = senza "+K")
+ui_dice:
+        stx tmp6
+        sty tmp7
+        tay
+        lda ui_col
+        pha
+        lda ui_fc               ; (15/11) colore forzato (schermata C: valore nuovo in verde) anche per 'd' e '+'
+        bne +
+        lda #UC_VALUE
++       sta ui_col
+        tya
+        jsr ui_b3l
+        lda #4                  ; 'd'
+        jsr ui_putc
+        lda tmp6
+        jsr ui_b3l
+        lda tmp7
+        beq +
+        lda #$2b
+        jsr ui_putc
+        lda tmp7
+        jsr ui_b3l
++       pla
+        sta ui_col
+        rts
+
+; caratteristica secondaria (al massimo 9 caratteri): "2h pen 1", "dex max 2" o niente
+it_sec:
+        ldx ui_sel
+        lda itreq,x             ; (21/11, O6) FOR richiesta e non raggiunta: "str N" al posto del resto
+        cmp s_str
+        beq _s0
+        bcc _s0
+        #msg "str "
+        ldx ui_sel
+        lda itreq,x
+        jmp ui_b3l
+_s0     lda itcat,x
+        cmp #CAT_ARMOR
+        beq _ar
+        cmp #CAT_WEAPON
+        bne _r
+        lda itfl,x
+        and #1
+        beq _pn
+        #msg "2h "
+_pn     ldx ui_sel
+        lda itpen,x
+        beq _r
+        #msg "pen "
+        ldx ui_sel
+        lda itpen,x
+        jmp ui_b3l
+_ar     lda itfl,x              ; armatura: limite al modificatore di DES
+        cmp #99
+        bcs _r
+        #msg "dex max "
+        ldx ui_sel
+        lda itfl,x
+        jmp ui_b3l
+_r      rts
+
+; anello: " str" / " dex" / " con" secondo ui_ib (1..3)
+ring_stat:
+        lda ui_ib
+        beq _r
+        cmp #4
+        bcs _r
+        sec
+        sbc #1
+        sta tmp7
+        asl
+        adc tmp7                ; x 3
+        tax
+        adc #3
+        sta tmp7                ; fine (ui_putc usa Y: il contatore e' X)
+        lda #$20
+        jsr ui_putc
+_c      lda rs_txt,x
+        jsr ui_putc
+        inx
+        cpx tmp7
+        bne _c
+_r      rts
+rs_txt  .text "strdexcon"
+
+
+; icona: A = codice, X = colore (ui_col preservato)
+ui_icon:
+        ldy ui_col
+        sty tmp6
+        stx ui_col
+        jsr ui_putc
+        lda tmp6
+        sta ui_col
+        rts
+
+; A = id oggetto -> icona della categoria (08/11, TODO 1.3) nel suo colore; spazio se 0 o $FF (oro del baule).
+; Pozioni nel loro colore (itfl). X conservato.
+ui_cic:
+        tay
+        beq _sp
+        iny
+        beq _sp
+        dey
+        txa
+        pha
+        lda itcat,y
+        cmp #CAT_POTION
+        bne +
+        ldx itfl,y
+        bne _c
++       tay
+        ldx cat_icc,y
+_c      lda cat_ic,y
+        cpy #CAT_POTION         ; (pozione: Y = id, l'icona e' fissa)
+        bcc +
+        lda #CH_POT
+        cpy #CAT_SCROLL
+        bne +
+        lda #CH_SCR
++       jsr ui_icon
+        pla
+        tax
+        rts
+_sp     lda #$20
+        jmp ui_putc
+cat_ic  .byte $20, CH_SWORD, CH_ARMOR, CH_SHLD, CH_RING
+cat_icc .byte 0, 1, 15, 9, 7, 0, 15
+
+
+; statistiche (righe 2-4), lista, riquadro dell'oggetto
+inv_dynamic:
+        lda #2                  ; righe 2-4 pulite (i valori cambiano lunghezza)
+        sta iv_r
+_c      ldx #1
+        ldy iv_r
+        jsr ui_at
+        lda #$20
+        ldy #37
+-       sta (cp),y
+        dey
+        bpl -
+        inc iv_r
+        lda iv_r
+        cmp #5
+        bne _c
+        jsr ui_labels
+        .byte 2,2
+        .text "lvl"
+        .byte 0,9,2
+        .text "xp"
+        .byte 0,2,3
+        .text "hp"
+        .byte 0,13,3
+        .text "att +"
+        .byte 0,21,3
+        .text "ac"
+        .byte 0,28,3
+        .text "dmg"
+        .byte 0,2,4
+        .text "str"
+        .byte 0,9,4
+        .text "dex"
+        .byte 0,16,4
+        .text "con"
+        .byte 0,$ff
+        #at 6,2
+        lda c_lvl
+        jsr ui_b3l
+        #at 12,2                ; xp come nell'HUD (08/11): "9999/27k", da 10000 in migliaia (16 bit bassi)
+        lda c_xp
+        ldx c_xp+1
+        jsr ui_n5k
+        ldx c_lvl
+        cpx #PL_MAXLVL
+        bcs _xm                 ; livello massimo: niente soglia
+        lda #$2f
+        jsr ui_putc
+        lda xp_n1-1,x
+        pha
+        lda xp_n0-1,x
+        tay
+        pla
+        tax
+        tya
+        jsr ui_n5k
+_xm
+        #at 26,2
+        jsr ui_gold
+        lda c_gold
+        ldx c_gold+1
+        jsr ui_n5l
+        #at 33,2                ; chiavi
+        jsr keys_n
+        #at 5,3
+        lda c_hp
+        ldx c_hp+1
+        jsr ui_n5l
+        lda #$2f
+        jsr ui_putc
+        lda hpmax
+        ldx hpmax+1
+        jsr ui_n5l
+        #at 18,3
+        lda s_att
+        jsr ui_b3l
+        #at 24,3
+        lda s_ac
+        jsr ui_b3l
+        #at 32,3
+        lda s_dn
+        ldx s_ds
+        ldy s_dk
+        jsr ui_dice
+        #at 6,4
+        lda s_str
+        jsr ui_b3l
+        #at 13,4
+        lda s_dex
+        jsr ui_b3l
+        #at 20,4
+        lda s_con
+        jsr ui_b3l
+        ldx #0
+        jsr sl_draw
+; riquadro dell'oggetto sotto il cursore (titolo = icona e nome; caratteristiche, valore e durabilita', confronto con
+; l'indossato della stessa categoria o la provenienza)
+iv_sel:
+        ldx #1                  ; titolo: cornice pulita, poi " icona nome "
+        ldy #IV_SY
+        jsr ui_at
+        lda ui_bc
+        sta ui_col
+        ldx #38
+-       lda #BOX_H
+        jsr ui_putc
+        dex
+        bne -
+        lda #IV_SY+1            ; righe 19-21 pulite
+        sta iv_r
+_cl     ldx #1
+        ldy iv_r
+        jsr ui_at
+        lda #$20
+        ldy #37
+-       sta (cp),y
+        dey
+        bpl -
+        inc iv_r
+        lda iv_r
+        cmp #IV_SY+4
+        bne _cl
+        jsr sl_sel
+        #at 2,IV_SY
+        lda #$20
+        jsr ui_putc
+        lda ui_sel
+        bne +
+        rts
++       jsr ui_cic
+        lda tmp5
+        sta ui_ib
+        lda ui_sel
+        jsr ui_item
+        jsr iv_trim             ; (ui_item riempie 16 colonne: la cornice riprende dopo il nome)
+        #at 2,IV_SY+1           ; caratteristiche
+        jsr it_prim
+        lda #$20
+        jsr ui_putc
+        jsr it_sec
+        #at 2,IV_SY+2           ; valore e durabilita' (it_val senza la sua durabilita' corta)
+        lda ui_durm
+        pha
+        lda #0
+        sta ui_durm
+        jsr it_val
+        pla
+        sta ui_durm
+        beq +
+        #msg "  dur "
+        lda ui_dur
+        jsr ui_b3l
+        lda #$2f
+        jsr ui_putc
+        lda ui_durm
+        jsr ui_b3l
++       #at 2,IV_SY+3           ; provenienza o confronto
+        lda sl_mk
+        cmp #CH_PACK
+        beq _cmp
+        tay
+        ldx #ICOL_EQ
+        lda #<tx_eqd
+        cpy #CH_EQ
+        beq +
+        ldx #UC_LABEL
+        lda #<tx_inb
++       pha
+        tya
+        jsr ui_icon
+        pla
+        ldx #>tx_eqd
+        jmp ui_puts
+_cmp    ldx ui_sel              ; zaino: "you: " + caratteristica principale dell'indossato della stessa categoria
+        lda itcat,x
+        cmp #CAT_RING+1
+        bcs _x
+        tax
+        lda c_eq-1,x
+        beq _x
+        sta ui_sel
+        lda c_eqb-1,x
+        sta tmp5
+        lda #UC_LABEL
+        sta ui_col
+        #msg "you: "
+        jmp it_prim
+_x      rts
+; la cornice del titolo riprende dopo il nome (gli spazi di riempimento di ui_item tornano BOX_H)
+iv_trim:
+        ldy cidx
+_t      dey
+        lda (cp),y
+        cmp #$20
+        bne _e
+        lda #BOX_H
+        sta (cp),y
+        lda ui_bc
+        sta (ccp),y
+        bne _t
+_e      iny
+        lda #$20
+        sta (cp),y
+        rts
+tx_eqd  .text " equipped", 0
+tx_inb  .text " in belt", 0
+        .cerror (>tx_eqd) != (>tx_inb), "tx_eqd e tx_inb nella stessa pagina"
+

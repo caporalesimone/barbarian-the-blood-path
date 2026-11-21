@@ -136,7 +136,8 @@ flowchart TB
 | `combat.asm` | 895 | aritmetica (d20, dadi, moltiplicazioni), statistiche del PG, schede dei mostri del piano (`floor_types`), tiro per colpire e danni (`hit_one`, `mon_attack`), usura, tempi di abilità, pozioni | [Combattimento](combattimento.md) |
 | `levels.asm` | 1112 | nuovo eroe, villaggio, `enter_gfx`, `load_location`, `place_player`, `change_level`, STASH del piano lasciato, `game_start`, varianti di test `TESTUI` | [Flussi](flussi.md) |
 | `dungeon.asm` + `gen_io.asm` | 139 + 840 | generazione dal seed; il generatore vero gira nella RAM sotto l'I/O (`gen_call`, `$01 = $34`); (18/11) stanze, grotte, palude o (19/11) cittadella secondo `lv_look` | [Dungeon](dungeon.md) |
-| `ui.asm` | 3240 | primitive delle schermate (testo, numeri, riquadri), motore dei menu (`ui_nav`), inventario, voci condivise coi negozi, minimappa, schermate varie, barra di I/O, menu di gioco, baule del piano | [Interfaccia](interfaccia.md) |
+| `core.asm` (`slist.asm`, `inv.asm`) | ~1100 | (21/11, TODO D15) **segmento CORE** a `$E000` (RAM sotto il KERNAL, file `core`): liste a scorrimento (`sl_*`), schermata dell'inventario, descrizione degli oggetti; costruito in due passate come il generatore | [Interfaccia](interfaccia.md) |
+| `ui.asm` | 3240 | primitive delle schermate (testo, numeri, riquadri), motore dei menu (`ui_nav`), ingresso dell'inventario, voci condivise coi negozi, minimappa, schermate varie, barra di I/O, menu di gioco, baule del piano | [Interfaccia](interfaccia.md) |
 | `stash.asm`, `stash_io.asm` | 135 + 125 | baule della locanda (logica residente), caricamento del modulo MENU (`ovl_town`) e decompressore ZX0; oro del baule (CODE2) | [Villaggio](villaggio.md) |
 | `hud.asm`, `bar.asm` | 796 + 798 | fascia HUD in basso e catena degli interrupt raster; barra in alto (vita e nome del bersaglio, 8 sprite) | [Interfaccia](interfaccia.md), [Prestazioni](prestazioni.md) |
 | `music.asm` | 361 | richieste di musica, caricamento dei brani, combattimento; player e effetti in `src/common/` | [Musica](musica.md) |
@@ -188,7 +189,8 @@ flowchart TB
         SLT["$D8DA-$DAAA slot dei piani del capitolo<br/>(5 x 93 B, LVRAM)"]
     end
     subgraph R5["$E000-$FFFF RAM sotto il KERNAL"]
-        CT["$E000 cache del villaggio (GFX0)"]
+        CORE["$E000-$E99C segmento CORE (21/11): liste,<br/>inventario, descrizione degli oggetti (file core)"]
+        CT["$EC00 file del villaggio (TWNc), poi appoggio del MENU"]
         CD["$EC6D-$F4DF buffer del tema<br/>(GFXn letto a ogni ingresso; 15/11: comincia<br/>nella coda del villaggio)"]
         Z2["$F4E0-$FCFF MENU zona 2"]
         FM["$FD00-$FFF9 FMAP, $FFFA vettori"]
@@ -204,7 +206,8 @@ flowchart TB
 | codice del piano `$C900`–`$CFFF` (19/11) | `ovp_copy` (`gfx_tail`) dalla coda del tema del piano (oggi `GFX8`, sala del trono) | lettura del tema successivo | nel dungeon la zona 1 del MENU è libera: [dungeon](dungeon.md#codice-del-piano-1911) |
 | STASH `$D000`–`$D07F` | `st_out` (portale, morte) | rientro nel piano (`st_in`) o cambio | boss, 5 mostri caldi e 10 bauli lasciati del piano lasciato (19/11) |
 | generatore `$D080`– | avvio (`gen_install`) | sempre | eseguito con `$01 = $34` |
-| file del villaggio `$E000` | `load_gfx 0` | `gfx_install` lo usa subito; poi il file MENU ci si appoggia (18/11) | (11/11) nessuna cache: si rilegge a ogni ingresso; dal 18/11 non si rilegge dopo un salvataggio |
+| segmento CORE `$E000`–`core_end` (21/11, TODO D15) | `core_need` (file `core`): alla prima schermata, in `sv_write` dopo ogni salvataggio, in `ui_begin`, `ui_inventory` e `main_loop` se manca | finché un salvataggio o una lettura dell'eroe (`sv_read`, `sv_save`: `core_ok` = 0) non lo copre | codice di GAME fuori dal PRG: liste a scorrimento, inventario, descrizione degli oggetti (`src/game/core.asm`); il KERNAL sempre escluso lo rende chiamabile come il resto del gioco. Fine al massimo all'inizio dell'appoggio del file MENU (`ML_LO` = `core_end`, `pack_menu.py`) |
+| file del villaggio `$EC00` (21/11; prima `$E000`) | `load_gfx 0` | `gfx_install` lo usa subito; poi il file MENU ci si appoggia (18/11) | (11/11) nessuna cache: si rilegge a ogni ingresso; dal 18/11 non si rilegge dopo un salvataggio; copre la zona 2 del MENU, che si rilegge a ogni ingresso nel villaggio |
 | immagine del salvataggio `$E000`, buffer del plugin `$ECE0` | `sv_read` / plugin di save | fine del salvataggio | solo durante un salvataggio (interrupt spenti) |
 | buffer del tema `GFX_DUN_AT` (`$EC6D`)–`$F4DF` | `load_gfx n` | `gfx_install` (poi dato morto: un salvataggio lo copre) | (15/11) i primi 147 B sono la coda del buffer del villaggio: villaggio e dungeon non sono mai in RAM insieme |
 | colori e nomi dei mostri `NM_AT` (`$8F6D`–`$8FFF`) | `gfx_install` (blocco info del tema) | tema successivo | (15/11) `build_sprites` (colore), `bar_name` (nome) |

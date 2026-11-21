@@ -1195,10 +1195,11 @@ def preview(cs, sp):
     img.save(os.path.join(ROOT, "out", "work", "gfx", "sprites.png"))
 
 
-GFX_TOWN_AT = 0xE000                 # cache: tile del villaggio (RAM sotto il KERNAL)
+GFX_TOWN_AT = 0xEC00                 # file del villaggio (RAM sotto il KERNAL); (21/11) sopra il segmento CORE ($E000-)
+assert GFX_TOWN_AT + 4 * 360 + 0x760 <= 0xFD00, "file del villaggio (tile + TOWN_MAX) oltre FMAP"
 GFX_DUN_END = 0xF4E0                 # fine del buffer del tema (inizio della zona 2 del MENU, src/game/stash.asm MR2_AT)
-# (15/11) il buffer del tema finisce sempre a GFX_DUN_END e comincia GFX_INFO byte prima di $ED00 (blocco info): quei byte
-# sono la coda del buffer del villaggio ($E000), libera nel dungeon (il villaggio si rilegge a ogni ingresso).
+# (15/11) il buffer del tema finisce sempre a GFX_DUN_END (lunghezza fissa); villaggio e tema non sono mai in RAM insieme
+# (il villaggio si rilegge a ogni ingresso; 21/11: i due file cominciano quasi allo stesso indirizzo).
 GFX_DUN_AT = None                    # calcolato in main(): GFX_DUN_END - lunghezza del file
 DUN_NT = 27                          # tile dei dungeon: 0..26 (muri, pavimenti, scale, portale, bauli; 8-11 liberi)
 

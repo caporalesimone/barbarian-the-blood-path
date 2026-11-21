@@ -1,8 +1,8 @@
 """Gold (10/11, sanity of the gold-in-tens feature, moved to regression on 11/11): inn chest gold in tens, payment with the total gold, no withdrawal, a sale
 over the purse cap does nothing. Only GAME and the module MENU (its zones, out/work/menu_zK.prg; 11/11) are loaded in VICE,
 without starting the game, and the real routines are called (st_gold, add_gold16, gold_need/gold_pay, shop_buy/shop_sell
-with a simulated confirmation) with the state written to memory, $01 = $35 as in the menus (zone 2 is under the
-KERNAL): one session, ~2 s."""
+with a simulated confirmation) with the state written to memory, $01 = $35 as in the game (zone 2 and the CORE segment
+are under the KERNAL): one session, ~2 s."""
 import os
 from lib.c64 import Vice, labels, OUT
 from c64test import test, check
@@ -17,9 +17,11 @@ def setup(ctx):
     v.cmd("bank ram")
     for k in (1, 2, 3):
         v.load(os.path.join(OUT, "menu_z%d.prg" % k))
+    v.load(os.path.join(OUT, "core.prg"))                       # (21/11) CORE segment under the KERNAL (item names, values)
     v.cmd("bank cpu")
-    v.poke(1, 0x35)                                             # KERNAL out, as in the menus
+    v.poke(1, 0x35)                                             # KERNAL out, as in the game since 21/11
     L = labels("game"); L.update(labels("menu"))
+    v.poke(L["core_ok"], 1)                                     # CORE in RAM: no read from the disk (there is no Krill here)
     ctx["L"] = L
 
 

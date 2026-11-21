@@ -35,6 +35,8 @@ HERO_LEN = CHREND - CHRBLK
 LV_SLOT  = 93                   ; stato compatto di un piano: 82 o 93 byte (9 + baule del boss 1 o 12 + nebbia 72)
 SV_LEN   = HERO_LEN + MAXLEVEL*LV_SLOT
 SV_IMG   = $e000                ; immagine del file (RAM sotto il KERNAL)
+SV_ALT   = $ec00                ; (21/11) immagine letta e basta (load_char, chap_ensure): sopra il segmento CORE, nel buffer
+        .cerror (<SV_IMG) != 0 || (<SV_ALT) != 0 || SV_ALT < core_end || SV_ALT + SV_LEN > MR2_AT || HERO_LEN - LV_SLOT > 255, "SV_ALT"
 SV_SCR   = $ece0                ; buffer del plugin ($0800 byte, "drive-code buffer" di Krill)
         .cerror SV_IMG + SV_LEN > krill_save, "immagine del salvataggio sopra il plugin di save (tools/build/krill_build.sh, TRANSIENT)"
         .cerror krill_save + KRILL_SAVE_LEN > SV_SCR, "plugin di save sopra il suo buffer"
@@ -155,13 +157,18 @@ _s      .text "save-0"
 
 ; file dell'eroe cur_slot -> SV_IMG. C=1 errore
 sv_read:
+        lsr core_ok             ; (21/11) SV_IMG copre il segmento CORE: da rileggere
+        lda #>SV_IMG
+; (21/11, TODO D15) A = pagina dell'immagine: SV_IMG (salvataggi) o SV_ALT (solo lettura: load_char, chap_ensure; non copre CORE)
+sv_rdh:
+        pha
         jsr snd_io
         jsr io_begin
         jsr sv_name
-        lda #<SV_IMG
-        sta krill_loadaddrlo
-        lda #>SV_IMG
+        pla
         sta krill_loadaddrhi
+        lda #0
+        sta krill_loadaddrlo
         sec
         ldx #<sv_nm
         ldy #>sv_nm
@@ -181,9 +188,14 @@ sv_write:
         sty sv_par+4
         ldy #>SV_LEN
         sty sv_par+5
-        ; (fallthrough)
+        jsr sv_save
+        php                     ; (21/11) fine del gruppo di operazioni: il segmento CORE di nuovo in memoria (C conservato)
+        jsr core_need
+        plp
+        rts
 ; plugin di save: nome A/X, gia' scritti da/lunghezza/indirizzo in sv_par+2..+7. C=1 errore
 sv_save:
+        lsr core_ok             ; (21/11) plugin e suo buffer coprono il segmento CORE: da rileggere
         sta sv_par
         stx sv_par+1
         clc                     ; plugin ricaricato dal disco (file KSAVE) a ogni save: modifica il proprio codice
@@ -268,10 +280,11 @@ load_char:
         sta io_dir
         lda #0
         sta io_what
-        jsr sv_read
+        lda #>SV_ALT            ; (21/11) solo lettura: a SV_ALT, cosi' il segmento CORE resta
+        jsr sv_rdh
         bcs _old
-        ldx #0                  ; (21/11) SV_IMG e' sotto il KERNAL, sempre escluso (MEMCFG)
-_l      lda SV_IMG,x
+        ldx #0
+_l      lda SV_ALT,x
         sta CHRBLK,x
         inx
         cpx #HERO_LEN
@@ -365,13 +378,16 @@ _z      sta slot_valid,x
         jmp hdr_write
 
 ; ---------------------------------------------------------------- piani
-; rpt = SV_IMG + HERO_LEN + (A-1)*LV_SLOT (A = piano 1..MAXLEVEL)
+; rpt = SV_IMG (SV_ALT se tmp6 = 1) + HERO_LEN + (A-1)*LV_SLOT (A = piano 1..MAXLEVEL)
 rec_level:
         tax
         lda #<(SV_IMG+HERO_LEN-LV_SLOT)
         sta rpt
-        lda #>(SV_IMG+HERO_LEN-LV_SLOT)
-        sta rpt+1
+        lda #>SV_IMG            ; (21/11) tmp6 = 1 (immagine -> slot, chap_ensure): l'immagine e' a SV_ALT
+        ldy tmp6
+        beq +
+        lda #>SV_ALT
++       sta rpt+1
 -       lda rpt
         clc
         adc #LV_SLOT
@@ -529,9 +545,10 @@ chap_ensure:
         sta io_what
         lda cur_level
         sta io_lvl
-        jsr sv_read
+        lda #>SV_ALT            ; (21/11) solo lettura: a SV_ALT (il tema nel buffer e' gia' installato), CORE resta
+        jsr sv_rdh
         bcs _bad
-        lda #1                  ; immagine -> slot
+        lda #1                  ; immagine (SV_ALT) -> slot
         jsr chap_copy
         rts
 _bad    lda #0                  ; slot vuoti: primo byte 0 (lv_get li scarta perche' diverso dal piano)

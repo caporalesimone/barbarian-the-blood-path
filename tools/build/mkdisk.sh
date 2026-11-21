@@ -53,6 +53,9 @@ for f in out/work/bundle/gfx[12].prg; do n=$(basename $f .prg); ARGS+=(-f $n -w 
 for f in out/work/snd/snd*.prg; do n=$(basename $f .prg); [ $HUB = 1 ] && [ $n = snd0 ] && continue; ARGS+=(-f $n -w $f); done     # brani (tools/build/gen_music.py)
 ARGS+=(-f title -w out/work/title.prg -f lore -w out/work/lore.prg -f ldat -w out/work/ldat.prg -f help -w out/work/helpz.prg -f jukebox -w out/work/jukebox.prg)
 ARGS+=(-f hl -w out/work/hl.prg -f ksave -w out/work/krill/save.prg)     # ksave: plugin di save di Krill, ricaricato a ogni save
+# (21/11, TODO D15) core: segmento CORE di GAME (src/game/core.asm), riletto dopo ogni salvataggio. Posizione scelta misurando
+# PERF-DISK con 9 posizioni: qui (fra ksave e save-01) la somma dei tempi e' la piu' bassa (81,7 s, senza il file 79,2 s)
+ARGS+=(-f core -w out/work/core.prg)
 for s in 1 2 3 4 5; do ARGS+=(-f save-0$s -w out/work/save.prg); done
 # (18/11, PERF-12, docs/wiki/FastLoader.md 7.2) Krill cerca un file in una finestra di 11 voci della directory e, se non c'e',
 # legge i settori della directory successivi in giro (solo in avanti). Dopo un salvataggio la finestra sta sui file di

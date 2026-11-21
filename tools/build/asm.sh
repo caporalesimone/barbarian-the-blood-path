@@ -20,7 +20,9 @@ asm_game() {
     local log=$1; shift
     mkdir -p out/tmp
     64tass -a "$@" -D GENPASS=1 $INC src/game.asm -o out/tmp/genpass1.prg -l out/tmp/genpass1.lbl -L out/tmp/genpass1.lst > "$log" 2>&1 || return 1
-    python3 tools/build/gen_imgz.py out/tmp/genpass1.prg out/tmp/genpass1.lbl >> "$log" 2>&1 || return 1
+    local o="" prev=""                       # (21/11, TODO D15) file del segmento CORE accanto al PRG: game.prg -> core.prg
+    for a in "$@"; do [ "$prev" = "-o" ] && o=$a; prev=$a; done
+    python3 tools/build/gen_imgz.py out/tmp/genpass1.prg out/tmp/genpass1.lbl out/work/gen_img.zx0 "$(dirname "$o")/$(basename "$o" .prg | sed 's/game/core/').prg" >> "$log" 2>&1 || return 1
     64tass -a "$@" -D GENPASS=2 $INC src/game.asm >> "$log" 2>&1
 }
 if [ "$1" = "release-game" ]; then

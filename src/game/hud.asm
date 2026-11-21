@@ -71,7 +71,7 @@ irq_entry:
         beq _irq
         jmp ($0316)
 _irq    jmp ($0314)
-        .cerror >(irq_entry+11) != >(irq_entry+13), "irq_entry: il beq non deve cambiare pagina (cicli come nella ROM)"
+        .cerror (>(irq_entry+11)) != (>(irq_entry+13)), "irq_entry: il beq non deve cambiare pagina (cicli come nella ROM)"
 ; uscita dell'IRQ (copia di $EA81-$EA86 della ROM)
 irq_exit:
         pla

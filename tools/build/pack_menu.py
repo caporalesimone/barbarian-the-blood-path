@@ -49,7 +49,7 @@ def main():
     fend = G["MR2_END"]
     assert zs[last][3] == fend, "la zona sul posto deve finire a MR2_END"
     load_at = fend - total
-    assert load_at >= G["ML_LO"], "file MENU di %d B: scende sotto ML_LO ($%04x, cache del villaggio) di %d B" % (total, G["ML_LO"], G["ML_LO"] - load_at)
+    assert load_at >= G["ML_LO"], "file MENU di %d B: scende sotto ML_LO ($%04x, fine del segmento CORE) di %d B" % (total, G["ML_LO"], G["ML_LO"] - load_at)
     hdr, data, pos = [len(zs)], b"", load_at + hdr_len
     for k in order:
         hdr += [pos & 255, pos >> 8, zs[k][1] & 255, zs[k][1] >> 8]
