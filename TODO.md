@@ -26,7 +26,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M10, M3, M4, M5 |
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
-| 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
+| 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H7, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J3, J2, J1 |
 | Z | [Note urgenti](#z--note-urgenti) | Z4 |
@@ -254,7 +254,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - **Atteso**: margine di GAME ~+2300 B (misura) e ~+100–150 B dal passo 1 (stima). Avvio e save al massimo +1 s.
 - **Attenzioni**: `CORE` finisce dove comincia l'appoggio del file MENU (`.cerror`); un caricamento di Krill con `$01=$35` non è
   ancora provato (dal sorgente il residente non tocca `$01`); il disco ha 75 blocchi liberi; con gli affissi (database ~2470 B)
-  servirà una leva di riserva: scheda del personaggio letta all'apertura (+1517 B, tempo da misurare), D10, testo a 5 bit.
+  servirà una leva di riserva: scheda del personaggio letta all'apertura (+1517 B, tempo da misurare), D10. (21/11 sera) Fatti testo a 5 bit e font della UI compattato: margine 1534 B ([tecnica](docs/wiki/tecnica.md)).
 - (21/11, **da fare** con gli affissi) Database degli oggetti diviso per momento d'uso e generazione da un sottoinsieme
   preparato durante i caricamenti: [oggetti](docs/wiki/oggetti.md#memoria-e-salvataggi-f7-approvato). Non cambia i passi qui sopra.
   **(21/11 sera, fase 3 degli affissi fatta senza sottoinsieme)**: le tabelle di generazione (`af_min`, `af_ty`, `af_ch`, `af_pl`/`af_ph`,
@@ -265,7 +265,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   margine **942 B**; sotto l'I/O restano ~30 B (`LVRAM_end` = `$DFE1`). Provato e scartato: `ui_badsave` nel LOBBY (37 B oltre `$CBFF`).
   Leve rimaste (da decidere): la scheda C (1517 B) nella coda dei file del tema e del villaggio, gia' letti a ogni ingresso
   (niente accesso in piu' al disco, ~6 blocchi in piu' per file; da rileggere dopo un salvataggio); il sottoinsieme qui sopra;
-  testo a 5 bit (D10).
+  (fatto il 21/11 sera: testo a 5 bit e font compattato, margine 1534 B).
 - **Fatto (21/11), fase B**: negozi, locanda e baule del piano sulle liste a scorrimento, vecchia interfaccia comune tolta
   (margine di GAME 2437 B, zone 1 e 2 del MENU con 863 e 523 B liberi); branch `liste-menu` unito a `main` il 21/11.
 - (21/11, committente) **Budget del passaggio fra dungeon e villaggio: al massimo 3 s**: entro quel tempo si può caricare
@@ -544,6 +544,20 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - **Da decidere con il committente** (15/11): i colori dei disegni (Hellhound e Blood Knight sono rossi, 2, come il Lord of Ruin:
   nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema
   grigio del capitolo 3 si legge poco sui muri chiari: screenshot `out/work/villages/monsters3.png` dei test `MON-CHAP-*`); se i boss con nome dei piani normali devono avere nomi per capitolo (oggi `first_names`/`epithets` comuni).
+
+### H7 (21/11 sera, committente) Testi delle quest: meno caratteri speciali, 5 bit e compressione — S
+- **Obiettivo**: far stare piu' quest e testi piu' lunghi nei file `QSTn` (1024 B ciascuno: oggi `QST0` 999 B, cioe' indice e codice
+  della pagina quasi pieni, e `QST2` 931 B).
+- **Passi decisi dal committente**:
+  1. **Rivedere i testi** di `data/quests.yaml` per usare il minor numero possibile di caratteri speciali (es. niente `;`, che
+     non e' fondamentale: si riscrive la frase). Ideale: solo lettere, spazio, `:` `.` `/` (5 bit) e pochi segni della tabella
+     `T5X` (10 bit).
+  2. **Testo a 5 bit** come nel gioco (`docs/wiki/tecnica.md`, "Testo a 5 bit"): codificatore Python in `tools/build/gen_quests.py`
+     (stessa tabella della macro `t5` di `src/common/macros.inc`), stampa con `ui_puts5` di GAME in `src/qpage.asm`; titoli
+     dell'indice e righe del dettaglio. Testo leggibile in `quests.yaml` (regola: il testo a 5 bit si scrive sempre leggibile).
+  3. **Compressione** se ha senso: valutare ZX0 dei file `QSTn` (decompressore gia' in GAME, `src/common/zx0.inc`) o un dizionario
+     di parole frequenti, misurando i byte risparmiati contro il codice in piu' in `QST0` e il tempo di caricamento.
+- **Quando**: con H1 o prima di aggiungere una quest (in `QST0` restano 25 B). Test: le pagine delle quest a video uguali.
 
 ### H1 (ex 5.1) Quest system — XL
 - **Progetto deciso il 20/11** ([quests](docs/wiki/quests.md)): regole, trama The Blood Tithe, catena di 12 passi, 15 accessorie,

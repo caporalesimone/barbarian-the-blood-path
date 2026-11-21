@@ -92,8 +92,9 @@ TILE = {
     "CIRCLE": ("pentacle circle", "circle of the pentacle around the final boss"),
 }
 
-# ------------------------------------------------------------------ UI font (out/work/gfx/uifont.bin, 128 screen codes)
-# codes 0..63: normal glyphs; 64..127: the inverted versions (ui_putc with inv = $40), but for the redrawn icons.
+# ------------------------------------------------------------------ UI font (out/work/gfx/uifont.bin, UIF_N = 80 screen codes)
+# codes 0..63: normal glyphs; 64..79 (21/11 evening): the icons one after the other (no inverted block any more: the RAM after
+# the glyphs holds GAME tables, src/game.asm gd_font).
 SCREEN = "@abcdefghijklmnopqrstuvwxyz[£]↑← !\"#$%&'()*+,-./0123456789:;<=>?"
 # code -> (name, constant or key, description)
 UI = {
@@ -106,24 +107,22 @@ UI = {
     34: ("hammer", "CH_ANVIL", "icon of the smith: shop title (yellow) and minimap (white); instead of \""),
     35: ("shield", "CH_SHLD", "icon of the shield category (brown) in equipped, inventory, chest, shop; instead of #"),
     36: ("flask", "CH_FLASK", "icon of the alchemist: shop title and minimap (yellow); instead of $"),
-    91: ("key", "CH_KEY", "keys next to the gold (purse) and in the item box"),
-    92: ("coin", "CH_COIN", "gold: values and prices (\"600o\"), title of the golden chest (08/11: a coin with an engraved C)"),
-    93: ("arrow", "CH_ARROW", "right arrow: C screen, current value -> value with the pending points (15/11; free since 08/11)"),
-    94: ("potion", "CH_POT", "potions in the belt and in the shops, in the colour of the potion (red, yellow, violet)"),
-    95: ("scroll", "CH_SCR", "portal scrolls (s N) and icon of the category"),
-    97: ("sword", "CH_SWORD", "icon of the weapon category (equipped, inventory, chest, shop) and title of the barbarian menu"),
-    98: ("armor", "CH_ARMOR", "icon of the armor category"),
-    99: ("ring", "CH_RING", "icon of the ring category (yellow)"),
-    100: ("skull", "CH_SKULL", "title of the death screen (09/11)"),
-    101: ("tankard", "CH_INN", "inn: title \"inn\" (yellow) and icon on the minimap (light green) (09/11)"),
-    102: ("check", "CH_EQ", "scrolling lists (21/11): mark of an equipped item (yellow), in front of the item icon"),
-    103: ("belt", "CH_BELT", "scrolling lists (21/11): mark of a belt slot (light blue), also on empty slots"),
-    104: ("thin separator", "CH_SEP", "scrolling lists (21/11): thin centred line between the blocks (equipped, belt, pack)"),
-    106: ("scroll thumb", "CH_THUMB", "scrolling lists (21/11): thumb of the scroll bar on the right side of the box (light grey)"),
-    107: ("backpack", "CH_PACK", "scrolling lists (21/11): mark of an item in the pack (light grey)"),
-    124: ("bar 1/3", "$7c", "progress bar: one third full (bar_glyph, io_screen)"),
-    125: ("bar 2/3", "$7d", "progress bar: two thirds full (bar_glyph)"),
-    126: ("bar full", "$7e", "progress bar: full character (bar_glyph)"),
+    64: ("cursor", "CH_CURS", "inverted space: cursor of the name and seed fields (LOBBY, new barbarian); 21/11 evening: before, the inverted block with inv = $40"),
+    65: ("key", "CH_KEY", "keys next to the gold (purse) and in the item box"),
+    66: ("coin", "CH_COIN", "gold: values and prices (\"600o\"), title of the golden chest (08/11: a coin with an engraved C)"),
+    67: ("arrow", "CH_ARROW", "right arrow: C screen, current value -> value with the pending points (15/11)"),
+    68: ("potion", "CH_POT", "potions in the belt and in the shops, in the colour of the potion (red, yellow, violet)"),
+    69: ("scroll", "CH_SCR", "portal scrolls (s N) and icon of the category"),
+    70: ("sword", "CH_SWORD", "icon of the weapon category (equipped, inventory, chest, shop) and title of the barbarian menu"),
+    71: ("armor", "CH_ARMOR", "icon of the armor category"),
+    72: ("ring", "CH_RING", "icon of the ring category (yellow)"),
+    73: ("skull", "CH_SKULL", "title of the death screen (09/11)"),
+    74: ("tankard", "CH_INN", "inn: title \"inn\" (yellow) and icon on the minimap (light green) (09/11)"),
+    75: ("check", "CH_EQ", "scrolling lists (21/11): mark of an equipped item (yellow), in front of the item icon"),
+    76: ("belt", "CH_BELT", "scrolling lists (21/11): mark of a belt slot (light blue), also on empty slots"),
+    77: ("thin separator", "CH_SEP", "scrolling lists (21/11): thin centred line between the blocks (equipped, belt, pack)"),
+    78: ("scroll thumb", "CH_THUMB", "scrolling lists (21/11): thumb of the scroll bar on the right side of the box (light grey)"),
+    79: ("backpack", "CH_PACK", "scrolling lists (21/11): mark of an item in the pack (light grey)"),
 }
 PUNCT = {" ": "space", "!": "exclamation mark", "\"": "quotes", "#": "hash", "$": "dollar", "%": "percent",
          "&": "ampersand", "'": "apostrophe", "(": "open parenthesis", ")": "close parenthesis", "*": "asterisk", "+": "plus",
@@ -134,9 +133,9 @@ RELIQUIA = set("abcdefghijklmnopqrstuvwxyz0123456789 !',-./:?")
 
 
 def ui_glyphs():
-    """the 128 codes of the UI font: list of dict(c, name, key, desc, kind)"""
+    """the UIF_N codes of the UI font: list of dict(c, name, key, desc, kind)"""
     out = []
-    for c in range(128):
+    for c in range(80):
         base, inv = c & 63, c >= 64
         ch = SCREEN[base]
         if c in UI:

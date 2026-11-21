@@ -515,9 +515,9 @@ space.append(dict(name="Game charset (256 codes: tiles, HUD, minimap)", used=256
                   free=[dict(i=o["c"], n=o["l"], id="") for o in codes if o["k"] == "free"],
                   note="free codes for new HUD glyphs: the ones listed (the others are 4 tile quarters, HUD glyphs, minimap)"))
 uf = [o for o in uiglyphs if o["kind"] == "free"]
-space.append(dict(name="UI font (128 codes)", used=128 - len(uf), cap=128, free=[dict(i=o["c"], n=o["name"], id="") for o in uf],
-                  note="certainly free: only the ones listed. Codes 64-127 not redrawn are the inverted letters: many never "
-                       "show on a screen, but which ones is not verified, so here they count as used"))
+space.append(dict(name="UI font (80 codes)", used=80 - len(uf), cap=80, free=[dict(i=o["c"], n=o["name"], id="") for o in uf],
+                  note="(21/11 evening) icons one after the other from 64, no inverted block: codes 80-127 do not exist, their "
+                       "RAM ($BA80-$BBFF) holds GAME tables. A new icon goes at 80 and moves the tables (src/game.asm gd_font)"))
 title_info = dict(used=used_cells, free=1000 - used_cells, rows={str(k): spans(v) for k, v in sorted(free_rows.items())},
                   colors=sorted(colcount.items(), key=lambda x: -x[1]), size=title_size)
 html = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "atlas_template.html")).read()

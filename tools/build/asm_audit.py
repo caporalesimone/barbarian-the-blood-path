@@ -13,7 +13,7 @@ import collections, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 OUT = os.path.join(ROOT, "out", "work")
-PROGS = ["game", "lobby", "menu", "start", "barbarian", "lore", "help", "jukebox"]
+PROGS = ["game", "lobby", "menu", "start", "barbarian", "lore", "help", "jukebox", "qpage", "cheats"]   # (21/11 sera) + qpage, cheats: chiamano GAME (ui_puts)
 # riga d'istruzione: .indirizzo [indirizzo di esecuzione (.logical)] byte  istruzione  sorgente (formati diversi per programma)
 INS = re.compile(r"^\.([0-9a-f]{4})\t(?:([0-9a-f]{4})\t|\t)?((?:[0-9a-f]{2} ?){1,3})\t+(\w{3})(?:[ \t]+([^\t]*?))?\t+(.*)$")
 LAB = re.compile(r"^\.([0-9a-f]{4})\t+(?:([0-9a-f]{4})\t+)?([A-Za-z_][\w.]*|[+-]+):?\s*(?:;.*)?$")

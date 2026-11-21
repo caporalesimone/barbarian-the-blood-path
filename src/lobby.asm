@@ -198,8 +198,8 @@ _red    sta COLRAM+18,x
         jsr ui_boxes
         jsr ui_labels
         .byte 9,2
-        .text " barbarians "
-        .byte 0,$ff
+        #t5 " barbarians "
+        .byte $ff
         ; (16/11, committente) niente "version" ne' "loader by krill": stanno solo nel menu iniziale (BARBARIAN)
         #at 4,21
         lda #UC_HELP
@@ -286,7 +286,7 @@ lb_leave
         pla
         rts
 
-tt_menu .text "barbarian: the blood path", 0
+tt_menu #t5 "barbarian: the blood path"
 mn_box  .byte 7,2,26,7, 7,9,26,4
 
 dt_n5:                          ; A/X = valore 16 bit -> ui_num5
@@ -319,7 +319,7 @@ _d      lda tmp0
 ; scheda del barbaro salvato. In basso "start" e "delete barbarian" (sinistra/destra, 07/11 sera); fire/RETURN su
 ; start = in partita (A=1), su delete = domanda y/n e cancellazione (A=0); RUN/STOP o DEL = di nuovo l'elenco (A=0)
 DT_ROW  = 19                    ; start game / delete <nome> / back, in colonna (08/11: riquadro 18-22, riga 23 per la domanda)
-dt_tt   .text "saved game", 0
+dt_tt   #t5 "saved game"
 ; scheda del barbaro salvato (slot scelto): riquadri barbaro, progressi, caratteristiche, quest; start game, delete, back
 detail_screen:
         lda #0
@@ -343,42 +343,42 @@ dt_redraw
         sta ui_col
         jsr ui_labels           ; etichette: x, y, testo, 0 ... $ff
         .byte 2,3
-        .text "name"
-        .byte 0,2,4
-        .text "seed"
-        .byte 0,25,3
-        .text "sessions"
-        .byte 0,25,4
-        .text "time"
-        .byte 0,2,7
-        .text "level"
-        .byte 0,2,8
-        .text "exp"
-        .byte 0,2,10
-        .text "deaths"
-        .byte 0,2,11
-        .text "kills"
-        .byte 0,2,12
-        .text "abyss depth"
-        .byte 0,22,7
-        .text "max hp"
-        .byte 0,22,8
-        .text "attack"
-        .byte 0,22,9
-        .text "armor class"
-        .byte 0,22,10
-        .text "str"
-        .byte 0,22,11
-        .text "dex"
-        .byte 0,22,12
-        .text "con"
-        .byte 0,2,15
-        .text "active quests:"
-        .byte 0,2,16
-        .text "completed quests:"
-        .byte 0,1,24
-        .text "fire:select  run/stop:back"
-        .byte 0,$ff
+        #t5 "name"
+        .byte 2,4
+        #t5 "seed"
+        .byte 25,3
+        #t5 "sessions"
+        .byte 25,4
+        #t5 "time"
+        .byte 2,7
+        #t5 "level"
+        .byte 2,8
+        #t5 "exp"
+        .byte 2,10
+        #t5 "deaths"
+        .byte 2,11
+        #t5 "kills"
+        .byte 2,12
+        #t5 "abyss depth"
+        .byte 22,7
+        #t5 "max hp"
+        .byte 22,8
+        #t5 "attack"
+        .byte 22,9
+        #t5 "armor class"
+        .byte 22,10
+        #t5 "str"
+        .byte 22,11
+        #t5 "dex"
+        .byte 22,12
+        #t5 "con"
+        .byte 2,15
+        #t5 "active quests:"
+        .byte 2,16
+        #t5 "completed quests:"
+        .byte 1,24
+        #t5 "fire:select  run/stop:back"
+        .byte $ff
         lda #1                  ; titolo (routine unica ui_title, riga 1)
         sta ti_row
         lda #<dt_tt
@@ -619,10 +619,10 @@ _l      stx tmp3
         sta ui_bc
         jsr ui_labels
         .byte 6,2
-        .text " name "
-        .byte 0,6,6
-        .text " seed "
-        .byte 0,$ff
+        #t5 " name "
+        .byte 6,6
+        #t5 " seed "
+        .byte $ff
         rts
 ne_box  .byte 4,2,32,4, 4,6,32,4, 4,10,32,3
 
@@ -676,12 +676,8 @@ _l      stx tmp3
         jmp _p
 _ch     lda namebuf,x
         jmp _p
-_cur    lda #$40                ; inverso = +$40 nel charset UI
-        sta inv
-        lda #$20
+_cur    lda #CH_CURS            ; (21/11 sera) cursore: lo spazio invertito del font della UI (prima inv = $40 + spazio)
         jsr ui_putc
-        lda #0
-        sta inv
         jmp _n
 _p      jsr ui_putc
 _n      ldx tmp3
@@ -718,12 +714,8 @@ _ch     lda seedbuf,x
         bne _p
 _a      sbc #9
         jmp _p
-_cur    lda #$40
-        sta inv
-        lda #$20
+_cur    lda #CH_CURS
         jsr ui_putc
-        lda #0
-        sta inv
         jmp _n
 _p      jsr ui_putc
 _n      ldx tmp3
@@ -766,7 +758,7 @@ _r      rts
 NE_ERR  = 14                    ; riga del messaggio "name already in use."
 ne_last .byte $ff               ; campo di cui ne_boxes ha disegnato la cornice verde ($ff = nessuno: ridisegno)
 nedit   .byte 0                 ; 1 = si scrive il campo nfield, 0 = scelta con joystick/W-S (dopo il seed)
-tt_new  .text "new barbarian", 0
+tt_new  #t5 "new barbarian"
 ; schermata del nuovo barbaro: nome (RETURN), seed (RETURN, F1 = a caso), poi scelta fra le voci con W/S e Fire
 name_entry:
         lda #$ff

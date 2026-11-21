@@ -101,10 +101,12 @@ iv_main:                        ; (21/11) ingresso da ui_inventory (ui.asm), che
         jsr ui_boxes
         jsr ui_labels
         .byte 2,6
-        .text " items "
-        .byte 0,1,24
-        .text "fire:use  del:drop  run/stop:back"
-        .byte 0,2,1,$20,0,$ff
+        #t5 " items "
+        .byte 1,24
+        #t5 "fire:use  del:drop  run/stop:back"
+        .byte 2,1
+        #t5 " "
+        .byte $ff
         jsr ui_cname
         lda #$20
         jsr ui_putc
@@ -165,7 +167,7 @@ iv_cur  jsr sl_sel
 ; segmenti: indossati (EQ_N), cintura (4), zaino (8)
 iv_sg   .byte 3, SK_EQ,0,EQ_N, SK_BELT|SK_SEP,0,4, SK_PACK|SK_SEP,0,PACK_N
 iv_box  .byte 0,1,40,5, 0,6,40,12, 0,IV_SY,40,5
-tt_bp   .text "backpack", 0
+tt_bp   #t5 "backpack"
 
 
 ; valore di vendita: "val 1200o d135/178" (08/11: numero e poi la moneta)
@@ -402,24 +404,24 @@ _c      ldx #1
         bne _c
         jsr ui_labels
         .byte 2,2
-        .text "lvl"
-        .byte 0,9,2
-        .text "xp"
-        .byte 0,2,3
-        .text "hp"
-        .byte 0,13,3
-        .text "att +"
-        .byte 0,21,3
-        .text "ac"
-        .byte 0,28,3
-        .text "dmg"
-        .byte 0,2,4
-        .text "str"
-        .byte 0,9,4
-        .text "dex"
-        .byte 0,16,4
-        .text "con"
-        .byte 0,$ff
+        #t5 "lvl"
+        .byte 9,2
+        #t5 "xp"
+        .byte 2,3
+        #t5 "hp"
+        .byte 13,3
+        #t5 "att +"
+        .byte 21,3
+        #t5 "ac"
+        .byte 28,3
+        #t5 "dmg"
+        .byte 2,4
+        #t5 "str"
+        .byte 9,4
+        #t5 "dex"
+        .byte 16,4
+        #t5 "con"
+        .byte $ff
         #at 6,2
         lda c_lvl
         jsr ui_b3l
@@ -560,7 +562,7 @@ iv_l3s  lda sl_mk
         jsr ui_icon
         pla
         ldx #>tx_eqd
-        jmp ui_puts
+        jmp ui_puts5            ; (21/11 sera) testi a 5 bit
 _cmp    ldx ui_sel              ; zaino: "you: " + caratteristica principale dell'indossato della stessa categoria
         lda itcat,x
         cmp #CAT_RING+1
@@ -634,7 +636,7 @@ _e      iny
         lda #$20
         sta (cp),y
         rts
-tx_eqd  .text " equipped", 0
-tx_inb  .text " in belt", 0
+tx_eqd  #t5 " equipped"
+tx_inb  #t5 " in belt"
         .cerror (>tx_eqd) != (>tx_inb), "tx_eqd e tx_inb nella stessa pagina"
 

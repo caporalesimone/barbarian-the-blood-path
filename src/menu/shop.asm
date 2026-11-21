@@ -89,19 +89,19 @@ _cz     ldx shp_i
         jsr ls2_frame
         jsr ui_labels
         .byte 2,1
-        .text " wares "
-        .byte 0,$ff
+        #t5 " wares "
+        .byte $ff
         lda shop_id
         bne +
         jsr ui_labels
         .byte 2,9
-        .text " gear "
-        .byte 0,$ff
+        #t5 " gear "
+        .byte $ff
         jmp ++
 +       jsr ui_labels
         .byte 2,9
-        .text " yours "
-        .byte 0,$ff
+        #t5 " yours "
+        .byte $ff
 +       lda #1
         sta iv_mode
         lda #<sh_l3
@@ -480,8 +480,8 @@ _no     jsr msg23
 shop_ic  .byte CH_ANVIL, CH_FLASK
 shop_nm_lo .byte <sn_smith, <sn_alch
 shop_nm_hi .byte >sn_smith, >sn_alch
-sn_smith .text "blacksmith", 0
-sn_alch  .text "alchemist", 0
+sn_smith #t5 "blacksmith"
+sn_alch  #t5 "alchemist"
 
 ; titolo (riga 0): icona + nome + icona
 shop_title:

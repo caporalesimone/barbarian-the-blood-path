@@ -28,7 +28,9 @@ st_gold:
         plp
         beq _ok
         jsr h_msg
+        .enc "screen"           ; (21/11 sera) qui la codifica era "none": il messaggio usciva in caratteri sbagliati
         #msg "the chest is full"
+        .enc "none"
 _ok     lda #SFX_PICK
         jmp sfx_play
 _r      rts

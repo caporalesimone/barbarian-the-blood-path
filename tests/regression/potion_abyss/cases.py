@@ -16,7 +16,15 @@ MAXLEVEL = 20
 def setup(ctx):
     v = ctx["v"] = Vice()
     v.load(os.path.join(OUT, "game.prg"))
-    ctx["L"] = labels("game")
+    L = ctx["L"] = labels("game")
+    # (21/11 evening) itdn & co. live in the RAM of the UI font after the glyphs ($B800 + UIF_N x 8), copied there by copy_gfx at
+    # start: without a started game, copy them from the PRG (right after the font glyphs, gd_font) as copy_gfx does
+    prg = open(os.path.join(OUT, "game.prg"), "rb").read()
+    src = L["gd_font"] + L["UIF_N"] * 8 - (prg[0] | prg[1] << 8) + 2
+    data = prg[src:src + L["ft_end"] - L["ft_beg"]]
+    for k in range(0, len(data), 32):                                   # (short monitor lines)
+        v.poke(L["ft_beg"] + k, *data[k:k + 32])
+    v.poke(1, 0x35)                                                    # BASIC ROM out (as in the game): $A000-$BFFF is RAM
 
 
 def teardown(ctx):

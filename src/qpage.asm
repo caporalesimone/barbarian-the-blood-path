@@ -17,7 +17,7 @@
 QV_N    = 14                    ; righe di testo visibili nel riquadro del dettaglio (righe 5..18)
 QV_Y    = 5
 QL_Y    = 5                     ; prima riga dell'elenco (una voce ogni 2 righe)
-tt_q    .text "quests", 0
+tt_q    #t5 "quests"
 qp_lst  .fill 8                 ; quest dell'elenco (numeri)
 qp_sel  .byte 0                 ; voce dell'elenco scelta (si ritrova tornando dal dettaglio)
 qd_id   .byte 0                 ; quest del dettaglio
@@ -257,12 +257,12 @@ qd_draw:
         #ubox 0,QV_Y+QV_N+1,40,3    ; premio
         jsr ui_labels
         .byte 2,QV_Y+QV_N+1
-        .text " reward "
-        .byte 0,2,2
-        .text "chapter "
-        .byte 0,1,24
-        .text "w/s:scroll  run/stop:back"
-        .byte 0,$ff
+        #t5 " reward "
+        .byte 2,2
+        #t5 "chapter "
+        .byte 1,24
+        #t5 "w/s:scroll  run/stop:back"
+        .byte $ff
         lda qd_id               ; capitolo e titolo dall'indice
         jsr qi_find
         #at 10,2

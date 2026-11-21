@@ -90,10 +90,13 @@ class Out:
             head = f"{label:<12}" if i == 0 else " " * 12
             self(f"{head}.word " + ", ".join(str(v) for v in vals[i:i + per]))
 
-    def strings(self, prefix, names):
+    def strings(self, prefix, names, t5=False):
         self.bytes(prefix + "_lo", [f"<{prefix}_{i}" for i in range(len(names))])
         self.bytes(prefix + "_hi", [f">{prefix}_{i}" for i in range(len(names))])
         for i, n in enumerate(names):
+            if t5:                       # (21/11 sera) testo a 5 bit (macro t5 di src/common/macros.inc): il testo resta leggibile
+                self(f'{prefix}_{i:<8} #t5 "{n}"')
+                continue
             self(f'{prefix}_{i:<8} .text "{n}"')
             self("            .byte 0")
 
@@ -374,11 +377,15 @@ def main():
     o.bytes("itcat", cat)
     o.words("itprice", price)
     o.bytes("itilvl", ilvl)
-    o.bytes("itdn", dn)                  # arma: numero di dadi; pozione: cura per livello (A in A*L+B)
-    o.bytes("itds", ds)                  # arma: facce del dado
+    # (21/11 sera) tabelle spostate nella RAM del font della UI dopo i glifi ($B800 + UI_N x 8: out/work/fonttab.asm, incluso in
+    # src/game.asm dopo gd_font e copiato con il font da copy_gfx)
+    global FT
+    FT = Out()
+    FT.bytes("itdn", dn)                 # arma: numero di dadi; pozione: cura per livello (A in A*L+B)
+    FT.bytes("itds", ds)                 # arma: facce del dado
     o.bytes("itval", val)                # armatura/scudo: CA; anello: +N al modificatore; pozione: cura fissa (B)
-    o.bytes("itrate", rate)              # arma: cadenza (fotogrammi); pozione: ricarica / 2
-    o.bytes("itpen", pen)
+    FT.bytes("itrate", rate)             # arma: cadenza (fotogrammi); pozione: ricarica / 2
+    FT.bytes("itpen", pen)
     o.bytes("itfl", fl)                  # arma: bit0 due mani, bit2 senza modificatori; armatura: limite DES; pozione: colore
     o.bytes("itreq", req)                # (21/11, O6) FOR (valore) o DES (valore | $80) richiesta per indossarlo (anello compreso); 0 = nessuna
     # (15/11, TODO J4) cura delle pozioni nell'Abisso (livello del PG > MAXLEVEL), indice = id - I_POTR (rossa, gialla, viola):
@@ -622,8 +629,8 @@ def main():
         chk(v == int(r["value2"] or 0), f"affisso {r['name']}: value1 != value2 (valore variabile: serve il byte del valore, Abisso)")
         chk(-128 <= v <= 127, f"affisso {r['name']}: valore {v} fuori da un byte con segno")
         pw.append(PW.index(r["power"]) + 1); val.append(v & 255)
-    o.bytes("af_pw", pw)                 # potere della riga (PW_*)
-    o.bytes("af_val", val)               # valore della riga (con segno)
+    FT.bytes("af_pw", pw)                # potere della riga (PW_*)
+    FT.bytes("af_val", val)              # valore della riga (con segno)
     # (21/11 sera, fase 3) generazione: livello minimo (bit 7 = maledetto: valore negativo), tipi di oggetto (bit 0 arma, 1 armatura,
     # 2 scudo, 3 anello: cat_bit >> 1), peso; prezzo aggiunto (con segno, 16 bit: E5, prezzi dei .tsv da tarare)
     TYB = {"weapon": 1, "armor": 2, "shield": 4, "ring": 8}
@@ -647,8 +654,10 @@ def main():
     ag.bytes("af_min", amin)
     ag.bytes("af_ty", aty)
     ag.bytes("af_ch", ach)
-    o.bytes("af_pl", apl)
-    o.bytes("af_ph", aph)
+    FT.bytes("af_pl", apl)
+    FT.bytes("af_ph", aph)
+    if "--check" not in sys.argv:
+        open(os.path.join(os.path.dirname(DST), "fonttab.asm"), "w").write("; (gen_db.py) tabelle nella RAM del font della UI dopo i glifi (src/game.asm gd_font)\n" + "\n".join(FT.lines) + "\n")
     AR = yaml.safe_load(open(os.path.join(nx, "affix_rules.yaml")))
     q = AR["quality"]
     # magico con probabilita' base + per_t x T (T = chestLevel / 8), al massimo max: soglie su 256 per T = 0..31
@@ -691,16 +700,16 @@ def main():
         chk(r["name"].startswith("of "), f"suffisso {r['name']}: deve cominciare con 'of '")
         names.append(asm_str(r["name"][3:], "suffisso"))
     # (senza .enc: si include in src/game/inv.asm, gia' in codifica "screen" come tutto CORE; un .enc "none" qui cambiava il resto)
-    an = ["af_names                        ; (gen_db.py) nomi degli affissi: prefissi, suffissi senza \"of \", 0 finale"]
+    an = ["af_names                        ; (gen_db.py) nomi degli affissi a 5 bit (#t5, leggibili qui): prefissi, suffissi senza \"of \""]
     for n in names:
-        an.append(f'        .text "{n}", 0')
+        an.append(f'        #t5 "{n}"')
     if "--check" not in sys.argv:
         open(os.path.join(os.path.dirname(DST), "afnames.asm"), "w").write("\n".join(an) + "\n")
     o()
 
     # ------------------------------------------------------------ nomi (codici schermo)
     o('        .enc "screen"')
-    o.strings("itnm", [asm_str(it["name"], f"nome {k}") for k, _, it in items])
+    o.strings("itnm", [asm_str(it["name"], f"nome {k}") for k, _, it in items], t5=True)   # (21/11 sera) a 5 bit: ui_item / ip_puts
     # (15/11) niente piu' tn_*: i nomi dei tipi stanno nel file del tema del capitolo (tools/build/gen_gfx.py, NM_AT)
     o.strings("fn", [asm_str(n, "boss") for n in bw["first_names"]])
     o.strings("ep", [asm_str(n, "boss") for n in bw["epithets"]])

@@ -27,18 +27,18 @@ ct_menu:
         jsr nav_help
         jsr ui_labels           ; voci a x = 15, righe 8, 10, ..., 16 (come il menu di gioco)
         .byte 15,8
-        .text "god mode:"
-        .byte 0,15,10
-        .text "level up"
-        .byte 0,15,12
-        .text "respec token"
-        .byte 0,15,14
-        .text "next level"
-        .byte 0,15,16
-        .text "next chapter"
-        .byte 0,15,18
-        .text "gold +1000"
-        .byte 0,$ff
+        #t5 "god mode:"
+        .byte 15,10
+        #t5 "level up"
+        .byte 15,12
+        #t5 "respec token"
+        .byte 15,14
+        #t5 "next level"
+        .byte 15,16
+        #t5 "next chapter"
+        .byte 15,18
+        #t5 "gold +1000"
+        .byte $ff
 _dr     ldx #CT_N-1             ; '>' sulla voce del cursore
 _l      stx tmp3
         txa

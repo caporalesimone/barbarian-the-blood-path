@@ -85,7 +85,6 @@ ui_begin0:                      ; (io_screen: senza, perche' durante un salvatag
         sta SPR_EN
         sta BORDER
         sta BGCOL
-        sta inv
         sta sh_mask
         sta tp_on               ; in UI lo schermo A e' testo: set_tile non deve toccarlo
         lda #UC_BOX
@@ -139,24 +138,26 @@ BOX_TL   = 31
 BOX_TR   = 59
 BOX_BL   = 60
 BOX_BR   = 0
-CH_KEY   = 91
-CH_COIN  = 92                   ; una moneta (08/11: prima un mucchio di 2 caratteri, 92-93)
-CH_POT   = 94
-CH_SCR   = 95
+CH_CURS  = 64                   ; (21/11 sera) icone di seguito da 64 (tools/build/gen_font.py): spazio invertito, cursore dei campi
+UIF_N     = 80                   ; glifi del font della UI; da $B800 + UIF_N x 8 a $BBFF RAM libera (gd_font)
+CH_KEY   = 65
+CH_COIN  = 66                   ; una moneta (08/11: prima un mucchio di 2 caratteri, 92-93)
+CH_POT   = 68
+CH_SCR   = 69
 CH_ANVIL = 34
 CH_SHLD  = 35
 CH_FLASK = 36
-CH_SWORD = 97                   ; icone dell'equipaggiamento (08/11, font UI: blocco "inverso" non usato dalla UI)
-CH_ARMOR = 98                   ; (lo scudo e' CH_SHLD)
-CH_RING  = 99
-CH_SKULL = 100                  ; teschio (09/11: titolo della schermata di morte)
-CH_INN   = 101                  ; boccale (09/11: titolo della locanda)
-CH_ARROW = 93                   ; freccia a destra (15/11: schermata C, "valore -> nuovo" dei punti in attesa)
-CH_EQ    = 102                  ; (21/11, liste a scorrimento) spunta: oggetto indossato
-CH_BELT  = 103                  ; posto della cintura
-CH_SEP   = 104                  ; separatore sottile fra i blocchi di una lista
-CH_THUMB = 106                  ; cursore della barra di scorrimento
-CH_PACK  = 107                  ; zaino: oggetto nello zaino
+CH_SWORD = 70                   ; icone dell'equipaggiamento
+CH_ARMOR = 71                   ; (lo scudo e' CH_SHLD)
+CH_RING  = 72
+CH_SKULL = 73                  ; teschio (09/11: titolo della schermata di morte)
+CH_INN   = 74                  ; boccale (09/11: titolo della locanda)
+CH_ARROW = 67                   ; freccia a destra (15/11: schermata C, "valore -> nuovo" dei punti in attesa)
+CH_EQ    = 75                  ; (21/11, liste a scorrimento) spunta: oggetto indossato
+CH_BELT  = 76                  ; posto della cintura
+CH_SEP   = 77                  ; separatore sottile fra i blocchi di una lista
+CH_THUMB = 78                  ; cursore della barra di scorrimento
+CH_PACK  = 79                  ; zaino: oggetto nello zaino
 
 ui_at:
         lda #UC_LABEL
@@ -199,7 +200,6 @@ _n      lda cp
 
 ; A = carattere: alla posizione corrente (cp/ccp + cidx) con il colore ui_col (il cursore '>' nel suo colore), avanza
 ui_putc:
-        ora inv
         ldy cidx
         sta (cp),y
         cmp #$3e                ; cursore '>'
@@ -225,25 +225,82 @@ _l      ldy tmp5
         jmp _l
 _d      rts
 
-; stringa in linea dopo la JSR
+; stringa a 5 bit in linea dopo la JSR (#msg; 21/11 sera, prima testo normale con lo 0 finale)
 ui_pi:
         pla
         sta ptr2
         pla
         sta ptr2+1
-_l      inc ptr2
-        bne _a
+        inc ptr2                ; (l'indirizzo sulla pila e' quello dell'ultimo byte della JSR)
+        bne +
         inc ptr2+1
-_a      ldy #0
-        lda (ptr2),y
-        beq _d
-        jsr ui_putc
-        jmp _l
-_d      lda ptr2+1
++       jsr ui_p5
+        lda ptr2                ; ptr2 = dopo il testo: si torna a ptr2 (rts aggiunge 1)
+        bne +
+        dec ptr2+1
++       dec ptr2
+        lda ptr2+1
         pha
         lda ptr2
         pha
         rts
+; A/X = stringa a 5 bit (#t5): stampa con ui_putc
+ui_puts5:
+        sta ptr2
+        stx ptr2+1
+ui_p5:  lda #0
+        sta d5_n
+-       jsr d5_get
+        beq +
+        jsr ui_putc
+        jmp -
++       rts
+
+; ---- (21/11 sera) decodificatore del testo a 5 bit (macro t5 in src/common/macros.inc): ptr2 = testo, d5_n = 0 all'inizio di
+; una stringa. A = carattere (codice schermo), 0 = fine (flag Z). Dopo la fine ptr2 punta al byte dopo la stringa. Usa X
+d5_get: jsr d5_sym
+        beq _r                  ; fine
+        cmp #27
+        bcc _r                  ; lettere: codice schermo = simbolo
+        cmp #31
+        beq _x
+        tax
+        lda d5_t1-27,x          ; spazio : . /
+        rts
+_x      jsr d5_sym
+        tax
+        lda d5_t2,x             ; cambio: cifre e segni rari (T5X)
+_r      rts
+d5_sym: lda d5_n                ; prossimo simbolo di 5 bit
+        bne _hv
+        ldy #0                  ; parola nuova (byte alto prima): via il bit 15, 3 simboli
+        lda (ptr2),y
+        sta d5_h
+        iny
+        lda (ptr2),y
+        sta d5_l
+        lda ptr2
+        clc
+        adc #2
+        sta ptr2
+        bcc +
+        inc ptr2+1
++       asl d5_l
+        rol d5_h
+        lda #3
+        sta d5_n
+_hv     dec d5_n
+        lda #0
+        ldx #5
+-       asl d5_l
+        rol d5_h
+        rol a
+        dex
+        bne -
+        cmp #0
+        rts
+d5_t1   .text " :./"
+d5_t2   .text "0123456789?-+!,'()>%"   ; = T5X di src/common/macros.inc (stesso ordine)
 
 ;; (10/11) oro del baule a decine: tmp0..2 = A/X x 10 (24 bit; usa tmp3..5)
 ui_x10: sta tmp0
@@ -625,31 +682,34 @@ _sc     stx ui_cur
 
 ; testi in linea dopo la JSR: x, y, testo, 0, ... $ff (08/11: dal modulo LOBBY, usata anche dalla casa)
 ui_labels:
-        pla
+        pla                     ; (21/11 sera) dopo la JSR: x, y, testo a 5 bit (#t5), ...; x = $ff fine
         sta ptr2
         pla
         sta ptr2+1
-_n      jsr _g
+        inc ptr2
+        bne _n
+        inc ptr2+1
+_n      ldy #0
+        lda (ptr2),y
         cmp #$ff
         beq _e
         tax
-        jsr _g
+        iny
+        lda (ptr2),y
         tay
         jsr ui_at
-_c      jsr _g
-        beq _n
-        jsr ui_putc
-        jmp _c
-_e      lda ptr2+1
+        lda ptr2
+        clc
+        adc #2
+        sta ptr2
+        bcc +
+        inc ptr2+1
++       jsr ui_p5
+        jmp _n
+_e      lda ptr2+1              ; ptr2 sul $ff: si torna li' (rts aggiunge 1)
         pha
         lda ptr2
         pha
-        rts
-_g      inc ptr2
-        bne +
-        inc ptr2+1
-+       ldy #0
-        lda (ptr2),y
         rts
 
 ; riga 24: i tasti, uguali in tutte le schermate
@@ -1003,38 +1063,33 @@ af_name:
         sta ptr2
         lda #>af_names
         sta ptr2+1
-_w      dex
-        beq _pr
--       ldy #0
-        lda (ptr2),y
-        inc ptr2
-        bne +
-        inc ptr2+1
-+       cmp #0
+_w      dex                     ; (21/11 sera) nomi a 5 bit: si salta una stringa decodificandola
+        beq ip_p5
+        stx af_t
+        lda #0
+        sta d5_n
+-       jsr d5_get
         bne -
-        beq _w
-_pr     lda ptr2
-        ldx ptr2+1
-; A/X = stringa (0 finale) stampata fino alla colonna ui_lim esclusa (i nomi lunghi si tagliano)
+        ldx af_t
+        jmp _w
+; A/X = stringa a 5 bit (#t5) stampata fino alla colonna ui_lim esclusa (i nomi lunghi si tagliano)
 ip_puts:
         sta ptr2
         stx ptr2+1
-_l      ldy #0
-        lda (ptr2),y
-        beq _r
+ip_p5:  lda #0
+        sta d5_n
+-       jsr d5_get
+        beq +
         jsr ip_putc
-        inc ptr2
-        bne _l
-        inc ptr2+1
-        bne _l
-_r      rts
+        jmp -
++       rts
 ip_putc:
         ldy cidx
         cpy ui_lim
         bcs +
         jmp ui_putc
 +       rts
-af_of   .text " of ", 0
+af_of   #t5 " of "
 ; (21/11, O6) requisito dell'oggetto Y (itreq: bit 7 = DES, s_dex; altrimenti FOR, s_str; valore nei bit 0-6, 0 = nessuno):
 ; C = 1 se non raggiunto. X e Y conservati
 req_chk:
@@ -1270,18 +1325,22 @@ ui_mark:
 +       lda #$20
         jmp ui_putc
 
-; titolo di ogni schermata (08/11, routine unica): riga ti_row, centrato, giallo; A/X = testo, Y = icona ai due lati
+; titolo di ogni schermata (08/11, routine unica): riga ti_row, centrato, giallo; A/X = testo a 5 bit (#t5), Y = icona ai due lati
 ; (gialla; 0 = nessuna): "^ blacksmith ^", "o golden chest o", "backpack"
 ui_title:
+        sta ti_p                ; (21/11 sera) testo a 5 bit (#t5): la lunghezza si conta decodificando
+        stx ti_p+1
         sta ptr2
         stx ptr2+1
         sty tmp7
-        ldy #0
--       lda (ptr2),y
+        lda #0
+        sta d5_n
+        sta tmp6
+-       jsr d5_get
         beq +
-        iny
+        inc tmp6
         bne -
-+       tya                     ; lunghezza (+4 con le icone e gli spazi)
++       lda tmp6                ; lunghezza (+4 con le icone e gli spazi)
         ldx tmp7
         beq +
         clc
@@ -1302,9 +1361,9 @@ ui_title:
         jsr ui_icon
         lda #$20
         jsr ui_putc
-+       lda ptr2
-        ldx ptr2+1
-        jsr ui_puts
++       lda ti_p
+        ldx ti_p+1
+        jsr ui_puts5
         lda tmp7
         beq +
         lda #$20
@@ -2039,7 +2098,7 @@ _w      jsr ui_input
         beq _w
 _r      rts
 
-tt_died .text "you have died", 0
+tt_died #t5 "you have died"
 ; schermata della morte: titolo rosso con il teschio, oro perso, Fire o RUN/STOP per continuare
 ui_died:
         jsr ui_begin
@@ -2169,11 +2228,11 @@ gm_hi   .byte >gm0, >gm1, >gm2
 .endif
 ; (15/11) build con CHEATS = 1: quarta voce "cheats" (src/game/cheats.asm). Le voci si contano con .if e non con un
 ; simbolo: con CHEATS = 0 il listato della release resta identico a quello di prima dei trucchi
-gm0     .text "resume", 0
-gm1     .text "save game", 0
-gm2     .text "quit game", 0
+gm0     #t5 "resume"
+gm1     #t5 "save game"
+gm2     #t5 "quit game"
 .if CHEATS
-gm3     .text "cheats", 0
+gm3     #t5 "cheats"
 .endif
 
 
@@ -2198,7 +2257,7 @@ _l      stx tmp3
         lda gm_hi,x
         tax
         pla
-        jsr ui_puts
+        jsr ui_puts5            ; (21/11 sera) voci a 5 bit
         ldx tmp3
         inx
 .if CHEATS
@@ -2209,7 +2268,7 @@ _l      stx tmp3
         bne _l
         rts
 
-tt_gm   .text "game menu", 0
+tt_gm   #t5 "game menu"
 ; menu di gioco (RUN/STOP): resume, save game, quit game (e cheats con CHEATS = 1)
 ui_gamemenu:
 .if CHEATS
@@ -2227,9 +2286,7 @@ ui_gamemenu:
         ldy #0
         jsr ui_title
         #at VER_X,19            ; centrata (09/11)
-        jsr ui_pi
-        .text "version ", VERSION
-        .byte 0
+        #msg "version " .. VERSION
         jsr nav_help
 .if TESTUI == 33
         jmp _qask               ; screenshot della domanda "quit game?"
@@ -2327,10 +2384,10 @@ ui_chest:
 _show   jsr ls2_frame           ; (21/11, liste a scorrimento) contenuto del baule e quello che si ha addosso
         jsr ui_labels
         .byte 2,1
-        .text " contents "
-        .byte 0,2,9
-        .text " yours "
-        .byte 0,$ff
+        #t5 " contents "
+        .byte 2,9
+        #t5 " yours "
+        .byte $ff
         lda ch_gold             ; oro trovato aprendolo: nel titolo del contenuto
         ora ch_gold+1
         beq +
@@ -2422,10 +2479,10 @@ ch_keys:
 ; tipo del baule: ch_t & 3 = 0/1 normale, 2 con chiave, 3 d'oro; $40 epico
 ch_nm_lo .byte <cn_0, <cn_1, <cn_2, <cn_3
 ch_nm_hi .byte >cn_0, >cn_1, >cn_2, >cn_3
-cn_0    .text "chest", 0
-cn_1    .text "key chest", 0
-cn_2    .text "golden chest", 0
-cn_3    .text "epic chest", 0
+cn_0    #t5 "chest"
+cn_1    #t5 "key chest"
+cn_2    #t5 "golden chest"
+cn_3    #t5 "epic chest"
 
 ; (21/11) oggetti del baule ch_cur -> l8_id / l8_b e segmento 0 (merce: SK_WARE) con quanti sono
 ch_fill:

@@ -33,10 +33,10 @@ ov_stash:
         jsr ls2_frame
         jsr ui_labels
         .byte 2,1
-        .text " yours "
-        .byte 0,2,9
-        .text " chest "
-        .byte 0,$ff
+        #t5 " yours "
+        .byte 2,9
+        #t5 " chest "
+        .byte $ff
         lda #0
         sta iv_mode
         sta sl_rv+1
@@ -87,7 +87,7 @@ _rb     jsr st_sort             ; le voci possono essere cambiate
         jmp _dr
 _x      jmp ui_exit             ; (11/11 sera: niente salvataggio uscendo, lo fa "save game": il baule e' nel blocco dell'eroe)
 
-h_tt    .text "inn", 0
+h_tt    #t5 "inn"
 h_sg    .byte 3, SK_EQ,0,EQ_N, SK_PACK|SK_SEP,0,PACK_N, SK_CHEST,0,STASH_N
 
 ; oro nei titoli (addosso, baule), liste, oggetto, tasti

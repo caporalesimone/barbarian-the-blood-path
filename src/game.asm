@@ -119,7 +119,6 @@ joynew     .byte ?
 scr_ptr    .word ?
 cp         .word ?
 cidx       .byte ?
-inv        .byte ?
 ccp        .word ?          ; puntatore color RAM per ui_putc
 ui_cur     .byte ?          ; (11/11: qui dalla RAM $94xx, istruzioni piu' corte) motore dei menu: voce del cursore
 ui_n       .byte ?          ; voci
@@ -2024,6 +2023,16 @@ gfx_data:                       ; solo la grafica fissa: tile del villaggio e de
 gd_fchr .binary "../out/work/gfx/fixed_chr.bin"  ; caratteri fissi (glifi HUD, minimappa): 4 strisce da GFX_FSTRIP byte
 gd_core .binary "../out/work/gfx/spr_core.bin"   ; sprite 0..11 (eroe, fendenti) + 24..26
 gd_font .binary "../out/work/gfx/uifont.bin"
+; (21/11 sera, richiesta del committente) dopo i UIF_N glifi del font (icone di seguito, niente blocco invertito) la RAM fino a
+; $BBFF non la mostra nessuno: ci stanno tabelle di GAME (out/work/fonttab.asm, gen_db.py), copiate con il font (4 pagine)
+        .cerror * - gd_font != UIF_N * 8, "uifont.bin: UIF_N glifi (tools/build/gen_font.py)"
+        .logical $b800 + UIF_N * 8
+ft_beg
+        .include "../out/work/fonttab.asm"
+ft_end
+        .here
+        .cerror ft_end > $bc00, "tabelle nella RAM del font oltre $BBFF di ", ft_end - $bc00, " B"
+;@map $b800+UIF_N*8..ft_end "Tabelle di GAME nella RAM del font della UI dopo i glifi (fonttab.asm, copiate con il font)"
 gfx_end:
 
 ; generatore dei piani: nel PRG dopo la grafica (anche lui dato morto dopo l'avvio), eseguito sotto l'I/O.

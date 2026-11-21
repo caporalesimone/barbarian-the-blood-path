@@ -16,7 +16,7 @@ Mappe dettagliate e sempre aggiornate (rigenerate a ogni build, Lab64): [indice]
 | `NM_AT`–`$8FFF` | (15/11) colori e nomi dei mostri del capitolo (blocco info del file del tema, `GFX_INFO` = 147 B da `$8F6D`) |
 | `$9000`–`$9BFF` | variabili (il VIC qui vede la ROM dei caratteri): generatore e stanze `$9000`, gioco `$9100`, barra `$91A8`, `solidtab` `$9200`, coda dei tesori `$9240`, **combattimento `$9318`**, musica `$93A0`, eroe `CHRBLK` `$9500` (206 B, con il baule della locanda), tabelle dei mostri `MRT` `$9600` (12 × 32), stato del piano `LVLBLK` `$9800`–`$9AFF`, salvataggi `$9B00`, player SID `$9B4E`–`$9BF7` |
 | `$9C00`–`$9FFF` | `CODE2`: disco, caricamenti, salvataggio del piano, caricamento dei moduli |
-| `$A000`–`$BFFF` | VIC banco 2: sprite, charset del gioco `$A800`, schermi A `$B400` e B `$BC00`, font della UI `$B800`; negli slot sprite 28–31 (`$A700`–`$A7FF`) la **zona 3 del modulo MENU** |
+| `$A000`–`$BFFF` | VIC banco 2: sprite, charset del gioco `$A800`, schermi A `$B400` e B `$BC00`, font della UI `$B800`–`$BA7F` (80 glifi dal 21/11 sera) e dopo, fino a `$BBFF`, **tabelle di GAME** (`fonttab.asm`: `itdn`, `itds`, `itrate`, `itpen`, `af_pw`, `af_val`, `af_pl`, `af_ph`); negli slot sprite 28–31 (`$A700`–`$A7FF`) la **zona 3 del modulo MENU** |
 | `$C000`–`$C8FF` | `MAP` 48 × 48 (nel menu: modulo `LOBBY`, fino a `$CBFF`) |
 | `$C900`–`$CFFF` | **modulo MENU, zona 1** (locanda e negozi, caricato all'ingresso nel villaggio, resta fino al LOBBY); arena: modulo a `$C900` |
 | `$D000`–`$DFFF` | sotto l'I/O: STASH del piano lasciato (portale/morte: boss, 5 mostri, 10 bauli) `$D000`–`$D07F`; **generatore dei piani** `$D080`–`$DD04` (`src/game/gen_io.asm`, ~3,2 KB, nel PRG compresso ZX0 a 2,2 KB e decompresso all'avvio da `copy_gfx` (21/11), eseguito con `$01=$34` da `gen_call`: [Dungeon](dungeon.md)); il resto libero |
@@ -26,6 +26,28 @@ Margine del codice: controllato a ogni build (`.cerror`, avviso sotto 1 KB sotto
 `$8720` (da 509 B: sala del trono pregenerata su file +300 B, generatore sotto l'I/O +1,1 KB, codice di debug tolto,
 conferma dell'eliminazione −70 B) + ~450 B in `CODE2`. Altre idee in `TODO.md` (negozi in overlay). Lo zaino a 8 posti
 (07/11 sera) non ha liberato codice: toglie 32 B dal blocco dell'eroe, non dal margine.
+
+### Font della UI compattato e testo a 5 bit (21/11 sera, richieste del committente)
+
+- **Font della UI** (`tools/build/gen_font.py`, `out/work/gfx/uifont.bin`): 80 glifi invece di 128. I codici 0–63 restano quelli di
+  sempre (gli altri programmi, BARBARIAN, START, LORE, HELP, ne usano solo i primi 512 byte); le **icone stanno tutte di seguito
+  da 64** (`CH_CURS` 64 = spazio invertito, cursore dei campi del LOBBY; `CH_KEY` 65 ... `CH_PACK` 79). Il blocco "inverso"
+  64–127 non serviva: le lettere invertite non le mostrava nessuna schermata (la variabile `inv` di `ui_putc` era usata solo per il
+  cursore, ora c'e' il suo glifo) e le barre di avanzamento 124–126 erano state tolte l'11/11. La RAM dei codici 80–127
+  (`$BA80`–`$BBFF`, 384 B), che il VIC non mostra mai, tiene tabelle di GAME copiate con il font da `copy_gfx` (`gd_font` in
+  `src/game.asm`, `.cerror` sul limite). Aggiungere un'icona: codice 80 in `gen_font.py`, costante in `ui.asm`, nome in
+  `tools/atlas/atlas_names.py`; le tabelle si spostano da sole (la guardia ferma la build se non ci stanno).
+- **Testo a 5 bit** (macro `t5` e `msg` in `src/common/macros.inc`, decodificatore `d5_get` in `src/game/ui.asm`): ogni carattere e'
+  un simbolo di 5 bit, 3 simboli per parola di 16 bit (byte alto prima, bit 15 non usato). Simboli: 0 fine, 1–26 lettere (codice
+  schermo = simbolo), 27 spazio, 28 `:`, 29 `.`, 30 `/`, 31 cambio (il simbolo dopo indica la tabella `T5X`: cifre e
+  `? - + ! , ' ( ) > %`). **Regola del committente: il testo a 5 bit nel codice si scrive sempre leggibile**, come argomento della
+  macro (`#msg "fire:use"`, `tt_bp #t5 "backpack"`), che lo codifica in fase di assemblaggio; un carattere non previsto ferma la
+  build (aggiungerlo a `T5X` e a `d5_t2`). La codifica e' quella dello schermo: una macro fuori da `.enc "screen"` si ferma.
+  A 5 bit: i messaggi `#msg` (`ui_pi`), le etichette (`ui_labels`: x, y, `#t5`, ...; `$ff` fine), i titoli (`ui_title`), le voci del
+  menu di gioco, i nomi degli oggetti (`itnm`, `gen_db.py`) e degli affissi (`af_names`, `ip_puts`, `af_name`), i testi della scheda
+  C e dell'inventario (`ui_puts5`). Restano a 8 bit (`ui_puts`): i testi delle quest (file `QSTn`), nomi di file, nome e seme
+  dell'eroe, scritte dell'HUD e della barra (font degli sprite). Guadagno con il font: margine di GAME da 942 a 1534 B; CORE da 41 a
+  169 B liberi.
 
 ### Moduli su disco
 Oltre a `LOBBY` ($C000, solo nel menu iniziale), il gioco ha un modulo su disco: **MENU** (`src/menu.asm`, parti in

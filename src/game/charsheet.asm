@@ -15,7 +15,7 @@ CS_N     = 6                    ; voci: 0..2 FOR DES COS, 3 confirm, 4 undo, 5 r
 UC_PEND  = 5                    ; punti in attesa e valori nuovi: verdi
         .cerror s_dk - hpmax != 11 || s_str - hpmax != 2, "cs_nv: blocco hpmax..s_dk cambiato"
 
-tt_cs   .text "character", 0
+tt_cs   #t5 "character"
 ; (12/11, committente) senza punti da spendere niente voci: si legge e si esce con RUN/STOP ("no points to spend").
 ; Eccezione mia (da confermare): con un gettone respec resta la sola voce "respec" (cs_mode 1), altrimenti il respec
 ; non si potrebbe mai usare quando i punti sono tutti spesi. cs_mode: 0 tutte le voci, 1 solo respec, 2 nessuna.
@@ -59,18 +59,18 @@ _ni     jsr nav_init
         #ubox 0,8,40,8
         jsr ui_labels
         .byte 2,8
-        .text " stats "
-        .byte 0,2,2
-        .text "lvl"
-        .byte 0,2,3
-        .text "hp"
-        .byte 0,2,4
-        .text "att"
-        .byte 0,2,5
-        .text "ac"
-        .byte 0,2,6
-        .text "dmg"
-        .byte 0,$ff
+        #t5 " stats "
+        .byte 2,2
+        #t5 "lvl"
+        .byte 2,3
+        #t5 "hp"
+        .byte 2,4
+        #t5 "att"
+        .byte 2,5
+        #t5 "ac"
+        .byte 2,6
+        #t5 "dmg"
+        .byte $ff
         #at 2,1                 ; nome sulla cornice (come l'inventario)
         lda #$20
         jsr ui_putc
@@ -84,8 +84,8 @@ _ni     jsr nav_init
         beq _nr
         jsr ui_labels
         .byte 22,2
-        .text "respec tokens"
-        .byte 0,$ff
+        #t5 "respec tokens"
+        .byte $ff
         #at 36,2
         lda c_resp
         jsr ui_b3
@@ -95,8 +95,8 @@ _nr     lda cs_mode
         #ubox 0,16,40,5
         jsr ui_labels
         .byte 2,16
-        .text " actions "
-        .byte 0,$ff
+        #t5 " actions "
+        .byte $ff
         lda c_resp
         beq _nb
         ldy #19                 ; "respec": terza azione, o la sola (riga 17) senza punti
@@ -110,19 +110,19 @@ _nb     lda cs_mode
         bne _lm
         jsr ui_labels
         .byte 4,17
-        .text "confirm"
-        .byte 0,4,18
-        .text "undo"
-        .byte 0,3,13
-        .text "points to spend"
-        .byte 0,$ff
+        #t5 "confirm"
+        .byte 4,18
+        #t5 "undo"
+        .byte 3,13
+        #t5 "points to spend"
+        .byte $ff
         #at 1,24
         #msg "a/d -/+:points "
         jmp _kf
 _lm     jsr ui_labels
         .byte 3,13
-        .text "no points to spend."
-        .byte 0,$ff
+        #t5 "no points to spend."
+        .byte $ff
         ldx c_lvl               ; prossimo punto: primo livello con pl_pts piu' alto (niente oltre PL_MAXLVL)
         cpx #PL_MAXLVL
         bcs _kk
@@ -513,14 +513,14 @@ cs_text:
         lda cs_th,x
         tax
         pla
-        jmp ui_puts
+        jmp ui_puts5            ; (21/11 sera) testi a 5 bit
 
 cs_tl   .byte <cs_str, <cs_dex, <cs_con, <cs_hs, <cs_hd, <cs_hc
 cs_th   .byte >cs_str, >cs_dex, >cs_con, >cs_hs, >cs_hd, >cs_hc
-cs_str  .text "str", 0
-cs_dex  .text "dex", 0
-cs_con  .text "con", 0
-cs_hs   .text "attack, damage, battle cry", 0
-cs_hd   .text "armor class (armor may cap it)", 0
-cs_hc   .text "hit points, for every level", 0
+cs_str  #t5 "str"
+cs_dex  #t5 "dex"
+cs_con  #t5 "con"
+cs_hs   #t5 "attack, damage, battle cry"
+cs_hd   #t5 "armor class (armor may cap it)"
+cs_hc   #t5 "hit points, for every level"
         .enc "none"

@@ -109,7 +109,7 @@ def snap(path=SNAP):
 # icone della UI in piu' (08/11 sera, regola della moneta e glifi dell'equipaggiamento): in data/help.txt si
 # scrivono con questi caratteri; vanno nel charset dopo i glifi dell'HUD (codice 64 + glifi HUD + posizione).
 # Lo scudo e' gia' nel font a 64 caratteri (codice 35 = '#'). Colore fisso (hires, < 8).
-EXTRA = [("\u00a4", 92, 7), ("\u2020", 97, 1), ("\u2021", 98, 1), ("\u00b0", 99, 7)]   # moneta, spada, armatura, anello
+EXTRA = [("\u00a4", 66, 7), ("\u2020", 70, 1), ("\u2021", 71, 1), ("\u00b0", 72, 7)]   # moneta, spada, armatura, anello (21/11 sera: codici del font compattato, CH_COIN, CH_SWORD, CH_ARMOR, CH_RING)
 EXTRA_CODE = {}
 
 

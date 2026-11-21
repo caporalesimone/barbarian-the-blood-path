@@ -53,6 +53,10 @@ ui_sx   .byte ?                 ; suffisso dell'oggetto mostrato (sl_get, ibox_l
 ui_px   .byte ?                 ; (fase 3) prefisso dell'oggetto mostrato (prima in tmp5, che e' un temporaneo: prezzi)
 ui_lim  .byte ?                 ; ui_item / ip_puts: colonna dopo l'ultima del nome
 ui_x    .byte ?                 ; ui_item: id salvato
+d5_n    .byte ?                 ; (21/11 sera) decodificatore del testo a 5 bit (ui.asm d5_get): simboli rimasti, parola
+d5_h    .byte ?
+d5_l    .byte ?
+ti_p    .word ?                 ; ui_title: testo
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"
