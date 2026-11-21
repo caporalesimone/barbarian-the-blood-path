@@ -459,7 +459,9 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 - **Cittadella** (capitolo 4, prototipo del 19/11: [dungeon](docs/wiki/dungeon.md) "Cittadella"): sale con colonne, simmetria
   sinistra/destra. Da rivedere con il committente in gioco: palette (oggi casuale), colonne, passaggi sull'asse.
 - **Memoria del generatore** (19/11): il PRG `GAME` (codice + grafica fissa + immagine del generatore) deve finire prima di
-  `$9C00`: oggi `$99BF` (build normale), `$9B80` nella build di test più grande (`TESTUI=28`, 128 B di margine). Il "margine
+  `$9C00`: oggi `$99BF` (build normale), `$9B80` nella build di test più grande (`TESTUI=28`, 128 B di margine). (21/11) Con armi,
+  NPC fissi e requisiti la build di test sforava: l'immagine del generatore ora è **compressa ZX0** (3243 → 2177 B,
+  `tools/build/gen_imgz.py`, GAME in due passate in `asm.sh`) e GAME finisce a `$96F6` (build normale). Il "margine
   codice" stampato dalla build (fino a `$8720`) non lo dice: va aggiunto alla stampa. Per altro codice di uno stile solo
   conviene la strada della cittadella (codice nella coda del file del tema, `GFX_DUN_END`).
 - **Attenzione**: ogni stile cambia i piani salvati di quel capitolo (`GVER`, `test_gen`).
@@ -476,7 +478,7 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   ogni capitolo ha quelle del tipo *t* del capitolo 1 (per profondità).
   **Da fare nel codice**: **statistiche proprie** per capitolo (le tabelle `mt_*`/`mon_spd`/`mon_llb` da caricare col tema,
   come i nomi: ~120 B per file; oggi le righe dei capitoli 2–4 nel bestiario sono concept); **IA nuove** (distanza per Bone
-  Archer e Cultist, carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per Drowned e
+  Archer e Cultist (21/11: progetto delle frecce in [bestiario](docs/wiki/bestiario.md#arcieri-e-frecce-2111-progetto-non-nel-codice): al massimo 2 in volo, sprite 2 + uno slot dei mostri), carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per Drowned e
   Frost Wight: da scegliere); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97% (19/11: oggi Mother Stitch, stesse statistiche, meccanica nuova),
   Varok 100%: da rifare con `fit_rules.py` e `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).
 - **Da decidere con il committente** (15/11): i colori dei disegni (Hellhound e Blood Knight sono rossi, 2, come il Lord of Ruin:

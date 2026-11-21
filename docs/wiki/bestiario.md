@@ -137,6 +137,14 @@ in gioco e da tarare**):
 
 Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco** (19/11): leggibilità degli avvisi, difficoltà.
 
+**(21/11, committente) Rabbia dell'abate** (`src/game/ovl_boss1.asm`, `ab_tick2`): sotto il **30%** della vita (1/4 + 1/32 +
+1/64 = 29,7%) entra in rabbia (bordo rosso e suono, una volta): **attacca più spesso** (ricarica dell'attacco al massimo 28
+fotogrammi invece di 45) e ogni **6 s** (il primo dopo 2 s) agita il **turibolo**: lampeggia di bianco per **1 s** (avviso), poi la
+nube d'incenso (bordo grigio) toglie **1/8 della vita massima** al PG se è a meno di 40 pixel (2,5 caselle) su entrambi gli assi:
+basta allontanarsi durante il lampeggio. Scelta mia (il committente ha lasciato libera la scelta dell'effetto); numeri da provare
+in gioco. Le evocazioni del codice (2/3 e 1/3) restano; i sarcofagi a caso e la nube senza rabbia della proposta (sezione sotto)
+non sono nel codice. Test: `BOSS1-10`, `BOSS1-11` (`tests/sanity/boss1/cases.py`).
+
 ### Proposta del 20/11: più meccaniche e taratura con il simulatore (design, non nel codice)
 
 Richiesta del committente (20/11): boss di capitolo più difficili (oggi i piani 5, 10, 15 sono i più facili, salvo l'abate),
@@ -161,6 +169,22 @@ nuove, vita e danno dei boss tarati sul profilo bilanciato (`--fit-bosses`: vita
 finale è al livello massimo: niente farming). I profili specializzati restano sotto (forza 20–54%, costituzione 26–53%): è
 lo stesso squilibrio delle caratteristiche (TODO B18). Limiti: niente movimento, schivata a probabilità fissa, statistiche dei
 boss = boss con nome del piano (le schede proprie del bestiario non sono nel gioco).
+
+### Arcieri e frecce (21/11, progetto: non nel codice)
+
+Richiesta del committente: mostri arcieri (Bone Archer del capitolo 3, Cultist) e, più avanti, l'arco del PG. **Sprite nel
+dungeon** (`bs_body`, `src/game/game.asm`): 0 eroe, 1 fendente, 2 effetto delle abilità, 3–7 mostri (al massimo 5 visibili),
+nessun multiplexer (la barra in alto usa gli 8 sprite in un'altra fascia del raster). **Una o due frecce insieme ci stanno**:
+- prima freccia sullo **sprite 2** (l'effetto delle abilità dura pochi fotogrammi: con una freccia in volo l'effetto non si
+  disegna, la freccia ha la precedenza);
+- seconda freccia sullo **slot dei mostri più lontano** (lo sprite 7: con due frecce in volo si vedono al massimo 4 mostri);
+- più di due frecce: non con gli sprite (servirebbero caratteri disegnati sullo schermo a passi di 8 pixel, o un multiplexer:
+  costi alti con il doppio buffer). Proposta: **al massimo 2 frecce in volo** (un arciere aspetta che una si liberi).
+Grafica: una freccia hires in 4 direzioni (o 8 con le diagonali): 4 × 64 B nella zona degli sprite forti del tema; logica:
+posizione a 16 bit, passo di 3–4 pixel a fotogramma, fine su un muro (tile solido) o sul PG (colpo con il tiro per colpire
+dell'arciere), ~150–250 B di codice stimati (GAME o codice del piano del capitolo). IA dell'arciere: resta a 3–6 caselle, tira
+se allineato e se la linea è libera (stessa riga o colonna, come la carica di Varok), scappa se il PG si avvicina. Da decidere:
+quanti arcieri per capitolo, danno della freccia, se la freccia si schiva muovendosi (sì: è uno sprite che viaggia).
 
 ### Concept dei comuni (in breve)
 - Capitolo 2 (palude, mulino): **Drowned** (cadavere gonfio, lento e resistente; lascia una pozza che rallenta), **Bog
