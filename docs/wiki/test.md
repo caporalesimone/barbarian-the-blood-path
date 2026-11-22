@@ -164,7 +164,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | ID | Test |
 |---|---|
 | `BU-10` | data: un_bch = boss_chapter of uniques.tsv; no unique given by a quest is in a boss subset; UNB_C 128 (50%), UNB_N 32 (12.5%) |
-| `BU-11` | bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1 (empty subset) never |
+| `BU-11` | bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1, level 5: only the 2 uniques of chapter 1 (D17) |
 | `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
 | `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
 

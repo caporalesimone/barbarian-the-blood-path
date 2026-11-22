@@ -54,17 +54,19 @@ def bu_data(ctx):
     check(L["UNB_C"] == 128 and L["UNB_N"] == 32, "UNB_C %d UNB_N %d" % (L["UNB_C"], L["UNB_N"]))
 
 
-@test("BU-11", "bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1 (empty subset) never")
+@test("BU-11", "bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1, level 5: only the 2 uniques of chapter 1 (D17)")
 def bu_roll(ctx):
     g = ctx["g"]; L = g.L
     sub2 = {i for i, u in enumerate(UQ) if int(u["boss_chapter"]) == 2}
+    sub1 = {i for i, u in enumerate(UQ) if int(u["boss_chapter"]) == 1}
     r10 = rolls(g, 2, 10, 120)
     r7 = rolls(g, 2, 7, 120)
-    r1 = rolls(g, 1, 5, 40)
+    r1 = rolls(g, 1, 5, 60)
     g.poke(L["c_chap"], 1); g.poke(L["cur_level"], 0)
     n10, n7 = sum(x is not None for x in r10), sum(x is not None for x in r7)
-    print("      chapter boss %d / 120, named boss %d / 120, chapter 1 %d / 40" % (n10, n7, sum(x is not None for x in r1)))
+    print("      chapter boss %d / 120, named boss %d / 120, chapter 1 %d / 60" % (n10, n7, sum(x is not None for x in r1)))
     check("bad" not in r10 + r7 + r1, "wrong chest content after bu_roll")
     check({x for x in r10 + r7 if x is not None} <= sub2, "uniques outside the subset of chapter 2: %s" % sorted({x for x in r10 + r7 if x is not None} - sub2))
     check(35 <= n10 <= 85 and 3 <= n7 <= 30, "chapter boss %d / 120 (expected ~60), named boss %d / 120 (expected ~15)" % (n10, n7))
-    check(all(x is None for x in r1), "chapter 1 gave a unique")
+    u1 = [x for x in r1 if x is not None]
+    check(len(sub1) == 2 and u1 and set(u1) <= sub1, "chapter 1: uniques %s, subset %s" % (sorted(set(u1)), sorted(sub1)))

@@ -126,7 +126,7 @@ sottoinsieme del capitolo `c_chap` non è vuoto (colonna `boss_chapter` di `data
 probabilità `UNB_C`/256 = 50% per il **boss del capitolo** (piano multiplo di 5) e `UNB_N`/256 = 12,5% per il **boss con nome**
 degli altri piani (`boss_unique` di `affix_rules.yaml`) uno di loro a caso prende il posto del primo oggetto del baule (base
 dell'unico, prefisso 0, suffisso $80 + numero). Sottoinsiemi di oggi (prima proposta, da rivedere con i boss dei capitoli, D8):
-capitolo 1 nessuno; 2 censer-bearer, stitchripper; 3 oath blade; 4 tithe-taker, ruin's crown. Simulatore:
+capitolo 1 warchief's hide e bone king's ward (D17, 22/11: armatura e scudo nuovi, livelli 2-6); 2 censer-bearer, stitchripper; 3 oath blade; 4 tithe-taker, ruin's crown. Simulatore:
 `items_model.boss_unique_roll`. Test: `BU-10`, `BU-11`, `UNQ-13`.
 
 ## Bauli epici della sala del trono

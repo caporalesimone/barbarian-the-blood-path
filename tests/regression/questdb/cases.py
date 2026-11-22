@@ -12,16 +12,18 @@ OK = re.compile(r"^[a-z0-9 .,:'!?\-()+/%]*$")
 
 def load():
     q = yaml.safe_load(open(os.path.join(ROOT, "data", "quests", "next", "quests.yaml")))
-    uq = {u["name"] for u in csv.DictReader(open(os.path.join(ROOT, "data", "items", "next", "uniques.tsv")), delimiter="\t")}
+    rows = list(csv.DictReader(open(os.path.join(ROOT, "data", "items", "next", "uniques.tsv")), delimiter="\t"))
+    uq = {u["name"] for u in rows}
+    uq_boss = {u["name"] for u in rows if int(u.get("boss_chapter") or 0)}     # (22/11, D9) from the boss chests
     mon = {}
     for m in csv.DictReader(open(os.path.join(ROOT, "data", "monsters", "bestiary.tsv")), delimiter="\t"):
         mon.setdefault(int(m["chapter"]), set()).add(m["name"].lower())
-    return q, uq, mon
+    return q, uq, mon, uq_boss
 
 
 @test("QUESTDB-NEXT-10", "quest database (data/quests/next): 12 chain steps, 15 side quests, 6 repeatable models; limits, 5-bit characters, references")
 def questdb(ctx):
-    q, uq, mon = load()
+    q, uq, mon, uq_boss = load()
     bad = []
     qs = q["quests"]
     ids = [str(x["id"]) for x in qs]
@@ -63,7 +65,7 @@ def questdb(ctx):
             given.add(u)
     for u, s in q["unique_sources"].items():
         if u not in uq: bad.append("unique_sources: %s" % u)
-    rest = uq - given - set(q["unique_sources"])
+    rest = uq - given - set(q["unique_sources"]) - uq_boss
     if rest: bad.append("uniques with no source: %s" % sorted(rest))
     skills = [x["reward"]["skill"] for x in kinds["chain"] if "skill" in x["reward"]]
     check(skills == ["whirlwind", "battle cry", "rage", "smash", "frenzy"], "skills of the chain: %s" % skills)
@@ -94,7 +96,7 @@ def t5(s):
 @test("QUESTDB-NEXT-11", "quest texts at 5 bits (H7): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B")
 def questdb_size(ctx):
     import shutil, subprocess, tempfile
-    q, _, _ = load()
+    q, _, _, _ = load()
     zx0 = shutil.which("zx0")
     rows, tot_b, tot_z, bad = [], 0, 0, []
     for x in q["quests"]:

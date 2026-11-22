@@ -15,3 +15,5 @@ tithe-taker	battle_axe	17	20	9000	DMG	3	3	LEECH	5	5	STR	2	2				drop: named boss 
 angel's tear	gothic_shield	17	20	8000	AC	3	3	GETHIT	2	2	ALL	1	1				accessory A4.2		0
 ruin's crown	gold	19	20	15000	ATT	3	3	ALL	2	2	LIFE	20	20				epic chest of the rings	a ring in the game	4
 aldric's heart	field_plate	19	20	14000	AC	4	4	LIFE	35	35	GETHIT	2	2	INDESTRUCTIBLE			quest step 12 / epic chest of the armors	the last relic	0
+warchief's hide	leather_armor	2	6	800	AC	2	2	LIFE	6	6	GETHIT	1	1				boss chest, chapter 1 (D17)	the Fallen Warchief's hide	1
+bone king's ward	small_shield	3	6	700	AC	2	2	DEX	1	1	DUR	50	50				boss chest, chapter 1 (D17)	the Skeleton King's ward	1

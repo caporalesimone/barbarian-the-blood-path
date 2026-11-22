@@ -644,11 +644,11 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   sul capitolo 1; poi gli altri capitoli.
 - (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).
   **Da decidere in futuro**: le regole fini (categoria, livello oggetto, qualità minima, legame con il modello della quest).
-- (22/11, D9) **Unici**: fatto (`bu_roll`, [bottino](docs/wiki/bottino.md)). Resta da rivedere i sottoinsiemi per capitolo
-  (oggi il capitolo 1 non ne ha: i 5 unici non dati da quest sono dei capitoli 2-4) insieme ai boss dei capitoli. (22/11, D8, D16) **Boss dei capitoli** con statistiche proprie e sala
+- (22/11, D9) **Unici**: fatto (`bu_roll`, [bottino](docs/wiki/bottino.md)). Sottoinsiemi: capitolo 1 con i due unici nuovi (D17),
+  2-4 con i 5 unici non dati da quest. (22/11, D8, D16) **Boss dei capitoli** con statistiche proprie e sala
   disegnata a mano (mappe come `FMAP`), mostri solo se evocati; **a fasi con meccaniche** (D16: evoca, cambia attacco, si cura;
-  codice nella coda del tema, modello `boss_scripts.py`): proposta delle fasi prima del codice. (22/11, D17) **Due unici nuovi**
-  per i boss del capitolo 1 (livello 2-6): proposta prima del commit. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
+  codice nella coda del tema, modello `boss_scripts.py`): proposta delle fasi prima del codice. (22/11, D17) Due unici nuovi per i boss del capitolo 1: fatti.
+  D16 approvato: le aggiunte `new` del 20/11 (`data/rules_next.yaml`), un commit per boss. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
   attiva il mostro richiesto nasce sempre nel piano.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 
