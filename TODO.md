@@ -447,6 +447,38 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   tre unici hanno quel potere senza effetto; taratura di `unique_one_in` e dei prezzi con i simulatori (`sim_gold.py`, `sim_chest.py`).
 - Regola di `uniques.tsv`: righe nuove solo in fondo (numero dell'unico nei salvataggi), altrimenti `SAVE_VER` nuovo.
 
+### G11 (22/11) Furto di vita e spine: come funzionano e cosa serve — S-M (dopo la 2.0, decisione O5)
+Oggi i due poteri esistono nei dati (`PW_LEECH` = 15, `PW_THORNS` = 16; affissi *of the leech* (3%), *of blood* (5%) e *of thorns* (2) con peso 0, cioe' mai generati; unici
+*censer-bearer* LEECH 3, *tithe-taker* LEECH 5, *doll-hide* THORNS 2) ma **nel gioco non fanno niente**: `af_one` li salta e nel
+riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (da approvare prima di scrivere il codice):
+
+- **Furto di vita (LEECH N)**: N è una **percentuale del danno inflitto**. Ogni colpo del PG che toglie vita a un mostro
+  (attacco base, Whirlwind su ogni mostro colpito, Smash; non il Battle Cry, che non fa danno) cura il PG di
+  `danno × N / 100`, arrotondato per difetto, **almeno 1** se il colpo ha fatto danno, mai oltre la vita massima. Conta il danno
+  realmente tolto (dopo lo scudo di Varok o la protezione dei feticci di Mother Stitch, non oltre la vita rimasta al mostro),
+  così un colpo di grazia su un mostro quasi morto cura poco. I valori di più oggetti si sommano (arma + anello).
+  - Esempio con i dati di oggi: *censer-bearer* (3%) ai piani 6–10, danno medio per colpo ~15 → +1 a colpo (il minimo);
+    *tithe-taker* (5%) ai piani 17–20, danno ~40 → +2 a colpo, circa +4/5 punti al secondo con la cadenza di un'ascia: da confrontare
+    con il danno subito al secondo in quei piani (simulatore) per non rendere inutili le pozioni.
+  - Codice: un totale in più in `recalc_stats` (`af_lch`, accanto ad `af_spd`); in `hit_one`, dopo aver calcolato il danno,
+    `mul16x8` per `N × 256 / 100` e byte alto; somma a `c_hp`, `hp_cap`, `hud_pend |= 1`. Stima **~45 B** in GAME.
+- **Spine (THORNS N)**: N è **danno fisso restituito**. Ogni volta che un mostro colpisce il PG **in corpo a corpo**
+  (`mon_attack` andato a segno, non i colpi a distanza degli arcieri quando ci saranno, non le aree dei boss) il mostro
+  perde N punti vita, senza tiro per colpire e senza armatura; può morire (esperienza e bottino normali, `kill_monster`), non
+  viene stordito. I valori si sommano.
+  - **Problema di scala**: 2 punti fissi (*doll-hide*, piani 9–13) contro mostri da 60–150 punti vita non si notano. Due
+    alternative da decidere: (a) N **per livello del PG / 4** (2 → 6–8 danni al livello 13); (b) N × 25% del danno ricevuto
+    prima delle riduzioni (2 → 50%). Consiglio (a): resta un numero fisso leggibile nel riquadro ("thn+2") e cresce da solo.
+  - Codice: totale `af_thn`; in `mon_attack` dopo `hurt_player` sottrazione a 16 bit da `mhp`/`mhph` del mostro `ho_i` e
+    salto a `kill_monster` se arriva a 0. **Attenzione**: `kill_monster` verrebbe chiamata mentre `update_monsters` sta
+    scorrendo proprio quel mostro: va verificato che il ciclo regga un mostro che muore durante il suo attacco (oggi i mostri
+    muoiono solo per mano del PG, fuori da quel ciclo). Stima **~40 B** + la verifica.
+- **Per tutti e due**: peso > 0 delle righe degli affissi in `gen_db.py` (oggi forzato a 0), `it_pw` mostra già le sigle con il
+  valore; simulatore (`rules.py` `Hero(affixes=)`: cura per colpo e danno di ritorno nel ciclo del combattimento,
+  `sim_builds.py` per vedere quanto valgono rispetto a +danno e +vita); test: un colpo con danno noto cura il giusto e si
+  ferma alla vita massima; un mostro con 1 punto vita muore colpendo il PG con le spine e lascia bottino; arena per il
+  confronto col simulatore. `SAVE_VER` non cambia (gli id delle righe ci sono già).
+
 ### G4 (ex 4.4) Armi casuali (seed per oggetto) — M
 - Seed per oggetto (+1 B a oggetto) e funzione seed → statistiche uguale in 6502 e Python. Cambia `SAVE_VER` (categoria 5).
 
