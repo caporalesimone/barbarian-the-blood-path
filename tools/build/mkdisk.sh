@@ -13,10 +13,11 @@
 #           in "end"; BOSSCH2 e BOSSCH3 si spostano con il loro capitolo); TWN5 in fondo
 #   hub     MENU, SND0 (il brano di ogni villaggio, snd_town_c), TWN1..TWN5 e FMAP uno dopo l'altro (stessi segmenti di directory
 #           e stesse tracce di quello che un ingresso nel villaggio carica); il resto come in "end"
+#   seg11   (22/11, sperimentale) directory a gruppi di 11 voci per capitolo con voci doppie: vedi sotto
 #   hubchap (PREDEFINITO dal 15/11 sera: decisione dopo le misure, docs/wiki/FastLoader.md) MENU, SND0, TWN1 e FMAP insieme (come "hub"); TWN2..TWN4 e BOSSCH2/3 con la grafica dei loro capitoli e TWN5 in fondo (come "chapter")
 # Provare un layout senza lasciare la build normale: lab64 run env TWN_LAYOUT=start tools/build/mkdisk.sh
 TWN_LAYOUT=${TWN_LAYOUT:-hubchap}
-case $TWN_LAYOUT in end|start|chapter|hub|hubchap) ;; *) echo "mkdisk: TWN_LAYOUT=$TWN_LAYOUT sconosciuto (end|start|chapter|hub|hubchap)"; exit 1;; esac
+case $TWN_LAYOUT in end|start|chapter|hub|hubchap|seg11) ;; *) echo "mkdisk: TWN_LAYOUT=$TWN_LAYOUT sconosciuto (end|start|chapter|hub|hubchap|seg11)"; exit 1;; esac
 # (11/11, ramo fast-loader) disco scritto con cc1541 (14/11: 4.2 di Lab64, compilato dai sorgenti): nomi con hash a 8 caratteri.
 cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 OUT=${1:-out/work/disk.d64}; PRG=${2:-out/work/game.zx0}     # GAME compresso ZX0 (tools/build/pack.py)
@@ -40,6 +41,42 @@ command -v $CC >/dev/null || { echo "mkdisk: manca cc1541: gira nel container la
 # (14/11) -S 4 = interleave dei settori 4 (quello dei benchmark di Krill): con cc1541 4.2 l'interleave predefinito (10) dava il MENU
 # in 3,23 s (limite 3,1 s, PERF-DISK-11); con 4 misurato: avvio 14,2 -> 11,4 s, MENU 3,23 -> 2,64 s, villaggio 5,0 -> 3,6 s.
 # I file caricati dal KERNAL (BARBARIAN, START, LORE, HELP) misurati con LOAD: stessi tempi con 10 e con 4 (entro 0,1 s).
+if [ $TWN_LAYOUT = seg11 ]; then
+# (22/11) SEG11, SPERIMENTALE (non predefinito: misure e limiti in docs/wiki/FastLoader.md 7.5): la directory a GRUPPI DI 11
+# VOCI, uno per capitolo. Krill (drivecode-common.inc, FIND_FILE) tiene nel drive
+# 11 voci della directory (DIRBUFFSIZE) e le riempie a blocchi consecutivi di 11, solo in avanti e in giro: un file che non
+# sta nel blocco corrente costa la lettura dei settori fino al suo blocco, cioe' fino a un giro intero della directory
+# (~1,2 s con 7 settori: per questo i tempi cambiavano "a scatti" secondo cio' che si era letto prima). Qui tutto cio' che si
+# legge giocando un capitolo sta nello STESSO blocco di 11 voci: villaggio, MENU, i due temi, scheda C, CORE, pagina Q,
+# motivetto, plugin e elenco dei salvataggi. Le voci in piu' sono "loop file" di cc1541 (-l: stessa catena di blocchi, nessun
+# blocco in piu' sul disco). Il numero totale di voci e' un multiplo di 11, cosi' i blocchi restano allineati anche dopo un giro.
+# Blocchi: 0 avvio; 1 brani e programmi del menu iniziale; 2 salvataggi (con CORE, scheda C e pagina Q); 3-6 capitoli 1-4;
+# 7 capitolo 5; 8 quest. Dopo un salvataggio (blocco 2) la ricerca prosegue in avanti verso il capitolo.
+A=(); NE=0
+f() { A+=(-f "$1" -w "$2"); NE=$((NE+1)); }    # file vero (voce + dati)
+d() { A+=(-N -f "$1" -l "$1"); NE=$((NE+1)); } # voce in piu' dello stesso file
+S=out/work/snd; B=out/work/bundle
+X=cheats; [ -f out/work/cheats.prg ] || X=hl   # (release: niente CHEATS, al suo posto una voce di HL: stesse posizioni)
+f barbarian $BRB; f start out/work/start.prg; f game "$PRG"; f lobby out/work/lobby.prg; f menu out/work/menu.prg
+f snd0 $S/snd0.prg; f twn1 $B/twn1.prg; f fmap out/work/fmap.prg; f gfx1 $B/gfx1.prg; f gfx2 $B/gfx2.prg; f snd1 $S/snd1.prg   # 0
+for n in 2 3 4 5 6 7; do f snd$n $S/snd$n.prg; done
+f title out/work/title.prg; f lore out/work/lore.prg; f ldat out/work/ldat.prg; f help out/work/helpz.prg; f jukebox out/work/jukebox.prg   # 1
+f hl out/work/hl.prg; f ksave out/work/krill/save.prg; f core out/work/core.prg; f csheet out/work/csheet.prg
+for s in 1 2 3 4 5; do f save-0$s out/work/save.prg; done
+if [ $X = cheats ]; then f cheats out/work/cheats.prg; else A=(-m "${A[@]}"); d hl; fi
+f qst0 out/work/qst0.prg                                                                                         # 2
+[ $X = cheats ] && A=(-m "${A[@]}")
+d twn1; d menu; d gfx1; d gfx2; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X                             # 3: capitolo 1
+f twn2 $B/twn2.prg; d menu; f gfx3 $B/gfx3.prg; f gfx4 $B/gfx4.prg; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X   # 4
+f twn3 $B/twn3.prg; d menu; f gfx5 $B/gfx5.prg; f gfx6 $B/gfx6.prg; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X   # 5
+f twn4 $B/twn4.prg; d menu; f gfx7 $B/gfx7.prg; f gfx8 $B/gfx8.prg; d csheet; d core; d qst0; d snd6; d ksave; d hl; d fmap # 6 (fmap: sala del trono)
+f twn5 $B/twn5.prg; d menu; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X
+f qst1 out/work/qst1.prg; f qst2 out/work/qst2.prg                                                               # 7
+for q in out/work/qst[3-9].prg; do [ -f "$q" ] && f $(basename $q .prg) $q; done
+while [ $((NE % 11)) != 0 ]; do d hl; done                                                                       # 8 (riempito fino a 11)
+[ $((NE % 11)) = 0 ] || { echo "mkdisk: voci della directory non multiple di 11"; exit 1; }
+ARGS=(-S 4 -M 8 -n "blood path" -i "bp" "${A[@]}")
+else
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" -f barbarian -w $BRB -f start -w out/work/start.prg -f game -w "$PRG" -f lobby -w out/work/lobby.prg
       -f menu -w out/work/menu.prg)       # (18/11) modulo MENU: un file solo (prima menu1..menu5, tools/build/pack_menu.py)
 HUB=0; case $TWN_LAYOUT in hub|hubchap) HUB=1;; esac     # HUB=1: il brano del villaggio (SND0) e i villaggi subito dopo MENU
@@ -82,6 +119,7 @@ esac
 # quest) e cosi' non spostano i file dei capitoli 2-5 (PERF-DISK)
 for f in out/work/qst[2-9].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done
 for f in out/work/qst[01].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) elenco delle quest; (18/11) in fondo (vedi le voci in piu' dopo save-05)
+fi
 $CC "${ARGS[@]}" "$OUT" > out/work/mkdisk.log 2>&1 || { cat out/work/mkdisk.log; echo "mkdisk: errore cc1541"; exit 1; }
 # (18/11) catena della directory con interleave 2 (cc1541 la scrive con 3): Krill legge i settori della directory uno dopo
 # l'altro e con 2 ne trova uno ogni ~21 ms invece di ~32 ms; misurato: 0,1-0,6 s in meno su quasi tutti i caricamenti

@@ -315,6 +315,48 @@ in fondo): **fra `ksave` e `save-01`** la somma è la più bassa, 81,7 s contro 
 - Il budget del committente per il passaggio fra dungeon e villaggio (3 s, 21/11) è già superato oggi in tutti i capitoli
   (3,2-4,0 s senza il file `core`; con il file 2,7-4,6 s).
 
+### 7.5 Studio del 22/11: da cosa dipende il caso peggiore e perché l'ordine dei file non basta [MISURATO, tempo emulato]
+
+Soglie proposte dal committente (22/11): villaggio ⇄ dungeon al massimo **4 s**, morte e portale 4 s, menu 3 s, salvataggio
+libero (anche 10 s), lobby → villaggio lungo va bene.
+
+**Cosa si legge** (cronologia con il cronometro di VICE a ogni `load_raw` / `load_file`): ingresso nel villaggio = `TWNc`
+(~1,0 s, con il brano in coda) + `MENU` (~1,2 s) + installazione; scale = il tema `GFXn` (0,5–0,8 s) + generazione (0,6–1,2 s).
+**Caso tipico**: ingresso 2,5–2,7 s, scale 1,7–2,4 s, morte e portale 2,7 s, scheda C 0,3–1,4 s, salvataggio 5–7 s: tutto
+dentro le soglie.
+
+**Caso peggiore**: lo stesso ingresso nel villaggio costa **5,1 s** se prima si è letto un file la cui voce sta più avanti
+nella directory (la scheda C, un salvataggio, la pagina Q): `TWN1` passa da 1,07 a 2,25 s e `MENU` da 1,34 a 2,53 s, cioè
+**+1,2 s per ogni file cercato "all'indietro"**. Il motivo è la ricerca di Krill (7.2): 11 voci nel drive, riempite a
+blocchi consecutivi, solo in avanti; un file dietro la finestra costa un giro della directory, e il costo sembra crescere con il
+**numero di blocchi di 11 voci** attraversati (~0,24 s l'uno: 52 voci = 5 blocchi = 1,2 s; **ipotesi** dedotta dai tempi e dal
+sorgente `drivecode-common.inc`, non misurata blocco per blocco). È lo stato
+lasciato dai caricamenti precedenti a decidere, per questo le misure cambiano "a scatti" fra una sequenza di test e l'altra.
+
+**Prove del 22/11** (stessi test `PERF-DISK`, tempi in s; ognuna è un disco costruito con `TWN_LAYOUT`):
+
+| Disposizione | in1..in5 | scale cap. 1 / 2–4 | scheda C | morte, portale | salvataggio | Note |
+|---|---|---|---|---|---|---|
+| `hubchap` (in uso) | 5,10 4,72 3,14 3,42 3,85 | 1,7 / 2,3–2,4 | 0,8–1,4 | 2,70 | 5,2–6,8 | in1 sopra il limite di 5,0 dopo la fase 6 |
+| scheda C in fondo al disco | 2,70 3,17 4,00 3,01 3,84 | 1,7 / 2,3–2,5 | 0,5–1,1 | 2,69 | — | twn1 2,20, boss2 2,78, boss3 2,93 |
+| settori da 8 voci per capitolo (voci doppie) | 2,50 2,71 4,14 4,21 2,43 | 1,7 / 2,6–2,9 | 0,3–0,6 | 2,49 | 6,0–7,7 | con un'altra sequenza in1 = 4,70 |
+| `seg11`: gruppi di 11 voci per capitolo (voci doppie, 99 voci) | 3,10 2,72 2,55 2,40 2,43 | 1,7 / 2,8–3,1 | 0,3–0,6 | 2,50 | 8,5 | con un'altra sequenza in3 = 4,54, twn4 = 3,18 |
+| `seg11` con il tema ripetuto dopo scheda C e pagina Q | 4,26 2,77 2,45 4,46 2,42 | 1,7 / 2,8–3,3 | 0,3–0,6 | 2,66 | 6,6–8,5 | peggio: boss2 3,66 |
+
+Conclusioni:
+- Le voci doppie ("loop file" di cc1541, nessun blocco in più) migliorano il caso tipico e la scheda C, ma **allungano la
+  directory** (99 voci = 9 blocchi: un giro costa ~2 s) e rallentano le scale dei capitoli 2–4 di ~0,5 s (dopo ogni file il
+  drive prepara il primo blocco della voce seguente e sposta la testina). Il caso peggiore resta fra 4,1 e 4,7 s e **dipende
+  ancora dalla sequenza**: nessuna disposizione provata lo garantisce sotto i 4 s. `seg11` resta in `mkdisk.sh` come opzione
+  sperimentale; il disco predefinito è ancora `hubchap`.
+- **La leva robusta è avere un solo file per passaggio**, così il caso peggiore è "un file + un giro": (a) **`MENU` in coda a
+  ogni `TWNc`** (come già il brano): ingresso nel villaggio = 1 file, stimato 2,3 s tipico e ~3,5 s nel caso peggiore; costa
+  14 blocchi × 4 villaggi in più (ne restano ~50) e va rivisto dove si appoggia il file (oggi `TWNc` a `$EC00` e `MENU`
+  subito dopo `CORE`: insieme non stanno sotto il KERNAL senza decomprimere il MENU a pezzi mentre arriva); (b) **meno voci**:
+  i 9 file `QSTn` in 1–2 file e i brani usati solo dal jukebox fuori dalla directory del gioco (52 → ~38 voci: un giro da
+  1,2 a ~0,9 s); (c) Krill senza ricerca per nome (file aperti per traccia e settore, tabella scritta dalla build): toglie il
+  problema alla radice ma cambia la configurazione del loader e il plugin di salvataggio (da studiare).
+
 ## 8. Compatibilità
 
 | Ambiente | Stato |

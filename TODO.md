@@ -339,6 +339,14 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   **(22/11, dopo la fase 6: GAME +680 B) PERF-DISK fallisce anche con la scheda dopo CORE**: town_in / in1 5,10 s (limite 5,0 del
   committente; prima 4,86). Con la scheda in fondo: in1 2,70, town_in 2,69, ma twn1 2,20 (limite 2,0), boss2 2,78 e boss3 2,93
   (oltre il 90% di 3,0). Serve la decisione del committente (limiti o altra disposizione dei file).
+- (22/11 notte) **Studio della disposizione dei file** con le soglie proposte dal committente (villaggio ⇄ dungeon, morte e
+  portale 4 s; menu 3 s; salvataggio libero): [FastLoader 7.5](docs/wiki/FastLoader.md). Caso tipico già dentro le soglie
+  (ingresso 2,5–2,7 s, scale 1,7–2,4 s); il **caso peggiore** (ingresso nel villaggio dopo scheda C, pagina Q o salvataggio:
+  5,1 s) dipende dalla ricerca in avanti di Krill nella directory e **nessun ordine dei file lo garantisce sotto i 4 s** (5
+  disposizioni provate, anche con voci doppie: 4,1–4,7 s secondo la sequenza). **Da fare, in ordine di robustezza**: (a) `MENU`
+  in coda a ogni `TWNc` (un solo file per ingresso nel villaggio: ~3,5 s nel caso peggiore, +56 blocchi); (b) meno voci nella
+  directory (`QSTn` in 1–2 file, brani del solo jukebox fuori); (c) Krill con file aperti per traccia e settore. **Oggi
+  `PERF-DISK-14` e `PERF-DISK-21` falliscono** (5,10 s su 5,0): serve una di queste o un limite diverso.
 - (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
   disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
   misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da
