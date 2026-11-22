@@ -191,14 +191,21 @@ def used_names():
     return "\n".join(txt)
 
 
+_WORDS = {}
+
+
 def dead_labels(prog, labels, alltxt):
+    # (22/11) le parole di tutti i sorgenti si contano una volta sola (prima una ricerca su tutto il testo per ogni
+    # etichetta: 66 s su 68 dello strumento, test ASM-10)
+    cnt = _WORDS.get(id(alltxt))
+    if cnt is None:
+        cnt = _WORDS[id(alltxt)] = collections.Counter(re.findall(r"(?<![\w.])[A-Za-z]\w+", alltxt))
     res = []
     for a, names in labels.items():
         for nm in names:
             if not re.match(r"^[A-Za-z]\w+$", nm) or nm.startswith("_"):
                 continue
-            n = len(re.findall(r"(?<![\w.])%s(?![\w])" % re.escape(nm), alltxt))
-            if n <= 1:                                                   # solo la definizione
+            if cnt[nm] <= 1:                                             # solo la definizione
                 res.append(dict(a=a, name=nm))
     return res
 

@@ -22,8 +22,20 @@ def _rows(name):
     return list(csv.DictReader(open(os.path.join(NEXT, name)), delimiter="\t"))
 
 
+_INT = {}
+
+
 def _int(v, d=0):
-    return int(v) if str(v).strip() not in ("", "None") else d
+    # (22/11) cached: the simulators call it tens of millions of times on the same few strings of the .tsv files
+    try:
+        return _INT[(v, d)]
+    except (KeyError, TypeError):
+        r = int(v) if str(v).strip() not in ("", "None") else d
+        try:
+            _INT[(v, d)] = r
+        except TypeError:
+            pass
+        return r
 
 
 RULES = yaml.safe_load(open(os.path.join(NEXT, "affix_rules.yaml")))
@@ -62,8 +74,15 @@ def eligible(rows, cat, level):
     return win or ok
 
 
+_ELIG = {}
+
+
 def eligible_all(rows, cat, level):
-    return [r for r in rows if cat in r["item_types"].split(",") and _int(r["min_level"]) <= level]
+    # (22/11) cached by table, category and level: the tables never change (the result is a shared list: do not modify it)
+    k = (id(rows), cat, level)
+    if k not in _ELIG:
+        _ELIG[k] = [r for r in rows if cat in r["item_types"].split(",") and _int(r["min_level"]) <= level]
+    return _ELIG[k]
 
 
 def pick(rng, rows):
@@ -71,6 +90,26 @@ def pick(rng, rows):
     rows = [r for r in rows if r["power"] not in ("LEECH", "THORNS")]
     w = [_int(r["chance"], 1) for r in rows]
     return rng.choices(rows, weights=w)[0] if rows else None
+
+
+_SETS = {}
+
+
+def _sets(k, c, level, top):
+    """(22/11, cached) the row lists of affix_roll for one affix kind, category, item level and 'gold ring prefix'"""
+    key = (k, c, level, top)
+    if key not in _SETS:
+        allr = eligible_all(PREFIXES if k == "prefix" else SUFFIXES, c, level)
+        lo = min(level, RULES["affix_choice"]["top_level"]) * RULES["affix_choice"]["low_fraction"]
+        cur = [r for r in allr if _int(r["value1"]) < 0]
+        pos = [r for r in allr if _int(r["value1"]) >= 0]
+        win = [r for r in pos if _int(r["min_level"]) >= lo]
+        if top and win:
+            mx = max(_int(r["min_level"]) for r in win)
+            win = [r for r in win if _int(r["min_level"]) == mx]
+            pos = [r for r in pos if _int(r["min_level"]) == mx]
+        _SETS[key] = (cur, win or pos)
+    return _SETS[key]
 
 
 def base_for(cat, level):
@@ -127,8 +166,6 @@ def affix_roll(rng, cat, base_id, level, t, force_magic=False):
     q = RULES["quality"]
     item = {"prefix": None, "suffix": None}
     c = cat
-    class _B(dict):
-        pass
     b = {"id": base_id}
     pm = min(q["magic"]["max"], q["magic"]["base"] + q["magic"]["per_t"] * t)
     if c == "ring":
@@ -144,27 +181,25 @@ def affix_roll(rng, cat, base_id, level, t, force_magic=False):
         # (21/11 evening) the same steps as the game (src/game/combat.asm af_pick): cursed first with cursed_share %, else the
         # normal rows inside the window (none: without the window); no cursed row fits: a normal one; gold ring prefix: only
         # the rows of the highest min_level inside the window
-        allr = eligible_all(PREFIXES if k == "prefix" else SUFFIXES, c, level)
-        lo = min(level, RULES["affix_choice"]["top_level"]) * RULES["affix_choice"]["low_fraction"]
-        cur = [r for r in allr if _int(r["value1"]) < 0]
-        pos = [r for r in allr if _int(r["value1"]) >= 0]
-        win = [r for r in pos if _int(r["min_level"]) >= lo]
         top = b["id"] == "gold" and k == "prefix"
-        if top and win:
-            mx = max(_int(r["min_level"]) for r in win)
-            win = [r for r in win if _int(r["min_level"]) == mx]
-            pos = [r for r in pos if _int(r["min_level"]) == mx]
+        cur, good = _sets(k, c, level, top)
         cursed = not top and rng.randrange(100) < RULES["affix_choice"]["cursed_share"]
-        row = pick(rng, cur) if cursed and cur else pick(rng, win or pos)
+        row = pick(rng, cur) if cursed and cur else pick(rng, good)
         if row:
             item[k] = (row, roll_value(rng, row, level))
     return item
 
 
+_UWIN = {}
+
+
 def unique_roll(rng, cat, level):
     """(22/11, phase 6) the game's un_roll (af_gen, not in the shops): if a unique of category cat has level in its window,
     with probability UN_T / 256 one of them at random (its row of uniques.tsv), else None"""
-    wins = [u for u in UNIQUES if BY_ID[u["base"]]["type"] == cat and _int(u["min_level"]) <= level <= _int(u["max_level"])]
+    k = (cat, level)
+    if k not in _UWIN:
+        _UWIN[k] = [u for u in UNIQUES if BY_ID[u["base"]]["type"] == cat and _int(u["min_level"]) <= level <= _int(u["max_level"])]
+    wins = _UWIN[k]
     if wins and rng.randrange(256) < UN_T:
         return rng.choice(wins)
     return None
