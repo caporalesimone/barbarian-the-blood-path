@@ -38,6 +38,7 @@ la lista `events` del JSON e il file di testo `out/work/bot/<name>.log` (una rig
 | `meet` | un mostro compare sullo schermo la prima volta in questa visita del piano | nome (dal bestiario del capitolo; *named* = il boss con nome del piano), vita, casella, se è sveglio, vita dell'eroe |
 | `attack` | ogni colpo dell'eroe (ogni decisione di attacco, 4 fotogrammi con Fire premuto) | nome del mostro, sua vita prima del colpo, vita dell'eroe, abilità in uso |
 | `hurt` | la vita dell'eroe scende | vita prima e dopo, il mostro più vicino (chi con ogni probabilità ha colpito) e la sua vita |
+| `avoid` | il boss con nome di un piano normale ha più di 10 colpi medi dell'eroe di vita | nome, vita, danno medio dell'eroe: il bot lo lascia stare (se lo insegue, interviene `Flee`) |
 | `give_up` | un mostro non perde vita per 120 decisioni (irraggiungibile) | tipo, casella, vita: il bot lo lascia stare per quella visita |
 | `skill` | un'abilità scelta o un potere attivato | piano, abilità, mostri attorno, se il bersaglio è un boss, vita |
 | `level_up`, `stat` | livello nuovo, punto speso | livello, piano, vita massima; statistica scelta |
@@ -48,6 +49,18 @@ e di quelli indossati.
 
 **Tempi**: i secondi sono **tempo di gioco emulato** (fotogrammi giocati / 50); i caricamenti dal disco non sono contati.
 Accanto c'è il tempo vero. Velocità misurata il 22/11: circa **5 volte** il tempo reale (un capitolo in ~80 s veri).
+
+## Molte partite e rapporto del bottino (`run_many.py`)
+```
+lab64 run python3 tests/bot/run_many.py --seeds 10 --max-level 5 --minutes 5 --name loot
+```
+Un seme diverso per partita (sempre gli stessi, generati da un numero fisso: le misure si ripetono), una VICE per partita,
+poi un rapporto unico `out/work/bot/<name>_report.md` (e `.json`): per piano visite, tempi, morti, pozioni, bauli, uccisioni, oro,
+**oggetti nei bauli per categoria**, quanti magici, livello oggetto medio dell'equipaggiamento, quante armi migliori del pugnale
+e quanti pezzi di livello oggetto ≥ 3, **accanto a quello che prevede il simulatore** (`tools/simulators/sim_chest.py`, tesoro di un
+mostro comune e del boss con nome), livello dell'eroe all'ingresso; gli oggetti più frequenti per piano; l'eroe a fine partita.
+`--merge-only` rifà solo il rapporto dalle partite già in `out/work/bot`. Una partita che serve solo per il capitolo 1
+(`--max-level 5`) si ferma quando il capitolo è finito.
 
 ## Trucchi (`--cheat`) e limiti di una partita
 - `--cheat potions`: nel sotterraneo, quando la cintura è vuota, compare una pozione rossa nel primo posto.

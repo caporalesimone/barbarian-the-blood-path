@@ -616,6 +616,11 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   3. **Compressione** se ha senso: valutare ZX0 dei file `QSTn` (decompressore gia' in GAME, `src/common/zx0.inc`) o un dizionario
      di parole frequenti, misurando i byte risparmiati contro il codice in piu' in `QST0` e il tempo di caricamento.
 - **Quando**: con H1 o prima di aggiungere una quest (in `QST0` restano 25 B). Test: le pagine delle quest a video uguali.
+- (22/11 notte) **Stato**: passo 1 fatto nei testi nuovi (`data/quests/next/quests.yaml`: solo caratteri della tabella a 5 bit,
+  controllati da `QUESTDB-NEXT-10`); **passo 2 (testo a 5 bit nel gioco: codificatore in `gen_quests.py`, stampa con `d5_get` in
+  `src/qpage.asm`) ancora da fare**: il codificatore Python c'è gia' nel test `QUESTDB-NEXT-11` (stessa tabella della macro `t5`),
+  da spostare in `gen_quests.py`. Misura: 8 826 B a 5 bit contro 12 689 B in codici schermo (−30%); passo 3, ZX0: solo −9%, non
+  conviene. Dove vanno i file (uno per quest o uno per capitolo): `QUEST-DOMANDE.md` Q2.
 
 ### H1 (ex 5.1) Quest system — XL
 - **Progetto deciso il 20/11** ([quests](docs/wiki/quests.md)): regole, trama The Blood Tithe, catena di 12 passi, 15 accessorie,
@@ -659,6 +664,18 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
   livello oggetto L = T × u² dei bauli (quasi sempre 0 nei primi piani: `docs/wiki/bottino.md`) o il numero di bauli; (3)
   bot capace di battere l'abate (prima gli scheletri, ritirata e ritorno) per misurare la difficolta' vera del boss; (4) poi
   capitoli 2-4.
+- (22/11 notte) **Prima misura su 10 semi senza trucchi** (`tests/bot/run_many.py`, rapporto in `out/work/bot/loot_report.md`):
+  - morti per piano 22 / 12 / 2 / 1 / 3 (135 visite del piano 1: il bot muore spesso ai livelli 1-2; una parte e' il bot, che
+    non si ritira bene e combatte da solo contro gruppi);
+  - **bottino**: piano 1 quasi solo pugnali, cuoio e scudi piccoli (livello oggetto medio dell'equipaggiamento 0,1; arma
+    migliore del pugnale nell'8% degli oggetti contro il 16% del simulatore); piano 2 18% (simulatore 22%); nessun pezzo di
+    livello oggetto ≥ 3 prima del piano 3; dal piano 4 le armi migliori arrivano (67%, simulatore 25%);
+  - oro: 690-1000 per piano nei piani 1-2 su 10 partite (~70-100 a partita per piano): il fabbro (spada 200, ascia 300) e'
+    raggiungibile solo dopo 2-3 piani.
+  - Campione piccolo (60 oggetti per piano): servono piu' semi prima di cambiare `balance.yaml`. Differenze sospette con il
+    simulatore: il gioco ha anche i bauli dei piani (non solo i tesori dei mostri) e il simulatore conta le categorie in
+    modo diverso: da allineare prima di trarre conclusioni.
+  - Bot migliorato: non resta piu' bloccato (bauli con un mostro vicino, boss con nome troppo forte evitato, capitolo finito).
 
 ### J14 (14/11) Pubblicare le build quando si passera' a GitHub — S
 - Oggi le versioni stanno solo in `out/releases/` (ultime 5, locale). Per GitHub: asset del tag `v<V>` (disco, manuale,

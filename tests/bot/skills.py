@@ -82,11 +82,27 @@ class Fight(Capability):
     def target(self, bot):
         h = bot.world.hero
         ms = [m for m in bot.world.visible_monsters() if (m["awake"] or dist((m["tx"], m["ty"]), (h.tx, h.ty)) <= 4)
-              and (bot.world.level, m["i"]) not in bot.ignored]
+              and (bot.world.level, m["i"]) not in bot.ignored and not self.too_strong(bot, m)]
         # the nearest one; on a boss level the others first (the abbot heals while his risen skeletons stand), unless the boss
         # is already next to the hero
         key = lambda m: (bool(m["boss"]) and abs(m["x"] - h.px) + abs(m["y"] - h.py) > 24, abs(m["x"] - h.px) + abs(m["y"] - h.py))
         return min(ms, key=key) if ms else None
+
+    def too_strong(self, bot, m):
+        """(22/11) the named boss of a normal level when it has more than 10 blows of the hero's mean damage: leave it (it
+        may chase the hero: Flee takes over under 30%). Not on the boss level of a chapter (that one is the goal). Logged once."""
+        w = bot.world
+        if not m["boss"] or not w.level or w.level % 5 == 0:
+            return False
+        e, L = bot.emu, bot.emu.L
+        dmg = e.b(L["s_dn"]) * (e.b(L["s_ds"]) + 1) / 2 + e.b(L["s_dk"])
+        strong = m["hp"] > 10 * max(1, dmg)
+        k = (w.level, bot.log.visit_n, m["i"])
+        if strong and k not in bot.avoided:
+            bot.avoided.add(k)
+            bot.log.event("avoid", level=w.level, monster=bot.monster_name(m), monster_hp=m["hp"], hero_damage=round(dmg, 1),
+                          hero_level=w.hero.lvl)
+        return strong
 
     def ready(self, bot):
         return bot.world.level > 0 and self.target(bot) is not None
@@ -167,18 +183,30 @@ class Loot(Capability):
             bot.emu.step(joy=bot.walker.follow(path), n=bot.walker.run)
             return
         if any(max(abs(m["tx"] - h.tx), abs(m["ty"] - h.ty)) < 3 for m in w.monsters):
-            bot.emu.step(n=2)                               # a monster too close: Fight will take the turn
+            # a monster too close (chest_blocked): Fight takes the turn, unless the bot gave up on it or avoids it; then leave
+            # the chest for now (it is tried again on the next visit of the level)
+            bot.loot_wait += 1
+            if bot.loot_wait > 20:
+                bot.loot_wait = 0
+                bot.done_chests.add((w.level, chest))
+                bot.log.event("chest_skipped", level=w.level, pos="%d,%d" % chest, why="a monster within 3 tiles")
+            bot.emu.step(n=2)
             return
+        bot.loot_wait = 0
         bot.emu.step(n=1)
         bot.emu.tap_fire(3)
+        bot.opened.add((w.level, chest))
         bot.done_chests.add((w.level, chest))
         e, L = bot.emu, bot.emu.L
-        def content():
+        def content(raw=False):
             ids, bs, ss = e.mem(L["l8_id"], 8), e.mem(L["l8_b"], 8), e.mem(L["l8_s"], 8)
+            if raw:
+                return [bot.loot_info(i, b, s) for i, b, s in zip(ids, bs, ss) if i]
             return [bot.item_name(i, b, s) for i, b, s in zip(ids, bs, ss) if i]
         opened = not bot.emu.in_game()
         locked = opened and e.b(L["ch_msg"]) == 1
         inside = content() if opened and not locked else []
+        items = content(True) if opened and not locked else []
         gold = e.w(L["ch_gold"]) if opened and not locked else 0
         n = 0
         while not bot.emu.in_game() and n < 8:             # the chest screen: fire takes the item under the cursor
@@ -188,7 +216,7 @@ class Loot(Capability):
             bot.emu.step(key="runstop"); bot.emu.step(n=2)
         bot.log.count("chests")
         bot.log.event("chest", level=w.level, pos="%d,%d" % chest, opened=opened, locked=locked, gold=gold,
-                      contents=", ".join(inside) or "-", left_inside=", ".join(left) or "-")
+                      contents=", ".join(inside) or "-", left_inside=", ".join(left) or "-", items=items)
         w.read_map()
         bot.gear_check = True
         bot.inv_check = True
@@ -432,6 +460,9 @@ class Town(Capability):
         if (h.tx, h.ty) in goal:
             if what == "exit":
                 bot.log.event("chapter", done=chap)
+                if bot.max_level <= 5 * chap:
+                    bot.stop = "chapter %d done" % chap
+                    return
                 w.cache.clear(); w.level = -1              # another village, other levels
             bot.emu.tap_fire(3)
             bot.town_done = False
@@ -439,8 +470,11 @@ class Town(Capability):
         path = nav.bfs(w, (h.tx, h.ty), lambda x, y: (x, y) in goal)
         if path:
             bot.emu.step(joy=bot.walker.follow(path), n=bot.walker.run)
+        elif not bot.town_reread:
+            bot.town_reread = True                          # (the map may still be the one of the place before)
+            w.read_map(); bot.emu.step(n=10)
         else:
-            bot.log.event("stuck", where="village: no path to the %s %s" % (what, sorted(goal)))
+            bot.log.event("stuck", where="village: no path to the %s %s from %d,%d" % (what, sorted(goal), h.tx, h.ty))
             bot.stop = "no path to the %s in the village" % what
 
     def trade(self, bot):

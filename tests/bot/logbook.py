@@ -16,6 +16,8 @@ def _names():
         n["prefix"] = {i + 1: r["name"] for i, r in enumerate(rd("prefixes.tsv"))}
         n["suffix"] = {i + 1: r["name"] for i, r in enumerate(rd("suffixes.tsv"))}
         n["uniques"] = {i: r["name"] for i, r in enumerate(rd("uniques.tsv"))}
+        il = {r["name"]: int(r["ilvl"] or 0) for r in rd("bases.tsv")}
+        n["ilvl"] = {i: il.get(nm, 0) for i, nm in n["items"].items()}
         be = list(csv.DictReader(open(os.path.join(ROOT, "data", "monsters", "bestiary.tsv")), delimiter="\t"))
         n["monsters"] = {}
         for c in range(1, 5):

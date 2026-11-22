@@ -21,6 +21,7 @@ def main():
                     help="potions: a red potion appears in the belt when it is empty; gold: 10000 gold in the inn chest at the start")
     a = ap.parse_args()
     seed = [(ord(c) - 48) if c.isdigit() else (ord(c.lower()) - 87) for c in a.seed][:6]
+    print("seed", a.seed, "cheats", a.cheat or "-", flush=True)
     emu = Emu(seed=seed)
     bot = None
     try:
@@ -40,7 +41,8 @@ def main():
             bot.log.close("error")
     finally:
         if bot:
-            print("report:", bot.log.write(a.name))
+            bot.log.events.insert(0, dict(kind="run", at=0, seed=a.seed, cheats=" ".join(a.cheat) or "-", max_level=a.max_level, max_deaths=a.max_deaths))
+        print("report:", bot.log.write(a.name))
         emu.close()
 
 

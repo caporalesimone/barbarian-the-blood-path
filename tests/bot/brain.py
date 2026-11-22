@@ -24,6 +24,7 @@ class Bot:
         self.inv = None; self.inv_check = True; self.last_lvl = 0; self.last_gold = None
         self.ignored = set(); self.fight_t = [None, 0, 0]
         self.met = set(); self.last_hp = None
+        self.avoided = set(); self.town_reread = False; self.loot_wait = 0; self.opened = set()
         self.dead = False; self.stop = None
         self.pot_wait = 0; self.skill_sel = 0
         self.done_chests = set()
@@ -55,7 +56,18 @@ class Bot:
         nm = self.log.names.get("monsters", {}).get(min(c, 4), {}).get(m["type"], "type %d" % m["type"])
         if m["type"] == 9 and self.world.level % 5:
             nm = "Lord of Ruin"
+        if m["boss"] and self.world.level and self.world.level % 5 == 0:
+            # (22/11) the boss level of a chapter: its boss is a strong monster of a random family (place_boss) shown with
+            # the chapter boss's sprite and name (build_sprites, lv_cboss): the name is the chapter boss, the stats that type's
+            return "%s (stats of %s)" % (self.log.names.get("monsters", {}).get(min((self.world.level - 1) // 5 + 1, 4), {}).get(9, "chapter boss"), nm)
         return ("named " + nm) if m["boss"] and m["type"] != 9 else nm
+
+    def loot_info(self, i, b, s):
+        """an item for the loot statistics: [category, item level of the base (bases.tsv), quality, name]"""
+        T, L = self.tables(), self.emu.L
+        cat = {1: "weapon", 2: "armor", 3: "shield", 4: "ring", 5: "potion", 6: "scroll"}.get(T["cat"][i], "other")
+        q = "unique" if s >= 0x80 else "normal" if not (b or s) or cat == "scroll" else "magic"
+        return [cat, self.log.names.get("ilvl", {}).get(i, 0), q, self.item_name(i, b, s)]
 
     def item_name(self, i, b, s):
         names = self.log.names
@@ -78,6 +90,8 @@ class Bot:
             h = w.read()
             if w.level != self.log.level:
                 self.log.enter(w.level, h)
+                self.town_reread = False
+                self.done_chests = {c for c in self.done_chests if c[0] != w.level or c in self.opened}
                 self.explored_all = False
                 self.skill_sel = 0
                 self.mon_n = len(w.monsters)
