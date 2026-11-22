@@ -4,7 +4,7 @@ the game too. Closing the inventory or the minimap with RUN/STOP must not open t
 clears joynew/keynew). Real game from the development disk, keys written at the exit of read_input."""
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, fire_to, key, SMITH_DOOR, INN_DOOR, K_RUNSTOP, D
+from lib.play import new_game, fire_to, key, SMITH_DOOR, INN_DOOR, K_RUNSTOP, D, U, RT, LF
 
 
 def setup(ctx):
@@ -80,3 +80,34 @@ def menu_save(ctx):
     n = g.hits[g.L["ovl_town"]]
     g.unwatch()
     check(n == 0 and g.in_game(), "the inn opened after 'save game' (%d times)" % n)
+
+
+@test("UI-LIST-10", "(22/11, owner) two lists as one (smith): down past the last ware -> first entry of 'gear', up from the first ware -> last of 'gear', down past the last of 'gear' -> first ware; D/A -> first entry of the other list")
+def list_cont(ctx):
+    g = ctx["g"]; L = g.L
+    fire_to(g, *SMITH_DOOR)
+    check(g.b(L["sh_mask"]) != 0, "the smith does not open")
+    st = lambda: (g.b(L["sl_l"]), g.b(L["sl_cur"] + g.b(L["sl_l"])))
+    mv = lambda j: (g.frames(1, joy=j), g.frames(1), st())[2]
+    n0, n1 = g.mem(L["sl_n"], 2)
+    why = []
+    s = st()
+    for _ in range(n0 - 1): s = mv(D)
+    if s != (0, n0 - 1): why.append("not on the last ware: %s" % (s,))
+    s = mv(D)
+    if s != (1, 0): why.append("down from the last ware: %s (expected list 1, entry 0)" % (s,))
+    s = mv(U)
+    if s != (0, n0 - 1): why.append("up from the first of gear: %s (expected the last ware %d)" % (s, n0 - 1))
+    for _ in range(n0 - 1): s = mv(U)
+    s = mv(U)
+    if s[0] != 1 or s[1] < n1 - 2: why.append("up from the first ware: %s (expected the last of gear, %d entries)" % (s, n1))
+    s = mv(D)
+    if s != (0, 0): why.append("down from the last of gear: %s (expected the first ware)" % (s,))
+    mv(D); mv(D)
+    s = mv(RT)
+    if s != (1, 0): why.append("D: %s (expected list 1, entry 0)" % (s,))
+    mv(D)
+    s = mv(LF)
+    if s != (0, 0): why.append("A: %s (expected list 0, entry 0)" % (s,))
+    g.run_stop(); g.frames(2)
+    check(not why, "; ".join(why))

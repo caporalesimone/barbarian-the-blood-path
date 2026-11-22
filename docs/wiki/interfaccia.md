@@ -58,7 +58,10 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
   (colonna 1 cursore, 2 segno: spunta `CH_EQ` gialla per l'indossato, cintura `CH_BELT` azzurra, zaino `CH_PACK` grigio
   chiaro; 4 icona della categoria; nome dalla colonna 5; prezzo a destra nei negozi), posti liberi `-`, riga sottile
   `CH_SEP` fra i blocchi, barra di scorrimento `CH_THUMB` sulla cornice destra e posizione " n/N " nel titolo; due liste per
-  schermata al massimo (A/D passano all'altra). Voci da segmenti (`SK_EQ`, `SK_PACK`, `SK_BELT`, `SK_CHEST`, `SK_WARE`). Le
+  schermata al massimo. (22/11, committente) **Le due liste si percorrono come una sola**: giù oltre l'ultima voce di una si
+  passa alla prima dell'altra, su dalla prima all'ultima dell'altra (dalla fine della seconda si torna all'inizio della
+  prima); **A/D saltano alla prima voce dell'altra lista** (`sl_oth`, `sl_nav`). Con una lista sola, o con l'altra vuota, il
+  cursore fa il giro nella stessa lista come prima. Test `UI-LIST-10`. Voci da segmenti (`SK_EQ`, `SK_PACK`, `SK_BELT`, `SK_CHEST`, `SK_WARE`). Le
   schermate a due liste (negozi, locanda, baule del piano) usano `ls2_frame`, `ls2_init`, `ls2_draw` (righe 2-7 e 10-16) e
   il riquadro dell'oggetto `iv_sel` (righe 18-22: icona e nome nel titolo; la riga 3 la sceglie la schermata, `iv_l3`).
 - **Icona della categoria** (08/11 sera, `ui_cic`): in ogni lista di oggetti (pack, wares, contents, zaino e baule

@@ -561,6 +561,22 @@ sl_skv: lda sl_sk
 
 ; ------------------------------------------------------------------ cursore
 ; un fotogramma: A = NAV_BACK (RUN/STOP), NAV_MOVE (cursore o lista cambiati, gia' ridisegnati), NAV_FIRE, NAV_NONE
+; (22/11, committente) le due liste come una sola: oltre l'ultima voce di una si passa alla prima dell'altra, prima della
+; prima all'ultima dell'altra (e dall'ultima della seconda alla prima della prima). Con una lista, o con l'altra vuota, il
+; giro resta nella stessa. X = lista -> X = lista del cursore (sl_l), la lista lasciata ridisegnata senza cursore
+sl_oth: lda sl_nl
+        cmp #2
+        bcc _r
+        txa
+        eor #1
+        tay
+        lda sl_n,y
+        beq _r
+        sty sl_l
+        jsr sl_draw             ; (X = la lista lasciata, conservato)
+        ldx sl_l
+_r      rts
+
 sl_nav:
         jsr ui_input
 .if NOKEYS
@@ -577,8 +593,9 @@ sl_nav:
         lsr
         bcs _up
         lsr
-        bcs _dn
-        and #3                  ; sinistra / destra (A / D): l'altra lista
+        bcc +
+        jmp _dn
++       and #3                  ; sinistra / destra (A / D): l'altra lista
         beq _f
         lda sl_nl
         cmp #2
@@ -588,7 +605,12 @@ sl_nav:
         sta sl_l
         jsr sl_draw             ; (X = la lista lasciata: senza cursore)
         ldx sl_l
+        lda sl_n,x              ; (22/11, committente) A/D: la prima voce dell'altra lista (non piu' la voce lasciata li')
+        bne +
         jmp _mv
++       lda #$ff
+        sta sl_cur,x
+        jmp _d1
 _f      jsr ui_fire
         beq _no
         lda #NAV_FIRE
@@ -622,7 +644,8 @@ _up     lda sl_n,x
         beq _no
 _u1     ldy sl_cur,x
         bne +
-        ldy sl_n,x              ; dalla prima voce: l'ultima
+        jsr sl_oth              ; (22/11, committente) dalla prima voce: l'ultima dell'altra lista (con una lista: la sua)
+        ldy sl_n,x
 +       dey
         tya
         sta sl_cur,x
@@ -636,6 +659,7 @@ _d1     ldy sl_cur,x
         tya
         cmp sl_n,x
         bcc +
+        jsr sl_oth              ; (22/11, committente) dall'ultima voce: la prima dell'altra lista (con una lista: la sua)
         lda #0
 +       sta sl_cur,x
         jsr sl_get

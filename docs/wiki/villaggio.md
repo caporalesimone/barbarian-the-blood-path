@@ -264,7 +264,7 @@ il disegno sulla porta della locanda (tile `DHOME`) e l'icona della locanda sull
 ## Negozi (`enter_shop`, `sh_draw`; modulo MENU dall'11/11)
 
 Dal 21/11 (branch `liste-menu`, prototipi approvati dal committente) due **liste a scorrimento** (`src/game/slist.asm`, nel
-segmento CORE) e il riquadro dell'oggetto, come nell'inventario; A/D passano da una lista all'altra:
+segmento CORE) e il riquadro dell'oggetto, come nell'inventario; le due liste si percorrono come una sola, A/D saltano alla prima voce dell'altra (22/11, [interfaccia](interfaccia.md)):
 - **wares** (righe 2-7): la merce, una voce per riga, prezzo pieno a destra;
 - **gear** (fabbro) o **yours** (alchimista) (righe 10-16): il fabbro mostra arma, armatura e scudo indossati (spunta), poi
   armi, armature e scudi dello zaino e i posti liberi `-`; l'alchimista l'anello indossato, la cintura (una pozione per posto),
