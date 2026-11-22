@@ -48,7 +48,8 @@ class Dice:
 
 
 def mod(score):
-    return (score - 10) // 2
+    # (22/11) never below 0, as the game's modv (cursed "of weakness" items can push STR under 10)
+    return max(0, (score - 10) // 2)
 
 
 # ------------------------------------------------------------------ PG

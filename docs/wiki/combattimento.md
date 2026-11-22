@@ -44,6 +44,8 @@ per livello. Tetto del livello prima dell'Abisso: 20 (`PL_MAXLVL`).
 | cadenza | (18/11, committente: "con Fire tenuto la velocità dipende dalle stat, all'inizio più lenta") `itrate` dell'arma + max(0, `ATK_SLOW` − `ATK_DEX` × mod DES) fotogrammi fra due Slash (`s_rate`, `recalc_stats`; `data/rules.yaml` `player.attack_speed`: 12 e 3). DES 13 (mod +1): +9 (pugnale 12 → 21, 0,24 → 0,42 s); DES 16-17 (+3): +3; DES 18 (+4) o più: la cadenza dell'arma. Vale per ogni Slash, tenuto o premuto ogni volta |
 | penetrazione | `itpen` dell'arma: si sottrae alla CA del mostro |
 
+(22/11) Il **modificatore** di una caratteristica è (valore − 10) / 2 e **non scende mai sotto 0** (`modv`); il danno fisso (modificatore + affissi) non scende sotto 0. Prima, con oggetti maledetti (*of weakness* su più pezzi, arma *bent* o *dull*), una FOR sotto 10 dava un modificatore di ~+126 e un danno fisso di 255; inoltre un totale negativo degli affissi aggiungeva 1 alla caratteristica (riporto). Test `AFP-14`.
+
 (21/11) Si indossano **due anelli** e contano tutti e due. Ogni anello aggiunge +N (rame 1, argento 2, oro 3) al **modificatore** della caratteristica scritta nel suo byte
 bonus (1 FOR, 2 DES, 3 COS), cioè +2N al valore; quello di COS aggiunge anche N × (livello + 1) alla vita.
 Il PG ha **sempre un'arma** equipaggiata (si scambia, non si toglie; 07/11: i pugni non esistono più). Un'arma

@@ -160,7 +160,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `UNQ-13` | af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never |
 | `UNQ-14` | inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1) |
 
-### regression (266)
+### regression (267)
 
 | ID | Test |
 |---|---|
@@ -168,6 +168,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `AFP-11` | hurt_player with s_gh 2: 5 damage -> -3 hp, 1 damage -> -1 hp (at least 1) |
 | `AFP-12` | add_to_pack (same random state): durability +50 -> max + max/2, +100 -> max x 2 (at most 255), -50 -> max - max/2, indestructible -> 0 |
 | `AFP-13` | af_ch: life leech and thorns have weight 0 (after 2.0, decision O5), every other row a weight > 0 |
+| `AFP-14` | recalc_stats with cursed items: 3 x 'of weakness' (STR 16 -> 10) and a 'bent' weapon -> s_mod 0, s_dk 0 (not 255); 4 x -> STR 8, s_mod still 0 (not 126) |
 | `AFG-10` | gen_item at chestLevel 80 (T 10): magic share of weapons/armors/shields near mag_t[10]; every affix fits the item type; rings always have affixes, silver and gold both |
 | `AFG-11` | it_cost: price = itprice + price_add of prefix and suffix (signed: a cursed row costs less), at least 1; scrolls ignore the quantity |
 | `AFG-12` | blacksmith: 3..8 wares from the filtered pool (repetitions allowed), empty entries after them |

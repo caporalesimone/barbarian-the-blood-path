@@ -121,10 +121,13 @@ mu_shr: lsr mu2
         bne mu_shr
         rts
 
-; A = valore della caratteristica (>= 10) -> modificatore (valore - 10) / 2
+; A = valore della caratteristica -> modificatore (valore - 10) / 2, mai sotto 0 (22/11: con gli affissi maledetti "of
+; weakness" la FOR puo' scendere sotto 10; prima il modificatore diventava ~+126)
 modv:   sec
         sbc #10
-        lsr
+        bcs +
+        lda #0
++       lsr
         rts
 
 pl_base .byte PL_STR0, PL_DEX0, PL_CON0
@@ -642,6 +645,7 @@ _an     ldx af_i
         asl
         clc
         adc pl_base,x
+        clc                     ; (22/11) con un totale negativo degli affissi la somma sopra lascia C = 1: prima dava +1
         adc c_sadd,x
         sta s_str,x
         dex
@@ -690,7 +694,9 @@ _nr     lda s_str
         lda s_mod               ; (21/11 sera) danno fisso e ATT: mod + affissi (prima: + magia dell'arma)
         clc
         adc af_dmg
-        sta s_dk
+        bpl +                   ; (22/11) mai negativo (arma "bent" o "dull" con mod 0: prima diventava 255 di danno fisso)
+        lda #0
++       sta s_dk
         lda s_mod
         clc
         adc af_att

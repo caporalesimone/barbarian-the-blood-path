@@ -2031,7 +2031,7 @@ ft_beg
 ft_end
         .here
         .cerror ft_end > $bc00, "tabelle nella RAM del font oltre $BBFF di ", ft_end - $bc00, " B"
-;@map $b800+UIF_N*8..ft_end "Tabelle di GAME nella RAM del font della UI dopo i glifi (fonttab.asm, copiate con il font)"
+;@map ft_beg..ft_end "Tabelle di GAME nella RAM del font della UI dopo i glifi (fonttab.asm, copiate con il font)"
 gfx_end:
 
 ; generatore dei piani: nel PRG dopo la grafica (anche lui dato morto dopo l'avvio), eseguito sotto l'I/O.

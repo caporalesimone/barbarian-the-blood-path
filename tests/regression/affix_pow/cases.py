@@ -96,3 +96,25 @@ def afp_weights(ctx):
     g.cmd("bank ram"); ch = g.mem(L["af_ch"], n); g.cmd("bank cpu")   # (under the I/O, with the generator)
     bad = [k for k in range(1, n) if (ch[k] == 0) != (p[k] in (L["PW_LEECH"], L["PW_THORNS"]))]
     check(not bad, "rows with a wrong weight: %s" % bad)
+
+
+@test("AFP-14", "recalc_stats with cursed items: 3 x 'of weakness' (STR 16 -> 10) and a 'bent' weapon -> s_mod 0, s_dk 0 (not 255); 4 x -> STR 8, s_mod still 0 (not 126)")
+def afp_cursed(ctx):
+    g = ctx["g"]; L = g.L
+    n = L["AF_NP"] + L["AF_NS"] + 1
+    p, v = g.mem(L["af_pw"], n), g.mem(L["af_val"], n)
+    weak = sfx(g, "STR", -1)
+    bent = next(k for k in range(1, L["AF_NP"] + 1) if p[k] == L["PW_DMG"] and sgn(v[k]) == -1)
+    keep = [g.mem(L[t], 5) for t in ("c_eq", "c_eqb", "c_eqs", "c_eqd", "c_eqm")]
+    sadd = g.mem(L["c_sadd"], 3)
+    g.poke(L["c_sadd"], 0, 0, 0)
+    g.poke(L["c_eq"], L["I_SWORD"], L["I_LEATHER_ARMOR"], L["I_SMALL_SHIELD"], L["I_COPPER"], L["I_COPPER"])
+    g.poke(L["c_eqd"], 30, 30, 30, 0, 0); g.poke(L["c_eqm"], 30, 30, 30, 0, 0)
+    for rings, strv in ((0, 10), (1, 8)):
+        g.poke(L["c_eqb"], bent, 0, 0, 0, 0)
+        g.poke(L["c_eqs"], weak, weak, weak, weak if rings else 0, 0)
+        g.call_keep(L["recalc_stats"])
+        st, mod, dk = g.b(L["s_str"]), g.b(L["s_mod"]), g.b(L["s_dk"])
+        check(st == strv and mod == 0 and dk == 0, "STR %d (expected %d), s_mod %d, s_dk %d (expected 0, 0)" % (st, strv, mod, dk))
+    for t, vals in zip(("c_eq", "c_eqb", "c_eqs", "c_eqd", "c_eqm"), keep): g.poke(L[t], *vals)
+    g.poke(L["c_sadd"], *sadd); g.call_keep(L["recalc_stats"]); g.call_keep(L["hp_full"])
