@@ -112,11 +112,8 @@ iv_main:                        ; (21/11) ingresso da ui_inventory (ui.asm), che
         sta sl_nl
         tax                     ; (X = 0 dopo il dex sotto)
         dex
-        jsr sl_init
-        lda #EQ_N+6             ; cursore sul primo posto dello zaino (indossati + riga + cintura 4 + riga)
-        sta sl_cur
-        lda #1
-        sta sl_top
+        jsr sl_init             ; (22/11, committente) cursore sul primo oggetto della lista (l'arma), finestra dall'inizio:
+                                ; prima andava sul primo posto dello zaino con la finestra dalla seconda riga (niente '>')
         jsr nav_init
         jsr iv_cur
 _dyn    jsr inv_dynamic

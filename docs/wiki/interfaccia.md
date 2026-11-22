@@ -61,7 +61,12 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
   schermata al massimo. (22/11, committente) **Le due liste si percorrono come una sola**: giù oltre l'ultima voce di una si
   passa alla prima dell'altra, su dalla prima all'ultima dell'altra (dalla fine della seconda si torna all'inizio della
   prima); **A/D saltano alla prima voce dell'altra lista** (`sl_oth`, `sl_nav`). Con una lista sola, o con l'altra vuota, il
-  cursore fa il giro nella stessa lista come prima. Test `UI-LIST-10`. Voci da segmenti (`SK_EQ`, `SK_PACK`, `SK_BELT`, `SK_CHEST`, `SK_WARE`). Le
+  cursore fa il giro nella stessa lista come prima. (22/11, committente) **Il cursore salta i posti vuoti** (`-`) oltre alle
+  righe separatrici (`sl_ok`, `sl_fwd` in `src/game/ui.asm`, in GAME perché CORE è pieno); all'apertura e dopo un acquisto,
+  una vendita o uno spostamento va sulla prima voce con un oggetto. In liste senza oggetti si ferma su un posto vuoto dopo
+  64 tentativi (`SL_NTRY`). Test `UI-LIST-10`, `UI-LIST-11`. (22/11, correzione chiesta dal committente) L'**inventario si apre con
+  il cursore sull'arma** (prima voce della lista) e la finestra dall'inizio: prima il cursore partiva dal primo posto dello zaino
+  con la finestra dalla seconda riga, e spesso il `>` non si vedeva. Voci da segmenti (`SK_EQ`, `SK_PACK`, `SK_BELT`, `SK_CHEST`, `SK_WARE`). Le
   schermate a due liste (negozi, locanda, baule del piano) usano `ls2_frame`, `ls2_init`, `ls2_draw` (righe 2-7 e 10-16) e
   il riquadro dell'oggetto `iv_sel` (righe 18-22: icona e nome nel titolo; la riga 3 la sceglie la schermata, `iv_l3`).
 - **Icona della categoria** (08/11 sera, `ui_cic`): in ogni lista di oggetti (pack, wares, contents, zaino e baule

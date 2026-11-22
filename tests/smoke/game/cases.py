@@ -240,8 +240,10 @@ def equip(ctx):
     w0 = g.b(L["c_eq"])
     new = 2 if w0 != 2 else 1
     g.poke(L["c_pack"], new); g.poke(L["c_packd"], 50); g.poke(L["c_packm"], 60)
-    g.frames(1, keys={4: 2}); g.frames(3)                    # I: inventory, cursor on the first pack slot
+    g.frames(1, keys={4: 2}); g.frames(3)                    # I: inventory (22/11: the cursor starts on the weapon)
     check(not g.in_game(), "the inventory does not open")
+    check(g.b(L["sl_cur"]) == 0 and g.b(L["sl_top"]) == 0, "cursor %d, window from %d (expected the weapon, 0/0)" % (g.b(L["sl_cur"]), g.b(L["sl_top"])))
+    check(list_to(g, 0, "ui_cur", 0), "the cursor does not reach the first pack slot")
     g.press_fire()
     check(g.b(L["c_eq"]) == new and w0 in g.mem(L["c_pack"], 8), "weapon %d, pack %s (expected %d and the old %d in the pack)" % (g.b(L["c_eq"]), g.mem(L["c_pack"], 8), new, w0))
     if not g.in_game(): g.run_stop(); g.frames(2)

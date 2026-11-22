@@ -82,32 +82,66 @@ def menu_save(ctx):
     check(n == 0 and g.in_game(), "the inn opened after 'save game' (%d times)" % n)
 
 
-@test("UI-LIST-10", "(22/11, owner) two lists as one (smith): down past the last ware -> first entry of 'gear', up from the first ware -> last of 'gear', down past the last of 'gear' -> first ware; D/A -> first entry of the other list")
+def selectable(g, l, c):
+    """entry c of list l: an item (not a separator row, not an empty slot)"""
+    r = g.call_keep(g.L["sl_get"], regs="a=%02x x=%02x" % (c, l))
+    return not r["c"] and g.b(g.L["ui_sel"]) != 0
+
+
+@test("UI-LIST-10", "(22/11, owner) two lists as one (smith, pack full): down past the last ware -> first item of 'gear', up from the first item of 'gear' -> last ware, up from the first ware -> last item of 'gear', down from there -> first ware; D/A -> first item of the other list")
 def list_cont(ctx):
     g = ctx["g"]; L = g.L
+    g.poke(L["c_pack"], *([L["I_DAGGER"]] * 8))
     fire_to(g, *SMITH_DOOR)
     check(g.b(L["sh_mask"]) != 0, "the smith does not open")
     st = lambda: (g.b(L["sl_l"]), g.b(L["sl_cur"] + g.b(L["sl_l"])))
     mv = lambda j: (g.frames(1, joy=j), g.frames(1), st())[2]
     n0, n1 = g.mem(L["sl_n"], 2)
+    f1 = next(c for c in range(n1) if selectable(g, 1, c))
+    l1 = next(c for c in reversed(range(n1)) if selectable(g, 1, c))
     why = []
     s = st()
     for _ in range(n0 - 1): s = mv(D)
     if s != (0, n0 - 1): why.append("not on the last ware: %s" % (s,))
     s = mv(D)
-    if s != (1, 0): why.append("down from the last ware: %s (expected list 1, entry 0)" % (s,))
+    if s != (1, f1): why.append("down from the last ware: %s (expected list 1, entry %d)" % (s, f1))
     s = mv(U)
     if s != (0, n0 - 1): why.append("up from the first of gear: %s (expected the last ware %d)" % (s, n0 - 1))
     for _ in range(n0 - 1): s = mv(U)
     s = mv(U)
-    if s[0] != 1 or s[1] < n1 - 2: why.append("up from the first ware: %s (expected the last of gear, %d entries)" % (s, n1))
+    if s != (1, l1): why.append("up from the first ware: %s (expected the last item of gear, %d)" % (s, l1))
     s = mv(D)
     if s != (0, 0): why.append("down from the last of gear: %s (expected the first ware)" % (s,))
     mv(D); mv(D)
     s = mv(RT)
-    if s != (1, 0): why.append("D: %s (expected list 1, entry 0)" % (s,))
+    if s != (1, f1): why.append("D: %s (expected list 1, entry %d)" % (s, f1))
     mv(D)
     s = mv(LF)
     if s != (0, 0): why.append("A: %s (expected list 0, entry 0)" % (s,))
     g.run_stop(); g.frames(2)
     check(not why, "; ".join(why))
+
+
+@test("UI-LIST-11", "(22/11, owner) the cursor skips empty slots ('-') and separator rows: smith (2 lists) and inventory (1 list), 25 moves down and 25 up, every stop on an entry with an item")
+def list_skip(ctx):
+    g = ctx["g"]; L = g.L
+    g.poke(L["c_pack"], L["I_DAGGER"], 0, 0, 0, 0, 0, 0, 0)               # one item in the pack: 7 empty slots in the lists
+    bad = []
+
+    def run(name):
+        for j in (D, U):
+            for i in range(25):
+                g.frames(1, joy=j); g.frames(1)
+                l = g.b(L["sl_l"]); c = g.b(L["sl_cur"] + l)
+                r = g.call_keep(L["sl_get"], regs="a=%02x x=%02x" % (c, l))
+                if r["c"] or g.b(L["ui_sel"]) == 0:
+                    bad.append("%s: list %d entry %d (%s)" % (name, l, c, "separator" if r["c"] else "empty"))
+                    return
+    fire_to(g, *SMITH_DOOR)
+    check(g.b(L["sh_mask"]) != 0, "the smith does not open")
+    run("smith")
+    g.run_stop(); g.frames(3)
+    g.frames(1, keys={4: 0x02}); g.frames(3)                            # I: inventory
+    run("inventory")
+    g.run_stop(); g.frames(3)
+    check(not bad and g.in_game(), "; ".join(bad) or "not back in the game")

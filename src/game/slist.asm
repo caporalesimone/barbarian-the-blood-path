@@ -103,7 +103,7 @@ _n      iny
         bne _s
         lda sl_t
         sta sl_n,x
-        rts
+        jmp sl_fwd              ; (22/11, committente) il cursore sulla prima voce con un oggetto (ui.asm, GAME)
 
 
 ; L = X: come sl_init, ma dopo un cambiamento delle voci (comprato, venduto, spostato) tiene cursore e finestra: il cursore
@@ -125,14 +125,14 @@ sl_reinit:
         sbc #1
 +       sta sl_cur,x
 _s      lda sl_cur,x
-        jsr sl_get
+        jsr sl_ok               ; (22/11) niente righe separatrici ne' posti vuoti (ui.asm)
         bcc sl_win
         dec sl_cur,x
         bpl _s
 _z      lda #0
         sta sl_cur,x
         sta sl_top,x
-        rts
+        jmp sl_fwd              ; (22/11) nessuna voce sopra: la prima con un oggetto dall'inizio
 
 ; L = X: finestra con il cursore dentro, senza spazio vuoto in fondo se le voci sono piu' delle righe
 sl_win:
@@ -649,7 +649,7 @@ _u1     ldy sl_cur,x
 +       dey
         tya
         sta sl_cur,x
-        jsr sl_get
+        jsr sl_ok               ; (22/11, committente) si saltano righe separatrici e posti vuoti
         bcs _u1                 ; (la riga separatrice si salta)
         bcc _mv
 _dn     lda sl_n,x
@@ -662,7 +662,7 @@ _d1     ldy sl_cur,x
         jsr sl_oth              ; (22/11, committente) dall'ultima voce: la prima dell'altra lista (con una lista: la sua)
         lda #0
 +       sta sl_cur,x
-        jsr sl_get
+        jsr sl_ok
         bcs _d1
 _mv     jsr sl_win              ; finestra: il cursore dentro
         jsr sl_draw

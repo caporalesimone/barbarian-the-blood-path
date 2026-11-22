@@ -2029,6 +2029,38 @@ _g      lda (ptr0),y
         bpl _i
         rts
 
+; ------------------------------------------------------------------ liste: voci da saltare (22/11, committente)
+; Il cursore delle liste (src/game/slist.asm, segmento CORE: qui perche' CORE e' pieno) salta le righe separatrici e i posti
+; vuoti ('-'). SL_NTRY tentativi per ricerca: in una lista (o due) senza oggetti il cursore si ferma su un posto vuoto.
+SL_NTRY  = 64
+; voce A della lista X: C = 1 se il cursore la salta (riga separatrice sempre; posto vuoto finche' ci sono tentativi:
+; esauriti, si accetta). Ogni voce accettata rimette i tentativi. Come sl_get (ui_sel, sl_sl, ...). X conservato
+sl_ok:  jsr sl_get
+        bcs _r
+        lda ui_sel
+        beq _e
+_y      lda #SL_NTRY
+        sta sl_try
+        clc
+_r      rts
+_e      dec sl_try
+        beq _y
+        sec
+        rts
+sl_try  .byte SL_NTRY
+; lista X: dal cursore in giu' la prima voce con un oggetto (nessuna: la voce 0), poi la finestra (sl_win)
+sl_fwd:
+_l      lda sl_cur,x
+        cmp sl_n,x
+        bcs _z
+        jsr sl_ok
+        bcc +
+        inc sl_cur,x
+        bne _l
+_z      lda #0
+        sta sl_cur,x
++       jmp sl_win
+
 ; ---- minimappa: testo (piano, seed, coordinate x,y del PG) in 7 sprite sulla riga 24, marcatore del PG nello sprite 7
 MM_MARK = $8a00                 ; blocco sprite libero (40)
 mm_sprites:

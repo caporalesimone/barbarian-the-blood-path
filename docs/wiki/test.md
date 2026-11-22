@@ -431,7 +431,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `SFX-12` | hero file: HERO_LEN + inn chest (22/11, $CE) + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx |
 | `UI-INV-10` | inventory: RUN/STOP closes it and returns to the game (no game menu) |
 | `UI-MAP-10` | minimap: RUN/STOP closes it and returns to the game (no game menu) |
-| `UI-LIST-10` | (22/11, owner) two lists as one (smith): down past the last ware -> first entry of 'gear', up from the first ware -> last of 'gear', down past the last of 'gear' -> first ware; D/A -> first entry of the other list |
+| `UI-LIST-10` | (22/11, owner) two lists as one (smith, pack full): down past the last ware -> first item of 'gear', up from the first item of 'gear' -> last ware, up from the first ware -> last item of 'gear', down from there -> first ware; D/A -> first item of the other list |
+| `UI-LIST-11` | (22/11, owner) the cursor skips empty slots ('-') and separator rows: smith (2 lists) and inventory (1 list), 25 moves down and 25 up, every stop on an entry with an item |
 | `UI-SHOP-10` | shop closed with RUN/STOP: back in the game, no game menu |
 | `UI-MENU-10` | game menu 'resume' with Fire in front of a shop door: the shop does not open |
 | `UI-MENU-11` | game menu 'save game' with Fire in front of the inn: the inn does not open |
