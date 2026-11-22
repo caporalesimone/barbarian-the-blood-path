@@ -40,7 +40,7 @@ conferma dell'eliminazione −70 B) + ~450 B in `CODE2`. Altre idee in `TODO.md`
 - **Testo a 5 bit** (macro `t5` e `msg` in `src/common/macros.inc`, decodificatore `d5_get` in `src/game/ui.asm`): ogni carattere e'
   un simbolo di 5 bit, 3 simboli per parola di 16 bit (byte alto prima, bit 15 non usato). Simboli: 0 fine, 1–26 lettere (codice
   schermo = simbolo), 27 spazio, 28 `:`, 29 `.`, 30 `/`, 31 cambio (il simbolo dopo indica la tabella `T5X`: cifre e
-  `? - + ! , ' ( ) > %`). **Regola del committente: il testo a 5 bit nel codice si scrive sempre leggibile**, come argomento della
+  `? - + ! , ' ( ) > %`, e dal 22/11 `$` = la moneta `CH_COIN`, per il premio "purse: upgrade ¤1000" delle quest). **Regola del committente: il testo a 5 bit nel codice si scrive sempre leggibile**, come argomento della
   macro (`#msg "fire:use"`, `tt_bp #t5 "backpack"`), che lo codifica in fase di assemblaggio; un carattere non previsto ferma la
   build (aggiungerlo a `T5X` e a `d5_t2`). La codifica e' quella dello schermo: una macro fuori da `.enc "screen"` si ferma.
   A 5 bit: i messaggi `#msg` (`ui_pi`), le etichette (`ui_labels`: x, y, `#t5`, ...; `$ff` fine), i titoli (`ui_title`), le voci del

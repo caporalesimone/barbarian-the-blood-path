@@ -23,7 +23,7 @@ OUT = os.path.join(ROOT, "out", "work", "qtab.inc")
 QTX = 0xEC00            # testi del capitolo nel gioco (qengine.asm QTX, D2): fino a MR2_AT ($F4E0, zona 2 del MENU)
 QTX_MAX = 0xF4E0 - QTX
 WRAP = 36
-T5X = "0123456789?-+!,'()>%"
+T5X = "0123456789?-+!,'()>%$"          # (22/11) '$' = la moneta del font della UI (CH_COIN, d5_t2 in ui.asm)
 COL = {"red": 1, "yellow": 2, "violet": 3}
 QG = {"K": 1, "B": 2, "P": 3, "IM": 4, "IC": 5, "C": 6, "G": 7, "V": 8}
 CH_LV = 5
@@ -103,7 +103,7 @@ def reward(x, uq, ids):
         words.append("a respec token")
     if r.get("purse"):
         pot |= 0x40
-        words.append("a purse of %d" % r["purse"])
+        words.append("purse: upgrade $%d" % r["purse"])      # (22/11, committente: "a purse of N" sembrava oro)
     if r.get("belt"):
         pot |= 0x80
         words.append("a belt of %d" % r["belt"])

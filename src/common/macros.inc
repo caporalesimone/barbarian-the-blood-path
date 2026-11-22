@@ -11,7 +11,7 @@ at      .macro
 ; segni rari). Regola del committente: il testo a 5 bit nel codice si scrive SEMPRE leggibile, come argomento delle macro
 ; (#msg "testo", #t5 "testo"); la macro lo codifica. Decodificatore: d5_get in src/game/ui.asm (ui_pi, ui_puts5).
 t5      .macro
-T5X     := "0123456789?-+!,'()>%" ; (dentro la macro: macros.inc si include anche nei moduli assemblati con game.lbl)
+T5X     := "0123456789?-+!,'()>%$" ; ('$' = moneta CH_COIN, 22/11) (dentro la macro: macros.inc si include anche nei moduli assemblati con game.lbl)
 _s      := \1
 _y      := []
         .for _i = 0, _i < len(_s), _i += 1

@@ -303,6 +303,7 @@ _hv     dec d5_n
         rts
 d5_t1   .text " :./"
 d5_t2   .text "0123456789?-+!,'()>%"   ; = T5X di src/common/macros.inc (stesso ordine)
+        .byte CH_COIN           ; (22/11) '$' nel testo a 5 bit: la moneta (premio del borsello, "purse: upgrade $1000")
 
 ;; (10/11) oro del baule a decine: tmp0..2 = A/X x 10 (24 bit; usa tmp3..5)
 ui_x10: sta tmp0
