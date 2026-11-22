@@ -181,7 +181,11 @@ _l      lda npc_k
         lda #0
         sta npc_mv,x
         sta npc_q,x
-        jsr NPC_JLOOK           ; colore (zona 3); il disegno e' quello di tk_fix
+        lda npc_k               ; (22/11) colore fisso per nome: il k-esimo dei 4 del villaggio (prima a caso a ogni ingresso)
+        and #3
+        tay
+        jsr npc_colr
+        sta npc_c,x
         lda npc_k
         asl
         tay
@@ -194,6 +198,18 @@ _l      lda npc_k
         sta npc_g,x
 _n      dec npc_k
         bne _l
+        rts
+
+; (22/11) Y = 0..3 -> A = colore del vestito numero Y degli NPC del villaggio c_chap (npc_col, out/work/town_places.inc:
+; tools/build/villages.py NPC_COL, scelti perche' non si confondano con i terreni). X conservato
+npc_colr:
+        sty tmp7
+        lda c_chap
+        asl
+        asl
+        adc tmp7                ; (C = 0)
+        tay
+        lda npc_col-4,y
         rts
 
 ; ------------------------------------------------------------------ chi e' accanto al PG

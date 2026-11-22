@@ -81,6 +81,8 @@ def main():
         for n in names:
             offs.append(o)
             o += len(n) + 1
+        # (22/11) colori dei vestiti degli NPC: 4 per villaggio (villages.py NPC_COL), letti da npc_colr (quest.asm)
+        f.write("npc_col .byte " + ", ".join(str(x) for c in sorted(V.VILLAGES) for x in V.NPC_COL[c]) + "\n")
         f.write("fix_nm  .byte " + ", ".join(str(b) for n in names for b in text(n) + b"\0") + "\n")
         f.write("fix_lo  .byte " + ", ".join("<(fix_nm+%d)" % x for x in offs) + "\n")
         f.write("fix_hi  .byte " + ", ".join(">(fix_nm+%d)" % x for x in offs) + "\n")
@@ -262,6 +264,8 @@ def build(c, v):
     k += sectors(c, m, walk) + gv
     k += bytes([t for q in boats for t in q]).ljust(4, b"\0")    # (19/11) tk_boat: x1, y1, x2, y2 (0 = nessun traghetto)
     k += fixed(c, m, walk, seen, pl, need, gv)                     # (21/11) tk_fix, tk_fnm
+    npc = V.NPC_COL[c]                                             # (22/11) colori dei vestiti degli NPC (npc_col in town_places.inc)
+    assert len(npc) == 4 and not set(npc) & {bg, c1, c2, 9, 15}, "villaggio %d: colori degli NPC %s uguali al terreno o ai multicolor degli sprite" % (c, npc)
     assert len(k) == TK_LEN
     k += bytes(sol + [0] * (TK_SOLID - len(sol)))          # tile solidi del villaggio (solidtab)
     r = rle(m)

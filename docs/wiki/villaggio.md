@@ -189,9 +189,17 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
 - **NPC nel villaggio** (`src/game/quest.asm`, modulo MENU): sprite 3–7 (liberi nel villaggio: `sh_en` ha solo lo sprite 0 e i
   3–7; gli sprite 1 e 2, fendente ed effetto nel dungeon, servono al "!"). **Disegni** (17/11): 4 figure viste di fronte, 2
   fotogrammi (fermo / passo): *villager*, *woman*, *elder*, *guard* (`tools/build/npc_gfx.py`), negli slot sprite 12–19
-  (`$A300`, zona 4 del MENU). Il vestito usa il colore dello sprite. **Colore** (`npc_look`, `src/menu/npc_look.asm`): a caso, mai
-  uno dei colori del villaggio (`tk_pal`) né il 9 e il 15 (multicolor degli sprite). Disegno a caso per i vaganti (`npc_g`); chi
-  dà la quest è la *woman*, a partire dal giallo.
+  (`$A300`, zona 4 del MENU). Il vestito usa il colore dello sprite. **(22/11, committente) Disegni
+  rifatti**: i due multicolor degli sprite (9 marrone, 15 grigio chiaro: quelli dell'eroe e dei mostri) sono spesso i colori
+  del terreno, quindi la sagoma la fa il colore del vestito, che incornicia anche la testa (cappello a tesa larga del
+  contadino, fazzoletto della donna, cappuccio dell'anziano, elmo dell'armato con scudo tondo e lancia); viso grigio con gli
+  occhi marroni. Prima capelli marroni ed elmo grigio sparivano sul terreno. **Colore** (`npc_look`,
+  `src/menu/npc_look.asm`): uno dei **4 colori del villaggio** (`npc_col`, 4 per villaggio in `out/work/town_places.inc` da
+  `NPC_COL` di `tools/build/villages.py`, letti da `npc_colr` in `quest.asm`), scelti a mano sui terreni di quel villaggio: mai
+  un colore del terreno, né 9 e 15, né 10 (il colore dell'eroe; `gen_maps.py` lo controlla). Prima era un colore a caso fra
+  quelli non usati dal villaggio (anche nero o grigio scuro su un fondo scuro, o il rosso chiaro dell'eroe). Chi sta nella
+  piazza è la *woman* con il primo colore; gli **NPC fissi** hanno un colore fisso (il k-esimo), non più a caso a ogni
+  ingresso. Disegno a caso per i vaganti (`npc_g`).
 - **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo nella piazza** (casella `tk_g` dell'intestazione del villaggio, scelta da
   `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e lontana
   dalle porte): accanto a lei compare il suo nome nella barra; **Fire** = quest presa (bit 0 di `c_qst`) e il suo dettaglio, che

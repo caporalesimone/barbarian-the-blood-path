@@ -29,6 +29,19 @@ def _v(mod, n):
     return dict(name=mod.NAME, pal=mod.PAL, heal=mod.HEAL, map="data/town_map%d.txt" % n, tiles=mod.TILES)
 
 
+# (22/11, committente: i colori degli NPC non devono confondersi con lo sfondo) i 4 colori dei vestiti per villaggio, scelti
+# a mano sui terreni di quel villaggio (prima: un colore a caso fra quelli non usati dal villaggio, anche nero o grigio scuro
+# su un fondo scuro). Il primo e' di chi sta nella piazza. Mai un colore del terreno, ne' 9 / 15 (multicolor degli sprite), ne' 10 (il colore dell'eroe).
+# Vanno nell'intestazione del file del villaggio (tk_npc, tools/build/gen_maps.py); li usa npc_look (src/menu/npc_look.asm).
+NPC_COL = {
+    1: (7, 14, 4, 1),       # prato verde, terra marrone, selciato grigio: giallo, azzurro, viola, bianco
+    2: (7, 3, 13, 4),       # lago nero, palafitte marroni e arancio: giallo, ciano, verde chiaro, viola
+    3: (6, 5, 4, 14),       # neve bianca, terra marrone, roccia grigio scuro: blu, verde, viola, azzurro
+    4: (7, 3, 13, 14),      # rovine grigio scuro e nere: giallo, ciano, verde chiaro, azzurro
+    5: (7, 1, 13, 3),       # pietra nera e blu, ponti azzurri: giallo, bianco, verde chiaro, ciano
+}
+assert all(10 not in v for v in NPC_COL.values()), "NPC: mai il rosso chiaro (10), e' il colore dell'eroe"
+
 VILLAGES = {
     1: dict(name="Aldric's Hollow", pal=(5, 9, 15, 3), heal="fountain of saint aldric", map="data/town_map.txt", tiles={}),
     2: _v(vil2_badwater, 2),
