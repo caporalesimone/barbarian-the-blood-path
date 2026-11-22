@@ -21,7 +21,8 @@ SK_SEP  = $80                   ; riga separatrice prima del segmento
 SL_ESEP = $ff                   ; sl_sl della riga separatrice
 
         .virtual $9480          ; (21/11) sovrapposte alle variabili dei salvataggi (slot_*: usate solo dal LOBBY e alla
-sl_l    .byte ?                 ; creazione dell'eroe, mai mentre una lista e' sullo schermo)
+sl_l    .byte ?                 ; creazione dell'eroe, mai mentre una lista e' sullo schermo). Qui SOLO variabili delle liste,
+                                ; degli oggetti mostrati e dei negozi: niente che usi anche il LOBBY (testo, titoli)
 sl_nl   .byte ?                 ; liste nella schermata (1 o 2)
 sl_y    .fill 2                 ; prima riga delle voci
 sl_h    .fill 2                 ; righe
@@ -52,10 +53,6 @@ ui_is   .byte ?                 ; (21/11 sera) ui_item: suffisso (come ui_ib per
 ui_sx   .byte ?                 ; suffisso dell'oggetto mostrato (sl_get, ibox_ld)
 ui_px   .byte ?                 ; (fase 3) prefisso dell'oggetto mostrato (prima in tmp5, che e' un temporaneo: prezzi)
 ui_lim  .byte ?                 ; ui_item / ip_puts: colonna dopo l'ultima del nome
-d5_n    .byte ?                 ; (21/11 sera) decodificatore del testo a 5 bit (ui.asm d5_get): simboli rimasti, parola
-d5_h    .byte ?
-d5_l    .byte ?
-ti_p    .word ?                 ; ui_title: testo
 ui_w    .byte ?                 ; (fase 5) ui_item: colonne del nome (dal chiamante); caratteri da saltare (nome scorrevole); caratteri contati
 ui_sk   .byte ?
 ui_nlen .byte ?
@@ -66,6 +63,16 @@ sl_wd   .byte ?                 ; (22/11) colonne del nome nelle righe: 33 (inve
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"
+; (22/11) decodificatore del testo a 5 bit e titolo: FUORI dalle variabili dei salvataggi. Erano in coda al blocco sopra, ma il
+; testo lo stampa anche il LOBBY con l'elenco degli eroi in slot_name: il nome del quarto eroe si rovinava (test LOBBY-13)
+        .virtual $9470
+d5_n    .byte ?                 ; (21/11 sera) decodificatore del testo a 5 bit (ui.asm d5_get): simboli rimasti, parola
+d5_h    .byte ?
+d5_l    .byte ?
+ti_p    .word ?                 ; ui_title: testo
+t5_end
+        .endv
+        .cerror t5_end > $9480, "variabili del testo a 5 bit oltre $947F"
 
 ; ------------------------------------------------------------------ dati di una lista
 ; L = X: conta le voci (sl_n) e le righe separatrici (sl_nsp) dai segmenti; cursore e finestra sulla prima voce (il

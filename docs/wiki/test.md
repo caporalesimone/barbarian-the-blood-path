@@ -160,7 +160,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `UNQ-13` | af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never |
 | `UNQ-14` | inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1) |
 
-### regression (267)
+### regression (268)
 
 | ID | Test |
 |---|---|
@@ -311,6 +311,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LOBBY-10` | both disks have the file LOBBY (start menu) and START loads it by the 5-character name |
 | `LOBBY-11` | GAME load_menu reads LOBBY from the disk into $C000: same bytes as out/work/lobby.prg |
 | `LOBBY-12` | main menu plays Demon's Eye (file SND_MENU in the buffer of the place, player running); leaving it fades to silence, then music_town loads the village song |
+| `LOBBY-13` | barbarian menu with a hero in the 4th slot: drawing the menu (title and texts, 5-bit decoder) leaves its name in slot_name intact |
 | `PROBE-10` | BARBARIAN: the loader menu with its three entries; the session ends in BARBARIAN (memory probe) |
 | `PROBE-11` | LORE from the BARBARIAN menu: title, PRESS SPACE, the story scrolls; the session ends in LORE (memory probe) |
 | `PROBE-12` | HELP from the BARBARIAN menu: all the pages (data/help.txt); the session ends in HELP on the last page (memory probe) |

@@ -67,3 +67,19 @@ def lobby_music(ctx):
         check(g.mem(L["SND_LBUF"], len(tavern)) == list(tavern), "SND_LBUF differs from the village song")
     finally:
         g.close()
+
+
+@test("LOBBY-13", "barbarian menu with a hero in the 4th slot: drawing the menu (title and texts, 5-bit decoder) leaves its name in slot_name intact")
+def lobby_names(ctx):
+    from lib.c64 import Game
+    g = Game()
+    try:
+        g.to_menu()
+        M = g.M
+        name = list(range(1, 13))                           # "abcdefghijkl" in screen codes
+        g.poke(M["slot_valid"] + 3, 1); g.poke(M["slot_name"] + 48, *name)
+        g.frames(3)                                         # the menu draws itself and reads the input
+        got = g.mem(M["slot_name"] + 48, 12)
+        check(list(got) == name, "name of the 4th hero after the menu was drawn: %s (expected %s)" % (list(got), name))
+    finally:
+        g.close()
