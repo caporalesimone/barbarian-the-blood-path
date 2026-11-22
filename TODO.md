@@ -646,6 +646,15 @@ Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
   registra i tempi per piano e capitolo. **Da fare**: negozi veri (oggi vendita e acquisto sono scorciatoie in memoria), inventario
   e scheda C navigati davvero, pergamena del portale, riparazioni, bersaglio ragionato (evocati dei boss), capitoli 2–4 provati
   a fondo (palude con i cancelli, sala del trono), più semi in fila con un rapporto unico per il bilanciamento.
+- (22/11 notte, committente) **Migliorare il bot e usarlo per verificare se il bottino dei piani basta.** Prima partita con i
+  trucchi (`out/work/bot/cheat3.json`): nei bauli dei piani 1-4 solo pugnali, scudi piccoli e cuoio (10 oggetti, nessuna arma
+  migliore del pugnale); senza comprare dal fabbro l'eroe arriva all'abate con l'arma di partenza; con ascia da guerra, cotta
+  di maglia e scudo medio (livello 6, CA 19) muore 4 volte lasciando all'abate 21-57 punti vita su 210. **Da fare**: (1) bot
+  senza trucchi su 10+ semi in fila, rapporto unico per piano (oggetti trovati per categoria e livello oggetto, oro, pozioni,
+  morti, livello dell'eroe all'ingresso) da confrontare con `sim_chest.py` e `sim_gold.py`; (2) capire se il problema e' il
+  livello oggetto L = T × u² dei bauli (quasi sempre 0 nei primi piani: `docs/wiki/bottino.md`) o il numero di bauli; (3)
+  bot capace di battere l'abate (prima gli scheletri, ritirata e ritorno) per misurare la difficolta' vera del boss; (4) poi
+  capitoli 2-4.
 
 ### J14 (14/11) Pubblicare le build quando si passera' a GitHub — S
 - Oggi le versioni stanno solo in `out/releases/` (ultime 5, locale). Per GitHub: asset del tag `v<V>` (disco, manuale,
