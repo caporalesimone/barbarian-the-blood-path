@@ -1,0 +1,553 @@
+# Quests of the game: full definition (22/11, owner's request). PROPOSAL: the game does not read this file yet (it still builds
+# the 8 placeholders of data/quests.yaml); it is the source for the quest system (TODO H1, docs/wiki/quests.md: rules Q1-Q16,
+# plot "The Blood Tithe", chain of 12 steps, 15 side quests, repeatable models). Checked by the test QUESTDB-NEXT-10
+# (tests/regression/questdb/cases.py): limits, characters, references to monsters, NPCs and uniques.
+#
+# Texts (owner's rule H7): English, lower case, only letters, digits, space and  . , : ' ! ? - ( ) + / %  (the 5-bit table of
+# src/common/macros.inc: letters, space, ":", "." and "/" cost 5 bits, the others 10). No ";" and no double quotes.
+# Limits: title 24 characters, goal 36 (with the counter), text and done 600 characters each (wrapped at 36 columns by the tool).
+#
+# Fields
+#   id        chain: 1..12; side: a<chapter>.<n>; repeatable models: r.<model>
+#   kind      chain | side | repeatable
+#   chapter   1..4 (repeatable models: every chapter, parameters in `chapters`)
+#   giver     NPC who offers it (tools/build/villages.py FIXED); turn_in: NPC who takes it back (default = giver)
+#   after     quest that must be done before this one is offered (chain: the previous step, implied; side chains: explicit)
+#   goal      what to do. type (docs/wiki/quests.md 4.2):
+#               K kill `count` monsters of `monster` (type 1..8 of the chapter, bestiary name)
+#               B kill a named boss (every generated level has one) on `level` (global depth) or anywhere in the chapter
+#               C kill the chapter boss
+#               I find `count` quest items `item`: `from` = chest of `level`, or dropped by `monster` one time in `one_in`
+#               G give `gold` to the NPC
+#               P kill `count` monsters of any type on `level`
+#               V fire on a place of the village (`place`) (with G: pay there)
+#   goal_text yellow line of page Q; {n} = counter, {t} = target
+#   reward    gold, purse (new cap of the purse), skill, potions (list colour x count), unique (name of uniques.tsv), item
+#             (generated magic item: category, level = level of the chapter boss), belt (slots), respec (tokens), relic (story only)
+#   text      what the NPC says when the quest is taken (also the text of page Q)
+#   done      what the NPC says at the delivery
+#   proposal  true = a reward or a detail not yet approved by the owner (clarifications C3, C6 of docs/wiki/quests.md)
+
+npcs:
+  1: {chain: father osric, side: [hilde, grom, the gravedigger]}
+  2: {chain: mama sabine, side: [corbeau, little pip, the drummer]}
+  3: {chain: sergeant brenna, side: [chaplain edric, quartermaster]}
+  4: {chain: the penitent, side: [the scavenger, the gatewarden]}
+
+quest_items:
+  tams_amulet: tam's amulet
+  stitched_doll: stitched doll
+  oath_roll: the oath roll
+  groms_hammer: grom's hammer
+  marsh_glass: marsh glass
+  scout_map: the scout's map
+  diary_page: diary page
+  lost_goods: lost goods
+
+quests:
+  # ------------------------------------------------------------------ chain, chapter 1: aldric's hollow
+  - id: 1
+    kind: chain
+    chapter: 1
+    giver: father osric
+    title: a sword for the crypt
+    goal: {type: K, monster: fallen, count: 8}
+    goal_text: "slay the fallen: {n}/{t}"
+    reward: {gold: 120, purse: 1000, unique: osric's cudgel}
+    text: >-
+      the crypt door stands open again. every winter the carts take our people east, and now the fallen climb up at night
+      to choose for themselves. i am old, stranger, and my arm is weak. go down and thin them out. do that and you shall
+      have the cudgel i carried when i was young.
+    done: >-
+      eight less to drag us down. take my cudgel, it has broken harder heads than theirs. and take this purse. it is
+      deeper than yours.
+  - id: 2
+    kind: chain
+    chapter: 1
+    giver: hilde
+    turn_in: father osric
+    title: the widow's son
+    goal: {type: I, item: tams_amulet, count: 1, from: chest, level: 3}
+    goal_text: "find tam's amulet on level 3"
+    reward: {gold: 150, skill: whirlwind, unique: tam's amulet}
+    proposal: true      # C6: tam's amulet as the reward of this step (uniques.tsv says "unassigned, proposal: step 2")
+    text: >-
+      my son tam went down into the crypt. he wanted his father's name off the tithe roll. he wore an amulet with a red
+      hand on it, the mark they put on the chosen. bring it back so that i know. then show it to father osric. he will
+      know what it means.
+    done: >-
+      the red hand. the same mark you carry on your arm. you were on a cart once, child of this valley, and you ran. keep
+      the amulet, hilde wants it so. your arms remember the north now: strike in a circle, as they taught you.
+  - id: 3
+    kind: chain
+    chapter: 1
+    giver: father osric
+    title: the abbot's censer
+    goal: {type: C}
+    goal_text: "slay the hollow abbot (level 5)"
+    reward: {gold: 250, potions: [{red: 3}], relic: the censer of saint aldric}
+    text: >-
+      under the crypt lies the old abbot. he was the keeper of the saint's censer. the lord of ruin promised him life
+      without end, and he sold us for it. he is long dead and he has not stopped choosing. kill his risen bones first, or
+      he will heal. bring back the censer.
+    done: >-
+      the censer of saint aldric, the first of the four relics. the valley is free this winter. but the carts went on to
+      the lake. the ferry to bad water waits at the gate of the village. find mama sabine by the bottle tree.
+
+  # ------------------------------------------------------------------ chain, chapter 2: bad water
+  - id: 4
+    kind: chain
+    chapter: 2
+    giver: mama sabine
+    title: the silent village
+    goal: {type: K, monster: drowned, count: 12}
+    goal_text: "lay the drowned to rest: {n}/{t}"
+    reward: {gold: 400, purse: 3000, skill: battle cry}
+    text: >-
+      hear how quiet it is. the drums are still. the chosen who fell from the carts sleep under the black water, and the
+      dollmaker will not let them rest. they walk the swamp. lay them down, traveller, and the drums will speak for you.
+    done: >-
+      the drums speak again. shout with them, the way the north shouts before a fight, and see your enemies shake. this
+      purse belonged to a ferryman. he does not need it.
+  - id: 5
+    kind: chain
+    chapter: 2
+    giver: mama sabine
+    title: dolls with names
+    goal: {type: I, item: stitched_doll, count: 5, from: monster, monster: mire witchling, one_in: 3}
+    goal_text: "stitched dolls: {n}/{t}"
+    reward: {gold: 450, unique: doll-hide}
+    text: >-
+      mother stitch was our healer once. she kept the silver needle of the saint. now she sews the souls of the chosen
+      into dolls, and her witchlings carry them. bring me five dolls. i will cut the thread at the bottle tree and call
+      each one by its name.
+    done: >-
+      five names, five souls gone home. i kept the cloth. wear it: the dolls took many blows meant for others, and they
+      still do.
+  - id: 6
+    kind: chain
+    chapter: 2
+    giver: mama sabine
+    title: the silver needle
+    goal: {type: C}
+    goal_text: "slay mother stitch (level 10)"
+    reward: {gold: 600, potions: [{yellow: 3}], skill: rage, relic: the silver needle}
+    text: >-
+      she sits on her isle with her fetishes around her. while one of them stands, your blade will hardly mark her. break
+      the fetishes first, then strike while she is bare. bring back the needle. it was made to close wounds, not to open
+      souls.
+    done: >-
+      the silver needle, the second relic. the dolls are only cloth now. i see the anger in you: do not bury it, use it.
+      the carts climbed to the pass. follow them to the last camp and ask for sergeant brenna.
+
+  # ------------------------------------------------------------------ chain, chapter 3: the last camp
+  - id: 7
+    kind: chain
+    chapter: 3
+    giver: sergeant brenna
+    title: cold fires
+    goal: {type: K, monster: frost wight, count: 10}
+    goal_text: "burn the frost wights: {n}/{t}"
+    reward: {gold: 600, purse: 5000, potions: [{yellow: 3}]}
+    text: >-
+      we are what is left of the company of the pass. our captain varok chose to guard the carts. we said no. the ones
+      who froze up there walk the caves now, in our colours. they were my friends. give them a fire, and i will count
+      you as one of us.
+    done: >-
+      ten fires on the mountain tonight. you fight like the northmen who raised you. the paymaster died rich: his purse
+      is yours.
+  - id: 8
+    kind: chain
+    chapter: 3
+    giver: chaplain edric
+    turn_in: sergeant brenna
+    title: the oath roll
+    goal: {type: I, item: oath_roll, count: 1, from: chest, level: 14}
+    goal_text: "find the oath roll on level 14"
+    reward: {gold: 650, skill: smash}
+    text: >-
+      every man of the company signed the roll: to guard the pilgrims on the road, to the last of us. varok signed first.
+      it lies in the deep caves, where we left our dead. bring it to the sergeant. the men must see whose name was
+      struck out, and by whose hand.
+    done: >-
+      his own name, struck out with his own blade. so it is true. the company is with you now. strike like the hammer on
+      the oath stone: one blow, with all you have.
+  - id: 9
+    kind: chain
+    chapter: 3
+    giver: sergeant brenna
+    title: the oathbreaker
+    goal: {type: C}
+    goal_text: "slay varok (level 15)"
+    reward: {gold: 900, unique: bastion door, skill: frenzy, relic: the oath blade of the saint}
+    text: >-
+      varok holds the broken bastion with the sword of the oath, snapped in two. the demon paid him with the lives of
+      his men. when he lines up with you he will charge: stand before a wall and step aside. his shield drops when he
+      hits the stone.
+    done: >-
+      the oath is kept at last. we took the door of his bastion off its hinges: carry it as a shield. let your blood run
+      hot now, as the north taught you. the pass is open. beyond it there is only ash. look for the penitent at ruin's
+      gate.
+
+  # ------------------------------------------------------------------ chain, chapter 4: ruin's gate
+  - id: 10
+    kind: chain
+    chapter: 4
+    giver: the penitent
+    title: where the carts end
+    goal: {type: K, monster: cultist, count: 12}
+    goal_text: "slay the cultists: {n}/{t}"
+    reward: {gold: 900, potions: [{violet: 3}]}
+    text: >-
+      i wore the hood once. i counted the chosen at the gate and i signed for them. here the carts end. the cultists take
+      the tithe into the citadel and come back with empty hands and full bellies. kill those who count, as i did. it is
+      all the penance i have left to give.
+    done: >-
+      twelve hoods. i knew some of the faces. the last cart of this winter is still inside, not yet unloaded.
+  - id: 11
+    kind: chain
+    chapter: 4
+    giver: the penitent
+    title: the last cart
+    goal: {type: B, level: 19}
+    goal_text: "slay the jailer on level 19"
+    reward: {gold: 1000, item: {category: any, magic: true}}
+    text: >-
+      the chosen of this winter wait in the cells above the throne room. their jailer has a name, and his master knows
+      it. kill him and the cells will open. there is a boy among them who wears no amulet. he gave it away, he says, to
+      someone who would come back for it.
+    done: >-
+      the cells are open. tam is alive, and he asks for his mother. he will go home when the road is safe. only one
+      thing still keeps it red.
+  - id: 12
+    kind: chain
+    chapter: 4
+    giver: the penitent
+    title: the saint's heart
+    goal: {type: C}
+    goal_text: "slay the lord of ruin (level 20)"
+    reward: {purse: 10000, respec: 1, unique: aldric's heart, relic: the heart of saint aldric}
+    text: >-
+      on the throne of the dead king sits the lord of ruin, and in his hand the heart of saint aldric still beats. three
+      relics you carry. the fourth will close the seal. he calls his servants when he bleeds, and he is hungry: he ate a
+      city. do not let him eat you.
+    done: >-
+      the four relics are home. the tithe is paid in full. but the seal closes the crater, not what lies beneath it.
+
+  # ------------------------------------------------------------------ side quests, chapter 1
+  - id: a1.1
+    kind: side
+    chapter: 1
+    giver: grom
+    title: grom's old hammer
+    goal: {type: I, item: groms_hammer, count: 1, from: chest, level: [2, 4]}
+    goal_text: "find grom's hammer (levels 2-4)"
+    reward: {gold: 60, item: {category: weapon, base: sword, magic: true}}
+    text: >-
+      my father's hammer went down with the last cart, in a chest of tools for the abbot's forge. i can make iron sing
+      with it. find it and the first blade off my anvil is yours.
+    done: >-
+      listen to that ring! here, a sword as i promised. there is a little of the old craft in it.
+  - id: a1.2
+    kind: side
+    chapter: 1
+    giver: grom
+    after: a1.1
+    title: iron for the forge
+    goal: {type: G, gold: 300}
+    goal_text: "give grom 300 gold"
+    reward: {unique: gravedigger}
+    text: >-
+      with the hammer back i could forge something that the dead will fear. but good iron costs. bring me three hundred
+      gold and leave the rest to me.
+    done: >-
+      i made it from the spades of the cemetery. it has put many under the ground already. i call it the gravedigger.
+  - id: a1.3
+    kind: side
+    chapter: 1
+    giver: the gravedigger
+    title: a name on the stone
+    goal: {type: B, chapter: 1}
+    goal_text: "slay a named one in the crypt"
+    reward: {gold: 150, item: {category: ring, base: copper ring, magic: true}}
+    proposal: true      # C6: reward to be decided (here: gold and a magic copper ring)
+    text: >-
+      i carve the names of those the tithe took. but some of the things down there have names too, and they are proud of
+      them. kill one that has a name and i will carve that as well. the small stone, in the corner.
+    done: >-
+      a small stone, as i said. this ring came out of an old grave. the dead man will not miss it.
+  - id: a1.4
+    kind: side
+    chapter: 1
+    giver: the gravedigger
+    title: candles for the saint
+    goal: {type: P, level: 4, count: 10}
+    goal_text: "clear level 4: {n}/{t}"
+    reward: {gold: 120, potions: [{red: 2}]}
+    text: >-
+      the chapel of the saint is on the fourth level, under the bones. nobody has lit a candle there in my lifetime.
+      clear the way and i will go down myself, one last time.
+    done: >-
+      the candles burn. i left one for you. and these, from the fountain.
+
+  # ------------------------------------------------------------------ side quests, chapter 2
+  - id: a2.1
+    kind: side
+    chapter: 2
+    giver: the drummer
+    title: marsh glass
+    goal: {type: I, item: marsh_glass, count: 6, from: monster, monster: bog crawler, one_in: 2}
+    goal_text: "marsh glass: {n}/{t}"
+    reward: {potions: [{yellow: 2}], unique: bottle tree}
+    proposal: true      # C6: the unique "bottle tree" (unassigned) here, with the potions
+    text: >-
+      the bottles on the tree hold the bad spirits. the tree is nearly bare. the bog crawlers swallow the old glass of
+      the sunken houses. cut six of them open for me.
+    done: >-
+      good glass, green and thick. i hung the best pieces on a shield for you. let the spirits hit that and not you.
+  - id: a2.2
+    kind: side
+    chapter: 2
+    giver: the drummer
+    after: a2.1
+    title: bottles for the tree
+    goal: {type: K, monster: crawler queen, count: 2}
+    goal_text: "slay the crawler queens: {n}/{t}"
+    reward: {belt: 8}
+    proposal: true      # P3: the belt with 8 slots here or at the start of chapter 3 (sim_floor.py)
+    text: >-
+      the glass is blown, but the queens of the crawlers nest under the tree and eat the roots. two of them. kill them
+      and the tree will stand another hundred years.
+    done: >-
+      the tree is safe. take this belt of the old ferrymen: it holds twice the bottles of yours.
+  - id: a2.3
+    kind: side
+    chapter: 2
+    giver: little pip
+    title: lanterns on the water
+    goal: {type: K, monster: will-o'-wisp, count: 8}
+    goal_text: "put out the wisps: {n}/{t}"
+    reward: {respec: 1}
+    text: >-
+      i followed the lanterns once. they are not lanterns. they called me by my name and i nearly went under. put them
+      out, mister. eight of them. then nobody will follow them again.
+    done: >-
+      it is dark on the water now. good. mama says this token lets a person begin again. i do not want to begin again.
+      you take it.
+  - id: a2.4
+    kind: side
+    chapter: 2
+    giver: corbeau
+    title: corbeau's toll
+    goal: {type: G, gold: 600}
+    goal_text: "pay corbeau 600 gold"
+    reward: {unique: ferryman's oar}
+    text: >-
+      everybody pays the ferryman. the chosen paid with their lives. you can pay with gold: six hundred. for that i will
+      give you the oar that pushed the carts across. i want it out of my boat.
+    done: >-
+      take it. it is heavier than it looks. it has a great deal on its conscience.
+
+  # ------------------------------------------------------------------ side quests, chapter 3
+  - id: a3.1
+    kind: side
+    chapter: 3
+    giver: quartermaster
+    title: the frozen scout
+    goal: {type: I, item: scout_map, count: 1, from: chest, level: 11}
+    goal_text: "find the scout's map on level 11"
+    reward: {gold: 400, potions: [{yellow: 2}]}
+    text: >-
+      our scout went into the snow caves to map a way around the bastion. he did not come back. his pack will be where
+      he fell, on the first level. the map is worth more than he was, and he would say so himself.
+    done: >-
+      his hand, his marks. there is a nest drawn here, deep down, and a crown beside it. hm. come back when you have
+      rested.
+  - id: a3.2
+    kind: side
+    chapter: 3
+    giver: quartermaster
+    after: a3.1
+    title: the wight lord's crown
+    goal: {type: K, monster: wight lord, count: 2}
+    goal_text: "slay the wight lords: {n}/{t}"
+    reward: {unique: frostbound}
+    text: >-
+      the map shows where the wight lords hold court. our old officers, the ones varok let freeze. two of them still wear
+      the mail of the company. it should not rot on dead men. bring them down.
+    done: >-
+      the ice never left this mail. it will keep the cold out, they say, or keep it in. wear it and tell me which.
+  - id: a3.3
+    kind: side
+    chapter: 3
+    giver: sergeant brenna
+    title: hounds at the pass
+    goal: {type: K, monster: hellhound, count: 14}
+    goal_text: "kill the hellhounds: {n}/{t}"
+    reward: {unique: hound's tooth}
+    text: >-
+      the hounds are not from this mountain. they came up from the crater behind the carts and they take my sentries at
+      night. fourteen would make the pack think twice.
+    done: >-
+      the nights are quiet. one of the men set a tooth of the pack leader in a silver ring. it bites, he says.
+  - id: a3.4
+    kind: side
+    chapter: 3
+    giver: chaplain edric
+    title: the bonfire vigil
+    goal: {type: V, place: the great bonfire, gold: 1000}
+    goal_text: "offer 1000 gold at the bonfire"
+    reward: {potions: [{violet: 2}], item: {category: ring, base: silver ring, magic: true}}
+    proposal: true      # C6: reward to be decided (here: violet potions and a magic silver ring)
+    text: >-
+      the bonfire has burned since the day we said no. wood is dear up here and the men are tired. a thousand gold keeps
+      it alight through the winter. lay it at the fire yourself, so that they see who gave it.
+    done: >-
+      the fire will last. the company remembers its friends. this ring was left at the fire by one who did not come
+      back. it is yours.
+
+  # ------------------------------------------------------------------ side quests, chapter 4
+  - id: a4.1
+    kind: side
+    chapter: 4
+    giver: the scavenger
+    title: the king's diary
+    goal: {type: I, item: diary_page, count: 3, from: chest, level: [16, 17, 18]}
+    goal_text: "diary pages: {n}/{t}"
+    reward: {gold: 500, item: {category: ring, base: gold ring, magic: true}}
+    text: >-
+      i dig in the ash for what the rich left behind. the king of ruin kept a diary, and the cultists tore it up and hid
+      the pages in the citadel, one on each level. i want to know why he opened the door. do you not?
+    done: >-
+      here: i was afraid to die. so he did it for that. a whole city, for that. take this ring, i found it on a hand in
+      the ash. i do not want it near me.
+  - id: a4.2
+    kind: side
+    chapter: 4
+    giver: the gatewarden
+    title: stone that walks
+    goal: {type: K, monster: stone gargoyle, count: 3}
+    goal_text: "break the stone gargoyles: {n}/{t}"
+    reward: {unique: angel's tear}
+    text: >-
+      the statues on the citadel wall were saints once. the great ones climb down at night. three of them. i have held
+      this gate for thirty years and i will not have my own wall walk over me.
+    done: >-
+      the wall is only a wall again. this shield hung under the weeping angel. her tears have run over it for a hundred
+      years.
+  - id: a4.3
+    kind: side
+    chapter: 4
+    giver: the penitent
+    title: tears of the angel
+    goal: {type: P, level: 18, count: 15}
+    goal_text: "clear level 18: {n}/{t}"
+    reward: {respec: 1, potions: [{violet: 2}]}
+    text: >-
+      the angel weeps for everyone i signed for. i cannot go where they went. you can. walk the eighteenth level and let
+      nothing there keep walking. it is not enough, but it is something.
+    done: >-
+      she wept a little less tonight. take this token: it lets a man begin again. i have no use for it. i know what i
+      would do again.
+
+  # ------------------------------------------------------------------ repeatable models (offered by the wanderers)
+  - id: r.cull
+    kind: repeatable
+    goal: {type: K, monster: base, count: [8, 15]}
+    goal_text: "{m}: {n}/{t}"
+    text: >-
+      they come closer to the houses every night. somebody has to thin them out, and you have the arm for it. i can pay
+      a little.
+    done: >-
+      fewer of them tonight. here is what i promised.
+    chapters:
+      1: [thin the fallen, bones in the crypt]
+      2: [lay the drowned, beetles in the reeds]
+      3: [ash and frost, arrows in the dark]
+      4: [hoods and blades, wings of stone]
+  - id: r.hunt
+    kind: repeatable
+    goal: {type: K, monster: strong, count: [2, 4]}
+    goal_text: "{m}: {n}/{t}"
+    text: >-
+      the big ones lead the others. kill the leaders and the rest lose heart. i saw them with my own eyes, i will not go
+      near them again.
+    done: >-
+      you really did it. take this, and my thanks.
+    chapters:
+      1: [the warchief's guard]
+      2: [the hag of the mere]
+      3: [the pack alpha]
+      4: [the champion's guard]
+  - id: r.bounty
+    kind: repeatable
+    goal: {type: B, chapter: any}
+    goal_text: "slay a named one"
+    text: >-
+      one of them has a name. the others say it when they come. i do not want to hear that name under my window again.
+    done: >-
+      nobody will say that name now. this is yours.
+    chapters:
+      1: [a name on the stone]
+      2: [a doll with a name]
+      3: [an oath to settle]
+      4: [a high hood]
+  - id: r.recovery
+    kind: repeatable
+    goal: {type: I, item: lost_goods, count: [3, 6], from: monster, monster: any, one_in: 4}
+    goal_text: "lost goods: {n}/{t}"
+    text: >-
+      the carts dropped half their load on the way down, and the things below carry it around like treasure. bring back
+      what you find. it belonged to people here.
+    done: >-
+      i know this bundle. and this one. thank you, stranger.
+    chapters:
+      1: [grave goods]
+      2: [sunken bundles]
+      3: [frozen supplies]
+      4: [relics of ruin]
+  - id: r.patrol
+    kind: repeatable
+    goal: {type: P, level: [1, 4], count: [10, 20]}
+    goal_text: "clear level {l}: {n}/{t}"
+    text: >-
+      nobody has kept watch down there since the tithe began. walk that level for us, sword in hand, and let them know
+      somebody still does.
+    done: >-
+      a quiet night, the first in years. take this for your trouble.
+    chapters:
+      1: [the gravedigger's watch]
+      2: [candles for the drowned]
+      3: [the snow cave watch]
+      4: [the citadel watch]
+  - id: r.offering
+    kind: repeatable
+    goal: {type: G, gold: chapter}
+    goal_text: "offer {g} gold"
+    text: >-
+      we keep a little for those the carts left with nothing. if your purse is heavy, help us carry it. i will give you
+      what the healer left for our friends.
+    done: >-
+      this will feed three houses until spring. drink these to our health.
+    chapters:
+      2: [alms for the stilts]
+      3: [a share for the camp]
+      4: [bread for the gate]
+
+# Rewards of the repeatable quests (P5): gold about a quarter of a level of the chapter, 1-2 potions, a magic item of the
+# chapter one time in 4; never respec tokens, uniques or special rewards. Offering: only potions. Reference gold per level
+# (tools/simulators/sim_gold.py, 20/11): 220, 735, 1055, 1540.
+repeatable_rewards:
+  1: {gold: 55, potions: {red: [1, 2]}, magic_one_in: 4, offering: null}
+  2: {gold: 180, potions: {red: [1, 2]}, magic_one_in: 4, offering: {gold: 300, potions: {yellow: 3}}}
+  3: {gold: 260, potions: {yellow: [1, 2]}, magic_one_in: 4, offering: {gold: 500, potions: {yellow: 4}}}
+  4: {gold: 380, potions: {violet: [1, 2]}, magic_one_in: 4, offering: {gold: 800, potions: {violet: 3}}}
+
+# Uniques not given by a quest: where they come from (data/items/next/uniques.tsv, column `source`)
+unique_sources:
+  censer-bearer: {drop: hollow_abbot}
+  stitchripper: {drop: mother_stitch}
+  oath blade: {drop: varok_oathbreaker}
+  tithe-taker: {drop: named boss of chapter 4, one_in: 8}
+  ruin's crown: {chest: epic chest of the rings}
+  aldric's heart: {quest: 12, also: epic chest of the armors}

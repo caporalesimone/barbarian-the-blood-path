@@ -579,6 +579,9 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   vaganti, pagina Q, `QST0`/`QSTn`, `c_qst` a 8 bit) è descritto in [villaggio](docs/wiki/villaggio.md#abitanti-1718-11-concept).
 - Prima delle quest: oggetti ed economia (fase 2, [oggetti](docs/wiki/oggetti.md#progetto-affissi-unici-e-memoria-2011)).
 - **`QST0` è pieno** (1021 B su 1024): la pagina Q va riprogettata (cancello G2).
+- (22/11) **Tutte le quest definite** con testi e premi in `data/quests/next/quests.yaml` (test `QUESTDB-NEXT-10`); **come
+  implementare** motore, modulo del villaggio, pagina Q e ogni singola quest: [QUEST-IMPLEMENTAZIONE.md](QUEST-IMPLEMENTAZIONE.md)
+  (usa e getta: si cancella a quest finite). Da approvare: i premi `proposal: true`, C3, C6, P3 e dove mettere i 32 B di stato.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 
 ### H3 (ex 5.2) The Endless Abyss (dopo B10, B11, G6, E5) — XL

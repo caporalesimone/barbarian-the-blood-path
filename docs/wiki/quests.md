@@ -7,6 +7,11 @@ NPC e "!" del villaggio in [villaggio](villaggio.md#abitanti-1718-11-concept), p
 (affissi, unici, memoria) è in [oggetti](oggetti.md#progetto-affissi-unici-e-memoria-2011). L'analisi del 07/11 (tre villaggi su un
 dungeon unico, mulino, Torvald, generatori su disco) è superata e resta solo nella storia di git.
 
+**(22/11) Definizione completa di tutte le quest, con i testi in inglese e i premi**: `data/quests/next/quests.yaml` (12 passi della
+catena, 15 accessorie, 6 modelli ripetibili, sorgenti degli unici; il gioco non lo legge ancora; test `QUESTDB-NEXT-10`). I premi
+ancora da approvare sono marcati `proposal: true` (passo 2 *tam's amulet*; `a1.3`, `a3.4`: C6; *bottle tree* in `a2.1`; cintura a 8
+in `a2.2`: P3). Come implementare il sistema e ogni quest: `QUEST-IMPLEMENTAZIONE.md` nella radice (documento usa e getta).
+
 ## Indice
 1. [Regole fissate](#1-regole-fissate)
 2. [Villaggi, NPC e boss](#2-villaggi-npc-e-boss)

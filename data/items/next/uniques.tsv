@@ -2,11 +2,11 @@ name	base	min_level	max_level	price	power0	v0a	v0b	power1	v1a	v1b	power2	v2a	v2b
 osric's cudgel	club	2	6	400	ATT_DMG	2	2	CON	1	1	DUR	100	100				quest step 1	the priest's old club
 gravedigger	mace	4	8	900	DMG	2	2	PEN	1	1	LIFE	6	6				accessory A1.2	
 censer-bearer	morning_star	6	10	2500	ATT_DMG	2	2	LEECH	3	3	CON	1	1				drop: The Hollow Abbot	green fire of the crypt
-tam's amulet	copper	3	7	1500	LIFE	8	8	GETHIT	1	1							unassigned (proposal: step 2)	a ring in the game (no amulet slot)
+tam's amulet	copper	3	7	1500	LIFE	8	8	GETHIT	1	1							quest step 2 (proposal, data/quests/next)	a ring in the game (no amulet slot)
 ferryman's oar	war_axe	8	12	3500	DMG	2	2	SPEED	1	1	STR	1	1				accessory A2.4	blunt edge, heavy
 stitchripper	dagger	9	13	3000	ATT_DMG	3	3	SPEED	2	2	DEX	2	2				drop: Mother Stitch	her own needle-knife
 doll-hide	studded_armor	9	13	3200	AC	2	2	LIFE	12	12	THORNS	2	2				quest step 5	stitched from the dolls
-bottle tree	mid_shield	8	12	2500	AC	2	2	GETHIT	1	1	CON	1	1				unassigned	
+bottle tree	mid_shield	8	12	2500	AC	2	2	GETHIT	1	1	CON	1	1				accessory A2.1 (proposal, data/quests/next)	
 oath blade	broad_sword	13	17	6000	ATT_DMG	3	3	PEN	2	2	STR	2	2				drop: Varok the Oathbreaker	the broken sword of the oath
 bastion door	tower_shield	13	17	5500	AC	3	3	GETHIT	2	2	LIFE	12	12				quest step 9	
 frostbound	splint_mail	14	18	6500	AC	2	2	GETHIT	2	2	CON	2	2				accessory A3.2	
