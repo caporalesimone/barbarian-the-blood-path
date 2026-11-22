@@ -1977,7 +1977,13 @@ _l      txa
         inx
         cpx #MI_N
         bne _l
-        jsr mm_qmark            ; (22/11) tmp1 = sprite dei segni, tmp2 = loro bit MSB
+        lda #0                  ; (22/11) "!" delle quest sugli NPC fissi: mm_qmark nel modulo MENU (src/menu/npc_fix.asm);
+        sta tmp1                ; tmp1 = sprite dei segni, tmp2 = loro bit MSB
+        sta tmp2
+        lda ovl_cur
+        beq +
+        jsr MENU_QMMK
++
         lda SPR_MSB
         and #$80
         ora tmp2
@@ -1990,80 +1996,6 @@ _l      txa
         sta SPR_EN
         rts
 
-; (22/11, committente) minimappa del villaggio: un "!" (glifo del font della UI, 8x8) sopra ogni NPC fisso con un segno
-; (npc_q, q_marks: giallo una quest da dare, verde una da ritirare), negli sprite MI_N..MI_N+NFIX-1, nel colore del segno.
-; Glifo 8x8 (mq_gl) a doppia grandezza. Casella dell'NPC come in npc_fix (tk_fix + tk_sec); x = 82 + 4 col (glifo
-; centrato sulla casella, 9 bit), y = 34 + 4 riga (glifo appena sopra la casella). Uscita: tmp1 = bit di SPR_EN, tmp2 = bit di SPR_MSB
-        .cerror MI_N + NFIX > 7, "segni delle quest nella minimappa: sprite oltre il 6"
-mm_qmark:
-        lda #0
-        sta tmp1
-        sta tmp2
-        lda npc_pend            ; NPC non ancora piazzati: npc_q non valido
-        bne _r
-        ldx #NFIX
-_l      stx tmp0                ; tmp0 = k (1..NFIX)
-        txa
-        asl
-        tay                     ; Y = 2k: tk_fix-2,y / tk_fix-1,y
-        lda tk_fix-2,y
-        beq _n
-        and #31
-        tax                     ; X = NPC = settore
-        lda npc_q,x
-        beq _n
-        ldx tmp0
-        and #15
-        sta SPR_COL+MI_N-1,x    ; colore del segno
-        lda mq_bit-1,x
-        ora tmp1
-        sta tmp1
-        lda tk_fix-1,y          ; (x - x0) | (y - y0) << 4
-        sta tmp3
-        lda tk_fix-2,y
-        and #31
-        asl
-        asl
-        tax                     ; X = 4 x settore: tk_sec-4,x = sua voce
-        lda tmp0
-        asl
-        tay                     ; Y = 2k: SPR_X+2*(MI_N-1),y = registri dello sprite
-        lda tmp3
-        lsr
-        lsr
-        lsr
-        lsr
-        clc
-        adc tk_sec-3,x          ; riga
-        asl
-        asl                     ; (righe < 64: C = 0)
-        adc #34
-        sta SPR_X+2*(MI_N-1)+1,y
-        lda tmp3
-        and #15
-        clc
-        adc tk_sec-4,x          ; colonna
-        asl
-        asl                     ; (colonne < 64: C = 0)
-        adc #82
-        sta SPR_X+2*(MI_N-1),y
-        bcc +
-        ldx tmp0                ; x oltre 255: bit MSB dello sprite
-        lda mq_bit-1,x
-        ora tmp2
-        sta tmp2
-+       ldx tmp0
-        lda #MG_B+MI_N          ; blocco del "!" (mm_names)
-        sta SCR_A+$3f8+MI_N-1,x
-_n      ldx tmp0
-        dex
-        bne _l
-_r      rts
-mq_gl   .byte $18, $18, $18, $18, $18, $00, $18, $00   ; "!" largo 2 pixel (il glifo del font e' largo 1: non si vedeva)
-mq_bit  .for i = 0, i < NFIX, i = i + 1
-        .byte 1 << (MI_N + i)
-        .next
-
 ; blocchi MG_B..MG_B+MI_N-1: un glifo del font della UI ($B800) per icona, in alto a sinistra dello sprite
 mm_names:
         lda #0
@@ -2071,12 +2003,6 @@ mm_names:
 _z      sta $b000,y
         iny
         bne _z
-        ldx #7                  ; (22/11) "!" largo dei segni delle quest (mm_qmark) nel blocco MG_B+MI_N
-_q      ldy mul3,x
-        lda mq_gl,x
-        sta $b000+64*MI_N,y
-        dex
-        bpl _q
         ldx #MI_N-1
 _i      lda mi_ic,x
         ldy #$b8                ; ptr0 = $B800 + codice x 8

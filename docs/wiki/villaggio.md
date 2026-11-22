@@ -195,7 +195,7 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   contadino, fazzoletto della donna, cappuccio dell'anziano, elmo dell'armato con scudo tondo e lancia); viso grigio con gli
   occhi marroni. Prima capelli marroni ed elmo grigio sparivano sul terreno. **Colore** (`npc_look`,
   `src/menu/npc_look.asm`): uno dei **4 colori del villaggio** (`npc_col`, 4 per villaggio in `out/work/town_places.inc` da
-  `NPC_COL` di `tools/build/villages.py`, letti da `npc_colr` in `quest.asm`), scelti a mano sui terreni di quel villaggio: mai
+  `NPC_COL` di `tools/build/villages.py`, letti da `npc_colr`, dal 22/11 nella zona 1 del MENU, `src/menu/npc_fix.asm`), scelti a mano sui terreni di quel villaggio: mai
   un colore del terreno, né 9 e 15, né 10 (il colore dell'eroe; `gen_maps.py` lo controlla). Prima era un colore a caso fra
   quelli non usati dal villaggio (anche nero o grigio scuro su un fondo scuro, o il rosso chiaro dell'eroe). Chi sta nella
   piazza è la *woman* con il primo colore; gli **NPC fissi** hanno un colore fisso (il k-esimo), non più a caso a ogni

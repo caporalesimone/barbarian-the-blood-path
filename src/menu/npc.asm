@@ -17,7 +17,7 @@ NPC_BMIN = 80                   ; sopra questa riga c'e' la barra in alto (IRQ_B
         jmp npc_init            ; NPC_JINIT
         jmp npc_draw5           ; NPC_JDRAW
         jmp _rts                ; NPC_JTALK (22/11: niente, il Fire va a QGIV)
-        jmp npc_px              ; NPC_JPX (21/11, npc_fix in GAME)
+        jmp npc_px              ; NPC_JPX (21/11; dal 22/11 npc_fix sta nel MENU e chiama npc_px: voce libera)
         jmp npc_look            ; NPC_JLOOK
 
 _rts    rts
@@ -91,7 +91,7 @@ _w
 _nx     dex
         bmi +
         jmp _i
-+       jmp npc_fix             ; (21/11) gli NPC fissi al posto dei vaganti dei loro settori (zona 1, npc_here.asm)
++       jmp npc_fix             ; (21/11) gli NPC fissi al posto dei vaganti dei loro settori (zona 1, npc_fix.asm)
 
 ; A = numero a caso da 0 a A-1 (A = 1..63). Y conservato.
 npc_rm:

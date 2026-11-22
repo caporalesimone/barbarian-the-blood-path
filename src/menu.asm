@@ -25,6 +25,7 @@
         jmp q_offer             ; MENU_QOFFER (22/11): quest da dare (menu/q_who.asm)
         jmp q_tin               ; MENU_QTIN (22/11): quest da ritirare
         jmp q_marks             ; MENU_QMARK (22/11, D12): segni degli NPC fissi
+        jmp mm_qmark            ; MENU_QMMK (22/11): "!" delle quest sulla minimappa (menu/npc_fix.asm)
 
 ; interrupt spenti per tutto il menu (dal 21/11 il KERNAL e' sempre escluso, $01 = MEMCFG: la zona 2 si esegue sempre).
 ; Preserva A, X, Y.
@@ -38,6 +39,7 @@ mk_exit = ui_exit
         .include "menu/shop_act.asm"
         .include "menu/npc_here.asm"
         .include "menu/q_who.asm"       ; (22/11) quest: chi da' e chi ritira
+        .include "menu/npc_fix.asm"     ; (22/11) NPC fissi, colore del vestito, "!" sulla minimappa (da GAME)
 mz1_top
         .cerror mz1_top > MR1_END, "modulo MENU: zona 1 oltre $CFFF di ", mz1_top - MR1_END, " B"
 ;@free mz1_top..MR1_END "Coda della zona 1 del MENU: codice o dati del modulo MENU (la build stampa lo spazio libero delle zone)" use=code

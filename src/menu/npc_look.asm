@@ -19,6 +19,6 @@ npc_look:
         jsr rand
         and #3
         tay
-+       jsr npc_colr            ; (GAME, quest.asm)
++       jsr npc_colr            ; (zona 1, npc_fix.asm; fino al 22/11 in GAME)
         sta npc_c,x
         rts
