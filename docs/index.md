@@ -11,6 +11,7 @@ non coincidono, ha ragione il codice: la pagina va corretta (regola in `CLAUDE.m
 
 | Pagina | Argomento |
 |---|---|
+| [Analisi del 22/11](fable-analisi.md) | Analisi d'insieme di codice e memoria: mappa delle zone e riuso, difetti, duplicazioni, risparmi possibili, oggetti, menu, mostri, test |
 | [Avvio e storia](wiki/intro.md) | Build di debug e di release, il loader `BARBARIAN` (menu nella release), `START`, trampoline di caricamento, la storia a scorrimento (LORE): immagini, tecnica, formato di `LDAT` |
 | [Architettura](wiki/architettura.md) | (11/11) Struttura del codice: programmi su disco, moduli di GAME e dipendenze, memoria e ciclo di vita, banchi `$01`, interruzioni, pagina zero, decisioni architetturali |
 | [Flussi del codice](wiki/flussi.md) | (11/11) Diagrammi di come gira il codice: avvio, partita, ciclo per fotogramma, IRQ, input, cambio di luogo, generazione, precaricamento, disco, salvataggi, combattimento, IA, morte e portale, schermate, menu del villaggio, musica, sala del trono |

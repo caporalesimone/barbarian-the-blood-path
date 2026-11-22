@@ -628,6 +628,9 @@ def main():
         v = int(r["value1"] or 0)
         chk(v == int(r["value2"] or 0), f"affisso {r['name']}: value1 != value2 (valore variabile: serve il byte del valore, Abisso)")
         chk(-128 <= v <= 127, f"affisso {r['name']}: valore {v} fuori da un byte con segno")
+        # (22/11) il gioco regge un totale negativo solo per questi poteri (recalc_stats, af_dur): vita, danno subito,
+        # penetrazione e cadenza non hanno il controllo
+        chk(v >= 0 or r["power"] in ("DMG", "ATT_DMG", "AC", "STR", "DUR"), f"affisso {r['name']}: valore negativo non previsto per {r['power']}")
         pw.append(PW.index(r["power"]) + 1); val.append(v & 255)
     # (22/11, fase 6) unici (data/items/next/uniques.tsv): nell'oggetto suffisso = $80 + numero dell'unico, prefisso 0, id = la
     # base. I poteri (fino a 4, valori fissi) sono righe in coda ad af_pw / af_val: unico u -> righe UN0 + 4u .. UN0 + 4u + 3

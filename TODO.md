@@ -33,6 +33,10 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 
 ---
 
+> **(22/11) Analisi d'insieme del codice e della memoria**: [docs/fable-analisi.md](docs/fable-analisi.md) (mappa della memoria e
+> zone riusabili, difetti trovati, duplicazioni, risparmi possibili, oggetti, menu, mostri, abilità, test). Le proposte non
+> fatte stanno lì, sezione 4 (memoria) e sezione 2 righe 7–10 (difetti aperti).
+
 ## 1 — Priorità massima
 
 ### A1 Punti statistica: rifiniture e verifiche a mano — **TOP PRIO** — S (verifica) + M (spostamento nel MENU)
