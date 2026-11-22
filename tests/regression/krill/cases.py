@@ -44,7 +44,7 @@ def krill_resident(ctx):
     check(g.b(0x8e) == 0, "LDFLAGS $8E = %d after the menu (expected 0: consumed)" % g.b(0x8e))
 
 
-@test("KRILL-11", "disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (9 blocks), barbarian first")
+@test("KRILL-11", "disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (4 blocks since 22/11), barbarian first")
 def krill_disk(ctx):
     L = ctx["g"].L
     b = blocks(os.path.join(OUT, "disk.d64"))

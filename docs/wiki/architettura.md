@@ -171,7 +171,7 @@ flowchart TB
     subgraph R1["$0400-$9FFF: GAME residente"]
         CODE["codice e dati $0400-$7972<br/>(margine 3501 B fino a $8720)"]
         HUDS["$8400 schermo HUD, sprite della barra,<br/>brani SND_LBUF $8A40 / SND_FBUF $8E80,<br/>sprite forti $8C00 (villaggio: MENU zona 5, NPC e '!'), nomi dei mostri NM_AT $8F6D"]
-        VARS["$9000-$9BFF variabili: gioco, combattimento,<br/>eroe CHRBLK $9500, mostri MRT $9600 (villaggio: MENU zona 6),<br/>stato del piano LVLBLK $9800, player SID"]
+        VARS["$9000-$9BFF variabili: gioco, combattimento,<br/>eroe CHRBLK $9500 (166 B),<br/>mostri MRT $9600 (villaggio: MENU zona 6),<br/>stato del piano LVLBLK $9800, player SID"]
         C2["$9C00-$9FFF CODE2: disco, percorsi dei mostri"]
     end
     subgraph R2["$A000-$BFFF: banco VIC 2"]
@@ -193,7 +193,7 @@ flowchart TB
         CT["$EC00 file del villaggio (TWNc), poi appoggio del MENU"]
         CD["$EC6D-$F4DF buffer del tema<br/>(GFXn letto a ogni ingresso; 15/11: comincia<br/>nella coda del villaggio)"]
         Z2["$F4E0-$FCFF MENU zona 2"]
-        FM["$FD00-$FFF9 FMAP, $FFFA vettori"]
+        FM["$FD00-$FE95 FMAP, $FF80-$FFF7 baule della locanda<br/>(INN_AT, 22/11), $FFFA vettori"]
     end
 ```
 

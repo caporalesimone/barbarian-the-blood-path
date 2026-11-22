@@ -71,7 +71,7 @@ Il quest system non sta in GAME: quasi tutto il suo codice serve solo nel villag
 - `tools/build/gen_quests.py` va riscritto su `data/quests/next/quests.yaml`; quando il gioco lo legge, il file passa a
   `data/quests.yaml` e la cartella `next` sparisce.
 
-### 2.3 Stato nell'eroe (32 B, `SAVE_VER` nuovo)
+### 2.3 Stato nell'eroe (32 B, `SAVE_VER` nuovo) — **fatto il 22/11** (formato $CE: baule a `$FF80`, campi `q_*` in `game.asm`)
 Come deciso in `quests.md` 4.3:
 
 | Campo | Byte | Contenuto |

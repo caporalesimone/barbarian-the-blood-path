@@ -44,10 +44,10 @@ def sfx_sort(ctx):
     check(p == [sw, pr] and s == [9, 0], "pack %s suffixes %s (expected [%d, %d], [9, 0])" % (p, s, sw, pr))
 
 
-@test("SFX-12", "hero file: HERO_LEN 254, file of HERO_LEN + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx")
+@test("SFX-12", "hero file: HERO_LEN + inn chest (22/11, $CE) + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx")
 def sfx_save(ctx):
     g = ctx["g"]; L = g.L
-    check(L["HERO_LEN"] == 254 and L["SV_LEN"] == L["HERO_LEN"] + 5 * L["LV_SLOT"], "HERO_LEN %d SV_LEN %d" % (L["HERO_LEN"], L["SV_LEN"]))
+    check(L["SV_LEN"] == L["HERO_LEN"] + L["INN_LEN"] + 5 * L["LV_SLOT"], "HERO_LEN %d SV_LEN %d" % (L["HERO_LEN"], L["SV_LEN"]))
     g.poke(L["c_packs"], 1, 2, 3, 4, 5, 6, 7, 8); g.poke(L["c_eqs"], 11, 12, 13, 14, 15); g.poke(L["st_sx"], 21, 22, 23)
     s0 = g.mem(L["CHRBLK"], L["HERO_LEN"])
     g.call_keep(L["save_char"], tmax=90)

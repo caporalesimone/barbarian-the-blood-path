@@ -43,7 +43,7 @@ I file `SND0`…`SND7` restano sul disco: li leggono `JUKEBOX`, `LOBBY` (brano d
 senza coda (piano del boss raggiunto con il portale dal villaggio).
 | `JUKEBOX` | PRG | prova di brani ed effetti (`src/jukebox.asm`) | build |
 | `HL` | PRG, 1 blocco | elenco eroi: versione, 5 byte "eroe presente", 5 nomi (66 B) | creato dalla build (versione attuale, nessun eroe), scritto dal gioco |
-| `SAVE-01` … `SAVE-05` | PRG, 3 blocchi | un file per eroe: blocco dell'eroe + i 5 stati dei piani del capitolo in corso (739 B, dal formato $CC) | creati vuoti dalla build, scritti dal gioco |
+| `SAVE-01` … `SAVE-05` | PRG, 4 blocchi | un file per eroe: blocco dell'eroe + baule della locanda + i 5 stati dei piani del capitolo in corso (771 B, dal formato $CE) | creati vuoti dalla build, scritti dal gioco |
 | `KSAVE` | PRG | plugin di save di Krill's Loader (`out/work/krill/save.prg`, a `$7D00`): il gioco lo ricarica prima di ogni salvataggio | build (`tools/build/krill_build.sh`) |
 
 Nomi in PETSCII maiuscolo. I file PRG hanno i 2 byte iniziali dell'indirizzo di caricamento. Il disco lo scrive il
@@ -55,12 +55,13 @@ lo stesso numero di blocchi** (altrimenti errore `$F9`): la build crea `HL` e `S
 la directory non cambia mai. Ogni scrittura riscrive il file intero (il gioco legge il file, cambia la parte e lo
 riscrive: [salvataggi.md](salvataggi.md)).
 
-**`SAVE-0N`** (eroe `N-1`, `SV_LEN` = 2070 byte):
+**`SAVE-0N`** (eroe `N-1`, `SV_LEN` = 771 byte dal formato $CE, 4 blocchi):
 
 | Offset | Byte | Contenuto |
 |---|---|---|
-| 0 | 254 (`HERO_LEN`, dal formato $CC) | blocco dell'eroe (`CHRBLK`, vedi sotto), con il baule della locanda |
-| 254 + ((piano − 1) mod 5) × 97 | 97 (`LV_SLOT`) | stato compatto dei 5 piani del capitolo in corso (82 o 97 byte usati) |
+| 0 | 166 (`HERO_LEN`, dal formato $CE) | blocco dell'eroe (`CHRBLK`, vedi sotto), con lo stato delle quest |
+| 166 | 120 (`INN_LEN`) | baule della locanda (`INN_AT` = `$FF80`: `st_id`, `st_b`, `st_du`, `st_m`, `st_sx`, 24 byte ciascuno) |
+| 286 (`LV_OFS`) + ((piano − 1) mod 5) × 97 | 97 (`LV_SLOT`) | stato compatto dei 5 piani del capitolo in corso (82 o 97 byte usati) |
 
 **`HL`** (66 byte): versione (`save_version`), 5 byte "eroe presente", 5 nomi da 12 caratteri (scritto solo creando
 un eroe o cancellandolo; `START` e il menu leggono solo questo file).
@@ -119,11 +120,21 @@ Dal formato **$CC** (21/11 sera, fase 2a degli affissi; decisioni del committent
 Dal formato **$CD** (21/11 sera, fase 2b): stessi campi, ma il byte bonus (`c_packb`/`c_eqb`, `st_b`, `ch_b`) è l'**id del prefisso**
 (riga di `prefixes.tsv`; pergamene: quantità) e il quinto byte l'**id del suffisso** (riga di `suffixes.tsv`): la magia +N e la
 caratteristica degli anelli dei formati di prima non hanno più lo stesso significato.
+
+Dal formato **$CE** (22/11, decisione D1 del committente, [quests.md](quests.md) sezione 0):
+- il **baule della locanda esce dal blocco dell'eroe**: in memoria sta a `INN_AT` = `$FF80`–`$FFF7` (RAM sotto il KERNAL, sempre
+  escluso: accesso diretto; nessun file la copre), nel file segue il blocco dell'eroe (offset `HERO_LEN`, 120 B). Si scrive e si
+  legge sempre insieme all'eroe (`char_img`, `load_char`); `new_character` lo svuota;
+- in fondo al blocco, dopo `c_qst`, i **32 B dello stato delle quest**: `q_step` (passi della catena consegnati), `q_flag` (passo
+  preso, obiettivo raggiunto, gradino del borsello), `q_cnt` (contatore del passo), `q_sdone` (15 bit: accessorie consegnate),
+  `q_side` (4 accessorie attive × id e contatore), `q_rep` (2 ripetibili × 5 B), `q_item` (oggetto premio delle 2 ripetibili),
+  3 liberi. Le ripetibili (16 B) si possono togliere dal salvataggio se servisse spazio (D1);
+- blocco da 254 a **166** byte, piani dall'offset 286, file da 739 a **771** byte: da 3 a **4 blocchi**.
 **Unici** (22/11, fase 6, sempre formato $CD: estensione compatibile, i valori di prima restano validi): quinto byte = **$80 + numero
 dell'unico** (riga di `data/items/next/uniques.tsv`, da 0), prefisso 0, id = la base dell'unico. Le righe nuove di `uniques.tsv`
 vanno **in fondo**: riordinarle o toglierle cambia il significato degli oggetti salvati e richiede un `SAVE_VER` nuovo.
 
-## 3. Stato di un piano — `SAVE-0N`, offset `HERO_LEN` + ((piano − 1) mod 5) × 97 (formato compatto)
+## 3. Stato di un piano — `SAVE-0N`, offset `LV_OFS` (286) + ((piano − 1) mod 5) × 97 (formato compatto)
 
 In memoria: blocco `LVLBLK` a `$9800`. La **mappa non è salvata**, e nemmeno mostri e bauli
 del piano: entrando nel piano si rigenera tutto dal seed (`seed_level`), poi si applicano le differenze
@@ -322,7 +333,7 @@ Krill invece permette sprite, IRQ e badline durante i caricamenti.
 - **Personaggio** (`SAVE-0N`): solo con "save game" del menu RUN/STOP, una volta alla creazione dell'eroe e al
   **cambio di capitolo** (gruppi di 5 piani, 11/11 sera). "Quit game" **non** salva. Mai alla morte o alla vittoria,
   né uscendo dalla locanda o dalla scheda del personaggio.
-- **Stato del piano** (`SAVE-0N`, offset `HERO_LEN` (254) + ((piano − 1) mod 5) × 97):
+- **Stato del piano** (`SAVE-0N`, offset `LV_OFS` (286) + ((piano − 1) mod 5) × 97):
   - lasciandolo per le **scale**: copiato nel suo **slot in RAM** (`LVRAM`, 5 slot del capitolo, RAM sotto l'I/O);
     sul disco va con "save game" o al cambio di capitolo, insieme all'eroe;
   - lasciandolo per **portale o morte**: nel suo slot come per le scale, e in più boss, 5 mostri caldi e 10 bauli

@@ -6,8 +6,9 @@
 ;  in RAM (slot LVRAM, sotto l'I/O): le scale, il portale, la locanda e la scheda del personaggio non scrivono il disco.
 ;
 ;  Un file per eroe, "save-01".."save-05" (scelta del committente: pochi file sul disco), SV_LEN byte:
-;    +0                       blocco dell'eroe CHRBLK..CHREND (con il baule della locanda)
-;    +HERO_LEN + (piano-1)*LV_SLOT   stato compatto del piano (lv_put / lv_get, al massimo LV_SLOT byte)
+;    +0                       blocco dell'eroe CHRBLK..CHREND (con lo stato delle quest)
+;    +HERO_LEN                (22/11, D1) baule della locanda INN_AT..INN_END (INN_LEN byte)
+;    +LV_OFS + (piano-1)*LV_SLOT   stato compatto del piano (lv_put / lv_get, al massimo LV_SLOT byte)
 ;  Elenco eroi: file "hl" (HDR_LEN byte: versione SAVE_VER, 5 byte "eroe presente", 5 nomi da NAME_LEN).
 ;  I file li crea la build (tools/build/mkdisk.sh) con la lunghezza giusta: il plugin di Krill riscrive solo file gia'
 ;  presenti e con lo stesso numero di blocchi. Ogni scrittura riscrive il file intero: si legge il file (sv_read),
@@ -33,10 +34,11 @@
 HDR_LEN  = 1 + 5 + 5*NAME_LEN
 HERO_LEN = CHREND - CHRBLK
 LV_SLOT  = 97                   ; stato compatto di un piano: 82 o 97 byte (9 + baule del boss 1 o 16 + nebbia 72; 21/11 sera: + i suffissi)
-SV_LEN   = HERO_LEN + CH_LV*LV_SLOT     ; (21/11 sera, decisione C1 del piano F7) solo i piani del capitolo in corso
+LV_OFS   = HERO_LEN + INN_LEN       ; (22/11) piani dopo eroe e baule della locanda
+SV_LEN   = LV_OFS + CH_LV*LV_SLOT     ; (21/11 sera, decisione C1 del piano F7) solo i piani del capitolo in corso
 SV_IMG   = $e000                ; immagine del file (RAM sotto il KERNAL)
 SV_ALT   = $ec00                ; (21/11) immagine letta e basta (load_char, chap_ensure): sopra il segmento CORE, nel buffer
-        .cerror (<SV_IMG) != 0 || (<SV_ALT) != 0 || SV_ALT < core_end || SV_ALT + SV_LEN > MR2_AT || HERO_LEN - LV_SLOT > 255, "SV_ALT"
+        .cerror (<SV_IMG) != 0 || (<SV_ALT) != 0 || SV_ALT < core_end || SV_ALT + SV_LEN > MR2_AT || LV_OFS - LV_SLOT > 255 || HERO_LEN > 255 || INN_LEN > 255, "SV_ALT"
 SV_SCR   = $ece0                ; buffer del plugin ($0800 byte, "drive-code buffer" di Krill)
         .cerror SV_IMG + SV_LEN > krill_save, "immagine del salvataggio sopra il plugin di save (tools/build/krill_build.sh, TRANSIENT)"
         .cerror krill_save + KRILL_SAVE_LEN > SV_SCR, "plugin di save sopra il suo buffer"
@@ -263,7 +265,7 @@ char_pos:
         sta io_dir
         sta io_what
         rts
-; CHRBLK -> immagine del file (scrittura nella RAM sotto il KERNAL: con il KERNAL acceso va alla RAM)
+; CHRBLK e baule della locanda -> immagine del file (RAM sotto il KERNAL)
 char_img:
         ldx #0
 _l      lda CHRBLK,x
@@ -271,6 +273,12 @@ _l      lda CHRBLK,x
         inx
         cpx #HERO_LEN
         bne _l
+        ldx #0
+_s      lda INN_AT,x
+        sta SV_IMG+HERO_LEN,x
+        inx
+        cpx #INN_LEN
+        bne _s
         rts
 
 ; C=1 se l'eroe cur_slot non c'e' o e' di un'altra versione (sv_old = 1)
@@ -288,6 +296,12 @@ _l      lda SV_ALT,x
         inx
         cpx #HERO_LEN
         bne _l
+        ldx #0                  ; (22/11, D1) baule della locanda, dopo il blocco dell'eroe
+_s      lda SV_ALT+HERO_LEN,x
+        sta INN_AT,x
+        inx
+        cpx #INN_LEN
+        bne _s
         lda c_magic
         cmp #SAVE_VER
         beq _ok
@@ -376,13 +390,13 @@ _z      sta slot_valid,x
         jmp hdr_write
 
 ; ---------------------------------------------------------------- piani
-; rpt = SV_IMG (SV_ALT se tmp6 = 1) + HERO_LEN + ((A-1) mod CH_LV)*LV_SLOT (A = piano 1..MAXLEVEL). (21/11 sera, C1) Il file
+; rpt = SV_IMG (SV_ALT se tmp6 = 1) + LV_OFS + ((A-1) mod CH_LV)*LV_SLOT (A = piano 1..MAXLEVEL). (21/11 sera, C1) Il file
 ; tiene solo i CH_LV piani del capitolo in corso: gli slot di un altro capitolo hanno un altro piano nel primo byte e lv_get
 ; li scarta (il piano si rigenera)
 rec_level:
         jsr lv_grp              ; X = (A-1) mod CH_LV
         inx
-        lda #<(SV_IMG+HERO_LEN-LV_SLOT)
+        lda #<(SV_IMG+LV_OFS-LV_SLOT)
         sta rpt
         lda #>SV_IMG            ; (21/11) tmp6 = 1 (immagine -> slot, chap_ensure): l'immagine e' a SV_ALT
         ldy tmp6

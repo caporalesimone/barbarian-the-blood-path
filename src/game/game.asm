@@ -64,11 +64,11 @@ LVLEND
 
 ; ---- personaggio (salvato su disco)
 NAME_LEN = 12                   ; caratteri del nome dell'eroe
-STASH_N  = 24                   ; oggetti nel baule di casa (07/11 sera: da 48 a 24), nel blocco dell'eroe (08/11 sera)
+STASH_N  = 24                   ; oggetti nel baule di casa (07/11 sera: da 48 a 24); (22/11) a INN_AT, fuori dal blocco dell'eroe
 PACK_N   = 8                    ; posti dello zaino (07/11 sera: da 16 a 8); l'equipaggiamento segue: indici PACK_N..PACK_N+EQ_N-1
 EQ_N     = 5                    ; (21/11, SAVE_VER $CA) posti indossati: arma, armatura, scudo, due anelli (EQ_RING, EQ_RING+1)
 EQ_RING  = 3
-;@map CHRBLK..CHREND "CHRBLK: eroe e baule della locanda, il blocco salvato nel file save-0N (docs/wiki/FORMATO_DATI.md)" layout
+;@map CHRBLK..CHREND "CHRBLK: eroe e stato delle quest (22/11: il baule della locanda sta a INN_AT), il blocco salvato nel file save-0N (docs/wiki/FORMATO_DATI.md)" layout
         .virtual $9500
 CHRBLK
 c_magic .byte ?          ; versione del formato di salvataggio (SAVE_VER): primo byte del file
@@ -110,19 +110,37 @@ c_sadd  .fill 3          ; (11/11, SAVE_VER $C6) punti statistica spesi in FOR, 
 c_resp  .byte ?          ; gettoni respec (0..RESP_MAX)
 c_chap  .byte ?          ; (12/11, SAVE_VER $C7, TODO M1) capitolo in cui si gioca 1..CHAPTERS (villaggio TWNc, src/game/chapter.asm)
 c_unl   .byte ?          ; capitolo piu' alto sbloccato (uccidere il boss del capitolo c sblocca c+1)
-; baule di casa (08/11 sera, SAVE_VER $C3): dentro il blocco dell'eroe, un solo record per eroe e baule. Uscendo di
-; casa dopo una modifica si salva tutto con una sola scrittura (prima: record a parte e l'eroe non si salvava, TODO 2.6)
-st_id   .fill STASH_N    ; baule della locanda: id dei 24 oggetti (0 = vuoto)
-st_b    .fill STASH_N    ; baule della locanda: bonus
-st_du   .fill STASH_N    ; baule della locanda: durabilita' attuale
-st_m    .fill STASH_N    ; baule della locanda: durabilita' massima
-st_sx   .fill STASH_N    ; (21/11 sera, SAVE_VER $CC, affissi) baule della locanda: suffisso (0 = nessuno); st_b = prefisso
 c_packs .fill PACK_N     ; (21/11 sera, SAVE_VER $CC) suffisso degli oggetti nello zaino (0 = nessuno)
 c_eqs   .fill EQ_N       ; ... e dell'equipaggiamento (segue lo zaino come c_packb / c_eqb)
-c_qst   .byte ?          ; (17/11, SAVE_VER $C8, concept) quest prese: (18/11) maschera, bit n-1 = quest n (file QSTn); in fondo al blocco
+c_qst   .byte ?          ; (17/11, SAVE_VER $C8, concept) quest prese: (18/11) maschera, bit n-1 = quest n (file QSTn)
+; (22/11, SAVE_VER $CE, decisione D1 del committente) stato delle quest, 32 B (docs/wiki/quests.md sezione 0, QUEST-IMPLEMENTAZIONE 2.3)
+q_step  .byte ?          ; passi della catena consegnati (0..12)
+q_flag  .byte ?          ; bit 0 passo corrente preso, bit 1 obiettivo raggiunto (da riscuotere), bit 4-7 gradino borsello / cintura
+q_cnt   .byte ?          ; contatore del passo corrente della catena
+q_sdone .word ?          ; accessorie consegnate: bit n-1 = accessoria n (15 bit)
+q_side  .fill 4*2        ; 4 accessorie attive: id (bit 7 = da riscuotere), contatore
+q_rep   .fill 2*5        ; 2 ripetibili: modello e capitolo, parametro, quantita', contatore, premio (sacrificabili se serve spazio: D1)
+q_item  .fill 2*3        ; oggetto premio delle 2 ripetibili (id, prefisso, suffisso), generato alla consegna (D10)
+q_free  .fill 3          ; liberi
 CHREND
         .endv
         .cerror CHREND > $9600, "blocco personaggio sovrapposto alle tabelle dei mostri ($9600, MRT)"
+
+; ---- baule della locanda (22/11, SAVE_VER $CE, decisione D1 del committente: fuori dal blocco dell'eroe, piano F7). Sta nella
+; RAM sotto il KERNAL (sempre escluso dal 21/11, accesso diretto), in fondo alla zona libera dopo FMAP: nessun file la copre
+; (villaggio, dungeon, salvataggi, LOBBY, HELP). Nel file save-0N segue il blocco dell'eroe (rel.asm, char_img / load_char).
+;@map INN_AT..INN_END "Baule della locanda: 24 oggetti x 5 B (id, prefisso, durabilita', massima, suffisso), salvato nel file save-0N dopo CHRBLK (docs/wiki/FORMATO_DATI.md)" layout
+INN_AT = $ff80
+        .virtual INN_AT
+st_id   .fill STASH_N    ; baule della locanda: id dei 24 oggetti (0 = vuoto)
+st_b    .fill STASH_N    ; baule della locanda: bonus (prefisso)
+st_du   .fill STASH_N    ; baule della locanda: durabilita' attuale
+st_m    .fill STASH_N    ; baule della locanda: durabilita' massima
+st_sx   .fill STASH_N    ; (21/11 sera, SAVE_VER $CC, affissi) baule della locanda: suffisso (0 = nessuno)
+INN_END
+        .endv
+INN_LEN = INN_END - INN_AT
+        .cerror INN_END > $fffa, "baule della locanda sopra i vettori NMI/RESET/IRQ"
 
 ; ---- variabili (non salvate)
         .virtual $9100

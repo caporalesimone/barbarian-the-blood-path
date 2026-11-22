@@ -168,9 +168,9 @@ Le voci che cambiano il blocco eroe (C5, F1–F3, G4) vanno fatte insieme per ca
 ### F2 (ex 3.2) Pergamene fuori dallo zaino (dopo B3) — M
 - Contatore 0..10 nell'eroe, icona col numero nel purse e nell'HUD, pile da 10 nel baule; cooldown ≥ 5 s.
 
-### F3 (ex 3.3) Campi per quest e Abisso nell'eroe — M
-- Stato quest (~32 B, [quests](docs/wiki/quests.md) sez. 4.3), modalità normal/nightmare + eroe morto (1 B). (20/11) Il formato nuovo
-  dell'eroe (oggetti a 7 B, baule della locanda sotto l'I/O, 5 piani nel file) è nel progetto di [oggetti](docs/wiki/oggetti.md#progetto-affissi-unici-e-memoria-2011).
+### F3 (ex 3.3) Campi dell'Abisso nell'eroe — S
+- Modalità normal/nightmare + eroe morto (1 B, nei 3 liberi `q_free` o dopo: il blocco è da 166 B su 256). (22/11) Lo stato delle
+  quest (32 B) è fatto (formato $CE, [FORMATO_DATI](docs/wiki/FORMATO_DATI.md)).
 
 ### C5 (ex 1.8) CRC sui salvataggi — M
 - Controllo di integrità (CRC-8/16 o somma) per eroe, piani, baule, verificato al caricamento; un record corrotto si
@@ -351,6 +351,10 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   in coda a ogni `TWNc` (un solo file per ingresso nel villaggio: ~3,5 s nel caso peggiore, +56 blocchi); (b) meno voci nella
   directory (`QSTn` in 1–2 file, brani del solo jukebox fuori); (c) Krill con file aperti per traccia e settore. **Oggi
   `PERF-DISK-14` e `PERF-DISK-21` falliscono** (5,10 s su 5,0): serve una di queste o un limite diverso.
+  (22/11) Con il formato $CE i file `save-0N` passano da 3 a 4 blocchi (baule della locanda fuori dal blocco, D1 delle quest):
+  i file dopo (capitoli 2-4, `QSTn`) scendono di 5 blocchi e **`PERF-DISK-24` fallisce** (tema del capitolo 4: 1,05–1,23 s, oltre il
+  90% di 1,1 s). Strade: (a) rifare la disposizione con le soluzioni sopra; (b) non salvare le ripetibili (16 B, consentito da D1:
+  file di nuovo da 3 blocchi, 755 B su 760); (c) limite diverso. Da decidere con il committente.
 - (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
   disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
   misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da
@@ -634,7 +638,8 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
 - (22/11) **Progetto chiuso**: decisioni D1-D13 del committente in [quests.md sezione 0](docs/wiki/quests.md) (stato, testi per
   capitolo, `QGIV`, cancello a messaggio, finale in due tempi con portale e portale nero verso l'Abisso, premi, boss dei
   capitoli disegnati e tarati, unici solo da quest e boss, ripetibili, mostri delle quest generati sempre, segni, ordine).
-  **Ordine (D13)**: 1) stato nel salvataggio (baule della locanda fuori dal blocco dell'eroe); 2) motore nel dungeon e `QGIV`
+  **Ordine (D13)**: 1) stato nel salvataggio (baule della locanda fuori dal blocco dell'eroe): **fatto il 22/11** (formato $CE,
+  baule a `$FF80`, 32 B `q_step`..`q_free`, file da 4 blocchi; test `QSAVE-10/11`); 2) motore nel dungeon e `QGIV`
   sul capitolo 1; poi gli altri capitoli.
 - (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).
   **Da decidere in futuro**: le regole fini (categoria, livello oggetto, qualità minima, legame con il modello della quest).

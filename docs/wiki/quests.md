@@ -30,7 +30,7 @@ Valgono sopra a quanto scritto nelle sezioni seguenti, dove c'è differenza.
 
 | # | Tema | Decisione |
 |---|---|---|
-| D1 | Stato (32 B) | Il **baule della locanda esce dal blocco dell'eroe** (in coda al file di salvataggio, piano F7): il blocco libera 120 B per le quest e il futuro. **Se servisse spazio, le ripetibili si possono non salvare.** |
+| D1 | Stato (32 B) | Il **baule della locanda esce dal blocco dell'eroe** (in coda al file di salvataggio, piano F7): il blocco libera 120 B per le quest e il futuro. **Se servisse spazio, le ripetibili si possono non salvare.** **Fatto il 22/11** (formato $CE): baule a `INN_AT` = `$FF80` e nel file dopo il blocco, stato `q_step`..`q_free` in fondo al blocco ([FORMATO_DATI](FORMATO_DATI.md)). |
 | D2 | Testi | **Un file per capitolo** (+ uno per le ripetibili), a 5 bit, letto a `$EC00` come la scheda C: 36 blocchi, 5 voci di directory. |
 | D3 | Codice del villaggio | **File `QGIV`** caricato a `QBUF` quando si preme Fire su un NPC. Verificato il 22/11: il tasto Q (pagina delle quest, file `QST0` allo stesso indirizzo) funziona anche nel dungeon; `QGIV` serve solo nel villaggio. |
 | D4 | Cancello del boss (Q14) | **Messaggio** "the way is sealed" sulla scala del piano 4 (9, 14, 19) se il passo "uccidi il boss" non è preso. |

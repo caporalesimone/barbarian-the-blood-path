@@ -70,6 +70,10 @@ _c      sta (ptr0),y
         iny
         cpy #(CHREND-CHRBLK)
         bne _c
+        ldy #INN_LEN-1        ; (22/11, D1) baule della locanda vuoto (fuori dal blocco)
+_cs     sta INN_AT,y
+        dey
+        bpl _cs
         pla
         sta c_seed+1
         pla

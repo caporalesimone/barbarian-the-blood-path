@@ -159,48 +159,38 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (5)
+### sanity (2)
 
 | ID | Test |
 |---|---|
-| `UNQ-10` | data: the 4 power rows of each unique (af_pw / af_val from UN0) and its price (un_pl / un_ph) as in uniques.tsv |
-| `UNQ-11` | recalc_stats and it_cost: 'gravedigger' (mace, DMG 2, PEN 1, LIFE 6) -> hpmax +6, pen +1 over a plain mace; price 900 |
-| `UNQ-12` | add_to_pack (same random state): 'osric's cudgel' (DUR 100) -> maximum x 2 of a plain club; 'aldric's heart' -> indestructible (0) |
-| `UNQ-13` | af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never |
-| `UNQ-14` | inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1) |
+| `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
+| `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
 
-### regression (269)
+### regression (274)
 
 | ID | Test |
 |---|---|
+| `AFX-10` | MAG_W/MAG_A: the ATT_DMG +N prefix of weapons, the AC +N prefix of armors and shields; RSX_: stat x metal -> STR/DEX/CON +metal suffix |
+| `AFX-11` | recalc_stats: weapon prefix ATT_DMG +2 -> ATT and damage +2; armor prefix AC +2 -> AC +2; ring suffix STR +2 -> STR +4 |
+| `AFX-12` | inventory: 'fine sword' (prefix, pack) and 'copper ring of strength' (suffix, worn, whole in 33 columns since 22/11) in the list |
+| `AFG-10` | gen_item at chestLevel 80 (T 10): magic share of weapons/armors/shields near mag_t[10]; every affix fits the item type; rings always have affixes, silver and gold both |
+| `AFG-11` | it_cost: price = itprice + price_add of prefix and suffix (signed: a cursed row costs less), at least 1; scrolls ignore the quantity |
+| `AFG-12` | blacksmith: 3..8 wares from the filtered pool (repetitions allowed), empty entries after them |
 | `AFP-10` | recalc_stats: armor 'of the wolf' -> hpmax +12; shield 'of health' -> s_gh 1; weapon 'of piercing' -> pen +1, 'of readiness' -> rate -1 |
 | `AFP-11` | hurt_player with s_gh 2: 5 damage -> -3 hp, 1 damage -> -1 hp (at least 1) |
 | `AFP-12` | add_to_pack (same random state): durability +50 -> max + max/2, +100 -> max x 2 (at most 255), -50 -> max - max/2, indestructible -> 0 |
 | `AFP-13` | af_ch: life leech and thorns have weight 0 (after 2.0, decision O5), every other row a weight > 0 |
 | `AFP-14` | recalc_stats with cursed items: 3 x 'of weakness' (STR 16 -> 10) and a 'bent' weapon -> s_mod 0, s_dk 0 (not 255); 4 x -> STR 8, s_mod still 0 (not 126) |
-| `AFG-10` | gen_item at chestLevel 80 (T 10): magic share of weapons/armors/shields near mag_t[10]; every affix fits the item type; rings always have affixes, silver and gold both |
-| `AFG-11` | it_cost: price = itprice + price_add of prefix and suffix (signed: a cursed row costs less), at least 1; scrolls ignore the quantity |
-| `AFG-12` | blacksmith: 3..8 wares from the filtered pool (repetitions allowed), empty entries after them |
-| `AFX-10` | MAG_W/MAG_A: the ATT_DMG +N prefix of weapons, the AC +N prefix of armors and shields; RSX_: stat x metal -> STR/DEX/CON +metal suffix |
-| `AFX-11` | recalc_stats: weapon prefix ATT_DMG +2 -> ATT and damage +2; armor prefix AC +2 -> AC +2; ring suffix STR +2 -> STR +4 |
-| `AFX-12` | inventory: 'fine sword' (prefix, pack) and 'copper ring of strength' (suffix, worn, whole in 33 columns since 22/11) in the list |
 | `AFU-10` | inventory: an item with a cursed prefix has its name in grey (UC_CURSED), a magic one in light blue (UC_MAGIC) |
 | `AFU-11` | inventory: the item box title shows the full name beyond 16 columns ('... studded armor of ...') |
 | `AFU-12` | inventory: a 32-character name is whole on its row (33 columns, 22/11); a 35-character one scrolls on the cursor row |
 | `AFU-13` | inventory: the item box lists the powers not in the numbers: armor 'of the wolf' -> 'hp+12', shield 'of health' -> 'hit-1' |
-| `SFX-10` | inventory: equipping an armor with suffix 7 puts 7 in c_eqs[1]; the old armor goes to the pack with its suffix 5 |
-| `SFX-11` | sort_pack: the suffix follows its item (5 parallel tables) |
-| `SFX-12` | hero file: HERO_LEN 254, file of HERO_LEN + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx |
-| `BASES-10` | item tables: 11 armors with CA 1..10, 4 shields with CA 1..4 |
-| `BASES-11` | inventory: the studded armor (DEX 14) stays in the pack with s_dex 13 ('dex 14' in its box); with DEX 14 it is equipped |
-| `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
-| `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
-| `RING-12` | alchemist: a ring among the wares has affixes (af_gen) and the bought ring keeps its suffix |
-| `RING-13` | alchemist: the second worn ring has its own ui_lc (PACK_N + 4 = 12, wares from LC_W): Fire on it buys nothing |
 | `ASM-10` | tools/build/asm_audit.py: GAME code all reachable (but jump tables), no fill_rect / chst_hold any more |
 | `ASM-11` | generated sources commented: every T_ tile constant with its description, item ids and monster types listed in db.asm |
 | `BAL-10` | d20 rules in the simulator: reference hero, weak hero, curves |
 | `ARENA-10` | arena: short repeatable series, sensible results |
+| `BASES-10` | item tables: 11 armors with CA 1..10, 4 shields with CA 1..4 |
+| `BASES-11` | inventory: the studded armor (DEX 14) stays in the pack with s_dex 13 ('dex 14' in its box); with DEX 14 it is equipped |
 | `BEST-10` | every chapter of chapters.yaml (but the Abyss) has base monsters, their strong variants and one boss = its final map boss |
 | `BEST-11` | the game = the table: monster types of out/work/db.asm are the rows implemented = yes, in order |
 | `BEST-12` | the checker refuses a wrong bestiary: strong_of of another chapter, unknown tier, duplicate id |
@@ -306,7 +296,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `ITEM-10` | 255 generated items, broken weapon, HUD warnings, TOD clock (repair: SHOP-FIX-10) |
 | `BELT-10` | belt (4 potions, the fifth refused), scroll stack, portal |
 | `KRILL-10` | START installs Krill: resident code at $0200 as out/work/krill/loader.prg (but its variables), LDFLAGS used |
-| `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (9 blocks), barbarian first |
+| `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (4 blocks since 22/11), barbarian first |
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
 | `KRILL-13` | no KERNAL disk call left in GAME, LOBBY, MENU and START (listing scan: after the install the drive does not answer the KERNAL) |
 | `KRILL-20` | village entry order: MENU (load_file, one file since 18/11) then SND0 (load_raw): each one read whole at the first read (end address and bytes) |
@@ -364,17 +354,15 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PERF-22` | Abyss levels 21..255: walking (when the Abyss exists) |
 | `PERF-23` | level generator on EVERY level 1..19 and on every Abyss level 21..255: <= 1.5 s each, up stairs present |
 | `PERF-24` | every village 1..5: walking from next to each wandering NPC (they walk too), lost <= 1.5%, worst <= 2.1 (19/11: before 3-4% near the NPCs) |
-| `QUESTDB-NEXT-10` | quest database (data/quests/next): 12 chain steps, 15 side quests, 6 repeatable models; limits, 5-bit characters, references |
-| `QUESTDB-NEXT-11` | quest texts at 5 bits (H7): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B |
 | `PERF-DISK-10` | START from the monitor to the barbarian menu (Krill install, GAME, LOBBY, hl) <= its limit |
-| `PERF-DISK-11` | loads with Krill (MENU, village, theme, song, hero list, hero file) <= their limits |
-| `PERF-DISK-13` | stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM) <= its limit |
+| `PERF-DISK-11` | loads with Krill (MENU, village, theme, song, hero list, hero file, C screen module) <= their limits |
+| `PERF-DISK-13` | stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM), then the C screen module <= their limits |
 | `PERF-DISK-14` | full village entry from level 1 (change_level: fade, GFX0, MENU module, gfx_install, song) <= its limit |
 | `PERF-DISK-12` | saves with the Krill plugin (hero file in the village, hero list) <= their limits |
-| `PERF-DISK-21` | village 1: file alone, full entry (from level 1), theme, stairs, boss level <= their limits |
-| `PERF-DISK-22` | village 2: file alone, full entry (from level 6), theme, stairs, boss level <= their limits |
-| `PERF-DISK-23` | village 3: file alone, full entry (from level 11), theme, stairs, boss level <= their limits |
-| `PERF-DISK-24` | village 4: file alone, full entry (from level 16), theme, stairs <= their limits |
+| `PERF-DISK-21` | village 1: file alone, full entry (from level 1), theme, stairs, C screen module, boss level <= their limits |
+| `PERF-DISK-22` | village 2: file alone, full entry (from level 6), theme, stairs, C screen module, boss level <= their limits |
+| `PERF-DISK-23` | village 3: file alone, full entry (from level 11), theme, stairs, C screen module, boss level <= their limits |
+| `PERF-DISK-24` | village 4: file alone, full entry (from level 16), theme, stairs, C screen module <= their limits |
 | `PERF-DISK-25` | village 5: file alone, full entry <= their limits |
 | `PERF-OPT-10` | mark_explored: the explored map equals the reference (9 x 7 cells around the hero) at the edges and inside |
 | `PERF-OPT-11` | HUD: a hit taken redraws only the HP panel, experience only the XP panel (hud_pend), not the whole HUD |
@@ -395,6 +383,12 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
 | `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |
 | `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
+| `QUESTDB-NEXT-10` | quest database (data/quests/next): 12 chain steps, 15 side quests, 6 repeatable models; limits, 5-bit characters, references |
+| `QUESTDB-NEXT-11` | quest texts at 5 bits (H7): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B |
+| `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
+| `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
+| `RING-12` | alchemist: a ring among the wares has affixes (af_gen) and the bought ring keeps its suffix |
+| `RING-13` | alchemist: the second worn ring has its own ui_lc (PACK_N + 4 = 12, wares from LC_W): Fire on it buys nothing |
 | `SAVE-10` | new disk: menu without error, no heroes |
 | `SAVE-11` | hl (hero list) missing: menu without error, the game starts |
 | `SAVE-12` | hero list zeroed / random / never written: no error, no heroes |
@@ -417,11 +411,19 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `STAT-14` | exit with pending points (15/11): question, yes = confirmed (dex +2); hp max follows con |
 | `STAT-15` | respec: no entry without tokens; with 2 tokens: yes -> all the points back, 1 token left, not saved on exit |
 | `STAT-16` | respec tokens: resp_add stops at RESP_MAX; resp_roll never above ground nor in levels 1-20, ~2% in the Abyss |
+| `SFX-10` | inventory: equipping an armor with suffix 7 puts 7 in c_eqs[1]; the old armor goes to the pack with its suffix 5 |
+| `SFX-11` | sort_pack: the suffix follows its item (5 parallel tables) |
+| `SFX-12` | hero file: HERO_LEN + inn chest (22/11, $CE) + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx |
 | `UI-INV-10` | inventory: RUN/STOP closes it and returns to the game (no game menu) |
 | `UI-MAP-10` | minimap: RUN/STOP closes it and returns to the game (no game menu) |
 | `UI-SHOP-10` | shop closed with RUN/STOP: back in the game, no game menu |
 | `UI-MENU-10` | game menu 'resume' with Fire in front of a shop door: the shop does not open |
 | `UI-MENU-11` | game menu 'save game' with Fire in front of the inn: the inn does not open |
+| `UNQ-10` | data: the 4 power rows of each unique (af_pw / af_val from UN0) and its price (un_pl / un_ph) as in uniques.tsv |
+| `UNQ-11` | recalc_stats and it_cost: 'gravedigger' (mace, DMG 2, PEN 1, LIFE 6) -> hpmax +6, pen +1 over a plain mace; price 900 |
+| `UNQ-12` | add_to_pack (same random state): 'osric's cudgel' (DUR 100) -> maximum x 2 of a plain club; 'aldric's heart' -> indestructible (0) |
+| `UNQ-13` | af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never |
+| `UNQ-14` | inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1) |
 | `VER-10` | branch tag: feature/stat-points -> stat, explicit branch_tags win, only lowercase letters and digits |
 | `VER-11` | branch_versions written at the end of version.yaml without touching version/comments; digest ignores them |
 | `VIL-MENU-10` | inn and smith right after the start, again after walking around: no read of the file MENU inside the same village visit |

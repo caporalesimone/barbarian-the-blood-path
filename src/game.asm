@@ -69,7 +69,8 @@ LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM de
 ;@free $87f5..$87f8 "Fra schermo HUD e puntatori sprite (banco VIC)" use=data
 ;@map $a5e3..$a5fb "Variabili della palude (gen_io.asm, 19/11: fuori dalla RAM sotto l'I/O)"
 ;@free $a5fb..$a600 "Coda degli slot sprite 20-23 (il resto: ricerca di percorso dei mostri, mon_path)" use=data
-;@free $fe96..$fffa "Fondo della cache sotto il KERNAL, dopo FMAP (si accorcia se FMAP cresce: lo dice questa verifica)" use=data
+; (22/11) $FF80-$FFF7: baule della locanda (INN_AT, src/game/game.asm)
+;@free $fe96..$ff80 "Fondo della cache sotto il KERNAL, dopo FMAP (si accorcia se FMAP cresce: lo dice questa verifica)" use=data
 ;@map $a6c0..$a6fc "Minimappa: tabella delle classi dei tile (mm_cls, 48 B) e byte esplorati della riga di celle (mm_ex, 12 B), solo mentre la minimappa e' aperta (ui.asm); il resto dello slot 27 riceve la coda della copia di copy_gfx (byte senza uso)"
 ;@free $a6fc..$a700 "Fine dello slot sprite 27" use=data
 TOWN_MAX   = $0760          ; (15/11) intestazione + mappa RLE del villaggio (nel file TWNc dopo i tile); (21/11) file da GFX_TOWN_AT = $EC00 fino a $F900

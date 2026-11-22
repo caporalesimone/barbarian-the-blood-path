@@ -195,7 +195,7 @@ flowchart LR
     GI -->|pergamena| SC["pila nello zaino (max 10)"]
     GI -->|altro| PK["zaino c_pack: 8 posti"]
     PK <-->|Fire nell'inventario| EQ["equipaggiamento c_eq:<br/>arma, armatura, scudo, due anelli"]
-    PK <-->|"baule della locanda (nella locanda)"| ST["baule della locanda: 24 posti<br/>(nel record dell'eroe) + oro (c_sgold)"]
+    PK <-->|"baule della locanda (nella locanda)"| ST["baule della locanda: 24 posti<br/>(INN_AT, nel file dell'eroe) + oro (c_sgold)"]
     PK -->|negozio: vendita a un quarto del prezzo| G["oro"]
     EQ -->|"usura a 0"| X["rotto: resta, in rosso,<br/>senza effetto (danno 0, CA 0)"]
 ```
@@ -336,7 +336,7 @@ non sta in GAME. Architettura:
 - **Bauli del piano**: contenuto **rigenerato** dal seme (seme del mondo, piano, nonce del baule) a ogni apertura, salvando solo
   quali oggetti sono presi: ~45 B invece dei 120 di `ch_i`/`ch_b` (generatore deterministico per baule: da verificare).
 - **Oggetto** = id + prefisso (id, valore) + suffisso (id, valore) + durabilità + massima = 7 B (oggi 4). **(21/11 sera, decisione del committente) 5 B**: id, prefisso, suffisso, durabilità, massima (valori dalle righe; un byte in più con l'Abisso). Fatto il quinto byte (formato $CC).
-- **Baule della locanda** sotto l'I/O (168 B nei 260 liberi a `LVRAM_end`); blocco dell'eroe ~189 B nella pagina `$9500`.
+- **Baule della locanda** sotto l'I/O (168 B nei 260 liberi a `LVRAM_end`); blocco dell'eroe ~189 B nella pagina `$9500`. **Fatto il 22/11 in un altro modo** (formato $CE, D1 delle quest): sotto l'I/O restano 32 B, quindi il baule (120 B) sta a `$FF80`, sotto il KERNAL; blocco dell'eroe 166 B.
 - **File di salvataggio**: solo i 5 piani del capitolo in corso (C1): ~790 B, 4 blocchi invece di 9. **Fatto il 21/11 sera** (formato $CC): 739 B, 3 blocchi.
 - **(21/11, da fare con gli affissi; idea del committente) Database diviso per momento d'uso, generazione da un sottoinsieme.**
   In RAM resta solo la **visualizzazione** (nomi, statistiche delle basi, poteri degli unici: ~1350–1700 B, stima; i nomi sono

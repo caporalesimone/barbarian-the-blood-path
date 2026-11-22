@@ -11,12 +11,13 @@ La mappa e il contenuto iniziale di ogni piano **non si salvano**: si rigenerano
 
 | Cosa | Dove | Dimensione |
 |---|---|---|
-| L'eroe (`CHRBLK`: livello, xp 24 bit, oro, vita 16 bit, posizione, equipaggiamento e zaino (8) con bonus e durabilità, cintura, chiavi, piani visitati, partita e minuti, morti, oro nel baule della locanda…) **e il baule della locanda** (24 oggetti × 5 byte dal 21/11 sera, formato $CC) | `save-0N`, offset 0 | 254 B |
-| Le differenze di un piano del capitolo in corso rispetto al seed | `save-0N`, offset 254 + ((piano − 1) mod 5) × 97 | 82 o 97 B |
+| L'eroe (`CHRBLK`: livello, xp 24 bit, oro, vita 16 bit, posizione, equipaggiamento e zaino (8) con bonus e durabilità, cintura, chiavi, piani visitati, partita e minuti, morti, oro nel baule della locanda, stato delle quest (32 B dal 22/11)…) | `save-0N`, offset 0 | 166 B |
+| Il baule della locanda (24 oggetti × 5 byte; dal 22/11, formato $CE, decisione D1: fuori dal blocco dell'eroe, in memoria a `INN_AT` = `$FF80`, RAM sotto il KERNAL) | `save-0N`, offset 166 | 120 B |
+| Le differenze di un piano del capitolo in corso rispetto al seed | `save-0N`, offset 286 + ((piano − 1) mod 5) × 97 | 82 o 97 B |
 | L'elenco degli eroi (versione, presenti, nomi) | file `hl` | 66 B |
 
 Dall'11/11 (ramo `fast-loader`, scelta del committente: pochi file sul disco) **un file per eroe** (`save-01`..`save-05`,
-739 B, 3 blocchi dal formato $CC; prima 2070 B, 9 blocchi) e l'elenco `hl`, già creati dalla build con la lunghezza giusta: il plugin di save di Krill
+771 B, 4 blocchi dal formato $CE; 739 B e 3 blocchi dal $CC; prima 2070 B, 9 blocchi) e l'elenco `hl`, già creati dalla build con la lunghezza giusta: il plugin di save di Krill
 **riscrive solo file esistenti con lo stesso numero di blocchi** e la directory non cambia mai. 5 slot di eroi × i 5 piani del capitolo in corso (dal 21/11 sera, decisione C1 del piano F7: prima tutti e 20).
 
 **Quando si scrive il disco** (11/11 sera, decisione del committente): **solo** con "save game" (menu RUN/STOP), alla
@@ -33,8 +34,8 @@ il gioco salva da solo eroe e piani del capitolo lasciato (`chap_save`, eroe reg
 `c_loc` e posizione) e rilegge dal file gli stati del capitolo nuovo (`chap_ensure`).
 
 Ogni scrittura riscrive **il file intero** (`sv_all`): il gioco legge il file dell'eroe (`sv_read`, Krill, ~0,8 s)
-nell'immagine a `$E000`, ci copia l'eroe e i 5 slot del capitolo (blocco contiguo, `chap_copy`), ricarica il plugin
-(file `ksave`, ~0,5 s: modifica il proprio codice) e riscrive il file (`sv_write`; 3 blocchi dal 21/11 sera, prima 9), poi rilegge il segmento CORE (21/11: file `core`, ~0,6 s stimati, che immagine e plugin coprono; anche dopo una lettura dell'eroe `sv_read`, alla prima schermata o al primo giro del ciclo principale). Il file del villaggio (`$EC00` dal 21/11) serve solo fino
+nell'immagine a `$E000`, ci copia l'eroe, il baule della locanda (`char_img`) e i 5 slot del capitolo (blocco contiguo, `chap_copy`), ricarica il plugin
+(file `ksave`, ~0,5 s: modifica il proprio codice) e riscrive il file (`sv_write`; 4 blocchi dal 22/11, 3 dal 21/11 sera, prima 9), poi rilegge il segmento CORE (21/11: file `core`, ~0,6 s stimati, che immagine e plugin coprono; anche dopo una lettura dell'eroe `sv_read`, alla prima schermata o al primo giro del ciclo principale). Il file del villaggio (`$EC00` dal 21/11) serve solo fino
 all'installazione: dal 18/11 non si rilegge più dopo un salvataggio (`sv_end`, ~0,7-1,7 s, era un resto della cache di
 prima dell'11/11). Dal 21/11 sera (formato $CC) il file tiene solo i piani del capitolo in corso: **cambiando capitolo lo stato dei piani del capitolo lasciato si perde** (rientrandoci si rigenerano dal seed; prima restavano quelli del file).
 
@@ -71,8 +72,8 @@ flowchart LR
 
 ### Cancellazione di un barbaro (07/11 sera)
 Dalla scheda del barbaro nel menu: voce **delete barbarian** e conferma Y. Si scrive solo l'elenco (`REC_HDR`): byte
-"eroe presente" del posto a 0 e nome a spazi (`hero_delete`, `src/lobby.asm`). Il baule della locanda sta nel record
-dell'eroe (08/11 sera): un barbaro nuovo nello stesso posto nasce con il blocco azzerato (`new_character`) e non
+"eroe presente" del posto a 0 e nome a spazi (`hero_delete`, `src/lobby.asm`). Il baule della locanda sta nel file
+dell'eroe (08/11 sera; dal 22/11 dopo il blocco): un barbaro nuovo nello stesso posto nasce con blocco e baule azzerati (`new_character`) e non
 eredita nulla. Test: `tests/regression/saves/test_saves.py` caso 7. Il record dell'eroe e
 quelli dei suoi piani restano sul disco ma non contano più: il prossimo eroe creato in quel posto riscrive il suo
 record e parte con `c_vis` = 0 (nessun piano visitato), quindi i vecchi record dei piani non vengono mai letti.
@@ -166,7 +167,7 @@ sequenceDiagram
 
 ## Versione
 
-`SAVE_VER` (`version.yaml save_version`, oggi `$C5`: 10/11, `c_sgold` in decine; `$C4`: 09/11, alzata senza cambiare i byte per scartare i salvataggi precedenti, che potevano avere l'eroe senza arma; `$C3` = 08/11 sera, baule della locanda nel record dell'eroe) è il primo byte dell'eroe e
+`SAVE_VER` (`version.yaml save_version`, oggi `$CE`: 22/11, baule della locanda fuori dal blocco e stato delle quest; `$C5`: 10/11, `c_sgold` in decine; `$C4`: 09/11, alzata senza cambiare i byte per scartare i salvataggi precedenti, che potevano avere l'eroe senza arma; `$C3` = 08/11 sera, baule della locanda nel record dell'eroe) è il primo byte dell'eroe e
 dell'elenco (oggi `$C7`, 12/11, capitolo e sblocco `c_chap`/`c_unl`; `$C6`, 11/11, punti statistica): va cambiata a ogni modifica del formato. Il menu propone di cancellare i salvataggi **solo** se l'elenco è davvero di un'altra versione: versione diversa, byte "eroe presente" tutti 0 o 1 e almeno un eroe. Un elenco vuoto, azzerato, illeggibile o con byte a caso o il file `hl` assente valgono "nessun eroe", senza errori (`tests/regression/saves/test_saves.py`: disco nuovo, `hl` cancellato, elenco azzerato / a caso, altra versione con un eroe, 4 cicli nuova partita → piano → quit → menu → continua). La build crea `hl` con la versione attuale e nessun eroe.
 
 ## File hl assente
