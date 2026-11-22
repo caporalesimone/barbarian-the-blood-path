@@ -169,7 +169,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `UNQ-13` | af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never |
 | `UNQ-14` | inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1) |
 
-### regression (268)
+### regression (269)
 
 | ID | Test |
 |---|---|
@@ -365,6 +365,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PERF-23` | level generator on EVERY level 1..19 and on every Abyss level 21..255: <= 1.5 s each, up stairs present |
 | `PERF-24` | every village 1..5: walking from next to each wandering NPC (they walk too), lost <= 1.5%, worst <= 2.1 (19/11: before 3-4% near the NPCs) |
 | `QUESTDB-NEXT-10` | quest database (data/quests/next): 12 chain steps, 15 side quests, 6 repeatable models; limits, 5-bit characters, references |
+| `QUESTDB-NEXT-11` | quest texts at 5 bits (H7): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B |
 | `PERF-DISK-10` | START from the monitor to the barbarian menu (Krill install, GAME, LOBBY, hl) <= its limit |
 | `PERF-DISK-11` | loads with Krill (MENU, village, theme, song, hero list, hero file) <= their limits |
 | `PERF-DISK-13` | stairs inside a chapter (change_level 1 -> 2: theme, generation, level state from RAM) <= its limit |

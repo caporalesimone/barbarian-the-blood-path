@@ -70,3 +70,52 @@ def questdb(ctx):
     purses = [x["reward"]["purse"] for x in kinds["chain"] if "purse" in x["reward"]]
     check(purses == [1000, 3000, 5000, 10000], "purse steps: %s" % purses)
     check(not bad, "; ".join(bad[:5]) + (" (+%d)" % (len(bad) - 5) if len(bad) > 5 else ""))
+
+
+T5X = "0123456789?-+!,'()>%"
+
+
+def t5(s):
+    """the 5-bit text of the game (macro t5, src/common/macros.inc): 1-26 letters, 27 space, 28 ':', 29 '.', 30 '/',
+    31 + index in T5X; 0 at the end; 3 symbols in a 16-bit word, high byte first"""
+    y = []
+    for ch in s:
+        if "a" <= ch <= "z": y.append(ord(ch) - 96)
+        else: y += {" ": [27], ":": [28], ".": [29], "/": [30]}.get(ch) or [31, T5X.index(ch)]
+    y.append(0)
+    while len(y) % 3: y.append(0)
+    out = bytearray()
+    for i in range(0, len(y), 3):
+        w = y[i] * 1024 + y[i + 1] * 32 + y[i + 2]
+        out += bytes([w >> 8, w & 255])
+    return bytes(out)
+
+
+@test("QUESTDB-NEXT-11", "quest texts at 5 bits (H7): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B")
+def questdb_size(ctx):
+    import shutil, subprocess, tempfile
+    q, _, _ = load()
+    zx0 = shutil.which("zx0")
+    rows, tot_b, tot_z, bad = [], 0, 0, []
+    for x in q["quests"]:
+        parts = [x.get("title") or "", x["goal_text"], x["text"], x["done"]]
+        if x["kind"] == "repeatable":
+            parts[0] = "/".join(t for ts in x["chapters"].values() for t in ts)
+        parts = [p.replace("{n}", "").replace("{t}", "").replace("{m}", "").replace("{l}", "").replace("{g}", "") for p in parts]
+        raw = b"".join(t5(p) for p in parts) + bytes(16)                     # + ~16 B of header (reward, goal)
+        z = len(raw)
+        if zx0:
+            with tempfile.TemporaryDirectory() as d:
+                a, b = os.path.join(d, "a"), os.path.join(d, "b")
+                open(a, "wb").write(raw)
+                subprocess.run([zx0, "-f", a, b], capture_output=True)
+                if os.path.exists(b): z = os.path.getsize(b)
+        plain = sum(len(p) + 1 for p in parts) + 16
+        blocks = (len(raw) + 2 + 253) // 254
+        rows.append((str(x["id"]), plain, len(raw), z, blocks))
+        tot_b += blocks; tot_z += (z + 2 + 253) // 254
+        if len(raw) > 1000: bad.append("%s: %d B" % (x["id"], len(raw)))
+    print("      %d files: %d B as screen codes, %d B at 5 bits, %d B with ZX0; disk %d blocks (5 bits), %d blocks (ZX0)%s" % (
+        len(rows), sum(r[1] for r in rows), sum(r[2] for r in rows), sum(r[3] for r in rows), tot_b, tot_z, "" if zx0 else " (no zx0: not measured)"))
+    print("      biggest: " + ", ".join("%s %d B" % (r[0], r[2]) for r in sorted(rows, key=lambda r: -r[2])[:5]))
+    check(not bad, "quest files over 1000 B: %s" % bad)

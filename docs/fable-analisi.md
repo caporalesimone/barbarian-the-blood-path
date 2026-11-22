@@ -92,6 +92,7 @@ Indirizzi della build del 22/11 (dopo le modifiche di oggi). "Riusabile" = cosa 
 | 7 | **Unici a caso sbagliati per il piano**: `un_roll` confronta la finestra dell'unico con il **livello dell'oggetto** L, che è quasi sempre molto sotto il piano (L = T × u²). Al piano 19 l'unico più probabile è *osric's cudgel* (finestra 2–6); *tithe-taker*, *angel's tear*, *ruin's crown*, *aldric's heart* non escono praticamente mai. In tutto ~1 unico ogni 130–300 oggetti | media (bilanciamento) | **da decidere**: confrontare la finestra con T (il livello del tesoro) invece che con L, e alzare la probabilità |
 | 8 | Unici deboli per la loro finestra: *stitchripper* (pugnale 1d4+3 ai piani 9–13, contro asce 1d12), *osric's cudgel* (1d6+2) | bassa (dati) | da tarare col simulatore |
 | 9 | `PERF-DISK-14/21`: ingresso nel villaggio 5,10 s nel caso peggiore | media | **aperto** (sezione 7) |
+| 11 | **Il boss del capitolo ha le statistiche di un mostro forte a caso**: nel piano 5 (10, 15) `place_boss` sceglie una variante forte qualsiasi (Fallen Warchief, Skeleton King, Lich, Balrog) e `build_sprites` le dà sprite e nome del boss del capitolo. Vita, CA e danni dell'abate cambiano da seme a seme (con il seme del bot era un Lich da 210 punti vita). Trovato con il bot | media (bilanciamento) | **da decidere** (`QUEST-DOMANDE.md` Q7) |
 | 10 | `docs/wiki/bestiario.md`, tabella "Nel gioco": al piano 10 scrive ancora *The Miller of Bad Water* | bassa (documento) | da correggere con la prossima revisione del bestiario |
 
 ---

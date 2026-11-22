@@ -626,6 +626,10 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
 - (22/11) **Tutte le quest definite** con testi e premi in `data/quests/next/quests.yaml` (test `QUESTDB-NEXT-10`); **come
   implementare** motore, modulo del villaggio, pagina Q e ogni singola quest: [QUEST-IMPLEMENTAZIONE.md](QUEST-IMPLEMENTAZIONE.md)
   (usa e getta: si cancella a quest finite). Da approvare: i premi `proposal: true`, C3, C6, P3 e dove mettere i 32 B di stato.
+- (22/11 notte) **Domande per chiudere il progetto**, con alternative e raccomandazione: [QUEST-DOMANDE.md](QUEST-DOMANDE.md) (13
+  domande: stato, testi sul disco, codice del villaggio, cancello, vittoria, premi, boss del capitolo, unici, ripetibili, segni,
+  ordine). Misurato (`QUESTDB-NEXT-11`): testi a 5 bit 8 826 B; un file per quest 50 blocchi e 33 voci, un file per capitolo 36
+  blocchi e 5 voci; ZX0 −9%, non conviene.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 
 ### H3 (ex 5.2) The Endless Abyss (dopo B10, B11, G6, E5) — XL
