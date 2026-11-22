@@ -193,9 +193,34 @@ Raggiunta la quantità: catena `q_flag` bit 1, accessoria bit 7 dell'id; nella b
 per ~3 s (`q_msg`, `loc_check`), lampo e suono. **D11** (`q_spawn`, `load_location` dopo `place_boss`): con una quest K o
 "oggetto da mostro" presa e non raggiunta, se nel piano (del capitolo della quest, non il piano del boss del capitolo) non c'è
 un mostro del tipo, il primo mostro che non è il boss lo diventa. **D4** (`q_gate`): la scala verso il piano del boss del
-capitolo è chiusa ("the way is sealed") finché il passo 3c non è preso o consegnato; **spento** (`QGATE` = 0) finché `QGIV`
-non dà le quest, altrimenti nessuno arriverebbe al boss. Costo: ~870 B di GAME (codice ~470, tabelle e nomi ~270, barra).
-Test: `QENG-10`..`14`. Da fare: `QGIV` (offerta, consegna, premi), segni "!" (D12), pagina Q, ripetibili (D18).
+capitolo è chiusa ("the way is sealed") finché il passo 3c non è preso o consegnato; acceso (`QGATE` = 1) **solo nel capitolo 1**
+(`QGATE_CH`): `QGIV` dà le quest di tutti i capitoli, ma i tipi di mostro dei capitoli 2-4 sono da verificare (D13). Costo: ~870 B di GAME (codice ~470, tabelle e nomi ~270, barra).
+Test: `QENG-10`..`14`.
+
+### 4.5 Modulo del villaggio `QGIV` (22/11, `src/qgiv.asm`)
+Fire accanto a un **NPC fisso** del villaggio (numero k di `villages.FIXED`: nel capitolo 1 0 hilde, 1 father osric, 2 grom, 3
+the gravedigger) → `q_talk` (GAME) legge il file **`qstg`** a `CORE_AT` (`$E000`: copre il segmento CORE, che `main_loop`
+rilegge dopo; per questo il modulo usa `ui_begin0`) e lo esegue. I vaganti restano quelli del concept (D18: ripetibili dopo).
+1. **Consegna** (`q_tin`, nel modulo MENU: `src/menu/q_who.asm`, `MENU_QTIN`): passo della catena raggiunto e ritirato da
+   quell'NPC, o accessoria raggiunta, o accessoria con obiettivo G presa ("give 300 gold?", solo l'oro addosso). Se il premio
+   non ha posto (zaino per unico e oggetto, cintura per le pozioni: Q12) "no room in your pack or belt" e la quest resta.
+   Premio (4 B per quest, `qgiv_rw.inc`): oro, unico (base `un_base`, suffisso $80+u), oggetto magico della base (`af_gen` con
+   `af_m` = 1, livello 5 × capitolo), pozioni, gettone respec, gradino del borsello (`q_flag` bit 4-7). Poi `q_step` + 1
+   (catena) o il bit in `q_sdone` (accessoria) e il testo "done" con la riga del premio.
+2. **Offerta** (`q_offer`, `MENU_QOFFER`): il passo `q_step` + 1 se quell'NPC lo dà, oppure un'accessoria del capitolo (dopo il
+   primo passo della catena del capitolo, non fatta, non presa, con la precedente fatta se serve, con un posto libero in
+   `q_side`). La quest è **presa subito** (Q11) e si mostrano titolo, obiettivo in giallo (con "0/N"), testo e premio.
+3. Altrimenti "nothing for you now."
+
+Testi: un file per capitolo **`QTX1`..`QTX4`** a 5 bit (`gen_qdata.py`, letto a `QTX` = `$EC00`; 1879-2204 B, al massimo 2272):
+n, n × (QID-1, indirizzo), poi per ogni quest titolo, obiettivo (fino a "{n}"), contatore sì/no, righe del testo, della
+consegna e del premio (36 colonne). Il testo scorre con W/S (12 righe). File su disco in fondo: `qstg` 6 blocchi, `qtx1-4`
+35 blocchi. **Segni (D12)**: `q_marks` (`src/menu/q_who.asm`, `MENU_QMARK`, all'ingresso nel villaggio dopo `npc_fix` e all'uscita da
+`QGIV`) mette in `npc_q` degli NPC fissi `$87` (giallo: una quest da dare), `$85` (verde: una da ritirare) o 0; `npc_offer`
+ne ricava il colore del "!" (`npc_bmark`, bianco quando è in alto). I vaganti del concept restano gialli.
+Test: `QGIV-10`..`15`. **Da fare**: pagina Q sul formato nuovo, abilità dalla catena
+(Q15), borsello variabile, cintura a 8, oggetto "qualsiasi" (passo 11), sblocco del capitolo alla consegna, cancello D4 nei capitoli 2-4
+(`QGATE_CH`), ripetibili (D18).
 
 ---
 

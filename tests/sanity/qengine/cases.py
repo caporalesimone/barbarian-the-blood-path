@@ -87,6 +87,8 @@ def qe_gate(ctx):
         state(g, step, flag)
         return bool(g.call_keep(L["q_gate"], regs="a=%02x" % lvl)["c"])
     res = [sealed(0, 0), sealed(2, 0), sealed(2, 1), sealed(3, 0), sealed(0, 0, 3)]
+    g.poke(L["c_chap"], 2); ch2 = sealed(3, 0, 10); g.poke(L["c_chap"], 1)
+    check(not ch2, "chapter 2 sealed (QGATE_CH = 1: only chapter 1 for now)")
     check(res == [True, True, False, False, False], "sealed (step 0, step 3 offered, taken, delivered, level 3): %s" % res)
     state(g, 2, 1)
     g.call_keep(L["q_cboss"])

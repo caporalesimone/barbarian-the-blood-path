@@ -119,6 +119,9 @@ esac
 # quest) e cosi' non spostano i file dei capitoli 2-5 (PERF-DISK)
 for f in out/work/qst[2-9].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done
 for f in out/work/qst[01].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) elenco delle quest; (18/11) in fondo (vedi le voci in piu' dopo save-05)
+# (22/11, D2, D3) modulo del villaggio delle quest (qstg) e testi dei capitoli a 5 bit (qtx1..4): in fondo, letti di rado
+ARGS+=(-f qstg -w out/work/qgiv.prg)
+for c in 1 2 3 4; do ARGS+=(-f qtx$c -w out/work/qtx$c.prg); done
 fi
 $CC "${ARGS[@]}" "$OUT" > out/work/mkdisk.log 2>&1 || { cat out/work/mkdisk.log; echo "mkdisk: errore cc1541"; exit 1; }
 # (18/11) catena della directory con interleave 2 (cc1541 la scrive con 3): Krill legge i settori della directory uno dopo

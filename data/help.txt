@@ -166,10 +166,11 @@
  walk on the fountain: it heals you.
  {every floor remembers what you did.}
 === people of the village
- <hilde>
-   she waits in the fountain square.
-   stand next to her and press [fire]:
-   she gives you her quest.
+ <the village folk>
+   some stay in place, their name at
+   the top. next to one, [fire]: a
+   quest, a reward or nothing.
+ {yellow [!] quest, green [!] reward.}
 
  <villagers>
    they walk around the village. when

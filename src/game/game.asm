@@ -3694,7 +3694,10 @@ _shp    cmp #T_DSMITH
         jmp MENU_SHOP
 _np     jsr npc_here            ; (17/11) nessun luogo sotto il PG: accanto a chi da' una quest (18/11: Hilde o un NPC che
         bcc _r                  ; vaga con il "!"), la quest e' presa e si apre il suo dettaglio (NPC_JTALK, src/menu/npc.asm)
-        jmp NPC_JTALK
+        lda npc_d,x             ; (22/11) NPC fisso: modulo QGIV (quest della catena e accessorie, qengine.asm q_talk)
+        bpl +
+        jmp q_talk
++       jmp NPC_JTALK
 _r      rts
 _st     stx st_kind
 .if QGATE

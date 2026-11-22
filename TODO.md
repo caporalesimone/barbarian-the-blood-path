@@ -641,7 +641,10 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   capitoli disegnati e tarati, unici solo da quest e boss, ripetibili, mostri delle quest generati sempre, segni, ordine).
   **Ordine (D13)**: 1) stato nel salvataggio (baule della locanda fuori dal blocco dell'eroe): **fatto il 22/11** (formato $CE,
   baule a `$FF80`, 32 B `q_step`..`q_free`, file da 4 blocchi; test `QSAVE-10/11`); 2) motore nel dungeon: **fatto il 22/11** (`qengine.asm`,
-  [quests 4.4](docs/wiki/quests.md), cancello D4 spento finché non c'è `QGIV`), poi `QGIV`, segni e pagina Q sul capitolo 1;
+  [quests 4.4](docs/wiki/quests.md), cancello D4 acceso nel capitolo 1), `QGIV`: **fatto il 22/11** (consegna, premi, offerta, testi `QTXc`; [quests 4.5](docs/wiki/quests.md)); poi segni
+  (D12) fatti; pagina Q, cancello nei capitoli 2-4 (oggi solo il capitolo 1, `QGATE_CH`), abilità dalla catena (Q15), borsello variabile, sblocco alla consegna sul capitolo 1;
+  **Margine di GAME 916 B** (sotto 1 KB, avviso della build): motore ~470 B, tabelle e nomi degli oggetti di quest ~270 B;
+  da recuperare (nomi a 5 bit, tabelle nel modulo MENU) prima di altro codice residente.
   poi gli altri capitoli.
 - (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).
   **Da decidere in futuro**: le regole fini (categoria, livello oggetto, qualità minima, legame con il modello della quest).

@@ -232,6 +232,7 @@ npc_bmark:
         ldy npc_k
         jsr npc_offer
         bcc _r
+        sta tmp6                ; (22/11, D12) colore del segno: giallo da dare, verde da ritirare
         ldy npc_b
         cpy #3
         bcs _r                  ; gia' due "!" sullo schermo
@@ -267,11 +268,11 @@ npc_bmark:
         sta bs_en
         lda #NPC_BPTR
         sta sh_ptr,y
-        lda tmp7                ; giallo, bianco quando e' in alto
+        lda tmp7                ; il suo colore, bianco quando e' in alto
         beq +
-        lda #1-7+256
-+       clc
-        adc #7
+        lda #1
+        .byte $2c               ; (bit abs: salta lda tmp6)
++       lda tmp6
         sta sh_col,y
         inc npc_b
 _r      rts

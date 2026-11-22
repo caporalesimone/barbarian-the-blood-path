@@ -52,7 +52,7 @@ def text_at(g, addr):
         s += chr(c + 96) if 1 <= c <= 26 else chr(c)
 
 
-@test("NPCFIX-10", "village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, no quest; nobody else in their sectors")
+@test("NPCFIX-10", "village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, npc_q = the D12 mark (0, $85, $87); nobody else in their sectors")
 def placed(ctx):
     g, L = ctx["g"], ctx["L"]
     new_game(g)
@@ -63,8 +63,8 @@ def placed(ctx):
     d, q, gg = g.mem(L["npc_d"], NPC_N), g.mem(L["npc_q"], NPC_N), g.mem(L["npc_g"], NPC_N)
     for k, (i, tx, ty, look) in enumerate(spec, 1):
         check(now.get(i) == (tx, ty), "fixed NPC %d (%s) at %s, expected (%d,%d)" % (i, NAMES[k], now.get(i), tx, ty))
-        check(d[i] == 0x80 | k << 4 and q[i] == 0 and gg[i] == look, "NPC %d: npc_d %02x npc_q %d design %d" % (i, d[i], q[i], gg[i]))
-    check(d[0] == 0x80 and q[0] == 1, "NPC 0 (hilde): npc_d %02x npc_q %d" % (d[0], q[0]))
+        check(d[i] == 0x80 | k << 4 and q[i] in (0, 0x85, 0x87) and gg[i] == look, "NPC %d: npc_d %02x npc_q %d design %d" % (i, d[i], q[i], gg[i]))
+    check(d[0] == 0x80 and q[0] == 0, "NPC 0 (hilde, nothing before step 1, D12): npc_d %02x npc_q %d" % (d[0], q[0]))
     ctx["spec"], ctx["now"] = spec, now
     g.frames(300)                                               # walkers move; the fixed ones never
     later = npcs_now(g, L)
@@ -72,7 +72,7 @@ def placed(ctx):
         check(later.get(i) == (tx, ty), "fixed NPC %d moved to %s" % (i, later.get(i)))
 
 
-@test("NPCFIX-11", "next to each fixed NPC the bar shows its name; Fire next to one without a quest opens nothing")
+@test("NPCFIX-11", "next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv)")
 def names(ctx):
     g, L = ctx["g"], ctx["L"]
     for k, (i, tx, ty, _) in enumerate(ctx["spec"], 1):
@@ -86,6 +86,3 @@ def names(ctx):
         check(text_at(g, ptr) == NAMES[k], "name %r (expected %r)" % (text_at(g, ptr), NAMES[k]))
         if k == 1:
             g.screenshot(os.path.join(OUT, "npc_fixed.png"))
-            qst = g.b(L["c_qst"])
-            g.press_fire(); g.frames(10)
-            check(g.b(L["cur_level"]) == 0 and g.b(L["c_qst"]) == qst, "Fire next to %s changed something" % NAMES[k])

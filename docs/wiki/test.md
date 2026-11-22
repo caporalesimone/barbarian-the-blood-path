@@ -159,7 +159,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (9)
+### sanity (15)
 
 | ID | Test |
 |---|---|
@@ -170,6 +170,12 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
 | `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open |
 | `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
+| `QGIV-10` | father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet |
+| `QGIV-11` | step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, purse step (q_flag $10), the 'done' text |
+| `QGIV-12` | hilde gives step 2 (the amulet, from father osric); grom gives a1.1 (side, q_side slot 0 = id 1) after step 1 of the chapter |
+| `QGIV-13` | a1.1 reached, back to grom: a magic sword; then a1.2 (G: 300 gold) offered; Fire again: 'give 300 gold?' yes -> -300 gold, the gravedigger, q_sdone bits 0-1 |
+| `QGIV-14` | Q12: pack full, step 2 reached: father osric says 'no room' and the step stays to be taken back (q_step 1, q_flag bit 1) |
+| `QGIV-15` | D12, marks of the fixed NPCs (q_marks, npc_q): yellow $87 who has a quest to give, green $85 who takes one back, 0 nobody; the '!' sprite has that colour |
 | `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
 | `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
 
@@ -335,7 +341,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MUSIC-10` | songs per level, buffer = SNDn files, combat and resume, copy under I/O |
 | `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
 | `NPCFIX-10` | village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, no quest; nobody else in their sectors |
-| `NPCFIX-11` | next to each fixed NPC the bar shows its name; Fire next to one without a quest opens nothing |
+| `NPCFIX-11` | next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv) |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |
 | `OPT-12` | neg16 / sabs: -tmp0:1 and |tmp0:1| saturated at 255 |
 | `OPT-02` | gold_total: c_gold + 10 x c_sgold (24 bit) at the limits |
@@ -385,7 +391,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `POT-10` | pot_heal: dungeon column up to level 20, Abyss column (heal_abyss) from level 21, all potions, Y kept |
 | `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
 | `QUEST-11` | Q with no quest taken: the list (file QST0) says 'talk to the villagers', RUN/STOP goes back to the game |
-| `QUEST-12` | Hilde: '!' over her head, name in the bar; Fire = quest 1 taken and its detail (title, chapter, yellow status, text, reward); back: the list; the '!' is gone |
+| `QUEST-12` | Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv); concept quest 1 marked taken for the list tests below |
 | `QUEST-13` | the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop |
 | `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
 | `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |

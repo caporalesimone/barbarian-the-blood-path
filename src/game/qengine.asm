@@ -10,8 +10,9 @@
 ;  oggetto da baule IC, D19), QE_CBOSS (boss del capitolo o boss finale: C). Si conta solo una quest presa (Q13); la morte non
 ;  tocca nulla (Q10).
 ; ===================================================================
-QGATE    = 0                           ; (22/11) 1 = cancello D4 attivo sulle scale (act_tick). Spento finche' QGIV non da' le quest:
-                                        ; altrimenti nessuno potrebbe arrivare al boss del capitolo
+QGATE    = 1                           ; (22/11) 1 = cancello D4 attivo sulle scale (act_tick)
+QGATE_CH = 1                           ; (22/11, D13) solo nei capitoli 1..QGATE_CH: QGIV da' le quest del capitolo 1; gli altri
+                                        ; capitoli restano aperti finche' non si estende (tipi di mostro da verificare)
 QE_KILL  = 1
 QE_CHEST = 2
 QE_CBOSS = 3
@@ -227,6 +228,9 @@ q_cboss:
 q_gate:
         jsr is_cboss
         bcc _r
+        lda c_chap
+        cmp #QGATE_CH+1
+        bcs _op
         lda c_chap              ; passo 3c - 1 = q_step che lo precede
         asl
         adc c_chap
@@ -290,3 +294,46 @@ _n      ldx q_sl
         dex
         bpl _s
 _r      rts
+
+; ===================================================================
+;  (22/11) NPC del villaggio: chi da' e chi ritira. Usati dal modulo QGIV (src/qgiv.asm) e dai segni (D12). La quest Y
+;  (QID-1) e' del capitolo qt_ty bit 4-6; qt_np: bit 0-1 NPC fisso che la da', bit 2-3 chi la ritira, bit 7 = serve la
+;  quest precedente (accessorie: "after").
+; ===================================================================
+        .virtual q_vend
+q_k     .byte ?                 ; NPC fisso (k di villages.FIXED) con cui si parla
+q_t     .byte ?
+q_t2    .byte ?
+q_t3    .byte ?                 ; (q_sdn: Y salvato)
+q_vend2
+        .endv
+        .cerror q_vend2 > $9abf, "variabili del motore delle quest oltre $9ABE (mslide)"
+
+; q_sdn, q_sfind, q_offer, q_tin: nel modulo MENU (src/menu/q_who.asm, zona 1: servono solo nel villaggio), MENU_QOFFER /
+; MENU_QTIN
+
+; Fire accanto all'NPC fisso X (act_tick, npc_here): il modulo QGIV (file "qstg") a CORE_AT, eseguito (finisce con ui_exit).
+; Copre il segmento CORE (core_ok = 0: main_loop lo rilegge)
+q_talk:
+        lda npc_d,x             ; nome k = bit 4-5
+        lsr
+        lsr
+        lsr
+        lsr
+        and #3
+        sta q_k
+        ldy #nm_qst-nm_tab      ; "QST" + "G"
+        jsr set_name4
+        lda #$47                ; "G" (PETSCII maiuscolo, come i nomi di nm_tab)
+        sta cmdbuf+6
+        lda #2
+        sta io_what
+        lsr core_ok
+        lda #<CORE_AT
+        sta ptr0
+        lda #>CORE_AT
+        sta ptr0+1
+        jsr load_raw
+        bcs +
+        jmp CORE_AT
++       jmp ui_exit

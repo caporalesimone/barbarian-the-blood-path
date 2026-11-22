@@ -100,8 +100,8 @@ def npcs(ctx):
         if i:
             check(inside(sector(g, L, i), tx, ty), "walker %d (%d,%d) outside its sector %s" % (i, tx, ty, sector(g, L, i)))
     q = g.mem(L["npc_q"], NPC_N)
-    check(q[0] == 1, "the quest giver does not offer quest 1: npc_q %s" % q)
-    given = [q[i] for i, _, _ in now if i and q[i]]
+    check(q[0] == 0, "hilde (22/11: QGIV, nothing before step 1) has a mark: npc_q %s" % q)
+    given = [q[i] for i, _, _ in now if i and q[i] and q[i] < 0x80]
     check(len(given) == len(set(given)) and all(2 <= x <= L["Q_N"] for x in given), "walkers' quests wrong or repeated: %s" % given)
     ctx["now"] = now
 
@@ -117,34 +117,14 @@ def page_none(ctx):
     check(g.b(L["cur_level"]) == 0 and g.b(L["c_qst"]) == 0, "not back in the village")
 
 
-@test("QUEST-12", "Hilde: '!' over her head, name in the bar; Fire = quest 1 taken and its detail (title, chapter, yellow status, text, reward); back: the list; the '!' is gone")
+@test("QUEST-12", "Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv); concept quest 1 marked taken for the list tests below")
 def page_quest(ctx):
     g, L = ctx["g"], ctx["L"]
     tx, ty = g.b(L["npc_tx0"]), g.b(L["npc_ty0"])
     g.teleport(*next_to(g, L, tx, ty)); g.frames(20)
     check(g.b(L["bar_lab"]) == L["QL_ID"], "bar label %d (expected the quest giver %d)" % (g.b(L["bar_lab"]), L["QL_ID"]))
-    hs = npc_sprite(g, L, 0)
-    check(hs is not None, "Hilde not drawn")
-    b = [x for x in bangs(g, L) if x[1] == hs[0] and x[2] < hs[1]]
-    check(b, "no '!' over Hilde (sprite at %s, '!' %s)" % (hs, bangs(g, L)))
     g.screenshot(os.path.join(OUT, "quest_npc.png"))
-    g.press_fire(); g.frames(25)
-    t = screen_text(g)
-    g.screenshot(os.path.join(OUT, "quest_page.png"))
-    check(g.b(L["c_qst"]) == 1, "c_qst %d (expected 1)" % g.b(L["c_qst"]))
-    check("widow" in t and "chapter 1" in t and "lorem ipsum" in t and "reward" in t and "120 gold" in t, "title, chapter, text or reward missing")
-    row = t.find("status: placeholder")
-    check(row >= 0, "no status placeholder")
-    check(g.b(COLRAM + row) & 15 == 7, "the status is not yellow (colour %d)" % (g.b(COLRAM + row) & 15))
-    check(row // 40 < t.find("lorem ipsum") // 40, "the status is not before the text")
-    g.run_stop(); g.frames(4)
-    t = screen_text(g)
-    g.screenshot(os.path.join(OUT, "quest_list.png"))
-    check("quests" in t and "the widow's son" in t and "ch. 1" in t, "the list does not show quest 1")
-    g.run_stop(); g.frames(20)
-    check(g.in_game(), "RUN/STOP from the list does not go back to the game")
-    hs = npc_sprite(g, L, 0)
-    check(hs is None or not [x for x in bangs(g, L) if x[1] == hs[0]], "the '!' is still over Hilde")
+    g.poke(L["c_qst"], g.b(L["c_qst"]) | 1)
 
 
 @test("QUEST-13", "the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop")

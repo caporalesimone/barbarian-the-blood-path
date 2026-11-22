@@ -198,7 +198,7 @@ _l      lda npc_k
         sta npc_g,x
 _n      dec npc_k
         bne _l
-        rts
+        jmp MENU_QMARK          ; (22/11, D12) segni delle quest sopra gli NPC fissi
 
 ; (22/11) Y = 0..3 -> A = colore del vestito numero Y degli NPC del villaggio c_chap (npc_col, out/work/town_places.inc:
 ; tools/build/villages.py NPC_COL, scelti perche' non si confondano con i terreni). X conservato
