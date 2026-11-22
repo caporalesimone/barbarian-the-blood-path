@@ -163,7 +163,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 | ID | Test |
 |---|---|
-| `QGIV-10` | father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet |
+| `QGIV-10` | father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet; (22/11) text with a blank row between lines, scroll bar on column 39 (CH_THUMB), S scrolls one line |
 | `QGIV-11` | step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, purse step (q_flag $10), the 'done' text |
 | `QGIV-12` | hilde gives step 2 (the amulet, from father osric); grom gives a1.1 (side, q_side slot 0 = id 1) after step 1 of the chapter |
 | `QGIV-13` | a1.1 reached, back to grom: a magic sword; then a1.2 (G: 300 gold) offered; Fire again: 'give 300 gold?' yes -> -300 gold, the gravedigger, q_sdone bits 0-1 |

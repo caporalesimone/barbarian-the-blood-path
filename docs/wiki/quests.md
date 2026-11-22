@@ -214,7 +214,10 @@ rilegge dopo; per questo il modulo usa `ui_begin0`) e lo esegue. I vaganti resta
 
 Testi: un file per capitolo **`QTX1`..`QTX4`** a 5 bit (`gen_qdata.py`, letto a `QTX` = `$EC00`; 1879-2204 B, al massimo 2272):
 n, n × (QID-1, indirizzo), poi per ogni quest titolo, obiettivo (fino a "{n}"), contatore sì/no, righe del testo, della
-consegna e del premio (36 colonne). Il testo scorre con W/S (12 righe). File su disco in fondo: `qstg` 6 blocchi, `qtx1-4`
+consegna e del premio (36 colonne). Il testo scorre con W/S o con il joystick, una riga per volta. (22/11, prova del committente) Fra una riga e l'altra c'è una
+riga vuota: nel riquadro di 12 righe se ne vedono 6 (`QG_VIS`); al posto di "up" e "more" c'è la **barra di scorrimento**
+sulla cornice destra, come nelle liste (`qg_bar`: `CH_THUMB` grigio chiaro, lunghezza 12 × 6 / righe, solo se il testo non
+sta nella finestra). Il premio resta a righe consecutive. File su disco in fondo: `qstg` 6 blocchi, `qtx1-4`
 35 blocchi. **Segni (D12)**: `q_marks` (`src/menu/q_who.asm`, `MENU_QMARK`, all'ingresso nel villaggio dopo `npc_fix` e all'uscita da
 `QGIV`) mette in `npc_q` degli NPC fissi `$87` (giallo: una quest da dare), `$85` (verde: una da ritirare) o 0; `npc_offer`
 ne ricava il colore del "!" (`npc_bmark`, bianco quando è in alto). I vaganti del concept restano gialli.

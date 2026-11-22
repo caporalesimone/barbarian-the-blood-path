@@ -4,7 +4,7 @@ or takes back its quest. One VICE session, a new barbarian in the village of cha
 import os
 from c64test import test, check
 from lib.c64 import Game, OUT
-from lib.play import new_game, key, K_M
+from lib.play import new_game, key, K_M, D
 
 CHAIN = True
 SCR_A = 0xB400
@@ -67,7 +67,7 @@ def close(g):
     check(g.b(g.L["cur_level"]) == 0 and g.in_game(), "not back in the village")
 
 
-@test("QGIV-10", "father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet")
+@test("QGIV-10", "father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet; (22/11) text with a blank row between lines, scroll bar on column 39 (CH_THUMB), S scrolls one line")
 def qg_offer(ctx):
     g = ctx["g"]; L = g.L
     t = talk(g, 0)
@@ -77,6 +77,14 @@ def qg_offer(ctx):
     check(g.b(L["q_flag"]) == 1 and g.b(L["q_step"]) == 0, "q_flag %d q_step %d" % (g.b(L["q_flag"]), g.b(L["q_step"])))
     check("a sword for the crypt" in t and "slay the fallen: 0/8" in t and "the crypt door stands open" in t and "reward: 120 gold" in t,
           "screen: %r" % t[:200])
+    row = lambda r: t[r * 40 + 1:r * 40 + 38]
+    check(row(5).strip() and not row(6).strip() and row(7).strip(), "no blank row between the text lines: %r / %r / %r" % (row(5), row(6), row(7)))
+    bar = [g.b(SCR_A + r * 40 + 39) for r in range(5, 17)]
+    check(bar[0] == 78 and 30 in bar, "scroll bar on column 39: %s" % bar)
+    l2 = row(7).strip()
+    g.frames(1, joy=D); g.frames(2)
+    t2 = screen_text(g)
+    check(t2[5 * 40 + 1:5 * 40 + 38].strip() == l2, "S: the second line does not go up (%r, expected %r)" % (t2[5 * 40 + 1:5 * 40 + 38], l2))
     close(g)
 
 

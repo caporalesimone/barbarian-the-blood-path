@@ -16,7 +16,9 @@
         * = CORE_AT
         .enc "screen"
         jmp qgiv
-QG_LN    = 12                    ; righe di testo visibili (righe 5..16)
+QG_LN    = 12                    ; righe del riquadro del testo (righe 5..16)
+QG_VIS  = QG_LN / 2             ; (22/11, prova del committente) righe di testo visibili, con una riga vuota fra l'una e l'altra
+QG_BX   = 39                    ; colonna della barra di scorrimento (cornice destra, come le liste: src/game/slist.asm)
 QG_Y    = 5
 QG_RY   = 19                    ; righe del premio (19..21)
 qg_id   .byte 0                 ; QID - 1
@@ -34,6 +36,10 @@ qg_rw   .byte 0, 0, 0, 0        ; premio della quest
 qg_n    .byte 0                 ; posti che servono (zaino) / pozioni (cintura)
 qg_lc   .byte 0                 ; capitolo del file QTX letto (0 = nessuno)
 qg_cv   .byte 0                 ; pagina Q: contatore della quest mostrata
+qg_st   .byte 1                 ; (22/11) passo fra le righe in qg_show: 1 premio, 2 testo (interlinea)
+qg_bl   .byte 0                 ; barra di scorrimento: lunghezza, inizio (qg_bar)
+qg_bs   .byte 0
+qg_r    .byte 0
 qg_rwt
         .include "../out/work/qgiv_rw.inc"
 
@@ -175,7 +181,7 @@ _up     lda qg_top
         jmp _dr
 _dn     lda qg_top
         clc
-        adc #QG_LN
+        adc #QG_VIS
         cmp qg_nl
         bcs _in
         inc qg_top
@@ -268,19 +274,13 @@ _z      ldx #0
         lda #QG_RY
         sta tmp3
         ldx qg_rn
+        lda #1                  ; premio: righe una dopo l'altra
+        sta qg_st
         jsr qg_show
-        lda qg_top              ; testo dalla riga qg_top
-        beq +
-        #at 33,4
-        #msg " up "
-+       lda qg_top
-        clc
-        adc #QG_LN
-        cmp qg_nl
-        bcs +
-        #at 32,QG_Y+QG_LN
-        #msg " more "
-+       lda qg_l0
+        jsr qg_bar              ; (22/11) barra di scorrimento al posto di "up" e "more"
+        lda #2                  ; testo: una riga vuota fra le righe
+        sta qg_st
+        lda qg_l0
         sta ptr2
         lda qg_l0+1
         sta ptr2+1
@@ -291,11 +291,11 @@ _z      ldx #0
         lda qg_nl
         sec
         sbc qg_top
-        cmp #QG_LN
+        cmp #QG_VIS
         bcc +
-        lda #QG_LN
+        lda #QG_VIS
 +       tax
-; X righe da ptr2 alle righe tmp3.. (colore: premio giallo, testo bianco)
+; X righe da ptr2 alle righe tmp3, tmp3 + qg_st, ... (colore: premio giallo, testo bianco)
 qg_show:
         txa
         beq _r
@@ -310,11 +310,86 @@ qg_show:
         lda #UC_VALUE
 +       sta ui_col
         jsr ui_p5
-        inc tmp3
+        lda tmp3
+        clc
+        adc qg_st
+        sta tmp3
         ldx tmp4
         dex
         bne -
 _r      rts
+
+; (22/11, prova del committente) barra di scorrimento del testo sulla cornice destra (colonna QG_BX, righe QG_Y..), come
+; le liste (sl_draw: CH_THUMB grigio chiaro sulla cornice), solo se le righe non stanno nella finestra. Le QG_LN righe del
+; riquadro valgono le qg_nl righe del testo: lunghezza = QG_LN * QG_VIS / qg_nl (almeno 1), inizio = qg_top * (QG_LN -
+; lunghezza) / (qg_nl - QG_VIS). (sl_mul e sl_div stanno in CORE, sotto il modulo: conti propri, a somme e sottrazioni)
+qg_bar:
+        lda qg_nl
+        cmp #QG_VIS+1
+        bcc _r
+        lda #QG_LN*QG_VIS
+        ldx qg_nl
+        jsr qg_div
+        bne +
+        lda #1
++       sta qg_bl
+        lda #QG_LN
+        sec
+        sbc qg_bl
+        tay                     ; Y = QG_LN - lunghezza
+        lda #0
+        ldx qg_top
+        beq _m
+-       sty tmp4
+        clc
+        adc tmp4
+        dex
+        bne -
+_m      pha
+        lda qg_nl
+        sec
+        sbc #QG_VIS
+        tax
+        pla
+        jsr qg_div
+        sta qg_bs
+        lda #0
+        sta qg_r
+_l      lda qg_r
+        clc
+        adc #QG_Y
+        tay
+        ldx #QG_BX
+        jsr ui_at
+        lda qg_r
+        sec
+        sbc qg_bs               ; riga - inizio
+        bcc _f
+        cmp qg_bl
+        bcs _f
+        lda #UC_BTTL
+        ldx #CH_THUMB
+        bne _p
+_f      lda ui_bc
+        ldx #BOX_V
+_p      sta ui_col
+        txa
+        jsr ui_putc
+        inc qg_r
+        lda qg_r
+        cmp #QG_LN
+        bne _l
+_r      rts
+; A = A / X (quoziente, divisione per sottrazioni; A, X piccoli). Z dal quoziente
+qg_div:
+        stx tmp5
+        ldx #$ff
+        sec
+-       inx
+        sbc tmp5
+        bcs -
+        txa
+        rts
 
 ; ------------------------------------------------------------------ pagina Q: le quest prese (catena e accessorie)
 QP_Y    = 5                     ; prima riga dell'elenco (una voce ogni 2 righe)
