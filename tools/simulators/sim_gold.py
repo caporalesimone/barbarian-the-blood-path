@@ -246,12 +246,21 @@ def report(t, floors):
     lines.append("")
     lines.append("bauli epici: 10%% dell'oro dei piani 1-19 = %.0f (%.0f a baule; oggi final_gold = %d)" % (tot / 10, tot / 40, FIN_GOLD))
     lines.append("")
+    lines.append("(22/11) Oro addosso oltre 500 (partenza 100, niente spese, nessun ritorno al villaggio, che lo deposita nella locanda):")
+    for label, k in (("medio", 0), ("ricco (media + 2 dev.)", 2)):
+        c, f500 = 100.0, None
+        for f in range(1, NF + 1):
+            c += t[f][0] + k * t[f][1]
+            if f500 is None and c > 500: f500 = f
+        lines.append("  %-24s durante il piano %s" % (label, f500))
+    lines.append("")
     lines.append("Borsello: oro perso per il tetto (oro trovato, partenza 100, niente spese)")
     steps = {"oggi: %d fisso" % gmax: lambda f: gmax,
              "500/1000/3000/5000 sui boss, 10000 col finale": lambda f: 500 if f <= 5 else 1000 if f <= 10 else 3000 if f <= 15 else 5000,
-             "1000/3000/5000/10000 col primo passo della catena (quests.md, P2)": lambda f: 1000 if f <= 5 else 3000 if f <= 10 else 5000 if f <= 15 else 10000}
+             "1000/3000/5000/10000 col primo passo della catena (quests.md, P2)": lambda f: 1000 if f <= 5 else 3000 if f <= 10 else 5000 if f <= 15 else 10000,
+             "(22/11) 500 fino al passo 3, 1000 al 3 (piano 5), 3000 al 4, 5000 al 7": lambda f: 500 if f <= 5 else 1000 if f <= 6 else 3000 if f <= 11 else 5000}
     for name, cap in steps.items():
-        for every, lab in ((1, "deposito a ogni piano"), (5, "deposito a fine capitolo")):
+        for every, lab in ((1, "deposito a ogni piano"), (2, "deposito ogni 2 piani"), (5, "deposito a fine capitolo")):
             r = purse_loss(t, cap, every)
             lines.append("  %-66s %-26s %s" % (name, lab, ", ".join("%s %.0f" % kv for kv in r.items())))
     return "\n".join(lines)

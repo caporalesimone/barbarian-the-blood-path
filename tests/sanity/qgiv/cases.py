@@ -88,13 +88,13 @@ def qg_offer(ctx):
     close(g)
 
 
-@test("QGIV-11", "step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, purse step (q_flag $10), the 'done' text")
+@test("QGIV-11", "step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, no purse step (q_flag 0: the purse of 1000 moved to step 3 on 22/11), the 'done' text")
 def qg_turnin(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["q_flag"], 3); g.poke(L["q_cnt"], 8)
     g0 = g.w16(L["c_gold"])
     t = talk(g, 1, "qgiv_done.png")
-    check(g.b(L["q_step"]) == 1 and g.b(L["q_flag"]) == 0x10 and g.b(L["q_cnt"]) == 0, "state %s" % g.mem(L["q_step"], 3))
+    check(g.b(L["q_step"]) == 1 and g.b(L["q_flag"]) == 0 and g.b(L["q_cnt"]) == 0, "state %s" % g.mem(L["q_step"], 3))
     check(g.w16(L["c_gold"]) == g0 + 120, "gold %d -> %d" % (g0, g.w16(L["c_gold"])))
     p, s = g.mem(L["c_pack"], 8), g.mem(L["c_packs"], 8)
     check(0x80 in s and p[s.index(0x80)] == g.b(L["un_base"]), "osric's cudgel not in the pack: %s %s" % (p, s))
@@ -135,11 +135,11 @@ def qg_gold(ctx):
 @test("QGIV-14", "Q12: pack full, step 2 reached: father osric says 'no room' and the step stays to be taken back (q_step 1, q_flag bit 1)")
 def qg_full(ctx):
     g = ctx["g"]; L = g.L
-    g.poke(L["q_flag"], 0x13); g.poke(L["q_cnt"], 1)
+    g.poke(L["q_flag"], 0x03); g.poke(L["q_cnt"], 1)
     g.poke(L["c_pack"], *([L["I_DAGGER"]] * 8))
     t = talk(g, 1)
     check("no room" in t, "no message: %r" % t[400:480])
-    check(g.b(L["q_step"]) == 1 and g.b(L["q_flag"]) == 0x13, "state changed: %s" % g.mem(L["q_step"], 3))
+    check(g.b(L["q_step"]) == 1 and g.b(L["q_flag"]) == 0x03, "state changed: %s" % g.mem(L["q_step"], 3))
     close(g)
 
 

@@ -239,9 +239,9 @@ Test: `QGIV-10`..`17`. **Da fare**: abilità dalla catena
 
 | # | Titolo | NPC | Obiettivo | Premio |
 |---|---|---|---|---|
-| 1 | **a sword for the crypt** | Father Osric | K: 8 fallen | oro, borsello **1000**, *osric's cudgel* (unico) |
+| 1 | **a sword for the crypt** | Father Osric | K: 8 fallen | oro, *osric's cudgel* (unico) |
 | 2 | **the widow's son** | Hilde → Osric | I: l'amuleto di Tam (baule del piano 3) | oro, **Whirlwind** |
-| 3 | **the abbot's censer** | Father Osric | C: The Hollow Abbot (piano 5) | oro, pozioni, il turibolo |
+| 3 | **the abbot's censer** | Father Osric | C: The Hollow Abbot (piano 5) | oro, borsello **1000** (dal passo 1 il 22/11, committente), pozioni, il turibolo |
 | 4 | **the silent village** | Mama Sabine | K: 12 drowned | oro, borsello **3000**, **Battle Cry** |
 | 5 | **dolls with names** | Mama Sabine | I: 5 bambole cucite (dalle mire witchling) | oro, *doll-hide* (unico) |
 | 6 | **the silver needle** | Mama Sabine | C: Mother Stitch (piano 10) | oro, pozioni, **Rage**, l'ago |
@@ -306,7 +306,7 @@ ruin, the citadel watch.
 | Oro della catena (P4) | un passo ≈ metà / due terzi dell'oro di un piano del suo capitolo; numeri dal simulatore dell'oro |
 | Ripetibili (P5) | oro (~1/4 di un piano del capitolo) + 1–2 pozioni + oggetto magico del capitolo con probabilità 1/4; mai respec, unici o premi speciali |
 | Gettoni respec (P1) | A2.3, A4.3 + boss finale (+ i rari dei bauli dell'Abisso) |
-| Borsello (P2) | 500 → 1000 (passo 1) → 3000 (passo 4) → 5000 (passo 7) → 10 000 (passo 12) |
+| Borsello (P2) | 500 → 1000 (passo 3, boss del capitolo 1: spostato dal passo 1 il 22/11, committente; `sim_gold.py`: senza tornare al villaggio l'oro addosso passa 500 durante il piano 3, il piano 2 per un PG ricco; tornando ogni 1-2 piani si perde poco o niente) → 3000 (passo 4) → 5000 (passo 7) → 10 000 (passo 12) |
 | Cintura a 8 (P3) | premio importante, fine capitolo 2 o inizio capitolo 3: quest e momento decisi col simulatore del piano intero (`sim_floor.py`, 20/11: con 4 posti 0,25–0,39 ritorni in città per piano dal piano 3 al 14, con 8 quasi nessuno; [bilanciamento](BILANCIAMENTO.md)). 8 posti = 4 slot da 2 pozioni, tasti 1–4; il tasto beve la prima fila, la seconda sale (08/11) |
 | Quest che chiedono oro (P6) | iron for the forge, corbeau's toll, the bonfire vigil, modello "offering" |
 | Oro di riferimento | simulatore dell'oro del 20/11 ([bilanciamento](BILANCIAMENTO.md)): ~220 oro per piano nel capitolo 1, ~735 nel 2, ~1055 nel 3, ~1540 nel 4 (oro trovato, piani normali) |

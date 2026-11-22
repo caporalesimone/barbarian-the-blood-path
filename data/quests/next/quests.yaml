@@ -53,14 +53,13 @@ quests:
     title: a sword for the crypt
     goal: {type: K, monster: fallen, count: 8}
     goal_text: "slay the fallen: {n}/{t}"
-    reward: {gold: 120, purse: 1000, unique: osric's cudgel}
+    reward: {gold: 120, unique: osric's cudgel}      # (22/11, committente: il borsello da 1000 passa al passo 3)
     text: >-
       the crypt door stands open again. every winter the carts take our people east, and now the fallen climb up at night
       to choose for themselves. i am old, stranger, and my arm is weak. go down and thin them out. do that and you shall
       have the cudgel i carried when i was young.
     done: >-
-      eight less to drag us down. take my cudgel, it has broken harder heads than theirs. and take this purse. it is
-      deeper than yours.
+      eight less to drag us down. take my cudgel, it has broken harder heads than theirs.
   - id: 2
     kind: chain
     chapter: 1
@@ -84,14 +83,14 @@ quests:
     title: the abbot's censer
     goal: {type: C}
     goal_text: "slay the hollow abbot (level 5)"
-    reward: {gold: 250, potions: [{red: 3}], relic: the censer of saint aldric}
+    reward: {gold: 250, purse: 1000, potions: [{red: 3}], relic: the censer of saint aldric}   # (22/11) purse from step 1
     text: >-
       under the crypt lies the old abbot. he was the keeper of the saint's censer. the lord of ruin promised him life
       without end, and he sold us for it. he is long dead and he has not stopped choosing. kill his risen bones first, or
       he will heal. bring back the censer.
     done: >-
-      the censer of saint aldric, the first of the four relics. the valley is free this winter. but the carts went on to
-      the lake. the ferry to bad water waits at the gate of the village. find mama sabine by the bottle tree.
+      the censer of saint aldric, the first of the four relics. the valley is free this winter. take this purse, it is
+      deeper than yours. but the carts went on to the lake. the ferry to bad water waits at the gate of the village. find mama sabine by the bottle tree.
 
   # ------------------------------------------------------------------ chain, chapter 2: bad water
   - id: 4
