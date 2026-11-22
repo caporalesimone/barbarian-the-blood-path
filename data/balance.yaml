@@ -20,7 +20,9 @@ constants:
 player:
   start_gold: 100
   # oro massimo addosso (07/11 sera): oltre si perde (raccolta) o non si vende; il resto va nel baule di casa (65535)
-  gold_max: 10000
+  # (22/11, committente) borsello a gradini: 300 all'inizio, poi +250 a ogni premio "purse" della catena (i passi dei boss
+  # dei capitoli: 3, 6, 9, 12; quests.yaml). Simulazione: tools/simulators/sim_purse.py
+  purse: [300, 550, 800, 1050, 1300]
 
 # ---------------------------------------------------------------- mostri: aspetto e bottino
 # L'ordine e i nomi devono coincidere con data/rules.yaml (monsters). tier: base | strong | final.

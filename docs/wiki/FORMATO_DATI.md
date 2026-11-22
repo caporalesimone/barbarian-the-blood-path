@@ -128,7 +128,7 @@ Dal formato **$CE** (22/11, decisione D1 del committente, [quests.md](quests.md)
   escluso: accesso diretto; nessun file la copre), nel file segue il blocco dell'eroe (offset `HERO_LEN`, 120 B). Si scrive e si
   legge sempre insieme all'eroe (`char_img`, `load_char`); `new_character` lo svuota;
 - in fondo al blocco, dopo `c_qst`, i **32 B dello stato delle quest**: `q_step` (passi della catena consegnati), `q_flag` (passo
-  preso, obiettivo raggiunto, gradino del borsello), `q_cnt` (contatore del passo), `q_sdone` (15 bit: accessorie consegnate),
+  preso, obiettivo raggiunto, bit 4-7 gradino del borsello: 0 = 300, +250 a gradino, `gold_cap`), `q_cnt` (contatore del passo), `q_sdone` (15 bit: accessorie consegnate),
   `q_side` (4 accessorie attive × id e contatore), `q_rep` (2 ripetibili × 5 B), `q_item` (oggetto premio delle 2 ripetibili),
   3 liberi. Le ripetibili (16 B) si possono togliere dal salvataggio se servisse spazio (D1);
 - blocco da 254 a **166** byte, piani dall'offset 286, file da 739 a **771** byte: da 3 a **4 blocchi**.

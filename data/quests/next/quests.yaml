@@ -83,7 +83,7 @@ quests:
     title: the abbot's censer
     goal: {type: C}
     goal_text: "slay the hollow abbot (level 5)"
-    reward: {gold: 250, purse: 1000, potions: [{red: 3}], relic: the censer of saint aldric}   # (22/11) purse from step 1
+    reward: {gold: 250, purse: 550, potions: [{red: 3}], relic: the censer of saint aldric}   # (22/11, committente) borsello 300 -> 550
     text: >-
       under the crypt lies the old abbot. he was the keeper of the saint's censer. the lord of ruin promised him life
       without end, and he sold us for it. he is long dead and he has not stopped choosing. kill his risen bones first, or
@@ -100,13 +100,12 @@ quests:
     title: the silent village
     goal: {type: K, monster: drowned, count: 12}
     goal_text: "lay the drowned to rest: {n}/{t}"
-    reward: {gold: 400, purse: 3000, skill: battle cry}
+    reward: {gold: 400, skill: battle cry}      # (22/11, committente: i borselli solo dai passi dei boss)
     text: >-
       hear how quiet it is. the drums are still. the chosen who fell from the carts sleep under the black water, and the
       dollmaker will not let them rest. they walk the swamp. lay them down, traveller, and the drums will speak for you.
     done: >-
-      the drums speak again. shout with them, the way the north shouts before a fight, and see your enemies shake. this
-      purse belonged to a ferryman. he does not need it.
+      the drums speak again. shout with them, the way the north shouts before a fight, and see your enemies shake.
   - id: 5
     kind: chain
     chapter: 2
@@ -129,14 +128,15 @@ quests:
     title: the silver needle
     goal: {type: C}
     goal_text: "slay mother stitch (level 10)"
-    reward: {gold: 600, potions: [{yellow: 3}], skill: rage, belt: 8, relic: the silver needle}   # (22/11, D7) the belt with 8 slots
+    reward: {gold: 600, purse: 800, potions: [{yellow: 3}], skill: rage, belt: 8, relic: the silver needle}   # (22/11, D7) the belt with 8 slots; borsello 550 -> 800
     text: >-
       she sits on her isle with her fetishes around her. while one of them stands, your blade will hardly mark her. break
       the fetishes first, then strike while she is bare. bring back the needle. it was made to close wounds, not to open
       souls.
     done: >-
       the silver needle, the second relic. the dolls are only cloth now. i see the anger in you: do not bury it, use it.
-      take this belt of the old ferrymen too: it holds twice the bottles of yours. the carts climbed to the pass. follow
+      take this belt of the old ferrymen too: it holds twice the bottles of yours, and the purse of a ferryman, who does
+      not need it. the carts climbed to the pass. follow
       them to the last camp and ask for sergeant brenna.
 
   # ------------------------------------------------------------------ chain, chapter 3: the last camp
@@ -147,14 +147,13 @@ quests:
     title: cold fires
     goal: {type: K, monster: frost wight, count: 10}
     goal_text: "burn the frost wights: {n}/{t}"
-    reward: {gold: 600, purse: 5000, potions: [{yellow: 3}]}
+    reward: {gold: 600, potions: [{yellow: 3}]}
     text: >-
       we are what is left of the company of the pass. our captain varok chose to guard the carts. we said no. the ones
       who froze up there walk the caves now, in our colours. they were my friends. give them a fire, and i will count
       you as one of us.
     done: >-
-      ten fires on the mountain tonight. you fight like the northmen who raised you. the paymaster died rich: his purse
-      is yours.
+      ten fires on the mountain tonight. you fight like the northmen who raised you.
   - id: 8
     kind: chain
     chapter: 3
@@ -178,13 +177,14 @@ quests:
     title: the oathbreaker
     goal: {type: C}
     goal_text: "slay varok (level 15)"
-    reward: {gold: 900, unique: bastion door, skill: frenzy, relic: the oath blade of the saint}
+    reward: {gold: 900, purse: 1050, unique: bastion door, skill: frenzy, relic: the oath blade of the saint}   # (22/11) borsello 800 -> 1050
     text: >-
       varok holds the broken bastion with the sword of the oath, snapped in two. the demon paid him with the lives of
       his men. when he lines up with you he will charge: stand before a wall and step aside. his shield drops when he
       hits the stone.
     done: >-
-      the oath is kept at last. we took the door of his bastion off its hinges: carry it as a shield. let your blood run
+      the oath is kept at last. we took the door of his bastion off its hinges: carry it as a shield, and the paymaster's
+      purse with it: he died rich. let your blood run
       hot now, as the north taught you. the pass is open. beyond it there is only ash. look for the penitent at ruin's
       gate.
 
@@ -225,7 +225,7 @@ quests:
     title: the saint's heart
     goal: {type: C}
     goal_text: "slay the lord of ruin (level 20)"
-    reward: {purse: 10000, respec: 1, unique: aldric's heart, relic: the heart of saint aldric}
+    reward: {purse: 1300, respec: 1, unique: aldric's heart, relic: the heart of saint aldric}      # (22/11, committente) borsello 1050 -> 1300
     text: >-
       on the throne of the dead king sits the lord of ruin, and in his hand the heart of saint aldric still beats. three
       relics you carry. the fourth will close the seal. he calls his servants when he bleeds, and he is hungry: he ate a

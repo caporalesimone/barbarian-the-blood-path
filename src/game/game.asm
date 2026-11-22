@@ -797,10 +797,11 @@ _n      iny
         lda tmp3
         rts
 
-; oro automatico: A = quantita' (byte); add_gold16: A basso, X alto. Tetto GOLD_MAX addosso: l'eccedenza si perde
+; oro automatico: A = quantita' (byte); add_gold16: A basso, X alto. Tetto del borsello addosso: l'eccedenza si perde
 add_gold:
         ldx #0
-; A/X = monete da aggiungere (16 bit; add_gold: A, X = 0): oro addosso al massimo GOLD_MAX, HUD da ridisegnare
+; A/X = monete da aggiungere (16 bit; add_gold: A, X = 0): oro addosso al massimo il tetto del borsello (gold_cap), HUD
+; da ridisegnare. Y conservato
 add_gold16:
         clc
         adc c_gold
@@ -809,17 +810,35 @@ add_gold16:
         adc c_gold+1
         sta c_gold+1
         bcs _cap
-        lda c_gold              ; c_gold > GOLD_MAX ?
-        cmp #<(GOLD_MAX+1)
-        lda c_gold+1
-        sbc #>(GOLD_MAX+1)
-        bcc _o
-_cap    lda #<GOLD_MAX
+        jsr gold_cap            ; tetto >= oro addosso?
+        cmp c_gold
+        txa
+        sbc c_gold+1
+        bcs _o
+_cap    jsr gold_cap
         sta c_gold
-        lda #>GOLD_MAX
-        sta c_gold+1
+        stx c_gold+1
 _o      lda #1
         sta hud_dirty
+        rts
+
+; (22/11, committente) tetto dell'oro addosso: il gradino del borsello (q_flag bit 4-7: uno per ogni premio "purse" della
+; catena, passi 3, 6, 9) -> A = basso, X = alto (balance.yaml player.purse: 250, 500, 1000, 1500). Y conservato
+gold_cap:
+        lda q_flag
+        lsr
+        lsr
+        lsr
+        lsr
+        cmp #PURSE_N
+        bcc +
+        lda #PURSE_N-1
++       tax
+        lda pc_lo,x
+        pha
+        lda pc_hi,x
+        tax
+        pla
         rts
 
 ; tile (tx,ty) pavimento libero? C=0 si

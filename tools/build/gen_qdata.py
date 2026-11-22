@@ -111,7 +111,10 @@ def reward(x, uq, ids):
         words.append("the skill " + r["skill"])
     if r.get("relic"):
         words.append(r["relic"])
-    return [gold // 10, u, it, pot], wrap("reward: " + ", ".join(words))
+    rl = wrap("reward: " + ", ".join(words))
+    if len(rl) > 3:                                     # (22/11) il riquadro del premio di QGIV ha 3 righe (QG_RY)
+        die("premio di %s su %d righe (al massimo 3): %r" % (x.get("id"), len(rl), rl))
+    return [gold // 10, u, it, pot], rl
 
 
 def main():

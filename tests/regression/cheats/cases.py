@@ -141,6 +141,7 @@ def respec(ctx):
 @test("CHEAT-23", "gold +1000: 1000 coins on the hero at every Fire (GOLD_MAX at most), message 'gold N'")
 def gold(ctx):
     g, L = need(ctx)
+    g.poke(L["q_flag"], (L["PURSE_N"] - 1) << 4)                 # (22/11) purse at its last step: cap = GOLD_MAX
     g.poke16(L["c_gold"], 100)
     msg = cheat(g, "gold")
     check(g.w16(L["c_gold"]) == 1100, "gold %d, expected 1100" % g.w16(L["c_gold"]))
@@ -148,6 +149,7 @@ def gold(ctx):
     g.poke16(L["c_gold"], L["GOLD_MAX"] - 500)
     cheat(g, "gold")
     check(g.w16(L["c_gold"]) == L["GOLD_MAX"], "gold %d, expected GOLD_MAX %d" % (g.w16(L["c_gold"]), L["GOLD_MAX"]))
+    g.poke(L["q_flag"], 0)
 
 
 @test("CHEAT-14", "level up at the maximum level (PL_MAXLVL): nothing changes, message 'limit reached'")

@@ -37,6 +37,7 @@ CHAPTERS = [(1, 4), (6, 9), (11, 14), (16, 19)]
 SETS = {
     "oggi (catena: 500, 1000 p.3, 3000 p.4, 5000 p.7, 10000 p.12)": [500, 1000, 3000, 5000],
     "committente (indicativa): 600 / 800 / 1000 / 1500": [600, 800, 1000, 1500],
+    "scelta del 22/11 (nel gioco: balance.yaml player.purse; +250 per boss di capitolo)": [300, 550, 800, 1050],
 }
 
 

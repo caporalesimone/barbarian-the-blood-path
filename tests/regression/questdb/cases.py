@@ -69,8 +69,9 @@ def questdb(ctx):
     if rest: bad.append("uniques with no source: %s" % sorted(rest))
     skills = [x["reward"]["skill"] for x in kinds["chain"] if "skill" in x["reward"]]
     check(skills == ["whirlwind", "battle cry", "rage", "smash", "frenzy"], "skills of the chain: %s" % skills)
-    purses = [x["reward"]["purse"] for x in kinds["chain"] if "purse" in x["reward"]]
-    check(purses == [1000, 3000, 5000, 10000], "purse steps: %s" % purses)
+    purses = [(x["id"], x["reward"]["purse"]) for x in kinds["chain"] if "purse" in x["reward"]]
+    steps = yaml.safe_load(open(os.path.join(ROOT, "data", "balance.yaml")))["player"]["purse"]
+    check(purses == list(zip((3, 6, 9, 12), steps[1:])), "purse steps (22/11: the chapter bosses 3, 6, 9, 12 -> %s): %s" % (steps[1:], purses))
     check(not bad, "; ".join(bad[:5]) + (" (+%d)" % (len(bad) - 5) if len(bad) > 5 else ""))
 
 

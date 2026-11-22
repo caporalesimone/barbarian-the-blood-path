@@ -247,14 +247,15 @@ flowchart LR
 ## Prezzi
 
 Acquisto = `it_cost` (dal 21/11 sera: `itprice` + `price_add` degli affissi, con segno, almeno 1); vendita = un quarto (dal 20/11). **Oro addosso al massimo
-10 000** (`GOLD_MAX`, `player.gold_max` in `data/balance.yaml`, 07/11 sera): oro raccolto (mostri, bauli, bauli epici)
+il tetto del borsello** (22/11, committente: **300 all'inizio, +250 a ogni boss di capitolo** consegnato con la catena, fino a
+1300 = `GOLD_MAX`; `player.purse` in `data/balance.yaml`, `gold_cap`; prima 10 000 fisso dal 07/11 sera): oro raccolto (mostri, bauli, bauli epici)
 oltre il tetto **si perde** (`add_gold16`); la **vendita** che lo supererebbe **non fa nulla**
 (`purse_room`, l'oggetto resta nello zaino; dal 10/11 senza messaggio, decisione del committente: caso rarissimo). Oro nel baule della locanda in decine (655 350, dal 10/11).
 **Pagamento nei negozi (10/11, decisione del committente)**: acquisto e riparazione si pagano con l'**oro totale**
 (addosso + baule della locanda): prima tutto l'oro addosso, il resto dal baule a decine arrotondate per eccesso, e le
 unità che avanzano tornano addosso (`gold_need` / `gold_pay` in `ui.asm`; es. 7 addosso, prezzo 15: una decina dal
 baule, 2 tornano addosso). Il purse dei negozi mostra il **totale** (`shop_gold` con `sh_mask` <> 0, somma in `gold_total`, anche nella scheda del barbaro; da 100 000 in
-migliaia, `657k`); nei bauli dei dungeon mostra solo l'oro addosso. La vendita resta addosso (tetto `GOLD_MAX`).
+migliaia, `657k`); nei bauli dei dungeon mostra solo l'oro addosso. La vendita resta addosso (tetto del borsello: un oggetto che vale più di 4 volte il tetto non si vende, da decidere).
 Test: `tests/sanity/gold/cases.py` (casi del negozio). Salvataggi della v1.58–1.60 con più di 10 000 monete addosso: l'eccedenza si perde al primo oro raccolto
 (formato invariato, niente SAVE_VER). Oro iniziale **100** (`PL_START_GOLD`, dal 06/11 sera; prima 1000). Nei negozi l'assortimento dipende
 dal livello del PG ([Villaggio](villaggio.md#negozi-enter_shop-sh_draw)). Prezzi proporzionali al guadagno:

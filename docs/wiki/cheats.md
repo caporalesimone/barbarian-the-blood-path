@@ -165,7 +165,7 @@ salvataggio; `hud_dirty` può spostarsi a ogni build. Indirizzi della **v1.64**:
 | God mode on | `godmode` | da `out/work/game.lbl` | `POKE 1021,1` prima del `RUN` | `> <indirizzo> 01` | `0` per spegnere |
 | Avvio diretto (senza menu del loader) | `POKE_SKIP` | `$03FC` | `POKE 1020,1` prima del `RUN` | — | subito `START`, senza il menu del loader |
 | Vita 999 | `c_hp` | `$950A` | `POKE 38154,231: POKE 38155,3` | `> 950a e7 03` | 999 = `$03E7`; sopra la vita massima: comportamento **da verificare** (probabilmente riportata al massimo al primo `recalc_stats`/cura) |
-| Oro addosso 10000 (massimo) | `c_gold` | `$9508` | `POKE 38152,16: POKE 38153,39` | `> 9508 10 27` | 10000 = `$2710` = `GOLD_MAX`; oltre, il gioco lo riporta a 10000 al primo oro raccolto |
+| Oro addosso 1300 (massimo dal 22/11) | `c_gold` | `$9508` | `POKE 38152,20: POKE 38153,5` | `> 9508 14 05` | 1300 = `$0514` = `GOLD_MAX` (ultimo gradino del borsello); oltre il tetto del gradino (`q_flag` bit 4-7), il gioco lo riporta al tetto al primo oro raccolto |
 | Oro nel baule 600000 | `c_sgold` | `$956C` | `POKE 38252,96: POKE 38253,234` | `> 956c 60 ea` | 60000 decine = `$EA60` (10/11: il baule conta le decine); massimo 65535 = 655350 monete; si salva con l'eroe |
 | 10 chiavi | `c_keys` | `$954E` | `POKE 38222,10` | `> 954e 0a` | massimo 10 |
 | Esperienza 12345 | `c_xp` | `$9505` | `POKE 38149,57: POKE 38150,48: POKE 38151,0` | `> 9505 39 30 00` | 24 bit; il livello sale al prossimo guadagno di XP |

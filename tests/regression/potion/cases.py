@@ -156,7 +156,7 @@ def shop_sell_belt(ctx):
     g, L = ctx["g"], ctx["g"].L
     belt(g, L["I_POTY"], 0, 0, 0)
     g.fill(L["c_pack"], L["c_pack"] + 7, 0); g.poke(L["c_pack"], L["I_SCROLL"]); g.poke(L["c_packb"], 3)
-    g.poke16(L["c_gold"], 1000)
+    g.poke16(L["c_gold"], 100)                                  # (22/11) under the first step of the purse (250)
     door = find(g, L["T_DALCH"])
     fire_to(g, door[0][0], door[0][1] + 1)
     check(g.b(L["sh_mask"]) != 0, "the alchemist does not open")

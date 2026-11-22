@@ -189,7 +189,12 @@ def main():
     o(f"PL_HP1      = {L1}")
     o(f"PL_HPL      = {byte(P['hp_per_level'], 'hp_per_level')}")
     o(f"PL_START_GOLD = {word(B['player']['start_gold'], 'start_gold')}")
-    o(f"GOLD_MAX = {word(B['player']['gold_max'], 'gold_max')}       ; oro massimo addosso")
+    pu = B["player"]["purse"]                         # (22/11, committente) borsello a gradini (q_flag bit 4-7)
+    chk(all(v % 10 == 0 for v in pu) and pu == sorted(pu) and 1 <= len(pu) <= 16, "player.purse: multipli di 10, crescenti")
+    o(f"GOLD_MAX = {word(max(pu), 'purse')}       ; oro massimo addosso (l'ultimo gradino del borsello)")
+    o(f"PURSE_N  = {len(pu)}          ; gradini del borsello")
+    o.bytes("pc_lo", [v & 255 for v in pu])
+    o.bytes("pc_hi", [v >> 8 for v in pu])
     # (11/11) punti statistica: caratteristiche di base + punti spesi (c_sadd), vita = 10 + COS + (L-1) x (6 + mod COS)
     chk(len(P["reference_alloc"]) >= pl_points(P, plmax) and all(k in STATS for k in P["reference_alloc"]),
         "player.reference_alloc: una caratteristica (str/dex/con) per ogni punto fino al livello massimo")

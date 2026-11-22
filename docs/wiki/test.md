@@ -286,7 +286,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `GEN-12` | swamp of chapter 2 (levels 6-9, 8 seeds + 2 anagram seeds with different gates): entry and exit gates on two sides of the border, the exit of a level facing the entry of the next one (random path, at least 3 sides used), gates of a level at least 34 tiles apart, all reachable, generation under 1.2 s, palette 12 |
 | `GEN-13` | citadel of chapter 4 (levels 16-19, 6 seeds): connected, symmetric left/right (but the stairs), 4..40 columns, big halls, generation under 1.0 s; no monster born in a wall or in the water on levels 1-19 |
 | `INN-GOLD-10` | inn chest: deposit in tens (remainder kept, chest full, purse full) |
-| `GOLD-CAP-10` | gold picked up: GOLD_MAX cap on the hero (add_gold16) |
+| `GOLD-CAP-10` | gold picked up: purse cap on the hero (add_gold16), last step (GOLD_MAX) |
+| `GOLD-CAP-11` | (22/11, owner) purse in steps (q_flag bits 4-7): 300, then +250 for each chapter boss (balance.yaml player.purse); step over the last: the last; the sale over the cap of the step does nothing (purse_room) |
 | `SHOP-PAY-10` | payment: carried gold first, then the chest in tens, change back on the hero (gold_need/gold_pay) |
 | `SHOP-BUY-10` | buy: 3 prices x different gold x pack full/empty (gold, chest, pack) |
 | `SHOP-SELL-10` | sell: price >> SELL_SHIFT, GOLD_MAX cap (no sale), category not bought, empty entry |

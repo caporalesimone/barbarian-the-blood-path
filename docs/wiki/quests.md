@@ -227,7 +227,7 @@ testo dell'offerta con il contatore vero. Anche nel sotterraneo (QTX copre la co
 rifanno solo nel villaggio). Il concept del 17-18/11 (`QST0`..`QST8`, `src/qpage.asm`, `gen_quests.py`, `data/quests.yaml`,
 le quest dei vaganti) è stato tolto.
 Test: `QGIV-10`..`17`. **Da fare**: abilità dalla catena
-(Q15), borsello variabile, cintura a 8, oggetto "qualsiasi" (passo 11), sblocco del capitolo alla consegna, cancello D4 nei capitoli 2-4
+(Q15), cintura a 8, oggetto "qualsiasi" (passo 11), sblocco del capitolo alla consegna, cancello D4 nei capitoli 2-4
 (`QGATE_CH`), ripetibili (D18).
 
 ---
@@ -241,16 +241,16 @@ Test: `QGIV-10`..`17`. **Da fare**: abilità dalla catena
 |---|---|---|---|---|
 | 1 | **a sword for the crypt** | Father Osric | K: 8 fallen | oro, *osric's cudgel* (unico) |
 | 2 | **the widow's son** | Hilde → Osric | I: l'amuleto di Tam (baule del piano 3) | oro, **Whirlwind** |
-| 3 | **the abbot's censer** | Father Osric | C: The Hollow Abbot (piano 5) | oro, borsello **1000** (dal passo 1 il 22/11, committente), pozioni, il turibolo |
-| 4 | **the silent village** | Mama Sabine | K: 12 drowned | oro, borsello **3000**, **Battle Cry** |
+| 3 | **the abbot's censer** | Father Osric | C: The Hollow Abbot (piano 5) | oro, borsello **550** (22/11, committente), pozioni, il turibolo |
+| 4 | **the silent village** | Mama Sabine | K: 12 drowned | oro, **Battle Cry** |
 | 5 | **dolls with names** | Mama Sabine | I: 5 bambole cucite (dalle mire witchling) | oro, *doll-hide* (unico) |
-| 6 | **the silver needle** | Mama Sabine | C: Mother Stitch (piano 10) | oro, pozioni, **Rage**, l'ago |
-| 7 | **cold fires** | Sergeant Brenna | K: 10 frost wight | oro, borsello **5000**, pozioni |
+| 6 | **the silver needle** | Mama Sabine | C: Mother Stitch (piano 10) | oro, borsello **800**, pozioni, **Rage**, l'ago |
+| 7 | **cold fires** | Sergeant Brenna | K: 10 frost wight | oro, pozioni |
 | 8 | **the oath roll** | Chaplain Edric → Brenna | I: il rotolo dei giuramenti (baule del piano 14) | oro, **Smash** |
-| 9 | **the oathbreaker** | Sergeant Brenna | C: Varok the Oathbreaker (piano 15) | oro, *bastion door* (unico), **Frenzy**, la spada |
+| 9 | **the oathbreaker** | Sergeant Brenna | C: Varok the Oathbreaker (piano 15) | oro, borsello **1050**, *bastion door* (unico), **Frenzy**, la spada |
 | 10 | **where the carts end** | the Penitent | K: 12 cultist | oro, pozioni |
 | 11 | **the last cart** | the Penitent | B: il boss con nome del piano 19 (il carceriere) | oro, un oggetto magico del piano |
-| 12 | **the saint's heart** | the Penitent | C: Lord of Ruin (piano 20) | borsello **10 000**, gettone respec (c'è già), *aldric's heart* (unico), vittoria e Abisso |
+| 12 | **the saint's heart** | the Penitent | C: Lord of Ruin (piano 20) | borsello **1300**, gettone respec (c'è già), *aldric's heart* (unico), vittoria e Abisso |
 
 Abilità e piani (Q15): Whirlwind (livello 3) al passo 2 (piano 3), Battle Cry (6) al 4 (piani 6–7), Rage (9) al 6 (piano 10),
 Smash (12) all'8 (piani 13–14), Frenzy (15) al 9 (piano 15): da verificare col simulatore.
@@ -306,7 +306,7 @@ ruin, the citadel watch.
 | Oro della catena (P4) | un passo ≈ metà / due terzi dell'oro di un piano del suo capitolo; numeri dal simulatore dell'oro |
 | Ripetibili (P5) | oro (~1/4 di un piano del capitolo) + 1–2 pozioni + oggetto magico del capitolo con probabilità 1/4; mai respec, unici o premi speciali |
 | Gettoni respec (P1) | A2.3, A4.3 + boss finale (+ i rari dei bauli dell'Abisso) |
-| Borsello (P2) | (22/11, committente) riga del premio: "purse: upgrade ¤1000" (prima "a purse of 1000", che sembrava oro). 500 → 1000 (passo 3, boss del capitolo 1: spostato dal passo 1 il 22/11, committente; `sim_gold.py`: senza tornare al villaggio l'oro addosso passa 500 durante il piano 3, il piano 2 per un PG ricco; tornando ogni 1-2 piani si perde poco o niente) → 3000 (passo 4) → 5000 (passo 7) → 10 000 (passo 12) |
+| Borsello (P2) | (22/11, committente, nel codice) **300 all'inizio, +250 a ogni boss di capitolo**: 550 (passo 3), 800 (passo 6), 1050 (passo 9), 1300 (passo 12); `balance.yaml player.purse`, `gold_cap` in GAME (gradino = `q_flag` bit 4-7, uno per premio "purse" consegnato): tetto della raccolta (`add_gold16`) e delle vendite (`purse_room`). Riga del premio: "purse: upgrade ¤550" (prima "a purse of N", che sembrava oro). Analisi: `sim_purse.py` (PG medio = metà dell'incasso massimo: ~0,4 ritorni in città per piano dovuti al tetto nel capitolo 1, ~0,7 nei capitoli 2-4). **Effetto collaterale da decidere**: un oggetto che vale più del tetto (vendita a 1/4: prezzo > 4 × tetto) non si vende |
 | Cintura a 8 (P3) | premio importante, fine capitolo 2 o inizio capitolo 3: quest e momento decisi col simulatore del piano intero (`sim_floor.py`, 20/11: con 4 posti 0,25–0,39 ritorni in città per piano dal piano 3 al 14, con 8 quasi nessuno; [bilanciamento](BILANCIAMENTO.md)). 8 posti = 4 slot da 2 pozioni, tasti 1–4; il tasto beve la prima fila, la seconda sale (08/11) |
 | Quest che chiedono oro (P6) | iron for the forge, corbeau's toll, the bonfire vigil, modello "offering" |
 | Oro di riferimento | simulatore dell'oro del 20/11 ([bilanciamento](BILANCIAMENTO.md)): ~220 oro per piano nel capitolo 1, ~735 nel 2, ~1055 nel 3, ~1540 nel 4 (oro trovato, piani normali) |

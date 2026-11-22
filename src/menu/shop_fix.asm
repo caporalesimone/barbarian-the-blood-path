@@ -73,18 +73,26 @@ _ng     jmp no_gold
 _r      rts
 
 
-; C=0 se c_gold + tmp2:3 <= GOLD_MAX; altrimenti C=1, senza messaggio (10/11: la vendita oltre il tetto non fa nulla)
+; C=0 se c_gold + tmp2:3 <= tetto del borsello (gold_cap, 22/11: a gradini); altrimenti C=1, senza messaggio (10/11: la
+; vendita oltre il tetto non fa nulla)
 purse_room:
         clc
         lda c_gold
         adc tmp2
-        tax
+        sta pr_l
         lda c_gold+1
         adc tmp3
+        sta pr_h
         bcs _pf
-        cpx #<(GOLD_MAX+1)
-        sbc #>(GOLD_MAX+1)
-        bcc _x
+        jsr gold_cap            ; A/X = tetto: tetto >= somma?
+        cmp pr_l
+        txa
+        sbc pr_h
+        bcc _pf
+        clc
+        rts
 _pf     sec
-_x      rts
+        rts
+pr_l    .byte 0
+pr_h    .byte 0
 

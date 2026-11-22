@@ -7,7 +7,7 @@ import os
 from lib.c64 import Vice, labels, OUT
 from c64test import test, check
 
-GOLD_MAX = 10000
+GOLD_MAX = None                 # (22/11) the last step of the purse (labels: GOLD_MAX); the tests run with q_flag at that step
 PACK_N = 8
 
 
@@ -22,6 +22,9 @@ def setup(ctx):
     v.poke(1, 0x35)                                             # KERNAL out, as in the game since 21/11
     L = labels("game"); L.update(labels("menu"))
     v.poke(L["core_ok"], 1)                                     # CORE in RAM: no read from the disk (there is no Krill here)
+    global GOLD_MAX
+    GOLD_MAX = L["GOLD_MAX"]
+    v.poke(L["q_flag"], (L["PURSE_N"] - 1) << 4)                # (22/11) purse at its last step: cap = GOLD_MAX
     ctx["L"] = L
 
 
@@ -44,17 +47,45 @@ def inn_gold(ctx):
     check(not bad, "; ".join(bad))
 
 
-@test("GOLD-CAP-10", "gold picked up: GOLD_MAX cap on the hero (add_gold16)")
+def add16(v, L, add):
+    a = L["add_gold16"]                                         # sei; lda #lo; ldx #hi; jsr add_gold16; nop
+    v.poke(0x0340, 0x78, 0xa9, add & 255, 0xa2, add >> 8, 0x20, a & 255, a >> 8, 0xea)
+    v.brk(0x0348); v.pc(0x0340); v.go(); v.delbrk()
+
+
+@test("GOLD-CAP-10", "gold picked up: purse cap on the hero (add_gold16), last step (GOLD_MAX)")
 def gold_cap(ctx):
     v, L = ctx["v"], ctx["L"]
     bad = []
-    for g, add, want in [(500, 430, 930), (9990, 20, 10000), (10000, 65535, 10000), (0, 10000, 10000), (0, 10001, 10000)]:
+    M = GOLD_MAX
+    for g, add, want in [(500, 430, 930), (M - 10, 20, M), (M, 65535, M), (0, M, M), (0, M + 1, M)]:
         v.poke16(L["c_gold"], g)
-        a = L["add_gold16"]                                     # sei; lda #lo; ldx #hi; jsr add_gold16; nop
-        v.poke(0x0340, 0x78, 0xa9, add & 255, 0xa2, add >> 8, 0x20, a & 255, a >> 8, 0xea)
-        v.brk(0x0348); v.pc(0x0340); v.go(); v.delbrk()
+        add16(v, L, add)
         if v.w16(L["c_gold"]) != want: bad.append("%d + %d -> %d (expected %d)" % (g, add, v.w16(L["c_gold"]), want))
     check(not bad, "; ".join(bad))
+
+
+@test("GOLD-CAP-11", "(22/11, owner) purse in steps (q_flag bits 4-7): 300, then +250 for each chapter boss (balance.yaml player.purse); step "
+      "over the last: the last; the sale over the cap of the step does nothing (purse_room)")
+def gold_steps(ctx):
+    v, L = ctx["v"], ctx["L"]
+    import yaml
+    steps = yaml.safe_load(open(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "balance.yaml")))["player"]["purse"]
+    bad = []
+    for k in range(len(steps) + 2):
+        cap = steps[min(k, len(steps) - 1)]
+        v.poke(L["q_flag"], k << 4 | 1)
+        v.poke16(L["c_gold"], cap - 5)
+        add16(v, L, 20)
+        if v.w16(L["c_gold"]) != cap: bad.append("step %d: %d (expected %d)" % (k, v.w16(L["c_gold"]), cap))
+        v.poke16(L["c_gold"], cap - 5); v.poke(L["tmp2"], 5, 0)
+        v.call(L["purse_room"])
+        if v.regs()["c"]: bad.append("step %d: a sale up to the cap refused" % k)
+        v.poke16(L["c_gold"], cap - 5); v.poke(L["tmp2"], 6, 0)
+        v.call(L["purse_room"])
+        if not v.regs()["c"]: bad.append("step %d: a sale over the cap allowed" % k)
+    v.poke(L["q_flag"], (L["PURSE_N"] - 1) << 4)
+    check(steps == [300, 550, 800, 1050, 1300] and not bad, "; ".join(bad) or "steps %s" % steps)
 
 
 def model_buy(g, sg, p):
@@ -138,6 +169,8 @@ def shop_sell(ctx):
         half = p >> ctx["L"]["SELL_SHIFT"]
         for g, sg, mask in [(0, 50, 0x7e), (1234, 7, 0x7e), (GOLD_MAX - half, 3, 0x7e), (GOLD_MAX - half + 1, 3, 0x7e),
                             (GOLD_MAX, 65535, 0x7e), (500, 20, 0x00)]:
+            if g < 0:                                           # (22/11) sale over the whole purse (cap 1500): no "just below"
+                continue
             gg, ss, pk = shop_call(ctx, "shop_sell", g, sg, [it], 0, mask, 0)
             sold = mask != 0 and g + half <= GOLD_MAX
             exp = (g + half if sold else g, sg, 0 if sold else 1)

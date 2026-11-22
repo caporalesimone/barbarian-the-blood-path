@@ -227,7 +227,7 @@ def purse_loss(t, caps, deposit_every):
 
 
 def report(t, floors):
-    gmax = B["player"]["gold_max"]
+    gmax = max(B["player"]["purse"])                 # (22/11) borsello a gradini: l'ultimo
     lines = ["Oro del gioco (sim_gold.py, 20/11): censimento di %d semi (versione %s, GVER %s), vendita a 1/%d del prezzo"
              % (len(CENSUS["seeds"]), CENSUS["version"], CENSUS["gver"], SELL_DIV), "",
              "%5s %7s %6s %9s %9s %10s %12s %7s" % ("piano", "mostri", "bauli", "oro", "vendita", "oro cum", "oro+vend cum", "dev.oro")]
@@ -258,7 +258,8 @@ def report(t, floors):
     steps = {"oggi: %d fisso" % gmax: lambda f: gmax,
              "500/1000/3000/5000 sui boss, 10000 col finale": lambda f: 500 if f <= 5 else 1000 if f <= 10 else 3000 if f <= 15 else 5000,
              "1000/3000/5000/10000 col primo passo della catena (quests.md, P2)": lambda f: 1000 if f <= 5 else 3000 if f <= 10 else 5000 if f <= 15 else 10000,
-             "(22/11) 500 fino al passo 3, 1000 al 3 (piano 5), 3000 al 4, 5000 al 7": lambda f: 500 if f <= 5 else 1000 if f <= 6 else 3000 if f <= 11 else 5000}
+             "(22/11) 500 fino al passo 3, 1000 al 3 (piano 5), 3000 al 4, 5000 al 7": lambda f: 500 if f <= 5 else 1000 if f <= 6 else 3000 if f <= 11 else 5000,
+             "(22/11, committente, nel gioco) 300, poi +250 ai passi 3, 6, 9, 12": lambda f: 300 if f <= 5 else 550 if f <= 10 else 800 if f <= 15 else 1050}
     for name, cap in steps.items():
         for every, lab in ((1, "deposito a ogni piano"), (2, "deposito ogni 2 piani"), (5, "deposito a fine capitolo")):
             r = purse_loss(t, cap, every)
