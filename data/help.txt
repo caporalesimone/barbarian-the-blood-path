@@ -249,6 +249,7 @@
 
  <floor map>
    [fire] [m] [run/stop]	close
+ {town: ! yellow quest, green done}
 === chests and shops
  <chest on a floor>
    [fire]	take an item

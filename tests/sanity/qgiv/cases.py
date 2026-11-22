@@ -4,7 +4,7 @@ or takes back its quest. One VICE session, a new barbarian in the village of cha
 import os
 from c64test import test, check
 from lib.c64 import Game, OUT
-from lib.play import new_game
+from lib.play import new_game, key, K_M
 
 CHAIN = True
 SCR_A = 0xB400
@@ -160,6 +160,34 @@ def qg_marks(ctx):
         cols |= {g.b(L["sh_col"] + s) & 15 for s in (1, 2) if en & (1 << s) and g.b(L["sh_ptr"] + s) == 0x30}
     g.screenshot(os.path.join(OUT, "qgiv_marks.png"))
     check(5 in cols and 7 not in cols, "colours of the '!': %s (expected green 5, and white 1 when up)" % sorted(cols))
+
+
+@test("QGIV-18", "town minimap (M): a '!' over each fixed NPC with a mark (sprites 3..5 = k 1..3, mm_qmark): osric green, the gravedigger yellow, grom none; glyph block MG_B+3 (mq_gl, double size), x = 82 + 4 col, y = 34 + 4 row")
+def qg_minimap(ctx):
+    g = ctx["g"]; L = g.L
+    key(g, K_M, 3)
+    check(not g.in_game(), "the minimap does not open")
+    g.watch(until=(L["mm_wait"],)); g.frames(2); g.unwatch()        # after mm_icons, before the text group
+    g.screenshot(os.path.join(OUT, "qgiv_minimap.png"))
+    en, msb = g.b(0xd015), g.b(0xd010)
+    why = []
+    for k, col in ((1, 5), (2, None), (3, 7)):
+        s = 2 + k
+        if col is None:
+            if en & (1 << s): why.append("sprite %d on (k %d has no mark)" % (s, k))
+            continue
+        i = fixed_index(g, k)
+        tx = ((g.b(L["npc_xh"] + i) << 8) | g.b(L["npc_xl"] + i)) >> 4
+        ty = ((g.b(L["npc_yh"] + i) << 8) | g.b(L["npc_yl"] + i)) >> 4
+        sx = g.b(0xd000 + 2 * s) + (256 if msb & (1 << s) else 0)
+        sy = g.b(0xd001 + 2 * s)
+        got = (bool(en & (1 << s)), g.b(0xd027 + s) & 15, sx, sy, g.b(L["SCR_A"] + 0x3f8 + s))
+        exp = (True, col, 82 + 4 * tx, 34 + 4 * ty, 0xc3)
+        if got != exp: why.append("k %d: on/colour/x/y/pointer %s, expected %s" % (k, got, exp))
+    if list(g.mem(0xb0c0, 24)[0::3]) != [0x18] * 5 + [0, 0x18, 0]: why.append("no wide '!' glyph in block $B0C0")
+    if g.b(0xd01d) & g.b(0xd017) & 0x28 != 0x28: why.append("the '!' sprites are not double size")
+    g.run_stop(); g.frames(3)
+    check(not why and g.in_game(), "; ".join(why) or "RUN/STOP does not close the minimap")
 
 
 @test("QGIV-16", "page Q (key Q, module QGIV with q_k $ff): step 2 and the side a1.3 taken -> 2 rows with their titles; Fire on the first: its text and the goal; RUN/STOP back")
