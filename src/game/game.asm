@@ -1116,7 +1116,12 @@ roll_loot:
         bcc _no
         cmp #T_STAIRSD
         bcc _ok
-_no     rts
+_no     ldx km_i                ; (22/11, committente) il boss con nome lascia SEMPRE il baule: morto su una porta, una scala
+        jsr mon_named           ; o un arredo, il baule va su un pavimento accanto (adj_floor)
+        bcc +
+        jsr adj_floor
+        bcc _boss
++       rts
 _ok     lda km_i
         clc
         adc #1
@@ -2005,7 +2010,8 @@ kill_monster:
         sta malive,x
         jsr mon_tx
         sta loot_x
-        jsr mon_ty
+        ldx km_i                ; (22/11) mon_tx non conserva X (pix2tile: X = byte alto): prima loot_y era la riga del
+        jsr mon_ty              ; mostro numero mxh (0-2), cioe' spesso di un altro mostro: bauli altrove o persi
         sta loot_y
                             ; nessun cadavere sul terreno (rimosso: creava confusione con i bauli)
 _nc     ldx km_i                ; esperienza del tipo al piano (floor_types)
@@ -2110,9 +2116,12 @@ _nb2    ldx km_i                ; (22/11) quest: K, B, P, oggetto da mostro (qen
         ldx km_i                ; (19/11) il codice del piano decide (piano 20: ne' il boss ne' i mostri evocati lasciano
         jsr ovp_kill            ; bottino; feticci di Mother Stitch: solo esperienza)
         bcs _nl
-        lda km_nl               ; mostro troppo debole: niente bottino
-        bne _nl
-        jsr roll_loot
+        lda km_nl               ; mostro troppo debole: niente bottino (22/11, committente: il boss con nome il baule lo lascia
+        beq +                   ; sempre)
+        ldx km_i
+        jsr mon_named
+        bcc _nl
++       jsr roll_loot
 _nl
 .endif
         lda #SFX_DIE

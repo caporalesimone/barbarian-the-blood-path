@@ -28,8 +28,10 @@ Il chestLevel si calcola **al momento della morte** (nulla della vita resta in R
 
 ```mermaid
 flowchart TD
-    K["kill_monster (non al piano 20, non se il PG è ≥ 4 livelli sopra)"] --> T{"casella del corpo<br/>è pavimento?"}
-    T -->|no| X["niente"]
+    K["kill_monster (non al piano 20; non se il PG è ≥ 4 livelli sopra, tranne il boss del piano)"] --> T{"casella del corpo<br/>è pavimento?"}
+    T -->|"no, boss del piano"| AF["adj_floor: pavimento accanto"]
+    AF --> BK
+    T -->|"no, altri"| X["niente"]
     T -->|sì| B{"boss del piano?"}
     B -->|sì| BK["chiave + tesoro: 3 oggetti,<br/>chestLevel + 12, si salva con il piano"]
     B -->|no| CR["chest_room: c'è posto per un tesoro?<br/>(bauli + coda < 15, uno riservato al boss vivo)"]
@@ -48,6 +50,12 @@ flowchart TD
   libera (niente bauli, oggetti, mostri vivi, PG) raggiungibile; in ripiego una casella adiacente, altrimenti il
   corpo stesso.
 - Massimo 15 bauli nel piano (`CH_MAX`), compresi quelli del piano.
+- (22/11, committente) **Il boss del piano lascia sempre il suo baule** (non il boss finale, piano 20): anche con il PG 4 o più
+  livelli sopra (per gli altri mostri niente bottino) e anche se muore su una scala, una porta o un arredo (il baule va su
+  una casella di pavimento accanto, `adj_floor`; se non ce n'è nessuna, niente). Test `LOOT-BOSS-10`, `LOOT-BOSS-11`.
+- (22/11, correzione) Fino al 22/11 `kill_monster` prendeva la riga del corpo dal mostro sbagliato (`mon_tx` non conserva X:
+  `mon_ty` leggeva la riga del mostro numero "colonna / 16"): i tesori e il baule del boss cadevano su un'altra riga o, su un
+  muro, non cadevano affatto. Probabile causa del "campione che non lascia il baule".
 
 ### Tesoro di un mostro: contenuto alla prima apertura
 Il tesoro nasce con il bit 3 di `ch_t` e conserva solo **numero di oggetti** (`ch_i[0]`) e **chestLevel**

@@ -261,6 +261,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `DISK-12` | entry of the tests (11/11, Krill): the real START from the monitor (Krill installed), new game in the village |
 | `DUNG-CHEST-10` | key chest: without a key 'it is locked' (stays closed); with a key it opens, one key used |
 | `DUNG-CHEST-11` | monster within 2 tiles: Fire refused, label 'monster too close!' (id 15); monster gone: it opens |
+| `LOOT-BOSS-10` | the hero 6 levels above the boss of level 2 (no loot for weaker monsters): the boss still leaves its chest |
+| `LOOT-BOSS-11` | the boss of level 3 dies on the stairs down (column >= 16: the high byte of its x is not 0): its chest is on a floor tile next to them (22/11: kill_monster took the row of the loot from the wrong monster) |
 | `LOOT-10` | full pack: a weapon in a chest stays there ('pack is full'); one free slot: taken |
 | `LOOT-11` | full belt: a potion in a chest stays there; one free belt slot: it goes to the belt, not the pack |
 | `DUNG-CHEST-12` | golden chest: needs a key like the key chest (ch_keyr), one key used |

@@ -623,7 +623,7 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   baule a `$FF80`, 32 B `q_step`..`q_free`, file da 4 blocchi; test `QSAVE-10/11`); 2) motore nel dungeon: **fatto il 22/11** (`qengine.asm`,
   [quests 4.4](docs/wiki/quests.md), cancello D4 acceso nel capitolo 1), `QGIV`: **fatto il 22/11** (consegna, premi, offerta, testi `QTXc`; [quests 4.5](docs/wiki/quests.md)); poi segni
   (D12) e pagina Q fatti (concept tolto); cancello nei capitoli 2-4 (oggi solo il capitolo 1, `QGATE_CH`), abilità dalla catena (Q15), borsello variabile, sblocco alla consegna sul capitolo 1;
-  **Margine di GAME 1079 B** (22/11: `npc_fix`, `npc_colr` e `mm_qmark` spostati nella zona 1 del MENU, `src/menu/npc_fix.asm`;
+  **Margine di GAME 1004 B** (sotto 1 KB di nuovo dopo il cursore delle liste e il baule del boss, 22/11; prima 1079 B dopo `npc_fix`, `npc_colr` e `mm_qmark` spostati nella zona 1 del MENU, `src/menu/npc_fix.asm`;
   prima 804 B). Zona 1 del MENU: 223 B liberi. Altri ~30 B possibili con i nomi degli oggetti di quest a 5 bit.
   poi gli altri capitoli.
 - (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).
