@@ -286,10 +286,10 @@ righe): `recalc_stats` (`af_pair`), alla nascita `af_dur` (DUR, indistruttibile)
 (LEECH, THORNS: censer-bearer, doll-hide, tithe-taker) **non hanno effetto** fino alla 2.0 (O5): nel riquadro compaiono come `lch`
 e `thn`. Nome proprio (`un_names`, a 5 bit, `it_nm`: il nome dell'oggetto è passato da CORE a GAME) in **giallo** (`UC_UNIQUE` =
 7); prezzo fisso (`un_pl`/`un_ph`, `it_cost`: vendita a un quarto, riparazione al 25% come gli altri). Generazione: [Bottino](bottino.md)
-(`un_roll`, solo nella finestra di livelli, mai nei negozi). Regole per `uniques.tsv`: righe nuove **in fondo** (il numero
+(22/11, D9: solo dai bauli dei boss, `bu_roll`, e dalle quest; mai dai tesori normali né nei negozi). Regole per `uniques.tsv`: righe nuove **in fondo** (il numero
 dell'unico sta nei salvataggi: riordinare o togliere righe chiede un `SAVE_VER` nuovo); base per id di `bases.tsv`, nome al
-massimo 16 caratteri, valore unico per potere (`v_a` = `v_b`), DUR solo ±50/100: li controlla `gen_db.py`. Da fare: unici garantiti
-da boss, quest e bauli epici (con le quest, H1), sottoinsieme della generazione (TODO D15).
+massimo 16 caratteri, valore unico per potere (`v_a` = `v_b`), DUR solo ±50/100: li controlla `gen_db.py`. Da fare: premi unici delle quest (H1),
+sottoinsieme della generazione (TODO D15).
 
 **Progetto** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
 database proposto sta in `data/items/next/` (il gioco non lo legge ancora): `bases.tsv` (31 basi, colonna `status`: `today` o

@@ -1611,7 +1611,13 @@ _drop   txa
         jsr ch_goldroll
         pla
         jsr chest_fill
-        jmp _show
+        ldx ch_cur              ; (22/11, D9) baule del boss: forse un unico del capitolo
+        inx
+        cpx lb_bch
+        bne +
+        dex
+        jsr bu_roll
++       jmp _show
 
 ; contenuto del baule determinato dal seed (piano + posizione)
 chest_gen_seed:

@@ -343,14 +343,7 @@ af_gen0:
         cmp #CAT_RING+1
         bcc +
         rts
-+       lda af_m                ; (fase 6) unico (non nei negozi)
-        cmp #2
-        beq _sh
-        jsr un_roll
-        bcc +
-        rts
-+       ldy af_id
-_sh     ldx itcat,y
++       ldx itcat,y             ; (22/11, D9) niente unici qui: solo dai boss (bu_roll) e dalle quest
         lda cat_bit,x           ; tipo: af_ty ha i bit di cat_bit spostati di 1
         lsr
         sta af_cm
@@ -406,57 +399,58 @@ _pfx    lda #1
         sta ap_b
         rts
 
-; (22/11, fase 6, O3 e O12) unico al posto dell'oggetto af_id: se c'e' almeno un unico della stessa categoria con af_l nella
-; sua finestra (un_lo..un_hi), con probabilita' UN_T / 256 uno di loro a caso. C = 1 fatto: af_id = la sua base, ap_s = $80 + u
-; (prefisso 0). Sotto l'I/O (tabelle un_*: afgen.asm)
-un_roll:
+;; (22/11, decisione D9 del committente) unico dal baule del boss, alla prima apertura (chest_open, _drop): X = posto del
+; baule. Gli unici della trama vengono solo dalle quest; gli altri solo dai boss, dal sottoinsieme del capitolo c_chap (un_bch,
+; colonna boss_chapter di uniques.tsv): boss del capitolo (piano multiplo di CH_LV) con probabilita' UNB_C / 256, boss con nome
+; degli altri piani UNB_N / 256. L'unico prende il posto del primo oggetto del baule: id = la sua base, prefisso 0, suffisso $80 + u.
+bu_roll:
+        txa
+        asl
+        asl
+        sta af_a                ; indice del primo oggetto (ch_i, ch_b, ch_s)
         lda #0
         sta af_c
-        ldx #UN_N-1
--       jsr _ok
-        bcs +
+        ldx #UN_N-1             ; candidati: unici del capitolo
+-       lda un_bch,x
+        cmp c_chap
+        bne +
         inc af_c
 +       dex
         bpl -
         lda af_c
         beq _no
+        lda cur_level           ; boss del capitolo: piano multiplo di CH_LV
+-       sec
+        sbc #CH_LV
+        beq _c
+        bcs -
+        lda #UNB_N
+        .byte $2c
+_c      lda #UNB_C
+        sta af_b
         jsr rand
-        cmp #UN_T
+        cmp af_b
         bcs _no
         lda af_c
-        jsr rndrange            ; (X e Y conservati)
+        jsr rndrange
         sta af_c
         ldx #UN_N-1
--       jsr _ok
-        bcs +
+-       lda un_bch,x
+        cmp c_chap
+        bne +
         dec af_c
         bmi _got
 +       dex
         bpl -
-_no     clc
-        rts
-_got    lda un_base,x
-        sta af_id
+_no     rts
+_got    ldy af_a
+        lda un_base,x
+        sta ch_i,y
+        lda #0
+        sta ch_b,y
         txa
         ora #$80
-        sta ap_s
-        sec
-        rts
-; C = 0 se l'unico X va bene
-_ok     ldy un_base,x
-        lda itcat,y
-        ldy af_id
-        cmp itcat,y
-        bne _n
-        lda af_l
-        cmp un_lo,x
-        bcc _n
-        lda un_hi,x
-        cmp af_l
-        bcc _n
-        clc
-        rts
-_n      sec
+        sta ch_s,y
         rts
 
 ; una riga fra gli indici A..X: tipo af_cm, livello af_l, peso af_ch. Prima si decide se maledetta (CURSE_T); le altre stanno

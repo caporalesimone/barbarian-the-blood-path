@@ -541,8 +541,9 @@ repeatable_rewards:
 
 # Uniques not given by a quest: where they come from (data/items/next/uniques.tsv, column `source`).
 # (22/11, owner D9) the uniques of the story only from quests; the others only from bosses, each from a subset of its
-# chapter: chapter boss 50%, named boss of a level 12.5%; never from the common treasures. The subsets are TO DEFINE with
-# the stats of the chapter bosses (D8); the entries below are the first proposal.
+# chapter: chapter boss 50%, named boss of a level 12.5%; never from the common treasures. Done on 22/11 (bu_roll; subsets in
+# uniques.tsv, column boss_chapter, to review with the chapter bosses, D8). The entries below are the older proposal (named
+# sources): the game does not read them.
 unique_sources:
   censer-bearer: {drop: hollow_abbot}
   stitchripper: {drop: mother_stitch}

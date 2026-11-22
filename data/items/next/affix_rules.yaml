@@ -6,10 +6,11 @@ quality:
   magic: {base: 8, per_t: 3, max: 60}
   # among magic items: only a prefix / only a suffix / both (percent)
   affixes: {prefix: 40, suffix: 40, both: 20}
-  # O3 + O12: a unique inside its level window [min_level, max_level], one item in N (O3 said 200 outside windows: the
-  # random chance now lives only inside the windows, higher; to be tuned). (22/11, phase 6) the game rounds it to a threshold
-  # on 256: UN_T = 4 (one in 64; gen_db.py, combat.asm un_roll; items_model.UN_T the same)
-  unique_one_in: 60
+  # (22/11, owner's decision D9) uniques: the ones of the story only from quests; the others only from bosses, at the first
+  # opening of the boss chest, one of the subset of the current chapter (uniques.tsv, column boss_chapter; 0 = quest only):
+  # chapter boss (level multiple of 5) 50%, named boss of the other levels 12.5% (percent). Never from the common treasures,
+  # the epic chests or the shops. The game rounds them to thresholds on 256 (gen_db.py: UNB_C, UNB_N; combat.asm bu_roll)
+  boss_unique: {chapter_boss: 50, named_boss: 12.5}
 affix_choice:
   # a row can appear if min_level <= item level and min_level >= item level x low_fraction (Diablo 1-like window;
   # if no row qualifies, every row with min_level <= item level)

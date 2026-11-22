@@ -3,7 +3,7 @@
 data/items/next/, rules of data/items/next/affix_rules.yaml (owner's decisions O1-O14, E3: docs/wiki/oggetti.md, "Progetto:
 affissi, unici e memoria"). Used by the simulators to tune the numbers before the game code exists (fase 2 of the quest plan).
 
-  unique_roll(rng, cat, level) -> a row of uniques.tsv or None (the game's un_roll)
+  boss_unique_roll(rng, chapter, level) -> a row of uniques.tsv or None (the game's bu_roll, boss chests, D9)
   gen_item(rng, cl, cat=None)  -> dict: base, quality (normal/magic/unique/cursed), prefix/suffix (row, value), price, sell
   full_name(item)              -> "warrior's morning star of the craft"
   check()                      -> list of problems (names too long, values over a byte, missing rows): used by ITEMDB-NEXT-10
@@ -46,8 +46,10 @@ UNIQUES = _rows("uniques.tsv")
 BY_ID = {b["id"]: b for b in BASES}
 SELL_DIV = yaml.safe_load(open(os.path.join(ROOT, "data", "balance.yaml")))["shop_rules"].get("sell_divisor", 2)
 CATS = ["weapon", "armor", "shield", "ring"]
-# (22/11, phase 6) chance of a unique as the game's un_roll: UN_T / 256 (gen_db.py: pct256(100 / unique_one_in))
-UN_T = min(255, round(100 / RULES["quality"]["unique_one_in"] * 256 / 100))
+# (22/11, owner's decision D9) uniques only from the boss chests (the game's bu_roll): thresholds on 256 as gen_db.py
+_BU = RULES["quality"]["boss_unique"]
+UNB_C = min(255, round(_BU["chapter_boss"] * 256 / 100))
+UNB_N = min(255, round(_BU["named_boss"] * 256 / 100))
 CURSED_POWERS = None        # a row with a negative value is cursed
 
 
@@ -142,13 +144,7 @@ def gen_item(rng, cl, cat=None, level=None):
         if cat:
             return None
     item = {"base": b["id"], "cat": c, "level": level, "quality": "normal", "prefix": None, "suffix": None}
-    # unique inside its window
-    u = unique_roll(rng, c, level)
-    if u:
-        item.update(base=u["base"], quality="unique", unique=u)
-        item["price"] = price(item)
-        item["sell"] = item["price"] // SELL_DIV
-        return item
+    # (22/11, D9) no unique from the common treasures: only boss_unique_roll (boss chests) and the quests
     for k, v in affix_roll(rng, c, b["id"], level, t).items():
         item[k] = v
     if item["prefix"] or item["suffix"]:
@@ -190,18 +186,13 @@ def affix_roll(rng, cat, base_id, level, t, force_magic=False):
     return item
 
 
-_UWIN = {}
-
-
-def unique_roll(rng, cat, level):
-    """(22/11, phase 6) the game's un_roll (af_gen, not in the shops): if a unique of category cat has level in its window,
-    with probability UN_T / 256 one of them at random (its row of uniques.tsv), else None"""
-    k = (cat, level)
-    if k not in _UWIN:
-        _UWIN[k] = [u for u in UNIQUES if BY_ID[u["base"]]["type"] == cat and _int(u["min_level"]) <= level <= _int(u["max_level"])]
-    wins = _UWIN[k]
-    if wins and rng.randrange(256) < UN_T:
-        return rng.choice(wins)
+def boss_unique_roll(rng, chapter, level):
+    """(22/11, owner's decision D9) the game's bu_roll at the first opening of a boss chest: a unique of the subset of the
+    chapter (uniques.tsv boss_chapter) with probability UNB_C / 256 (chapter boss: level multiple of 5) or UNB_N / 256
+    (named boss of the other levels); it takes the place of the first item. Its row of uniques.tsv, or None"""
+    subset = [u for u in UNIQUES if _int(u.get("boss_chapter") or 0) == chapter]
+    if subset and rng.randrange(256) < (UNB_C if level % 5 == 0 else UNB_N):
+        return rng.choice(subset)
     return None
 
 

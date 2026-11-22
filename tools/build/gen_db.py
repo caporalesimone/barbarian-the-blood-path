@@ -642,7 +642,7 @@ def main():
     chk(1 <= len(UQ) <= 32, "unici: da 1 a 32")
     un0 = len(pw)
     chk(un0 + 4 * len(UQ) <= 128, "unici: righe dei poteri oltre 127 (af_pw)")
-    unb, unl, unh, unpl, unph, unn = [], [], [], [], [], []
+    unb, unbc, unpl, unph, unn = [], [], [], [], []
     maxu = yaml.safe_load(open(os.path.join(nx, "affix_rules.yaml")))["names"]["max_unique"]
     for u in UQ:
         nm = u["name"]
@@ -652,6 +652,8 @@ def main():
         chk(items[b][1] in ("weapon", "armor", "shield", "ring"), f"unico {nm}: la base deve essere arma, armatura, scudo o anello")
         lo, hi = int(u["min_level"]), int(u["max_level"])
         chk(0 <= lo <= hi <= 127, f"unico {nm}: finestra {lo}..{hi}")
+        bch = int(u.get("boss_chapter") or 0)          # (22/11, D9) 0 = solo da una quest
+        chk(0 <= bch <= 4, f"unico {nm}: boss_chapter {bch}")
         n = 0
         for k in range(4):
             p = u.get(f"power{k}") or ""
@@ -667,7 +669,7 @@ def main():
         pw += [0] * (4 - n); val += [0] * (4 - n)
         pr = int(u["price"])
         chk(0 < pr < 65536, f"unico {nm}: prezzo {pr}")
-        unb.append(b); unl.append(lo); unh.append(hi); unpl.append(pr & 255); unph.append(pr >> 8)
+        unb.append(b); unbc.append(bch); unpl.append(pr & 255); unph.append(pr >> 8)
         unn.append(asm_str(nm, "unico"))
     o(f"UN_N        = {len(UQ)}        ; (fase 6) unici: quanti, prima riga dei poteri in af_pw / af_val (4 righe per unico)")
     o(f"UN0         = {un0}")
@@ -675,11 +677,11 @@ def main():
     o.bytes("af_val", val)               # valore della riga (con segno)
     FT.bytes("un_pl", unpl)               # prezzo dell'unico (it_cost)
     FT.bytes("un_ph", unph)
-    # unici: base, finestra dei livelli (af_gen0); uno ogni unique_one_in, nella finestra (O3, O12). Nella RAM del font (FT):
+    # unici: base e capitolo del boss (22/11, D9: solo dai bauli dei boss, bu_roll; prima af_gen0 nella finestra dei livelli). Nella RAM del font (FT):
     # sotto l'I/O dopo gli slot dei piani non c'e' posto
     FT.bytes("un_base", unb)
-    FT.bytes("un_lo", unl)
-    FT.bytes("un_hi", unh)
+    # (22/11, D9) capitolo del boss che puo' lasciare l'unico (0 = solo da una quest): bu_roll (combat.asm)
+    FT.bytes("un_bch", unbc)
     # (21/11 sera, fase 3) generazione: livello minimo (bit 7 = maledetto: valore negativo), tipi di oggetto (bit 0 arma, 1 armatura,
     # 2 scudo, 3 anello: cat_bit >> 1), peso; prezzo aggiunto (con segno, 16 bit: E5, prezzi dei .tsv da tarare)
     TYB = {"weapon": 1, "armor": 2, "shield": 4, "ring": 8}
@@ -721,7 +723,9 @@ def main():
     o(f"CURSE_T     = {pct256(ac['cursed_share'], 'cursed_share')}       ; affisso maledetto con probabilita' CURSE_T / 256")
     chk(AR["rings"] == {"copper": 1, "silver": 2, "gold": 2}, "rings: il gioco fa rame 1, argento e oro 2 (oro: prefisso del livello piu' alto)")
     sm = AR["shops"]["magic"]
-    o(f"UN_T        = {pct256(100 / q['unique_one_in'], 'unique_one_in')}       ; unico con probabilita' UN_T / 256 se ce n'e' uno nella finestra")
+    bu = q["boss_unique"]
+    o(f"UNB_C       = {pct256(bu['chapter_boss'], 'boss_unique.chapter_boss')}       ; (22/11, D9) unico dal baule del boss del capitolo: UNB_C / 256")
+    o(f"UNB_N       = {pct256(bu['named_boss'], 'boss_unique.named_boss')}       ; ... dal baule del boss con nome degli altri piani: UNB_N / 256")
     ag.bytes("shm_t", [pct256(min(sm["max"], sm["base"] + sm["per_level"] * l), "shops.magic") for l in range(21)])   # negozi: merce magica per livello del PG
     if "--check" not in sys.argv:
         open(os.path.join(os.path.dirname(DST), "afgen.asm"), "w").write("; (gen_db.py) tabelle di generazione degli affissi, sotto l'I/O\n" + "\n".join(ag.lines) + "\n")

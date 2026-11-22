@@ -159,10 +159,12 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (2)
+### sanity (4)
 
 | ID | Test |
 |---|---|
+| `BU-10` | data: un_bch = boss_chapter of uniques.tsv; no unique given by a quest is in a boss subset; UNB_C 128 (50%), UNB_N 32 (12.5%) |
+| `BU-11` | bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1 (empty subset) never |
 | `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
 | `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
 
@@ -422,7 +424,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `UNQ-10` | data: the 4 power rows of each unique (af_pw / af_val from UN0) and its price (un_pl / un_ph) as in uniques.tsv |
 | `UNQ-11` | recalc_stats and it_cost: 'gravedigger' (mace, DMG 2, PEN 1, LIFE 6) -> hpmax +6, pen +1 over a plain mace; price 900 |
 | `UNQ-12` | add_to_pack (same random state): 'osric's cudgel' (DUR 100) -> maximum x 2 of a plain club; 'aldric's heart' -> indestructible (0) |
-| `UNQ-13` | af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never |
+| `UNQ-13` | af_gen (22/11, D9): never a unique, neither from the treasures (af_m 0) nor in the shops (af_m 2): only prefix and suffix rows |
 | `UNQ-14` | inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1) |
 | `VER-10` | branch tag: feature/stat-points -> stat, explicit branch_tags win, only lowercase letters and digits |
 | `VER-11` | branch_versions written at the end of version.yaml without touching version/comments; digest ignores them |

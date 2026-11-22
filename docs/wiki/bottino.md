@@ -118,11 +118,16 @@ comuni, con il 2–11% dei tiri d'arma; `tools/simulators/sim_chest.py` stampa l
 `data/items/next/affix_rules.yaml`, modello `tools/simulators/items_model.py`): la probabilità di un oggetto magico cresce con T; la riga
 si sceglie fra quelle del tipo dell'oggetto con `min_level` ≤ L, prima decidendo se maledetta (5%, a ogni livello), poi nella
 **finestra** 2 × `min_level` ≥ min(L, 20) (se nessuna, senza finestra), pesata da `chance`. Un oggetto di livello 0 non ha righe
-adatte: resta bianco. **Unici** (22/11, fase 6, decisioni O3 e O12; `un_roll` in `combat.asm`, chiamata da `af_gen` prima degli
-affissi, mai nei negozi): se almeno un unico di `data/items/next/uniques.tsv` della stessa categoria dell'oggetto ha L nella sua
-finestra `min_level`..`max_level`, con probabilità `UN_T`/256 (= 4/256, uno su 64: `unique_one_in` = 60 arrotondato) l'oggetto
-diventa uno di loro a caso (stessa probabilità fra i candidati), con la sua base (`af_id`: `gen_item` restituisce la base
-dell'unico) e senza affissi. Gli unici garantiti da boss, quest e bauli epici (colonna `source`) arriveranno con le quest (H1).
+adatte: resta bianco. **Unici** (22/11, decisione D9 del committente, [quests](quests.md) sezione 0): **mai** dai tesori normali, dai bauli epici o
+dai negozi (`af_gen` non li genera più; dal 22/11 mattina al 22/11 pomeriggio `un_roll` li tirava nella finestra di livelli con
+probabilità 4/256). Gli unici della **trama** vengono solo dalle **quest** (premio `unique` di `quests.yaml`); gli **altri** solo
+dal **baule del boss**, alla prima apertura (`bu_roll` in `combat.asm`, chiamata da `chest_open` dopo `chest_fill`): se il
+sottoinsieme del capitolo `c_chap` non è vuoto (colonna `boss_chapter` di `data/items/next/uniques.tsv`, tabella `un_bch`), con
+probabilità `UNB_C`/256 = 50% per il **boss del capitolo** (piano multiplo di 5) e `UNB_N`/256 = 12,5% per il **boss con nome**
+degli altri piani (`boss_unique` di `affix_rules.yaml`) uno di loro a caso prende il posto del primo oggetto del baule (base
+dell'unico, prefisso 0, suffisso $80 + numero). Sottoinsiemi di oggi (prima proposta, da rivedere con i boss dei capitoli, D8):
+capitolo 1 nessuno; 2 censer-bearer, stitchripper; 3 oath blade; 4 tithe-taker, ruin's crown. Simulatore:
+`items_model.boss_unique_roll`. Test: `BU-10`, `BU-11`, `UNQ-13`.
 
 ## Bauli epici della sala del trono
 

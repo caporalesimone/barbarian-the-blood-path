@@ -72,9 +72,7 @@ def gen_item(cl, rng, force=None):
         if not cands:
             continue
         il, k = max(cands)
-        # (22/11, phase 6) a unique of its window now and then (af_gen -> un_roll): third value "U"
-        if IM.unique_roll(rng, cat, l):
-            return cat, k, "U", l
+        # (22/11, D9) no unique from the common chests (only boss chests, bu_roll)
         # (21/11 evening) affixes as the game's af_gen (items_model.affix_roll): third value = number of affixes
         aff = IM.affix_roll(rng, cat, k, l, t)
         return cat, k, bool(aff["prefix"]) + bool(aff["suffix"]), l
