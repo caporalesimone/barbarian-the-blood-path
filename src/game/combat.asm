@@ -177,6 +177,7 @@ _no     clc
 af_one: tay
         beq _r
         ldx af_pw,y
+        beq _r                  ; (fase 6) riga vuota di un unico
         lda af_val,y
         cpx #PW_ATT_DMG
         beq _ad
@@ -230,10 +231,32 @@ af_pair:
         jsr af_one
         lda af_t
         beq +
-        clc
+        bpl _s
+        ldx #<af_one            ; (fase 6) unico: le sue 4 righe
+        ldy #>af_one
+        jmp af_rowv
+_s      clc
         adc #AF_SX0
         jmp af_one
 +       rts
+; (22/11, fase 6) A = suffisso di un unico ($80 + u), X/Y = routine: la routine con A = ciascuna delle 4 righe dell'unico in
+; af_pw / af_val (UN0 + 4u ..; potere 0 = riga vuota). La routine puo' usare A, X, Y, non af_k / af_c / af_v
+af_rowv:
+        stx af_v
+        sty af_v+1
+        asl                     ; (u < 64: dopo il secondo asl C = 0)
+        asl
+        adc #UN0
+        sta af_k
+        lda #4
+        sta af_c
+-       lda af_k
+        jsr _go
+        inc af_k
+        dec af_c
+        bne -
+        rts
+_go     jmp (af_v)
 ; totali degli affissi a 0
 af_clr: lda #0
         ldx #9
@@ -250,7 +273,11 @@ af_dur: lda ap_b
         jsr _one
         lda ap_s
         beq _r
-        clc
+        bpl +
+        ldx #<_one              ; (fase 6) unico: le sue 4 righe
+        ldy #>_one
+        jmp af_rowv
++       clc
         adc #AF_SX0
 _one    tay
         beq _r
@@ -308,10 +335,19 @@ af_gen0:
         sta ap_b
         sta ap_s
         sta af_tp
+        sty af_id
         lda itcat,y
         cmp #CAT_RING+1
-        bcs _r
-        tax
+        bcc +
+        rts
++       lda af_m                ; (fase 6) unico (non nei negozi)
+        cmp #2
+        beq _sh
+        jsr un_roll
+        bcc +
+        rts
++       ldy af_id
+_sh     ldx itcat,y
         lda cat_bit,x           ; tipo: af_ty ha i bit di cat_bit spostati di 1
         lsr
         sta af_cm
@@ -365,6 +401,59 @@ _pfx    lda #1
         ldx #AF_NP
         jsr af_pick
         sta ap_b
+        rts
+
+; (22/11, fase 6, O3 e O12) unico al posto dell'oggetto af_id: se c'e' almeno un unico della stessa categoria con af_l nella
+; sua finestra (un_lo..un_hi), con probabilita' UN_T / 256 uno di loro a caso. C = 1 fatto: af_id = la sua base, ap_s = $80 + u
+; (prefisso 0). Sotto l'I/O (tabelle un_*: afgen.asm)
+un_roll:
+        lda #0
+        sta af_c
+        ldx #UN_N-1
+-       jsr _ok
+        bcs +
+        inc af_c
++       dex
+        bpl -
+        lda af_c
+        beq _no
+        jsr rand
+        cmp #UN_T
+        bcs _no
+        lda af_c
+        jsr rndrange            ; (X e Y conservati)
+        sta af_c
+        ldx #UN_N-1
+-       jsr _ok
+        bcs +
+        dec af_c
+        bmi _got
++       dex
+        bpl -
+_no     clc
+        rts
+_got    lda un_base,x
+        sta af_id
+        txa
+        ora #$80
+        sta ap_s
+        sec
+        rts
+; C = 0 se l'unico X va bene
+_ok     ldy un_base,x
+        lda itcat,y
+        ldy af_id
+        cmp itcat,y
+        bne _n
+        lda af_l
+        cmp un_lo,x
+        bcc _n
+        lda un_hi,x
+        cmp af_l
+        bcc _n
+        clc
+        rts
+_n      sec
         rts
 
 ; una riga fra gli indici A..X: tipo af_cm, livello af_l, peso af_ch. Prima si decide se maledetta (CURSE_T); le altre stanno
@@ -478,7 +567,9 @@ it_cost:
         cmp #I_SCROLL
         bne +
         ldx #0
-+       sty af_t
++       cpy #$80                ; (fase 6) unico: il suo prezzo
+        bcs _un
+        sty af_t
         asl
         tay
         lda itprice,y
@@ -501,6 +592,11 @@ _one    lda #1
         lda #0
         sta tmp1
 _r      rts
+_un     lda un_pl-$80,y
+        sta tmp0
+        lda un_ph-$80,y
+        sta tmp1
+        rts
 _add    tay
         beq +
         lda tmp0

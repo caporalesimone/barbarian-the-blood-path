@@ -336,6 +336,9 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   in1 4,86 → 2,46 s, in2 4,63 → 3,09, in4 3,34 → 2,78, scheda nel dungeon 1,23 → 0,84 s; peggiorano in3 3,07 → 3,95, twn1 → 2,14 s
   (limite 2,0 del committente) e boss2 → 2,71 s (oltre il 90% di 3,0). Per adottarla: limiti twn1 2,5 e boss2 3,2 (solo con l'OK).
   Causa non verificata (probabile: tracce dei file seguenti e salti della testina).
+  **(22/11, dopo la fase 6: GAME +680 B) PERF-DISK fallisce anche con la scheda dopo CORE**: town_in / in1 5,10 s (limite 5,0 del
+  committente; prima 4,86). Con la scheda in fondo: in1 2,70, town_in 2,69, ma twn1 2,20 (limite 2,0), boss2 2,78 e boss3 2,93
+  (oltre il 90% di 3,0). Serve la decisione del committente (limiti o altra disposizione dei file).
 - (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
   disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
   misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da
@@ -436,8 +439,13 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
   tarare tutti i prezzi con **formule** che dipendono da prefisso, suffisso e livello dell'oggetto (non più la regola "1,5 piani"
   del 06/11, [BILANCIAMENTO](docs/wiki/BILANCIAMENTO.md) sez. 12, superata), poi verifica col simulatore dell'oro.
 
-### G5 (ex 4.5) Set di oggetti unici con nome — M
-- Come `unique_itemdat.tsv` di DevilutionX: una tabella nel database degli oggetti; ~8 B a set + 40–60 B di codice.
+### G5 (ex 4.5) Unici: cosa resta dopo la fase 6 — M
+- (22/11) **Fatti** gli unici di `data/items/next/uniques.tsv` (fase 6, [oggetti](docs/wiki/oggetti.md)): poteri, nome giallo, prezzo,
+  generazione a caso nella finestra di livelli (uno su 64 se c'è un candidato).
+- **Da fare**: unici **garantiti** da boss, quest e bauli epici (colonna `source`: The Hollow Abbot, Mother Stitch, Varok, passi delle
+  quest, bauli epici degli anelli e delle armature), con le quest (H1); furto di vita e spine (LEECH, THORNS) dopo la 2.0 (O5): oggi
+  tre unici hanno quel potere senza effetto; taratura di `unique_one_in` e dei prezzi con i simulatori (`sim_gold.py`, `sim_chest.py`).
+- Regola di `uniques.tsv`: righe nuove solo in fondo (numero dell'unico nei salvataggi), altrimenti `SAVE_VER` nuovo.
 
 ### G4 (ex 4.4) Armi casuali (seed per oggetto) — M
 - Seed per oggetto (+1 B a oggetto) e funzione seed → statistiche uguale in 6502 e Python. Cambia `SAVE_VER` (categoria 5).
@@ -455,7 +463,7 @@ a +100% (oggi) ~34, a +150% ~31, a +250% ~28–30. Il costo è lo **scorrimento*
 
 ### G8 (11/11) Database degli oggetti: prossimi passi — M-L
 - `data/items/items.tsv` è la sorgente di verità. Da valutare: affissi magici (prefissi/suffissi come
-  `item_prefixes.tsv`/`item_suffixes.tsv` di DevilutionX) al posto del solo +N; oggetti unici (G5); requisiti
+  `item_prefixes.tsv`/`item_suffixes.tsv` di DevilutionX) al posto del solo +N (fatto il 21/11); oggetti unici (G5, fatti il 22/11 salvo i garantiti); requisiti
   (FOR/DES minime, colonne `minStrength`/`minDexterity`), utili con i punti statistica (A1).
 
 ### G7 (11/11) Combattere con due armi (dual wield), regole alla Diablo — M-L

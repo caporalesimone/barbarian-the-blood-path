@@ -72,6 +72,9 @@ def gen_item(cl, rng, force=None):
         if not cands:
             continue
         il, k = max(cands)
+        # (22/11, phase 6) a unique of its window now and then (af_gen -> un_roll): third value "U"
+        if IM.unique_roll(rng, cat, l):
+            return cat, k, "U", l
         # (21/11 evening) affixes as the game's af_gen (items_model.affix_roll): third value = number of affixes
         aff = IM.affix_roll(rng, cat, k, l, t)
         return cat, k, bool(aff["prefix"]) + bool(aff["suffix"]), l
@@ -93,6 +96,8 @@ def main():
             mag = tot = 0
             for _ in range(a.n):
                 cat, k, b, l = gen_item(cl, rng)
+                if b == "U":
+                    continue
                 if k in cnt:
                     cnt[k] += 1
                     if cat != "ring":

@@ -278,7 +278,18 @@ maledetto `UC_CURSED` = 12: `it_qcol`); nelle liste il nome sta intero in 33 col
 quello della voce del cursore **scorre** solo se è più lungo (`sl_wd`, `sl_nav`: un
 carattere ogni 8 fotogrammi, pausa di 6 passi all'inizio e alla fine; `ui_sk`, `ui_nlen`); nel titolo del riquadro dell'oggetto il
 **nome completo** fino a 34 colonne (`ui_w`); nella riga delle caratteristiche i **poteri** che non stanno nei numeri (`it_pw`:
-`hp+12`, `hit-1`, `spd+2`, `pen+1`, `str+1`, `ind`). Da fare: unici (fase 6), sottoinsieme della generazione (TODO D15).
+`hp+12`, `hit-1`, `spd+2`, `pen+1`, `str+1`, `ind`). **Fase 6 (22/11, O3, O7, O12): unici** da `data/items/next/uniques.tsv`
+(16, `gen_db.py`). Nell'oggetto: suffisso = $80 + numero dell'unico, prefisso 0, id = la base ([Formato dati](FORMATO_DATI.md)). I
+poteri (fino a 4, valori fissi) sono **righe in coda ad `af_pw`/`af_val`** (unico u: righe `UN0` + 4u .. + 3, potere 0 = vuota; le
+due tabelle sono passate dalla RAM del font a GAME), quindi valgono le stesse routine degli affissi tramite `af_rowv` (le 4
+righe): `recalc_stats` (`af_pair`), alla nascita `af_dur` (DUR, indistruttibile), riquadro `it_pw`. **Furto di vita e spine**
+(LEECH, THORNS: censer-bearer, doll-hide, tithe-taker) **non hanno effetto** fino alla 2.0 (O5): nel riquadro compaiono come `lch`
+e `thn`. Nome proprio (`un_names`, a 5 bit, `it_nm`: il nome dell'oggetto è passato da CORE a GAME) in **giallo** (`UC_UNIQUE` =
+7); prezzo fisso (`un_pl`/`un_ph`, `it_cost`: vendita a un quarto, riparazione al 25% come gli altri). Generazione: [Bottino](bottino.md)
+(`un_roll`, solo nella finestra di livelli, mai nei negozi). Regole per `uniques.tsv`: righe nuove **in fondo** (il numero
+dell'unico sta nei salvataggi: riordinare o togliere righe chiede un `SAVE_VER` nuovo); base per id di `bases.tsv`, nome al
+massimo 16 caratteri, valore unico per potere (`v_a` = `v_b`), DUR solo ±50/100: li controlla `gen_db.py`. Da fare: unici garantiti
+da boss, quest e bauli epici (con le quest, H1), sottoinsieme della generazione (TODO D15).
 
 **Progetto** (decisioni del committente del 20/11, domande O, E, C1; analisi della memoria F7). Il
 database proposto sta in `data/items/next/` (il gioco non lo legge ancora): `bases.tsv` (31 basi, colonna `status`: `today` o

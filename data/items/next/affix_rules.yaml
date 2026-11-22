@@ -1,13 +1,14 @@
 # Rules of magic and unique items (20/11, owner's decisions O2, O3, O9, O10, O12, E3: docs/wiki/oggetti.md, "Progetto: affissi,
-# unici e memoria"). PROPOSAL: the game does not read this folder yet; tools/simulators/items_model.py does. First draft
-# numbers, to be tuned with the simulators.
+# unici e memoria"). Since 21/11 the game reads this folder (tools/build/gen_db.py), the simulators too
+# (tools/simulators/items_model.py). First draft numbers, to be tuned with the simulators.
 quality:
   # O2: magic with probability base + per_t x T (T = chest level / 8), at most max (percent)
   magic: {base: 8, per_t: 3, max: 60}
   # among magic items: only a prefix / only a suffix / both (percent)
   affixes: {prefix: 40, suffix: 40, both: 20}
   # O3 + O12: a unique inside its level window [min_level, max_level], one item in N (O3 said 200 outside windows: the
-  # random chance now lives only inside the windows, higher; to be tuned)
+  # random chance now lives only inside the windows, higher; to be tuned). (22/11, phase 6) the game rounds it to a threshold
+  # on 256: UN_T = 4 (one in 64; gen_db.py, combat.asm un_roll; items_model.UN_T the same)
   unique_one_in: 60
 affix_choice:
   # a row can appear if min_level <= item level and min_level >= item level x low_fraction (Diablo 1-like window;

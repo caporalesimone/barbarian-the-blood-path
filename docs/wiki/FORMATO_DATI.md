@@ -119,6 +119,9 @@ Dal formato **$CC** (21/11 sera, fase 2a degli affissi; decisioni del committent
 Dal formato **$CD** (21/11 sera, fase 2b): stessi campi, ma il byte bonus (`c_packb`/`c_eqb`, `st_b`, `ch_b`) è l'**id del prefisso**
 (riga di `prefixes.tsv`; pergamene: quantità) e il quinto byte l'**id del suffisso** (riga di `suffixes.tsv`): la magia +N e la
 caratteristica degli anelli dei formati di prima non hanno più lo stesso significato.
+**Unici** (22/11, fase 6, sempre formato $CD: estensione compatibile, i valori di prima restano validi): quinto byte = **$80 + numero
+dell'unico** (riga di `data/items/next/uniques.tsv`, da 0), prefisso 0, id = la base dell'unico. Le righe nuove di `uniques.tsv`
+vanno **in fondo**: riordinarle o toglierle cambia il significato degli oggetti salvati e richiede un `SAVE_VER` nuovo.
 
 ## 3. Stato di un piano — `SAVE-0N`, offset `HERO_LEN` + ((piano − 1) mod 5) × 97 (formato compatto)
 

@@ -31,7 +31,7 @@ def afg_loot(ctx):
     n = L["AF_NP"] + L["AF_NS"] + 1
     g.cmd("bank ram"); ty, mn = g.mem(L["af_ty"], n), g.mem(L["af_min"], n); g.cmd("bank cpu")   # (under the I/O, with the generator)
     cat = g.mem(L["itcat"], L["N_ITEMS"]); val = g.mem(L["itval"], L["N_ITEMS"])
-    eq = mag = 0; bad = []; rings = Counter()
+    eq = mag = uq = 0; bad = []; rings = Counter()
     for _ in range(N):
         g.poke(L["gi_ll"], 80); g.poke(L["gi_force"], 0)
         r = g.call_keep(L["gen_item"])
@@ -40,6 +40,9 @@ def afg_loot(ctx):
         c = cat[i]
         if c > L["CAT_RING"]:
             check(p == 0 and s == 0, "potion or scroll %d with affixes %d/%d" % (i, p, s)); continue
+        if s >= 0x80:                   # (22/11, phase 6) a unique: no affixes, its base (UNQ-13); counted apart
+            check(p == 0 and g.b(L["un_base"] + (s & 0x7f)) == i, "unique %02x on item %d with prefix %d" % (s, i, p))
+            uq += 1; continue
         bit = 1 << (c - 1)
         for k in ([p] if p else []) + ([s + L["AF_SX0"]] if s else []):
             if not ty[k] & bit or (mn[k] & 0x7f) > 20: bad.append((i, k))
@@ -50,7 +53,7 @@ def afg_loot(ctx):
     check(not bad, "affixes that do not fit: %s" % bad[:6])
     g.cmd("bank ram"); want = g.b(L["mag_t"] + 10) / 256; g.cmd("bank cpu")
     share = mag / max(1, eq)
-    print("      magic %d / %d = %.2f (mag_t %.2f), rings %s" % (mag, eq, share, want, dict(rings)))
+    print("      magic %d / %d = %.2f (mag_t %.2f), rings %s, uniques %d" % (mag, eq, share, want, dict(rings), uq))
     # (below mag_t: an item of level 0 has no row with min_level <= 0, as in tools/simulators/items_model.py)
     check(eq >= 60 and 0.1 <= share <= want + 0.1, "magic share %.2f, expected up to about %.2f" % (share, want))
     check(all(k[1] >= 1 for k in rings) and all(k[1] == 2 for k in rings if k[0] >= 2), "rings: %s" % dict(rings))

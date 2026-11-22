@@ -75,7 +75,7 @@ def afx_recalc(ctx):
     stats(g)
 
 
-@test("AFX-12", "inventory: 'fine sword' (prefix, pack) and 'copper ring of s' (suffix, worn, cut at 16 columns) in the list")
+@test("AFX-12", "inventory: 'fine sword' (prefix, pack) and 'copper ring of strength' (suffix, worn, whole in 33 columns since 22/11) in the list")
 def afx_names(ctx):
     g = ctx["g"]; L = g.L
     mag = [0, L["MAG_W1"], L["MAG_W2"], L["MAG_W3"], 0, L["MAG_A1"], L["MAG_A2"], L["MAG_A3"]]
@@ -87,5 +87,5 @@ def afx_names(ctx):
     check(not g.in_game(), "the inventory does not open")
     s = screen(g)
     check("fine sword" in s, "no 'fine sword' on the screen")
-    check("copper ring of s" in s and "copper ring of st" not in s, "ring name not cut at 16 columns: %s" % [s[i:i+40] for i in range(0, 1000, 40) if "copper" in s[i:i+40]])
+    check("copper ring of strength" in s, "ring name not whole: %s" % [s[i:i+40] for i in range(0, 1000, 40) if "copper" in s[i:i+40]])
     g.run_stop(); g.frames(2)

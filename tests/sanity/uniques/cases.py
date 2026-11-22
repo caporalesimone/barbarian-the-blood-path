@@ -1,0 +1,125 @@
+"""Unique items, phase 6 (22/11, owner's decisions O3, O7, O12; data/items/next/uniques.tsv). In the item: suffix byte $80 + u,
+prefix 0, id = the unique's base. Powers = 4 rows per unique after the affixes in af_pw / af_val (UN0 + 4u), applied by
+recalc_stats (af_pair), at birth (af_dur: DUR, INDESTRUCTIBLE) and listed in the item box (it_pw); name from un_names in yellow
+(UC_UNIQUE); fixed price (un_pl / un_ph, it_cost); generation inside the level window with probability UN_T / 256 (un_roll,
+never in the shops). One VICE session, the village."""
+import csv
+import os
+from lib.c64 import Game
+from c64test import test, check
+from lib.play import new_game, key, K_I, D, U
+
+CHAIN = True
+UQ = list(csv.DictReader(open(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "items", "next", "uniques.tsv")),
+                         delimiter="\t"))
+
+
+def uq(name):
+    return next(i for i, u in enumerate(UQ) if u["name"] == name)
+
+
+def setup(ctx):
+    g = ctx["g"] = Game()
+    g.to_menu()
+    new_game(g); g.frames(3)
+
+
+def teardown(ctx):
+    if "g" in ctx: ctx["g"].close()
+
+
+def row(g, y):
+    return "".join(chr(b + 96) if 1 <= b <= 26 else chr(b) if 32 <= b < 64 else "." for b in g.mem(0xB400 + 40 * y, 40))
+
+
+def stats(g):
+    L = g.L
+    g.call_keep(L["recalc_stats"])
+    return dict(hp=g.w16(L["hpmax"]), pen=g.b(L["s_pen"]))
+
+
+@test("UNQ-10", "data: the 4 power rows of each unique (af_pw / af_val from UN0) and its price (un_pl / un_ph) as in uniques.tsv")
+def unq_data(ctx):
+    g = ctx["g"]; L = g.L
+    check(L["UN_N"] == len(UQ), "UN_N %d, uniques.tsv %d" % (L["UN_N"], len(UQ)))
+    pw = g.mem(L["af_pw"], L["UN0"] + 4 * len(UQ)); va = g.mem(L["af_val"], L["UN0"] + 4 * len(UQ))
+    for i, u in enumerate(UQ):
+        want = [(L["PW_" + u["power%d" % k]], int(u["v%da" % k] or 0) & 255) for k in range(4) if u["power%d" % k]]
+        got = [(pw[L["UN0"] + 4 * i + k], va[L["UN0"] + 4 * i + k]) for k in range(4) if pw[L["UN0"] + 4 * i + k]]
+        check(got == want, "%s: rows %s, expected %s" % (u["name"], got, want))
+        pr = g.b(L["un_pl"] + i) + 256 * g.b(L["un_ph"] + i)
+        check(pr == int(u["price"]), "%s: price %d" % (u["name"], pr))
+
+
+@test("UNQ-11", "recalc_stats and it_cost: 'gravedigger' (mace, DMG 2, PEN 1, LIFE 6) -> hpmax +6, pen +1 over a plain mace; price 900")
+def unq_recalc(ctx):
+    g = ctx["g"]; L = g.L
+    u = uq("gravedigger")
+    g.poke(L["c_eqb"], 0, 0, 0, 0, 0); g.poke(L["c_eqs"], 0, 0, 0, 0, 0)
+    g.poke(L["c_eq"], L["I_MACE"]); g.poke(L["c_eqd"], 30); g.poke(L["c_eqm"], 30)
+    s0 = stats(g)
+    g.poke(L["c_eqs"], 0x80 + u)
+    s1 = stats(g)
+    check(s1["hp"] == s0["hp"] + 6 and s1["pen"] == s0["pen"] + 1, "before %s after %s" % (s0, s1))
+    g.call_keep(L["it_cost"], regs="a=%02x,x=00,y=%02x" % (L["I_MACE"], 0x80 + u))
+    p = g.b(L["tmp0"]) + 256 * g.b(L["tmp1"])
+    check(p == 900, "price %d" % p)
+    g.poke(L["c_eqs"], 0); g.call_keep(L["recalc_stats"])
+
+
+@test("UNQ-12", "add_to_pack (same random state): 'osric's cudgel' (DUR 100) -> maximum x 2 of a plain club; 'aldric's heart' -> indestructible (0)")
+def unq_dur(ctx):
+    g = ctx["g"]; L = g.L
+    seed = g.mem(L["rnd"], 2)
+    def give(it, s):
+        g.fill(L["c_pack"], L["c_pack"] + 7, 0)
+        g.poke(L["rnd"], *seed); g.poke(L["ap_b"], 0); g.poke(L["ap_s"], s); g.poke(L["ap_m"], 0)
+        g.call_keep(L["add_to_pack"], regs="a=%02x" % it)
+        return g.b(L["c_packm"]), g.b(L["c_packs"])
+    m0, _ = give(L["I_CLUB"], 0)
+    m1, s1 = give(L["I_CLUB"], 0x80 + uq("osric's cudgel"))
+    check(s1 == 0x80 + uq("osric's cudgel") and m1 == min(255, 2 * m0), "club max %d, cudgel max %d (suffix %02x)" % (m0, m1, s1))
+    m2, _ = give(L["I_FIELD_PLATE"], 0x80 + uq("aldric's heart"))
+    check(m2 == 0, "aldric's heart: maximum %d (expected 0, indestructible)" % m2)
+    g.fill(L["c_pack"], L["c_pack"] + 7, 0)
+
+
+@test("UNQ-13", "af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never")
+def unq_gen(ctx):
+    g = ctx["g"]; L = g.L
+    ok = {i for i, u in enumerate(UQ) if int(u["min_level"]) <= 4 <= int(u["max_level"])
+          and g.b(L["itcat"] + g.b(L["un_base"] + i)) == g.b(L["itcat"] + L["I_DAGGER"])}
+    got, bad = 0, []
+    for m in (0, 2):
+        g.poke(L["af_l"], 4); g.poke(L["af_tt"], 0); g.poke(L["af_m"], m)
+        for _ in range(400 if m == 0 else 150):
+            g.call_keep(L["af_gen"], regs="y=%02x" % L["I_DAGGER"])
+            s, i = g.b(L["ap_s"]), g.b(L["af_id"])
+            if s >= 0x80:
+                if m == 2 or (s & 0x7f) not in ok or i != g.b(L["un_base"] + (s & 0x7f)) or g.b(L["ap_b"]):
+                    bad.append((m, s, i))
+                got += 1
+            elif i != L["I_DAGGER"]:
+                bad.append((m, s, i))
+    print("      uniques: %d in 400 (expected ~%.1f), candidates %s" % (got, 400 * L["UN_T"] / 256, sorted(ok)))
+    check(not bad, "wrong results (af_m, suffix, id): %s" % bad[:5])
+    check(ok and 1 <= got <= 20, "%d uniques in 400 items" % got)
+
+
+@test("UNQ-14", "inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1)")
+def unq_ui(ctx):
+    g = ctx["g"]; L = g.L
+    g.poke(L["c_pack"], L["I_MACE"], 0, 0, 0, 0, 0, 0, 0)
+    g.poke(L["c_packb"], 0, 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], 0x80 + uq("gravedigger"), 0, 0, 0, 0, 0, 0, 0)
+    key(g, K_I, 3)
+    g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)
+    y = next((y for y in range(25) if "gravedigger" in row(g, y) and y != L["IV_SY"]), None)
+    check(y is not None, "unique name not in the list")
+    x = row(g, y).index("gravedigger")
+    c = g.b(0xD800 + 40 * y + x) & 15
+    check(c == L["UC_UNIQUE"], "colour %d (expected %d)" % (c, L["UC_UNIQUE"]))
+    check("mace" not in row(g, y), "the base name is shown: %r" % row(g, y))
+    b = row(g, L["IV_SY"] + 1)
+    check("hp+6" in b and "pen+1" in b, "box row %r" % b.strip())
+    g.run_stop(); g.frames(2)
+    g.poke(L["c_packs"], 0)

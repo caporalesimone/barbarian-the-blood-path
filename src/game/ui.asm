@@ -124,6 +124,7 @@ UC_ITEM  = 1                    ; nome di un oggetto normale (bianco)
 UC_CURSED = 12                  ; (fase 5, O7) nome di un oggetto con un affisso maledetto (grigio; 11 e' "posto vuoto")
 UC_CURSOR = 13
 UC_MAGIC = 14
+UC_UNIQUE = 7                   ; (22/11, fase 6, O7) nome di un unico (giallo)
 ; (21/11 sera) codici ui_lc dei negozi (src/menu/shop.asm sh_cur): 0..7 zaino, 8..12 equipaggiamento (PACK_N + posto), LC_W + n merce,
 ; LC_B + n cintura. Prima la merce partiva da 12, che e' anche il secondo anello indossato (EQ_N = 5 dal 21/11): Fire sul secondo
 ; anello dall'alchimista comprava la prima merce
@@ -1066,6 +1067,8 @@ af_name:
         sta ptr2
         lda #>af_names
         sta ptr2+1
+; X-esima stringa (da 1) della lista a 5 bit in ptr2
+af_nth:
 _w      dex                     ; (21/11 sera) nomi a 5 bit: si salta una stringa decodificandola
         beq ip_p5
         stx af_t
@@ -1098,14 +1101,54 @@ ip_putc:
         jmp ui_putc
 +       rts
 af_of   #t5 " of "
+; (22/11, da ui_item in CORE) X = id: "[prefisso ]nome[ of suffisso]" (ui_ib, ui_is) fino a ui_lim; (fase 6) unico (ui_is =
+; $80 + u): il suo nome (un_names, db.asm)
+it_nm:  lda ui_is
+        bpl _px
+        and #$7f
+        tax
+        inx
+        lda #<un_names
+        sta ptr2
+        lda #>un_names
+        sta ptr2+1
+        jmp af_nth
+_px     lda ui_ib               ; prefisso
+        beq _nb
+        stx af_k
+        jsr af_name
+        lda #$20
+        jsr ip_putc
+        ldx af_k
+_nb     lda itnm_lo,x
+        pha
+        lda itnm_hi,x
+        tax
+        pla
+        jsr ip_puts
+        lda ui_is               ; suffisso
+        beq _r
+        lda #<af_of
+        ldx #>af_of
+        jsr ip_puts
+        lda ui_is
+        clc
+        adc #AF_SX0
+        jmp af_name
+_r      rts
 ; (fase 5, O8) poteri degli affissi dell'oggetto mostrato (ui_px, ui_sx) che non stanno gia' nei numeri della riga: "hp+12",
 ; "hit-1" (danno subito in meno), "spd+2", "pen+1", "str+1" (non per gli anelli: la prima caratteristica e' gia' nella riga),
 ; "ind" (indistruttibile), fino alla colonna 34
 it_pw:  lda ui_px
         jsr _one
         lda ui_sx
-        beq _r
-        clc
+        bne +
+        rts
++       bpl +
+        ldx #<_one              ; (fase 6) unico: le sue 4 righe
+        ldy #>_one
+        jmp af_rowv
++       clc
         adc #AF_SX0
 _one    tay
         beq _r
@@ -1113,6 +1156,7 @@ _one    tay
         cmp #34
         bcs _r
         ldx af_pw,y
+        beq _r                  ; (riga vuota di un unico)
         lda pw_tx-1,x           ; 0 = gia' nei numeri (o nella durabilita')
         beq _r
         cpx #PW_ALL+1           ; caratteristiche: non per gli anelli
@@ -1178,8 +1222,10 @@ pw_t3   .byte 0, 0, 0, 0
         .cerror pw_t2 - pw_tx != 16, "pw_tx: 16 poteri"
 
 ; (fase 5, O7) colore di un oggetto con affissi (ui_ib prefisso, ui_is suffisso): grigio se uno dei due e' maledetto (valore
-; negativo), altrimenti azzurro. A = colore; X conservato
+; negativo), altrimenti azzurro; (fase 6) unico giallo. A = colore; X conservato
 it_qcol:
+        lda ui_is
+        bmi _u
         ldy ui_ib
         lda af_val,y
         bmi _c
@@ -1193,6 +1239,8 @@ it_qcol:
 _m      lda #UC_MAGIC
         rts
 _c      lda #UC_CURSED
+        rts
+_u      lda #UC_UNIQUE
         rts
 
 ; (21/11, O6) requisito dell'oggetto Y (itreq: bit 7 = DES, s_dex; altrimenti FOR, s_str; valore nei bit 0-6, 0 = nessuno):

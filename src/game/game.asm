@@ -163,6 +163,10 @@ af_sum     .byte ?
 af_a       .byte ?
 af_b       .byte ?
 af_pf      .byte ?
+af_id      .byte ?          ; (fase 6) af_gen: id dell'oggetto (un unico lo cambia nella sua base); af_rows: riga, righe rimaste,
+af_k       .byte ?          ;  routine (anche it_nm: id)
+af_c       .byte ?
+af_v       .word ?
 ps_n       .byte ?
 gi_cat     .byte ?
 rm_min     .byte ?
@@ -723,8 +727,7 @@ _lt     cmp #MAXLL+1
 +       sta gi_l
         jsr lt_scan             ; A = oggetto migliore con ilvl <= L (0: nessuno -> altra categoria)
         beq _cat
-        pha                     ; (21/11 sera, fase 3) affissi: livello dell'oggetto gi_l, T = gi_t (af_gen)
-        tay
+        tay                     ; (21/11 sera, fase 3) affissi: livello dell'oggetto gi_l, T = gi_t (af_gen)
         lda gi_l
         sta af_l
         lda gi_t
@@ -732,7 +735,7 @@ _lt     cmp #MAXLL+1
         lda #0
         sta af_m
         jsr af_gen
-        pla
+        lda af_id               ; (fase 6) un unico ha la sua base
         rts
 _scr    lda #I_SCROLL
         rts

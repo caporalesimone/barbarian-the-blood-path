@@ -150,16 +150,17 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (4)
+### sanity (5)
 
 | ID | Test |
 |---|---|
-| `AFU-10` | inventory: an item with a cursed prefix has its name in grey (UC_CURSED), a magic one in light blue (UC_MAGIC) |
-| `AFU-11` | inventory: the item box title shows the full name beyond 16 columns ('... studded armor of ...') |
-| `AFU-12` | inventory: a 32-character name is whole on its row (33 columns, 22/11); a 35-character one scrolls on the cursor row |
-| `AFU-13` | inventory: the item box lists the powers not in the numbers: armor 'of the wolf' -> 'hp+12', shield 'of health' -> 'hit-1' |
+| `UNQ-10` | data: the 4 power rows of each unique (af_pw / af_val from UN0) and its price (un_pl / un_ph) as in uniques.tsv |
+| `UNQ-11` | recalc_stats and it_cost: 'gravedigger' (mace, DMG 2, PEN 1, LIFE 6) -> hpmax +6, pen +1 over a plain mace; price 900 |
+| `UNQ-12` | add_to_pack (same random state): 'osric's cudgel' (DUR 100) -> maximum x 2 of a plain club; 'aldric's heart' -> indestructible (0) |
+| `UNQ-13` | af_gen: a weapon of level 4 becomes a unique of its window now and then (~UN_T/256), with its base; the shops (af_m 2) never |
+| `UNQ-14` | inventory: a unique has its own name in yellow (UC_UNIQUE) and the box lists its powers ('gravedigger': hp+6 pen+1) |
 
-### regression (261)
+### regression (265)
 
 | ID | Test |
 |---|---|
@@ -172,7 +173,11 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `AFG-12` | blacksmith: 3..8 wares from the filtered pool (repetitions allowed), empty entries after them |
 | `AFX-10` | MAG_W/MAG_A: the ATT_DMG +N prefix of weapons, the AC +N prefix of armors and shields; RSX_: stat x metal -> STR/DEX/CON +metal suffix |
 | `AFX-11` | recalc_stats: weapon prefix ATT_DMG +2 -> ATT and damage +2; armor prefix AC +2 -> AC +2; ring suffix STR +2 -> STR +4 |
-| `AFX-12` | inventory: 'fine sword' (prefix, pack) and 'copper ring of s' (suffix, worn, cut at 16 columns) in the list |
+| `AFX-12` | inventory: 'fine sword' (prefix, pack) and 'copper ring of strength' (suffix, worn, whole in 33 columns since 22/11) in the list |
+| `AFU-10` | inventory: an item with a cursed prefix has its name in grey (UC_CURSED), a magic one in light blue (UC_MAGIC) |
+| `AFU-11` | inventory: the item box title shows the full name beyond 16 columns ('... studded armor of ...') |
+| `AFU-12` | inventory: a 32-character name is whole on its row (33 columns, 22/11); a 35-character one scrolls on the cursor row |
+| `AFU-13` | inventory: the item box lists the powers not in the numbers: armor 'of the wolf' -> 'hp+12', shield 'of health' -> 'hit-1' |
 | `SFX-10` | inventory: equipping an armor with suffix 7 puts 7 in c_eqs[1]; the old armor goes to the pack with its suffix 5 |
 | `SFX-11` | sort_pack: the suffix follows its item (5 parallel tables) |
 | `SFX-12` | hero file: HERO_LEN 254, file of HERO_LEN + 5 x LV_SLOT; save_char then load_char gives back c_packs, c_eqs and st_sx |

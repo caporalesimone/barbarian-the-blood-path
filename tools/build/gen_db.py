@@ -629,8 +629,54 @@ def main():
         chk(v == int(r["value2"] or 0), f"affisso {r['name']}: value1 != value2 (valore variabile: serve il byte del valore, Abisso)")
         chk(-128 <= v <= 127, f"affisso {r['name']}: valore {v} fuori da un byte con segno")
         pw.append(PW.index(r["power"]) + 1); val.append(v & 255)
-    FT.bytes("af_pw", pw)                # potere della riga (PW_*)
-    FT.bytes("af_val", val)              # valore della riga (con segno)
+    # (22/11, fase 6) unici (data/items/next/uniques.tsv): nell'oggetto suffisso = $80 + numero dell'unico, prefisso 0, id = la
+    # base. I poteri (fino a 4, valori fissi) sono righe in coda ad af_pw / af_val: unico u -> righe UN0 + 4u .. UN0 + 4u + 3
+    # (potere 0 = riga vuota). Righe nuove solo in fondo al .tsv: il numero dell'unico sta nei salvataggi (riordinare o togliere
+    # righe chiede un SAVE_VER nuovo)
+    UQ = rows("uniques.tsv")
+    gname = {it["name"]: i for i, (k, cat, it) in enumerate(items)}
+    bname = {r["id"]: r["name"] for r in rows("bases.tsv")}
+    chk(1 <= len(UQ) <= 32, "unici: da 1 a 32")
+    un0 = len(pw)
+    chk(un0 + 4 * len(UQ) <= 128, "unici: righe dei poteri oltre 127 (af_pw)")
+    unb, unl, unh, unpl, unph, unn = [], [], [], [], [], []
+    maxu = yaml.safe_load(open(os.path.join(nx, "affix_rules.yaml")))["names"]["max_unique"]
+    for u in UQ:
+        nm = u["name"]
+        chk(len(nm) <= maxu, f"unico {nm}: nome oltre {maxu} caratteri")
+        chk(u["base"] in bname and bname[u["base"]] in gname, f"unico {nm}: base {u['base']} sconosciuta")
+        b = gname[bname[u["base"]]]
+        chk(items[b][1] in ("weapon", "armor", "shield", "ring"), f"unico {nm}: la base deve essere arma, armatura, scudo o anello")
+        lo, hi = int(u["min_level"]), int(u["max_level"])
+        chk(0 <= lo <= hi <= 127, f"unico {nm}: finestra {lo}..{hi}")
+        n = 0
+        for k in range(4):
+            p = u.get(f"power{k}") or ""
+            if not p:
+                continue
+            chk(p in PW, f"unico {nm}: potere {p} sconosciuto")
+            va, vb = int(u.get(f"v{k}a") or 0), int(u.get(f"v{k}b") or 0)
+            chk(va == vb, f"unico {nm}: {p} con valore variabile ({va}..{vb})")
+            chk(-128 <= va <= 127, f"unico {nm}: {p} {va} fuori da un byte con segno")
+            if p == "DUR":
+                chk(va in (50, 100, -50), f"unico {nm}: DUR solo +50, +100, -50 (af_dur)")
+            pw.append(PW.index(p) + 1); val.append(va & 255); n += 1
+        pw += [0] * (4 - n); val += [0] * (4 - n)
+        pr = int(u["price"])
+        chk(0 < pr < 65536, f"unico {nm}: prezzo {pr}")
+        unb.append(b); unl.append(lo); unh.append(hi); unpl.append(pr & 255); unph.append(pr >> 8)
+        unn.append(asm_str(nm, "unico"))
+    o(f"UN_N        = {len(UQ)}        ; (fase 6) unici: quanti, prima riga dei poteri in af_pw / af_val (4 righe per unico)")
+    o(f"UN0         = {un0}")
+    o.bytes("af_pw", pw)                 # potere della riga (PW_*); (22/11) in GAME con i poteri degli unici (prima nel font)
+    o.bytes("af_val", val)               # valore della riga (con segno)
+    FT.bytes("un_pl", unpl)               # prezzo dell'unico (it_cost)
+    FT.bytes("un_ph", unph)
+    # unici: base, finestra dei livelli (af_gen0); uno ogni unique_one_in, nella finestra (O3, O12). Nella RAM del font (FT):
+    # sotto l'I/O dopo gli slot dei piani non c'e' posto
+    FT.bytes("un_base", unb)
+    FT.bytes("un_lo", unl)
+    FT.bytes("un_hi", unh)
     # (21/11 sera, fase 3) generazione: livello minimo (bit 7 = maledetto: valore negativo), tipi di oggetto (bit 0 arma, 1 armatura,
     # 2 scudo, 3 anello: cat_bit >> 1), peso; prezzo aggiunto (con segno, 16 bit: E5, prezzi dei .tsv da tarare)
     TYB = {"weapon": 1, "armor": 2, "shield": 4, "ring": 8}
@@ -672,6 +718,7 @@ def main():
     o(f"CURSE_T     = {pct256(ac['cursed_share'], 'cursed_share')}       ; affisso maledetto con probabilita' CURSE_T / 256")
     chk(AR["rings"] == {"copper": 1, "silver": 2, "gold": 2}, "rings: il gioco fa rame 1, argento e oro 2 (oro: prefisso del livello piu' alto)")
     sm = AR["shops"]["magic"]
+    o(f"UN_T        = {pct256(100 / q['unique_one_in'], 'unique_one_in')}       ; unico con probabilita' UN_T / 256 se ce n'e' uno nella finestra")
     ag.bytes("shm_t", [pct256(min(sm["max"], sm["base"] + sm["per_level"] * l), "shops.magic") for l in range(21)])   # negozi: merce magica per livello del PG
     if "--check" not in sys.argv:
         open(os.path.join(os.path.dirname(DST), "afgen.asm"), "w").write("; (gen_db.py) tabelle di generazione degli affissi, sotto l'I/O\n" + "\n".join(ag.lines) + "\n")
@@ -710,6 +757,9 @@ def main():
     # ------------------------------------------------------------ nomi (codici schermo)
     o('        .enc "screen"')
     o.strings("itnm", [asm_str(it["name"], f"nome {k}") for k, _, it in items], t5=True)   # (21/11 sera) a 5 bit: ui_item / ip_puts
+    o("un_names                        ; (fase 6) nomi degli unici a 5 bit (#t5, leggibili qui), uno dopo l'altro (it_nm)")
+    for n in unn:
+        o(f'        #t5 "{n}"')
     # (15/11) niente piu' tn_*: i nomi dei tipi stanno nel file del tema del capitolo (tools/build/gen_gfx.py, NM_AT)
     o.strings("fn", [asm_str(n, "boss") for n in bw["first_names"]])
     o.strings("ep", [asm_str(n, "boss") for n in bw["epithets"]])

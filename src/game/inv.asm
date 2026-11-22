@@ -34,7 +34,7 @@ _nfi    sta ui_col
         cpx #I_SCROLL
         bne _px
         lda ui_ib
-        beq _nb
+        beq _px
         cmp #10                 ; "3 portal scroll", "10 portal scroll" (08/11: senza la x, fino a 10)
         bcc +
         sbc #10
@@ -46,31 +46,10 @@ _nfi    sta ui_col
         jsr ui_putc
         lda #$20
         jsr ui_putc
-        jmp _nb
-_px     lda ui_ib               ; prefisso
-        beq _nb
-        stx ui_x
-        jsr af_name
-        lda #$20
-        jsr ip_putc
-        ldx ui_x
-_nb     stx ui_x
-        lda itnm_lo,x
-        pha
-        lda itnm_hi,x
-        tax
-        pla
-        jsr ip_puts
-        lda ui_is               ; suffisso
-        beq +
-        lda #<af_of
-        ldx #>af_of
-        jsr ip_puts
-        lda ui_is
-        clc
-        adc #AF_SX0
-        jsr af_name
-+       lda #0
+        lda #0                  ; (la quantita' non e' un prefisso)
+        sta ui_ib
+_px     jsr it_nm               ; (22/11, fase 6: in GAME per lo spazio di CORE) "[prefisso ]nome[ of suffisso]" o nome dell'unico
+        lda #0
         sta ui_ib
         sta ui_is
         sta ui_sk

@@ -45,7 +45,7 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
 - **Colori** (08/11, scelti dal committente su prove in VICE): cornici dei riquadri **grigio scuro** (`UC_BOX` = 11),
   titoli sulle cornici **grigio chiaro** (`UC_BTTL` = 15: `ui_at` riconosce il titolo perché il testo parte sopra un
   `BOX_H`), etichette ciano, **tutti i numeri gialli** (statistiche, quantità, prezzi, oro: `UC_VALUE` = 7, 08/11, prima
-  bianchi), **nomi degli oggetti bianchi** (`UC_ITEM`; magici azzurri, rotti rossi), titolo della schermata giallo, riga dei tasti grigio medio.
+  bianchi), **nomi degli oggetti bianchi** (`UC_ITEM`; magici azzurri, maledetti grigi, unici gialli, rotti rossi), titolo della schermata giallo, riga dei tasti grigio medio.
 - **Oro** (08/11, regola del committente): mai la parola, sempre la **moneta** (un glifo, `CH_COIN` = 92, gialla).
   Possesso: moneta e poi il valore (`ui_gold`: `o 2350` in purse, inventario, locanda, scheda). Prezzi e valori: numero e
   poi moneta, attaccati (`ui_coin`: `buy 25o`, `sell 600o`, `fix 45o`, `val 1200o`, `64o` nel baule, `buy for 1200o?`,
@@ -69,7 +69,7 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
   spazio (22/11, committente; prima 16 colonne fisse): **33 colonne** (fino alla 37) in inventario, locanda e baule, **27** nei negozi, dove
   dalla colonna 32 c'è il prezzo (`sl_wd`, scelto in `sl_row` da `sl_rv`; `ui_item` usa sempre le colonne `ui_w` del chiamante: righe
   `sl_wd`, titolo del riquadro 34, messaggio "replaced" 16). Nella voce del cursore un nome più lungo **scorre** (fase 5 degli affissi, decisione del committente ex B4: un carattere
-  ogni 8 fotogrammi, pausa all'inizio e alla fine); colore del nome secondo la qualità (bianco, azzurro magico, grigio maledetto);
+  ogni 8 fotogrammi, pausa all'inizio e alla fine); colore del nome secondo la qualità (bianco, azzurro magico, grigio maledetto, giallo unico `UC_UNIQUE`: 22/11, con il suo nome);
   nel titolo del riquadro dell'oggetto il nome completo (fino a 34 colonne) e nella riga sotto i poteri degli affissi che non stanno
   nei numeri ([Oggetti](oggetti.md)). La colonna in più non sposta
   nulla. Le etichette weapon/armor/shield/ring non compaiono più in nessuna schermata.

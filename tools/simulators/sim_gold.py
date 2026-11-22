@@ -119,6 +119,9 @@ def gen_item(rng, cl, floor, force=0):
         best = [(p, k) for il, p, k in ITEMS[c] if il <= lvl]
         if best:                          # (21/11 evening) with the affixes of the game (af_gen / it_cost: items_model)
             p, k = best[-1]
+            u = IM.unique_roll(rng, c, lvl)       # (22/11, phase 6) unique: its fixed price (un_roll, it_cost)
+            if u:
+                return max(1, int(u["price"])) // SELL_DIV
             return max(1, p + IM.affix_price(IM.affix_roll(rng, c, k, lvl, t))) // SELL_DIV
 
 
