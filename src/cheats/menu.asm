@@ -9,6 +9,7 @@
 ;  (18/11, committente) gold +1000: a ogni Fire 1000 monete addosso (add_gold16: al massimo GOLD_MAX, il resto nel baule
 ;  della locanda lo si porta a mano).
 ;  Fire = fai, RUN/STOP = menu di gioco, W/S o joystick = scegli; la riga 23 conferma.
+;  (22/11, committente) In alto a destra la casella del PG nella mappa (x:y, colonne e righe 0..47), per le segnalazioni.
 ; ===================================================================
         .enc "screen"
 CT_N    = 6
@@ -39,6 +40,16 @@ ct_menu:
         .byte 15,18
         #t5 "gold +1000"
         .byte $ff
+        jsr player_tile         ; (22/11, committente) in alto a destra la casella del PG nella mappa: "x:y"
+        #at 31,1
+        lda ptx
+        ldx #0
+        jsr ui_n5l
+        lda #":"
+        jsr ui_putc
+        lda pty
+        ldx #0
+        jsr ui_n5l
 _dr     ldx #CT_N-1             ; '>' sulla voce del cursore
 _l      stx tmp3
         txa

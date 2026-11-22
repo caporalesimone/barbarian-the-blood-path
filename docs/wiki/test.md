@@ -242,7 +242,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CS-14` | preview: con +1 shows 'hp N -> N+6' and 'mod +2 -> +3' (new values green); hint of the stat under the cursor |
 | `CS-15` | confirm asks 'spend 2 points for good?': no = keep editing, yes = spent and 'no points to spend.' if none left |
 | `CS-16` | RUN/STOP with pending points asks 'spend 1 point before leaving?': no = points given back, yes = spent |
-| `CHEAT-10` | game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter |
+| `CHEAT-10` | game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter; (22/11) top right the hero's tile 'x:y' |
 | `CHEAT-11` | god mode on: no damage (hurt_player); god mode off: damage again |
 | `CHEAT-12` | level up: level + 1, xp = threshold of that level, stat points of pl_pts, hp max up and full; message 'level N' |
 | `CHEAT-13` | respec token: +1, message 'tokens N' |

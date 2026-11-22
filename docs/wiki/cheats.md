@@ -33,7 +33,10 @@ Codice in `src/cheats/menu.asm` (`ct_menu`), test `CHEAT-10..22` ([Test](test.md
 | `respec token` | +1 gettone respec (si usa nella schermata C) | `tokens N` (il totale) | Si ferma a `RESP_MAX` (255, `data/rules.yaml`): il messaggio mostra il totale, che non cresce più |
 | `next level` | Come le scale in giù, vedi sotto | nessuno (il gioco cambia schermata) | Villaggio 5: `limit reached` |
 | `next chapter` | Sblocca il capitolo dopo e **viaggia al suo villaggio** come l'uscita del capitolo (`chap_travel`): **salva** | nessuno (il gioco cambia schermata) | Villaggio 5 (l'ultimo): `limit reached` |
-| `gold +1000` | (18/11, committente) **1000 monete addosso a ogni Fire** (`add_gold16`) | `gold N` (l'oro addosso) | Al massimo `GOLD_MAX` (10000, `data/balance.yaml`): il resto va portato nel baule della locanda |
+| `gold +1000` | (18/11, committente) **1000 monete addosso a ogni Fire** (`add_gold16`) | `gold N` (l'oro addosso) | Al massimo il tetto del borsello (dal 22/11: 300, +250 per boss di capitolo, `GOLD_MAX` = 1300): il resto va portato nel baule della locanda |
+
+(22/11, committente) **In alto a destra il menu mostra la casella del PG nella mappa**, `x:y` (colonne e righe 0..47 della
+mappa del luogo: `ptx`, `pty`), per indicare un punto preciso nelle segnalazioni.
 
 Dettaglio di **`next level`** secondo dove si è:
 

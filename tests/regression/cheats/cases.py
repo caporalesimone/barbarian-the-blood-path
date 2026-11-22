@@ -74,7 +74,7 @@ def hero_saved(g, *names):
     return [g.b(L[n]) for n in names]
 
 
-@test("CHEAT-10", "game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter")
+@test("CHEAT-10", "game menu: 4th entry 'cheats'; the cheat menu lists god mode (off), level up, respec token, next level, next chapter; (22/11) top right the hero's tile 'x:y'")
 def menu(ctx):
     g, L = need(ctx)
     g.run_stop(); g.frames(2)
@@ -85,6 +85,8 @@ def menu(ctx):
     exp = ["> god mode: off", "  level up", "  respec token", "  next level", "  next chapter", "  gold ?1000"]
     check(got == exp, "cheat menu %s, expected %s" % (got, exp))
     check(text(g, 17, 4, 6) == "cheats", "title %r" % text(g, 17, 4, 6))
+    px, py = g.ptile()                                          # (22/11) the hero's tile, top right: "x:y"
+    check(text(g, 31, 1, 9).strip() == "%d:%d" % (px, py), "coordinates %r, expected '%d:%d'" % (text(g, 31, 1, 9), px, py))
     g.run_stop(); g.frames(2)
     check(text(g, 15, 14, 6) == "cheats", "RUN/STOP from the cheat menu: not back in the game menu")
     g.run_stop(); g.frames(2)
