@@ -57,6 +57,12 @@ d5_n    .byte ?                 ; (21/11 sera) decodificatore del testo a 5 bit 
 d5_h    .byte ?
 d5_l    .byte ?
 ti_p    .word ?                 ; ui_title: testo
+ui_w    .byte ?                 ; (fase 5) ui_item: colonne del nome (0 = 16); caratteri da saltare (nome scorrevole); caratteri contati
+ui_sk   .byte ?
+ui_nlen .byte ?
+sl_sk   .byte ?                 ; (fase 5) nome scorrevole della voce del cursore: passo, lunghezza del nome, riga del cursore in disegno
+sl_len  .byte ?
+sl_isc  .byte ?
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"
@@ -275,6 +281,7 @@ sl_draw:
         stx sl_r
         lda #0
         sta sl_w
+        sta sl_sk               ; (fase 5) il nome scorrevole riparte dall'inizio
 _r      ldx sl_r
         lda sl_w
         clc
@@ -445,12 +452,17 @@ sl_row:
 +       pha
         jsr sl_get
         pla
-        bcs _sep
+        bcc +
+        jmp _sep
++
+        ldy #0
+        sty sl_isc
         ldy sl_l                ; '>' solo nella lista attiva
         cpy sl_r
         bne +
         cmp sl_cur,x
         bne +
+        inc sl_isc              ; (fase 5) la voce del cursore: il nome lungo scorre
         lda #$3e
         jsr ui_putc
 +       lda #1                  ; colonna 2: segno nel suo colore
@@ -487,9 +499,16 @@ _it     jsr ui_cic
         bne +
         lda #2
 +       sta ui_fc
-        lda ui_sel
+        lda sl_isc              ; (fase 5) voce del cursore: si saltano i primi caratteri (sl_skv) e si conta la lunghezza
+        beq +
+        jsr sl_skv
++       lda ui_sel
         jsr ui_item
-        lda #0
+        lda sl_isc
+        beq +
+        lda ui_nlen
+        sta sl_len
++       lda #0
         sta ui_fc
 _v      ldx sl_r
         lda sl_rv+1             ; valore a destra (routine del MENU: A = sl_sl)
@@ -506,6 +525,25 @@ _sep    lda #9                  ; riga separatrice sottile, colonne 10..29
         dex
         bne -
 _x      ldx sl_r
+        rts
+
+; caratteri da saltare = sl_sk - 6 (pausa all'inizio), fra 0 e lunghezza - 16 (pausa alla fine)
+sl_skv: lda sl_sk
+        sec
+        sbc #6
+        bcs +
+        lda #0
++       sta ui_sk
+        lda sl_len
+        sec
+        sbc #16
+        bcc _z
+        cmp ui_sk
+        bcs +
+        sta ui_sk
++       rts
+_z      lda #0
+        sta ui_sk
         rts
 
 ; ------------------------------------------------------------------ cursore
@@ -542,8 +580,31 @@ _f      jsr ui_fire
         beq _no
         lda #NAV_FIRE
         rts
-_no     lda #NAV_NONE
+_no     lda sl_len          ; (fase 5, committente) nome della voce del cursore oltre 16 caratteri: scorre di uno ogni 8 fotogrammi,
+        cmp #17                 ; con una pausa all'inizio e alla fine
+        bcc _nn
+        lda frame
+        and #7
+        bne _nn
+        inc sl_sk
+        lda sl_len
+        sec
+        sbc #4                  ; lunghezza - 16 + 12 (6 passi di pausa all'inizio e 6 alla fine)
+        cmp sl_sk
+        bcs +
+        lda #0
+        sta sl_sk
++       ldx sl_l                ; si ridisegna solo la riga del cursore
+        stx sl_r
+        lda sl_cur,x
+        sec
+        sbc sl_top,x
+        sta sl_w
+        lda sl_cur,x
+        jsr sl_row
+_nn     lda #NAV_NONE
         rts
+
 _up     lda sl_n,x
         beq _no
 _u1     ldy sl_cur,x

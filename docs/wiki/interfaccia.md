@@ -63,10 +63,13 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
   il riquadro dell'oggetto `iv_sel` (righe 18-22: icona e nome nel titolo; la riga 3 la sceglie la schermata, `iv_l3`).
 - **Icona della categoria** (08/11 sera, `ui_cic`): in ogni lista di oggetti (pack, wares, contents, zaino e baule
   della locanda) e nel riquadro selected item, la colonna fra il cursore e il nome mostra l'icona della categoria al
-  posto dello spazio: spada (`CH_SWORD` 97, bianca), armatura (`CH_ARMOR` 98, grigio chiaro), scudo (`CH_SHLD` 35,
-  marrone), anello (`CH_RING` 99, giallo), pozione (`CH_POT` 94, nel colore della pozione), pergamena (`CH_SCR` 95,
-  grigio chiaro); spazio sui posti vuoti e sulla riga dell'oro del baule. I nomi (con `+N `) stanno in **16 colonne**
-  (`ui_item`, prima 17: il nome più lungo è `10 portal scroll` / `+2 viking sword`), così la colonna in più non sposta
+  posto dello spazio: spada (`CH_SWORD` 70, bianca), armatura (`CH_ARMOR` 71, grigio chiaro), scudo (`CH_SHLD` 35,
+  marrone), anello (`CH_RING` 72, giallo), pozione (`CH_POT` 68, nel colore della pozione), pergamena (`CH_SCR` 69,
+  grigio chiaro); spazio sui posti vuoti e sulla riga dell'oro del baule. I nomi ("prefisso nome of suffisso" dal 21/11 sera) stanno in **16 colonne**
+  (`ui_item`): nella voce del cursore un nome più lungo **scorre** (fase 5 degli affissi, decisione del committente ex B4: un carattere
+  ogni 8 fotogrammi, pausa all'inizio e alla fine); colore del nome secondo la qualità (bianco, azzurro magico, grigio maledetto);
+  nel titolo del riquadro dell'oggetto il nome completo (fino a 34 colonne) e nella riga sotto i poteri degli affissi che non stanno
+  nei numeri ([Oggetti](oggetti.md)). La colonna in più non sposta
   nulla. Le etichette weapon/armor/shield/ring non compaiono più in nessuna schermata.
 - Variabili `ui_cur`, `ui_n`, `ui_lc` (e `tb_n`/`tb_i`, contatori di `ui_boxes`); `nav_init` legge una volta la tastiera
   all'apertura, così un tasto già premuto (fire, I) non conta. Nelle build `NOKEYS` (screenshot) `ui_nav` non legge

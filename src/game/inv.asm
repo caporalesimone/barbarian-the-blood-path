@@ -19,15 +19,21 @@ ui_item:
         bne _mg
         ldy ui_is
         beq +
-_mg     lda #UC_MAGIC
+_mg     jsr it_qcol             ; (fase 5) magico azzurro, maledetto grigio
 +       ldy ui_fc
         beq _nfi
         lda ui_fc
 _nfi    sta ui_col
-        lda cidx
+        lda #0
+        sta ui_nlen
+        lda ui_w                ; (fase 5) colonne del nome: 16 (liste) o di piu' (riquadro dell'oggetto)
+        bne +
+        lda #16
+        sta ui_w
++       lda cidx
         pha
         clc
-        adc #16                 ; 16 colonne (08/11: la colonna prima del nome e' l'icona della categoria, ui_cic)
+        adc ui_w                ; 16 colonne (08/11: la colonna prima del nome e' l'icona della categoria, ui_cic)
         sta ui_lim
         cpx #I_SCROLL
         bne _px
@@ -71,10 +77,13 @@ _nb     stx ui_x
 +       lda #0
         sta ui_ib
         sta ui_is
+        sta ui_sk
         pla
         clc
-        adc #16
+        adc ui_w
         sta tmp6
+        lda #0
+        sta ui_w
 _p      lda cidx
         cmp tmp6
         bcs _d
@@ -520,14 +529,17 @@ _cl     ldx #1
         sta ui_ib
         lda ui_sx
         sta ui_is
+        lda #34                 ; (fase 5, O8) nel titolo del riquadro il nome completo (fino a 34 colonne)
+        sta ui_w
         lda ui_sel
         jsr ui_item
-        jsr iv_trim             ; (ui_item riempie 16 colonne: la cornice riprende dopo il nome)
+        jsr iv_trim             ; (ui_item riempie le colonne del nome: la cornice riprende dopo il nome)
         #at 2,IV_SY+1           ; caratteristiche
         jsr it_prim
         lda #$20
         jsr ui_putc
         jsr it_sec
+        jsr it_pw               ; (fase 5) i poteri degli affissi che non stanno nei numeri
         #at 2,IV_SY+2           ; valore e durabilita' (negozi: solo la durabilita', il prezzo e' nella riga 3)
         lda iv_mode
         bne +

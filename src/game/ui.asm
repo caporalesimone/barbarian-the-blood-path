@@ -121,6 +121,7 @@ UC_HELP  = 12
 UC_LABEL = 3
 UC_VALUE = 7                    ; numeri (statistiche, quantita', prezzi): gialli (08/11, prima bianchi)
 UC_ITEM  = 1                    ; nome di un oggetto normale (bianco)
+UC_CURSED = 12                  ; (fase 5, O7) nome di un oggetto con un affisso maledetto (grigio; 11 e' "posto vuoto")
 UC_CURSOR = 13
 UC_MAGIC = 14
 ; (21/11 sera) codici ui_lc dei negozi (src/menu/shop.asm sh_cur): 0..7 zaino, 8..12 equipaggiamento (PACK_N + posto), LC_W + n merce,
@@ -1084,12 +1085,114 @@ ip_p5:  lda #0
         jmp -
 +       rts
 ip_putc:
-        ldy cidx
+        inc ui_nlen             ; (fase 5) lunghezza del nome completo e caratteri saltati del nome scorrevole
+        ldy ui_sk
+        beq +
+        dec ui_sk
+        rts
++       ldy cidx
         cpy ui_lim
         bcs +
         jmp ui_putc
 +       rts
 af_of   #t5 " of "
+; (fase 5, O8) poteri degli affissi dell'oggetto mostrato (ui_px, ui_sx) che non stanno gia' nei numeri della riga: "hp+12",
+; "hit-1" (danno subito in meno), "spd+2", "pen+1", "str+1" (non per gli anelli: la prima caratteristica e' gia' nella riga),
+; "ind" (indistruttibile), fino alla colonna 34
+it_pw:  lda ui_px
+        jsr _one
+        lda ui_sx
+        beq _r
+        clc
+        adc #AF_SX0
+_one    tay
+        beq _r
+        lda cidx
+        cmp #34
+        bcs _r
+        ldx af_pw,y
+        lda pw_tx-1,x           ; 0 = gia' nei numeri (o nella durabilita')
+        beq _r
+        cpx #PW_ALL+1           ; caratteristiche: non per gli anelli
+        bcs +
+        cpx #PW_STR
+        bcc +
+        ldx ui_sel
+        lda itcat,x
+        cmp #CAT_RING
+        beq _r
+        ldx af_pw,y
++       sty af_t
+        inc cidx
+        txa                     ; 3 caratteri: pw_t1/2/3
+        tax
+        lda pw_tx-1,x
+        jsr ui_putc
+        lda pw_t2-1,x
+        jsr ui_putc
+        lda pw_t3-1,x
+        cmp #$20
+        beq +
+        jsr ui_putc
++       cpx #PW_INDESTRUCTIBLE
+        beq _r
+        ldy af_t
+        lda af_val,y
+        cpx #PW_GETHIT
+        beq _m
+        tax
+        bmi _n
+        lda #$2b                ; '+'
+        jsr ui_putc
+        txa
+        jmp ui_b3l
+_n      lda #$2d
+        jsr ui_putc
+        txa
+        eor #$ff
+        clc
+        adc #1
+        jmp ui_b3l
+_m      pha
+        lda #$2d                ; danno subito: "-N"
+        jsr ui_putc
+        pla
+        jmp ui_b3l
+_r      rts
+; 3 caratteri per potere (PW_ATT_DMG .. PW_THORNS); 0 = non mostrato qui
+pw_tx   .byte 0, 0, 0, 0        ; att/dmg, att, dmg, ac: gia' nei numeri; poi str dex con all  hp hit pen spd (dur: 0) ind lch thn
+        .text "sdca hps"
+        .byte 0
+        .text "ilt"
+pw_t2   .byte 0, 0, 0, 0
+        .text "teolhiep"
+        .byte 0
+        .text "nch"
+pw_t3   .byte 0, 0, 0, 0
+        .text "rxnlptnd"
+        .byte 0
+        .text "dhn"
+        .cerror PW_THORNS != 16 || PW_STR != 5, "pw_tx: tabella dei poteri"
+        .cerror pw_t2 - pw_tx != 16, "pw_tx: 16 poteri"
+
+; (fase 5, O7) colore di un oggetto con affissi (ui_ib prefisso, ui_is suffisso): grigio se uno dei due e' maledetto (valore
+; negativo), altrimenti azzurro. A = colore; X conservato
+it_qcol:
+        ldy ui_ib
+        lda af_val,y
+        bmi _c
+        lda ui_is
+        beq _m
+        clc
+        adc #AF_SX0
+        tay
+        lda af_val,y
+        bmi _c
+_m      lda #UC_MAGIC
+        rts
+_c      lda #UC_CURSED
+        rts
+
 ; (21/11, O6) requisito dell'oggetto Y (itreq: bit 7 = DES, s_dex; altrimenti FOR, s_str; valore nei bit 0-6, 0 = nessuno):
 ; C = 1 se non raggiunto. X e Y conservati
 req_chk:

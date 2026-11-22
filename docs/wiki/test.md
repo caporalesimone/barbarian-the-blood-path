@@ -154,15 +154,19 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 | ID | Test |
 |---|---|
+| `AFU-10` | inventory: an item with a cursed prefix has its name in grey (UC_CURSED), a magic one in light blue (UC_MAGIC) |
+| `AFU-11` | inventory: the item box title shows the full name beyond 16 columns ('... studded armor of ...') |
+| `AFU-12` | inventory: the long name on the cursor row scrolls (after ~80 frames the row shows a later part of the name) |
+| `AFU-13` | inventory: the item box lists the powers not in the numbers: armor 'of the wolf' -> 'hp+12', shield 'of health' -> 'hit-1' |
+
+### regression (261)
+
+| ID | Test |
+|---|---|
 | `AFP-10` | recalc_stats: armor 'of the wolf' -> hpmax +12; shield 'of health' -> s_gh 1; weapon 'of piercing' -> pen +1, 'of readiness' -> rate -1 |
 | `AFP-11` | hurt_player with s_gh 2: 5 damage -> -3 hp, 1 damage -> -1 hp (at least 1) |
 | `AFP-12` | add_to_pack (same random state): durability +50 -> max + max/2, +100 -> max x 2 (at most 255), -50 -> max - max/2, indestructible -> 0 |
 | `AFP-13` | af_ch: life leech and thorns have weight 0 (after 2.0, decision O5), every other row a weight > 0 |
-
-### regression (257)
-
-| ID | Test |
-|---|---|
 | `AFG-10` | gen_item at chestLevel 80 (T 10): magic share of weapons/armors/shields near mag_t[10]; every affix fits the item type; rings always have affixes, silver and gold both |
 | `AFG-11` | it_cost: price = itprice + price_add of prefix and suffix (signed: a cursed row costs less), at least 1; scrolls ignore the quantity |
 | `AFG-12` | blacksmith: 3..8 wares from the filtered pool (repetitions allowed), empty entries after them |

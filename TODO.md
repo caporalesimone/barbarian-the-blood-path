@@ -20,7 +20,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
 | 2 | [Decisioni del committente](#2--decisioni-del-committente) | B2, B3, B6, B8–B18 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
-| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E5, C1, E1, M2, E6, E7, E8, E9, E10 |
+| 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E5, C1, M2, E6, E7, E8, E9, E10 |
 | 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
 | 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M10, M3, M4, M5 |
@@ -113,14 +113,6 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 ### C1 (ex 1.2) Grafica della cintura nell'HUD: ampolle colorate — S-M
 - Ampolle nei colori della pozione (rossa 2, gialla 7, viola 4) al posto dell'icona generica; in ricarica blu (già fatto).
   **Cavilli**: caratteri hires, colori < 8; i codici liberi dell'HUD sono finiti (`HUD_FREE`); da ripensare con la cintura a 8 (F1).
-
-### E1 (ex 2.2) Nomi corti degli oggetti (con gli affissi) — S-M
-- **Deciso (21/11, committente, ex B4)**: gli anelli prendono la caratteristica come suffisso ("of strength", O9); per i nomi
-  lunghi prima si prova ad **accorciare tutti i nomi** (basi e affissi) perché stiano nelle liste (28 colonne nei negozi, 34
-  nelle altre); se non si riesce per tutti, il nome **scorre sulla riga evidenziata**. Il nome intero sta comunque nel titolo
-  del riquadro dell'oggetto (35 colonne).
-- Nomi in `data/items/items.tsv` / `data/items/next/`, `docs/wiki/oggetti.md`, help, manuale. **Cavillo**: la rarità del
-  materiale va spiegata altrove.
 
 ### M2 Temi audio veri dei villaggi — S-M
 - Brano per capitolo fatto il 12/11 ([musica](docs/wiki/musica.md)). **Resta**: scegliere i temi dei villaggi 2–4 (oggi tutti Tavern
