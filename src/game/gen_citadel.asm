@@ -6,41 +6,28 @@
 ;  gen_dmain (gen_io.asm: jsr cit_finish = OVP_AT + OVJ_GEN). Prima del 19/11 era assemblato da solo per GFX_DUN_END.
 ; ===================================================================
 cit_main:
-        ldx #44                 ; colonne
-_pr     stx cit_py
-        lda maprow_lo-1,x       ; riga y - 1
-        sta ptr1
-        lda maprow_hi-1,x
-        sta ptr1+1
-        lda #1                  ; x - 1
-_pc     sta cit_px
-        ldx #8
-_p9     lda cit_9,x
+        ; (22/11, committente: "troppe colonne") colonne solo nelle sale della navata centrale (celle della colonna 1: 13, 9, 5,
+        ; 1; lo specchio fa le gemelle), quattro per sala, a una casella dagli angoli: (rx+1 | rx+rw-2, ry+1 | ry+rh-2). Le corsie
+        ; dei corridoi (centro della sala, larghe 2) restano libere e una colonna non tocca mai un muro (sale almeno 7 x 7).
+        ; Prima: una colonna ogni 3 caselle in tutte le sale (70-110 per piano); ora 32.
+        ldx #13
+_pl     stx cit_py
+        ldy ry,x
+        iny
+        jsr _two
+        ldx cit_py
+        lda ry,x
         clc
-        adc cit_px
+        adc rh,x
         tay
-        lda (ptr1),y
-        cmp #T_FLOOR
-        bne _pn
-        dex
-        bpl _p9
-        lda cit_px
-        clc
-        adc #MAPW+1             ; centro del quadrato
-        tay
-        lda #T_WALL
-        sta (ptr1),y
-_pn     lda cit_px
-        clc
-        adc #3
-        cmp #21
-        bcc _pc
+        dey
+        dey
+        jsr _two
         lda cit_py
         sec
-        sbc #3
+        sbc #4
         tax
-        cpx #2
-        bcs _pr
+        bpl _pl
         ; passaggi sull'asse: ogni riga con probabilita' 1/2, l'ultima se non ce n'e' ancora nessuno
         lda #0
         sta cit_na
@@ -123,4 +110,22 @@ _mn     dex
         bpl _mm
         rts
 
-cit_9    .byte 0, 1, 2, MAPW, MAPW+1, MAPW+2, 2*MAPW, 2*MAPW+1, 2*MAPW+2    ; quadrato 3x3 dall'angolo in alto a sinistra
+; riga Y della sala cit_py: le due colonne (rx+1 e rx+rw-2)
+_two    lda maprow_lo,y
+        sta ptr1
+        lda maprow_hi,y
+        sta ptr1+1
+        ldx cit_py
+        ldy rx,x
+        iny
+        lda #T_WALL
+        sta (ptr1),y
+        lda rx,x
+        clc
+        adc rw,x
+        tay
+        dey
+        dey
+        lda #T_WALL
+        sta (ptr1),y
+        rts

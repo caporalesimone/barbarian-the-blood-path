@@ -134,8 +134,11 @@ sale grandi con colonne, porte allineate, **simmetria sinistra/destra**; si gene
 si specchia (`cit_finish` in `gen_io.asm`, ~250 B). Stesso contratto delle stanze (16 celle, `vis`, rettangoli, centri, albero):
 - sale **7..10 × 7..10**, tutte presenti (`lv_drop` = 0); l'albero di `gen_links` e gli anelli **solo nella metà sinistra**
   (celle delle colonne 2-3 segnate assenti per l'albero, partenza in colonna 0-1);
-- **colonne**: un muro su una griglia di 3 caselle (x = 2, 5 .. 20; y = 2, 5 .. 44) dove il quadrato 3×3 intorno è tutto
-  pavimento, cioè dentro le sale. Un muro con 8 vicini di pavimento non separa mai nulla (`post_walls` gli dà la facciata);
+- **colonne** (22/11, committente: "troppe colonne"; `GVER` 12): solo nelle sale della **navata centrale** (le due colonne di
+  sale accanto all'asse: celle della colonna 1 e le loro gemelle), **quattro per sala**, a una casella dagli angoli
+  (`rx+1` / `rx+rw-2`, `ry+1` / `ry+rh-2`): **32 per piano**. Le sale laterali sono vuote. Le corsie dei corridoi (centro
+  della sala, larghe 2) restano libere; un muro con 8 vicini di pavimento non separa mai nulla (`post_walls` gli dà la
+  facciata). Prima (19/11): una colonna ogni 3 caselle in tutte le sale, 70-110 per piano;
 - **passaggi sull'asse**: da 1 a 4 corridoi dritti larghi 2 dalla sala della colonna 1 fino all'asse (x = 24), sulla riga del
   centro della sala; lo specchio li prolunga nella sala gemella (porte allineate). Almeno uno, quindi il piano è collegato;
 - **specchio**: colonne 24..47 = 23..0; celle 2-3 = specchio delle 1-0 (`rx' = 48 - rx - rw`, `rcx' = 46 - rcx`, così i

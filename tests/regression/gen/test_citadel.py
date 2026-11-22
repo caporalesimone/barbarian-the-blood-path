@@ -16,6 +16,7 @@ import cases as PD  # noqa: E402   (stopwatch of VICE: sw_reset, sw, CPS)
 SEEDS = 6
 MIN_FLOOR = 700
 MIN_COLS = 4
+MAX_COLS = 40          # (22/11, owner: "too many columns") four columns in each hall of the central nave: 32 a level
 MAX_GEN = 1.0            # s; rooms ~0.3 s
 FLOORS = (2, 3, 4)
 W = 48
@@ -30,7 +31,7 @@ def main():
         g.to_menu(); new_game(g); g.frames(3); g.at_input = False
         L = g.L
         g.poke(L["c_chap"], 4); g.poke(L["c_unl"], 4)
-        worst, cols_min, floor_min = 0, 999, 9999
+        worst, cols_min, floor_min, cols_max = 0, 999, 9999, 0
         for s in range(SEEDS):
             g.poke(L["c_seedt"], *[rng.randrange(36) for _ in range(6)])
             g.poke(L["c_vis"], 0, 0, 0)
@@ -70,8 +71,9 @@ def main():
                 cols = sum(1 for y in range(1, W - 1) for x in range(1, W - 1) if (x, y) not in fl and
                            all((x + dx, y + dy) in fl for dx in (-1, 0, 1) for dy in (-1, 0, 1) if dx or dy))
                 cols_min = min(cols_min, cols); floor_min = min(floor_min, len(fl))
-                if cols < MIN_COLS:
-                    err.append("%s: only %d columns" % (tag, cols))
+                if not MIN_COLS <= cols <= MAX_COLS:
+                    err.append("%s: %d columns (expected %d..%d)" % (tag, cols, MIN_COLS, MAX_COLS))
+                cols_max = max(cols_max, cols)
                 if len(fl) < MIN_FLOOR:
                     err.append("%s: only %d walkable tiles" % (tag, len(fl)))
                 if t > MAX_GEN:
@@ -82,8 +84,8 @@ def main():
                     for y in range(W):
                         print("".join("U" if (x, y) == up else "D" if (x, y) == dn else "." if (x, y) in fl else "#"
                                       for x in range(W)))
-        print("citadel: %d seeds x levels 16-19, slowest generation %.2f s, fewest columns %d, fewest walkable tiles %d; "
-              "no monster in a wall on levels 1-19" % (SEEDS, worst, cols_min, floor_min))
+        print("citadel: %d seeds x levels 16-19, slowest generation %.2f s, columns %d..%d, fewest walkable tiles %d; "
+              "no monster in a wall on levels 1-19" % (SEEDS, worst, cols_min, cols_max, floor_min))
     finally:
         g.close()
     if err:
