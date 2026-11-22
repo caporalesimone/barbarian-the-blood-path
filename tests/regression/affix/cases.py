@@ -4,7 +4,7 @@ and shields AC: mag_px), the ring stat a suffix (of strength / dexterity / vital
 adds the affixes of what is worn; the lists show "prefix name of suffix" cut at 16 columns. One VICE session, the village."""
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, key, K_I
+from lib.play import new_game, key, K_I, inv_pack
 
 CHAIN = True
 PW = ["ATT_DMG", "ATT", "DMG", "AC", "STR", "DEX", "CON", "ALL"]
@@ -83,7 +83,7 @@ def afx_names(ctx):
     g.poke(L["c_pack"], L["I_SWORD"], 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["c_packb"], mag[2], 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], 0, 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["c_eq"] + 3, L["I_COPPER"]); g.poke(L["c_eqb"] + 3, 0); g.poke(L["c_eqs"] + 3, rs[0])   # worn: always in view
-    key(g, K_I, 3)
+    inv_pack(g)
     check(not g.in_game(), "the inventory does not open")
     s = screen(g)
     check("fine sword" in s, "no 'fine sword' on the screen")

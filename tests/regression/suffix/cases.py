@@ -4,7 +4,7 @@ equipping (eq_get / pk_swap / eq_put), sorting (sort4 with 5 tables), the inn ch
 the village."""
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, key, K_I, D, U
+from lib.play import new_game, key, K_I, D, U, inv_pack
 
 CHAIN = True
 
@@ -26,7 +26,7 @@ def sfx_equip(ctx):
     g.poke(L["c_eq"] + 1, ch); g.poke(L["c_eqs"] + 1, 5)
     g.poke(L["c_pack"], la, 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], 7, 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["c_packd"], 30); g.poke(L["c_packm"], 40); g.poke(L["c_packb"], 0)
-    key(g, K_I, 3)
+    inv_pack(g)
     check(not g.in_game(), "the inventory does not open")
     g.press_fire(); g.frames(2)
     check(g.b(L["c_eq"] + 1) == la and g.b(L["c_eqs"] + 1) == 7, "equipped %d suffix %d (expected %d, 7)" % (g.b(L["c_eq"] + 1), g.b(L["c_eqs"] + 1), la))

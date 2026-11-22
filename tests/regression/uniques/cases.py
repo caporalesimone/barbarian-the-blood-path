@@ -7,7 +7,7 @@ import csv
 import os
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, key, K_I, D, U
+from lib.play import new_game, key, K_I, D, U, inv_pack
 
 CHAIN = True
 UQ = list(csv.DictReader(open(os.path.join(os.path.dirname(__file__), "..", "..", "..", "data", "items", "next", "uniques.tsv")),
@@ -103,7 +103,7 @@ def unq_ui(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["c_pack"], L["I_MACE"], 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["c_packb"], 0, 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], 0x80 + uq("gravedigger"), 0, 0, 0, 0, 0, 0, 0)
-    key(g, K_I, 3)
+    inv_pack(g)
     g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)
     y = next((y for y in range(25) if "gravedigger" in row(g, y) and y != L["IV_SY"]), None)
     check(y is not None, "unique name not in the list")

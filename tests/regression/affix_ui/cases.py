@@ -3,7 +3,7 @@ UC_CURSED), full name in the title of the item box (up to 34 columns), long name
 (sl_nav: one character every 8 frames, pauses at both ends). One VICE session, the village, the real inventory."""
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, key, K_I, D, U
+from lib.play import new_game, key, K_I, D, U, inv_pack
 
 CHAIN = True
 
@@ -46,7 +46,7 @@ def afu_colour(ctx):
     cur = next(k for k in range(1, L["AF_NP"] + 1) if sgn(v[k]) < 0 and p[k] in (L["PW_DMG"], L["PW_ATT_DMG"]))
     g.poke(L["c_pack"], L["I_SWORD"], L["I_MACE"], 0, 0, 0, 0, 0, 0)
     g.poke(L["c_packb"], cur, L["MAG_W1"], 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], 0, 0, 0, 0, 0, 0, 0, 0)
-    key(g, K_I, 3)
+    inv_pack(g)
     check(not g.in_game(), "the inventory does not open")
     g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)
     y = find_row(g, "sword"); y2 = find_row(g, " mace")
@@ -62,7 +62,7 @@ def afu_title(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["c_pack"], L["I_STUDDED_ARMOR"], 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["c_packb"], L["MAG_A2"], 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], L["RSX_11"], 0, 0, 0, 0, 0, 0, 0)
-    key(g, K_I, 3)
+    inv_pack(g)
     g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)
     t = row(g, L["IV_SY"])
     check("studded armor of" in t, "box title %r" % t.strip())
@@ -74,7 +74,7 @@ def afu_scroll(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["c_pack"], L["I_STUDDED_ARMOR"], L["I_VIKING_SWORD"], 0, 0, 0, 0, 0, 0)
     g.poke(L["c_packb"], L["MAG_A2"], L["MAG_W3"], 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], L["RSX_11"], L["RSX_21"], 0, 0, 0, 0, 0, 0)
-    key(g, K_I, 3)
+    inv_pack(g)
     g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)
     y = next((y for y in range(25) if row(g, y).startswith(".>")), None)
     check(y is not None, "no cursor row")
@@ -103,7 +103,7 @@ def afu_powers(ctx):
     for item, s, want in ((L["I_LEATHER_ARMOR"], sfx("LIFE", 12), "hp+12"), (L["I_SMALL_SHIELD"], sfx("GETHIT", 1), "hit-1")):
         g.poke(L["c_pack"], item, 0, 0, 0, 0, 0, 0, 0)
         g.poke(L["c_packb"], 0, 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packs"], s, 0, 0, 0, 0, 0, 0, 0)
-        key(g, K_I, 3)
+        inv_pack(g)
         g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)
         r = row(g, L["IV_SY"] + 1)
         check(want in r, "box row %r without %r" % (r.strip(), want))

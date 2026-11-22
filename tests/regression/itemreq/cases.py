@@ -2,7 +2,7 @@
 (s_str, ring included) an item is not equipped (inventory and inn) and its box shows "str N". One VICE session, the village."""
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, key, K_I, D, U
+from lib.play import new_game, key, K_I, D, U, inv_pack
 
 CHAIN = True
 
@@ -25,7 +25,7 @@ def req_inv(ctx):
     check(req[heavy] >= 17, "no weapon with a STR requirement >= 17 (itreq %s)" % req)
     w0 = g.b(L["c_eq"])
     g.poke(L["c_pack"], heavy, 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packd"], 30); g.poke(L["c_packm"], 40); g.poke(L["c_packb"], 0)
-    key(g, K_I, 3)
+    inv_pack(g)
     check(not g.in_game(), "the inventory does not open")
     g.poke(L["s_str"], req[heavy] - 1)
     g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)  # (21/11, scrolling list) away and back: the box is redrawn

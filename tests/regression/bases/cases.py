@@ -2,7 +2,7 @@
 4 shields in the game, the DEX requirement (column min_dex -> itreq bit 7, req_chk). One VICE session, the village."""
 from lib.c64 import Game
 from c64test import test, check
-from lib.play import new_game, key, K_I, D, U
+from lib.play import new_game, key, K_I, D, U, inv_pack
 
 CHAIN = True
 
@@ -40,7 +40,7 @@ def bases_dex(ctx):
     check(req == 0x80 | 14, "itreq of the studded armor $%02x (expected $8e: DEX 14)" % req)
     a0 = g.b(L["c_eq"] + 1)
     g.poke(L["c_pack"], sa, 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packd"], 30); g.poke(L["c_packm"], 40); g.poke(L["c_packb"], 0)
-    key(g, K_I, 3)
+    inv_pack(g)
     check(not g.in_game(), "the inventory does not open")
     g.poke(L["s_dex"], 13); g.poke(L["s_str"], 18)
     g.frames(1, joy=D); g.frames(1); g.frames(1, joy=U); g.frames(2)  # away and back: the box is redrawn

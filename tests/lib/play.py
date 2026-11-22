@@ -43,6 +43,13 @@ def list_to(g, lst, var, want, n=40):
 K_R, K_E = (2, 0x02), (1, 0x40)
 
 
+def inv_pack(g, slot=0, settle=3):
+    """(22/11) open the inventory (I) and bring the cursor to pack slot `slot` (since 22/11 the inventory opens on the weapon;
+    before, on the first pack slot)"""
+    key(g, K_I, settle)
+    return list_to(g, 0, "ui_cur", slot)
+
+
 def key(g, k, settle=1):
     g.frames(1, keys={k[0]: k[1]}); g.frames(settle)
 
