@@ -18,8 +18,8 @@ Tutti i testi del gioco sono in inglese; i nomi di oggetti, mostri e abilità no
 | I | inventario |
 | M | mappa del piano (solo le parti esplorate) |
 | C | (11/11, branch `feature/stat-points`) schermata del personaggio: punti statistica e respec (`ui_charsheet`) |
-| Q | (17/11, concept; 18/11 elenco) elenco delle quest prese (titolo, capitolo); Fire = dettaglio: titolo, capitolo, stato segnaposto giallo, testo che scorre con W/S, premio; senza quest "talk to the villagers" (`ui_quest`, file `QST0` + `QSTn`, [Quest](quests.md)) |
-| Fire accanto a chi dà la quest | (17/11, villaggio) la quest è letta e si apre la sua pagina (i luoghi hanno la precedenza) |
+| Q | (22/11) elenco delle quest prese (titolo, "n/N" o "done"); Fire = dettaglio: titolo, obiettivo giallo con il contatore, testo che scorre con W/S, premio; senza quest "talk to the villagers" (`ui_quest` → modulo `QGIV`, [Quest](quests.md) 4.5) |
+| Fire accanto a un NPC fisso | (22/11, villaggio) modulo `QGIV`: consegna con il premio, oppure la quest presa e il suo testo, oppure "nothing for you now" (i luoghi hanno la precedenza) |
 | RUN/STOP | menu di gioco: resume, save game (salva e torna al gioco, senza schermata di conferma: basta l'attesa di `io_screen`, 08/11 sera), quit game (torna al menu dei barbari **senza salvare**, 11/11 sera) |
 
 Scelta dei tasti (06/11): chi gioca di tastiera ha la sinistra su W A S D + spazio e la destra sulla riga

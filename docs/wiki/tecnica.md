@@ -45,7 +45,7 @@ conferma dell'eliminazione −70 B) + ~450 B in `CODE2`. Altre idee in `TODO.md`
   build (aggiungerlo a `T5X` e a `d5_t2`). La codifica e' quella dello schermo: una macro fuori da `.enc "screen"` si ferma.
   A 5 bit: i messaggi `#msg` (`ui_pi`), le etichette (`ui_labels`: x, y, `#t5`, ...; `$ff` fine), i titoli (`ui_title`), le voci del
   menu di gioco, i nomi degli oggetti (`itnm`, `gen_db.py`) e degli affissi (`af_names`, `ip_puts`, `af_name`), i testi della scheda
-  C e dell'inventario (`ui_puts5`). Restano a 8 bit (`ui_puts`): i testi delle quest (file `QSTn`), nomi di file, nome e seme
+  C e dell'inventario (`ui_puts5`). Restano a 8 bit (`ui_puts`): nomi di file, nome e seme
   dell'eroe, scritte dell'HUD e della barra (font degli sprite). Guadagno con il font: margine di GAME da 942 a 1534 B; CORE da 41 a
   169 B liberi.
 

@@ -64,15 +64,14 @@ f title out/work/title.prg; f lore out/work/lore.prg; f ldat out/work/ldat.prg; 
 f hl out/work/hl.prg; f ksave out/work/krill/save.prg; f core out/work/core.prg; f csheet out/work/csheet.prg
 for s in 1 2 3 4 5; do f save-0$s out/work/save.prg; done
 if [ $X = cheats ]; then f cheats out/work/cheats.prg; else A=(-m "${A[@]}"); d hl; fi
-f qst0 out/work/qst0.prg                                                                                         # 2
+f qstg out/work/qgiv.prg                                                                                         # 2
 [ $X = cheats ] && A=(-m "${A[@]}")
-d twn1; d menu; d gfx1; d gfx2; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X                             # 3: capitolo 1
-f twn2 $B/twn2.prg; d menu; f gfx3 $B/gfx3.prg; f gfx4 $B/gfx4.prg; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X   # 4
-f twn3 $B/twn3.prg; d menu; f gfx5 $B/gfx5.prg; f gfx6 $B/gfx6.prg; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X   # 5
-f twn4 $B/twn4.prg; d menu; f gfx7 $B/gfx7.prg; f gfx8 $B/gfx8.prg; d csheet; d core; d qst0; d snd6; d ksave; d hl; d fmap # 6 (fmap: sala del trono)
-f twn5 $B/twn5.prg; d menu; d csheet; d core; d qst0; d snd6; d ksave; d hl; d $X
-f qst1 out/work/qst1.prg; f qst2 out/work/qst2.prg                                                               # 7
-for q in out/work/qst[3-9].prg; do [ -f "$q" ] && f $(basename $q .prg) $q; done
+d twn1; d menu; d gfx1; d gfx2; d csheet; d core; d qstg; d snd6; d ksave; d hl; d $X                             # 3: capitolo 1
+f twn2 $B/twn2.prg; d menu; f gfx3 $B/gfx3.prg; f gfx4 $B/gfx4.prg; d csheet; d core; d qstg; d snd6; d ksave; d hl; d $X   # 4
+f twn3 $B/twn3.prg; d menu; f gfx5 $B/gfx5.prg; f gfx6 $B/gfx6.prg; d csheet; d core; d qstg; d snd6; d ksave; d hl; d $X   # 5
+f twn4 $B/twn4.prg; d menu; f gfx7 $B/gfx7.prg; f gfx8 $B/gfx8.prg; d csheet; d core; d qstg; d snd6; d ksave; d hl; d fmap # 6 (fmap: sala del trono)
+f twn5 $B/twn5.prg; d menu; d csheet; d core; d qstg; d snd6; d ksave; d hl; d $X
+for c in 1 2 3 4; do f qtx$c out/work/qtx$c.prg; done                                                          # 7 (22/11: testi delle quest, D2)
 while [ $((NE % 11)) != 0 ]; do d hl; done                                                                       # 8 (riempito fino a 11)
 [ $((NE % 11)) = 0 ] || { echo "mkdisk: voci della directory non multiple di 11"; exit 1; }
 ARGS=(-S 4 -M 8 -n "blood path" -i "bp" "${A[@]}")
@@ -115,10 +114,6 @@ case $TWN_LAYOUT in
            ARGS+=(-f twn4 -w out/work/bundle/twn4.prg -f gfx7 -w out/work/bundle/gfx7.prg -f gfx8 -w out/work/bundle/gfx8.prg
                   -f twn5 -w out/work/bundle/twn5.prg) ;;
 esac
-# (18/11) le quest QST2..QST8 (piu' quest, tools/build/gen_quests.py) in fondo al disco: si leggono di rado (dettaglio di una
-# quest) e cosi' non spostano i file dei capitoli 2-5 (PERF-DISK)
-for f in out/work/qst[2-9].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done
-for f in out/work/qst[01].prg; do [ -f "$f" ] && ARGS+=(-f $(basename $f .prg) -w $f); done     # (17/11) elenco delle quest; (18/11) in fondo (vedi le voci in piu' dopo save-05)
 # (22/11, D2, D3) modulo del villaggio delle quest (qstg) e testi dei capitoli a 5 bit (qtx1..4): in fondo, letti di rado
 ARGS+=(-f qstg -w out/work/qgiv.prg)
 for c in 1 2 3 4; do ARGS+=(-f qtx$c -w out/work/qtx$c.prg); done

@@ -159,27 +159,20 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (15)
+### sanity (8)
 
 | ID | Test |
 |---|---|
-| `BU-10` | data: un_bch = boss_chapter of uniques.tsv; no unique given by a quest is in a boss subset; UNB_C 128 (50%), UNB_N 32 (12.5%) |
-| `BU-11` | bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1, level 5: only the 2 uniques of chapter 1 (D17) |
-| `QENG-10` | K (chain step 1, 8 fallen): only a fallen of chapter 1 counts; the 8th marks the step reached (q_flag bit 1) with 'quest complete' |
-| `QENG-11` | P and B (side a1.4: 10 kills on level 4; a1.3: a named boss of levels 1-4) in q_side slots 2 and 3: counted only on their level, bit 7 when reached |
-| `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
-| `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open |
-| `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
 | `QGIV-10` | father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet |
 | `QGIV-11` | step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, purse step (q_flag $10), the 'done' text |
 | `QGIV-12` | hilde gives step 2 (the amulet, from father osric); grom gives a1.1 (side, q_side slot 0 = id 1) after step 1 of the chapter |
 | `QGIV-13` | a1.1 reached, back to grom: a magic sword; then a1.2 (G: 300 gold) offered; Fire again: 'give 300 gold?' yes -> -300 gold, the gravedigger, q_sdone bits 0-1 |
 | `QGIV-14` | Q12: pack full, step 2 reached: father osric says 'no room' and the step stays to be taken back (q_step 1, q_flag bit 1) |
 | `QGIV-15` | D12, marks of the fixed NPCs (q_marks, npc_q): yellow $87 who has a quest to give, green $85 who takes one back, 0 nobody; the '!' sprite has that colour |
-| `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
-| `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
+| `QGIV-16` | page Q (key Q, module QGIV with q_k $ff): step 2 and the side a1.3 taken -> 2 rows with their titles; Fire on the first: its text and the goal; RUN/STOP back |
+| `QGIV-17` | page Q in a dungeon (level 1, no MENU module): the list, RUN/STOP back in the game; the stairs down still work (theme and CORE read again) |
 
-### regression (274)
+### regression (282)
 
 | ID | Test |
 |---|---|
@@ -223,6 +216,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BOSS1-10` | level 5: over 30% of its life the Abbot does not rage; under 30% it rages (red border, attack recharge <= AB_RCD) |
 | `BOSS1-11` | raging Abbot: the censer warns (white blinking) and then the cloud takes hpmax/8 from the hero next to it (far away: not checked, the boss walks) |
 | `BOSSMAP-10` | boss levels 5, 10, 15: the map of data/maps/bosschapN.txt (after post_walls), the furniture of the chapter, stairs up to the boss walkable, no stairs down, its own palette (final.palette), the tiles of GFX(2c) from boss_gfx.py |
+| `BU-10` | data: un_bch = boss_chapter of uniques.tsv; no unique given by a quest is in a boss subset; UNB_C 128 (50%), UNB_N 32 (12.5%) |
+| `BU-11` | bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1, level 5: only the 2 uniques of chapter 1 (D17) |
 | `BUILD-10` | variant: saved hero details (TESTUI=2) |
 | `BUILD-11` | variant: game menu (TESTUI=25) |
 | `BUILD-12` | variant: Fire on stairs (TESTFIRE) |
@@ -340,7 +335,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
 | `MUSIC-10` | songs per level, buffer = SNDn files, combat and resume, copy under I/O |
 | `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
-| `NPCFIX-10` | village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, no quest; nobody else in their sectors |
+| `NPCFIX-10` | village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, npc_q = the D12 mark (0, $85, $87); nobody else in their sectors |
 | `NPCFIX-11` | next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv) |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |
 | `OPT-12` | neg16 / sabs: -tmp0:1 and |tmp0:1| saturated at 255 |
@@ -389,15 +384,21 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BELT-13` | save from the game menu, belt wiped in RAM, hero loaded from disk: same belt |
 | `BELT-14` | death keeps the belt (no potion lost) |
 | `POT-10` | pot_heal: dungeon column up to level 20, Abyss column (heal_abyss) from level 21, all potions, Y kept |
+| `QENG-10` | K (chain step 1, 8 fallen): only a fallen of chapter 1 counts; the 8th marks the step reached (q_flag bit 1) with 'quest complete' |
+| `QENG-11` | P and B (side a1.4: 10 kills on level 4; a1.3: a named boss of levels 1-4) in q_side slots 2 and 3: counted only on their level, bit 7 when reached |
+| `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
+| `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open |
+| `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
 | `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
-| `QUEST-11` | Q with no quest taken: the list (file QST0) says 'talk to the villagers', RUN/STOP goes back to the game |
+| `QUEST-11` | Q with no quest taken: the list (22/11: module QGIV, q_k $ff) says 'talk to the villagers', RUN/STOP goes back to the game |
 | `QUEST-12` | Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv); concept quest 1 marked taken for the list tests below |
 | `QUEST-13` | the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop |
 | `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
-| `QUEST-15` | a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests |
 | `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
 | `QUESTDB-NEXT-10` | quest database (data/quests/next): 12 chain steps, 15 side quests, 6 repeatable models; limits, 5-bit characters, references |
-| `QUESTDB-NEXT-11` | quest texts at 5 bits (H7): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B |
+| `QUESTDB-NEXT-11` | quest texts at 5 bits (ex H7, done on 22/11 in gen_qdata.py): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B |
+| `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
+| `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
 | `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
 | `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
 | `RING-12` | alchemist: a ring among the wares has affixes (af_gen) and the bought ring keeps its suffix |

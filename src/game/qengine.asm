@@ -322,7 +322,7 @@ q_talk:
         lsr
         and #3
         sta q_k
-        ldy #nm_qst-nm_tab      ; "QST" + "G"
+q_load: ldy #nm_qst-nm_tab      ; "QST" + "G" (q_k: NPC, $ff = pagina Q)
         jsr set_name4
         lda #$47                ; "G" (PETSCII maiuscolo, come i nomi di nm_tab)
         sta cmdbuf+6

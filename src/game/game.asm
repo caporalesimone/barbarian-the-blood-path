@@ -112,7 +112,7 @@ c_chap  .byte ?          ; (12/11, SAVE_VER $C7, TODO M1) capitolo in cui si gio
 c_unl   .byte ?          ; capitolo piu' alto sbloccato (uccidere il boss del capitolo c sblocca c+1)
 c_packs .fill PACK_N     ; (21/11 sera, SAVE_VER $CC) suffisso degli oggetti nello zaino (0 = nessuno)
 c_eqs   .fill EQ_N       ; ... e dell'equipaggiamento (segue lo zaino come c_packb / c_eqb)
-c_qst   .byte ?          ; (17/11, SAVE_VER $C8, concept) quest prese: (18/11) maschera, bit n-1 = quest n (file QSTn)
+c_qst   .byte ?          ; (17/11, SAVE_VER $C8) concept delle quest; (22/11) non piu' usato (stato in q_step..)
 ; (22/11, SAVE_VER $CE, decisione D1 del committente) stato delle quest, 32 B (docs/wiki/quests.md sezione 0, QUEST-IMPLEMENTAZIONE 2.3)
 q_step  .byte ?          ; passi della catena consegnati (0..12)
 q_flag  .byte ?          ; bit 0 passo corrente preso, bit 1 obiettivo raggiunto (da riscuotere), bit 4-7 gradino borsello / cintura
@@ -3692,12 +3692,11 @@ _shp    cmp #T_DSMITH
         pla
         bcs _r
         jmp MENU_SHOP
-_np     jsr npc_here            ; (17/11) nessun luogo sotto il PG: accanto a chi da' una quest (18/11: Hilde o un NPC che
-        bcc _r                  ; vaga con il "!"), la quest e' presa e si apre il suo dettaglio (NPC_JTALK, src/menu/npc.asm)
-        lda npc_d,x             ; (22/11) NPC fisso: modulo QGIV (quest della catena e accessorie, qengine.asm q_talk)
-        bpl +
+_np     jsr npc_here            ; (17/11) nessun luogo sotto il PG: accanto a un NPC fisso (22/11: modulo QGIV, quest della
+        bcc _r                  ; catena e accessorie, qengine.asm q_talk; i vaganti non danno quest)
+        lda npc_d,x
+        bpl _r
         jmp q_talk
-+       jmp NPC_JTALK
 _r      rts
 _st     stx st_kind
 .if QGATE

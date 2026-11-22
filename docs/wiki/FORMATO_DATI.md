@@ -89,7 +89,9 @@ versione `GVER` 5 (i piani 5, 10, 15 sono mappe fisse). (18/11) `GVER` 6: grotte
 piani ([dungeon](dungeon.md)): i piani salvati si rigenerano allo stesso modo.
 Dal formato **$C8** (17/11, concept delle quest): in fondo al blocco, dopo il baule della locanda, **`c_qst`**: blocco da 213
 byte. (18/11) `c_qst` è una **maschera** delle quest prese (bit *n*-1 = quest *n*, al massimo 8); i valori di prima (0 nessuna,
-1 = quest 1) restano validi, quindi il formato non cambia. File delle quest (`data/quests.yaml`, `tools/build/gen_quests.py`):
+1 = quest 1) restano validi, quindi il formato non cambia. (22/11) Il concept è stato tolto: `c_qst` resta nel blocco ma non è
+più usato; le quest vere: stato `q_*` (formato $CE, sotto), file `qstg` e `QTX1`..`QTX4` ([quests](quests.md) 4.5). File del concept
+(fino al 22/11, `data/quests.yaml`, `tools/build/gen_quests.py`):
 - `QST0` (caricato a `$BC00`, schermo B, ed eseguito): codice della pagina (`src/qpage.asm`) + **indice**: per ogni quest 1..`Q_N`
   il capitolo (1 byte) e il titolo (codici dello schermo, 0 finale). Al massimo 1024 B.
 - `QST1` … `QST8` (caricati a `$B000` dalla pagina): premio (0 finale), numero di righe dello stato (1 byte), righe dello stato e

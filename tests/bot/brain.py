@@ -149,6 +149,12 @@ class Bot:
         """--cheat: potions = a red potion in the first belt slot when the belt is empty in a dungeon; gold = 10000 gold in
         the inn chest at the start (the bot takes it from there in the village). Every use is an event of the log."""
         e, L = self.emu, self.emu.L
+        if not getattr(self, "gate_open", False) and h.in_game and "q_step" in L:
+            # (22/11) the bot does not do quests: the stairs to the chapter boss are sealed without the step of the chain
+            # (D4, src/game/qengine.asm q_gate): step 3c taken, so the gate of every chapter is open (QGATE_CH)
+            self.gate_open = True
+            e.poke(L["q_step"], 2); e.poke(L["q_flag"], 1)
+            self.log.event("cheat", what="gate", q_step=2)
         if "gold" in self.cheats and not self.cheat_gold_done and h.in_game:
             self.cheat_gold_done = True
             e.poke(L["c_sgold"], 1000 & 255, 1000 >> 8)     # the chest counts tens of gold

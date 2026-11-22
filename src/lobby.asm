@@ -394,22 +394,39 @@ dt_redraw
         lda #7
         sta ui_col
         jsr ui_seed
-        #at 21,15               ; (18/11) quest prese: quante (bit di c_qst; i titoli sono nella pagina delle quest, file QST0)
+        #at 21,15               ; (22/11) quest attive: il passo della catena preso + le accessorie in q_side
         lda #7
         sta ui_col
-        lda c_qst
-        ldx #0
--       lsr
+        lda q_flag
+        and #1
+        tax
+        ldy #6
+-       lda q_side,y
+        beq +
+        inx
++       dey
+        dey
+        bpl -
+        txa
+        jsr ui_b3l
+        #at 21,16               ; completate: passi della catena + accessorie (bit di q_sdone)
+        lda #7
+        sta ui_col
+        ldx q_step
+        lda q_sdone
+        jsr _bits
+        lda q_sdone+1
+        jsr _bits
+        txa
+        jsr ui_b3l
+        jmp _qd
+_bits   lsr
         bcc +
         inx
 +       tay
-        bne -
-        txa
-        jsr ui_b3l
-        #at 21,16
-        lda #7
-        sta ui_col
-        #msg "0 / -"
+        bne _bits
+        rts
+_qd
         #at 15,7
         lda c_lvl
         jsr ui_b3

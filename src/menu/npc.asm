@@ -3,9 +3,10 @@
 ;  nel villaggio; il modulo si rilegge a ogni ingresso nel villaggio): piazzamento, sprite e "!", Fire. Il passo dei vaganti
 ;  e chi e' accanto al PG restano in GAME (src/game/quest.asm, con variabili, tabelle in BFP e punti d'ingresso).
 ;  In testa: lo sprite del "!" (puntatore $30) e la tabella dei salti NPC_JT (src/game/stash.asm).
-;  (18/11, committente) chi ha una quest da dare ha un "!" sopra la testa (sprite 1 e 2, giallo/bianco, ondeggia); gli NPC che
-;  vagano offrono ogni tanto una quest (1 su 4: npc_pick) e si chiamano "quest giver"; un NPC con il PG vicino (2 caselle o
-;  meno) non parte per un altro passo, cosi' e' facile fermarsi accanto a lui e premere Fire.
+;  (18/11, committente) chi ha una quest da dare ha un "!" sopra la testa (sprite 1 e 2, ondeggia; 22/11, D12: giallo da
+;  dare, verde da ritirare, solo gli NPC fissi: q_marks); un NPC con il PG vicino (2 caselle o meno) non parte per un altro
+;  passo, cosi' e' facile fermarsi accanto a lui e premere Fire. (22/11) I vaganti non danno piu' quest (concept tolto: le
+;  ripetibili verranno dopo, D18).
 ; ===================================================================
 NPC_BPTR = (NPC_BANG-$8000)/64  ; $30
 NPC_BUP  = 18                   ; il "!" sta 18 righe sopra lo sprite dell'NPC (14 righe disegnate: 4 righe di stacco)
@@ -15,19 +16,16 @@ NPC_BMIN = 80                   ; sopra questa riga c'e' la barra in alto (IRQ_B
         .cerror * != NPC_JT, "zona 5: la tabella dei salti degli NPC deve seguire lo sprite del !"
         jmp npc_init            ; NPC_JINIT
         jmp npc_draw5           ; NPC_JDRAW
-        jmp npc_talk5           ; NPC_JTALK
+        jmp _rts                ; NPC_JTALK (22/11: niente, il Fire va a QGIV)
         jmp npc_px              ; NPC_JPX (21/11, npc_fix in GAME)
         jmp npc_look            ; NPC_JLOOK
 
-        .include "quests_m.inc" ; q_ch: capitolo di ogni quest (tools/build/gen_quests.py)
+_rts    rts
 
 ; ------------------------------------------------------------------ piazzamento (ingresso nel villaggio)
-; lo 0 (Hilde, quest 1) nella piazza della fontana (tk_g); gli altri, uno per settore (tk_sec, voce X-1): presenti a caso con
-; probabilita' 7/8, su una casella libera presa a caso nel settore (16 tentativi, poi assente); ognuno con probabilita' 1/4
-; offre una quest non ancora presa (npc_pick).
+; lo 0 (il primo NPC fisso del villaggio, k = 0) nella piazza della fontana (tk_g); gli altri, uno per settore (tk_sec, voce
+; X-1): presenti a caso con probabilita' 7/8, su una casella libera presa a caso nel settore (16 tentativi, poi assente).
 npc_init:
-        lda c_qst               ; quest gia' prese: non si offrono piu'
-        sta npc_am
         ldx #NPC_N-1
 _i      lda #$ff
         sta npc_xh,x
@@ -85,46 +83,15 @@ _put    lda tx                  ; casella -> pixel (centro)
         bne _w
         lda #$80                ; (21/11) fisso, nome 0 del villaggio (tk_fnb, npc_here1)
         sta npc_d
-        lda c_chap              ; la quest segnaposto 1 (Hilde) solo nel villaggio 1
-        cmp #1
-        bne +
-        lda #Q_CUR              ; Hilde: la quest 1 (il "!" finche' non e' presa)
-        sta npc_q
-+       lda tx
+        lda tx
         sta npc_tx0
         lda ty
         sta npc_ty0
-        jmp _nx
-_w      jsr rand                ; (18/11) chi vaga: una quest da dare 1 volta su 4
-        and #3
-        bne _nx
-        jsr npc_pick
-        sta npc_q,x
+_w
 _nx     dex
         bmi +
         jmp _i
 +       jmp npc_fix             ; (21/11) gli NPC fissi al posto dei vaganti dei loro settori (zona 1, npc_here.asm)
-
-; A = una quest da offrire (2..Q_N: non presa, non gia' offerta qui, del capitolo attuale o di uno prima), 0 = nessuna. X conservato
-npc_pick:
-        ldy #2
-_l      cpy #Q_N+1
-        bcs _no
-        lda bitmask-1,y
-        and npc_am
-        bne _nx
-        lda c_chap
-        cmp q_ch-1,y            ; capitolo della quest <= capitolo attuale
-        bcc _nx
-        lda bitmask-1,y
-        ora npc_am
-        sta npc_am
-        tya
-        rts
-_nx     iny
-        bne _l
-_no     lda #0
-        rts
 
 ; A = numero a caso da 0 a A-1 (A = 1..63). Y conservato.
 npc_rm:
@@ -277,19 +244,4 @@ npc_bmark:
         inc npc_b
 _r      rts
 
-; ------------------------------------------------------------------ Fire accanto all'NPC X (npc_here): la sua quest e' presa
-; (bit in c_qst; chi vaga non la offre piu') e se ne apre il dettaglio (ui_quest)
-npc_talk5:
-        lda npc_q,x
-        beq _r                  ; (21/11) NPC fisso senza quest: niente
-        tay
-        lda bitmask-1,y
-        ora c_qst
-        sta c_qst
-        txa
-        beq +
-        lda #0
-        sta npc_q,x
-+       tya
-        jmp ui_quest
-_r      rts
+

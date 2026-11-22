@@ -93,7 +93,7 @@ def t5(s):
     return bytes(out)
 
 
-@test("QUESTDB-NEXT-11", "quest texts at 5 bits (H7): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B")
+@test("QUESTDB-NEXT-11", "quest texts at 5 bits (ex H7, done on 22/11 in gen_qdata.py): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B")
 def questdb_size(ctx):
     import shutil, subprocess, tempfile
     q, _, _, _ = load()

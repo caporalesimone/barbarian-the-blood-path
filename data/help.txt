@@ -177,14 +177,6 @@
    you come close they stop, so you
    can talk to them.
 
- <the quest giver>
-   now and then a villager has a quest
-   for you: a yellow [!] over his head
-   and quest giver at the top of the
-   screen. stand next to him, [fire].
-
- {the [!] goes away once you take}
- {the quest.}
 === your quests (q)
  [q] shows the quests you took.
 
@@ -194,9 +186,9 @@
    [run/stop] or [q]	back
 
  <a quest>
-   title, chapter, its status (in
-   yellow, at the top), the story
-   and the reward.
+   title, the goal (in yellow, with
+   how far you are), the story and
+   the reward.
    [w] [s] or [stick]	scroll the text
    [run/stop] or [fire]	back to the list
 

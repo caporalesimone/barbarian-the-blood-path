@@ -67,6 +67,8 @@ mostro comune e del boss con nome), livello dell'eroe all'ingresso; gli oggetti 
 - `--cheat gold`: all'inizio 10 000 monete nel baule della locanda; nel villaggio il bot le prende (fino al tetto del borsello)
   e compra dal fabbro arma, armatura e scudo migliori per il suo livello (scorciatoia), poi le pozioni.
 - Ogni uso di un trucco è un evento `cheat` del diario: una partita con i trucchi si riconosce dal rapporto.
+- (22/11) **Sempre**: il bot non fa le quest, quindi all'inizio mette il passo 3 della catena come preso (`q_step` 2, `q_flag` 1). Così
+  la scala verso il boss del capitolo 1 non è chiusa (cancello D4, `q_gate`). È l'evento `cheat` `gate`.
 - `--max-deaths N`: si ferma all'N-esima morte. In ogni caso si ferma dopo **4 morti di fila sullo stesso piano senza
   esperienza guadagnata**.
 

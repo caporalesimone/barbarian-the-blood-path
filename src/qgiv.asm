@@ -32,11 +32,15 @@ qg_r0   .word 0                 ; righe del premio
 qg_rn   .byte 0
 qg_rw   .byte 0, 0, 0, 0        ; premio della quest
 qg_n    .byte 0                 ; posti che servono (zaino) / pozioni (cintura)
+qg_lc   .byte 0                 ; capitolo del file QTX letto (0 = nessuno)
+qg_cv   .byte 0                 ; pagina Q: contatore della quest mostrata
 qg_rwt
         .include "../out/work/qgiv_rw.inc"
 
 qgiv:   lda q_k
-        jsr MENU_QTIN
+        bpl +
+        jmp qp_list             ; q_k = $ff: pagina Q (tasto Q, ui_quest)
++       jsr MENU_QTIN
         bcc _of
         sta qg_id
         stx qg_sl
@@ -56,15 +60,25 @@ _of     lda q_k
 
 ; ------------------------------------------------------------------ testo della quest qg_id (file QTXc a QTX)
 qg_text:
+        lda c_chap
+        jsr qg_load
+        bcs +
+        jsr qg_view
++       jmp qg_out
+
+; file QTX del capitolo A a QTX, se non c'e' gia' (qg_lc). C = 1 errore
+qg_load:
+        cmp qg_lc
+        beq _ok
+        sta qg_lc
+        ora #$30
+        sta cmdbuf+6
         lda #$51                ; "QTX" + capitolo (PETSCII maiuscolo, come i nomi di nm_tab)
         sta cmdbuf+3
         lda #$54
         sta cmdbuf+4
         lda #$58
         sta cmdbuf+5
-        lda c_chap
-        ora #$30
-        sta cmdbuf+6
         lda #0
         sta cmdbuf+7
         lda #4
@@ -80,10 +94,15 @@ qg_text:
         jsr load_raw
         lda #0
         sta io_quiet
-        bcc +
-        jmp qg_out
-+       ldy #1                  ; la voce della quest: n, n x (QID-1, indirizzo)
+        bcc _ok
+        sta qg_lc
+_ok     rts
+
+; ptr2 = voce della quest qg_id nel file QTX (n, n x (QID-1, indirizzo)); C = 1 se non c'e'
+qg_find:
+        ldy #1
         ldx QTX
+        beq _no
 -       lda QTX,y
         cmp qg_id
         beq +
@@ -92,11 +111,22 @@ qg_text:
         iny
         dex
         bne -
-        jmp qg_out
+_no     sec
+        rts
 +       lda QTX+1,y
         sta ptr2
         lda QTX+2,y
         sta ptr2+1
+        clc
+        rts
+
+; testo della quest qg_id: offerta (qg_mode 0, contatore 0), consegna (1, contatore pieno), pagina Q (2, contatore qg_cv);
+; W/S scorre, Fire o RUN/STOP chiude
+qg_view:
+        jsr qg_find
+        bcc +
+        rts
++
         jsr qg_here             ; titolo
         sta qg_tt
         stx qg_tt+1
@@ -107,14 +137,16 @@ qg_text:
         jsr qg_skip
         jsr qg_byte
         sta qg_cf
-        jsr qg_byte             ; testo dell'offerta
+        jsr qg_byte             ; testo dell'offerta (anche nella pagina Q)
         ldx qg_mode
-        bne +
+        cpx #1
+        beq +
         jsr qg_set
 +       jsr qg_lines
         jsr qg_byte             ; testo della consegna
         ldx qg_mode
-        beq +
+        cpx #1
+        bne +
         jsr qg_set
 +       jsr qg_lines
         jsr qg_byte             ; premio
@@ -136,8 +168,7 @@ _in     jsr ui_input
         lda keynew+7            ; RUN/STOP chiude
         and #$80
         beq _in
-_x      jsr read_input
-        jmp qg_out
+_x      jmp read_input              ; (il tasto che chiude non vale anche dopo)
 _up     lda qg_top
         beq _in
         dec qg_top
@@ -215,9 +246,13 @@ qg_draw:
         lda qg_cf
         beq +
         ldy qg_id
-        lda qg_mode             ; contatore: 0 all'offerta, la quantita' alla consegna
+        lda qg_mode             ; contatore: 0 all'offerta, la quantita' alla consegna, qg_cv nella pagina Q
         beq _z
         lda qt_n,y
+        ldx qg_mode
+        cpx #2
+        bne _z
+        lda qg_cv
 _z      ldx #0
         jsr ui_n5l
         lda #"/"
@@ -281,6 +316,160 @@ qg_show:
         bne -
 _r      rts
 
+; ------------------------------------------------------------------ pagina Q: le quest prese (catena e accessorie)
+QP_Y    = 5                     ; prima riga dell'elenco (una voce ogni 2 righe)
+tt_q    #t5 "quests"
+qp_id   .fill 5                 ; voci: QID-1, contatore, raggiunta (bit 7)
+qp_cv   .fill 5
+qp_dn   .fill 5
+qp_sel  .byte 0
+qp_list:
+        lda c_chap              ; titoli: dal file del capitolo
+        jsr qg_load
+_rd     ldx #0                  ; voci
+        lda q_flag
+        and #3
+        lsr
+        bcc +
+        ldy q_step
+        cpy #QT_CHAIN
+        bcs +
+        ror                     ; bit 1 (raggiunta) -> bit 7
+        sta qp_dn
+        sty qp_id
+        lda q_cnt
+        sta qp_cv
+        inx
++       ldy #0
+-       lda q_side,y
+        beq +
+        and #$80
+        sta qp_dn,x
+        lda q_side,y
+        and #$7f
+        clc
+        adc #QT_CHAIN-1
+        sta qp_id,x
+        lda q_side+1,y
+        sta qp_cv,x
+        inx
++       iny
+        iny
+        cpy #8
+        bne -
+        stx ui_n
+        jsr nav_init
+        lda qp_sel
+        cmp ui_n
+        bcc +
+        lda #0
++       sta ui_cur
+        jsr nav_sync
+        jsr ui_begin0
+        lda #<tt_q
+        ldx #>tt_q
+        ldy #0
+        jsr ui_title
+        jsr nav_help
+        lda ui_n
+        bne _full
+        #ubox 0,8,40,5
+        #at 4,10
+        #msg "talk to the villagers"
+        jmp _in
+_full   #ubox 0,3,40,13
+        ldx #0
+_ln     stx tmp3                ; voce X: titolo e stato
+        ldx #5
+        jsr qp_at
+        lda qp_id,x
+        sta qg_id
+        lda #UC_ITEM
+        sta ui_col
+        lda qg_lc
+        beq +
+        jsr qg_find
+        bcs +
+        lda ptr2
+        ldx ptr2+1
+        jsr ui_puts5
+        jmp _st
++       #msg "a quest of chapter "
+        ldy qg_id
+        lda qt_ty,y
+        lsr
+        lsr
+        lsr
+        lsr
+        ora #$30
+        jsr ui_putc
+_st     ldx #31
+        jsr qp_at
+        lda #UC_VALUE
+        sta ui_col
+        lda qp_dn,x
+        beq +
+        #msg "done"
+        jmp _nx
++       ldy qg_id
+        lda qt_n,y
+        cmp #2
+        bcc _nx
+        lda qp_cv,x
+        ldx #0
+        jsr ui_n5l
+        lda #"/"
+        jsr ui_putc
+        ldy qg_id
+        lda qt_n,y
+        ldx #0
+        jsr ui_n5l
+_nx     ldx tmp3
+        inx
+        cpx ui_n
+        beq _dr
+        jmp _ln
+_dr     ldx ui_n                ; '>' sulla voce del cursore
+        dex
+_mk     stx tmp3
+        ldx #3
+        jsr qp_at
+        jsr ui_mark
+        dex
+        bpl _mk
+_in     jsr ui_nav
+        cmp #NAV_MOVE
+        beq _dr
+        cmp #NAV_BACK
+        beq _out
+        cmp #NAV_FIRE
+        bne +
+        ldx ui_cur
+        stx qp_sel
+        lda qp_id,x
+        sta qg_id
+        lda qp_cv,x
+        sta qg_cv
+        lda #2
+        sta qg_mode
+        lda qg_lc
+        beq _in
+        jsr qg_view
+        jmp _rd
++       lda keynew+7            ; Q chiude come RUN/STOP
+        and #$40
+        beq _in
+_out    jmp qg_out
+
+; posizione (X, riga della voce tmp3 dell'elenco); X = tmp3 all'uscita
+qp_at   lda tmp3
+        asl
+        adc #QP_Y
+        tay
+        jsr ui_at
+        ldx tmp3
+        rts
+
 ; ------------------------------------------------------------------ niente da dare o da ritirare
 qg_none:
         jsr ui_begin0          ; (non ui_begin: rileggerebbe CORE sopra il modulo)
@@ -304,8 +493,10 @@ qg_say: pha
         jmp ui_wait_fire
 
 ; di nuovo nel gioco: la barra in alto si ricostruisce (come la pagina Q, src/qpage.asm)
-qg_out: jsr MENU_QMARK          ; (D12) segni di nuovo
-        lda #0
+qg_out: lda cur_level            ; (D12) segni di nuovo (solo nel villaggio: c'e' il modulo MENU)
+        bne +
+        jsr MENU_QMARK
++       lda #0
         sta bt_who
         sta bar_lab
         sta bar_on

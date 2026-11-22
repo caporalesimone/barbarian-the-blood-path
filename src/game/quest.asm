@@ -1,22 +1,15 @@
 ; ===================================================================
-;  quest.asm - (17/11, concept con testi segnaposto) quest e NPC del villaggio: nel gioco restano le variabili, l'apertura
-;  delle pagine e i punti d'ingresso; il codice degli NPC sta nel modulo MENU (zona 5, $8C00, src/menu/npc.asm, 18/11).
-;  Pagine (18/11, committente): tasto Q ovunque = elenco delle quest prese; Fire accanto a chi da' una quest = la si prende
-;  e si apre il suo dettaglio. Pagina = file QST0 (codice + indice: capitolo e titolo di ogni quest, src/qpage.asm) letto in
-;  QBUF = schermo B del gioco; il testo di una quest (QSTn) lo legge la pagina in QTXT. docs/wiki/villaggio.md (Abitanti), progetto in docs/wiki/quests.md.
-;  NPC: lo 0 (Hilde, quest 1) fermo nella piazza della fontana; gli altri vagano nel loro settore (tk_sec) e ogni tanto
-;  offrono una quest (npc_q). Chi ha una quest da dare ha un "!" sopra la testa (sprite 1 e 2).
+;  quest.asm - (17/11) NPC del villaggio e ingresso nelle quest: nel gioco restano le variabili, la pagina Q e i punti
+;  d'ingresso; il codice degli NPC sta nel modulo MENU (zona 5, $8C00, src/menu/npc.asm, 18/11). (22/11) Le quest sono quelle
+;  vere (decisioni D1-D19, docs/wiki/quests.md): motore src/game/qengine.asm, modulo QGIV src/qgiv.asm (Fire accanto a un NPC
+;  fisso, e la pagina Q con il tasto Q ovunque). Il concept del 17-18/11 (QST0..QST8, src/qpage.asm) e' stato tolto.
+;  NPC: lo 0 (il primo NPC fisso) fermo nella piazza della fontana; gli altri fissi al loro posto (npc_fix); i vaganti nel loro
+;  settore (tk_sec). Il "!" sopra gli NPC fissi (sprite 1 e 2): giallo una quest da dare, verde una da ritirare (D12).
 ; ===================================================================
         .enc "screen"
-QBUF    = SCR_B
-QTXT    = $b000                 ; (18/11) testo della quest aperta (file QSTn): sprite della barra, set B ($B000-$B3FF; come la
-                                ; minimappa, la pagina li usa e all'uscita la barra si ricostruisce: qp_out in src/qpage.asm)
-QTXT_END = SCR_A
 NPC_N   = NSEC+1                ; (17/11) lo 0 da' la quest (fermo); gli altri NSEC vagano ognuno nel suo settore (tk_sec, villaggio)
 QL_ID   = 20                    ; etichetta del luogo (bar.asm): nome di chi da' la quest
-QL_GV   = 21                    ; (18/11) "quest giver": NPC che vaga con una quest da dare
-Q_CUR   = 1                     ; (concept) la quest di Hilde
-        .cerror Q_N > 8, "quest: al massimo 8 (c_qst e' una maschera di 8 bit)"
+QL_GV   = 21                    ; (18/11) "quest giver" (concept; 22/11: nessun vagante da' quest)
 
 ; Le tabelle degli NPC stanno nella tabella della ricerca di percorso dei mostri (BFP, $A500, 169 B): nel villaggio non ci sono
 ; mostri, e ogni ricerca (mon_path) la riempie di $ff prima di usarla. Annotazione @map di BFP in game.asm.
@@ -29,7 +22,7 @@ npc_d   .fill NPC_N             ; direzione (0 +x, 1 -x, 2 +y, 3 -y)
 npc_mv  .fill NPC_N             ; pixel di cammino rimasti (0 = fermo)
 npc_g   .fill NPC_N             ; (17/11) disegno: 0..3 (tools/build/npc_gfx.py, slot 12-19)
 npc_c   .fill NPC_N             ; (17/11) colore del vestito, diverso dai colori del villaggio (npc_look, src/menu/npc_look.asm)
-npc_q   .fill NPC_N             ; (18/11) quest da dare (1..Q_N), 0 = nessuna; lo 0 ha sempre la quest 1
+npc_q   .fill NPC_N             ; (22/11, D12) segno degli NPC fissi: $87 giallo, $85 verde, 0 niente (q_marks)
 npc_tend
         .endv
         .cerror npc_tend > BFQ, "tabelle degli NPC oltre BFP (169 B)"
@@ -41,31 +34,17 @@ npc_pend .byte ?                ; 1 = da piazzare (ingresso nel villaggio)
 npc_s   .byte ?                 ; prossimo sprite libero in npc_draw
 npc_k   .byte ?
 npc_b   .byte ?                 ; (18/11) prossimo sprite del "!" (1, 2; 3 = finiti)
-npc_am  .byte ?                 ; (18/11) quest gia' offerte in questo villaggio (maschera, npc_init)
-q_open  .byte ?                 ; (18/11) quest da aprire subito nella pagina (0 = elenco)
 npc_vend
         .endv
 ;@map SND_FBUF_end..npc_vend "Quest e NPC del villaggio (quest.asm): posizioni, cammino, quest da aprire"
         .cerror npc_vend > NM_AT, "variabili di quest.asm oltre NM_AT"
 
 ; ------------------------------------------------------------------ pagina delle quest
-; A = quest da aprire subito (0 = elenco). Il file QST0 (codice + indice) a QBUF, eseguito (finisce con ui_exit).
-ui_quest:
-        sta q_open
-        ldy #nm_qst-nm_tab      ; "QST0"
-        jsr set_name4
-        lda #$30
-        sta cmdbuf+6
-        lda #2                  ; schermata di attesa generica (titolo e "please wait")
-        sta io_what
-        lda #<QBUF
-        sta ptr0
-        lda #>QBUF
-        sta ptr0+1
-        jsr load_raw
-        bcs +
-        jmp QBUF
-+       jmp ui_exit             ; file non letto: di nuovo nel gioco
+; (22/11) tasto Q: la pagina delle quest prese nel modulo QGIV (q_k = $ff)
+ui_quest:                       ; (22/11) pagina Q nel modulo QGIV (q_k = $ff): src/qgiv.asm
+        lda #$ff
+        sta q_k
+        jmp q_load
 
 ; ------------------------------------------------------------------ NPC del villaggio: ingressi nel modulo MENU (zona 5)
 ; Il codice c'e' solo nel villaggio, con il modulo MENU in memoria e gli NPC gia' piazzati (npc_pend = 0).

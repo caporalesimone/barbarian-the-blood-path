@@ -1946,7 +1946,6 @@ bitmask  .byte 1, 2, 4, 8, 16, 32, 64, 128
 ; etichette di inizio modulo: nomi dei moduli nei listati e nella mappa automatica (lab64 map)
 mod_db
         .include "db.asm"
-        .include "quests.inc"           ; (17/11) titoli e nomi delle quest (tools/build/gen_quests.py)
 mod_dungeon
         .include "dungeon.asm"
 mod_data

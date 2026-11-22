@@ -3,7 +3,7 @@
 **Pagina di progetto: niente di quello che c'è qui è ancora nel codice.** Riscritta il 20/11 dopo le decisioni del
 committente (piano di lavoro del 20/11, domande D, O, E, Q, P, T, C). Ciò che è già nel gioco sta nelle pagine del codice:
 NPC e "!" del villaggio in [villaggio](villaggio.md#abitanti-1718-11-concept), pagina Q in [interfaccia](interfaccia.md), file
-`QST0`/`QSTn` in [FORMATO_DATI](FORMATO_DATI.md), capitoli e profondità in [capitoli](capitoli.md). Il progetto degli oggetti
+stato nel salvataggio in [FORMATO_DATI](FORMATO_DATI.md), capitoli e profondità in [capitoli](capitoli.md). Il progetto degli oggetti
 (affissi, unici, memoria) è in [oggetti](oggetti.md#progetto-affissi-unici-e-memoria-2011). L'analisi del 07/11 (tre villaggi su un
 dungeon unico, mulino, Torvald, generatori su disco) è superata e resta solo nella storia di git.
 
@@ -32,7 +32,7 @@ Valgono sopra a quanto scritto nelle sezioni seguenti, dove c'è differenza.
 |---|---|---|
 | D1 | Stato (32 B) | Il **baule della locanda esce dal blocco dell'eroe** (in coda al file di salvataggio, piano F7): il blocco libera 120 B per le quest e il futuro. **Se servisse spazio, le ripetibili si possono non salvare.** **Fatto il 22/11** (formato $CE): baule a `INN_AT` = `$FF80` e nel file dopo il blocco, stato `q_step`..`q_free` in fondo al blocco ([FORMATO_DATI](FORMATO_DATI.md)). |
 | D2 | Testi | **Un file per capitolo** (+ uno per le ripetibili), a 5 bit, letto a `$EC00` come la scheda C: 36 blocchi, 5 voci di directory. |
-| D3 | Codice del villaggio | **File `QGIV`** caricato a `QBUF` quando si preme Fire su un NPC. Verificato il 22/11: il tasto Q (pagina delle quest, file `QST0` allo stesso indirizzo) funziona anche nel dungeon; `QGIV` serve solo nel villaggio. |
+| D3 | Codice del villaggio | **File `QGIV`** caricato quando si preme Fire su un NPC (22/11: file `qstg` a `CORE_AT`, non a `QBUF`, che era troppo piccolo; fa anche la pagina Q). Verificato il 22/11: il tasto Q (pagina delle quest, file `QST0` allo stesso indirizzo) funziona anche nel dungeon; `QGIV` serve solo nel villaggio. |
 | D4 | Cancello del boss (Q14) | **Messaggio** "the way is sealed" sulla scala del piano 4 (9, 14, 19) se il passo "uccidi il boss" non è preso. |
 | D5 | Finale | **Finale in due tempi.** Ucciso il Lord of Ruin, **al posto della leva compare un portale** che riporta in città (gratis, come una pergamena del portale). **Vicino al portale, nella piazza, compare l'NPC che dà il finale** (passo 12, the Penitent: epilogo). La quest si chiude con la possibilità di scendere nell'Abisso ("un'impresa a cui solo gli dei possono ambire"): chiusa la schermata della quest, **compare un portale nero nella piazza accanto a quello già aperto**. Il portale vecchio riporta nella sala del boss; **il portale nero resta per sempre** e porta tra l'Abisso e i villaggi. |
 | D6 | Abisso | **Solo una modalità sfida senza trama**: si scende finché si riesce (classifica della profondità). |
@@ -171,7 +171,7 @@ dopo `fatta` tornano nel mazzo del capitolo.
   ricavano abilità, gradini del borsello e testo. Progresso del passo: 1 byte.
 - **Accessorie**: bitmap "fatta" (2 B) + 4 slot attivi (id, contatore).
 - **Ripetibili**: 2 slot (modello e parametro, contatore, premio) + l'oggetto premio preparato nel dungeon (7 B l'uno).
-- `c_qst` (maschera di 8 bit del concept) si sostituisce.
+- `c_qst` (maschera di 8 bit del concept): non più usato dal 22/11.
 - (22/11, formato $CE) **Fatto**: campi `q_step`, `q_flag`, `q_cnt`, `q_sdone`, `q_side`, `q_rep`, `q_item` ([FORMATO_DATI](FORMATO_DATI.md)).
 
 ### 4.4 Motore residente (22/11, `src/game/qengine.asm`)
@@ -218,7 +218,12 @@ consegna e del premio (36 colonne). Il testo scorre con W/S (12 righe). File su 
 35 blocchi. **Segni (D12)**: `q_marks` (`src/menu/q_who.asm`, `MENU_QMARK`, all'ingresso nel villaggio dopo `npc_fix` e all'uscita da
 `QGIV`) mette in `npc_q` degli NPC fissi `$87` (giallo: una quest da dare), `$85` (verde: una da ritirare) o 0; `npc_offer`
 ne ricava il colore del "!" (`npc_bmark`, bianco quando è in alto). I vaganti del concept restano gialli.
-Test: `QGIV-10`..`15`. **Da fare**: pagina Q sul formato nuovo, abilità dalla catena
+**Pagina Q** (22/11): il tasto Q apre lo stesso modulo con `q_k` = `$ff` (`ui_quest` → `q_load`): elenco delle quest prese
+(titolo dal file del capitolo corrente, "a quest of chapter N" per una di un altro capitolo; stato "n/N" o "done"), Fire = il
+testo dell'offerta con il contatore vero. Anche nel sotterraneo (QTX copre la coda del tema, come la scheda C; i segni si
+rifanno solo nel villaggio). Il concept del 17-18/11 (`QST0`..`QST8`, `src/qpage.asm`, `gen_quests.py`, `data/quests.yaml`,
+le quest dei vaganti) è stato tolto.
+Test: `QGIV-10`..`17`. **Da fare**: abilità dalla catena
 (Q15), borsello variabile, cintura a 8, oggetto "qualsiasi" (passo 11), sblocco del capitolo alla consegna, cancello D4 nei capitoli 2-4
 (`QGATE_CH`), ripetibili (D18).
 

@@ -160,3 +160,40 @@ def qg_marks(ctx):
         cols |= {g.b(L["sh_col"] + s) & 15 for s in (1, 2) if en & (1 << s) and g.b(L["sh_ptr"] + s) == 0x30}
     g.screenshot(os.path.join(OUT, "qgiv_marks.png"))
     check(5 in cols and 7 not in cols, "colours of the '!': %s (expected green 5, and white 1 when up)" % sorted(cols))
+
+
+@test("QGIV-16", "page Q (key Q, module QGIV with q_k $ff): step 2 and the side a1.3 taken -> 2 rows with their titles; Fire on the first: its text and the goal; RUN/STOP back")
+def qg_page(ctx):
+    g = ctx["g"]; L = g.L
+    g.poke(L["q_step"], 1, 0x11, 0, 3, 0, 3, 0, 0, 0, 0, 0, 0, 0)       # step 2 taken; a1.3 (id 3) taken
+    g.frames(1, keys={7: 0x40})
+    t = wait_screen(g)
+    g.screenshot(os.path.join(OUT, "qgiv_page.png"))
+    check("quests" in t and "the widow's son" in t and "a name on the stone" in t, "list: %r" % t[:400])
+    g.press_fire(); t = wait_screen(g)
+    check("find tam's amulet on level 3" in t and "my son tam" in t, "detail: %r" % t[:300])
+    g.run_stop(); g.frames(10)
+    g.run_stop()
+    for _ in range(40):
+        g.frames(10)
+        if g.in_game():
+            break
+    check(g.in_game(), "not back in the game")
+
+
+@test("QGIV-17", "page Q in a dungeon (level 1, no MENU module): the list, RUN/STOP back in the game; the stairs down still work (theme and CORE read again)")
+def qg_page_dungeon(ctx):
+    from lib.play import go_level
+    g = ctx["g"]; L = g.L
+    go_level(g, 1); g.frames(10)
+    g.frames(1, keys={7: 0x40})
+    t = wait_screen(g)
+    check("the widow's son" in t, "list in the dungeon: %r" % t[:300])
+    g.run_stop()
+    for _ in range(40):
+        g.frames(10)
+        if g.in_game():
+            break
+    check(g.in_game() and g.b(L["cur_level"]) == 1, "not back on level 1")
+    go_level(g, 2); g.frames(10)
+    check(g.b(L["cur_level"]) == 2 and g.in_game(), "stairs to level 2 after the page")

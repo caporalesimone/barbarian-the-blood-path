@@ -200,18 +200,17 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   quelli non usati dal villaggio (anche nero o grigio scuro su un fondo scuro, o il rosso chiaro dell'eroe). Chi sta nella
   piazza è la *woman* con il primo colore; gli **NPC fissi** hanno un colore fisso (il k-esimo), non più a caso a ogni
   ingresso. Disegno a caso per i vaganti (`npc_g`).
-- **Chi dà la quest** (oggi *hilde*, quest 1) sta **fermo nella piazza** (casella `tk_g` dell'intestazione del villaggio, scelta da
-  `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e lontana
-  dalle porte): accanto a lei compare il suo nome nella barra; **Fire** = quest presa (bit 0 di `c_qst`) e il suo dettaglio, che
-  poi si riapre con Fire accanto a lei o dall'elenco (Q). I luoghi hanno la precedenza (su una porta o una scala vale il luogo).
-- **"!" sopra chi ha una quest da dare** (18/11): sprite hires a `$8C00` (puntatore `$30`, `BANG` in `npc_gfx.py`, 14 righe),
-  18 righe sopra l'NPC, **ondeggia** di 2 righe e passa dal giallo al bianco ogni 16 fotogrammi. Usa gli sprite 1 e 2 (il 2 solo
-  se l'effetto del colpo non c'è): al massimo due "!" sullo schermo; non sopra la riga 80 (barra in alto). Sparisce quando la
-  quest è presa (`npc_offer`).
-- **Vaganti con una quest** (18/11): all'ingresso ogni vagante, con probabilità **1/4**, offre una quest (`npc_q`, `npc_pick`): la
-  prima fra le 2..8 non ancora presa, non già offerta da un altro NPC in quella visita, del capitolo attuale o di uno prima
-  (`q_ch`). Accanto a lui la barra dice "quest giver" (`QL_GV`); Fire = quest presa e dettaglio, poi torna un NPC qualunque.
-  L'etichetta del luogo si ricalcola ogni 16 fotogrammi (`lc_x` = `$ff` in `npc_tick`).
+- **Il primo NPC fisso** (nel villaggio 1 *hilde*) sta **fermo nella piazza** (casella `tk_g` dell'intestazione del villaggio, scelta
+  da `gen_maps.py`: la più vicina al centro della fontana a 3 o più caselle, raggiungibile, con le 8 caselle attorno libere e
+  lontana dalle porte). Accanto a un NPC fisso compare il suo nome nella barra; **Fire** = modulo delle quest `QGIV` (22/11:
+  consegna, offerta o "nothing for you now", [quests](quests.md) 4.5). I luoghi hanno la precedenza (su una porta o una scala
+  vale il luogo).
+- **"!" sopra gli NPC fissi** (18/11; 22/11, D12): sprite hires a `$8C00` (puntatore `$30`, `BANG` in `npc_gfx.py`, 14 righe),
+  18 righe sopra l'NPC, **ondeggia** di 2 righe e passa al bianco ogni 16 fotogrammi: **giallo** = una quest da dare, **verde** =
+  una quest da ritirare (`q_marks` in `npc_q`, `npc_offer`). Usa gli sprite 1 e 2 (il 2 solo se l'effetto del colpo non c'è):
+  al massimo due "!" sullo schermo; non sopra la riga 80 (barra in alto).
+- **Vaganti** (22/11): non danno più quest (le quest segnaposto del concept del 17-18/11 sono state tolte; le ripetibili
+  verranno dopo, D18).
 - **Vaganti** (fino a 16 per villaggio, 17/11): ogni villaggio ha i suoi **settori** (`SECTORS` in `tools/build/villages.py`:
   griglia 4×4 nel 1 e nel 4, piattaforme nel 2 (11), terrazze nel 3 (12), isole nel 5 (12); rettangoli di 8–15 caselle per lato
   con almeno 20 caselle percorribili, 4 B l'uno nell'intestazione `TWNc`, copiati in `tk_sec`). Il vagante *n* vive nel
@@ -243,19 +242,13 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   non si muovono (`npc_tick6`) e accanto a loro la barra mostra il loro nome (`npc_here1` punta l'etichetta `QL_ID` al nome
   giusto). Oggi solo Hilde (villaggio 1) ha una quest (la segnaposto 1); Fire accanto a un fisso senza quest non fa niente.
   Il disegno dell'NPC 0 resta la donna in ogni villaggio. Test: `NPCFIX-10`, `NPCFIX-11` (`tests/sanity/npcfix/cases.py`).
-- **Pagina Q** (17–18/11, [interfaccia](interfaccia.md)): tasto **Q** ovunque = **elenco** delle quest prese (titolo e "ch. N",
-  W/S per scegliere, Fire = dettaglio, RUN/STOP o Q = di nuovo nel gioco; senza quest "talk to the villagers"). **Dettaglio**:
-  titolo sulla cornice, "chapter N", lo **stato** (righe gialle, oggi segnaposto: campo `status` di `data/quests.yaml`), il testo
-  e il **reward**; il riquadro mostra 14 righe e un testo più lungo scorre con W/S (" up " e " more " sulla cornice). Fire accanto
-  a chi dà una quest apre subito il dettaglio. **File** (`data/quests.yaml` → `tools/build/gen_quests.py`, formato in
-  [FORMATO_DATI](FORMATO_DATI.md)): `QST0` = codice della pagina (`src/qpage.asm`) + **indice**, letto da `ui_quest` a `$BC00`
-  (schermo B) con la schermata di attesa; **pieno** (1021 B su 1024: pagina 849 B + indice 172 B). `QSTn` (n = 1..8) = premio,
-  stato e testo, letto a `QTXT` = `$B000` senza schermata di attesa. In GAME restano ~40 B (`ui_quest`). `c_qst` (salvato con
-  l'eroe) è una **maschera**: bit *n*-1 = quest *n* presa, al massimo 8 quest.
-- **Quest segnaposto** (18/11): la 1 di Hilde (capitolo 1) e 7 "piccole" (2..8, capitoli 1, 1, 2, 2, 3, 4, 5) dei vaganti; la 2
-  ha un testo lungo per provare lo scorrimento. **Lobby**: "active quests:" = quante quest sono prese.
-- **Test**: `tests/regression/quest/cases.py` (21/11: spostati da sanity; QUEST-10..16: piazzamento e quest offerte, elenco vuoto, Hilde con "!" e dettaglio,
-  vaganti che si fermano, sprite, vagante "quest giver" e scorrimento del testo, cadenza dell'attacco).
+- **Pagina Q** (22/11, [interfaccia](interfaccia.md)): tasto **Q** ovunque = **elenco** delle quest prese (il passo della catena e
+  le accessorie: titolo e stato "n/N" o "done"; W/S per scegliere, Fire = dettaglio, RUN/STOP o Q = di nuovo nel gioco; senza
+  quest "talk to the villagers"). **Dettaglio**: titolo sulla cornice, obiettivo in giallo con il contatore, testo che scorre con
+  W/S e premio. È il modulo `QGIV` (file `qstg`, `q_k` = `$ff`), con i testi del capitolo (`QTXc`). **Lobby**: "active quests:"
+  = quest prese, "completed quests:" = passi della catena e accessorie consegnati.
+- **Test**: `tests/regression/quest/cases.py` (QUEST-10..14, 16: piazzamento, elenco vuoto, nome di Hilde, vaganti che si fermano,
+  sprite, cadenza dell'attacco); `tests/sanity/qgiv` (QGIV-10..17: modulo delle quest, segni, pagina Q).
 
 ## Armaiolo: tolto (09/11, decisione del committente)
 

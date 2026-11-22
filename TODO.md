@@ -26,7 +26,7 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M10, M3, M4, M5 |
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
 | 9 | [Oggetti, combattimento, bilanciamento](#9--oggetti-combattimento-bilanciamento) | G2, G5, G4, G1, G3, G6, G8, G7 |
-| 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H7, H1, H3 |
+| 10 | [Contenuti: capitoli, quest, Abisso, intro, lingue](#10--contenuti-capitoli-quest-abisso-intro-lingue) | H4, M1, H5, M9, H1, H3 |
 | 11 | [Build, test e strumenti del gioco](#11--build-test-e-strumenti-del-gioco) | J14 |
 | 12 | [Idee per dopo](#12--idee-per-dopo) | J3, J2, J1 |
 | Z | [Note urgenti](#z--note-urgenti) | Z4 |
@@ -608,31 +608,11 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema
   grigio del capitolo 3 si legge poco sui muri chiari: screenshot `out/work/villages/monsters3.png` dei test `MON-CHAP-*`); se i boss con nome dei piani normali devono avere nomi per capitolo (oggi `first_names`/`epithets` comuni).
 
-### H7 (21/11 sera, committente) Testi delle quest: meno caratteri speciali, 5 bit e compressione — S
-- **Obiettivo**: far stare piu' quest e testi piu' lunghi nei file `QSTn` (1024 B ciascuno: oggi `QST0` 999 B, cioe' indice e codice
-  della pagina quasi pieni, e `QST2` 931 B).
-- **Passi decisi dal committente**:
-  1. **Rivedere i testi** di `data/quests.yaml` per usare il minor numero possibile di caratteri speciali (es. niente `;`, che
-     non e' fondamentale: si riscrive la frase). Ideale: solo lettere, spazio, `:` `.` `/` (5 bit) e pochi segni della tabella
-     `T5X` (10 bit).
-  2. **Testo a 5 bit** come nel gioco (`docs/wiki/tecnica.md`, "Testo a 5 bit"): codificatore Python in `tools/build/gen_quests.py`
-     (stessa tabella della macro `t5` di `src/common/macros.inc`), stampa con `ui_puts5` di GAME in `src/qpage.asm`; titoli
-     dell'indice e righe del dettaglio. Testo leggibile in `quests.yaml` (regola: il testo a 5 bit si scrive sempre leggibile).
-  3. **Compressione** se ha senso: valutare ZX0 dei file `QSTn` (decompressore gia' in GAME, `src/common/zx0.inc`) o un dizionario
-     di parole frequenti, misurando i byte risparmiati contro il codice in piu' in `QST0` e il tempo di caricamento.
-- **Quando**: con H1 o prima di aggiungere una quest (in `QST0` restano 25 B). Test: le pagine delle quest a video uguali.
-- (22/11 notte) **Stato**: passo 1 fatto nei testi nuovi (`data/quests/next/quests.yaml`: solo caratteri della tabella a 5 bit,
-  controllati da `QUESTDB-NEXT-10`); **passo 2 (testo a 5 bit nel gioco: codificatore in `gen_quests.py`, stampa con `d5_get` in
-  `src/qpage.asm`) ancora da fare**: il codificatore Python c'è gia' nel test `QUESTDB-NEXT-11` (stessa tabella della macro `t5`),
-  da spostare in `gen_quests.py`. Misura: 8 826 B a 5 bit contro 12 689 B in codici schermo (−30%); passo 3, ZX0: solo −9%, non
-  conviene. (22/11, D2) un file per capitolo, letto a `$EC00`.
-
 ### H1 (ex 5.1) Quest system — XL
 - **Progetto deciso il 20/11** ([quests](docs/wiki/quests.md)): regole, trama The Blood Tithe, catena di 12 passi, 15 accessorie,
-  ripetibili per capitolo, premi, **piano di lavoro in 4 fasi con 3 cancelli** (sez. 8). Il concept del 17–18/11 (NPC, "!",
-  vaganti, pagina Q, `QST0`/`QSTn`, `c_qst` a 8 bit) è descritto in [villaggio](docs/wiki/villaggio.md#abitanti-1718-11-concept).
+  ripetibili per capitolo, premi, **piano di lavoro in 4 fasi con 3 cancelli** (sez. 8). Il concept del 17–18/11 è stato tolto
+  il 22/11 (sostituito da motore, `QGIV` e pagina Q).
 - Prima delle quest: oggetti ed economia (fase 2, [oggetti](docs/wiki/oggetti.md#progetto-affissi-unici-e-memoria-2011)).
-- **`QST0` è pieno** (1021 B su 1024): la pagina Q va riprogettata (cancello G2).
 - (22/11) **Tutte le quest definite** con testi e premi in `data/quests/next/quests.yaml` (test `QUESTDB-NEXT-10`); **come
   implementare** motore, modulo del villaggio, pagina Q e ogni singola quest: [QUEST-IMPLEMENTAZIONE.md](QUEST-IMPLEMENTAZIONE.md)
   (usa e getta: si cancella a quest finite). Da approvare: i premi `proposal: true`, C3, C6, P3 e dove mettere i 32 B di stato.
@@ -642,8 +622,8 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   **Ordine (D13)**: 1) stato nel salvataggio (baule della locanda fuori dal blocco dell'eroe): **fatto il 22/11** (formato $CE,
   baule a `$FF80`, 32 B `q_step`..`q_free`, file da 4 blocchi; test `QSAVE-10/11`); 2) motore nel dungeon: **fatto il 22/11** (`qengine.asm`,
   [quests 4.4](docs/wiki/quests.md), cancello D4 acceso nel capitolo 1), `QGIV`: **fatto il 22/11** (consegna, premi, offerta, testi `QTXc`; [quests 4.5](docs/wiki/quests.md)); poi segni
-  (D12) fatti; pagina Q, cancello nei capitoli 2-4 (oggi solo il capitolo 1, `QGATE_CH`), abilità dalla catena (Q15), borsello variabile, sblocco alla consegna sul capitolo 1;
-  **Margine di GAME 916 B** (sotto 1 KB, avviso della build): motore ~470 B, tabelle e nomi degli oggetti di quest ~270 B;
+  (D12) e pagina Q fatti (concept tolto); cancello nei capitoli 2-4 (oggi solo il capitolo 1, `QGATE_CH`), abilità dalla catena (Q15), borsello variabile, sblocco alla consegna sul capitolo 1;
+  **Margine di GAME 954 B** (sotto 1 KB, avviso della build): motore ~470 B, tabelle e nomi degli oggetti di quest ~270 B;
   da recuperare (nomi a 5 bit, tabelle nel modulo MENU) prima di altro codice residente.
   poi gli altri capitoli.
 - (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).

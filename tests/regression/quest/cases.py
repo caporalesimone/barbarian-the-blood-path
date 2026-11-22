@@ -106,15 +106,23 @@ def npcs(ctx):
     ctx["now"] = now
 
 
-@test("QUEST-11", "Q with no quest taken: the list (file QST0) says 'talk to the villagers', RUN/STOP goes back to the game")
+@test("QUEST-11", "Q with no quest taken: the list (22/11: module QGIV, q_k $ff) says 'talk to the villagers', RUN/STOP goes back to the game")
 def page_none(ctx):
     g, L = ctx["g"], ctx["L"]
-    g.frames(1, keys={7: 0x40}); g.frames(20)
-    t = screen_text(g)
+    g.frames(1, keys={7: 0x40})
+    for _ in range(60):
+        g.frames(10)
+        t = screen_text(g)
+        if "please wait" not in t and t.strip():
+            break
     g.screenshot(os.path.join(OUT, "quest_none.png"))
     check("quests" in t and "talk to the villagers" in t, "no empty list on the screen")
     g.frames(1, keys={7: 0x80}); g.frames(3)
-    check(g.b(L["cur_level"]) == 0 and g.b(L["c_qst"]) == 0, "not back in the village")
+    for _ in range(40):
+        if g.in_game():
+            break
+        g.frames(10)
+    check(g.b(L["cur_level"]) == 0 and g.in_game(), "not back in the village")
 
 
 @test("QUEST-12", "Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv); concept quest 1 marked taken for the list tests below")
@@ -124,7 +132,6 @@ def page_quest(ctx):
     g.teleport(*next_to(g, L, tx, ty)); g.frames(20)
     check(g.b(L["bar_lab"]) == L["QL_ID"], "bar label %d (expected the quest giver %d)" % (g.b(L["bar_lab"]), L["QL_ID"]))
     g.screenshot(os.path.join(OUT, "quest_npc.png"))
-    g.poke(L["c_qst"], g.b(L["c_qst"]) | 1)
 
 
 @test("QUEST-13", "the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop")
@@ -168,37 +175,6 @@ def sprites(ctx):
         n_on = bin(en & 0xF8).count("1")
         check(all(g.b(L["sh_ptr"] + k) == BANG_PTR for k in (1, 2) if en & (1 << k)), "sprites 1/2 on in the village, not as '!': %02x" % en)
         check(n_on >= min(len(near), 5), "%d NPCs well inside the screen but %d sprites (sh_en %02x)" % (len(near), n_on, en))
-
-
-@test("QUEST-15", "a walker with a quest ('quest giver' in the bar, '!'): Fire = quest taken, the walker gives it no more; long text scrolls with S; the list has 2 quests")
-def walker_quest(ctx):
-    g, L = ctx["g"], ctx["L"]
-    i, tx, ty = with_walkers(g, L)[0]
-    c = g.b(L["c_qst"]) & ~2
-    g.poke(L["c_qst"], c); g.poke(L["npc_q"] + i, 2)
-    g.teleport(*next_to(g, L, tx, ty)); g.frames(20)
-    _, tx, ty = {n[0]: n for n in npcs_now(g, L)}[i]
-    g.teleport(*next_to(g, L, tx, ty)); g.frames(36)
-    check(g.b(L["bar_lab"]) == L["QL_GV"], "bar label %d (expected 'quest giver' %d)" % (g.b(L["bar_lab"]), L["QL_GV"]))
-    ws = npc_sprite(g, L, i)
-    check(ws is not None and [x for x in bangs(g, L) if x[1] == ws[0] and x[2] < ws[1]], "no '!' over the walker %d" % i)
-    g.screenshot(os.path.join(OUT, "quest_giver.png"))
-    g.press_fire(); g.frames(25)
-    check(g.b(L["c_qst"]) & 2, "quest 2 not taken: c_qst %02x" % g.b(L["c_qst"]))
-    check(g.b(L["npc_q"] + i) == 0, "the walker still offers a quest")
-    t = screen_text(g)
-    check("rats in the cellar" in t and " more " in t, "detail of quest 2 without its title or without ' more '")
-    first = t[5 * 40:6 * 40]
-    for _ in range(3):
-        g.frames(1, joy=D); g.frames(2)
-    t = screen_text(g)
-    g.screenshot(os.path.join(OUT, "quest_scroll.png"))
-    check(t[5 * 40:6 * 40] != first and " up " in t, "the text did not scroll down")
-    g.run_stop(); g.frames(4)
-    t = screen_text(g)
-    check("the widow's son" in t and "rats in the cellar" in t, "the list does not show 2 quests")
-    g.run_stop(); g.frames(20)
-    check(g.in_game(), "not back in the game")
 
 
 @test("QUEST-16", "attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's")

@@ -65,19 +65,11 @@ _x      pla
         rts
 
 ; Y = NPC: C=1 se ha una quest da dare o da ritirare, A = colore del segno (D12: giallo da dare, verde da ritirare). Cambia Y.
-; (22/11) NPC fisso: npc_q = $80 + colore (q_marks, q_who.asm); vagante (concept): numero della quest, giallo se non presa
+; (22/11) solo gli NPC fissi: npc_q = $80 + colore (q_marks, q_who.asm); i vaganti hanno 0
 npc_offer:
         lda npc_q,y
         beq _no
-        bmi _fx
-        tay
-        lda bitmask-1,y
-        and c_qst
-        bne _no
-        lda #7
-        sec
-        rts
-_fx     and #$0f
+        and #$0f
         sec
         rts
 _no     clc

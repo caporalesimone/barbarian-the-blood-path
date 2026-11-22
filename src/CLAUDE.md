@@ -10,7 +10,7 @@ del progetto sono nel `CLAUDE.md` della radice; come si costruisce e si prova: `
   committente).
 - Sorgenti principali, **uno per file del disco**: `barbarian.asm` (BARBARIAN, il loader), `start.asm` (START), `game.asm` (GAME),
   `lobby.asm` (LOBBY), `menu.asm` (MENU: menu del villaggio, parti in `menu/`, compresso da `tools/build/pack_menu.py`), `lore.asm`
-  (LORE), `qpage.asm` (testa dei file QSTn, 17/11), `cheats.asm` (CHEATS, solo debug e test, 17/11), `help.asm` (HELP), `jukebox.asm` (JUKEBOX). Le parti incluse stanno in sottocartelle: `common/` (condivise: trampoline,
+  (LORE), `qgiv.asm` (QSTG: quest del villaggio e pagina Q, 22/11), `cheats.asm` (CHEATS, solo debug e test, 17/11), `help.asm` (HELP), `jukebox.asm` (JUKEBOX). Le parti incluse stanno in sottocartelle: `common/` (condivise: trampoline,
   avvio con titolo `boot.asm`, player SID, ZX0, macro, versione, effetti), `game/` (moduli del gioco), `lore/`, `help/`, `menu/`,
   `test/` (`arena.asm`, solo per `tools/vice/arena.py`).
 - Assemblaggio con `-I src -I src/common -I src/game -I out` (`tools/build/asm.sh`): le `.include` usano il nome semplice. I sorgenti

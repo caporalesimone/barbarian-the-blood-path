@@ -38,7 +38,6 @@ python3 tools/build/gen_gfx.py >/dev/null
 python3 tools/build/gen_font.py >/dev/null || exit 1
 python3 tools/build/gen_music.py >/dev/null || exit 1
 python3 tools/build/gen_db.py >/dev/null || exit 1
-python3 tools/build/gen_quests.py >/dev/null || exit 1   # (17/11) quest: file QSTn e quests.inc (concept)
 python3 tools/build/gen_qdata.py >/dev/null || exit 1   # (22/11) tabelle del motore delle quest: qtab.inc
 python3 tools/build/gen_maps.py >/dev/null || exit 1   # prima dell'assemblaggio: scrive town_places.inc (porte per la minimappa)
 rm -f out/work/game.prg
@@ -50,8 +49,6 @@ asm_game out/work/arena.log $ARX -D ARENA=1 -L out/work/arena_game.lst -l out/wo
 64tass -a $INC src/test/arena.asm -o out/work/arena.prg -l out/work/arena.lbl -L out/work/arena.lst >> out/work/arena.log 2>&1 || { grep -v '^$' out/work/arena.log | head -20; exit 1; }
 # moduli su file: assemblati con le etichette del gioco (out/work/game.lbl)
 64tass -a $INC src/lobby.asm -o out/work/lobby.prg -l out/work/lobby.lbl -L out/work/lobby.lst > out/work/ovl.log 2>&1 || { grep -v '^$' out/work/ovl.log | head -20; exit 1; }
-64tass -a -b $INC src/qpage.asm -o out/work/qpage.bin -l out/work/qpage.lbl -L out/work/qpage.lst > out/work/qpage.log 2>&1 || { grep -v '^$' out/work/qpage.log | head -20; exit 1; }   # (17/11) pagina della quest
-python3 tools/build/gen_quests.py --files >/dev/null || exit 1   # file QST0..QSTn: pagina + testo
 64tass -a $INC src/qgiv.asm -o out/work/qgiv.prg -l out/work/qgiv.lbl -L out/work/qgiv.lst > out/work/qgiv.log 2>&1 || { grep -v '^$' out/work/qgiv.log | head -20; exit 1; }   # (22/11) modulo del villaggio delle quest (file "qstg")
 for c in 1 2 3; do                  # (19/11) meccaniche dei boss dei capitoli 1-3: code di GFX2, GFX4, GFX6 (bundle.py)
     [ -f src/game/ovl_boss$c.asm ] || { rm -f out/work/ovl_boss$c.bin; continue; }
