@@ -16,6 +16,7 @@ ob_tx   .byte 0                 ; casella del boss
 ob_ty   .byte 0
 ob_k    .byte 0
 ob_i    .byte 0
+ob_one  .byte 0                 ; (22/11) 1 = ob_summon1 (un mostro solo)
 ob_d8x  .byte 1, $ff, 0, 0, 1, $ff, 1, $ff      ; 8 direzioni (prima le 4 dritte)
 ob_d8y  .byte 0, 0, 1, $ff, 1, 1, $ff, $ff
 
@@ -140,7 +141,13 @@ _d      asl tmp0
 
 
 ; evoca 2 mostri del tipo A sulle caselle di pavimento accanto al boss (ob_b), svegli -> ob_s0, ob_s1
+; (22/11) ob_summon1: uno solo (ob_s0)
+ob_summon1:
+        ldy #1
+        .byte $2c               ; (salta il ldy #0)
 ob_summon:
+        ldy #0
+        sty ob_one
         sta ob_k
         lda #$ff
         sta ob_s0
@@ -188,7 +195,9 @@ _l      stx ob_i
         lda ob_s0
         bpl +
         stx ob_s0
-        bmi _nx
+        lda ob_one              ; (22/11) uno solo: finito
+        bne _r
+        beq _nx
 +       stx ob_s1
         rts
 _nx     ldx ob_i

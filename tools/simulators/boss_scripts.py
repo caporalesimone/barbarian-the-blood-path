@@ -108,10 +108,12 @@ class Abbot(Base):
     def start(self, ms):
         self.th = list(self.g["summon_at"])
         self.summoned = []
-        if self.new:
-            n = self.c["new"]
-            self.timers["rise"] = n["crypt_rise"]["every"]
-            self.timers["censer"] = n["censer"]["every"]
+        # (22/11, D16) the proposal of 20/11 is in the game: crypt_rise and censer in "game" (before: only with new)
+        self.ext = {k: self.g.get(k) or (self.c.get("new") or {}).get(k) for k in ("crypt_rise", "censer")} \
+            if (self.new or "crypt_rise" in self.g) else None
+        if self.ext:
+            self.timers["rise"] = self.ext["crypt_rise"]["every"]
+            self.timers["censer"] = self.ext["censer"]["every"]
 
     def step(self, t, ms, pend):
         g = self.g
@@ -128,9 +130,9 @@ class Abbot(Base):
             for _ in range(g["summon_n"]):
                 self.summoned.append(self.spawn(pend, t + g["pause"], g["summon_type"]))
         self.regen(t, any(m.alive for m in self.summoned) or any(p[1] in self.summoned for p in pend), g["regen_every"])
-        if not self.new or not self.b.alive:
+        if not self.ext or not self.b.alive:
             return
-        n = self.c["new"]
+        n = self.ext
         if t >= self.timers["rise"]:
             r = n["crypt_rise"]
             self.timers["rise"] = t + r["every"]

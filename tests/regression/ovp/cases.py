@@ -79,7 +79,7 @@ def set_hp(g, b, v):
 
 
 @test("OVP-11", "level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 of its life it stops 1 s (green) and raises "
-      "2 Skeletons next to itself; while one of them lives it regenerates (1 hp every 25 frames)")
+      "a Skeleton next to itself (2 until 22/11); while it lives it regenerates (1 hp every 50 frames since 22/11)")
 def ovp_abbot(ctx):
     g = ctx["g"]; L = g.L
     O, b, (bx, by) = boss_level(g, 1)
@@ -92,12 +92,12 @@ def ovp_abbot(ctx):
     check(g.b(O["ab_t"]) > 0, "no stop under 2/3 (ab_t %d, ab_wave %d)" % (g.b(O["ab_t"]), g.b(O["ab_wave"])))
     g.frames(60)
     n1 = g.b(L["lb_cnt"])
-    check(n1 == n0 + 2, "skeletons raised: %d (expected 2)" % (n1 - n0))
+    check(n1 == n0 + 1, "skeletons raised: %d (expected 1)" % (n1 - n0))
     check(all(g.b(L["mtype"] + i) == O["AB_SKEL"] for i in range(n0, n1)), "raised monsters are not Skeletons")
     h0, _ = hp(g, b)
     g.frames(100)
     h1, _ = hp(g, b)
-    check(h1 >= h0 + 3, "regeneration with the skeletons alive: %d -> %d" % (h0, h1))
+    check(h1 >= h0 + 1, "regeneration with the skeleton alive: %d -> %d" % (h0, h1))
     g.poke(L["godmode"], 0)
 
 

@@ -368,15 +368,21 @@ def run_floor(rules, name, floor, belt, runs, rng, off=0):
                 m_hit=100 * st["m_hits"] / max(1, st["m_swings"]), pg_hit=100 * st["pg_hits"] / max(1, st["pg_swings"]))
 
 
-def boss_fight(rules, name, floor, mech, belt, rng, off=0, hp_mult=None):
-    """one chapter boss (floors 5, 10, 15) or final boss (20) fight with a full belt: 'win' / 'lose' / 'time'"""
+def boss_fight(rules, name, floor, mech, belt, rng, off=0, hp_mult=None, hp_fixed=None):
+    """one chapter boss (floors 5, 10, 15) or final boss (20) fight with a full belt: 'win' / 'lose' / 'time'.
+    (22/11, D8/D16) rules 'oggi': a chapter boss in rules.yaml chapter_bosses has its fixed type and life (hp_fixed: a
+    different life, for the fit)"""
     S.monster = mon_of(rules)
     key = BOSS_FLOORS[floor]
     cfg = NX["bosses"][key]
     hm = cfg["hp_mult"] if hp_mult is None else hp_mult
     mon = mon_of(rules)
+    cb = (RU.R.get("chapter_bosses") or {}).get(key)
     if floor == NF:
         b = dict(mon("lord_of_ruin", NF))
+    elif rules == "oggi" and cb:
+        b = dict(mon(cb["type"], floor, True))
+        b["hp_fixed"] = hp_fixed or cb["hp"]
     else:
         mix = [(n, c) for (n, isb), c in floor_mix(floor).items() if isb]
         n = rng.choices([x for x, _ in mix], weights=[c for _, c in mix])[0]
@@ -391,8 +397,21 @@ def boss_fight(rules, name, floor, mech, belt, rng, off=0, hp_mult=None):
     return S.fight(h, [b], rng, potions=list(SF.belt(floor, belt)), final_boss=(0 if floor == NF else None), script=script)[0]
 
 
-def boss_win(rules, name, floor, mech, belt, n, rng, off=0, hp_mult=None):
-    return 100 * sum(boss_fight(rules, name, floor, mech, belt, rng, off, hp_mult) == "win" for _ in range(n)) / n
+def boss_win(rules, name, floor, mech, belt, n, rng, off=0, hp_mult=None, hp_fixed=None):
+    return 100 * sum(boss_fight(rules, name, floor, mech, belt, rng, off, hp_mult, hp_fixed) == "win" for _ in range(n)) / n
+
+
+def fit_chapter(floor, belt, n, rng, name="riferimento"):
+    """(22/11, D16) fixed life of the chapter boss (rules today, mechanics of the game) for the hero `name` at the floor's
+    level to win bosses.target.level0 of the fights (bisection); then the wins at +1, +2 levels"""
+    goal = 100 * NX["bosses"]["target"]["level0"]
+    lo, hi = 20, 3000
+    for _ in range(11):
+        mid = (lo + hi) // 2
+        w = boss_win("oggi", name, floor, "game", belt, n, rng, 0, hp_fixed=mid)
+        lo, hi = (mid, hi) if w > goal else (lo, mid)
+    hp = (lo + hi) // 2
+    return hp, [boss_win("oggi", name, floor, "game", belt, n, rng, o, hp_fixed=hp) for o in (0, 1, 2)]
 
 
 def fit_boss(floor, belt, n, rng):
@@ -421,8 +440,15 @@ def main():
     ap.add_argument("--rules", default="oggi,next")
     ap.add_argument("--offsets", default="0,1,2", help="hero levels above the floor (farming)")
     ap.add_argument("--fit-bosses", action="store_true", help="only: hp_mult of each boss for the target (proposal rules)")
+    ap.add_argument("--fit-chapter", help="(22/11) only: fixed life of these chapter bosses (e.g. abbot) for the target, rules today")
     a = ap.parse_args()
     rng = random.Random(2011)
+    if a.fit_chapter:
+        for k in a.fit_chapter.split(","):
+            f = next(f for f, x in BOSS_FLOORS.items() if x == k)
+            hp, ws = fit_chapter(f, a.belt, a.runs, rng)
+            print("%-7s hp %d  vittorie liv +0/+1/+2: %s" % (k, hp, "/".join("%.0f" % w for w in ws)), flush=True)
+        return
     if a.fit_bosses:
         for f, k in BOSS_FLOORS.items():
             print("%-7s hp_mult %.2f" % (k, fit_boss(f, a.belt, a.runs, rng)), flush=True)

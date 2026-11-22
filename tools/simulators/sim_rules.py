@@ -27,6 +27,8 @@ class Mon:
         self.st = st
         # come mon_hp_init (src/game/combat.asm): vita MEDIA del tipo x (96 + rnd 0..64) / 128 (= +-25%), non i dadi
         self.hpmax = max(1, int(int(st["hp"].avg * st["hp_mult"]) * (96 + rng.randrange(65)) // 128))
+        if st.get("hp_fixed"):              # (22/11, D8/D16) boss dei capitoli: vita fissa (rules.yaml chapter_bosses)
+            self.hpmax = st["hp_fixed"]
         self.hp = self.hpmax
         self.ac, self.att, self.save = st["ac"], st["att"], st["save"]
         self.next = 1                       # primo colpo appena a contatto

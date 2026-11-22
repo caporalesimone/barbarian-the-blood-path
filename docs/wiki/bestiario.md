@@ -145,6 +145,17 @@ basta allontanarsi durante il lampeggio. Scelta mia (il committente ha lasciato 
 in gioco. Le evocazioni del codice (2/3 e 1/3) restano; i sarcofagi a caso e la nube senza rabbia della proposta (sezione sotto)
 non sono nel codice. Test: `BOSS1-10`, `BOSS1-11` (`tests/sanity/boss1/cases.py`). Nel simulatore dei boss (`boss_scripts.py`, `game`) dal 21/11: con le regole di **oggi** il PG di riferimento al livello 5 batte l'abate il **10%** delle volte (13% senza la rabbia, 22–27% con 1–2 livelli in più): l'abate del gioco di oggi è troppo duro e va tarato (vita, rigenerazione) prima di provarlo a mano.
 
+**(22/11, D8 e D16) Abate tarato, proposta del 20/11 nel codice.** Tipo e vita **fissi** (`data/rules.yaml chapter_bosses`,
+`CB1_TYPE` = Skeleton King, `CB1_HP` = 68: `ab_init` li mette al primo ingresso; al ritorno dal portale resta la vita lasciata).
+Evocazioni a 2/3 e 1/3 con **uno** scheletro (prima 2: scelta del committente sulla taratura), rigenerazione ogni **50**
+fotogrammi finché è vivo, **scheletri dalla cripta** (ogni 600 fotogrammi uno scheletro sveglio su una casella di pavimento a
+3–9 caselle dal PG, al massimo 3 vivi: `ab_crypt`), **nube d'incenso** per tutto il combattimento (ogni 400 fotogrammi: 1 s di
+lampeggio grigio chiaro, poi 3 colpi da 4 punti vita, uno al secondo, al PG entro 40 pixel: `ab_tick3`); la rabbia sotto il 30%
+resta. Taratura (`sim_builds.py --fit-chapter abbot`, PG di riferimento di oggi, cintura da 4): vittorie **60%** al livello 5,
+**77%** al 6, **85%** al 7. Con 2 scheletri per evocazione il 60% chiedeva un abate da ~31 punti vita (naturale 138); cripta e
+nube contano poco nel simulatore, dove il combattimento dura meno di 12 s (in gioco il PG si muove: da provare a mano).
+Test: `OVP-11`, `BOSS1-12`.
+
 ### Proposta del 20/11: più meccaniche e taratura con il simulatore (design, non nel codice)
 
 Richiesta del committente (20/11): boss di capitolo più difficili (oggi i piani 5, 10, 15 sono i più facili, salvo l'abate),

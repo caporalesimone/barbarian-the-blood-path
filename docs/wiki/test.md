@@ -216,6 +216,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BOOT-17` | BARBARIAN menu: one loop per frame whatever the phase of the music IRQ (CIA1 timer locked to the frame; before 19/11 an IRQ over raster line 250 froze the menu for ever, TODO I6, LORE-10 hangs) |
 | `BOSS1-10` | level 5: over 30% of its life the Abbot does not rage; under 30% it rages (red border, attack recharge <= AB_RCD) |
 | `BOSS1-11` | raging Abbot: the censer warns (white blinking) and then the cloud takes hpmax/8 from the hero next to it (far away: not checked, the boss walks) |
+| `BOSS1-12` | (22/11, D8/D16) the Abbot has the fixed type and life of rules.yaml chapter_bosses (CB1_TYPE, CB1_HP); a Skeleton rises from the crypt every AB_RISE x 4 frames, 3..9 tiles from the hero (at most AB_RMAX alive); the incense cloud: AB_NW frames of warning, then AB_NT hits of AB_ND to the hero next to the Abbot |
 | `BOSSMAP-10` | boss levels 5, 10, 15: the map of data/maps/bosschapN.txt (after post_walls), the furniture of the chapter, stairs up to the boss walkable, no stairs down, its own palette (final.palette), the tiles of GFX(2c) from boss_gfx.py |
 | `BU-10` | data: un_bch = boss_chapter of uniques.tsv; no unique given by a quest is in a boss subset; UNB_C 128 (50%), UNB_N 32 (12.5%) |
 | `BU-11` | bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1, level 5: only the 2 uniques of chapter 1 (D17) |
@@ -345,7 +346,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `OPT-03` | set_name4 / set_name: every name of nm_tab in cmdbuf+3.., nlen = length, io_dir = 1, A = 1, X kept |
 | `OPT-12B` | put_hero: the hero on tile (A, X) -> px/py = tile x 16 + 8 (centre) |
 | `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900 (ovp_ok = 1); the boss below 3/4 of its life calls a wave of SUM_WAVE monsters; level 19: the decor code of chapter 4 (with the citadel); village: the MENU module is read again at $C900 |
-| `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 of its life it stops 1 s (green) and raises 2 Skeletons next to itself; while one of them lives it regenerates (1 hp every 25 frames) |
+| `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 of its life it stops 1 s (green) and raises a Skeleton next to itself (2 until 22/11); while it lives it regenerates (1 hp every 50 frames since 22/11) |
 | `OVP-12` | level 10, Mother Stitch (GFX4): awake, a rite (1 s still) plants 2 fetishes (type 8, still, life = her max / 16); while one stands the hero's hits are halved and she regenerates; the last one down leaves her open (hits x2); under 2/3 a second rite; a fetish killed gives no loot |
 | `OVP-13` | level 15, Varok the Oathbreaker (GFX6): aligned with the hero he stops (warning) and charges along the row; his shield halves the hero's hits, not when stunned |
 | `PERF-10` | village: walking in 8 directions, lost frames <= 2%, worst frame <= 2 |

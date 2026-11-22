@@ -92,3 +92,47 @@ def censer(ctx):
     lost = hpmax - g.w16(L["c_hp"])
     check(lost == max(1, hpmax // 8), "cloud damage %d (expected hpmax/8 = %d)" % (lost, hpmax // 8))
     g.poke(L["godmode"], 1)
+
+
+@test("BOSS1-12", "(22/11, D8/D16) the Abbot has the fixed type and life of rules.yaml chapter_bosses (CB1_TYPE, CB1_HP); "
+      "a Skeleton rises from the crypt every AB_RISE x 4 frames, 3..9 tiles from the hero (at most AB_RMAX alive); the incense "
+      "cloud: AB_NW frames of warning, then AB_NT hits of AB_ND to the hero next to the Abbot")
+def fixed_rise_cloud(ctx):
+    g = ctx["g"]; L = g.L
+    O, b, (bx, by) = ctx["O"], ctx["b"], ctx["bxy"]
+    check(g.b(L["mtype"] + b) == L["CB1_TYPE"], "type %d (expected CB1_TYPE %d)" % (g.b(L["mtype"] + b), L["CB1_TYPE"]))
+    check(hpm(g, b) == L["CB1_HP"], "max life %d (expected CB1_HP %d)" % (hpm(g, b), L["CB1_HP"]))
+    g.poke(L["godmode"], 1)
+    g.poke(L["mwake"] + b, 1)
+    n0 = g.b(L["lb_cnt"])
+    g.poke(O["abr_cd"], 1)
+    g.frames(4)
+    n1 = g.b(L["lb_cnt"])
+    check(n1 == n0 + 1 and g.b(L["mtype"] + n0) == O["AB_SKEL"], "crypt: monsters %d -> %d" % (n0, n1))
+    if n1 == n0 + 1:
+        px, py = g.ptile()
+        d = (abs(g.b(L["mix"] + n0) - px), abs(g.b(L["miy"] + n0) - py))
+        check(3 <= max(d) and max(d) <= 9, "crypt skeleton at %s tiles from the hero" % (d,))
+    mx = hpm(g, b)                                                 # full life: no rage censer, no summons
+    g.poke(L["mhp"] + b, mx & 255); g.poke(L["mhph"] + b, mx >> 8); g.poke(O["abx_rage"], 0)
+    g.poke(L["godmode"], 0)
+    tx = (g.b(L["mxh"] + b) << 8 | g.b(L["mxl"] + b)) >> 4      # next to the Abbot where it is now
+    ty = (g.b(L["myh"] + b) << 8 | g.b(L["myl"] + b)) >> 4
+    g.teleport(tx, ty + 1); g.frames(2)
+    hpmax = g.w16(L["hpmax"])
+    g.poke(O["abn_w"], 0); g.poke(O["abn_t"], 0); g.poke(O["abn_cd"], 1)
+    seen = False
+    lost = 0
+    for _ in range(O["AB_NW"] + O["AB_NT"] * O["AB_NE"] + 10):
+        g.poke(L["mcd"] + b, 40)                                   # (no melee hit)
+        for i in range(g.b(L["lb_cnt"])):                          # (no other monster: skeletons of BOSS1-10/11 too)
+            if i != b: g.poke(L["malive"] + i, 0)
+        h0 = g.w16(L["c_hp"])
+        g.frames(1)
+        seen = seen or g.b(O["abn_w"]) > 0
+        h1 = g.w16(L["c_hp"])
+        if h1 < h0:
+            lost += h0 - h1
+        g.poke16(L["c_hp"], hpmax)
+    check(seen, "no warning of the cloud")
+    check(lost == O["AB_NT"] * O["AB_ND"], "the cloud took %d (expected %d x %d)" % (lost, O["AB_NT"], O["AB_ND"]))

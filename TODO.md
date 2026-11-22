@@ -632,7 +632,10 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   2-4 con i 5 unici non dati da quest. (22/11, D8, D16) **Boss dei capitoli** con statistiche proprie e sala
   disegnata a mano (mappe come `FMAP`), mostri solo se evocati; **a fasi con meccaniche** (D16: evoca, cambia attacco, si cura;
   codice nella coda del tema, modello `boss_scripts.py`): proposta delle fasi prima del codice. (22/11, D17) Due unici nuovi per i boss del capitolo 1: fatti.
-  D16 approvato: le aggiunte `new` del 20/11 (`data/rules_next.yaml`), un commit per boss. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
+  D16 approvato: le aggiunte `new` del 20/11 (`data/rules_next.yaml`), un commit per boss. **Abate fatto il 22/11** (Skeleton King, vita fissa 68, uno
+  scheletro per evocazione: [bestiario](docs/wiki/bestiario.md)); restano Mother Stitch, Varok, Lord of Ruin (stessa procedura:
+  `rules.yaml chapter_bosses`, `sim_builds.py --fit-chapter`). **Arena**: non fa girare il codice del piano dei boss (`ovl_boss*`):
+  la verifica del 22/11 e' solo con i test in VICE (`BOSS1-12`); da aggiungere all'arena prima di Stitch. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
   attiva il mostro richiesto nasce sempre nel piano.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 

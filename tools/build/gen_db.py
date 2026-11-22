@@ -478,6 +478,13 @@ def main():
     chk(round(bo["hp_mult"] * 2) == bo["hp_mult"] * 2, "boss.hp_mult: multiplo di 0,5")
     o(f"BOSS_HPH    = {byte(int(bo['hp_mult'] * 2), 'boss.hp_mult')}            ; vita del boss con nome x BOSS_HPH / 2")
     o(f"BOSS_AC     = {byte(bo['ac_add'], 'boss.ac_add')}")
+    mnames = list(B["monsters"])                    # (22/11, D8/D16) boss dei capitoli: tipo e vita fissi (codice del piano)
+    for k, cb in (R.get("chapter_bosses") or {}).items():
+        c = cb["floor"] // 5
+        chk(cb["type"] in mnames, "chapter_bosses.%s.type" % k)
+        chk(0 < cb["hp"] < 65536, "chapter_bosses.%s.hp" % k)
+        o(f"CB{c}_TYPE   = {mnames.index(cb['type']) + 1}            ; (22/11) boss del capitolo {c} ({k}): tipo {cb['type']}")
+        o(f"CB{c}_HP     = {cb['hp']}          ; vita fissa")
     o(f"BOSS_ATT    = {byte(bo['att_add'], 'boss.att_add')}")
     o(f"BOSS_LVL    = 3             ; livello del boss = piano + 3 (variante forte: + 2) per l'esperienza")
     bw = B["boss"]

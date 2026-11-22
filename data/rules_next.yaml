@@ -95,14 +95,17 @@ bosses:
   abbot:                      # capitolo 1, cripta (piano 5)
     hp_mult: 0.69
     dmg_mult: 0.8
-    game: {summon_at: [0.667, 0.333], summon_n: 2, summon_type: skeleton, pause: 50, regen_every: 25,
-           rage_at: 0.297, rage_rate: 28, censer_first: 100, censer_every: 300, censer_warn: 50, censer_hp_div: 8}
+    game: {summon_at: [0.667, 0.333], summon_n: 1, summon_type: skeleton, pause: 50, regen_every: 50,
+           rage_at: 0.297, rage_rate: 28, censer_first: 100, censer_every: 300, censer_warn: 50, censer_hp_div: 8,
+           crypt_rise: {every: 600, travel: [50, 150], max_alive: 3, type: skeleton},
+           censer: {every: 400, warn: 50, dmg: 0.5, ticks: 3, tick_every: 50}}
+                              # (22/11, D16) la proposta del 20/11 e' nel codice (ovl_boss1.asm): rigenerazione ogni 50,
+                              # uno scheletro per evocazione (committente: con 2 serviva un abate da ~31 punti vita),
+                              # scheletri dai sarcofagi, nube d'incenso per tutto il combattimento; tipo e vita fissi in
+                              # rules.yaml chapter_bosses
                               # (21/11, nel codice: ovl_boss1.asm) rabbia sotto il 30%: attacco ogni 28 fotogrammi, turibolo
                               # ogni 6 s (1 s di avviso, il primo dopo 2 s): 1/8 della vita massima del PG se non schiva
-    new:
-      changes: {regen_every: 50}                                                # proposta: rigenerazione dimezzata
-      crypt_rise: {every: 600, travel: [50, 150], max_alive: 3, type: skeleton}   # scheletri dai sarcofagi a caso
-      censer: {every: 400, warn: 50, dmg: 0.5, ticks: 3, tick_every: 50}        # nube d'incenso attorno all'abate
+    new: {}                   # (22/11) tutto nel gioco
   stitch:                     # capitolo 2, palude (piano 10)
     hp_mult: 1.43
     dmg_mult: 1.0
