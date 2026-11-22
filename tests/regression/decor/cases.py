@@ -43,7 +43,7 @@ def walk_set(g):
 
 @test("DECOR-10", "levels 2, 7, 12, 17 (chapters 1-4), 3 seeds: solid and walkable furniture on every level; every walkable tile "
       "still reachable from the stairs; no monster on a solid tile; the same map when the level is entered again; chapter 4: "
-      "the furniture is mirrored like the citadel (but where the mirrored tile is a stair or a chest)")
+      "the furniture is mirrored like the citadel (but next to a stair or a chest)")
 def decor(ctx):
     g = ctx["g"]; L = g.L
     for seed in SEEDS:
@@ -66,9 +66,13 @@ def decor(ctx):
             bad = [k for k in range(g.b(L["lb_cnt"])) if g.b(L["malive"] + k) and not ok(m[g.b(L["miy"] + k) * 48 + g.b(L["mix"] + k)])]
             check(not bad, "level %d seed %s: monsters on a solid tile: %s" % (lv, seed, bad))
             if ch in DG.MIRROR:
-                asym = [(x, y) for y in range(48) for x in range(24) if (m[y * 48 + x] in DEC or m[y * 48 + 47 - x] in DEC)
-                        and m[y * 48 + x] != m[y * 48 + 47 - x]
-                        and not ({m[y * 48 + x], m[y * 48 + 47 - x]} & {T["STAIRSU"], T["STAIRSD"], T["CHEST"], T["PORTAL"]})]
+                # (22/11) the rules look at the 8 neighbours: next to a stair (the only thing the citadel does not mirror), a
+                # chest or the portal the two sides may differ, not only on the tile itself
+                odd = {T["STAIRSU"], T["STAIRSD"], T["CHEST"], T["PORTAL"]}
+                def near(x, y):
+                    return any(m[yy * 48 + xx] in odd for yy in range(y - 1, y + 2) for xx in range(x - 1, x + 2))
+                asym = [(x, y) for y in range(1, 47) for x in range(1, 24) if (m[y * 48 + x] in DEC or m[y * 48 + 47 - x] in DEC)
+                        and m[y * 48 + x] != m[y * 48 + 47 - x] and not near(x, y) and not near(47 - x, y)]
                 check(not asym, "level %d seed %s: furniture not mirrored at %s" % (lv, seed, asym[:6]))
             if seed is SEEDS[0]:
                 g.screenshot(os.path.join(SHOTS, "level%d.png" % lv))

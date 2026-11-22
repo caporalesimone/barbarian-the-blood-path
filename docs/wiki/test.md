@@ -247,7 +247,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHEAT-20` | next level in the throne room (level 20): as the final boss killed (c_won, c_unl 5, respec gift), village 4 |
 | `CHEAT-21` | village 5 (last): next chapter and next level do nothing, message 'limit reached' |
 | `CHEAT-22` | GAME assembled with the release flags (tools/build/asm.sh release-game): no cheat code |
-| `DECOR-10` | levels 2, 7, 12, 17 (chapters 1-4), 3 seeds: solid and walkable furniture on every level; every walkable tile still reachable from the stairs; no monster on a solid tile; the same map when the level is entered again; chapter 4: the furniture is mirrored like the citadel (but where the mirrored tile is a stair or a chest) |
+| `DECOR-10` | levels 2, 7, 12, 17 (chapters 1-4), 3 seeds: solid and walkable furniture on every level; every walkable tile still reachable from the stairs; no monster on a solid tile; the same map when the level is entered again; chapter 4: the furniture is mirrored like the citadel (but next to a stair or a chest) |
 | `DISK-10` | the disk has every file (loader, START, game, LORE, LDAT, TITLE, HELP, JUKEBOX, saves, ...) |
 | `DISK-12` | entry of the tests (11/11, Krill): the real START from the monitor (Krill installed), new game in the village |
 | `DUNG-CHEST-10` | key chest: without a key 'it is locked' (stays closed); with a key it opens, one key used |
