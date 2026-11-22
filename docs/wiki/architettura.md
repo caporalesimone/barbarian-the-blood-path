@@ -147,6 +147,7 @@ flowchart TB
 | `rel.asm` | ~650 | salvataggi con il plugin di save di Krill: file `save-0N` (eroe + piani), elenco `hl`, stato compatto dei piani | [Salvataggi](salvataggi.md) |
 | `disk.asm` | ~180 | nomi dei file, `load_raw`/`load_file` (Krill), grafica, sala del trono, LOBBY (blocco `CODE2` `$9C00`–`$9FFF`) | [Tecnica](tecnica.md) |
 | `monpath.asm` | ~70 | (17/11) `mon_follow` e tabelle della ricerca di percorso dei mostri bloccati (`mon_path` sta in `game.asm`; blocco `CODE2`) | [Mostri](mostri.md) |
+| `qengine.asm` | ~330 | (22/11) motore residente delle quest: eventi `q_kill`, `q_chest`, `q_cboss`, cancello `q_gate` (D4), mostro della caccia `q_spawn` (D11), messaggi nella barra; tabelle `qtab.inc` da `tools/build/gen_qdata.py` | [Quest](quests.md) |
 | `quest.asm` | ~150 | (17/11, concept) NPC del villaggio: punti d'ingresso nel modulo MENU (`npc_tick` → zona 6 in `MRT`, passo dei vaganti fermi con il PG vicino, `src/menu/npc_tick.asm`; `npc_here` → zona 1, chi è accanto; zona 5: piazzamento, sprite e "!", Fire, `src/menu/npc.asm`); `ui_quest` che legge ed esegue il file `QST0` (18/11: elenco e dettaglio) | [Quest](quests.md) |
 | `src/qpage.asm` | ~330 | (17/11; 18/11 elenco e dettaglio) pagine delle quest: modulo in testa al file `QST0` (con l'indice), eseguito a `$BC00`; legge il testo `QSTn` a `$B000` | [Quest](quests.md) |
 | `src/menu/*` (modulo MENU) | 1765 | locanda (`inn.asm`, `inn_eq.asm`), negozi (`shop.asm`, `shop_act.asm`, `shop_fix.asm`) | [Villaggio](villaggio.md) |

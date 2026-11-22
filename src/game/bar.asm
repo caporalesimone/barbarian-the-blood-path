@@ -521,12 +521,15 @@ bar_target:                     ; X = indice mostro (preservato)
 loc_lo  .byte 0, <ls_down, <ls_up, <ls_tdown, <ls_portal, <ls_chest, <ls_kchest, <ls_gchest
         .byte <ls_smith, <ls_alch, <ls_fount, <ls_uptown, <ls_ptown, <ls_nokey, <ls_home, <ls_near, <ls_abyss
         .byte <ls_lever, <ls_epic, <ls_travel, <fix_nm, <ls_qgv, <ls_gdn, <ls_gup, <ls_gtown
+        .byte <ls_qdone, <ls_found, <ls_seal                         ; (22/11) quest: QL_DONE, QL_FOUND, QL_SEAL
 loc_hi  .byte 0, >ls_down, >ls_up, >ls_tdown, >ls_portal, >ls_chest, >ls_kchest, >ls_gchest
         .byte >ls_smith, >ls_alch, >ls_fount, >ls_uptown, >ls_ptown, >ls_nokey, >ls_home, >ls_near, >ls_abyss
         .byte >ls_lever, >ls_epic, >ls_travel, >fix_nm, >ls_qgv, >ls_gdn, >ls_gup, >ls_gtown
+        .byte >ls_qdone, >ls_found, >ls_seal
 gate_id .byte 22, 23, 0, 0, 0, 0, 0, 0, 0, 0, 24   ; (18/11) palude: id 1, 2, 11 -> cancelli
-; numero da accodare: 0 nessuno, 1 = livello+1, 2 = livello-1, 3 = livello di ritorno del portale, 4 = 1
-loc_numk .byte 0, 1, 2, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0
+; numero da accodare: 0 nessuno, 1 = livello+1, 2 = livello-1, 3 = livello di ritorno del portale, 4 = 1; (22/11) 5 = nome
+; dell'oggetto di quest q_mi
+loc_numk .byte 0, 1, 2, 4, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 0, 0, 5, 0
         .enc "screen"
 ls_down   .text "stairs down to level ", 0        ; (12/11, committente) + piano del capitolo 1..5 (loc_cl)
 ls_up     .text "stairs up to level ", 0
@@ -550,6 +553,9 @@ ls_travel .text "travel to next chapter", 0     ; (12/11, testo provvisorio del 
 ls_gdn    .text "gate to level ", 0              ; (18/11) palude: cancello est (verso il piano dopo)
 ls_gup    .text "gate back to level ", 0         ; cancello ovest
 ls_gtown  .text "gate back to town", 0
+ls_qdone  .text "quest complete", 0                ; (22/11) motore delle quest (qengine.asm)
+ls_found  .text "found: ", 0                       ; + nome dell'oggetto di quest (qi_*, D19)
+ls_seal   .text "the way is sealed", 0             ; (D4) scala verso il boss del capitolo senza il passo della catena
         .enc "none"
 
 ; id etichetta (0 = nessuna) per il tile sotto il giocatore -> A
@@ -738,7 +744,12 @@ _n      dex
 
 ; aggiorna la barra con l'etichetta del luogo (chiamata quando non c'e' un mostro)
 loc_check:
-        lda ptx                 ; ricalcola solo se cambia casella o numero di chiavi
+        lda q_mt                ; (22/11) messaggio delle quest (qengine.asm q_msg): al posto dell'etichetta del luogo
+        beq +
+        dec q_mt
+        lda q_ml
+        jmp _have
++       lda ptx                 ; ricalcola solo se cambia casella o numero di chiavi
         cmp lc_x
         bne _calc
         lda pty
@@ -792,7 +803,16 @@ loc_name:
         ldx bar_lab
         lda loc_numk,x
         beq nb_r
-        cmp #4
+        cmp #5                  ; (22/11) "found: " + oggetto di quest
+        bne _k0
+        ldx q_mi
+        lda qi_lo,x
+        pha
+        lda qi_hi,x
+        tax
+        pla
+        jmp bn_put
+_k0     cmp #4
         bne _k1
         lda c_chap              ; (12/11) cripta: primo piano del capitolo
         jsr chap_first

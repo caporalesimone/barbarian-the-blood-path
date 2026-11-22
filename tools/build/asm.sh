@@ -39,6 +39,7 @@ python3 tools/build/gen_font.py >/dev/null || exit 1
 python3 tools/build/gen_music.py >/dev/null || exit 1
 python3 tools/build/gen_db.py >/dev/null || exit 1
 python3 tools/build/gen_quests.py >/dev/null || exit 1   # (17/11) quest: file QSTn e quests.inc (concept)
+python3 tools/build/gen_qdata.py >/dev/null || exit 1   # (22/11) tabelle del motore delle quest: qtab.inc
 python3 tools/build/gen_maps.py >/dev/null || exit 1   # prima dell'assemblaggio: scrive town_places.inc (porte per la minimappa)
 rm -f out/work/game.prg
 asm_game out/work/build.log $EXTRA -L out/work/game.lst -l out/work/game.lbl -o out/work/game.prg || { grep -v '^$' out/work/build.log | head -${ERRLINES:-40}; exit 1; }

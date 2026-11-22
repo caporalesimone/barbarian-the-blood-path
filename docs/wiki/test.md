@@ -159,12 +159,17 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (4)
+### sanity (9)
 
 | ID | Test |
 |---|---|
 | `BU-10` | data: un_bch = boss_chapter of uniques.tsv; no unique given by a quest is in a boss subset; UNB_C 128 (50%), UNB_N 32 (12.5%) |
 | `BU-11` | bu_roll: chapter 2, level 10 (chapter boss) about half the chests get a unique of the chapter 2 subset; level 7 about 1 in 8; chapter 1, level 5: only the 2 uniques of chapter 1 (D17) |
+| `QENG-10` | K (chain step 1, 8 fallen): only a fallen of chapter 1 counts; the 8th marks the step reached (q_flag bit 1) with 'quest complete' |
+| `QENG-11` | P and B (side a1.4: 10 kills on level 4; a1.3: a named boss of levels 1-4) in q_side slots 2 and 3: counted only on their level, bit 7 when reached |
+| `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
+| `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open |
+| `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
 | `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
 | `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
 

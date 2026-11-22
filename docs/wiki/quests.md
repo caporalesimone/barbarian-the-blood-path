@@ -172,6 +172,30 @@ dopo `fatta` tornano nel mazzo del capitolo.
 - **Accessorie**: bitmap "fatta" (2 B) + 4 slot attivi (id, contatore).
 - **Ripetibili**: 2 slot (modello e parametro, contatore, premio) + l'oggetto premio preparato nel dungeon (7 B l'uno).
 - `c_qst` (maschera di 8 bit del concept) si sostituisce.
+- (22/11, formato $CE) **Fatto**: campi `q_step`, `q_flag`, `q_cnt`, `q_sdone`, `q_side`, `q_rep`, `q_item` ([FORMATO_DATI](FORMATO_DATI.md)).
+
+### 4.4 Motore residente (22/11, `src/game/qengine.asm`)
+Le quest **non ripetibili** hanno un numero nel gioco (QID): 1..12 i passi della catena, 13..27 le accessorie nell'ordine di
+`quests.yaml` (a1.1 = 13). `tools/build/gen_qdata.py` scrive `out/work/qtab.inc`: per ogni QID tipo dell'obiettivo e capitolo
+(`qt_ty`), parametri (`qt_p1`, `qt_p2`: tipo di mostro, piani, soglia della caduta 256/k), quantità (`qt_n`), oggetto di quest
+(`qt_it`, nomi `qi_*` per "found: ..."). Il tipo di mostro di un capitolo è la sua posizione nel bestiario (base, poi forti).
+
+Posti delle quest **prese**: la catena (passo `q_step` + 1 se `q_flag` bit 0 e non ancora raggiunto) e le 4 accessorie di
+`q_side` (id 1..15, bit 7 = raggiunta). Eventi:
+
+| Evento | Aggancio | Obiettivi |
+|---|---|---|
+| uccisione (`q_kill`) | `kill_monster`, prima del bottino | K (tipo del capitolo corrente), B (boss con nome nei piani p1..p2), P (piani p1..p2), oggetto da mostro (tipo, `rand` < soglia) |
+| baule (`q_chest`) | prima apertura del baule del boss con nome (`chest_open`, dopo `bu_roll`) | oggetto da baule nei piani p1..p2 (D19) |
+| boss del capitolo (`q_cboss`) | `chap_won` e boss finale | C |
+
+Raggiunta la quantità: catena `q_flag` bit 1, accessoria bit 7 dell'id; nella barra "quest complete" (o "found: <oggetto>")
+per ~3 s (`q_msg`, `loc_check`), lampo e suono. **D11** (`q_spawn`, `load_location` dopo `place_boss`): con una quest K o
+"oggetto da mostro" presa e non raggiunta, se nel piano (del capitolo della quest, non il piano del boss del capitolo) non c'è
+un mostro del tipo, il primo mostro che non è il boss lo diventa. **D4** (`q_gate`): la scala verso il piano del boss del
+capitolo è chiusa ("the way is sealed") finché il passo 3c non è preso o consegnato; **spento** (`QGATE` = 0) finché `QGIV`
+non dà le quest, altrimenti nessuno arriverebbe al boss. Costo: ~870 B di GAME (codice ~470, tabelle e nomi ~270, barra).
+Test: `QENG-10`..`14`. Da fare: `QGIV` (offerta, consegna, premi), segni "!" (D12), pagina Q, ripetibili (D18).
 
 ---
 

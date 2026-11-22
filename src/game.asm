@@ -1960,6 +1960,8 @@ mod_levels
 mod_ui
         .include "ui.asm"
         .include "quest.asm"             ; (17/11, concept) pagina della quest (Q) e NPC del villaggio
+        .include "qengine.asm"           ; (22/11) motore residente delle quest (agganci nel dungeon)
+        .include "qtab.inc"              ; (22/11) tabelle delle quest (tools/build/gen_qdata.py)
         .include "stash.asm"
 mod_hud
         .include "hud.asm"

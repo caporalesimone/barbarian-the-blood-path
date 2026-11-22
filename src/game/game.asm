@@ -1617,6 +1617,7 @@ _drop   txa
         bne +
         dex
         jsr bu_roll
+        jsr q_chest             ; (22/11, D19) quest: oggetto da baule
 +       jmp _show
 
 ; contenuto del baule determinato dal seed (piano + posizione)
@@ -2094,6 +2095,7 @@ _kb
         dex
         bne -
         jsr fin_doors           ; si aprono le stanze dei tesori
+        jsr q_cboss             ; (22/11) quest: boss finale (passo 12, obiettivo C)
 _nb     lda lv_cboss            ; (12/11) boss del capitolo ucciso: il capitolo dopo si sblocca
         beq _nb2
         lda km_i
@@ -2102,7 +2104,10 @@ _nb     lda lv_cboss            ; (12/11) boss del capitolo ucciso: il capitolo 
         cmp lb_boss
         bne _nb2
         jsr chap_won
-_nb2    ldx km_i                ; (19/11) il codice del piano decide (piano 20: ne' il boss ne' i mostri evocati lasciano
+        jsr q_cboss             ; (22/11) quest: obiettivo C del capitolo
+_nb2    ldx km_i                ; (22/11) quest: K, B, P, oggetto da mostro (qengine.asm)
+        jsr q_kill
+        ldx km_i                ; (19/11) il codice del piano decide (piano 20: ne' il boss ne' i mostri evocati lasciano
         jsr ovp_kill            ; bottino; feticci di Mother Stitch: solo esperienza)
         bcs _nl
         lda km_nl               ; mostro troppo debole: niente bottino
@@ -3692,6 +3697,17 @@ _np     jsr npc_here            ; (17/11) nessun luogo sotto il PG: accanto a ch
         jmp NPC_JTALK
 _r      rts
 _st     stx st_kind
+.if QGATE
+        cpx #1                  ; (22/11, D4) scala verso il piano del boss del capitolo: chiusa senza il passo della catena
+        bne +
+        lda cur_level
+        clc
+        adc #1
+        jsr q_gate
+        bcs _r
+        ldx st_kind
++
+.endif
         cpx #2
         beq _gu
         cpx #3

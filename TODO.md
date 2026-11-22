@@ -640,8 +640,9 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   capitolo, `QGIV`, cancello a messaggio, finale in due tempi con portale e portale nero verso l'Abisso, premi, boss dei
   capitoli disegnati e tarati, unici solo da quest e boss, ripetibili, mostri delle quest generati sempre, segni, ordine).
   **Ordine (D13)**: 1) stato nel salvataggio (baule della locanda fuori dal blocco dell'eroe): **fatto il 22/11** (formato $CE,
-  baule a `$FF80`, 32 B `q_step`..`q_free`, file da 4 blocchi; test `QSAVE-10/11`); 2) motore nel dungeon e `QGIV`
-  sul capitolo 1; poi gli altri capitoli.
+  baule a `$FF80`, 32 B `q_step`..`q_free`, file da 4 blocchi; test `QSAVE-10/11`); 2) motore nel dungeon: **fatto il 22/11** (`qengine.asm`,
+  [quests 4.4](docs/wiki/quests.md), cancello D4 spento finché non c'è `QGIV`), poi `QGIV`, segni e pagina Q sul capitolo 1;
+  poi gli altri capitoli.
 - (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).
   **Da decidere in futuro**: le regole fini (categoria, livello oggetto, qualità minima, legame con il modello della quest).
 - (22/11, D9) **Unici**: fatto (`bu_roll`, [bottino](docs/wiki/bottino.md)). Sottoinsiemi: capitolo 1 con i due unici nuovi (D17),

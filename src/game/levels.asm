@@ -206,6 +206,7 @@ _dun    ldx #63                 ; mostri: nessun percorso in corso (mslide, mslc
         jmp _pb
 _pc     jsr place_chests
 _pb     jsr place_boss
+        jsr q_spawn             ; (22/11, D11) quest di caccia: il mostro richiesto c'e' sempre
         lda cur_level           ; ...e se visitato, le differenze salvate sopra
         jsr vis_bit
         and c_vis,x
