@@ -138,15 +138,6 @@ _d      asl tmp0
         rol ob_th+1
 +       rts
 
-; ob_th = vita massima del boss X / 2
-ob_half:
-        lda mhmh,x
-        lsr
-        sta ob_th+1
-        lda mhm,x
-        ror
-        sta ob_th
-        rts
 
 ; evoca 2 mostri del tipo A sulle caselle di pavimento accanto al boss (ob_b), svegli -> ob_s0, ob_s1
 ob_summon:

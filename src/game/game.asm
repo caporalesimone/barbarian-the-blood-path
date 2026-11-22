@@ -162,7 +162,6 @@ af_lw      .byte ?
 af_sum     .byte ?
 af_a       .byte ?
 af_b       .byte ?
-af_pf      .byte ?
 af_id      .byte ?          ; (fase 6) af_gen: id dell'oggetto (un unico lo cambia nella sua base); af_rows: riga, righe rimaste,
 af_k       .byte ?          ;  routine (anche it_nm: id)
 af_c       .byte ?
@@ -251,7 +250,6 @@ io_dir     .byte ?
 io_what    .byte ?
 io_lvl     .byte ?
 io_quiet   .byte ?
-wbuf       .fill 16
 cs_pend    .fill 3          ; (11/11) schermata C: punti in attesa su FOR, DES, COS (0 fuori dalla schermata: pts_avail)
 cs_mode    .byte ?          ; (15/11) schermata C: 0 tutte le voci, 1 solo respec, 2 nessuna (prima nel codice)
 cs_nv      .fill 12         ; (15/11) schermata C: hpmax..s_dk con i punti in attesa (anteprima)

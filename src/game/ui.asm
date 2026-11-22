@@ -1597,11 +1597,8 @@ row24:  ldy #24
         ldy #24
         jmp ui_at
 
-; riga dei messaggi pulita, cursore all'inizio: msg23 = riga 23 (negozi), shop_msg_clear = riga 22 (baule del piano)
+; riga dei messaggi (23) pulita, cursore all'inizio (22/11: tolto l'ingresso shop_msg_clear per la riga 22, mai usato)
 msg23:  ldy #23
-        .byte $2c
-shop_msg_clear:
-        ldy #22
         ldx #1
         jsr ui_at
         lda #$20

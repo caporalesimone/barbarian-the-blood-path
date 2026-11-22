@@ -116,8 +116,7 @@ rel_done:
         beq _x
         lda #0
         sta sv_in
-        jsr sv_write
-        rts
+        jmp sv_write
 _x      rts
 
 ; immagine del file: letta una sola volta sotto rel_hold (sv_in), altrimenti a ogni operazione
@@ -135,8 +134,7 @@ _x      rts
 sv_put:
         lda rel_hold
         bne _x
-        jsr sv_write
-        rts
+        jmp sv_write
 _x      rts
 
 ; nome del file dell'eroe cur_slot: "save-0N" in sv_nm
@@ -344,8 +342,7 @@ _c      lda slot_name,y
         sta sv_par+5
         lda #<nm_hl
         ldx #>nm_hl
-        jsr sv_save             ; (il plugin si carica a $E820: nel villaggio copre il villaggio)
-        rts
+        jmp sv_save             ; (il plugin si carica a $E820: nel villaggio copre il villaggio)
 nm_hl   .text "hl"
         .byte 0
 
@@ -553,8 +550,7 @@ chap_ensure:
         jsr sv_rdh
         bcs _bad
         lda #1                  ; immagine (SV_ALT) -> slot
-        jsr chap_copy
-        rts
+        jmp chap_copy
 _bad    lda #0                  ; slot vuoti: primo byte 0 (lv_get li scarta perche' diverso dal piano)
         sta tmp6
 -       lda tmp6

@@ -737,8 +737,7 @@ _o2     lda rcy,x
         sta ch_x1
 _v      lda rcx,y
         sta ch_y
-        jsr carve_v
-        rts
+        jmp carve_v
 
 ; tratto orizzontale largo 2 (righe ch_y, ch_y+1) da ch_x0 a ch_x1
 carve_h:
