@@ -383,7 +383,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `POTION-12` | greater healing (violet): +40 + 4 x level at levels 1, 10 and +28 + 5 x level (Abyss) at 50, 99; 10 s cooldown, violet |
 | `BELT-11` | every belt slot: its key drinks only that slot; the key of an empty slot does nothing |
 | `BELT-12` | full hp: the potion is not drunk (stays in the belt, no cooldown) |
-| `SHOP-BELT-10` | alchemist: potion with a full belt refused (gold kept); one free slot: chosen, the potion goes there |
+| `SHOP-BELT-10` | alchemist: potion with a full belt refused (gold kept); one free slot: chosen (the '>' of list 1 on it: 22/11), the potion goes there |
 | `SHOP-SELL-11` | alchemist: sell a belt potion (slot freed) and one scroll of a stack, at price >> SELL_SHIFT |
 | `BELT-13` | save from the game menu, belt wiped in RAM, hero loaded from disk: same belt |
 | `BELT-14` | death keeps the belt (no potion lost) |

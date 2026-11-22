@@ -84,7 +84,7 @@ def menu_save(ctx):
 
 def selectable(g, l, c):
     """entry c of list l: an item (not a separator row, not an empty slot)"""
-    r = g.call_keep(g.L["sl_get"], regs="a=%02x x=%02x" % (c, l))
+    r = g.call_keep(g.L["sl_get"], regs="a=%02x,x=%02x" % (c, l))
     return not r["c"] and g.b(g.L["ui_sel"]) != 0
 
 
@@ -133,7 +133,7 @@ def list_skip(ctx):
             for i in range(25):
                 g.frames(1, joy=j); g.frames(1)
                 l = g.b(L["sl_l"]); c = g.b(L["sl_cur"] + l)
-                r = g.call_keep(L["sl_get"], regs="a=%02x x=%02x" % (c, l))
+                r = g.call_keep(L["sl_get"], regs="a=%02x,x=%02x" % (c, l))
                 if r["c"] or g.b(L["ui_sel"]) == 0:
                     bad.append("%s: list %d entry %d (%s)" % (name, l, c, "separator" if r["c"] else "empty"))
                     return

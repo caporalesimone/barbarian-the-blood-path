@@ -114,7 +114,7 @@ def belt_full_hp(ctx):
     check(g.w16(L["tmr"] + L["T_POT"]) == 0, "cooldown started with full hp")
 
 
-@test("SHOP-BELT-10", "alchemist: potion with a full belt refused (gold kept); one free slot: chosen, the potion goes there")
+@test("SHOP-BELT-10", "alchemist: potion with a full belt refused (gold kept); one free slot: chosen (the '>' of list 1 on it: 22/11), the potion goes there")
 def shop_belt(ctx):
     g, L = ctx["g"], ctx["g"].L
     g.poke(L["c_lvl"], 1); g.poke16(L["hpmax"], 100); g.poke16(L["c_hp"], 100)
@@ -141,6 +141,9 @@ def shop_belt(ctx):
     belt(g, L["I_POTR"], L["I_POTR"], 0, L["I_POTR"])
     g.press_fire()                                              # buy -> slot choice ('>' on the free slot)
     check(g.b(g.MN["sh_slot"]) == 2, "slot choice on %d (expected the free slot 2)" % g.b(g.MN["sh_slot"]))
+    c = g.b(L["sl_cur"] + 1)                                    # (22/11) the '>' of list 1 on that belt slot (2 rings before it)
+    r = g.call_keep(L["sl_get"], regs="a=%02x,x=01" % c)
+    check(g.b(L["sl_l"]) == 1 and not r["c"] and g.b(L["sl_sl"]) == 0x22, "the cursor is on entry %d of list %d (slot code $%02x), not on belt slot 2" % (c, g.b(L["sl_l"]), g.b(L["sl_sl"])))
     g.press_fire()                                              # put
     check(g.mem(L["c_beltt"], 4) == [L["I_POTR"], L["I_POTR"], pid, L["I_POTR"]], "belt %s (expected the potion in slot 3)" % g.mem(L["c_beltt"], 4))
     check(g.w16(L["c_gold"]) == 5000 - price, "gold %d (expected %d)" % (g.w16(L["c_gold"]), 5000 - price))

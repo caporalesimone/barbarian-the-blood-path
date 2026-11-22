@@ -303,6 +303,9 @@ flowchart LR
 - (22/11, committente) **Un oggetto comprato sparisce dalla merce** (`sh_take`, `src/menu/shop_act.asm`): le voci dopo salgono di
   un posto, `shp_cnt` - 1, il cursore resta sull'ultima voce se serve (`sl_reinit`). Due pozioni uguali si comprano solo se la
   merce le ha estratte due volte; tornando nel negozio l'assortimento si estrae di nuovo (come prima).
+- (22/11, correzione su segnalazione del committente) Acquisto di una pozione: il `>` della scelta del posto della cintura stava
+  una voce sopra il posto scelto (`sh_draw` contava un anello solo prima della cintura; dal 21/11 sono due: `SH_BELT0` = 3).
+  Fire metteva la pozione nel posto giusto, ma il cursore sullo schermo indicava quello sopra. Test `SHOP-BELT-10`.
 - (22/11, correzione) Fino al 22/11 la merce non era da 3 a 8 oggetti: in `shop_roll` lo `stx shp_cnt` non tocca i flag e il
   `bne` dopo vedeva lo Z del `dec`, sempre 1, quindi `shp_k` diventava la dimensione del pool filtrato (8 voci piene e, con un
   pool di 9 o più, voci in più lette da `l8_b`, fuori da `l8_id`). Trovato scrivendo il test di `sh_take` (`SHOP-BUY-01`).

@@ -225,6 +225,8 @@ _e      stx tmp4
         rts
 sh_eq0  .byte 0, 3
 sh_eqn  .byte 3, 2              ; (21/11) alchimista: i due anelli
+SH_BELT0 = 2 + 1                ; (22/11) voce della lista 1 del primo posto della cintura (alchimista): 2 anelli + riga
+                                ; separatrice (era 2: con i due anelli del 21/11 il '>' stava una voce sopra il posto scelto)
 
 ; voce del cursore -> ui_lc (codici di prima: 0..7 zaino, 8..12 equipaggiamento, LC_W.. merce, LC_B.. cintura (21/11 sera: prima merce 12 = secondo anello))
 sh_cur: jsr sl_sel
@@ -242,12 +244,12 @@ _s      sta ui_lc
         rts
 
 ; tutta la schermata variabile: oro nel titolo della lista 1, liste, oggetto, tasti. Nella scelta del posto della pozione
-; (sh_slot) il cursore sta sul posto della cintura (lista 1: anello, riga separatrice, poi la cintura)
+; (sh_slot) il cursore sta sul posto della cintura (lista 1: i due anelli, riga separatrice, poi la cintura: SH_BELT0)
 sh_draw:
         lda sh_slot
         bmi +
         clc
-        adc #2
+        adc #SH_BELT0
         sta sl_cur+1
         lda #1
         sta sl_l
