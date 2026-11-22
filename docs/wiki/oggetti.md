@@ -274,7 +274,8 @@ meno, almeno `RATE_MIN` = 6). Alla nascita dell'oggetto (`add_to_pack` → `af_d
 +50 / +100 / −50 (% del massimo tirato: +metà, +tutto fino a 255, −metà) e **indistruttibile** (massimo 0 = non si usura). **Furto
 di vita e spine** (LEECH, THORNS): dopo la 2.0 (O5), le righe hanno peso 0 e non escono. Il simulatore (`rules.py` `Hero(affixes=)`,
 `sim_rules.py`) ha vita, danno subito, penetrazione e cadenza. Le tabelle di sola generazione (`af_min`, `af_ty`, `af_ch`, `mag_t`, `shm_t`) stanno sotto l'I/O, in fondo al generatore (`out/work/afgen.asm` incluso da `gen_io.asm`): `af_gen` le legge con `$01 = $34` e interrupt spenti. **Fase 5 (21/11 sera, O7, O8, ex B4)**: colore del nome secondo la qualità (bianco normale, azzurro magico `UC_MAGIC`, grigio
-maledetto `UC_CURSED` = 12: `it_qcol`); nelle liste il nome della voce del cursore **scorre** se supera 16 colonne (`sl_nav`: un
+maledetto `UC_CURSED` = 12: `it_qcol`); nelle liste il nome sta intero in 33 colonne (inventario, locanda, baule) o 27 (negozi, con il prezzo: 22/11, prima 16) e
+quello della voce del cursore **scorre** solo se è più lungo (`sl_wd`, `sl_nav`: un
 carattere ogni 8 fotogrammi, pausa di 6 passi all'inizio e alla fine; `ui_sk`, `ui_nlen`); nel titolo del riquadro dell'oggetto il
 **nome completo** fino a 34 colonne (`ui_w`); nella riga delle caratteristiche i **poteri** che non stanno nei numeri (`it_pw`:
 `hp+12`, `hit-1`, `spd+2`, `pen+1`, `str+1`, `ind`). Da fare: unici (fase 6), sottoinsieme della generazione (TODO D15).

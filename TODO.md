@@ -331,6 +331,11 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 - Alternativa piu' piccola (non valutata a fondo): lasciare il KERNAL al menu e ridurre solo il primo caricamento (START).
 
 ### M3 Prestazioni dei caricamenti (ex J9) — M
+- (22/11) **Posizione di CSHEET sul disco — decisione del committente in sospeso**. Misurate 3 posizioni (variabile provvisoria
+  in `tools/build/mkdisk.sh`, tolta): dopo CORE (oggi), dopo la voce doppia di gfx1, in fondo prima delle quest. In fondo:
+  in1 4,86 → 2,46 s, in2 4,63 → 3,09, in4 3,34 → 2,78, scheda nel dungeon 1,23 → 0,84 s; peggiorano in3 3,07 → 3,95, twn1 → 2,14 s
+  (limite 2,0 del committente) e boss2 → 2,71 s (oltre il 90% di 3,0). Per adottarla: limiti twn1 2,5 e boss2 3,2 (solo con l'OK).
+  Causa non verificata (probabile: tracce dei file seguenti e salti della testina).
 - (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
   disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
   misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da

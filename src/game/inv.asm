@@ -4,7 +4,7 @@
 ;  Si chiamano solo dalle schermate (dopo ui_begin, che si assicura che CORE sia in memoria: core_need).
 ; ===================================================================
 ; A = id oggetto, ui_ib = prefisso (pergamene: quantita'), ui_is = suffisso: "[prefisso ]nome[ of suffisso]" tagliato e riempito
-; a 16 colonne (21/11 sera, fase 2b degli affissi: prima "+N nome" e "nome str"). Azzera ui_ib e ui_is
+; a ui_w colonne (22/11: impostate dal chiamante, prima 16 fisse; 21/11 sera, fase 2b degli affissi). Azzera ui_ib, ui_is, ui_sk
 ui_item:
         tax
         lda ui_col
@@ -26,11 +26,7 @@ _mg     jsr it_qcol             ; (fase 5) magico azzurro, maledetto grigio
 _nfi    sta ui_col
         lda #0
         sta ui_nlen
-        lda ui_w                ; (fase 5) colonne del nome: 16 (liste) o di piu' (riquadro dell'oggetto)
-        bne +
-        lda #16
-        sta ui_w
-+       lda cidx
+        lda cidx                ; (22/11) colonne del nome in ui_w, sempre dal chiamante: liste sl_wd, riquadro 34, messaggio 16
         pha
         clc
         adc ui_w                ; 16 colonne (08/11: la colonna prima del nome e' l'icona della categoria, ui_cic)
@@ -82,8 +78,6 @@ _nb     stx ui_x
         clc
         adc ui_w
         sta tmp6
-        lda #0
-        sta ui_w
 _p      lda cidx
         cmp tmp6
         bcs _d

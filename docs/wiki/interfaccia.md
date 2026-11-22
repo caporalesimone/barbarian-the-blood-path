@@ -65,8 +65,10 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
   della locanda) e nel riquadro selected item, la colonna fra il cursore e il nome mostra l'icona della categoria al
   posto dello spazio: spada (`CH_SWORD` 70, bianca), armatura (`CH_ARMOR` 71, grigio chiaro), scudo (`CH_SHLD` 35,
   marrone), anello (`CH_RING` 72, giallo), pozione (`CH_POT` 68, nel colore della pozione), pergamena (`CH_SCR` 69,
-  grigio chiaro); spazio sui posti vuoti e sulla riga dell'oro del baule. I nomi ("prefisso nome of suffisso" dal 21/11 sera) stanno in **16 colonne**
-  (`ui_item`): nella voce del cursore un nome più lungo **scorre** (fase 5 degli affissi, decisione del committente ex B4: un carattere
+  grigio chiaro); spazio sui posti vuoti e sulla riga dell'oro del baule. I nomi ("prefisso nome of suffisso" dal 21/11 sera) stanno interi dove c'è
+  spazio (22/11, committente; prima 16 colonne fisse): **33 colonne** (fino alla 37) in inventario, locanda e baule, **27** nei negozi, dove
+  dalla colonna 32 c'è il prezzo (`sl_wd`, scelto in `sl_row` da `sl_rv`; `ui_item` usa sempre le colonne `ui_w` del chiamante: righe
+  `sl_wd`, titolo del riquadro 34, messaggio "replaced" 16). Nella voce del cursore un nome più lungo **scorre** (fase 5 degli affissi, decisione del committente ex B4: un carattere
   ogni 8 fotogrammi, pausa all'inizio e alla fine); colore del nome secondo la qualità (bianco, azzurro magico, grigio maledetto);
   nel titolo del riquadro dell'oggetto il nome completo (fino a 34 colonne) e nella riga sotto i poteri degli affissi che non stanno
   nei numeri ([Oggetti](oggetti.md)). La colonna in più non sposta

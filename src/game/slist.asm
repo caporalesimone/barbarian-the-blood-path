@@ -57,12 +57,13 @@ d5_n    .byte ?                 ; (21/11 sera) decodificatore del testo a 5 bit 
 d5_h    .byte ?
 d5_l    .byte ?
 ti_p    .word ?                 ; ui_title: testo
-ui_w    .byte ?                 ; (fase 5) ui_item: colonne del nome (0 = 16); caratteri da saltare (nome scorrevole); caratteri contati
+ui_w    .byte ?                 ; (fase 5) ui_item: colonne del nome (dal chiamante); caratteri da saltare (nome scorrevole); caratteri contati
 ui_sk   .byte ?
 ui_nlen .byte ?
 sl_sk   .byte ?                 ; (fase 5) nome scorrevole della voce del cursore: passo, lunghezza del nome, riga del cursore in disegno
 sl_len  .byte ?
 sl_isc  .byte ?
+sl_wd   .byte ?                 ; (22/11) colonne del nome nelle righe: 33 (inventario, locanda, baule), 27 con i prezzi (negozi)
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"
@@ -499,6 +500,12 @@ _it     jsr ui_cic
         bne +
         lda #2
 +       sta ui_fc
+        lda #SL_WN              ; (22/11, committente) nome intero dove ci sta: fino alla colonna 37, o alla 31 se a destra c'e'
+        ldy sl_rv+1             ; il prezzo (sh_price dalla colonna 32); scorre solo se e' piu' lungo
+        beq +
+        lda #SL_WP
++       sta sl_wd
+        sta ui_w
         lda sl_isc              ; (fase 5) voce del cursore: si saltano i primi caratteri (sl_skv) e si conta la lunghezza
         beq +
         jsr sl_skv
@@ -527,7 +534,9 @@ _sep    lda #9                  ; riga separatrice sottile, colonne 10..29
 _x      ldx sl_r
         rts
 
-; caratteri da saltare = sl_sk - 6 (pausa all'inizio), fra 0 e lunghezza - 16 (pausa alla fine)
+SL_WN = 33                      ; colonne del nome senza e con il valore a destra
+SL_WP = 27
+; caratteri da saltare = sl_sk - 6 (pausa all'inizio), fra 0 e lunghezza - colonne (pausa alla fine; 0 se il nome ci sta)
 sl_skv: lda sl_sk
         sec
         sbc #6
@@ -536,15 +545,13 @@ sl_skv: lda sl_sk
 +       sta ui_sk
         lda sl_len
         sec
-        sbc #16
-        bcc _z
-        cmp ui_sk
+        sbc ui_w
+        bcs +
+        lda #0
++       cmp ui_sk
         bcs +
         sta ui_sk
 +       rts
-_z      lda #0
-        sta ui_sk
-        rts
 
 ; ------------------------------------------------------------------ cursore
 ; un fotogramma: A = NAV_BACK (RUN/STOP), NAV_MOVE (cursore o lista cambiati, gia' ridisegnati), NAV_FIRE, NAV_NONE
@@ -580,16 +587,16 @@ _f      jsr ui_fire
         beq _no
         lda #NAV_FIRE
         rts
-_no     lda sl_len          ; (fase 5, committente) nome della voce del cursore oltre 16 caratteri: scorre di uno ogni 8 fotogrammi,
-        cmp #17                 ; con una pausa all'inizio e alla fine
-        bcc _nn
+_no     lda sl_wd           ; (fase 5, committente) nome della voce del cursore piu' lungo delle colonne (sl_wd): scorre di uno
+        cmp sl_len              ; ogni 8 fotogrammi, con una pausa all'inizio e alla fine
+        bcs _nn                 ; (qui C = 0)
         lda frame
         and #7
         bne _nn
         inc sl_sk
         lda sl_len
-        sec
-        sbc #4                  ; lunghezza - 16 + 12 (6 passi di pausa all'inizio e 6 alla fine)
+        sbc sl_wd               ; C = 0: lunghezza - colonne - 1, poi + 12 + 1 (C = 1): 6 passi di pausa all'inizio e 6 alla fine
+        adc #12
         cmp sl_sk
         bcs +
         lda #0

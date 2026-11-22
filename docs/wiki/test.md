@@ -156,7 +156,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 |---|---|
 | `AFU-10` | inventory: an item with a cursed prefix has its name in grey (UC_CURSED), a magic one in light blue (UC_MAGIC) |
 | `AFU-11` | inventory: the item box title shows the full name beyond 16 columns ('... studded armor of ...') |
-| `AFU-12` | inventory: the long name on the cursor row scrolls (after ~80 frames the row shows a later part of the name) |
+| `AFU-12` | inventory: a 32-character name is whole on its row (33 columns, 22/11); a 35-character one scrolls on the cursor row |
 | `AFU-13` | inventory: the item box lists the powers not in the numbers: armor 'of the wolf' -> 'hp+12', shield 'of health' -> 'hit-1' |
 
 ### regression (261)

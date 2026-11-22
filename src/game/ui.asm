@@ -935,6 +935,8 @@ _ty     tay
         sta ui_ib
         lda c_packs,x
         sta ui_is
+        lda #16                 ; (22/11) colonne del nome (ui_item)
+        sta ui_w
         lda c_pack,x
         jsr ui_item
         jmp _after
