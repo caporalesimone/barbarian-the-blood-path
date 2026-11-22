@@ -43,6 +43,12 @@ Valgono sopra a quanto scritto nelle sezioni seguenti, dove c'è differenza.
 | D11 | Mostri delle quest di caccia | (correzione del committente alla risposta) **Con la quest attiva il generatore crea sempre il mostro richiesto** quando l'eroe arriva nel piano: va modificato il generatore dei mostri. Vale per `a2.2`, `a3.2`, `r.hunt` e gli obiettivi B della catena. |
 | D12 | Segni sopra gli NPC | **"!" giallo = quest da offrire, "!" verde = quest da ritirare** (stesso sprite; il verde ha la precedenza). |
 | D13 | Ordine del lavoro | Prima lo stato nel salvataggio (D1), poi motore nel dungeon e `QGIV` nel villaggio, tutto sul **capitolo 1**; quando il sistema è stabile si estende a tutti i capitoli. |
+| D14 | Tempi del disco (salvataggio da 4 blocchi) | Si accettano i tempi di oggi: limiti dei temi alzati (`theme2`, `theme4` a 1,4 s); il disco si ottimizza alla fine, prima della 2.0. Le ripetibili restano salvate. |
+| D15 | Ingresso nel villaggio (5,08 s) | Si rimisura dopo il riordino dei file delle quest (D2); intanto `town_in` e `in1` a 5,2 s. |
+| D16 | Boss dei capitoli | **Boss a fasi con meccaniche** (sotto una soglia di vita evoca, cambia attacco, si cura), codice nella coda del file del tema (`ovl_*`, come la sala del trono), modello in `tools/simulators/boss_scripts.py`. Proposta delle fasi da presentare prima di scrivere il codice. |
+| D17 | Unici del capitolo 1 | **Due unici nuovi** di livello 2-6 per i boss del capitolo 1 (proposta di nome, base, poteri, prezzo prima del commit), in fondo a `uniques.tsv`. |
+| D18 | Prima versione del motore | Catena e accessorie del capitolo 1 (motore, `QGIV`, segni, pagina Q); **ripetibili dopo**, quando il resto è stabile. |
+| D19 | Oggetti di quest "da baule" | Nel **baule del boss con nome** del piano giusto, con la quest attiva ("found: tam's amulet"). |
 
 ## 1. Regole fissate
 

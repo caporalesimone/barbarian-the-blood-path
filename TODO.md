@@ -354,7 +354,8 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   (22/11) Con il formato $CE i file `save-0N` passano da 3 a 4 blocchi (baule della locanda fuori dal blocco, D1 delle quest):
   i file dopo (capitoli 2-4, `QSTn`) scendono di 5 blocchi e **`PERF-DISK-24` fallisce** (tema del capitolo 4: 1,05–1,23 s, oltre il
   90% di 1,1 s). Strade: (a) rifare la disposizione con le soluzioni sopra; (b) non salvare le ripetibili (16 B, consentito da D1:
-  file di nuovo da 3 blocchi, 755 B su 760); (c) limite diverso. Da decidere con il committente.
+  file di nuovo da 3 blocchi, 755 B su 760); (c) limite diverso. **Deciso (22/11, D14-D15 di quests.md)**: (c), limiti dei temi
+  a 1,4 s e `town_in`/`in1` a 5,2 s finché, riordinati i file delle quest (D2), non si rimisura; il disco si ottimizza prima della 2.0.
 - (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
   disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
   misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da
@@ -644,8 +645,10 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
 - (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).
   **Da decidere in futuro**: le regole fini (categoria, livello oggetto, qualità minima, legame con il modello della quest).
 - (22/11, D9) **Unici**: fatto (`bu_roll`, [bottino](docs/wiki/bottino.md)). Resta da rivedere i sottoinsiemi per capitolo
-  (oggi il capitolo 1 non ne ha: i 5 unici non dati da quest sono dei capitoli 2-4) insieme ai boss dei capitoli. (22/11, D8) **Boss dei capitoli** con statistiche proprie e sala
-  disegnata a mano (mappe come `FMAP`), mostri solo se evocati. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
+  (oggi il capitolo 1 non ne ha: i 5 unici non dati da quest sono dei capitoli 2-4) insieme ai boss dei capitoli. (22/11, D8, D16) **Boss dei capitoli** con statistiche proprie e sala
+  disegnata a mano (mappe come `FMAP`), mostri solo se evocati; **a fasi con meccaniche** (D16: evoca, cambia attacco, si cura;
+  codice nella coda del tema, modello `boss_scripts.py`): proposta delle fasi prima del codice. (22/11, D17) **Due unici nuovi**
+  per i boss del capitolo 1 (livello 2-6): proposta prima del commit. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
   attiva il mostro richiesto nasce sempre nel piano.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 
