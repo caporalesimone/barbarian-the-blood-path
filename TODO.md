@@ -641,6 +641,12 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
 
 Lab64 (toolchain) ha il suo TODO; qui solo cio' che riguarda il gioco.
 
+### J15 (22/11) Bot che gioca da solo: prossime capacità — M
+- `tests/bot/` ([README](tests/bot/README.md)): gioca in VICE via TCP, esplora, combatte, usa le abilità, indossa, spende i punti,
+  registra i tempi per piano e capitolo. **Da fare**: negozi veri (oggi vendita e acquisto sono scorciatoie in memoria), inventario
+  e scheda C navigati davvero, pergamena del portale, riparazioni, bersaglio ragionato (evocati dei boss), capitoli 2–4 provati
+  a fondo (palude con i cancelli, sala del trono), più semi in fila con un rapporto unico per il bilanciamento.
+
 ### J14 (14/11) Pubblicare le build quando si passera' a GitHub — S
 - Oggi le versioni stanno solo in `out/releases/` (ultime 5, locale). Per GitHub: asset del tag `v<V>` (disco, manuale,
   `manifest.json` con gli SHA-256) invece di conservarle in locale; niente zip dei sorgenti (regola del committente 14/11: lo

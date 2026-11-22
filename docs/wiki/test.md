@@ -110,6 +110,15 @@ non stabiliscono cosa è giusto, dicono che il gioco funziona anche lì. Libreri
 container `lab64-vc64web` all'indirizzo `EMU_URL`, `boot`, `run_script`, `run_loop`, `peek`, `findText`); bot in
 `tests/regression/emu/bots/`. Senza il demone (`./build.sh --emu` o `--release` lo accendono) i test sono **SKIP** con il motivo. (14/11: prima erano FAIL, perche' il runner contava come fallimento ogni eccezione del `setup` del modulo; ora un `Skip` nel `setup` da' SKIP a tutti i test del modulo.) Guida e trappole: [emulatore.md](emulatore.md).
 
+## Il bot che gioca da solo (22/11)
+
+`tests/bot/` non è una suite: è uno **strumento di misura** che gioca il gioco vero in VICE (monitor remoto su TCP, modalità
+warp, ~5 volte il tempo reale) per vedere bilanciamento e difficoltà. Esplora i sotterranei che non conosce, combatte con
+le abilità che il livello gli dà, apre i bauli, indossa il meglio, spende i punti statistica, si cura e compra pozioni nel
+villaggio, e registra **tempi, morti, pozioni e bauli per piano e per capitolo** (`out/work/bot/<nome>.json`).
+`lab64 run python3 tests/bot/run.py --max-level 19 --minutes 20`. Struttura a strati e come aggiungere una capacità:
+[tests/bot/README.md](../../tests/bot/README.md).
+
 ## Elenco
 
 Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
