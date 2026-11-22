@@ -135,7 +135,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `PG-NEW-01` | new barbarian: name, seed, game starts in the village |
 | `VIL-MOVE-01` | village: walk without glitches (tiles, VIC registers, frames) |
 | `MAP-01` | minimap in the village: hero marker on the hero's position |
-| `SHOP-BUY-01` | smith: buy the first ware (gold carried + inn chest) |
+| `SHOP-BUY-01` | smith: buy the first ware (gold carried + inn chest); the bought ware leaves the list (22/11) |
 | `SHOP-SELL-01` | smith: sell the bought item at price >> SELL_SHIFT (a quarter since 20/11) |
 | `SHOP-REPAIR-01` | smith: repair the worn weapon (durability back to max - 1, gold paid) |
 | `INN-CHEST-01` | inn: an item from the pack to the chest |

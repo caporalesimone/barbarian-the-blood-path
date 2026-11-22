@@ -442,7 +442,8 @@ _nx     iny
         dec shp_cnt
         bne _c
         stx shp_cnt             ; pool filtrato
-        bne +
+        txa                     ; (22/11) stx non tocca i flag: Z veniva dal dec, sempre 1, e shp_k diventava la dimensione
+        bne +                   ; del pool (merce 9 col pool di 9: la nona voce era l8_b[0], fuori da l8_id)
         stx shp_k
 +       rts
 

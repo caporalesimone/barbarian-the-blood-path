@@ -32,6 +32,7 @@ shop_buy:
         bcs _full
         jsr sort_pack
 _pay    jsr gold_pay
+        jsr sh_take             ; (22/11, committente) l'oggetto comprato sparisce dalla merce
         jsr msg23
         #msg "bought."
         lda #SFX_PICK
@@ -84,6 +85,33 @@ _cn     lda #$ff
         lda #0                  ; (21/11) il cursore torna nella lista della merce
         sta sl_l
         rts
+
+; (22/11, committente) toglie dalla merce la voce comprata (ui_lc - LC_W): le seguenti salgono di un posto, shp_cnt - 1.
+; La lista si rifa' in enter_shop (_rb: sh_segs + sl_reinit, che riporta il cursore sull'ultima voce se serve)
+sh_take:
+        lda shp_cnt             ; (nessuna merce: niente da togliere; i test chiamano shop_buy senza enter_shop)
+        beq _r
+        lda ui_lc
+        sec
+        sbc #LC_W
+        tax
+_l      inx
+        cpx shp_cnt
+        bcs _e
+        lda l8_id,x
+        sta l8_id-1,x
+        lda l8_b,x
+        sta l8_b-1,x
+        lda l8_s,x
+        sta l8_s-1,x
+        bcc _l                  ; (C = 0 da cpx)
+_e      dec shp_cnt
+        ldx shp_cnt
+        lda #0
+        sta l8_id,x
+        sta l8_b,x
+        sta l8_s,x
+_r      rts
 
 ; vende la voce ui_lc (zaino, posto della cintura o una pergamena), se il negozio la compra
 shop_sell:

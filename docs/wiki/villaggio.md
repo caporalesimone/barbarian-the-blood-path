@@ -281,8 +281,8 @@ equipped, pack, purse; le chiavi non si mostrano.
 flowchart LR
     E["ingresso: shop_roll<br/>(pool filtrato; 3-8 a caso con ripetizioni), sort_pack, sh_segs"] --> N["lista wares / lista gear o yours<br/>(A/D)"]
     N -->|"fire su merce"| BUY{"pozione?"}
-    BUY -->|no| ASK["buy for N g? (fire = sì)<br/>give_item, paga"]
-    BUY -->|sì| SLOT["cursore sul primo posto libero della cintura<br/>W/S lo spostano · fire paga e la mette · RUN/STOP annulla senza pagare"]
+    BUY -->|no| ASK["buy for N g? (fire = sì)<br/>give_item, paga, sh_take"]
+    BUY -->|sì| SLOT["cursore sul primo posto libero della cintura<br/>W/S lo spostano · fire paga e la mette (sh_take) · RUN/STOP annulla senza pagare"]
     N -->|"fire su zaino o cintura"| SELL["sell for N g? un quarto del prezzo<br/>(una pergamena della pila per volta)"]
     N -->|"fabbro: R su zaino o indossato"| REP["riparazione: 25% del prezzo,<br/>durabilità al massimo, massimo − 1"]
     N -->|RUN/STOP| X["uscita"]
@@ -299,6 +299,12 @@ flowchart LR
   filtra, `enter_shop` estrae). Ogni oggetto d'equipaggiamento è **magico** con probabilità `shm_t[livello del PG]` (6% per livello,
   `affix_rules.yaml shops.magic`: all'inizio quasi tutti bianchi, dal 17 tutti magici), con gli affissi di `af_gen` al livello del
   PG; gli anelli hanno sempre i loro affissi (rame uno, argento e oro due). Prezzi con gli affissi (`it_cost`, sotto).
+- (22/11, committente) **Un oggetto comprato sparisce dalla merce** (`sh_take`, `src/menu/shop_act.asm`): le voci dopo salgono di
+  un posto, `shp_cnt` - 1, il cursore resta sull'ultima voce se serve (`sl_reinit`). Due pozioni uguali si comprano solo se la
+  merce le ha estratte due volte; tornando nel negozio l'assortimento si estrae di nuovo (come prima).
+- (22/11, correzione) Fino al 22/11 la merce non era da 3 a 8 oggetti: in `shop_roll` lo `stx shp_cnt` non tocca i flag e il
+  `bne` dopo vedeva lo Z del `dec`, sempre 1, quindi `shp_k` diventava la dimensione del pool filtrato (8 voci piene e, con un
+  pool di 9 o più, voci in più lette da `l8_b`, fuori da `l8_id`). Trovato scrivendo il test di `sh_take` (`SHOP-BUY-01`).
 
 L'assortimento cambia **a ogni visita** e **cresce con il livello del PG** (06/11 sera): `shop_roll` tiene solo gli
 oggetti del pool con `shop_minl` ≤ livello del PG; per armi, armature, scudi e anelli `shop_minl` = livello oggetto

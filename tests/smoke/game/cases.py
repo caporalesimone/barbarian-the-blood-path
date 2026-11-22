@@ -62,7 +62,7 @@ def map_village(ctx):
     check(not why, why)
 
 
-@test("SHOP-BUY-01", "smith: buy the first ware (gold carried + inn chest)")
+@test("SHOP-BUY-01", "smith: buy the first ware (gold carried + inn chest); the bought ware leaves the list (22/11)")
 def shop_buy(ctx):
     g, L = ctx["g"], ctx["L"]
     g.poke16(L["c_gold"], 50); g.poke16(L["c_sgold"], 100)
@@ -70,7 +70,10 @@ def shop_buy(ctx):
     check(g.b(L["sh_mask"]) != 0, "the shop did not open")
     item = g.b(L["l8_id"])
     price = g.w16(L["itprice"] + 2 * item)
+    n0, w0 = g.b(g.MN["shp_cnt"]), g.mem(L["l8_id"], 8)
     g.press_fire(); g.press_fire()                          # buy, confirm
+    n1, w1 = g.b(g.MN["shp_cnt"]), g.mem(L["l8_id"], 8)
+    check(n1 == n0 - 1 and list(w1) == list(w0[1:n0]) + [0] * (9 - n0), "wares %s (%d) -> %s (%d): the bought one must leave the list" % (list(w0), n0, list(w1), n1))
     pk, gd, sg = g.mem(L["c_pack"], 8), g.w16(L["c_gold"]), g.w16(L["c_sgold"])
     if price <= 50: want = (50 - price, 100)                 # (the stock is random: the price may fit in the purse)
     else: need = price - 50; dec = -(-need // 10); want = (dec * 10 - need, 100 - dec)
