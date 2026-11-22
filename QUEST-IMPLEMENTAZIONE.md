@@ -1,5 +1,9 @@
 # Quest system: come implementarlo (documento usa e getta, 22/11)
 
+> **22/11: il committente ha deciso** (D1-D13 in `docs/wiki/quests.md` sezione 0). Dove questo documento propone alternative,
+> vale la decisione: stato con il baule fuori (2.3 a), testi per capitolo a `$EC00` (non `QSTn` per quest), `QGIV`, cancello a
+> messaggio, finale con portale e NPC nella piazza, boss disegnati, unici solo da quest e boss, mostri di caccia generati sempre.
+
 **File temporaneo** (regola del `CLAUDE.md`: si cancella a lavoro finito; le decisioni passano in `docs/wiki/quests.md`).
 Serve a chi implementa il TODO H1. Fonti:
 

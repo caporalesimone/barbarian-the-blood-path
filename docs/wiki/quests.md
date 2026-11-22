@@ -24,6 +24,26 @@ in `a2.2`: P3). Come implementare il sistema e ogni quest: `QUEST-IMPLEMENTAZION
 
 ---
 
+## 0. Decisioni del 22/11 (committente: risposte alle 13 domande con alternative)
+
+Valgono sopra a quanto scritto nelle sezioni seguenti, dove c'è differenza.
+
+| # | Tema | Decisione |
+|---|---|---|
+| D1 | Stato (32 B) | Il **baule della locanda esce dal blocco dell'eroe** (in coda al file di salvataggio, piano F7): il blocco libera 120 B per le quest e il futuro. **Se servisse spazio, le ripetibili si possono non salvare.** |
+| D2 | Testi | **Un file per capitolo** (+ uno per le ripetibili), a 5 bit, letto a `$EC00` come la scheda C: 36 blocchi, 5 voci di directory. |
+| D3 | Codice del villaggio | **File `QGIV`** caricato a `QBUF` quando si preme Fire su un NPC. Verificato il 22/11: il tasto Q (pagina delle quest, file `QST0` allo stesso indirizzo) funziona anche nel dungeon; `QGIV` serve solo nel villaggio. |
+| D4 | Cancello del boss (Q14) | **Messaggio** "the way is sealed" sulla scala del piano 4 (9, 14, 19) se il passo "uccidi il boss" non è preso. |
+| D5 | Finale | **Finale in due tempi.** Ucciso il Lord of Ruin, **al posto della leva compare un portale** che riporta in città (gratis, come una pergamena del portale). **Vicino al portale, nella piazza, compare l'NPC che dà il finale** (passo 12, the Penitent: epilogo). La quest si chiude con la possibilità di scendere nell'Abisso ("un'impresa a cui solo gli dei possono ambire"): chiusa la schermata della quest, **compare un portale nero nella piazza accanto a quello già aperto**. Il portale vecchio riporta nella sala del boss; **il portale nero resta per sempre** e porta tra l'Abisso e i villaggi. |
+| D6 | Abisso | **Solo una modalità sfida senza trama**: si scende finché si riesce (classifica della profondità). |
+| D7 | Premi | Approvati: *tam's amulet* al passo 2, oro + anello di rame magico in `a1.3`, pozioni viola + anello d'argento magico in `a3.4`, *bottle tree* in `a2.1`. **La cintura a 8 posti è premio del passo 6** (Mother Stitch: la ottiene sempre chi finisce il capitolo 2); `a2.2` dà oro e pozioni. |
+| D8 | Boss dei capitoli | **Boss predefinito con statistiche tarate**, **livello del boss disegnato a mano** (come la sala del trono), **mostri casuali solo se il boss li evoca**. Corregge il difetto trovato con il bot (statistiche di un forte a caso). |
+| D9 | Unici | **Unici della trama solo dalle quest.** Gli altri unici sono **casuali e solo dai boss**, ognuno da un sottoinsieme del suo capitolo: **boss del capitolo 50%**, **boss con nome di ogni piano 12,5%**. **Mai unici dai tesori normali** (`un_roll` della fase 6 va tolto dai tesori). |
+| D10 | Ripetibili | Se il premio estratto comprende l'oggetto magico, la riga dice solo **"magical item"**; l'oggetto si genera alla consegna **in base al capitolo** (più alto il capitolo, migliore l'oggetto). Le regole fini di generazione sono da decidere più avanti (TODO). |
+| D11 | Mostri delle quest di caccia | (correzione del committente alla risposta) **Con la quest attiva il generatore crea sempre il mostro richiesto** quando l'eroe arriva nel piano: va modificato il generatore dei mostri. Vale per `a2.2`, `a3.2`, `r.hunt` e gli obiettivi B della catena. |
+| D12 | Segni sopra gli NPC | **"!" giallo = quest da offrire, "!" verde = quest da ritirare** (stesso sprite; il verde ha la precedenza). |
+| D13 | Ordine del lavoro | Prima lo stato nel salvataggio (D1), poi motore nel dungeon e `QGIV` nel villaggio, tutto sul **capitolo 1**; quando il sistema è stabile si estende a tutti i capitoli. |
+
 ## 1. Regole fissate
 
 | ID | Regola (committente, 20/11 salvo dove indicato) |

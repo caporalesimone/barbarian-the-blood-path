@@ -620,7 +620,7 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   controllati da `QUESTDB-NEXT-10`); **passo 2 (testo a 5 bit nel gioco: codificatore in `gen_quests.py`, stampa con `d5_get` in
   `src/qpage.asm`) ancora da fare**: il codificatore Python c'è gia' nel test `QUESTDB-NEXT-11` (stessa tabella della macro `t5`),
   da spostare in `gen_quests.py`. Misura: 8 826 B a 5 bit contro 12 689 B in codici schermo (−30%); passo 3, ZX0: solo −9%, non
-  conviene. Dove vanno i file (uno per quest o uno per capitolo): `QUEST-DOMANDE.md` Q2.
+  conviene. (22/11, D2) un file per capitolo, letto a `$EC00`.
 
 ### H1 (ex 5.1) Quest system — XL
 - **Progetto deciso il 20/11** ([quests](docs/wiki/quests.md)): regole, trama The Blood Tithe, catena di 12 passi, 15 accessorie,
@@ -631,10 +631,17 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
 - (22/11) **Tutte le quest definite** con testi e premi in `data/quests/next/quests.yaml` (test `QUESTDB-NEXT-10`); **come
   implementare** motore, modulo del villaggio, pagina Q e ogni singola quest: [QUEST-IMPLEMENTAZIONE.md](QUEST-IMPLEMENTAZIONE.md)
   (usa e getta: si cancella a quest finite). Da approvare: i premi `proposal: true`, C3, C6, P3 e dove mettere i 32 B di stato.
-- (22/11 notte) **Domande per chiudere il progetto**, con alternative e raccomandazione: [QUEST-DOMANDE.md](QUEST-DOMANDE.md) (13
-  domande: stato, testi sul disco, codice del villaggio, cancello, vittoria, premi, boss del capitolo, unici, ripetibili, segni,
-  ordine). Misurato (`QUESTDB-NEXT-11`): testi a 5 bit 8 826 B; un file per quest 50 blocchi e 33 voci, un file per capitolo 36
-  blocchi e 5 voci; ZX0 −9%, non conviene.
+- (22/11) **Progetto chiuso**: decisioni D1-D13 del committente in [quests.md sezione 0](docs/wiki/quests.md) (stato, testi per
+  capitolo, `QGIV`, cancello a messaggio, finale in due tempi con portale e portale nero verso l'Abisso, premi, boss dei
+  capitoli disegnati e tarati, unici solo da quest e boss, ripetibili, mostri delle quest generati sempre, segni, ordine).
+  **Ordine (D13)**: 1) stato nel salvataggio (baule della locanda fuori dal blocco dell'eroe); 2) motore nel dungeon e `QGIV`
+  sul capitolo 1; poi gli altri capitoli.
+- (22/11, D10) **Ripetibili, oggetto magico**: oggi si genera alla consegna con il livello del capitolo (più alto, migliore).
+  **Da decidere in futuro**: le regole fini (categoria, livello oggetto, qualità minima, legame con il modello della quest).
+- (22/11, D9) **Unici**: togliere `un_roll` dai tesori normali; sottoinsiemi di unici per capitolo dai boss (capitolo 50%, boss
+  con nome 12,5%); unici della trama solo dalle quest. (22/11, D8) **Boss dei capitoli** con statistiche proprie e sala
+  disegnata a mano (mappe come `FMAP`), mostri solo se evocati. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
+  attiva il mostro richiesto nasce sempre nel piano.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 
 ### H3 (ex 5.2) The Endless Abyss (dopo B10, B11, G6, E5) — XL

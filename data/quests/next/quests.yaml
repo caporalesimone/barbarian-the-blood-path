@@ -26,7 +26,7 @@
 #             (generated magic item: category, level = level of the chapter boss), belt (slots), respec (tokens), relic (story only)
 #   text      what the NPC says when the quest is taken (also the text of page Q)
 #   done      what the NPC says at the delivery
-#   proposal  true = a reward or a detail not yet approved by the owner (clarifications C3, C6 of docs/wiki/quests.md)
+#   proposal  true = a reward or a detail not yet approved by the owner (22/11: all approved, decisions D1-D13 of docs/wiki/quests.md)
 
 npcs:
   1: {chain: father osric, side: [hilde, grom, the gravedigger]}
@@ -69,8 +69,7 @@ quests:
     title: the widow's son
     goal: {type: I, item: tams_amulet, count: 1, from: chest, level: 3}
     goal_text: "find tam's amulet on level 3"
-    reward: {gold: 150, skill: whirlwind, unique: tam's amulet}
-    proposal: true      # C6: tam's amulet as the reward of this step (uniques.tsv says "unassigned, proposal: step 2")
+    reward: {gold: 150, skill: whirlwind, unique: tam's amulet}      # (22/11 approved, D7)
     text: >-
       my son tam went down into the crypt. he wanted his father's name off the tithe roll. he wore an amulet with a red
       hand on it, the mark they put on the chosen. bring it back so that i know. then show it to father osric. he will
@@ -131,14 +130,15 @@ quests:
     title: the silver needle
     goal: {type: C}
     goal_text: "slay mother stitch (level 10)"
-    reward: {gold: 600, potions: [{yellow: 3}], skill: rage, relic: the silver needle}
+    reward: {gold: 600, potions: [{yellow: 3}], skill: rage, belt: 8, relic: the silver needle}   # (22/11, D7) the belt with 8 slots
     text: >-
       she sits on her isle with her fetishes around her. while one of them stands, your blade will hardly mark her. break
       the fetishes first, then strike while she is bare. bring back the needle. it was made to close wounds, not to open
       souls.
     done: >-
       the silver needle, the second relic. the dolls are only cloth now. i see the anger in you: do not bury it, use it.
-      the carts climbed to the pass. follow them to the last camp and ask for sergeant brenna.
+      take this belt of the old ferrymen too: it holds twice the bottles of yours. the carts climbed to the pass. follow
+      them to the last camp and ask for sergeant brenna.
 
   # ------------------------------------------------------------------ chain, chapter 3: the last camp
   - id: 7
@@ -269,8 +269,7 @@ quests:
     title: a name on the stone
     goal: {type: B, chapter: 1}
     goal_text: "slay a named one in the crypt"
-    reward: {gold: 150, item: {category: ring, base: copper ring, magic: true}}
-    proposal: true      # C6: reward to be decided (here: gold and a magic copper ring)
+    reward: {gold: 150, item: {category: ring, base: copper ring, magic: true}}      # (22/11 approved, D7)
     text: >-
       i carve the names of those the tithe took. but some of the things down there have names too, and they are proud of
       them. kill one that has a name and i will carve that as well. the small stone, in the corner.
@@ -298,8 +297,7 @@ quests:
     title: marsh glass
     goal: {type: I, item: marsh_glass, count: 6, from: monster, monster: bog crawler, one_in: 2}
     goal_text: "marsh glass: {n}/{t}"
-    reward: {potions: [{yellow: 2}], unique: bottle tree}
-    proposal: true      # C6: the unique "bottle tree" (unassigned) here, with the potions
+    reward: {potions: [{yellow: 2}], unique: bottle tree}      # (22/11 approved, D7)
     text: >-
       the bottles on the tree hold the bad spirits. the tree is nearly bare. the bog crawlers swallow the old glass of
       the sunken houses. cut six of them open for me.
@@ -313,13 +311,12 @@ quests:
     title: bottles for the tree
     goal: {type: K, monster: crawler queen, count: 2}
     goal_text: "slay the crawler queens: {n}/{t}"
-    reward: {belt: 8}
-    proposal: true      # P3: the belt with 8 slots here or at the start of chapter 3 (sim_floor.py)
+    reward: {gold: 400, potions: [{yellow: 3}]}      # (22/11, D7: the belt moved to step 6)
     text: >-
       the glass is blown, but the queens of the crawlers nest under the tree and eat the roots. two of them. kill them
       and the tree will stand another hundred years.
     done: >-
-      the tree is safe. take this belt of the old ferrymen: it holds twice the bottles of yours.
+      the tree is safe. the ferrymen left a little silver at the roots, and the healer some bottles. they are yours.
   - id: a2.3
     kind: side
     chapter: 2
@@ -397,8 +394,7 @@ quests:
     title: the bonfire vigil
     goal: {type: V, place: the great bonfire, gold: 1000}
     goal_text: "offer 1000 gold at the bonfire"
-    reward: {potions: [{violet: 2}], item: {category: ring, base: silver ring, magic: true}}
-    proposal: true      # C6: reward to be decided (here: violet potions and a magic silver ring)
+    reward: {potions: [{violet: 2}], item: {category: ring, base: silver ring, magic: true}}      # (22/11 approved, D7)
     text: >-
       the bonfire has burned since the day we said no. wood is dear up here and the men are tired. a thousand gold keeps
       it alight through the winter. lay it at the fire yourself, so that they see who gave it.
@@ -543,7 +539,10 @@ repeatable_rewards:
   3: {gold: 260, potions: {yellow: [1, 2]}, magic_one_in: 4, offering: {gold: 500, potions: {yellow: 4}}}
   4: {gold: 380, potions: {violet: [1, 2]}, magic_one_in: 4, offering: {gold: 800, potions: {violet: 3}}}
 
-# Uniques not given by a quest: where they come from (data/items/next/uniques.tsv, column `source`)
+# Uniques not given by a quest: where they come from (data/items/next/uniques.tsv, column `source`).
+# (22/11, owner D9) the uniques of the story only from quests; the others only from bosses, each from a subset of its
+# chapter: chapter boss 50%, named boss of a level 12.5%; never from the common treasures. The subsets are TO DEFINE with
+# the stats of the chapter bosses (D8); the entries below are the first proposal.
 unique_sources:
   censer-bearer: {drop: hollow_abbot}
   stitchripper: {drop: mother_stitch}
