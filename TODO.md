@@ -278,6 +278,18 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
 
 ### D10 (ex 6.4) Altri interventi misurati — M
 - `SCR_H` da `$8400` a `$8800` (+224 B); musica sotto il KERNAL (0,8–1,3 KB); codice solo-villaggio su file; variabili sparse (~60 B).
+- **Analisi del 22/11 (richiesta del committente)**, con GAME a 2656 B di margine (dopo testo a 5 bit, font compattato, scheda C su
+  disco e fase 5 degli affissi): nessuna di queste leve serve oggi.
+  - **Musica sotto il KERNAL**: il brano del luogo serve anche nel villaggio, dove sotto il KERNAL non c'e' posto (CORE fino a
+    `$EBF1`, scheda C da `$EC00`, zona 2 del MENU da `$F4E0`). Fattibile solo il **motivetto di combattimento** (buffer `$8E80`,
+    384 B): suona solo nel dungeon (boss con nome a schermo, `docs/wiki/musica.md`), dove la zona 2 del MENU (`$F4E0`-`$FCFF`) e'
+    libera. Da verificare che nessun caricamento del dungeon la tocchi (tema fino a `$F4DF`, plugin di save e suo buffer fino a
+    `$F4DF`) e che il player legga con `$01 = $35` (si', KERNAL sempre escluso). Guadagno 384 B.
+  - **`SCR_H` spostato** (+224 B): cambia la disposizione del banco VIC (schermo HUD, puntatori degli sprite, split raster): rischio
+    alto per poco.
+  - **Variabili sparse** (~60 B) e **codice solo-villaggio su file**: guadagni piccoli; il codice solo-villaggio e' gia' quasi tutto
+    nel modulo MENU.
+  - Ordine se servira' spazio: motivetto nella zona 2 del MENU, poi sottoinsieme della generazione (D15), poi il resto.
 
 ### D11 (ex 6.5) Compressione ZX0 dei file rimasti — M
 - MENU, GFX0, temi: ~5 s in meno all'avvio (stima). Decompressore pronto (`src/common/zx0.inc`).
