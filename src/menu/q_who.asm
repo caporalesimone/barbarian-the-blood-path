@@ -151,7 +151,8 @@ _y      tya
         rts
 
 
-; (22/11, D12) segni degli NPC fissi: npc_q = $85 (verde: una quest da ritirare), $87 (giallo: una da dare), 0 niente. Li
+; (22/11, D12) segni degli NPC fissi: npc_q = $97 ("?" giallo: una quest da ritirare; fino al 22/11 "!" verde $85, che sul
+; prato non si vedeva), $87 ("!" giallo: una da dare), 0 niente. Bit 4: "?". Li
 ; chiamano npc_fix (ingresso nel villaggio) e QGIV prima di uscire (MENU_QMARK)
 q_marks:
         ldx #NPC_N-1
@@ -168,7 +169,7 @@ _l      lda npc_d,x
         pha
         jsr q_tin
         pla
-        ldy #$85
+        ldy #$97
         bcs _s
         jsr q_offer
         ldy #$87

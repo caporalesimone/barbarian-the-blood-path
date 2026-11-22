@@ -168,9 +168,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QGIV-12` | hilde gives step 2 (the amulet, from father osric); grom gives a1.1 (side, q_side slot 0 = id 1) after step 1 of the chapter |
 | `QGIV-13` | a1.1 reached, back to grom: a magic sword; then a1.2 (G: 300 gold) offered; Fire again: 'give 300 gold?' yes -> -300 gold, the gravedigger, q_sdone bits 0-1 |
 | `QGIV-14` | Q12: pack full, step 2 reached: father osric says 'no room' and the step stays to be taken back (q_step 1, q_flag bit 1) |
-| `QGIV-15` | D12, marks of the fixed NPCs (q_marks, npc_q): yellow $87 who has a quest to give, green $85 who takes one back, 0 nobody; the '!' sprite has that colour |
+| `QGIV-15` | D12, marks of the fixed NPCs (q_marks, npc_q): yellow '!' $87 who has a quest to give, yellow '?' $97 who takes one back (22/11, before a green '!'), 0 nobody; the sprite of the mark ('?': pointer NPC_QPTR) is yellow |
 | `QGIV-16` | page Q (key Q, module QGIV with q_k $ff): step 2 and the side a1.3 taken -> 2 rows with their titles; Fire on the first: its text and the goal; RUN/STOP back |
-| `QGIV-18` | town minimap (M): a '!' over each fixed NPC with a mark (sprites 3..5 = k 1..3, mm_qmark): osric green, the gravedigger yellow, grom none; glyph block MG_B+3 (mq_gl, double size), x = 82 + 4 col, y = 34 + 4 row |
+| `QGIV-18` | town minimap (M): a mark over each fixed NPC with a mark (sprites 3..5 = k 1..3, mm_qmark): osric a yellow '?' (block MG_B+4, 22/11), the gravedigger a yellow '!' (block MG_B+3), grom none; double size, x = 82 + 4 col, y = 34 + 4 row |
 | `QGIV-17` | page Q in a dungeon (level 1, no MENU module): the list, RUN/STOP back in the game; the stairs down still work (theme and CORE read again) |
 
 ### regression (282)

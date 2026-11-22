@@ -206,8 +206,9 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   consegna, offerta o "nothing for you now", [quests](quests.md) 4.5). I luoghi hanno la precedenza (su una porta o una scala
   vale il luogo).
 - **"!" sopra gli NPC fissi** (18/11; 22/11, D12): sprite hires a `$8C00` (puntatore `$30`, `BANG` in `npc_gfx.py`, 14 righe),
-  18 righe sopra l'NPC, **ondeggia** di 2 righe e passa al bianco ogni 16 fotogrammi: **giallo** = una quest da dare, **verde** =
-  una quest da ritirare (`q_marks` in `npc_q`, `npc_offer`). Usa gli sprite 1 e 2 (il 2 solo se l'effetto del colpo non c'è):
+  18 righe sopra l'NPC, **ondeggia** di 2 righe e passa al bianco ogni 16 fotogrammi: **giallo** = una quest da dare; una quest da
+  ritirare (22/11, committente: il verde sul prato non si vedeva) ha un **"?" giallo** (`QMARK` in `npc_gfx.py`, sprite a
+  `$8E40` in fondo alla zona 5, puntatore `$39`; `npc_q` = $97, bit 4) (`q_marks` in `npc_q`, `npc_offer`, `npc_bmark`). Usa gli sprite 1 e 2 (il 2 solo se l'effetto del colpo non c'è):
   al massimo due "!" sullo schermo; non sopra la riga 80 (barra in alto).
 - **Vaganti** (22/11): non danno più quest (le quest segnaposto del concept del 17-18/11 sono state tolte; le ripetibili
   verranno dopo, D18).

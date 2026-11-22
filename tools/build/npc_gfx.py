@@ -192,13 +192,31 @@ BANG = [
     "....XXXX....",
 ] + ["............"] * 7
 BANG_ROWS = 14                 # righe disegnate (npc_draw lo mette 18 righe sopra la testa dell'NPC)
+# (22/11, committente) "?" sopra chi ha una quest da ritirare (giallo come il "!": il verde non si vedeva sul prato)
+QMARK = [
+    "...XXXXXX...",
+    "..XXXXXXXX..",
+    "..XXX..XXX..",
+    "......XXXX..",
+    ".....XXXX...",
+    "....XXXX....",
+    "....XXX.....",
+    "....XXX.....",
+    "....XXX.....",
+    "............",
+    "............",
+    "....XXXX....",
+    "....XXXX....",
+    "....XXXX....",
+] + ["............"] * 7
 
 
-def bang_sprite():
-    """64 byte: sprite in alta risoluzione, ogni colonna di BANG = 2 pixel"""
-    assert len(BANG) == 21 and all(len(r) == 12 and set(r) <= set(".X") for r in BANG)
+def bang_sprite(rows=None):
+    """64 byte: sprite in alta risoluzione, ogni colonna di BANG (o di rows: QMARK) = 2 pixel"""
+    rows = rows or BANG
+    assert len(rows) == 21 and all(len(r) == 12 and set(r) <= set(".X") for r in rows)
     out = []
-    for r in BANG:
+    for r in rows:
         bits = "".join("11" if c == "X" else "00" for c in r)
         out += [int(bits[i:i + 8], 2) for i in (0, 8, 16)]
     return bytes(out + [0])

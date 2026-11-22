@@ -149,14 +149,14 @@ def fixed_index(g, k):
     return next(i for i in range(NPC_N) if d[i] & 0x80 and (d[i] >> 4) & 3 == k and g.b(L["npc_xh"] + i) != 0xff)
 
 
-@test("QGIV-15", "D12, marks of the fixed NPCs (q_marks, npc_q): yellow $87 who has a quest to give, green $85 who takes one back, 0 nobody; the '!' sprite has that colour")
+@test("QGIV-15", "D12, marks of the fixed NPCs (q_marks, npc_q): yellow '!' $87 who has a quest to give, yellow '?' $97 who takes one back (22/11, before a green '!'), 0 nobody; the sprite of the mark ('?': pointer NPC_QPTR) is yellow")
 def qg_marks(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["c_pack"], 0, 0, 0, 0, 0, 0, 0, 0)
     g.poke(L["q_step"], 1, 0x13, 1, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0)     # step 2 reached (to osric); a1.1, a1.2 done
     g.call_keep(L["MENU_QMARK"])
     q = [g.b(L["npc_q"] + fixed_index(g, k)) for k in range(4)]
-    check(q == [0, 0x85, 0, 0x87], "npc_q of hilde, osric, grom, gravedigger: %s (expected 0, $85, 0, $87)" % [hex(x) for x in q])
+    check(q == [0, 0x97, 0, 0x87], "npc_q of hilde, osric, grom, gravedigger: %s (expected 0, $97, 0, $87)" % [hex(x) for x in q])
     i = fixed_index(g, 1)
     x = ((g.b(L["npc_xh"] + i) << 8) | g.b(L["npc_xl"] + i)) >> 4
     y = ((g.b(L["npc_yh"] + i) << 8) | g.b(L["npc_yl"] + i)) >> 4
@@ -165,12 +165,12 @@ def qg_marks(ctx):
     for _ in range(12):
         g.frames(3)
         en = g.b(L["sh_en"])
-        cols |= {g.b(L["sh_col"] + s) & 15 for s in (1, 2) if en & (1 << s) and g.b(L["sh_ptr"] + s) == 0x30}
+        cols |= {g.b(L["sh_col"] + s) & 15 for s in (1, 2) if en & (1 << s) and g.b(L["sh_ptr"] + s) == g.MN["NPC_QPTR"]}
     g.screenshot(os.path.join(OUT, "qgiv_marks.png"))
-    check(5 in cols and 7 not in cols, "colours of the '!': %s (expected green 5, and white 1 when up)" % sorted(cols))
+    check(7 in cols, "colours of the '?' over father osric: %s (expected yellow 7, and white 1 when up)" % sorted(cols))
 
 
-@test("QGIV-18", "town minimap (M): a '!' over each fixed NPC with a mark (sprites 3..5 = k 1..3, mm_qmark): osric green, the gravedigger yellow, grom none; glyph block MG_B+3 (mq_gl, double size), x = 82 + 4 col, y = 34 + 4 row")
+@test("QGIV-18", "town minimap (M): a '!' over each fixed NPC with a mark (sprites 3..5 = k 1..3, mm_qmark): osric a yellow '?' (block MG_B+4, 22/11), the gravedigger a yellow '!' (block MG_B+3), grom none; double size, x = 82 + 4 col, y = 34 + 4 row")
 def qg_minimap(ctx):
     g = ctx["g"]; L = g.L
     key(g, K_M, 3)
@@ -179,7 +179,7 @@ def qg_minimap(ctx):
     g.screenshot(os.path.join(OUT, "qgiv_minimap.png"))
     en, msb = g.b(0xd015), g.b(0xd010)
     why = []
-    for k, col in ((1, 5), (2, None), (3, 7)):
+    for k, col, ptr in ((1, 7, 0xc4), (2, None, 0), (3, 7, 0xc3)):
         s = 2 + k
         if col is None:
             if en & (1 << s): why.append("sprite %d on (k %d has no mark)" % (s, k))
@@ -190,9 +190,10 @@ def qg_minimap(ctx):
         sx = g.b(0xd000 + 2 * s) + (256 if msb & (1 << s) else 0)
         sy = g.b(0xd001 + 2 * s)
         got = (bool(en & (1 << s)), g.b(0xd027 + s) & 15, sx, sy, g.b(L["SCR_A"] + 0x3f8 + s))
-        exp = (True, col, 82 + 4 * tx, 34 + 4 * ty, 0xc3)
+        exp = (True, col, 82 + 4 * tx, 34 + 4 * ty, ptr)
         if got != exp: why.append("k %d: on/colour/x/y/pointer %s, expected %s" % (k, got, exp))
     if list(g.mem(0xb0c0, 24)[0::3]) != [0x18] * 5 + [0, 0x18, 0]: why.append("no wide '!' glyph in block $B0C0")
+    if list(g.mem(0xb100, 24)[0::3]) != [0x3c, 0x66, 0x06, 0x0c, 0x18, 0, 0x18, 0]: why.append("no '?' glyph in block $B100")
     if g.b(0xd01d) & g.b(0xd017) & 0x28 != 0x28: why.append("the '!' sprites are not double size")
     g.run_stop(); g.frames(3)
     check(not why and g.in_game(), "; ".join(why) or "RUN/STOP does not close the minimap")

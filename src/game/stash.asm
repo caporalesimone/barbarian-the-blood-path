@@ -55,6 +55,7 @@ MENU_QMARK = OVL_AT+18
 MENU_QMMK  = OVL_AT+21         ; (22/11) mm_qmark: "!" delle quest sulla minimappa (src/menu/npc_fix.asm)
 NPC_BANG  = MR5_AT              ; (18/11) sprite del "!" (puntatore $30), all'inizio della zona 5
 NPC_JT    = MR5_AT+64           ; tabella dei salti degli NPC (zona 5): piazzamento, sprite, Fire
+NPC_QMARK = MR5_END-64          ; (22/11) sprite del "?" (quest da ritirare), in fondo alla zona 5 ($8E40)
 NPC_JINIT  = NPC_JT              ; piazzamento (ingresso nel villaggio)
 NPC_JDRAW  = NPC_JT+3
 NPC_JTALK  = NPC_JT+6

@@ -93,10 +93,17 @@ npc_colr:
 ; centrato sulla casella, 9 bit), y = 34 + 4 riga (glifo appena sopra la casella). Uscita: tmp1 = bit di SPR_EN, tmp2 = bit di SPR_MSB
         .cerror MI_N + NFIX > 7, "segni delle quest nella minimappa: sprite oltre il 6"
 mm_qmark:
+        lda #0                  ; (22/11) il blocco del "?" ($B100) non lo azzera mm_names
+        ldy #63
+-       sta $b000+64*MI_N+64,y
+        dey
+        bpl -
         ldx #7
 -       ldy mul3,x
         lda mq_gl,x
         sta $b000+64*MI_N,y
+        lda mq_gq,x             ; (22/11) "?" nel blocco dopo
+        sta $b000+64*MI_N+64,y
         dex
         bpl -
         lda #0
@@ -116,6 +123,10 @@ _l      stx tmp0                ; tmp0 = k (1..NFIX)
         lda npc_q,x
         beq _n
         ldx tmp0
+        pha
+        and #$10
+        sta mq_q-1,x            ; (22/11) "?" o "!"
+        pla
         and #15
         sta SPR_COL+MI_N-1,x    ; colore del segno
         lda mq_bit-1,x
@@ -156,13 +167,19 @@ _l      stx tmp0                ; tmp0 = k (1..NFIX)
         ora tmp2
         sta tmp2
 +       ldx tmp0
-        lda #MG_B+MI_N          ; blocco del "!" (mm_names)
+        ldy #MG_B+MI_N          ; blocco del "!" (da dare) o del "?" (da ritirare: bit 4 di npc_q)
+        lda mq_q-1,x
+        beq +
+        iny
++       tya
         sta SCR_A+$3f8+MI_N-1,x
 _n      ldx tmp0
         dex
         bne _l
 _r      rts
 mq_gl   .byte $18, $18, $18, $18, $18, $00, $18, $00   ; "!" largo 2 pixel (il glifo del font e' largo 1: non si vedeva)
+mq_gq   .byte $3c, $66, $06, $0c, $18, $00, $18, $00   ; (22/11) "?" largo 2 pixel (quest da ritirare)
+mq_q    .fill NFIX              ; (22/11) per NPC fisso: $10 = "?"
 mq_bit  .for i = 0, i < NFIX, i = i + 1
         .byte 1 << (MI_N + i)
         .next

@@ -66,6 +66,9 @@ mz4_top
 
         * = MR5_AT              ; (18/11) zona 5: sprite del "!" e codice degli NPC del villaggio (menu/npc.asm)
         .include "menu/npc.asm"
+        .cerror * > NPC_QMARK, "modulo MENU: il codice della zona 5 tocca lo sprite del ? di ", * - NPC_QMARK, " B"
+        .fill NPC_QMARK - *, 0
+        .binary "../out/work/gfx/npc_qmark.bin"  ; (22/11) NPC_QMARK: il "?" (tools/build/npc_gfx.py QMARK)
 mz5_top
         .cerror mz5_top > MR5_END, "modulo MENU: zona 5 oltre $8E7F di ", mz5_top - MR5_END, " B"
 

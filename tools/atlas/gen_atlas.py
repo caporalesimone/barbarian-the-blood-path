@@ -584,6 +584,18 @@ def npc_sprites():
                             im.putpixel((x * 6 + xx, y * 6 + yy), PAL[7])
         im.save(os.path.join(OUT, "png", "npc_bang.png"), optimize=True)
     out.append(dict(name="! (quest to give)", frame=0, slot="$8C00", png="npc_bang.png"))
+    # (22/11) il "?" sopra chi ha una quest da ritirare: in fondo alla zona 5 ($8E40), giallo
+    b = rd("out/work/menu_z5.prg")[2 + 0x240:2 + 0x240 + 64]
+    if not CHECK:
+        im = Image.new("RGB", (24 * 6, 21 * 6), (24, 24, 28))
+        for y in range(21):
+            for x in range(24):
+                if b[y * 3 + x // 8] & (128 >> (x % 8)):
+                    for yy in range(6):
+                        for xx in range(6):
+                            im.putpixel((x * 6 + xx, y * 6 + yy), PAL[7])
+        im.save(os.path.join(OUT, "png", "npc_qmark.png"), optimize=True)
+    out.append(dict(name="? (quest to take back)", frame=0, slot="$8E40", png="npc_qmark.png"))
     return out
 
 

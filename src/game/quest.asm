@@ -22,7 +22,7 @@ npc_d   .fill NPC_N             ; direzione (0 +x, 1 -x, 2 +y, 3 -y)
 npc_mv  .fill NPC_N             ; pixel di cammino rimasti (0 = fermo)
 npc_g   .fill NPC_N             ; (17/11) disegno: 0..3 (tools/build/npc_gfx.py, slot 12-19)
 npc_c   .fill NPC_N             ; (17/11) colore del vestito, diverso dai colori del villaggio (npc_look, src/menu/npc_look.asm)
-npc_q   .fill NPC_N             ; (22/11, D12) segno degli NPC fissi: $87 giallo, $85 verde, 0 niente (q_marks)
+npc_q   .fill NPC_N             ; (22/11, D12) segno degli NPC fissi: $87 "!" giallo, $97 "?" giallo, 0 niente (q_marks)
 npc_tend
         .endv
         .cerror npc_tend > BFQ, "tabelle degli NPC oltre BFP (169 B)"

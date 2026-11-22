@@ -9,6 +9,7 @@
 ;  ripetibili verranno dopo, D18).
 ; ===================================================================
 NPC_BPTR = (NPC_BANG-$8000)/64  ; $30
+NPC_QPTR = (NPC_QMARK-$8000)/64 ; (22/11) $39: il "?" (quest da ritirare)
 NPC_BUP  = 18                   ; il "!" sta 18 righe sopra lo sprite dell'NPC (14 righe disegnate: 4 righe di stacco)
 NPC_BMIN = 80                   ; sopra questa riga c'e' la barra in alto (IRQ_BAR, bar.asm): li' il "!" non si disegna
 
@@ -199,7 +200,14 @@ npc_bmark:
         ldy npc_k
         jsr npc_offer
         bcc _r
-        sta tmp6                ; (22/11, D12) colore del segno: giallo da dare, verde da ritirare
+        sta tmp6                ; (22/11, D12) colore del segno (giallo)
+        lda npc_q,y             ; (22/11, committente) bit 4: "?" (da ritirare), altrimenti "!" (da dare)
+        and #$10
+        beq +
+        lda #NPC_QPTR-NPC_BPTR
++       clc
+        adc #NPC_BPTR
+        sta nb_ptr
         ldy npc_b
         cpy #3
         bcs _r                  ; gia' due "!" sullo schermo
@@ -233,7 +241,7 @@ npc_bmark:
 +       lda bs_en
         ora bitmask,y
         sta bs_en
-        lda #NPC_BPTR
+        lda nb_ptr
         sta sh_ptr,y
         lda tmp7                ; il suo colore, bianco quando e' in alto
         beq +
@@ -243,5 +251,6 @@ npc_bmark:
         sta sh_col,y
         inc npc_b
 _r      rts
+nb_ptr  .byte NPC_BPTR          ; (22/11) puntatore del segno in disegno: "!" o "?"
 
 
