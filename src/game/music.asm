@@ -124,7 +124,6 @@ _r      rts
 snd_io:
         lda mus_mute
         bne _r
-        inc mus_mute
         lda sp_on
         ora sfx_t
         beq +
@@ -133,7 +132,9 @@ snd_io:
 +       jsr snd_mute
 _m      lda #0
         sta $d417
-_r      rts
+        inc mus_mute            ; (22/11) DOPO la dissolvenza: snd_fade aspetta 15 fotogrammi con l'IRQ acceso (in gioco) e
+_r      rts                     ; music_update, visto mus_mute, rimetteva il volume e lo azzerava poi snd_mute: musica muta
+                                ; fino al prossimo cambio di luogo (segnalazione del committente: uscendo dalla pagina Q)
 
 ; villaggio: il tema del villaggio del capitolo (12/11, TODO M2: un tema per villaggio, snd_town_c)
 music_town:

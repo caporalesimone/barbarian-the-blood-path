@@ -339,6 +339,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MON-CHAP-20` | back to chapter 1 after chapter 4: the chapter 1 set (fallen ... balrog, lord of ruin) is restored |
 | `MUSIC-10` | songs per level, buffer = SNDn files, combat and resume, copy under I/O |
 | `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
+| `MUS-IO-10` | village and level 2: Q page open and closed 3 times; back in the game the SID volume is full (15) and mus_mute is 0 |
 | `NPCFIX-10` | village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, npc_q = the D12 mark (0, $85, $87); nobody else in their sectors |
 | `NPCFIX-11` | next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv) |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |

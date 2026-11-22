@@ -89,7 +89,10 @@ leggere il brano (1–2 blocchi) aggiunge ~1,5 s. Il brano cambia a ogni piano, 
   volume in 15 fotogrammi se suona qualcosa, poi voci spente e volume 0 — perché il caricamento tiene il processore e il
   SID resterebbe sulla nota corrente (glitch all'help, al salvataggio, all'uscita al menu). Con Krill's Loader (11/11)
   gli interrupt restano accesi durante i caricamenti: la musica durante il disco è possibile (TODO M2, M5). Il volume
-  torna pieno alla prima `music_update` seguente.
+  torna pieno alla prima `music_update` seguente. (22/11, correzione su segnalazione del committente: "la musica sparisce e non torna; con Q riparte e
+  uscendo sparisce") `mus_mute` si alza **dopo** la dissolvenza: prima si alzava all'inizio, e in gioco, con l'IRQ acceso
+  durante i 15 fotogrammi della dissolvenza, `music_update` rimetteva il volume e azzerava `mus_mute`; poi `snd_mute`
+  lasciava il volume a 0 e nessuno lo rimetteva fino al cambio di luogo seguente. Test `MUS-IO-10`.
 - `music_fadeout` (bloccante, prima di un cambio di luogo o del menu principale) e `snd_fade` / `snd_mute`
   (`levels.asm`, volume generale) come prima.
 - **Menu principale** (15/11, ex TODO E3; dal 06/11 era muto): Demon's Eye suona anche in `LOBBY` con il **player del gioco**. Il brano
