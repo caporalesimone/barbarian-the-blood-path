@@ -1,17 +1,21 @@
 ; ===================================================================
 ;  hud.asm - fascia HUD fissa in basso (testo) + IRQ raster di split
 ;
-;  Schermo: righe 0..19 = campo di gioco (scroll fine)
-;           riga 20     = riga "regolo" (separatore, mostrata due volte: la prima e' vuota)
+;  Schermo: righe 0..18 = campo di gioco (scroll fine)
+;           riga 19     = (23/11, branch proto-barra-sotto) riga del bersaglio: nome del mostro e sua vita, o l'etichetta
+;                         del luogo / il messaggio delle quest (bt_row; prima: 8 sprite in alto, nascondevano il PG)
+;           riga 20     = riga "regolo" (vuota: lo spazio nero, poi il regolo nell'ultima linea di pixel)
 ;           righe 21..23 = HUD (3 righe di testo, posizione fissa)
-;  IRQ1 (linea 209): D011 -> yscroll 7 (la riga 20 viene ripresa a linea 215,
-;                    cosi' le righe 21..23 cadono sempre a 223/231/239)
-;  IRQ2 (linea 217): D016 -> xscroll 0, D021 -> nero
+;  IRQ1 (linea 201): D011 -> yscroll 7 (la riga 19 viene ripresa a linea 207,
+;                    cosi' le righe 20..23 cadono sempre a 215/223/231/239)
+;  IRQ2 (linea 205): scroll 7 + ECM, schermo HUD, D021 nero; alla 207 via l ECM, D016 -> MCM, xscroll 0
 ;  apply_frame (linea $fc) ripristina i registri dello scroll per il frame dopo.
 ; ===================================================================
 HUD_ROW0   = SCR_H + 800        ; riga 20 nello schermo HUD
-IRQ_L1     = 209
-IRQ_L2     = 217
+BTR_SCR     = SCR_H + 760        ; (23/11) riga 19: riga del bersaglio (bt_row)
+BT_COLR    = COLRAM + 760
+IRQ_L1     = 199                ; (23/11) era 209 (secondo hy): fine del campo di gioco fissa alla 199, HUD dalla 207 (riga 19)
+IRQ_L2     = 205                ; era 217 (2 righe prima della 207: margine anche con un IRQ in ritardo, vc64web)
 
         .virtual $9780
 hud_pend   .byte ?
@@ -33,7 +37,10 @@ ap_bg      .byte ?              ; l'IRQ di fine HUD li ripristina, cosi' un fram
 ap_d016    .byte ?              ; ciclo principale non lascia lo schermo HUD su tutto il campo
 ap_d011    .byte ?
 ap_l1      .byte ?
+ap_ph      .byte ?
+ap_p0      .byte ?              ; (23/11) valore di $D011 della fase 0 ($57, o scroll hy + ECM con hy = 0)              ; (23/11) fase dell'IRQ di inizio HUD: 0, o 3 con hy = 7 (IRQ nella 198)
 hw_low     .byte ?              ; 1 = vita bassa (avviso attivo: "HP nnn/nnn" lampeggia)
+bt_hold    .byte ?              ; (23/11) fotogrammi di testo tenuto dopo lo spegnimento della barra (bt_row)
         .endv
 
 ; ------------------------------------------------------------------ IRQ
@@ -109,36 +116,64 @@ irq_off:
         rts
 
 ; IRQ a raster, una fase per riga (irq_ph): 0 = inizio dell'HUD (schermo SCR_H, 24 righe), 1 = HUD multicolore,
-; 2 = riga 250, campo di gioco ripristinato (ap_*), 3 = barra in alto e sprite di gioco (bar.asm); esce da irq_exit
+; 2 = riga 250, campo di gioco ripristinato (ap_*); esce da irq_exit. (23/11) Niente piu' fase 3 (barra di sprite in alto)
 irq_h:
         lda #$ff
         sta $d019
         lda irq_ph
         beq _ph0
-        cmp #3
-        beq _top
         cmp #2
         beq _p2
+        cmp #3
+        beq _ph3
         bne _p1
-_ph0
+; (23/11) fine del campo di gioco alla riga 199 per ogni hy, senza scritture a tempo critiche:
+; fase 0 (IRQ nella 199): solo ECM in piu' allo scroll del campo (con l'MCM = modo illegale, pixel neri) all'inizio della 200.
+;   Lo scroll non cambia: nessuna riga cattiva tolta o aggiunta. Se la scrittura arriva qualche ciclo prima o dopo, solo la
+;   parte di una riga (199 o 200) cambia colore. La riga 19 del campo (riga cattiva a 200 + hy) parte, ma nera: la sua
+;   memoria colore (riga 19) e' quella della riga del bersaglio e non si vede. Con hy = 7 la 199 e' una riga cattiva del campo
+;   (l'IRQ arriverebbe a meta' della 200): IRQ nella 198 (fase 3), attesa della 199 e del fermo della CPU.
+; fase 1 (IRQ nella 205): scroll 7 + ECM (la 205 e la 206 non sono mai righe "7": nessuna riga cattiva nuova), schermo
+;   dell'HUD e sfondo nero; poi alla 207 (riga cattiva dell'HUD: VC 760, la riga 19 del campo non e' arrivata a RC 7) via
+;   l'ECM e MCM dell'HUD: la 207 e' la riga vuota in cima ai glifi, va bene in qualunque ciclo.
+_ph3
+-       lda $d012               ; aspetta la 199 (o oltre: mai un fotogramma intero); poi una lettura nei cicli 12-54 della 199
+        cmp #199                ; (riga cattiva) ferma la CPU fino al 55
+        bcc -
+        nop
+        nop
+        nop
+        nop
+        nop
+        nop
+_ph0    lda ap_p0               ; all'inizio della 200: ECM (nero dalla 200 alla 206) e scroll 7 (dalla 200 alla 206 nessuna riga
+        sta $d011               ; e' "7": nessuna riga cattiva nuova fino all'HUD). Con hy = 0 la 200 e' la riga cattiva della riga
+                                ; 19 del campo: in vc64web cambiare lo scroll li' (anche prima del ciclo 12) spostava l'HUD di una
+                                ; riga (provato): con hy = 0 qui solo l'ECM, lo scroll 7 nella fase 1 (206)
 .if TESTFZ
         inc $03f8               ; test: fotogrammi video (16 bit) contro giri del ciclo ($03fa)
         bne +
         inc $03f9
 +
 .endif
-        lda #$17                ; yscroll 7, 24 righe, DEN
+        lda #IRQ_L2
+        sta $d012
+        lda #1
+        sta irq_ph
+        jmp irq_exit
+_p1     lda #$57                ; scroll 7 + ECM (gia' scritti nella fase 0 se hy <> 0)
         sta $d011
         lda #$1a                ; schermo HUD (SCR_H = $8400), stesso charset
         sta $d018
-        lda #IRQ_L2
-        sta $d012
-        inc irq_ph
-        jmp irq_exit
-_p1     lda #$10                ; MCM, 38 col, xscroll 0
-        sta $d016
         lda #0
         sta $d021
+-       lda $d012
+        cmp #207
+        bcc -
+        lda #$17                ; 207: via l'ECM
+        sta $d011
+        lda #$10                ; MCM, 38 col, xscroll 0
+        sta $d016
         lda #250                ; dopo l'HUD: ripristino del campo di gioco
         sta $d012
         lda #2
@@ -158,31 +193,10 @@ _p2     lda ap_d018
         sta $d011
         lda ap_l1
         sta $d012
-        lda #0
+        lda ap_ph
         sta irq_ph
-        lda bar_on
-        beq _ps
-        jsr bar_regs
-        lda #IRQ_BAR
-        sta $d012
-        lda #3
-        sta irq_ph
-        jsr sfx_update          ; effetti e musica: una volta per fotogramma, a tempo anche se il ciclo sfora
-        jmp irq_exit
 _ps     jsr spr_copy
         jsr sfx_update
-        jmp irq_exit
-
-_top    jsr spr_copy
-        lda hy
-        cmp #5
-        bcc _t1
-        lda #1
-_t1     clc
-        adc #209
-        sta $d012
-        lda #0
-        sta irq_ph
         jmp irq_exit
 
 ; ------------------------------------------------------------------ primitive
@@ -318,6 +332,98 @@ _cc     sta hc,x
         dec bar_n
         bne _b
         rts
+
+; (23/11, branch proto-barra-sotto) riga del bersaglio, riga 19 dello schermo HUD (BTR_SCR): nome del mostro bersaglio
+; (colonne 1-24) e sua vita (12 caratteri G_BAR, colonne 26-37, viola), oppure l'etichetta del luogo o il messaggio delle quest
+; (nbuf, bar.asm: codici schermo della ROM tradotti nei glifi dell'HUD; lettere, cifre, "/" e "." - il resto spazio). Prima
+; stavano in 8 sprite in cima allo schermo, che coprivano il PG in cima alla mappa. Ogni 4 fotogrammi; quando la barra si
+; spegne il testo resta BTH_FR fotogrammi (tra un colpo e l'altro bar_on si spegne e si riaccende: lampeggio). Ogni cella si
+; scrive una volta sola con il valore finale (niente riga cancellata e riscritta mentre il raster la disegna).
+BTH_FR   = 50
+BT_NC     = 1                   ; colonna del nome
+BT_BC     = 26                  ; colonna della vita
+bt_row:
+        lda BTR_SCR             ; colonna 0 sempre vuota quando la riga e' scritta da qui: se no (avvio: c'e' la grafica copiata
+        cmp #G_BLANK            ; da copy_gfx) la riga si svuota subito
+        bne _bk
+        lda bar_on
+        bne _on
+        lda bt_hold             ; barra spenta: il testo resta BTH_FR fotogrammi, poi la riga si svuota
+        beq +
+        dec bt_hold
+        beq _bk
+_x      rts
++       lda frame               ; e si riscrive vuota ogni 16 fotogrammi: altre schermate (UI, attese) usano SCR_H e la sporcano
+        and #15
+        bne _x
+_bk     lda #0
+        sta bt_hold
+        ldx #40
+        jsr hb_clear
+        jmp _fl
+_on     lda #BTH_FR
+        sta bt_hold
+        lda frame
+        and #3
+        bne _x
+        ldx #40
+        jsr hb_clear
+        ldx #23
+_t      lda nbuf,x
+        jsr bt_ch
+        sta hb+BT_NC,x
+        dex
+        bpl _t
+        lda bar_lab
+        bne _fl
+        ldx #23                 ; vita del mostro: celle piene di cellf (bar_build) x 4 pixel su 12 caratteri
+        lda #0
+-       ldy cellf,x
+        beq +
+        clc
+        adc #4
++       dex
+        bpl -
+        ldx #12
+        stx bar_n
+        ldx #4                  ; viola: diversa dalla vita del PG (rossa) e dall'esperienza (gialla)
+        stx bar_c
+        ldx #BT_BC
+        jsr bar
+_fl     ldx #39
+-       lda hb,x
+        sta BTR_SCR,x
+        lda hc,x
+        sta BT_COLR,x
+        dex
+        bpl -
+        rts
+bt_ch:                          ; A = codice schermo -> glifo HUD (Y usato)
+        tay
+        dey
+        cpy #26
+        bcs +
+        lda bt_xl,y
+        rts
++       sec
+        sbc #48
+        cmp #10
+        bcs +
+        adc #G_0
+        rts
++       ldy #G_SLASH
+        cmp #(47-48) & $ff
+        beq +
+        ldy #G_DOT
+        cmp #(46-48) & $ff
+        beq +
+        ldy #G_BLANK
++       tya
+        rts
+; codici schermo 1-26 (lettere) -> glifi HUD (le cifre 48-57 sono G_0..G_9 di seguito)
+bt_xl   .byte G_A, G_B, G_C, G_D, G_E, G_F, G_G, G_H, G_I, G_J, G_K, G_L, G_M, G_N, G_O
+        .byte G_P, G_Q, G_R, G_S, G_T, G_U, G_V, G_W, G_X, G_Y, G_Z
+        .cerror G_9 != G_0 + 9, "bt_xl: cifre HUD non di seguito"
 
 ; azzera hb/hc[0..X-1] a vuoto/bianco
 hb_clear:
@@ -701,7 +807,7 @@ _bar    ldx #10
 hud_p2:
         ldx #40
         jsr hb_clear
-        lda COLRAM+760          ; colore della mappa (la riga e' mostrata anche come riga di mappa)
+        lda COLRAM+720          ; colore della mappa ((23/11) dalla riga 18: la 19 e' la riga del bersaglio)
         sta tmp4
         ldx #39
 _r      lda #G_RULE

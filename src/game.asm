@@ -47,7 +47,7 @@ LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM de
 ; ---- (15/11, TODO T1) annotazioni della mappa automatica della memoria (lab64 map, docs/wiki/build.md sezione 4a; sintassi in
 ; docs/memory-maps.md di Lab64): "@map" = zone che il gioco scrive solo con puntatori o copie (invisibili all'analisi statica: contano come
 ; usate); "@free" = memoria libera e cosa ci puo' stare; "@scenario" = cosa e' in memoria insieme (moduli e file del disco).
-;@map $8720..$87e8 "Schermo HUD: righe 20-24 di SCR_H (il VIC mostra solo queste, split raster)"
+;@map $86f8..$87e8 "Schermo HUD: righe 19-24 di SCR_H (il VIC mostra solo queste, split raster; 19 = riga del bersaglio, 23/11)"
 ;@map $87e8..$87f8 "Fra schermo HUD e puntatori sprite: all'avvio grafica fissa del PRG" free-after=start
 ;@map $87f8..$8800 "Puntatori sprite della fascia HUD"
 ;@map $8800..$8a40 "Sprite della barra, set A (doppio buffer con $B000) e segnaposto della minimappa"
@@ -1104,6 +1104,7 @@ main_loop:
         jsr update_world
         jsr update_camera
         jsr update_bar          ; (19/11) dopo la camera: l'etichetta del luogo non si ricalcola nei fotogrammi di ridisegno
+        jsr bt_row              ; (23/11) riga del bersaglio nell'HUD (hud.asm)
         jsr npc_tick            ; (17/11) NPC del villaggio (quest.asm); (19/11) dopo la camera: salta i fotogrammi di ridisegno
         jsr maybe_redraw
         jsr build_sprites
@@ -1852,7 +1853,8 @@ _xok    lda ent_y
         lda tmp2
         cmp #35
         bcc _hide
-        cmp #192
+        cmp #179                ; (23/11) era 192: il campo di gioco finisce alla riga 199 (sprite fino alla 199: niente furti
+                                ; di cicli che spostino le scritture dell'IRQ della 199)
         bcs _hide
         sta sh_y,x
         lda tmp0
@@ -1884,14 +1886,23 @@ apply_frame:
         lda bg_cur
         sta BGCOL
         sta ap_bg
-        lda hy
-        cmp #5
-        bcc _il
-        lda #1
-_il     clc
-        adc #209
-        sta $d012
+        ldx #0                  ; (23/11) inizio dell'HUD: IRQ nella 199 (fase 0), con hy = 7 nella 198 (fase 3, hud.asm)
+        lda #IRQ_L1
+        ldy hy
+        cpy #7
+        bne +
+        ldx #3
+        lda #IRQ_L1-1
++       sta $d012
         sta ap_l1
+        stx ap_ph
+        stx irq_ph
+        ldx #$57                ; fase 0: scroll 7 + ECM; con hy = 0 solo ECM (hud.asm, _ph0)
+        lda hy
+        bne +
+        ldx #$50
++       stx ap_p0              ; anche la fase (la riga 250 l'ha gia' messa dalla ap_ph di prima: con hy che entra o esce
+                                ; da 7 riga e fase non corrisponderebbero)
         lda hx
         ora #$10
         sta VIC_CTRL2
@@ -1900,14 +1911,6 @@ _il     clc
         ora #$10
         sta VIC_CTRL1
         sta ap_d011
-        lda bar_on
-        beq spr_copy
-        jsr bar_regs
-        lda #IRQ_BAR
-        sta $d012
-        lda #3
-        sta irq_ph
-        rts
 
 ; registri sprite di gioco dalle shadow (anche da IRQ)
 spr_copy:
@@ -2018,8 +2021,8 @@ cheat_menu:
 ;   - se la grafica cresce, FREE_RAM_START si sposta in avanti (guardia .cerror sotto).
 ;  Mappa: out/work/memory-map/program-game.html (lab64 map; annotazioni @map / @free nei sorgenti).
 ; ===================================================================
-;@map gfx_data..$8720 "All'avvio grafica fissa del PRG, dato morto dopo copy_gfx" free-after=start
-;@free gfx_data..$8720 "Margine del programma principale: codice e dati di main.asm (guardia .cerror a $8720, righe HUD)" use=code
+;@map gfx_data..$86f8 "All'avvio grafica fissa del PRG, dato morto dopo copy_gfx" free-after=start
+;@free gfx_data..$86f8 "Margine del programma principale: codice e dati di main.asm (guardia .cerror a $86F8, righe HUD)" use=code
 gfx_data:                       ; solo la grafica fissa: tile del villaggio e dei dungeon e mostri sono su file (gfxN)
 gd_fchr .binary "../out/work/gfx/fixed_chr.bin"  ; caratteri fissi (glifi HUD, minimappa): 4 strisce da GFX_FSTRIP byte
 gd_core .binary "../out/work/gfx/spr_core.bin"   ; sprite 0..11 (eroe, fendenti) + 24..26
@@ -2070,7 +2073,7 @@ core_end:
 FREE_RAM_END   = $9fff              ; il PRG puo' arrivare fino a $9FFF: la coda di gfx_data e' dato morto dopo
                                     ; copy_gfx (prima istruzione utile di `start`) e copre $8000-$9FFF (schermo HUD,
                                     ; sprite barra, sprites2, variabili $9000: tutti scritti DOPO la copia)
-        .cerror gfx_data > SCR_H + 800, "codice oltre $8720: le righe HUD (SCR_H+800) lo sovrascriverebbero"
+        .cerror gfx_data > SCR_H + 760, "codice oltre $86F8: le righe HUD (SCR_H+760, dalla riga 19) lo sovrascriverebbero"
         .cerror GENPASS == 2 && gen_img_end > CODE2, "grafica fissa + generatore (compresso) oltre $9C00 (secondo blocco di codice)"
 
 ; ------------------------------------------------------------------ secondo blocco di codice: $9C00-$9FFF
