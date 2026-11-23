@@ -1176,7 +1176,7 @@ _chest  jsr mon_ll              ; cassa: all'apertura da' sempre oro + gli ogget
         lda #0
         sta dc_b
         lda #1
-        jsr defer_drop          ; la cassa compare a fine combattimento
+        jsr defer_drop          ; la cassa compare DROP_T fotogrammi dopo (drops_tick)
 _r      rts
 _boss
 .if BOSS_KEY
@@ -1194,7 +1194,7 @@ _boss
         jsr defer_drop
 _r2     rts
 
-; ---- drop dei bauli: differito a fine combattimento, un baule per frame ----------------
+; ---- drop dei bauli: differito di DROP_T fotogrammi, un baule per frame ----------------
         .virtual $9240
 bq_x    .fill 48                ; coda BFS
 bq_y    .fill 48
@@ -1266,7 +1266,7 @@ _f      lda pd_f,y
         jmp drop_now
 _put    lda dc_b
         clc
-        adc #1
+        adc #1+DROP_T*4         ; (23/11) bit 0-1 tipo (1 normale, 2 boss), bit 2-7 fotogrammi che mancano (drops_tick)
         sta pd_f,y
         lda loot_x
         sta pd_x,y
@@ -1290,26 +1290,52 @@ drop_now:                       ; A = tipo, X = n oggetti, dc_b
         stx lb_bch
 _r      rts
 
-; chiamata ogni frame: a fine combattimento piazza un baule in coda
+; (23/11, committente) un baule compare DROP_T fotogrammi dopo la morte del suo mostro, anche a combattimento in corso
+; (prima: a combattimento finito, 100 fotogrammi senza mostri a contatto, cmb_t). Ogni fotogramma i tempi dei bauli in coda
+; scendono di 1; uno pronto (tempo 0) compare: uno per fotogramma. pd_any = 0 quando la coda e' vuota
+DROP_T  = 12                    ; ~0,25 s PAL
+        .cerror DROP_T > 63, "DROP_T: 6 bit in pd_f"
 drops_tick:
         lda pd_any
         beq _r
-        lda cmb_t
-        bne _r
-        jmp flush_one
+        lda #$ff
+        sta pd_i
+        ldx #0
+        ldy #PD_MAX-1
+_t      lda pd_f,y
+        beq _n
+        inx
+        cmp #4
+        bcs _d
+        sty pd_i                ; pronto
+        bcc _n
+_d      sbc #4                  ; (C = 1)
+        sta pd_f,y
+_n      dey
+        bpl _t
+        txa
+        bne +
+        sta pd_any
+        rts
++       ldy pd_i
+        bpl flush_y
 _r      rts
 
-; un baule in attesa (pd_f, lasciato da un mostro durante il combattimento) compare sulla mappa; pd_any = 0 se non ce ne sono piu'
+; un baule in coda (il primo trovato, pronto o no) compare sulla mappa; pd_any = 0 se non ce ne sono piu' (flush_drops)
 flush_one:
         ldy #PD_MAX-1
 _s      lda pd_f,y
-        bne _g
+        bne flush_y
         dey
         bpl _s
         lda #0
         sta pd_any
         rts
-_g      sty pd_i
+; il baule in coda Y compare sulla mappa
+flush_y:
+        sty pd_i
+        lda pd_f,y
+        and #3
         sec
         sbc #1
         sta dc_b
@@ -2105,6 +2131,9 @@ _k1     ldx km_i
         lda #0
         sta bar_t
         sta bar_m
+        sta bar_on              ; (23/11, committente) nome e vita via al prossimo bt_row (hud.asm), non dopo BTH_FR (~1 s
+        lda #1                  ; con la vita dell'ultimo ridisegno di un mostro gia' sparito)
+        sta bt_hold
 _kb
 .if ARENA == 0                  ; arena: niente vittoria, niente bottino
         ldx km_i
@@ -2367,8 +2396,6 @@ _contact lda m_adx              ; i mostri non entrano nella casella del PG: si 
         lda m_ady
         cmp #20
         bcs _next
-        lda #CMB_DROP           ; mostro a contatto: combattimento in corso (bauli in coda: drops_tick)
-        sta cmb_t               ; (17/11) il tema di combattimento non dipende piu' dai contatti: solo dal boss sullo schermo
         lda mcd,x
         bne _next
         lda #MON_ATK_T

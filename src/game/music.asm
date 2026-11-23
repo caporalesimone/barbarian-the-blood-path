@@ -20,7 +20,6 @@
 ;  occasione (prima: mostri forti a contatto, isteresi di 12 s). Ogni operazione su disco zittisce il SID (snd_io).
 ; ===================================================================
 CMB_HOLD   = 25                 ; isteresi del tema di combattimento, in unita' di 4 frame (2 s dopo che il boss e' uscito dallo schermo)
-CMB_DROP   = 100                ; frame dopo l'ultimo contatto con un mostro qualsiasi: fine combattimento (bauli)
 FADE_SLOW  = 2                  ; frame per passo: cambio livello / fine combattimento
 FADE_FAST  = 1                  ; inizio combattimento
 MUS_LVL    = 1
@@ -42,7 +41,7 @@ mus_want .byte ?                ; brano richiesto
 mus_fo  .byte ?                 ; frame residui di dissolvenza in uscita (rilascio)
 mus_fsp .byte ?                 ; frame per passo
 mus_cmb .byte ?                 ; tema di combattimento: unita' di 4 frame residue (scritto da game.asm)
-cmb_t   .byte ?                 ; frame residui di combattimento con qualsiasi mostro (game.asm, drops_tick)
+        .byte ?                 ; libero (23/11: era cmb_t, fine combattimento per i bauli; ora drops_tick usa DROP_T)
 mus_fr  .byte ?                 ; contatore dei fotogrammi della musica
 mus_mute .byte ?                ; 1 = SID zittito per un'operazione su disco (snd_io): volume da ripristinare
 mus_inc .byte ?                 ; 1 = tema di combattimento richiesto
@@ -271,10 +270,6 @@ snb_hi   .byte >SND_LBUF, >SND_FBUF
 
 ; ---------------------------------------------------------------- aggiornamento (1 volta per frame)
 music_update:
-        lda cmb_t
-        beq +
-        dec cmb_t
-+
 .if NOMUSIC
         rts
 .endif

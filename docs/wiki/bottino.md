@@ -43,8 +43,12 @@ flowchart TD
     O -->|niente| X
 ```
 
-- I tesori non compaiono subito: vanno in coda (`defer_drop`, 8 posti) e `drops_tick` li piazza **uno per
-  fotogramma a combattimento finito** (`cmb_t` = 0: 100 fotogrammi senza mostri a contatto). Se la coda è piena il tesoro va
+- I tesori vanno in coda (`defer_drop`, 8 posti) e `drops_tick` li piazza **`DROP_T` = 12 fotogrammi (~0,25 s) dopo la morte
+  del mostro, anche a combattimento in corso** (23/11, committente; il tempo sta nei bit 2-7 di `pd_f`), uno per fotogramma.
+  Fino al 23/11 aspettavano la fine del combattimento (`cmb_t`: 100 fotogrammi senza mostri a contatto, ~2 s). Il motivo
+  originale del ritardo non è documentato; il piazzamento costa ~2.800 cicli in un fotogramma con il corpo su una casella
+  libera, ~3.900 quando la ricerca deve allargarsi (misure in VICE, 23/11). Resta che un baule **non si apre con un mostro vivo
+  entro 2 caselle** (sotto). Test `DROP-11`. Se la coda è piena il tesoro va
   giù subito. Prima di salvare o lasciare il piano la coda si svuota (`flush_drops`).
 - Posizione (`find_free`): ricerca in ampiezza dalla casella del corpo fino alla prima casella di pavimento
   libera (niente bauli, oggetti, mostri vivi, PG) raggiungibile; in ripiego una casella adiacente, altrimenti il

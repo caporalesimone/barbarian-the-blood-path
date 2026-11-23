@@ -87,7 +87,7 @@ flowchart TD
     HK --> UP["update_player<br/>Frenzy (fz_move), movimento con collisioni, direzione"]
     UP --> UA["update_attack<br/>tick_timers; Fire = abilita' scelta"]
     UA --> UM["update_monsters<br/>IA, i 4 piu' vicini si muovono, attacchi"]
-    UM --> DT["drops_tick<br/>a fine combattimento un baule in coda"]
+    UM --> DT["drops_tick<br/>un baule in coda DROP_T fotogrammi dopo la morte"]
     DT --> UW["update_world<br/>orologio, boss finale, tile sotto il PG,<br/>esplorazione, Fire su scale/porte/bauli, morte"]
     UW --> UC["update_camera<br/>scorrimento a passi di tile"]
     UC --> UB["update_bar + bt_row<br/>riga del bersaglio: luogo o mostro"]
@@ -341,7 +341,7 @@ sequenceDiagram
             KM->>DQ: roll_loot: bottino in coda (baule al posto del mostro)
         end
     end
-    Note over DQ: drops_tick: a fine combattimento,<br/>un baule per fotogramma (BFS su casella libera)
+    Note over DQ: drops_tick: DROP_T fotogrammi dopo la morte,<br/>un baule per fotogramma (BFS su casella libera)
 ```
 
 ## 12. Mostri: IA a ogni fotogramma

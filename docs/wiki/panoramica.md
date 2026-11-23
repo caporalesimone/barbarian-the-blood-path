@@ -73,7 +73,7 @@ mescolato con il raster e il timer della CIA.
 | 6 | `update_player` | Frenzy (`fz_move`), movimento con collisioni, direzione |
 | 7 | `update_attack` | ricariche e durate (`tick_timers`), Fire = abilità scelta |
 | 8 | `update_monsters` | IA a fotogrammi alterni, attacchi a contatto |
-| 9 | `drops_tick` | a fine combattimento piazza un tesoro in coda |
+| 9 | `drops_tick` | piazza un tesoro in coda `DROP_T` fotogrammi dopo la morte del mostro |
 | 10 | `update_world` | tile sotto il PG (oggetti, fontana), Fire su scale/porte/bauli, nebbia, boss finale |
 | 11 | `update_camera` | scorrimento a passi di tile |
 | 12 | `update_bar`, `npc_tick` | riga del bersaglio nell'HUD (nome del luogo o del mostro bersaglio, `bt_row`); villaggio: passo dei vaganti. (19/11) Nei fotogrammi di ridisegno aspettano (`redraw_due`, [Flussi](flussi.md)) |

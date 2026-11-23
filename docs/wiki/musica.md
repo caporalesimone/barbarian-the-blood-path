@@ -80,8 +80,8 @@ leggere il brano (1–2 blocchi) aggiunge ~1,5 s. Il brano cambia a ogni piano, 
   parte **solo quando un boss con nome compare sullo schermo** (`mon_named`: il boss finale ha il suo brano ed è escluso) e
   **resta finché il boss è sullo schermo**: `build_sprites` scrive `mus_cmb` a ogni fotogramma in cui lo sprite del boss è
   visibile; si spegne `CMB_HOLD` = 25 × 4 fotogrammi (**2 s**) dopo che il boss è uscito dallo schermo o è morto e riprende il
-  brano del luogo **dal punto in cui era** (`sp_save` / `sp_resume`; la nota interrotta si perde). La fine del
-  combattimento per i bauli in coda (`drops_tick`) usa un contatore a parte (`cmb_t`, 100 fotogrammi, ogni mostro).
+  brano del luogo **dal punto in cui era** (`sp_save` / `sp_resume`; la nota interrotta si perde).
+  (23/11) I bauli in coda non dipendono più dal combattimento (`drops_tick`, `DROP_T`: `cmb_t` tolto).
 - **A tempo**: `sfx_update` (effetti + `music_update`) gira nell'IRQ di fine HUD (riga 250, `hud.asm`), una volta
   per fotogramma anche quando il ciclo principale sfora (prima era nel ciclo: nel villaggio, più pesante da
   scorrere, il tempo dei brani "inciampava"). Nelle schermate a tutto schermo (IRQ spento) lo chiama `ui_input`.

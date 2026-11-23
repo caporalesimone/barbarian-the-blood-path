@@ -105,7 +105,8 @@ in cima alla mappa e su cui passavano gli sprite): riga 20 dello schermo HUD (ri
 alle colonne 1-24 nei glifi dell'HUD (lettere, cifre, "/", "."; il resto spazio: tradotto da `nbuf`, codici schermo) e la sua
 vita in 12 caratteri `G_BAR` viola alle colonne 26-37 (da `cellf`); oppure l'etichetta del luogo o il messaggio delle quest.
 Ogni 4 fotogrammi, ogni cella scritta una volta (niente riga cancellata e riscritta: niente lampeggi); spegnendosi, il testo
-resta 1 s (`BTH_FR`); a barra spenta la riga si riscrive vuota ogni 16 fotogrammi (altre schermate usano `SCR_H`). Gli
+resta 1 s (`BTH_FR`), tranne alla morte del bersaglio: la riga si svuota subito (`kill_monster`: `bt_hold` = 1, 23/11,
+test `DROP-10`); a barra spenta la riga si riscrive vuota ogni 16 fotogrammi (altre schermate usano `SCR_H`). Gli
 sprite `BARSPR` ($8800/$B000) e `bt_step` restano solo per il testo della minimappa.
 
 **Bersaglio: quale mostro** (`src/game/bar.asm`, `bar_target` / `update_bar`, 06/11 sera): ogni colpo a segno del
