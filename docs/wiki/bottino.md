@@ -167,7 +167,7 @@ I tile del baule con la chiave (`KCHEST`) e del baule d'oro (`GCHEST`) erano tro
 bauli (normale, con la chiave, d'oro, epico della sala del trono) si disegnano con **`T_CHEST`**; il tipo stava già nella
 tabella dei bauli (`ch_t` & 3: 1 normale, 2 chiave, 3 oro, bit 6 epico), che resta l'unica fonte: `apply_chests` e la
 creazione del baule mettono sempre `T_CHEST`; i controlli `T_CHEST..T_GCHEST` (percorribilità `bf_walk`, `tile_trigger`,
-Fire in `act_tick`) sono diventati `= T_CHEST`; l'etichetta della barra in alto (`loc_id`, "chest", "locked chest",
+Fire in `act_tick`) sono diventati `= T_CHEST`; l'etichetta della riga del bersaglio (`loc_id`, "chest", "locked chest",
 "golden chest", "epic chest") e la chiave richiesta leggono il tipo da `ch_t` tramite `chest_here` (che ora restituisce
 anche l'indice del baule). Il titolo della schermata del baule usava già `ch_t`. Nessun cambio dei salvataggi (la mappa non
 si salva; i bauli sì, con `ch_t`) né del generatore. GAME: −22 B. I posti 25 e 26 dei file dei dungeon sono liberi

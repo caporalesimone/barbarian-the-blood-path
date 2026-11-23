@@ -3,7 +3,7 @@
 Action RPG a schermata scorrevole per Commodore 64: un barbaro scende 19 piani generati dal seed fino alla sala
 del trono (piano 20) dove lo aspetta il **Lord of Ruin**. Sorgenti principali: `src/game.asm` (ciclo, rendering),
 `src/game/game.asm` (mondo, mostri, bottino), `src/game/combat.asm` (regole d20), `src/game/levels.asm` (cambio di luogo,
-avvio), `src/game/ui.asm` (schermate), `src/game/hud.asm`, `src/game/bar.asm` (barra in alto), `src/game/rel.asm` + `src/game/disk.asm`
+avvio), `src/game/ui.asm` (schermate), `src/game/hud.asm`, `src/game/bar.asm` (bersaglio: riga 19 dell'HUD), `src/game/rel.asm` + `src/game/disk.asm`
 (disco), `src/lobby.asm` (modulo LOBBY), `src/menu.asm` (modulo MENU: locanda e negozi), `src/barbarian.asm` (loader con musica).
 Struttura del codice: [Architettura](architettura.md); flussi del codice: [Flussi](flussi.md); build: [Build e strumenti](build.md).
 
@@ -76,7 +76,7 @@ mescolato con il raster e il timer della CIA.
 | 9 | `drops_tick` | a fine combattimento piazza un tesoro in coda |
 | 10 | `update_world` | tile sotto il PG (oggetti, fontana), Fire su scale/porte/bauli, nebbia, boss finale |
 | 11 | `update_camera` | scorrimento a passi di tile |
-| 12 | `update_bar`, `npc_tick` | barra in alto (nome del luogo o del mostro bersaglio); villaggio: passo dei vaganti. (19/11) Nei fotogrammi di ridisegno aspettano (`redraw_due`, [Flussi](flussi.md)) |
+| 12 | `update_bar`, `npc_tick` | riga del bersaglio nell'HUD (nome del luogo o del mostro bersaglio, `bt_row`); villaggio: passo dei vaganti. (19/11) Nei fotogrammi di ridisegno aspettano (`redraw_due`, [Flussi](flussi.md)) |
 | 12b | `maybe_redraw` | ridisegno del buffer nascosto |
 | 13 | `build_sprites` | PG, mostri visibili (multiplex), effetti delle abilità |
 

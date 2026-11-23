@@ -90,7 +90,7 @@ flowchart TD
     UM --> DT["drops_tick<br/>a fine combattimento un baule in coda"]
     DT --> UW["update_world<br/>orologio, boss finale, tile sotto il PG,<br/>esplorazione, Fire su scale/porte/bauli, morte"]
     UW --> UC["update_camera<br/>scorrimento a passi di tile"]
-    UC --> UB["update_bar<br/>barra in alto: luogo o bersaglio"]
+    UC --> UB["update_bar + bt_row<br/>riga del bersaglio: luogo o mostro"]
     UB --> NT["npc_tick<br/>villaggio: passo dei vaganti"]
     NT --> MR["maybe_redraw<br/>ridisegno del buffer nascosto"]
     MR --> BS["build_sprites<br/>PG, mostri visibili (multiplex), effetti"]
@@ -114,17 +114,21 @@ Sorgente: `src/game/hud.asm` (`irq_h`), `src/game/bar.asm`. Un solo IRQ raster c
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> P0: irq_on (riga IRQ_L1 = 209)
-    P0: fase 0, riga 209<br/>schermo HUD $8400, 24 righe
-    P1: fase 1, riga 217<br/>multicolor, 38 colonne, sfondo nero
+    [*] --> P0: irq_on (riga IRQ_L1 = 199)
+    P0: fase 0, riga 199 (198 con hy = 7: fase 3)<br/>ECM + scroll 7 a inizio 200:<br/>campo di gioco nero 200-206
+    P1: fase 1, riga 205<br/>scroll 7, schermo HUD $8400, sfondo nero;<br/>alla 207 via l'ECM, multicolor, 38 colonne
     P2: fase 2, riga 250 (fine HUD)<br/>registri del campo di gioco<br/>dall'ultimo apply_frame
-    P3: fase 3, riga IRQ_BAR = 76<br/>(solo con la barra in alto)
     P0 --> P1
     P1 --> P2
-    P2 --> P0: senza barra:<br/>spr_copy + sfx_update
-    P2 --> P3: con la barra:<br/>bar_regs + sfx_update
-    P3 --> P0: spr_copy
+    P2 --> P0: spr_copy + sfx_update
 ```
+
+(23/11) L'HUD comincia alla riga raster 207 con la riga 19 di `SCR_H` (riga del bersaglio, VC 760: la riga 19 del campo di gioco
+puo' partire ma non arriva mai a RC 7). Il campo di gioco finisce alla 199 per ogni hy: dalla 200 alla 206 ECM + MCM (modo
+illegale, nero), perche' la riga 19 della memoria colore e' quella della riga del bersaglio. Lo scroll 7 si scrive all'inizio
+della 200 (con hy = 0 nella 205/206: in vc64web cambiarlo sulla riga cattiva del campo spostava l'HUD di una riga, provato);
+nessuna scrittura deve cadere entro pochi cicli da un limite (provato in VICE e vc64web per gli 8 valori di hy).
+Niente piu' fase della barra di sprite in alto (`IRQ_BAR`, tolta il 23/11).
 
 `sfx_update` (effetti e musica) gira una volta per fotogramma nella fase 2 anche se il ciclo principale sfora.
 `spr_copy` copia le ombre degli sprite preparate da `build_sprites` (pubblicate tutte insieme, mai a metà).

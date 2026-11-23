@@ -1,7 +1,7 @@
 # Interfaccia
 
 Sorgenti: `src/game.asm` (`read_input`), `src/game/game.asm` (`handle_keys`, `act_tick`), `src/game/hud.asm` (HUD),
-`src/game/bar.asm` (barra in alto), `src/game/ui.asm` (schermate a tutto schermo), `src/lobby.asm` (menu iniziale).
+`src/game/bar.asm` (bersaglio: riga 19 dell'HUD), `src/game/ui.asm` (schermate a tutto schermo), `src/lobby.asm` (menu iniziale).
 Tutti i testi del gioco sono in inglese; i nomi di oggetti, mostri e abilità non si traducono.
 
 ## Comandi
@@ -93,13 +93,22 @@ la legenda. Non sta nel gioco (nessun byte di RAM né tempo di CPU di `GAME`). P
 
 ```mermaid
 flowchart TB
-    BAR["barra in alto (riga 0): nome del luogo,<br/>oppure nome e vita del mostro bersaglio / boss"]
-    PLAY["campo di gioco: righe 1..19, scorrimento fine,<br/>doppio buffer (schermi $B400 / $BC00)"]
-    HUD["HUD: righe 20..23 su uno schermo fisso ($8400),<br/>split raster (IRQ alle righe 209 e 217)"]
-    BAR --> PLAY --> HUD
+    PLAY["campo di gioco: fino alla riga raster 199, scorrimento fine,<br/>doppio buffer (schermi $B400 / $BC00)"]
+    BAND["fascia nera: righe raster 200-206 (ECM + MCM)"]
+    BAR["riga del bersaglio (riga 19 di $8400, raster 207): nome del luogo,<br/>oppure nome e vita del mostro bersaglio / boss"]
+    HUD["HUD: righe 20..23 su uno schermo fisso ($8400),<br/>riga 20 vuota con il regolo, poi HP, XP, LV"]
+    PLAY --> BAND --> BAR --> HUD
 ```
 
-**Barra in alto: quale mostro** (`src/game/bar.asm`, `bar_target` / `update_bar`, 06/11 sera): ogni colpo a segno del
+**Riga del bersaglio** (23/11, decisione del committente; prima una barra di 8 sprite in cima allo schermo, che copriva il PG
+in cima alla mappa e su cui passavano gli sprite): riga 19 dello schermo HUD (`bt_row`, `src/game/hud.asm`), nome del mostro
+alle colonne 1-24 nei glifi dell'HUD (lettere, cifre, "/", "."; il resto spazio: tradotto da `nbuf`, codici schermo) e la sua
+vita in 12 caratteri `G_BAR` viola alle colonne 26-37 (da `cellf`); oppure l'etichetta del luogo o il messaggio delle quest.
+Ogni 4 fotogrammi, ogni cella scritta una volta (niente riga cancellata e riscritta: niente lampeggi); spegnendosi, il testo
+resta 1 s (`BTH_FR`); a barra spenta la riga si riscrive vuota ogni 16 fotogrammi (altre schermate usano `SCR_H`). Gli
+sprite `BARSPR` ($8800/$B000) e `bt_step` restano solo per il testo della minimappa.
+
+**Bersaglio: quale mostro** (`src/game/bar.asm`, `bar_target` / `update_bar`, 06/11 sera): ogni colpo a segno del
 PG la sposta sul mostro colpito (`hit_one`); se non c'è un bersaglio (`bar_t` = 0) la prende il mostro che attacca
 il PG (`mon_attack`) o quello che si sveglia (aggro, `mwake` 0 → 1); il boss del piano con nome è mostrato solo
 quando la barra è libera. Ogni nuovo bersaglio la tiene per 250 fotogrammi (`bar_t`), rinnovati a ogni colpo.
@@ -110,6 +119,8 @@ negozio o della locanda: `pl_tile`).
 
 | Riga | Contenuto |
 |---|---|
+| bersaglio (19) | (23/11) nome e vita del mostro bersaglio (viola), o etichetta del luogo / messaggio delle quest: sopra |
+| regolo (20) | vuota (spazio nero) con il regolo nell'ultima linea di pixel |
 | HP | vita attuale / massima (16 bit) e barra rossa (24 caratteri, `scale`) |
 | XP | esperienza / soglia del livello successivo e barra gialla della frazione (16 bit bassi). Da 10000 in su ogni numero (ciascuno per conto suo: `9999/27K`) è in **migliaia senza decimali** (`10K`, `11K` … `65K`, `hput_k`; 07/11 sera): `65K/30K` sta sempre negli 11 caratteri fra la colonna 4 e la barra. Al livello massimo: `MAX`. Test: `tests/regression/hud/test_hudxp.py` |
 | LV | livello; H J K L alle colonne 9, 11, 13, 15 (12/11: due colonne più a destra, richiesta del committente; il nome dell'abilità scelta dalla colonna 8) (giallo la scelta, bianco le altre); U e O (giallo attiva, bianco pronta, ciano in ricarica). Una lettera compare **solo se l'abilità è disponibile** (livello raggiunto; 07/11: prima grigio 11, che è un colore ≥ 8 e rendeva il carattere multicolore e illeggibile); chiavi; cintura (4 pozioni, **blu durante la ricarica delle pozioni**) |

@@ -97,8 +97,8 @@ durabilità 0 con "broken". Lampeggio fluido e suono gradevole (giudizio soggett
 **Atteso**: la linguetta attiva in negativo giallo, il `>` sempre visibile (sulla linguetta o sulla lista), riga 24
 uguale ovunque; nessuna lettera "a sorpresa" (D, A, S, Q tolte). Giudizio di comodità: soggettivo.
 
-### 010 · CTL · Mappa (M) e barra in alto
-1. Premere `M` nel dungeon e nel villaggio; guardare la barra in alto vicino a porte, fontana, mostri.
+### 010 · CTL · Mappa (M) e riga del bersaglio
+1. Premere `M` nel dungeon e nel villaggio; guardare la riga del bersaglio vicino a porte, fontana, mostri.
 
 **Atteso**: mappa leggibile (villaggio: fiume blu, strade ciano, icone sopra le porte); la barra mostra luogo o mostro con la vita per ~5 s.
 

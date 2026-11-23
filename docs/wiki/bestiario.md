@@ -185,7 +185,7 @@ boss = boss con nome del piano (le schede proprie del bestiario non sono nel gio
 
 Richiesta del committente: mostri arcieri (Bone Archer del capitolo 3, Cultist) e, più avanti, l'arco del PG. **Sprite nel
 dungeon** (`bs_body`, `src/game/game.asm`): 0 eroe, 1 fendente, 2 effetto delle abilità, 3–7 mostri (al massimo 5 visibili),
-nessun multiplexer (la barra in alto usa gli 8 sprite in un'altra fascia del raster). **Una o due frecce insieme ci stanno**:
+nessun multiplexer (fino al 23/11 la barra in alto usava gli 8 sprite in un'altra fascia del raster; ora il bersaglio e' testo nell'HUD). **Una o due frecce insieme ci stanno**:
 - prima freccia sullo **sprite 2** (l'effetto delle abilità dura pochi fotogrammi: con una freccia in volo l'effetto non si
   disegna, la freccia ha la precedenza);
 - seconda freccia sullo **slot dei mostri più lontano** (lo sprite 7: con due frecce in volo si vedono al massimo 4 mostri);

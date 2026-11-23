@@ -94,7 +94,7 @@ flowchart TB
     UI["ui.asm<br/>primitive UI, inventario, minimappa,<br/>baule, menu di gioco, attese del disco"]
     ST["stash.asm<br/>baule della locanda (sposta, ordina),<br/>caricamento del MENU + ZX0"]
     HUD["hud.asm<br/>fascia HUD + catena IRQ"]
-    BARM["bar.asm<br/>barra in alto (8 sprite)"]
+    BARM["bar.asm<br/>bersaglio (riga 19 dell'HUD)"]
     MUS["music.asm + common/sid_player.inc<br/>+ common/sfx.inc"]
     PF["theme.asm<br/>tema del piano, bit di visita"]
     REL["rel.asm<br/>salvataggi con il plugin di Krill<br/>(file per eroe, elenco)"]
@@ -139,7 +139,7 @@ flowchart TB
 | `core.asm` (`slist.asm`, `inv.asm`) | ~1100 | (21/11, TODO D15) **segmento CORE** a `$E000` (RAM sotto il KERNAL, file `core`): liste a scorrimento (`sl_*`), schermata dell'inventario, descrizione degli oggetti; costruito in due passate come il generatore | [Interfaccia](interfaccia.md) |
 | `ui.asm` | 3240 | primitive delle schermate (testo, numeri, riquadri), motore dei menu (`ui_nav`), ingresso dell'inventario, voci condivise coi negozi, minimappa, schermate varie, barra di I/O, menu di gioco, baule del piano | [Interfaccia](interfaccia.md) |
 | `stash.asm`, `stash_io.asm` | 135 + 125 | baule della locanda (logica residente), caricamento del modulo MENU (`ovl_town`) e decompressore ZX0; oro del baule (CODE2) | [Villaggio](villaggio.md) |
-| `hud.asm`, `bar.asm` | 796 + 798 | fascia HUD in basso e catena degli interrupt raster; barra in alto (vita e nome del bersaglio, 8 sprite) | [Interfaccia](interfaccia.md), [Prestazioni](prestazioni.md) |
+| `hud.asm`, `bar.asm` | 796 + 798 | fascia HUD in basso e catena degli interrupt raster; bersaglio (nome e vita, riga 19 dell'HUD; fino al 23/11 8 sprite in alto) | [Interfaccia](interfaccia.md), [Prestazioni](prestazioni.md) |
 | `music.asm` | 361 | richieste di musica, caricamento dei brani, combattimento; player e effetti in `src/common/` | [Musica](musica.md) |
 | `theme.asm` | ~50 | `lvl_theme` (piano → file `GFXn`), `vis_bit`. Dall'11/11 (ramo `fast-loader`) il precaricamento in sottofondo e le cache sono tolti | [Flussi](flussi.md#8-precaricamento-del-tema-tolto) |
 | `chapter.asm` | ~140 | (12/11) sequenza dei capitoli: `chap_first`, `is_cboss`, `chap_enter` (`lv_cboss`), `chap_won` (sblocco), `at_exit`/`exit_open` (uscita del villaggio), `chap_travel` (passaggio al capitolo dopo) | [Capitoli](capitoli.md) |

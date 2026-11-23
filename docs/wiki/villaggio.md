@@ -172,7 +172,7 @@ Arrivi (`place_player`): nuova partita sulla strada sud (16,46); dal portale o d
 portale (42,25); dal piano 1 sulla porta della cripta (12,5).
 
 **Porte dei negozi e della locanda** (06/11 sera): Fire apre anche stando **1 o 2 caselle davanti** alla porta (le porte
-sono tutte sul muro sud; `pl_tile` in `src/game/bar.asm`, usata da `act_tick` e dall'etichetta della barra in alto,
+sono tutte sul muro sud; `pl_tile` in `src/game/bar.asm`, usata da `act_tick` e dall'etichetta della riga del bersaglio,
 solo nel villaggio). Nessun arredo (lampioni, cespugli, fiori, bancarelle, pozzi, alberi) entro 3 caselle (Chebyshev)
 dalle porte `S L H`: lo controlla `tools/build/gen_maps.py` (errore di build).
 
@@ -209,7 +209,7 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   18 righe sopra l'NPC, **ondeggia** di 2 righe e passa al bianco ogni 16 fotogrammi: **giallo** = una quest da dare; una quest da
   ritirare (22/11, committente: il verde sul prato non si vedeva) ha un **"?" giallo** (`QMARK` in `npc_gfx.py`, sprite a
   `$8E40` in fondo alla zona 5, puntatore `$39`; `npc_q` = $97, bit 4) (`q_marks` in `npc_q`, `npc_offer`, `npc_bmark`). Usa gli sprite 1 e 2 (il 2 solo se l'effetto del colpo non c'è):
-  al massimo due "!" sullo schermo; non sopra la riga 80 (barra in alto).
+  al massimo due "!" sullo schermo; non sopra la riga 35 (`NPC_BMIN`; fino al 23/11 80, sotto la barra di sprite in alto).
 - **Vaganti** (22/11): non danno più quest (le quest segnaposto del concept del 17-18/11 sono state tolte; le ripetibili
   verranno dopo, D18).
 - **Vaganti** (fino a 16 per villaggio, 17/11): ogni villaggio ha i suoi **settori** (`SECTORS` in `tools/build/villages.py`:
@@ -255,7 +255,7 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
 
 L'armaiolo non c'è più: armature e scudi li vende e li compra il **fabbro** (già dall'08/11). Tolti: il negozio
 (`balance.yaml shops.armorer`, `shop_*` di `db.asm`: ora 2 negozi, `shop_id` 0 fabbro, 1 alchimista), il nome e l'icona del
-titolo (`sn_armor`, `shop_ic`), l'etichetta `armorer` della barra in alto (`ls_armor`; gli id delle etichette dopo il 9 sono
+titolo (`sn_armor`, `shop_ic`), l'etichetta `armorer` della riga del bersaglio (`ls_armor`; gli id delle etichette dopo il 9 sono
 scesi di uno), l'icona sulla minimappa (`mi_ic`: 3 icone, `MI_N`), il tile della porta `DARMOR` e quello dell'insegna `SIGNA`
 (l'insegna dell'alchimista `SIGNL` è passata nel posto 19), la variante `TESTUI=16`, lo screenshot `armaiolo` e la figura del
 manuale (ora l'alchimista). Il glifo dello scudo (`CH_SHLD`, 35) resta: è l'icona della categoria scudi. Nello stesso giorno

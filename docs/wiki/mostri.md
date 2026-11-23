@@ -84,7 +84,7 @@ Piani 1–19: un mostro in più al centro della stanza delle scale giù, **varia
 fra quelle del piano (con la stessa regola del piano minimo − 1; se la famiglia estratta è troppo presto, il
 boss è un fallen warchief). È il "boss con nome": nome = uno di 8 nomi + uno di 8 epiteti (es. *Duriel the Burning*),
 scelti da un hash del seed e del piano (`boss_name_idx`). Rispetto alla variante: vita × 2,5, CA + 2, ATT + 2,
-esperienza × 4, **immune al blocco da colpo**; lampeggia in bianco; la barra in alto mostra nome e vita (quando
+esperienza × 4, **immune al blocco da colpo**; lampeggia in bianco; la riga del bersaglio mostra nome e vita (quando
 non segue un altro mostro: la barra va all'ultimo mostro colpito, [Interfaccia](interfaccia.md)). Alla
 morte lascia una chiave e un tesoro con 4 oggetti a livello bottino + 3 ([Bottino](bottino.md)).
 

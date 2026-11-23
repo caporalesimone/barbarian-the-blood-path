@@ -78,7 +78,7 @@ flowchart TD
     HP -->|no| ST["Smash: stordito 25 fotogrammi (anche i boss)<br/>altrimenti blocco da colpo 5 fotogrammi<br/>(non ai boss con nome né al boss finale)"]
 ```
 
-Ogni colpo sveglia il mostro e lo rende il bersaglio della barra in alto.
+Ogni colpo sveglia il mostro e lo rende il bersaglio della riga del bersaglio.
 
 ### Abilità (`perform_skill1`)
 

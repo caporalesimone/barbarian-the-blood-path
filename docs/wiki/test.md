@@ -127,7 +127,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 | ID | Test |
 |---|---|
-| `BUILD-01` | memory margin positive (code below $8720 >= 128 B, total >= 256 B) |
+| `BUILD-01` | memory margin positive (code below $86F8, HUD row 19, >= 128 B, total >= 256 B) |
 | `BUILD-02` | SAVE_VER in the PRG = save_version in version.yaml |
 | `BUILD-03` | "version x.y" centred in the loader, start menu and game menu |
 | `BUILD-04` | manual: images and placeholders of the source |

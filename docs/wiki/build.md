@@ -129,7 +129,7 @@ flowchart TD
 - **Ordine obbligato**: GAME per primo (le sue etichette `out/work/game.lbl` servono a LOBBY e MENU, che lo chiamano);
   `pack.py` dopo GAME (START deve sapere dove caricare il flusso compresso: `out/work/pack.inc`); START dopo (conosce anche la
   dimensione di GAME + LOBBY + GFX0 per dosare la barra, `OTHERS`).
-- **Controlli in assemblaggio**: margine del codice (`.cerror`, avviso sotto 1 KB sotto `$8720`), zone del MENU, cache
+- **Controlli in assemblaggio**: margine del codice (`.cerror`, avviso sotto 1 KB sotto `$86F8`, dal 23/11), zone del MENU, cache
   del tema, pagina zero, generatore sotto l'I/O. La build stampa i margini:
   `margine codice: N B (di cui M prima del plugin di Krill)` e `menu: zona 1 ... libera N B`.
 - **Passi lenti in cache** (`tools/build/cache_run.py`): girano solo se cambiano i loro ingressi (storia `gen_lore`, manuale
@@ -198,7 +198,7 @@ assembla con il listato (`-L` in `tools/build/asm.sh`): senza, la sua mappa cono
 
 **Annotazioni nei sorgenti (15/11, Lab64 1.5)**: cio' che l'analisi statica non vede lo dicono commenti nei sorgenti, vicino alle
 costanti che definiscono le zone (sintassi ed esempi: `docs/memory-maps.md` di Lab64):
-- `;@map` = zona scritta solo con puntatori o copie, conta come usata: righe dell'HUD, puntatori e sprite di `$8720-$8FFF`, banco VIC
+- `;@map` = zona scritta solo con puntatori o copie, conta come usata: righe dell'HUD, puntatori e sprite di `$86F8-$8FFF`, banco VIC
   `$A000-$BFFF` e `MAP` (`src/game.asm`), `SND_LBUF`/`SND_FBUF` (`src/game/music.asm`, coppie `..._end`), `STASH`
   (`src/game/levels.asm`), slot dei piani `LVRAM` e buffer del plugin di save (`src/game/rel.asm`), `MRT`; `free-after=start` per
   `gfx_data..$8720` e `$87E8-$87F7` (grafica fissa del PRG, dato morto dopo `copy_gfx`); `scenario=` per le zone usate solo in

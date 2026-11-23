@@ -3,7 +3,7 @@
 # Versione del software: mostrata nel gioco (menu iniziale e RUN/STOP) e nel nome del d64 (blood_path_vX.Y.d64).
 # Cresce da sola (numero minore) a ogni build con cambiamenti ai sorgenti (tools/build/bump_version.py, chiamato da build.sh);
 # per una nuova versione maggiore modificala a mano.
-version: "1.599"
+version: "1.600"
 
 # Impronta dei sorgenti dell'ultima build (tools/build/bump_version.py): non si modifica a mano.
 source_hash: "c1576c99af9c1740b42a269ce1fa9667242f196f"
@@ -15,7 +15,6 @@ save_version: 0xce
 
 # Versioni delle build dei branch (tools/build/verinfo.py): tag.n, non bruciano i numeri di main.
 branch_versions:
-  proto-barra-sotto: "proto.11"
   liste-menu: "liste.16"
   villaggi: "villaggi.25"
   menu-c: "menu.2"
