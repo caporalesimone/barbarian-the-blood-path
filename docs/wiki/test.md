@@ -159,13 +159,14 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (3)
+### sanity (4)
 
 | ID | Test |
 |---|---|
 | `QREW-10` | Q15: sk_qs from quests.yaml (0, 2, 4, 8, 6, 9); level 3 with step 1 handed in: no Whirlwind; level 9 with step 5: no Rage (buff_act), with step 6 Rage starts |
 | `QREW-11` | step 2 reached, handed in to father osric (level 3): q_step 2, 'the skill whirlwind' in the reward, then J chooses Whirlwind |
 | `QREW-12` | chapter 1: the boss dying does not unlock chapter 2 (chap_won, c_unl 1); step 3 handed in to father osric: c_unl 2, purse step 1 (550) |
+| `QREW-13` | step 11 (the last cart, 'a magic item'): village 4, handed in to the penitent: q_step 11, +1000 gold (purse permitting), a new weapon, armor, shield or ring in the pack with a prefix or a suffix |
 
 ### regression (304)
 

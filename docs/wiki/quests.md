@@ -206,7 +206,7 @@ schermo, un fotogramma di ~1,7 s; test `QGIV-19`); per questo il modulo usa `ui_
    quell'NPC, o accessoria raggiunta, o accessoria con obiettivo G presa ("give 300 gold?", solo l'oro addosso). Se il premio
    non ha posto (zaino per unico e oggetto, cintura per le pozioni: Q12) "no room in your pack or belt" e la quest resta.
    Premio (4 B per quest, `qgiv_rw.inc`): oro, unico (base `un_base`, suffisso $80+u), oggetto magico della base (`af_gen` con
-   `af_m` = 1, livello 5 × capitolo), pozioni, gettone respec, gradino del borsello (`q_flag` bit 4-7). Poi `q_step` + 1
+   `af_m` = 1, livello 5 × capitolo; `$ff` = qualsiasi, vedi sotto), pozioni, gettone respec, gradino del borsello (`q_flag` bit 4-7). Poi `q_step` + 1
    (catena) o il bit in `q_sdone` (accessoria) e il testo "done" con la riga del premio.
 2. **Offerta** (`q_offer`, `MENU_QOFFER`): il passo `q_step` + 1 se quell'NPC lo dà, oppure un'accessoria del capitolo (dopo il
    primo passo della catena del capitolo, non fatta, non presa, con la precedente fatta se serve, con un posto libero in
@@ -231,7 +231,9 @@ le quest dei vaganti) è stato tolto.
 (`sk_qs`, scritta da `gen_qdata.py` dai premi `skill:` della catena: Whirlwind 2, Battle Cry 4, Rage 6, Smash 8, Frenzy 9); la
 usano `sel_skill`, `buff_act` e l'HUD. **Sblocco del capitolo alla consegna**: in `qg_give`, consegnato il passo 3c con *c* <=
 `QGATE_CH` (i capitoli con il cancello D4, che garantisce il passo preso prima del boss) → `c_unl` = *c*+1; `chap_won` non
-sblocca più quei capitoli. Test: `QGIV-10`..`19`, `QREW-10`..`12`. **Da fare**: cintura a 8, oggetto "qualsiasi" (passo 11),
+sblocca più quei capitoli. Test: `QGIV-10`..`19`, `QREW-10`..`12`. (23/11) **Oggetto "qualsiasi"** (`$ff`, passo 11): categoria a caso fra arma,
+armatura, scudo e anello, la base migliore fino al livello oggetto 5 × capitolo (`lt_scan`, come i bauli), poi magico come
+l'oggetto di una base (`af_gen`, `af_m` = 1); test `QREW-13`. **Da fare**: cintura a 8,
 cancello D4 nei capitoli 2-4 (`QGATE_CH`: con il cancello anche lo sblocco alla consegna), ripetibili (D18).
 
 ---

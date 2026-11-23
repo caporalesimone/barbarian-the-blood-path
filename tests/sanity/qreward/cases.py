@@ -69,3 +69,19 @@ def qr_unlock(ctx):
     check(g.b(L["q_step"]) == 3, "q_step %d, expected 3" % g.b(L["q_step"]))
     check(g.b(L["c_unl"]) == 2, "c_unl %d after step 3, expected 2" % g.b(L["c_unl"]))
     check(g.b(L["q_flag"]) >> 4 == 1, "purse step %d, expected 1" % (g.b(L["q_flag"]) >> 4))
+
+
+@test("QREW-13", "step 11 (the last cart, 'a magic item'): village 4, handed in to the penitent: q_step 11, +1000 gold (purse permitting), a new weapon, armor, shield or ring in the pack with a prefix or a suffix")
+def qr_any(ctx):
+    g = ctx["g"]; L = g.L
+    g.poke(L["c_chap"], 4); g.poke(L["c_unl"], 4)
+    g.call_keep(L["change_level"], regs="a=00,x=04", tmax=150); g.frames(3)
+    g.poke(L["q_step"], 10); g.poke(L["q_flag"], 3); g.poke(L["c_pack"], *([0] * 8))
+    t = talk(g, 0); close(g)
+    check(g.b(L["q_step"]) == 11, "q_step %d, expected 11 (%r)" % (g.b(L["q_step"]), t[400:480]))
+    p = g.mem(L["c_pack"], 8)
+    i = next((k for k in range(8) if p[k]), None)
+    check(i is not None, "nothing in the pack")
+    cat = g.b(L["itcat"] + p[i])
+    check(L["CAT_WEAPON"] <= cat <= L["CAT_RING"], "category %d of item %d" % (cat, p[i]))
+    check(g.b(L["c_packb"] + i) or g.b(L["c_packs"] + i), "item %d not magic (prefix %d, suffix %d)" % (p[i], g.b(L["c_packb"] + i), g.b(L["c_packs"] + i)))

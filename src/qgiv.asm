@@ -8,8 +8,8 @@
 ;  3. Altrimenti "nothing for you now".
 ;  Testi: file QTXc del capitolo (tools/build/gen_qdata.py, a 5 bit) letto a QTX ($EC00, come CSHEET: cs_ok si azzera).
 ;  Premi: qg_rw (out/work/qgiv_rw.inc), 4 byte per quest.
-;  Da fare: abilita' sbloccate dalla catena (Q15), borsello variabile (oggi solo il gradino in q_flag bit 4-7), cintura a 8
-;  (TODO F1), oggetto magico "qualsiasi" ($ff, passo 11), sblocco del capitolo alla consegna dei passi 3, 6, 9.
+;  (23/11) Fatti: abilita' dalla catena (Q15, sk_ok in GAME), sblocco del capitolo alla consegna del passo 3c (capitoli con
+;  il cancello, QGATE_CH), oggetto magico "qualsiasi" ($ff, passo 11). Da fare: cintura a 8 (TODO F1).
 ; ===================================================================
         .include "../out/work/game.lbl"
         .include "macros.inc"
@@ -722,9 +722,18 @@ _ok     lda qg_rw               ; oro / 10 -> x 10
         jsr qg_item
 +       lda qg_rw+2             ; oggetto magico della base (livello: boss del capitolo)
         beq _pt
-        cmp #$ff
-        beq _pt                 ; (da fare: "qualsiasi", passo 11)
-        tay
+        cmp #$ff                ; (23/11) "qualsiasi" (passo 11): arma, armatura, scudo o anello a caso, la base migliore
+        bne _ib                 ; fino al livello oggetto 5 x capitolo (lt_scan, come i bauli), poi magico come le altre
+        lda #CAT_RING
+        jsr rndrange
+        sta gi_cat              ; categoria - 1
+        lda c_chap
+        asl
+        asl
+        adc c_chap
+        sta gi_l
+        jsr lt_scan
+_ib     tay
         lda c_chap
         asl
         asl
