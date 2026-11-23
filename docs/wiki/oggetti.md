@@ -250,7 +250,8 @@ Acquisto = `it_cost` (dal 21/11 sera: `itprice` + `price_add` degli affissi, con
 il tetto del borsello** (22/11, committente: **300 all'inizio, +250 a ogni boss di capitolo** consegnato con la catena, fino a
 1300 = `GOLD_MAX`; `player.purse` in `data/balance.yaml`, `gold_cap`; prima 10 000 fisso dal 07/11 sera): oro raccolto (mostri, bauli, bauli epici)
 oltre il tetto **si perde** (`add_gold16`); la **vendita** che lo supererebbe **non fa nulla**
-(`purse_room`, l'oggetto resta nello zaino; dal 10/11 senza messaggio, decisione del committente: caso rarissimo). Oro nel baule della locanda in decine (655 350, dal 10/11).
+(`purse_room`, l'oggetto resta nello zaino; dal 10/11 al 23/11 senza messaggio, poi "your purse is full." nel riquadro dei
+messaggi: con il borsello iniziale di 300 il caso non è più raro e il rifiuto muto sembrava un difetto, decisione del committente del 23/11; test `SHOP-SELL-10`). Oro nel baule della locanda in decine (655 350, dal 10/11).
 **Pagamento nei negozi (10/11, decisione del committente)**: acquisto e riparazione si pagano con l'**oro totale**
 (addosso + baule della locanda): prima tutto l'oro addosso, il resto dal baule a decine arrotondate per eccesso, e le
 unità che avanzano tornano addosso (`gold_need` / `gold_pay` in `ui.asm`; es. 7 addosso, prezzo 15: una decina dal

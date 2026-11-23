@@ -293,7 +293,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `GOLD-CAP-11` | (22/11, owner) purse in steps (q_flag bits 4-7): 300, then +250 for each chapter boss (balance.yaml player.purse); step over the last: the last; the sale over the cap of the step does nothing (purse_room) |
 | `SHOP-PAY-10` | payment: carried gold first, then the chest in tens, change back on the hero (gold_need/gold_pay) |
 | `SHOP-BUY-10` | buy: 3 prices x different gold x pack full/empty (gold, chest, pack) |
-| `SHOP-SELL-10` | sell: price >> SELL_SHIFT, GOLD_MAX cap (no sale), category not bought, empty entry |
+| `SHOP-SELL-10` | sell: price >> SELL_SHIFT, GOLD_MAX cap (no sale, 23/11: message 'your purse is full.'), category not bought, empty entry |
 | `SHOP-FIX-10` | smith repair (shop_repair, confirmation simulated): sword 200, durability 10/100, 1000 gold -> 950, 99/99 |
 | `HELP-Z-10` | out/work/help.zx0 unpacks to out/work/help.prg byte by byte; the packed file is under 55% of the blocks |
 | `HELP-Z-11` | the disk holds the packed HELP (file 'help' equals out/work/helpz.prg) |

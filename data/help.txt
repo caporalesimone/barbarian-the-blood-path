@@ -260,6 +260,8 @@
    [fire] on yours	sell
    [r]	repair (smith)
    {worn gear: take it off to sell.}
+   {purse full: no sale. put ¤ in}
+   {the inn chest first.}
    {a potion: choose its belt slot.}
 
  <inn chest> {(every inn): 24 items}

@@ -1,5 +1,5 @@
 """Gold (10/11, sanity of the gold-in-tens feature, moved to regression on 11/11): inn chest gold in tens, payment with the total gold, no withdrawal, a sale
-over the purse cap does nothing. Only GAME and the module MENU (its zones, out/work/menu_zK.prg; 11/11) are loaded in VICE,
+over the purse cap does nothing but say 'your purse is full.' (23/11). Only GAME and the module MENU (its zones, out/work/menu_zK.prg; 11/11) are loaded in VICE,
 without starting the game, and the real routines are called (st_gold, add_gold16, gold_need/gold_pay, shop_buy/shop_sell
 with a simulated confirmation) with the state written to memory, $01 = $35 as in the game (zone 2 and the CORE segment
 are under the KERNAL): one session, ~2 s."""
@@ -162,7 +162,7 @@ def shop_buy(ctx):
     check(not bad, "; ".join(bad[:4]) + (" (+%d)" % (len(bad) - 4) if len(bad) > 4 else ""))
 
 
-@test("SHOP-SELL-10", "sell: price >> SELL_SHIFT, GOLD_MAX cap (no sale), category not bought, empty entry")
+@test("SHOP-SELL-10", "sell: price >> SELL_SHIFT, GOLD_MAX cap (no sale, 23/11: message 'your purse is full.'), category not bought, empty entry")
 def shop_sell(ctx):
     bad = []
     for p, it in shop_ctx(ctx):
@@ -171,11 +171,17 @@ def shop_sell(ctx):
                             (GOLD_MAX, 65535, 0x7e), (500, 20, 0x00)]:
             if g < 0:                                           # (22/11) sale over the whole purse (cap 1500): no "just below"
                 continue
+            v, L = ctx["v"], ctx["L"]
+            v.fill(L["SCR_A"] + 23 * 40, L["SCR_A"] + 23 * 40 + 39, 0x20)
             gg, ss, pk = shop_call(ctx, "shop_sell", g, sg, [it], 0, mask, 0)
             sold = mask != 0 and g + half <= GOLD_MAX
             exp = (g + half if sold else g, sg, 0 if sold else 1)
             if (gg, ss, pk.count(it)) != exp:
                 bad.append("price %d, %d/%d mask %02x -> %s (expected %s)" % (p, g, sg, mask, (gg, ss, pk.count(it)), exp))
+            row = "".join(chr(c + 96) if 1 <= c <= 26 else chr(c) if 32 <= c < 64 else " " for c in v.mem(L["SCR_A"] + 23 * 40, 40))
+            full = mask != 0 and g + half > GOLD_MAX                # (23/11, owner) refused for the purse: with its message
+            if full != ("your purse is full." in row):
+                bad.append("price %d, %d/%d: message row %r (purse full: %s)" % (p, g, sg, row.strip(), full))
     gg, ss, pk = shop_call(ctx, "shop_sell", 777, 5, [], 3, 0x7e, 0)
     if (gg, ss) != (777, 5): bad.append("empty entry: %d/%d" % (gg, ss))
     check(not bad, "; ".join(bad))

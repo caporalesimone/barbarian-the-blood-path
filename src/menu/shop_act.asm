@@ -135,8 +135,12 @@ _ok     jsr sh_cost             ; prezzo con gli affissi (fase 3) >> SELL_SHIFT 
         sta shp_price
         lda tmp3
         sta shp_price+1
-        jsr purse_room          ; tetto GOLD_MAX addosso: oltre non si vende (07/11 sera)
-        bcs _r
+        jsr purse_room          ; tetto del borsello addosso: oltre non si vende (07/11 sera)
+        bcc +
+        jsr msg23               ; (23/11, committente) con il messaggio: dal 10/11 il rifiuto era muto e sembrava un difetto
+        #msg "your purse is full."
+        rts
++
         lda #1
         jsr shop_ask
         bcc _r

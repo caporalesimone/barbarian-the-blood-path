@@ -73,8 +73,8 @@ _ng     jmp no_gold
 _r      rts
 
 
-; C=0 se c_gold + tmp2:3 <= tetto del borsello (gold_cap, 22/11: a gradini); altrimenti C=1, senza messaggio (10/11: la
-; vendita oltre il tetto non fa nulla)
+; C=0 se c_gold + tmp2:3 <= tetto del borsello (gold_cap, 22/11: a gradini); altrimenti C=1, senza messaggio (il messaggio
+; "your purse is full." lo scrive shop_sell, 23/11)
 purse_room:
         clc
         lda c_gold
