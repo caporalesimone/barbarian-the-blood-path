@@ -86,6 +86,18 @@ def main():
         f.write("fix_nm  .byte " + ", ".join(str(b) for n in names for b in text(n) + b"\0") + "\n")
         f.write("fix_lo  .byte " + ", ".join("<(fix_nm+%d)" % x for x in offs) + "\n")
         f.write("fix_hi  .byte " + ", ".join(">(fix_nm+%d)" % x for x in offs) + "\n")
+        # (23/11, committente) nome del villaggio di ogni capitolo (villages.py NAME) nella minimappa del villaggio: vil_lo/vil_hi
+        # indicizzati da c_chap - 1. Non nell'intestazione TWNc: il file del villaggio 1 e' gia' a TOWN_MAX
+        vn = [V.VILLAGES[c]["name"].lower() for c in sorted(V.VILLAGES)]
+        for n in vn:
+            assert 0 < len(n) <= 21 and all(ch in "abcdefghijklmnopqrstuvwxyz '" for ch in n), "nome del villaggio per la minimappa (max 21): %r" % n
+        vo, o = [], 0
+        for n in vn:
+            vo.append(o)
+            o += len(n) + 1
+        f.write("vil_nm  .byte " + ", ".join(str(b) for n in vn for b in text(n) + b"\0") + "\n")
+        f.write("vil_lo  .byte " + ", ".join("<(vil_nm+%d)" % x for x in vo) + "\n")
+        f.write("vil_hi  .byte " + ", ".join(">(vil_nm+%d)" % x for x in vo) + "\n")
     print("villaggi: intestazione + RLE in byte (max %d): %s" % (TOWN_MAX, ", ".join(msg)))
     print("settori NPC (al massimo in una finestra di gioco; sprite liberi: 5): " + ", ".join("%d: %d (%d)" % (c, n, w) for c, (n, w) in sorted(SEC_REPORT.items())))
     print("NPC fissi (nome, casella, settore, distanza dal punto): " + "; ".join("%d: %s" % (c, ", ".join("%s (%d,%d) s%d d%d" % e for e in v))

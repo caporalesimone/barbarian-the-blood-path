@@ -2074,8 +2074,13 @@ _f      sta nbuf,x
         sta bn_i
         lda cur_level
         bne _fl
-        lda #<mm_ttown
-        ldx #>mm_ttown
+        ldx c_chap              ; (23/11, committente) nome del villaggio del capitolo (vil_lo/vil_hi, town_places.inc)
+        dex
+        lda vil_lo,x
+        pha
+        lda vil_hi,x
+        tax
+        pla
         jsr bn_put
         jmp _bld
 _fl     lda #<mm_chap               ; (12/11, committente) "chapter 3 level 4" per intero (17 caratteri)
@@ -2182,7 +2187,6 @@ _tw     cli
         rts
 mm_sx   .byte 100, 124, 148, 172, 196, 220, 244
 mm_ring .byte $38, $44, $82, $92, $82, $44, $38
-mm_ttown .text "town", 0
 mm_chap  .text "chapter ", 0             ; (12/11) "chapter 3 level 4"
 mm_lev   .text " level ", 0
 
