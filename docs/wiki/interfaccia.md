@@ -121,8 +121,8 @@ negozio o della locanda: `pl_tile`).
 |---|---|
 | bersaglio (20) | (23/11) nome e vita del mostro bersaglio (viola), etichetta del luogo / messaggio delle quest, o per qualche istante il nome dell'abilità appena scelta (giallo, `sk_t`): sopra |
 | regolo (21) | vuota (spazio nero) con il regolo nell'ultima linea di pixel |
-| 22 | colonne 1–18: **barra rossa della vita** (solo barra, niente numeri: 23/11, richiesta del committente; 144 passi, `HB_BARW`); 19–21: icone d'usura; 23, 25, 27, 29: **pozioni 1–4**; 31: **pergamena**; 33, 35, 37: abilità **H J K** |
-| 23 | colonne 1–18: **barra gialla dell'esperienza** (frazione del livello, 16 bit bassi; piena al livello massimo); 20: freccia verde del livello (punti da spendere); 23–29: pozioni 5–8 (trattini: la cintura ne ha 4); 33, 35, 37: abilità **L U O** |
+| 22 | colonne 1–17 (la 18 resta vuota): **barra rossa della vita** (solo barra, niente numeri: 23/11, richiesta del committente; 136 passi, `HB_BARW`); 19–21: icone d'usura; 23, 25, 27, 29: **pozioni 1–4**; 31: **pergamena**; 33, 35, 37: abilità **H J K** |
+| 23 | colonne 1–17 (la 18 resta vuota): **barra gialla dell'esperienza** (frazione del livello, 16 bit bassi; piena al livello massimo); 20: freccia verde del livello (punti da spendere); 23–29: pozioni 5–8 (trattini: la cintura ne ha 4); 33, 35, 37: abilità **L U O** |
 
 HUD compatto (23/11, decisione del committente): via la riga "LV" (livello, chiavi, capitolo/piano) e i numeri di HP e XP; il campo
 di gioco guadagna una riga (fino alla raster 207). Il livello è nella scheda del personaggio, le chiavi nell'inventario ("key n/10"),
@@ -131,7 +131,7 @@ bianco pronta, ciano in ricarica; una lettera compare **solo se l'abilità è di
 punto blu per una tasca vuota.
 
 **Avvisi** (`hud_warn`, chiamata da `bs_body` una volta ogni 16 fotogrammi, 06/11 pomeriggio):
-- **vita bassa** (`c_hp` ≤ `hpmax` / 4): le celle piene della barra HP (riga 22, colonne 1–18, color RAM `$DB71`…; 23/11)
+- **vita bassa** (`c_hp` ≤ `hpmax` / 4): le celle piene della barra HP (riga 22, colonne 1–17, color RAM `$DB71`…; 23/11)
   alternano rosso (2) e giallo (7) a ogni chiamata (bit 4 di `frame`); al passaggio sotto la soglia un suono
   (`SFX_LOWHP`), una volta (`hw_low`). Quando la vita risale la riga HP si ridisegna (`hud_pend` bit 0);
 - **oggetto che si sta per rompere** (`hw_icons`): per arma, armatura e scudo indossati che si usurano, se la

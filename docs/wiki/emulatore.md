@@ -144,7 +144,7 @@ flowchart LR
 |---|---|---|
 | `EMU-10` | START (con Krill), GAME e LOBBY in RAM uguali ai PRG di `out/`, bordo non rosso | ~23 s di orologio (warp per i caricamenti) |
 | `EMU-11` | creazione dal menu con joystick e tastiera, salvataggio sul 1541-II emulato, villaggio: livello 0, PV > 0, oro 100, nome in RAM = «black thorne» | ~28 s |
-| `EMU-12` | codifica `hud` letta da `out/work/gfx_consts.inc` (`loadEncoding`); dal 23/11 l'HUD non ha più testo: le righe 22 e 23 (colonne 1-18) della matrice `$8400` sono glifi delle barre (`G_BAR0`..`G_BAR8`) e la barra HP non è vuota | < 1 s |
+| `EMU-12` | codifica `hud` letta da `out/work/gfx_consts.inc` (`loadEncoding`); dal 23/11 l'HUD non ha più testo: le righe 22 e 23 (colonne 1-17; la 18 vuota) della matrice `$8400` sono glifi delle barre (`G_BAR0`..`G_BAR8`) e la barra HP non è vuota | < 1 s |
 | `EMU-13` | cammina alla porta dell'alchimista (tile `DALCH`, trovata nella mappa), compra la pergamena (qualunque sia l'ordine della scorta): oro −60, pergamena nello zaino | ~12 s |
 | `EMU-14` | cammina alle scale (`TSTAIRS`) ed entra: `cur_level` = 1, mostri presenti | ~25 s |
 | `EMU-15` | caccia un mostro, lo uccide, legge la pergamena (tasto 5), entra nel portale: villaggio, PV > 0 | ~18 s |

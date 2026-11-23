@@ -6,7 +6,7 @@
 version: "1.600"
 
 # Impronta dei sorgenti dell'ultima build (tools/build/bump_version.py): non si modifica a mano.
-source_hash: "90a3c4c7f96c616a705c84818eb2b8a714ae9eb8"
+source_hash: "aea776067152f6a75df33483eb9ee900f8ec3f95"
 
 # Versione del formato dei salvataggi (un byte, 1..255; in esadecimale 0x01..0xff).
 # Da cambiare a mano ogni volta che cambia il formato del personaggio o del livello salvato:
@@ -15,7 +15,7 @@ save_version: 0xce
 
 # Versioni delle build dei branch (tools/build/verinfo.py): tag.n, non bruciano i numeri di main.
 branch_versions:
-  hud-compatto: "hud.5"
+  hud-compatto: "hud.7"
   liste-menu: "liste.16"
   villaggi: "villaggi.25"
   menu-c: "menu.2"

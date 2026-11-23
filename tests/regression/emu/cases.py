@@ -93,9 +93,10 @@ def hud(ctx):
         if v.strip().isdigit(): G[k.strip()] = int(v)
     bars = range(G["G_BAR0"], G["G_BAR8"] + 1)
     scr = 0x8400                                      # SCR_H (src/game.asm)
-    for name, off in (("HP", 880), ("XP", 920)):      # columns 1..18 of rows 22 and 23
-        row = e.peek(scr + off + 1, 18)
-        check(all(c in bars for c in row), "%s bar: glyphs %s are not bar glyphs" % (name, list(row)))
+    for name, off in (("HP", 880), ("XP", 920)):      # columns 1..17 of rows 22 and 23
+        row = e.peek(scr + off + 1, 18)                  # (an even length: e.peek with 17 bytes gave other data)
+        check(all(c in bars for c in row[:17]), "%s bar: glyphs %s are not bar glyphs" % (name, list(row[:17])))
+        check(row[17] == G["G_BLANK"], "%s bar: column 18 must stay empty (glyph %d)" % (name, row[17]))
     hp = e.peek(scr + 881, 18)
     check(hp[0] != G["G_BAR0"], "HP bar empty with %d/%d HP" % (e.word("c_hp"), e.word("hpmax")))
 

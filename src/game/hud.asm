@@ -504,10 +504,10 @@ _x      rts
 
 ; (23/11, committente) HUD compatto, righe 20-23 dello schermo HUD:
 ;   20 riga del bersaglio (bt_row) · 21 vuota con il regolo · 22 vita · 23 esperienza
-;   riga 22: barra rossa della vita (colonne 1-18, 144 pixel) · avvisi degli oggetti (19-21) · pozioni 1-4 (23, 25, 27, 29) · pergamena (31) · H J K (33, 35, 37)
-;   riga 23: barra gialla dell'esperienza (1-18) · freccia verde del level up (20) · posti 5-8 (23-29, cintura da 8) · L U O
+;   riga 22: barra rossa della vita (colonne 1-17, 136 pixel; la 18 vuota) · avvisi degli oggetti (19-21) · pozioni 1-4 (23, 25, 27, 29) · pergamena (31) · H J K (33, 35, 37)
+;   riga 23: barra gialla dell'esperienza (1-17) · freccia verde del level up (20) · posti 5-8 (23-29, cintura da 8) · L U O
 ; Niente numeri, niente "LV", niente chiavi (nell'inventario) ne' capitolo e piano (minimappa e menu di gioco).
-HB_BARW  = 18                   ; celle delle barre
+HB_BARW  = 17                   ; celle delle barre (23/11: una in meno di 18, resta la colonna 18 vuota)
 HB_HP    = 80                   ; offset da HUD_ROW0: riga 22
 HB_XP    = 120                  ; riga 23
 HB_POT   = 23                   ; colonna del primo posto della cintura
@@ -622,14 +622,14 @@ _n      lda frame
 _sc     sta hc,x
         dex
         bpl _i
-        lda #HB_HP+HB_BARW+1
+        lda #HB_HP+HB_BARW+2    ; colonna 19
         ldx #3
         jmp hflush
 hw_gl   .byte G_WSWORD, G_WARMOR, G_WSHIELD
 
 ; ---- riga 23: barra dell'esperienza (frazione del livello) e freccia verde del level up
 hud_p1:
-        ldx #HB_BARW+3
+        ldx #HB_BARW+4
         jsr hb_clear
         lda c_lvl
         cmp #PL_MAXLVL
@@ -673,11 +673,11 @@ _bar    ldx #HB_BARW
         jsr pts_avail           ; (11/11) punti statistica da spendere: freccia verde in su (G_LVUP)
         beq +
         lda #G_LVUP
-        sta hb+HB_BARW+2
+        sta hb+HB_BARW+3
         lda #5                  ; verde (colore < 8: carattere hires)
-        sta hc+HB_BARW+2
+        sta hc+HB_BARW+3
 +       lda #HB_XP
-        ldx #HB_BARW+3
+        ldx #HB_BARW+4
         jmp hflush
 
 ; ---- riga 21 (regolo) e abilita' H J K / L U O (righe 22-23, colonne 33, 35, 37)
