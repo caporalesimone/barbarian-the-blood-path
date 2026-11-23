@@ -91,8 +91,8 @@ profiles:
 # Obiettivo (committente, 20/11): al livello del piano ~60% di vittorie con la cintura piena, +2 livelli 80-90%.
 bosses:
   skill: 0.5
-  slash_area: 0.4             # (23/11) Slash colpisce tutta la sua area: probabilita' che colpisca anche un altro mostro accanto
-                              # al bersaglio (boss ed evocati; arena: ~4,8 colpi in piu' a combattimento con l'Abate)
+  slash_area: 0.7             # (23/11) Slash colpisce tutta la sua area: probabilita' che colpisca anche un altro mostro accanto
+                              # al bersaglio (boss ed evocati); tarata sull'arena con l'Abate (boss_scripts.Abbot.adds_first = False)
   arrive: [5, 90]             # (23/11) fotogrammi fra la nascita di un evocato accanto al boss e il suo primo colpo (misurati in
                               # arena: mediana 46, 6..129; nel gioco deve raggiungere il PG). Simulatore: boss_scripts.spawn
   target: {level0: 0.60, level2: 0.85}

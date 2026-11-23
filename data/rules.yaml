@@ -111,7 +111,7 @@ xp_needed: auto
 # data/monsters/bestiary.tsv (tools/build/bestiary.py li rimette qui per gen_db e tools/simulators/: righe implemented = yes).
 boss: {hp_mult: 2.5, ac_add: 2, att_add: 2}   # boss con nome dei piani 1..floors-1 (variante forte)
 chapter_bosses:               # (22/11, D8/D16) boss dei capitoli: tipo (statistiche del tipo al piano, + boss) e vita FISSI
-  abbot: {floor: 5, type: skeleton_king, hp: 100}      # sim_builds.py --fit-chapter abbot (obiettivo bosses.target): 68 il 22/11, 100 il 23/11 (simulatore corretto con l'arena)
+  abbot: {floor: 5, type: skeleton_king, hp: 123}      # sim_builds.py --fit-chapter abbot (obiettivo bosses.target): 68 il 22/11, 123 il 23/11 (simulatore corretto con l'arena: 68% in arena al livello 5)
 final_boss_hp_mult: 1         # moltiplicatore della vita del boss finale (la scheda e' gia' tarata)
 final_summons: {waves: 3, per_wave: 2, max_alive: 2, delay: 0, floor: 20, types: [fallen, skeleton, zombie, demon]}   # ondata (2 mostri, subito) al 75/50/25% della vita se i vivi (boss compreso) sono <= max_alive; statistiche del piano 20 (06/11)
 

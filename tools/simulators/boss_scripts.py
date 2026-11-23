@@ -96,14 +96,18 @@ class Base:
 
     def slash_area(self, alive, tgt):
         """(23/11) Slash hits every monster in its area (hit_area): with summons next to the boss, each other monster is also hit
-        with probability AREA (measured in the arena: ~1.2 monsters per Slash while a summon lives)"""
+        with probability AREA (fitted on the arena, 23/11: fight length, boss swings and damage to the summons match)"""
         return [m for m in alive if m is not tgt and (m is self.b or getattr(m, "add", False)) and self.rng.random() < AREA]
 
     def pg_rate(self, t):
         return 1.0
 
+    adds_first = True           # the hero's Slash goes to the summons first (the weakest), else to the boss
+
     def target(self, alive):
         a = [m for m in alive if getattr(m, "add", False)]
+        if not self.adds_first and self.b is not None and self.b.alive:
+            return self.b
         return min(a, key=lambda m: m.hp) if a else alive[0]
 
     def regen(self, t, cond, every):
@@ -118,6 +122,7 @@ class Base:
 
 
 class Abbot(Base):
+    adds_first = False          # (23/11, arena) the skeletons are born next to the abbot: facing him, Slash takes them too (AREA)
     """The Hollow Abbot (chapter 1): game = 2 skeletons at 2/3 and 1/3 (pause 1 s), +1 life every 25 frames while one is
     alive. New: skeletons rise from the crypt at random places every 8 s (they walk to the hero); censer cloud every 6 s"""
     def start(self, ms):

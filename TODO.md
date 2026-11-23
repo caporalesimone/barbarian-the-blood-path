@@ -632,14 +632,14 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   2-4 con i 5 unici non dati da quest. (22/11, D8, D16) **Boss dei capitoli** con statistiche proprie e sala
   disegnata a mano (mappe come `FMAP`), mostri solo se evocati; **a fasi con meccaniche** (D16: evoca, cambia attacco, si cura;
   codice nella coda del tema, modello `boss_scripts.py`): proposta delle fasi prima del codice. (22/11, D17) Due unici nuovi per i boss del capitolo 1: fatti.
-  D16 approvato: le aggiunte `new` del 20/11 (`data/rules_next.yaml`), un commit per boss. **Abate fatto il 22/11** (Skeleton King, vita fissa 68, 100 dal 23/11, uno
+  D16 approvato: le aggiunte `new` del 20/11 (`data/rules_next.yaml`), un commit per boss. **Abate fatto il 22/11** (Skeleton King, vita fissa 68, 123 dal 23/11, uno
   scheletro per evocazione: [bestiario](docs/wiki/bestiario.md)); restano Mother Stitch, Varok, Lord of Ruin (stessa procedura:
   `rules.yaml chapter_bosses`, `sim_builds.py --fit-chapter`). **Arena**: (23/11) fa girare il codice del piano dei boss
   (`arena_ovl_*`, `ARENA-11`). **Abate in arena (23/11)**: con 68 punti vita
-  98/96/96% ai livelli 5/6/7 contro 60/77/85% del simulatore. Deciso (23/11, committente): correggere il simulatore. Fatto:
-  arrivo degli evocati (`arrive`), pausa dell'evocazione come stordimento, area di Slash (`slash_area`); Abate ritarato a **100**
-  punti vita (simulatore 60/74/80%, arena 87/93/91%). **Resta da chiarire** la differenza di ~25 punti al livello 5 (in arena lo
-  scontro dura ~10% meno e il boss attacca meno: 8,4 contro 10,6 attacchi a combattimento) prima di tarare Stitch. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
+  98/96/96% ai livelli 5/6/7 contro 60/77/85% del simulatore. Deciso (23/11, committente): correggere il simulatore e cercare la
+  causa. Fatto: arrivo degli evocati, pausa come stordimento, area di Slash, bersaglio del PG ([bestiario](docs/wiki/bestiario.md));
+  Abate a **123** punti vita (simulatore 59/74/81%, arena 68/81/84%). Prossimo: Mother Stitch, tarata con il simulatore e
+  verificata in arena (i suoi feticci: da controllare se il PG li colpisce prima, come oggi nel simulatore). (22/11, D11) **Generatore dei mostri**: con una quest di caccia
   attiva il mostro richiesto nasce sempre nel piano.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 

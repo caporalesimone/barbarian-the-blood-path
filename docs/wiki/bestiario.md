@@ -156,15 +156,16 @@ resta. Taratura (`sim_builds.py --fit-chapter abbot`, PG di riferimento di oggi,
 nube contano poco nel simulatore, dove il combattimento dura meno di 12 s (in gioco il PG si muove: da provare a mano).
 Test: `OVP-11`, `BOSS1-12`.
 
-**(23/11) Verifica in arena e nuova taratura: `CB1_HP` = 100.** L'arena fa girare il codice del piano ([dungeon](dungeon.md)):
-con 68 punti vita il PG di riferimento vinceva il **98/96/96%** ai livelli 5/6/7, contro 60/77/85% del simulatore. Tre
-differenze misurate in arena e portate nel simulatore (`boss_scripts.py`, `data/rules_next.yaml bosses`): (1) gli evocati
-nascono accanto al boss e colpiscono la prima volta dopo 5–90 fotogrammi (`arrive`, mediana misurata 46); (2) la pausa
-dell'evocazione è uno **stordimento**: la ricarica dell'attacco del boss si ferma (`stun_for`, come `mstun` nel gioco);
-(3) **Slash colpisce tutta la sua area**: con un evocato accanto al bersaglio lo prende anche lui il 40% delle volte
-(`slash_area`). Con il simulatore corretto: 86/95/95% a 68 punti vita; ritaratura **100 punti vita** → simulatore
-**60/74/80%**, arena **87/93/91%** (100 combattimenti per livello). **Resta una differenza** di ~25 punti al livello 5 (in arena
-il combattimento dura ~10% meno e il boss attacca meno volte): da chiarire (TODO H1).
+**(23/11) Verifica in arena e nuova taratura: `CB1_HP` = 123.** L'arena fa girare il codice del piano ([dungeon](dungeon.md)):
+con 68 punti vita il PG di riferimento vinceva il **98/96/96%** ai livelli 5/6/7, contro 60/77/85% del simulatore. Confronto
+evento per evento (durata, attacchi del boss, danni per fonte, colpi del PG per bersaglio) e quattro correzioni del simulatore
+(`boss_scripts.py`, `data/rules_next.yaml bosses`): (1) gli evocati nascono accanto al boss e colpiscono la prima volta dopo
+5–90 fotogrammi (`arrive`, mediana misurata 46); (2) la pausa dell'evocazione è uno **stordimento**: la ricarica dell'attacco del
+boss si ferma (`stun_for`, come `mstun`); (3) **Slash colpisce tutta la sua area** (`slash_area` 0,7); (4) contro l'abate il PG
+colpisce **lui**, non prima gli scheletri (`Abbot.adds_first = False`): gli scheletri gli nascono accanto e Slash li prende con
+lui. Con queste il simulatore coincide con l'arena (100 punti vita: durata 473 contro 472 fotogrammi, 8,5 contro 8,4 attacchi
+del boss, 60 contro 58 punti vita persi). Ritaratura `--fit-chapter`: **123 punti vita** → simulatore **59/74/81%**, arena
+**68/81/84%** (150 combattimenti per livello, ±4 punti).
 
 ### Proposta del 20/11: più meccaniche e taratura con il simulatore (design, non nel codice)
 

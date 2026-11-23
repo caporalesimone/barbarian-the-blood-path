@@ -473,11 +473,12 @@ la frequenza dei tesori buoni (10% dei tiri a ≥ 0,8 T), l'oro dei bauli epici 
 - Pozioni: il simulatore beve sotto il 35% della vita con la cintura di riferimento; il colore reale dipende
   dal piano (zone).
 - Frenzy: il simulatore conta il colpo in più, non la corsa.
-- (23/11) **Boss con evocazioni, simulatore e arena**: tre differenze misurate in arena (codice vero) e corrette nel
+- (23/11) **Boss con evocazioni, simulatore e arena**: quattro differenze misurate in arena (codice vero) e corrette nel
   simulatore: gli evocati colpiscono dopo 5–90 fotogrammi (`bosses.arrive`), la pausa del boss che evoca ferma la sua ricarica
-  (stordimento), Slash prende anche un mostro accanto al bersaglio il 40% delle volte (`bosses.slash_area`). Resta: l'Abate
-  a 100 punti vita vince il 60% nel simulatore e l'87% in arena al livello 5 (scontri ~10% più brevi in arena, il boss attacca
-  ~20% meno volte); [bestiario](bestiario.md), TODO H1.
+  (stordimento), Slash prende anche un mostro accanto al bersaglio il 70% delle volte (`bosses.slash_area`), contro l'Abate il PG
+  colpisce il boss e non prima gli scheletri (`adds_first`). Dopo: Abate a 123 punti vita, simulatore 59% e arena 68% al
+  livello 5 (74/81 e 81/84 ai livelli 6/7); [bestiario](bestiario.md). L'arena azzera il contatore dei fotogrammi a ogni
+  combattimento (il codice del piano ne usa i bit): le serie si ripetono uguali.
 - (23/11) **Abilità e catena (Q15)**: nel gioco un'abilità vuole il livello e il passo della catena consegnato
   (`sk_ok`); il simulatore guarda solo il livello, cioè assume un giocatore che consegna i passi al piano previsto
   ([quests](quests.md) sezione 5). L'arena fa lo stesso (`q_step` = 12).

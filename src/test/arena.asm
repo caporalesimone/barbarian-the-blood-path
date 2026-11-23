@@ -129,6 +129,8 @@ ar_fight:
         txs
         jsr irq_off
         jsr clear_lvlblk
+        lda #0                  ; (23/11) contatore dei fotogrammi da 0: il codice del piano ne usa i bit (lampeggi, turibolo,
+        sta frame               ; rigenerazione), cosi' una serie si ripete uguale anche in un'altra sessione dell'arena
         lda cur_level
         sta lb_lvl
         ; PG
