@@ -313,7 +313,7 @@ q_vend2
 ; MENU_QTIN
 
 ; Fire accanto all'NPC fisso X (act_tick, npc_here): il modulo QGIV (file "qstg") a CORE_AT, eseguito (finisce con ui_exit).
-; Copre il segmento CORE (core_ok = 0: main_loop lo rilegge)
+; Copre il segmento CORE (core_ok = 0: ui_exit lo rilegge a schermo nero)
 q_talk:
         lda npc_d,x             ; nome k = bit 4-5
         lsr

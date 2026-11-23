@@ -1,6 +1,6 @@
 ; ===================================================================
 ;  qgiv.asm - (22/11, decisioni D3, D13, D18 del committente, docs/wiki/quests.md) modulo del villaggio delle quest: file
-;  "qstg", letto a CORE_AT ($E000: copre il segmento CORE, che main_loop rilegge dopo; per questo ui_begin0) da q_talk (src/game/qengine.asm) quando si preme Fire accanto a un NPC fisso (q_k = il suo
+;  "qstg", letto a CORE_AT ($E000: copre il segmento CORE, che ui_exit rilegge a schermo nero; per questo ui_begin0) da q_talk (src/game/qengine.asm) quando si preme Fire accanto a un NPC fisso (q_k = il suo
 ;  numero k di villages.FIXED), eseguito; finisce con ui_exit. Assemblato a parte con le etichette del gioco (game.lbl).
 ;  1. Consegna (q_tin, src/menu/q_who.asm): il premio (oro, unico, oggetto magico, pozioni, gettone, gradino del borsello), se c'e' posto (Q12:
 ;     altrimenti la quest resta da riscuotere); obiettivo G: "give N gold?" e l'oro addosso. Poi il testo "done" e il premio.

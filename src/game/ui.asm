@@ -571,7 +571,12 @@ _c      sta (cp),y
 ; uscita da una schermata della UI: palette, camera e finestra di gioco ridisegnate, HUD e sprite, i tasti che hanno
 ; chiuso la schermata non valgono nel gioco, IRQ riacceso
 ui_exit:
-        jsr pal_for_level
+        lda core_ok             ; (23/11) segmento CORE coperto (modulo QGIV, salvataggio): si rilegge qui, a schermo spento
+        bne +                   ; e prima di ridisegnare il gioco. Prima lo rileggeva main_loop con il gioco gia' a schermo:
+        lda #$0b                ; un fotogramma di ~1,7 s (1,69 M cicli in VICE) dopo il dialogo con un NPC o la pagina Q
+        sta VIC_CTRL1           ; (schermo nero; apply_frame lo riaccende)
+        jsr core_need
++       jsr pal_for_level
         jsr set_palette
         lda #0
         sta BORDER

@@ -199,6 +199,37 @@ def qg_minimap(ctx):
     check(not why and g.in_game(), "; ".join(why) or "RUN/STOP does not close the minimap")
 
 
+def back_with_core(g, close_fn):
+    """(23/11) close the QGIV screen with close_fn: at the first irq_on (ui_exit, the game is shown again) the CORE segment
+    must be in memory already (read at a black screen in ui_exit, not in main_loop with the game on screen: a ~1.7 s frame)"""
+    L = g.L
+    g.watch(until=(L["irq_on"],))
+    close_fn()
+    for _ in range(20):
+        if g.stopped is not None: break
+        g.frames(1)
+    stop, core = g.stopped, g.b(L["core_ok"])
+    g.unwatch()
+    for _ in range(40):
+        g.frames(5)
+        if g.in_game(): break
+    d = g.frames(30, joy=8)
+    return stop == L["irq_on"], core, max(d)
+
+
+@test("QGIV-19", "(23/11) back in the village from the QGIV module (talk to father osric, page Q): CORE read again before the game is shown (core_ok = 1 at irq_on of ui_exit), then no frame over 25000 cycles while walking")
+def qg_core_back(ctx):
+    g = ctx["g"]; L = g.L
+    talk(g, 1)
+    check(g.b(L["core_ok"]) == 0, "QGIV did not cover CORE (core_ok %d): the test no longer checks anything" % g.b(L["core_ok"]))
+    ok, core, mx = back_with_core(g, lambda: g.frames(1, fire=True))
+    check(ok and core == 1 and mx < 25000, "after the talk: irq_on reached %s, core_ok %d at irq_on, longest frame %d" % (ok, core, mx))
+    g.frames(1, keys={7: 0x40}); wait_screen(g)
+    ok, core, mx = back_with_core(g, lambda: g.frames(1, keys={7: 0x80}))
+    check(ok and core == 1 and mx < 25000, "after page Q: irq_on reached %s, core_ok %d at irq_on, longest frame %d" % (ok, core, mx))
+
+
+
 @test("QGIV-16", "page Q (key Q, module QGIV with q_k $ff): step 2 and the side a1.3 taken -> 2 rows with their titles; Fire on the first: its text and the goal; RUN/STOP back")
 def qg_page(ctx):
     g = ctx["g"]; L = g.L
@@ -234,3 +265,4 @@ def qg_page_dungeon(ctx):
     check(g.in_game() and g.b(L["cur_level"]) == 1, "not back on level 1")
     go_level(g, 2); g.frames(10)
     check(g.b(L["cur_level"]) == 2 and g.in_game(), "stairs to level 2 after the page")
+

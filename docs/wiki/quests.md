@@ -199,8 +199,9 @@ Test: `QENG-10`..`14`.
 
 ### 4.5 Modulo del villaggio `QGIV` (22/11, `src/qgiv.asm`)
 Fire accanto a un **NPC fisso** del villaggio (numero k di `villages.FIXED`: nel capitolo 1 0 hilde, 1 father osric, 2 grom, 3
-the gravedigger) → `q_talk` (GAME) legge il file **`qstg`** a `CORE_AT` (`$E000`: copre il segmento CORE, che `main_loop`
-rilegge dopo; per questo il modulo usa `ui_begin0`) e lo esegue. I vaganti restano quelli del concept (D18: ripetibili dopo).
+the gravedigger) → `q_talk` (GAME) legge il file **`qstg`** a `CORE_AT` (`$E000`: copre il segmento CORE, che `ui_exit`
+rilegge all'uscita a schermo nero, prima di ridisegnare il gioco (23/11: prima lo rileggeva `main_loop` con il gioco già a
+schermo, un fotogramma di ~1,7 s; test `QGIV-19`); per questo il modulo usa `ui_begin0`) e lo esegue. I vaganti restano quelli del concept (D18: ripetibili dopo).
 1. **Consegna** (`q_tin`, nel modulo MENU: `src/menu/q_who.asm`, `MENU_QTIN`): passo della catena raggiunto e ritirato da
    quell'NPC, o accessoria raggiunta, o accessoria con obiettivo G presa ("give 300 gold?", solo l'oro addosso). Se il premio
    non ha posto (zaino per unico e oggetto, cintura per le pozioni: Q12) "no room in your pack or belt" e la quest resta.
@@ -226,7 +227,7 @@ ne ricava il colore del "!" (`npc_bmark`, bianco quando è in alto). I vaganti d
 testo dell'offerta con il contatore vero. Anche nel sotterraneo (QTX copre la coda del tema, come la scheda C; i segni si
 rifanno solo nel villaggio). Il concept del 17-18/11 (`QST0`..`QST8`, `src/qpage.asm`, `gen_quests.py`, `data/quests.yaml`,
 le quest dei vaganti) è stato tolto.
-Test: `QGIV-10`..`17`. **Da fare**: abilità dalla catena
+Test: `QGIV-10`..`19`. **Da fare**: abilità dalla catena
 (Q15), cintura a 8, oggetto "qualsiasi" (passo 11), sblocco del capitolo alla consegna, cancello D4 nei capitoli 2-4
 (`QGATE_CH`), ripetibili (D18).
 
