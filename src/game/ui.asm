@@ -2077,9 +2077,9 @@ _f      sta nbuf,x
         lda #<mm_ttown
         ldx #>mm_ttown
         jsr bn_put
-        jmp _sd
-_fl     lda #<mm_chap               ; (12/11, committente) "chapter 3 level 4" per intero (17 caratteri); seed e
-        ldx #>mm_chap               ; coordinate del PG (debug) restano solo nella mappa del villaggio
+        jmp _bld
+_fl     lda #<mm_chap               ; (12/11, committente) "chapter 3 level 4" per intero (17 caratteri)
+        ldx #>mm_chap
         jsr bn_put
         lda cur_level
         jsr lv_grp
@@ -2091,20 +2091,8 @@ _fl     lda #<mm_chap               ; (12/11, committente) "chapter 3 level 4" p
         jsr bn_put
         lda tmp3
         jsr loc_num
-        jmp _bld                    ; (seed e coordinate non ci stanno: si vedono 21 caratteri, lo sprite 7 e' il marcatore)
-_sd     lda #9                  ; villaggio: "town anoano 18,33": seed, coordinate del PG (debug, 06/11)
-        sta bn_i
-        lda #<nb_chr
-        ldx #>nb_chr
-        jsr seed_out            ; (11/11, O10)
-        lda #16
-        sta bn_i
-        lda ptx
-        jsr loc_num
-        lda #$3a                ; ":" (separatore delle coordinate)
-        jsr nb_chr
-        lda pty
-        jsr loc_num
+        ; (23/11, committente) niente seed e coordinate del PG nella minimappa: le coordinate sono nel menu dei trucchi,
+        ; il seed nel menu di gioco (RUN/STOP)
 _bld    ; costruzione sincrona negli sprite della barra (poi la barra di gioco va ricostruita)
         lda #0
         sta bt_cel
@@ -2477,7 +2465,10 @@ ui_gamemenu:
         ldx #>tt_gm
         ldy #0
         jsr ui_title
-        #at VER_X,19            ; centrata (09/11)
+        #at VER_X+1,19          ; (23/11, committente) seed della partita sopra la versione, centrato, staccato dalle voci
+        #msg "seed "
+        jsr ui_seed
+        #at VER_X,20            ; centrata (09/11)
         #msg "version " .. VERSION
         jsr nav_help
 .if TESTUI == 33
