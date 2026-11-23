@@ -76,6 +76,84 @@ ue_x    .byte 1,1,1,1, 20,20,20,20
         .cerror PACK_N != 8, "tabella ue_x: 2 colonne da 4"
 
 
+; (23/11, committente: prototipo "liste compatte") nello zaino e nel baule della locanda i posti vuoti non sono voci. Gli
+; altri segmenti restano interi: equipaggiamento (5 posti fissi), cintura (posti 1-4 dei tasti e scelta del posto della
+; pozione nei negozi), merce.
+; Y = segmento -> A = voci visibili, flag Z di A. X e Y conservati
+sl_vis: lda sg_k,y
+        and #$7f
+        cmp #SK_PACK
+        beq _f
+        cmp #SK_CHEST
+        beq _f
+        lda sg_c,y
+        rts
+_f      sta sv_k
+        stx sv_x
+        lda #0
+        sta sv_n
+        lda sg_c,y
+        beq _d
+        sta sv_i
+        ldx sg_a,y
+_l      jsr sv_occ
+        beq +
+        inc sv_n
++       inx
+        dec sv_i
+        bne _l
+_d      ldx sv_x
+        lda sv_n
+        rts
+; A = voce visibile del segmento Y -> A = posto nella tabella del tipo. X e Y conservati
+sl_map: sta sv_n
+        lda sg_k,y
+        and #$7f
+        cmp #SK_PACK
+        beq _f
+        cmp #SK_CHEST
+        beq _f
+        lda sv_n
+        clc
+        adc sg_a,y
+        rts
+_f      sta sv_k
+        stx sv_x
+        ldx sg_a,y
+        dex
+_l      inx
+        jsr sv_occ
+        beq _l
+        dec sv_n
+        bpl _l
+        txa
+        ldx sv_x
+        rts
+; (sl_reinit, slist.asm) lista X rimasta senza voci (ultimo oggetto spostato) e con il cursore: il cursore passa all'altra
+; lista, se ne ha; poi sl_fwd. Nessuna lista con il cursore resta vuota: sl_get presume che la voce esista
+sl_z:   lda sl_n,x
+        bne +
+        cpx sl_l
+        bne +
+        lda sl_nl
+        cmp #2
+        bcc +
+        txa
+        eor #1
+        tay
+        lda sl_n,y
+        beq +
+        sty sl_l
++       jmp sl_fwd
+; posto X del tipo sv_k (SK_PACK o SK_CHEST) -> Z = 1 se vuoto
+sv_occ: lda sv_k
+        cmp #SK_PACK
+        bne +
+        lda c_pack,x
+        rts
++       lda st_id,x
+        rts
+
 ; ------------------------------------------------------------------ primitive
 ui_begin:
         jsr core_need           ; (21/11, TODO D15) le schermate usano il segmento CORE: se manca si rilegge

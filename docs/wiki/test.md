@@ -159,7 +159,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (12)
+### sanity (15)
 
 | ID | Test |
 |---|---|
@@ -175,6 +175,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QGIV-17` | page Q in a dungeon (level 1, no MENU module): the list, RUN/STOP back in the game; the stairs down still work (theme and CORE read again) |
 | `DROP-10` | (23/11) a monster hit shows its name and life in the target row; when it dies the row is empty within 2 frames (not after BTH_FR = 50) |
 | `DROP-11` | (23/11) a chest left by a dead monster (defer_drop) appears DROP_T frames later (+-2), with another monster still in contact with the hero (combat going on) |
+| `LIST-C-10` | (23/11, prototype liste-compatte) inventory, pack with 3 items of 8: the pack entries are the 3 occupied slots (no '-' rows); equipment and belt keep every slot |
+| `LIST-C-11` | (23/11, prototype) inn: the chest with 2 items of 24 shows 2 entries, the pack only its items |
+| `LIST-C-12` | (23/11, prototype) inn: a pack item to the empty chest (1 entry), back to the pack (chest empty again): the cursor goes back to the pack list; D on the empty chest list does nothing |
 
 ### regression (282)
 

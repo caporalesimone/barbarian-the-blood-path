@@ -60,6 +60,11 @@ sl_sk   .byte ?                 ; (fase 5) nome scorrevole della voce del cursor
 sl_len  .byte ?
 sl_isc  .byte ?
 sl_wd   .byte ?                 ; (22/11) colonne del nome nelle righe: 33 (inventario, locanda, baule), 27 con i prezzi (negozi)
+sv_x    .byte ?                 ; (23/11, prototipo liste compatte) sl_vis / sl_map: X salvato, tipo, voci contate, posti da vedere,
+sv_k    .byte ?                 ; voci visibili del segmento
+sv_n    .byte ?
+sv_i    .byte ?
+sv_v    .byte ?
 sl_end
         .endv
         .cerror sl_end > $94f7, "variabili delle liste oltre le variabili dei salvataggi"
@@ -86,7 +91,7 @@ sl_init:
         ldy sl_s0,x
         lda sl_sn,x
         sta sl_r
-_s      lda sg_c,y
+_s      jsr sl_vis              ; (23/11) voci visibili: zaino e baule senza i posti vuoti
         beq _n
         clc
         adc sl_t
@@ -132,7 +137,7 @@ _s      lda sl_cur,x
 _z      lda #0
         sta sl_cur,x
         sta sl_top,x
-        jmp sl_fwd              ; (22/11) nessuna voce sopra: la prima con un oggetto dall'inizio
+        jmp sl_z                ; (23/11, liste compatte: ui.asm) poi sl_fwd
 
 ; L = X: finestra con il cursore dentro, senza spazio vuoto in fondo se le voci sono piu' delle righe
 sl_win:
@@ -188,7 +193,7 @@ sl_get:
         lda #0
         sta sl_ns
         ldy sl_s0,x
-_s      lda sg_c,y
+_s      jsr sl_vis
         beq _nx
         lda sg_k,y
         bpl _in
@@ -203,14 +208,16 @@ _s      lda sg_c,y
         rts
 +       dec sl_e
         inc sl_ns
-_in     lda sl_e
-        cmp sg_c,y
+_in     jsr sl_vis
+        sta sv_v
+        lda sl_e
+        cmp sv_v
         bcc _it
-        sbc sg_c,y
+        sbc sv_v
         sta sl_e
 _nx     iny
         bne _s                  ; (sempre: la voce esiste)
-_it     adc sg_a,y              ; (C = 0) posto nella tabella del tipo
+_it     jsr sl_map              ; posto nella tabella del tipo
         sta sl_t
         lda sg_k,y
         and #$7f
@@ -272,6 +279,8 @@ _wa     lda l8_id,x
         clc
         rts
 sk_mk   .byte CH_EQ, CH_PACK, CH_BELT, 0, 0
+
+; (23/11) sl_vis, sl_map, sv_occ (liste compatte) stanno in GAME (ui.asm): il segmento CORE e' pieno
 sk_sl   .byte $20, $40, $60
 
 ; voce del cursore della lista attiva -> come sl_get
@@ -602,7 +611,10 @@ sl_nav:
         bcc _no
         txa
         eor #1
-        sta sl_l
+        tay
+        lda sl_n,y              ; (23/11, liste compatte) l'altra lista senza voci (baule vuoto): si resta qui
+        beq _no
+        sty sl_l
         jsr sl_draw             ; (X = la lista lasciata: senza cursore)
         ldx sl_l
         lda sl_n,x              ; (22/11, committente) A/D: la prima voce dell'altra lista (non piu' la voce lasciata li')

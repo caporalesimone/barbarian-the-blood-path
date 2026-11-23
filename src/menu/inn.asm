@@ -52,8 +52,10 @@ ov_stash:
         lda #1
         sta sl_sn+1
         jsr ls2_init
-        lda #EQ_N+1             ; cursore sul primo posto dello zaino (indossati + riga)
+        lda #EQ_N+1             ; cursore sul primo oggetto dello zaino (indossati + riga)
         sta sl_cur
+        ldx #0                  ; (23/11, liste compatte) zaino vuoto: niente riga e niente posti, la voce EQ_N+1 non c'e':
+        jsr sl_fwd              ; sl_fwd la riporta sulla prima voce (l'arma)
 _dr     jsr h_draw
 .if NOKEYS                      ; (da out/work/game.lbl: build di test per gli screenshot)
 _hg     jmp _hg

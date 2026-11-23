@@ -66,7 +66,13 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
   una vendita o uno spostamento va sulla prima voce con un oggetto. In liste senza oggetti si ferma su un posto vuoto dopo
   64 tentativi (`SL_NTRY`). Test `UI-LIST-10`, `UI-LIST-11`. (22/11, correzione chiesta dal committente) L'**inventario si apre con
   il cursore sull'arma** (prima voce della lista) e la finestra dall'inizio: prima il cursore partiva dal primo posto dello zaino
-  con la finestra dalla seconda riga, e spesso il `>` non si vedeva. Voci da segmenti (`SK_EQ`, `SK_PACK`, `SK_BELT`, `SK_CHEST`, `SK_WARE`). Le
+  con la finestra dalla seconda riga, e spesso il `>` non si vedeva. Voci da segmenti (`SK_EQ`, `SK_PACK`, `SK_BELT`, `SK_CHEST`, `SK_WARE`). (23/11, committente, **prototipo sul branch `liste-compatte`**) **Zaino e baule della
+  locanda senza posti vuoti**: le voci di `SK_PACK` e `SK_CHEST` sono solo i posti occupati, in ordine (`sl_vis` conta le voci
+  visibili di un segmento, `sl_map` trova il posto della voce k; in GAME, `src/game/ui.asm`, perché CORE è pieno). Il codice del
+  posto per le azioni (`sl_sl`) resta quello vero. Restano interi l'equipaggiamento (5 posti fissi), la cintura (posti 1-4 dei
+  tasti e scelta del posto della pozione) e la merce. Uno zaino vuoto non ha né voci né riga separatrice; un baule vuoto è una
+  lista senza voci: A/D non ci portano il cursore (`sl_nav`) e, se si svuota con il cursore sopra, il cursore torna all'altra
+  lista (`sl_z`); la locanda apre sulla prima voce dello zaino o, se è vuoto, sull'arma (`sl_fwd`). Test `LIST-C-10..12`. Le
   schermate a due liste (negozi, locanda, baule del piano) usano `ls2_frame`, `ls2_init`, `ls2_draw` (righe 2-7 e 10-16) e
   il riquadro dell'oggetto `iv_sel` (righe 18-22: icona e nome nel titolo; la riga 3 la sceglie la schermata, `iv_l3`).
 - **Icona della categoria** (08/11 sera, `ui_cic`): in ogni lista di oggetti (pack, wares, contents, zaino e baule
