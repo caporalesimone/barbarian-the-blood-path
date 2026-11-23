@@ -8,9 +8,16 @@ attack cadence (curse), target() picks the hero's target (the bot kills summons 
 Mechanics: "game" = what the code does since 19/11 (docs/wiki/bestiario.md "Meccaniche dei boss di capitolo"; the Lord of
 Ruin only summons, through final_boss in fight); "new" = additions proposed on 20/11. The simulator does not move: an
 announced attack (warning on screen) is dodged with probability `skill` (a stand-in for the player's movement)."""
+import os
+import yaml
 import sim_rules as S
 
 FAR = 10 ** 9
+# (23/11) frames between the birth of a monster summoned next to the boss and its first attack: in the game it is born next to
+# the boss and has to reach the hero (measured in the arena, out/tmp of 23/11: median 46, 6..129; 1/3 never attack)
+_NB = yaml.safe_load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "data", "rules_next.yaml")))["bosses"]
+ARRIVE = tuple(_NB["arrive"])
+AREA = _NB["slash_area"]    # (23/11) probability that a Slash also hits another monster next to its target (boss fights)
 
 
 class Base:
@@ -37,8 +44,11 @@ class Base:
     def frac(self):
         return self.b.hp / self.b.hpmax
 
-    def spawn(self, pend, at, kind):
+    def spawn(self, pend, at, kind, arrive=False):
+        """arrive: summoned next to the boss, first attack after ARRIVE frames (23/11; the crypt has its own travel)"""
         m = S.Mon(self.mon(kind, self.floor, False), self.rng)
+        if arrive:
+            m.next = at + self.rng.randint(*ARRIVE)
         m.add = True
         pend.append((at, m))
         self.adds.append(m)
@@ -84,6 +94,11 @@ class Base:
     def m_rate(self, m, t):
         return S.T["monster_attack"]
 
+    def slash_area(self, alive, tgt):
+        """(23/11) Slash hits every monster in its area (hit_area): with summons next to the boss, each other monster is also hit
+        with probability AREA (measured in the arena: ~1.2 monsters per Slash while a summon lives)"""
+        return [m for m in alive if m is not tgt and (m is self.b or getattr(m, "add", False)) and self.rng.random() < AREA]
+
     def pg_rate(self, t):
         return 1.0
 
@@ -126,9 +141,9 @@ class Abbot(Base):
                 self.hurt.append((t + g["censer_warn"], self.hero.hpmax // g["censer_hp_div"]))
         while self.th and self.b.alive and self.frac() <= self.th[0]:
             self.th.pop(0)
-            self.b.next = max(self.b.next, t + g["pause"])
+            self.b.stun_for(t, g["pause"])         # (23/11) ob_freeze = stordito: la ricarica dell'attacco si ferma (arena)
             for _ in range(g["summon_n"]):
-                self.summoned.append(self.spawn(pend, t + g["pause"], g["summon_type"]))
+                self.summoned.append(self.spawn(pend, t + g["pause"], g["summon_type"], arrive=True))
         self.regen(t, any(m.alive for m in self.summoned) or any(p[1] in self.summoned for p in pend), g["regen_every"])
         if not self.ext or not self.b.alive:
             return
@@ -164,7 +179,7 @@ class Stitch(Base):
         g = self.g
         while self.th and self.b.alive and self.frac() <= self.th[0]:
             self.th.pop(0)
-            self.b.next = max(self.b.next, t + 50)
+            self.b.stun_for(t, 50)                 # (23/11) ob_freeze: la ricarica si ferma, come nel gioco
             for _ in range(g["fetish_n"]):
                 f = self.spawn(pend, t + 50, "skeleton")
                 f.hpmax = f.hp = max(1, self.b.hpmax // g["fetish_hp_div"])

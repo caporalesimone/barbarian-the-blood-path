@@ -217,7 +217,11 @@ def fight(hero, mons, rng, potions=None, final_boss=None, stats=None, pot_cfg=No
                         a = [m for m in ms if m.alive]
                         if not a:
                             break
-                        hit(script.target(a) if script else a[0], 1)
+                        tg = script.target(a) if script else a[0]
+                        hit(tg, 1)
+                        if script:                  # (23/11) Slash colpisce tutta la sua area: anche gli altri mostri
+                            for m in script.slash_area(a, tg):      # accanto al bersaglio (boss ed evocati, arena)
+                                hit(m, 1)
                     for q in getattr(hero, "extra", ()):    # (21/11) attacchi extra della DES: probabilita' ridotta
                         a = [m for m in ms if m.alive]
                         if not a:
