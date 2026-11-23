@@ -634,8 +634,13 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   codice nella coda del tema, modello `boss_scripts.py`): proposta delle fasi prima del codice. (22/11, D17) Due unici nuovi per i boss del capitolo 1: fatti.
   D16 approvato: le aggiunte `new` del 20/11 (`data/rules_next.yaml`), un commit per boss. **Abate fatto il 22/11** (Skeleton King, vita fissa 68, uno
   scheletro per evocazione: [bestiario](docs/wiki/bestiario.md)); restano Mother Stitch, Varok, Lord of Ruin (stessa procedura:
-  `rules.yaml chapter_bosses`, `sim_builds.py --fit-chapter`). **Arena**: non fa girare il codice del piano dei boss (`ovl_boss*`):
-  la verifica del 22/11 e' solo con i test in VICE (`BOSS1-12`); da aggiungere all'arena prima di Stitch. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
+  `rules.yaml chapter_bosses`, `sim_builds.py --fit-chapter`). **Arena**: (23/11) fa girare il codice del piano dei boss
+  (`arena_ovl_*`, `ARENA-11`). **Abate in arena (23/11, 100 combattimenti per livello, PG di riferimento del piano 5, 4 rosse)**:
+  vince il 98% al livello 5, 96% al 6 e al 7, contro 60/77/85% del simulatore. La parte del boss coincide (un attacco ogni ~45
+  fotogrammi, ~8,5 punti a colpo), ma gli scheletri evocati in arena attaccano molto meno (~2 colpi a combattimento contro ~4 del
+  simulatore, che li mette a contatto subito: nel gioco nascono accanto al boss, devono raggiungere il PG e Whirlwind li prende) e
+  lo scontro dura meno (7,3 s contro 8,9 s). **Da decidere col committente prima di Stitch**: correggere il simulatore (ritardo di
+  arrivo degli evocati) e ritarare la vita dell'Abate, oppure tarare i boss direttamente in arena. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
   attiva il mostro richiesto nasce sempre nel piano.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 

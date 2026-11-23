@@ -220,8 +220,13 @@ comunque `ovl_cur` = 0. Nessuna lettura di disco in più (il tema si legge comun
   evocazioni del boss finale (`final_tick`, `fb_th`, `final_init`) e la leva (`ui_lever`). Margine di GAME 969 → 1445 B
   (1425 B con gli agganci delle meccaniche dei boss; le meccaniche stesse non costano nulla a GAME: 586, 612, 744 B a `$C900`).
   Restano in GAME `at_lever`, `fin_doors`, `fin_chests` (li usano anche il generatore e l'etichetta in alto).
-- **Build ARENA e TESTUI 36** (`OVP_RES`): il codice del piano 20 resta in GAME (l'arena carica il tema senza `gfx_tail`; lo
-  screenshot della leva parte senza piano 20).
+- **Build TESTUI 36** (`OVP_RES`): il codice del piano 20 resta in GAME (lo screenshot della leva parte senza piano 20).
+- **Build ARENA** (23/11; prima anche lei con `OVP_RES`): a `$C900` c'è il modulo dell'arena, quindi `OVP_AT` = `$F4E0`
+  (`OVP_END` = `$FD00`, la zona 2 del MENU, libera senza villaggio; il salto di `ovp_*` aggiunge il byte basso di `OVP_AT`).
+  `tools/build/asm.sh` assembla `ovl_boss1..3` e `ovl_final` anche con le etichette di `arena_game` (`-D ARENA_OVL=1` →
+  `out/work/arena_ovl_*.prg`, senza la leva); `tools/vice/arena.py` li carica sopra la coda del tema per i piani 5, 10, 15 e 20
+  e mette `ovp_ok` = 1. Le variabili del codice del piano stanno nei suoi byte: perché ripartano come all'ingresso nel piano, le
+  serie su quei piani si giocano un combattimento alla volta (codice ricaricato, seme `PAR_SEED` + 7919·k). Test `ARENA-11`.
 - **Boss dei capitoli 1–3** (19/11): le loro meccaniche (`src/game/ovl_boss1..3.asm`, parti comuni `ovl_boss.inc`) nelle code
   di `GFX2`, `GFX4`, `GFX6`, prima della mappa del boss ([bestiario](bestiario.md#meccaniche-dei-boss-di-capitolo-decise-il-1511)).
   Ingressi in più: `ovp_dmg` (colpo del PG a un mostro, `hit_one`: il danno si può cambiare) e `ovp_tint` (colore del boss del

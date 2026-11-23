@@ -112,6 +112,7 @@ componenti (07/11). Assemblaggio con `-I src -I src/common -I src/game -I out` (
 | `LOBBY`, `MENU` | `src/lobby.asm`; `src/menu.asm` + `src/menu/` (compresso da `tools/build/pack_menu.py`) | `out/work/game.lbl` (etichette del gioco), `common/macros.inc` |
 | `JUKEBOX` | `src/jukebox.asm` | `common/sid_player.inc`, `common/sfx.inc` |
 | (nessuno: arena) | `src/test/arena.asm` | `out/work/arena_game.lbl` |
+| (nessuno: arena, 23/11) | `src/game/ovl_boss1..3.asm`, `ovl_final.asm` con `-D ARENA_OVL=1` | `out/work/arena_game.lbl` (`out/work/arena_ovl_*.prg`) |
 
 File sorgente generati (11/11, G1: non più in `src/` né in git, li scrivono i generatori a ogni build): `out/work/version.inc`,
 `out/work/sid_freq.inc`, `out/work/start_data.inc`, `out/work/db.asm`, `out/work/gfx_consts.inc`, `out/work/final_map.inc`, `out/work/music_tab.inc`,

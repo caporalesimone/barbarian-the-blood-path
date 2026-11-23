@@ -9,7 +9,14 @@
 ;  Al rientro nel piano i riti gia' fatti non si ripetono (dm_init). I feticci si riconoscono dal TIPO, non dall'indice:
 ;  quelli rimessi dalla STASH (ritorno dal portale) restano fermi anche se il codice del piano e' ripartito da capo.
 ; ===================================================================
+        .weak
+ARENA_OVL = 0                   ; (23/11) 1 = versione per l'arena (tools/build/asm.sh: etichette di arena_game, OVP_AT = $F4E0)
+        .endweak
+.if ARENA_OVL
+        .include "../out/work/arena_game.lbl"
+.else
         .include "../out/work/game.lbl"
+.endif
         * = OVP_AT
         jmp dm_init             ; OVJ_INIT
         jmp dm_tick             ; OVJ_TICK

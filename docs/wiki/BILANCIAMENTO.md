@@ -473,6 +473,10 @@ la frequenza dei tesori buoni (10% dei tiri a ≥ 0,8 T), l'oro dei bauli epici 
 - Pozioni: il simulatore beve sotto il 35% della vita con la cintura di riferimento; il colore reale dipende
   dal piano (zone).
 - Frenzy: il simulatore conta il colpo in più, non la corsa.
+- (23/11) **Evocati dei boss**: il simulatore mette i mostri evocati a contatto con il PG appena nascono; nel gioco nascono
+  accanto al boss e devono arrivare. In arena (codice vero, `ARENA-11`) l'Abate al livello 5 vince il 98% contro il 60% del
+  simulatore; gli scheletri evocati attaccano ~2 volte a combattimento invece di ~4 (misura del 23/11, 100 combattimenti).
+  Finché non si decide come correggere (TODO H1), i numeri del simulatore sui boss con evocazioni sono pessimisti.
 - (23/11) **Abilità e catena (Q15)**: nel gioco un'abilità vuole il livello e il passo della catena consegnato
   (`sk_ok`); il simulatore guarda solo il livello, cioè assume un giocatore che consegna i passi al piano previsto
   ([quests](quests.md) sezione 5). L'arena fa lo stesso (`q_step` = 12).

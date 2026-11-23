@@ -56,8 +56,10 @@ Regole d'uso:
   rifà lo stesso scontro in arena (`tools/vice/arena.py --lvl 10 --plvl 10 --weapon sword+1 --armor chain_mail
   --shield medium_shield --ring copper+1 --monster skeleton_king --boss 1 --potions red:2,yellow:2 --fights 30`).
   Se i due differiscono per più del rumore, c'è un errore nel modello o nel codice: cercarlo prima di toccare i
-  numeri. Attenzione: l'arena azzera il seme a ogni serie; per statistiche indipendenti variare `rnd` fra le
-  serie (vedi `tests/regression/items/test_items.py`).
+  numeri. Attenzione: l'arena azzera il seme a ogni serie (`seed`, di solito `$1234`); per statistiche indipendenti
+  variare il seme fra le serie (vedi `tests/regression/items/test_items.py`). (23/11) Nei piani dei boss (5, 10, 15, 20)
+  l'arena carica il codice del piano (meccaniche dei boss, evocazioni del piano 20) e gioca un combattimento alla volta con
+  seme + 7919·k; `ovl=False` per lo scontro senza meccaniche ([dungeon](dungeon.md)).
 
 ## 2. Che cosa governa che cosa (mappa dei parametri)
 

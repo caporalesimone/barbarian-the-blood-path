@@ -44,10 +44,15 @@ vis_bit:
 ; src/game/ovl_*.asm) e gfx_tail (music.asm) lo copia a OVP_AT = $C900, la zona 1 del MENU, libera in tutti i piani del
 ; dungeon (il MENU si rilegge a ogni ingresso nel villaggio). ovp_ok = 1 se il tema del piano attuale ne aveva uno. Tabella
 ; dei salti all'inizio del codice: OVJ_INIT dopo il piazzamento dei mostri (load_location), OVJ_TICK a ogni giro, OVJ_FIRE
-; con Fire su T_DHOME (la leva della sala del trono). Nelle build ARENA e TESTUI 36 il codice del piano 20 resta in GAME.
+; con Fire su T_DHOME (la leva della sala del trono). Nella build TESTUI 36 il codice del piano 20 resta in GAME.
 ; ---------------------------------------------------------------------------------------------------------------------
+.if ARENA                       ; (23/11) arena: a $C900 c'e' il modulo dell'arena; il codice del piano (versione per l'arena,
+OVP_AT   = $f4e0                ; out/work/arena_ovl_*.prg) lo scrive tools/vice/arena.py nella zona 2 del MENU, libera
+OVP_END  = $fd00                ; senza villaggio (sopra la coda del tema, che l'arena non usa)
+.else
 OVP_AT   = $c900
 OVP_END  = $d000
+.endif
 ; (nessuna annotazione @map: la zona e' gia' quella del MENU, zona 1, con la sua coda @free; lab64 map le vedrebbe sovrapposte)
 OVJ_INIT = 0
 OVJ_TICK = 3
@@ -97,6 +102,9 @@ ovp_dmg:                        ; X = mostro colpito, cb_dl/cb_dh = danno (si pu
         ldy ovp_ok
         clc
         beq +
+.if <OVP_AT                     ; (23/11) arena: OVP_AT = $F4E0, il byte basso non e' 0 (C = 0 qui)
+        adc #<OVP_AT
+.endif
         sta _j+1
 _j      jmp OVP_AT
 +       rts

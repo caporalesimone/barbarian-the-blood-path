@@ -14,7 +14,14 @@
 ;  poi per AB_NT colpi, uno ogni AB_NE fotogrammi, toglie AB_ND punti vita al PG entro AB_R pixel (meta' del colpo del boss).
 ;  Modello: tools/simulators/boss_scripts.py Abbot (data/rules_next.yaml bosses.abbot.game).
 ; ===================================================================
+        .weak
+ARENA_OVL = 0                   ; (23/11) 1 = versione per l'arena (tools/build/asm.sh: etichette di arena_game, OVP_AT = $F4E0)
+        .endweak
+.if ARENA_OVL
+        .include "../out/work/arena_game.lbl"
+.else
         .include "../out/work/game.lbl"
+.endif
         * = OVP_AT
         jmp ab_init             ; OVJ_INIT
         jmp ab_tick2            ; OVJ_TICK

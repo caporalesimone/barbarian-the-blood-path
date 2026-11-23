@@ -6,7 +6,14 @@
 ;  contro un muro resta STORDITO 2 s (grigio, scudo giu'); se raggiunge il PG lo colpisce due volte e si ferma. Fuori dallo
 ;  stordimento lo SCUDO dimezza i danni dei colpi del PG. Dopo ogni carica una pausa di 1,5 s.
 ; ===================================================================
+        .weak
+ARENA_OVL = 0                   ; (23/11) 1 = versione per l'arena (tools/build/asm.sh: etichette di arena_game, OVP_AT = $F4E0)
+        .endweak
+.if ARENA_OVL
+        .include "../out/work/arena_game.lbl"
+.else
         .include "../out/work/game.lbl"
+.endif
         * = OVP_AT
         rts                     ; OVJ_INIT
         nop

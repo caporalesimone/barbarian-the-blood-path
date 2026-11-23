@@ -39,7 +39,9 @@ PAR_SKILLS = PAR+50             ; abilita' permesse: bit 0 slash, 1 whirlwind, 2
 PAR_POT    = PAR+51             ; beve sotto vita * PAR_POT / 256 (0 = mai)
 PAR_WAKE   = PAR+52             ; 1 = mostri gia' svegli
 PAR_BOT    = PAR+53             ; 0 = fermo, si gira e attacca; 1 = si avvicina
-PAR_LEN    = 54
+PAR_SEED   = PAR+54             ; (23/11) seme del generatore casuale (16 bit; arena.py: $1234 di solito, un altro a ogni
+                                ; combattimento dei piani con il codice del piano, che si rilegge a ogni combattimento)
+PAR_LEN    = 56
 
 RES      = $cf40                ; risultati (azzerati all'avvio)
 RES_DONE   = RES+0              ; combattimenti finiti
@@ -85,9 +87,9 @@ arena_main:
 _z      sta RES,x
         dex
         bpl _z
-        lda #$34                ; generatore casuale: valore fisso (prove ripetibili)
+        lda PAR_SEED            ; generatore casuale: valore dato (prove ripetibili; arena.py: $1234)
         sta rnd
-        lda #$12
+        lda PAR_SEED+1
         sta rnd+1
         lda PAR_LVL
         sta cur_level
@@ -233,7 +235,7 @@ _mf     sta mfar,x
         dex
         bpl _mf
         jsr init_monsters_rt
-        jsr final_init
+        jsr ovp_init            ; (23/11) codice del piano (boss dei capitoli, piano 20), se arena.py lo ha caricato (ovp_ok)
         ldx lb_cnt
         dex
 _w      lda PAR_WAKE

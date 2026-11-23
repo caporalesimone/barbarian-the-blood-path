@@ -2,8 +2,8 @@
 ;  final.asm - (19/11) codice del PIANO 20 (sala del trono): evocazioni del boss finale (final_tick, fb_th, final_init)
 ;  e la leva (ui_lever). Fino al 19/11 stava in GAME (src/game/game.asm, src/game/ui.asm); ora e' CODICE DEL PIANO: assemblato
 ;  a OVP_AT ($C900) da src/game/ovl_final.asm, sta nella coda del file del tema GFX8 (tools/build/bundle.py) e gfx_tail lo
-;  copia a OVP_AT entrando nel piano 20 (docs/wiki/dungeon.md "Codice del piano"). Nelle build ARENA (il boss finale
-;  dell'arena evoca) e TESTUI = 36 (screenshot della leva) resta in GAME (OVP_RES).
+;  copia a OVP_AT entrando nel piano 20 (docs/wiki/dungeon.md "Codice del piano"). Nella build TESTUI = 36 (screenshot
+;  della leva) resta in GAME (OVP_RES); (23/11) l'arena ne usa una versione sua (out/work/arena_ovl_final.prg, a $F4E0).
 ; ===================================================================
 ; a ogni giro nella sala del trono: quando la vita del boss finale scende sotto la soglia dell'ondata (fb_th) evoca
 ; un'ondata di mostri, se i vivi sono pochi (final_summons in data/rules.yaml)

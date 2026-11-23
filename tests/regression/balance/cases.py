@@ -6,3 +6,4 @@ PY = sys.executable
 """Balance: rules simulator (fast) and arena on the real code."""
 script("BAL-10", "d20 rules in the simulator: reference hero, weak hero, curves", [PY, os.path.join(H, "test_balance.py")])
 script("ARENA-10", "arena: short repeatable series, sensible results", [PY, os.path.join(H, "test_arena.py")])
+script("ARENA-11", "(23/11) arena with the code of the level: the Abbot (level 5) has his fixed life, summons, rages; repeatable", [PY, os.path.join(H, "test_arena_boss.py")])

@@ -47,6 +47,12 @@ tail -3 out/work/build.log
 ARX=$(echo "$EXTRA" | sed 's/-D NOKEYS=[0-9]*/-D NOKEYS=1/')
 asm_game out/work/arena.log $ARX -D ARENA=1 -L out/work/arena_game.lst -l out/work/arena_game.lbl -o out/work/arena_game.prg || { grep -v '^$' out/work/arena.log | head -20; exit 1; }
 64tass -a $INC src/test/arena.asm -o out/work/arena.prg -l out/work/arena.lbl -L out/work/arena.lst >> out/work/arena.log 2>&1 || { grep -v '^$' out/work/arena.log | head -20; exit 1; }
+# (23/11) codice dei piani dei boss per l'arena: le stesse sorgenti con le etichette di arena_game (OVP_AT = $F4E0, theme.asm);
+# tools/vice/arena.py lo carica per i piani dei boss dei capitoli e per il piano 20
+for o in ovl_boss1 ovl_boss2 ovl_boss3 ovl_final; do
+    [ -f src/game/$o.asm ] || { rm -f out/work/arena_$o.prg; continue; }
+    64tass -a $INC -D ARENA_OVL=1 src/game/$o.asm -o out/work/arena_$o.prg -l out/work/arena_$o.lbl -L out/work/arena_$o.lst > out/work/arena_$o.log 2>&1 || { grep -v '^$' out/work/arena_$o.log | head -20; exit 1; }
+done
 # moduli su file: assemblati con le etichette del gioco (out/work/game.lbl)
 64tass -a $INC src/lobby.asm -o out/work/lobby.prg -l out/work/lobby.lbl -L out/work/lobby.lst > out/work/ovl.log 2>&1 || { grep -v '^$' out/work/ovl.log | head -20; exit 1; }
 64tass -a $INC src/qgiv.asm -o out/work/qgiv.prg -l out/work/qgiv.lbl -L out/work/qgiv.lst > out/work/qgiv.log 2>&1 || { grep -v '^$' out/work/qgiv.log | head -20; exit 1; }   # (22/11) modulo del villaggio delle quest (file "qstg")

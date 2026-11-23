@@ -168,7 +168,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QREW-12` | chapter 1: the boss dying does not unlock chapter 2 (chap_won, c_unl 1); step 3 handed in to father osric: c_unl 2, purse step 1 (550) |
 | `QREW-13` | step 11 (the last cart, 'a magic item'): village 4, handed in to the penitent: q_step 11, +1000 gold (purse permitting), a new weapon, armor, shield or ring in the pack with a prefix or a suffix |
 
-### regression (304)
+### regression (305)
 
 | ID | Test |
 |---|---|
@@ -191,6 +191,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `ASM-11` | generated sources commented: every T_ tile constant with its description, item ids and monster types listed in db.asm |
 | `BAL-10` | d20 rules in the simulator: reference hero, weak hero, curves |
 | `ARENA-10` | arena: short repeatable series, sensible results |
+| `ARENA-11` | (23/11) arena with the code of the level: the Abbot (level 5) has his fixed life, summons, rages; repeatable |
 | `BASES-10` | item tables: 11 armors with CA 1..10, 4 shields with CA 1..4 |
 | `BASES-11` | inventory: the studded armor (DEX 14) stays in the pack with s_dex 13 ('dex 14' in its box); with DEX 14 it is equipped |
 | `BEST-10` | every chapter of chapters.yaml (but the Abyss) has base monsters, their strong variants and one boss = its final map boss |

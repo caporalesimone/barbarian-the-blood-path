@@ -14,6 +14,9 @@ From Python (several scenarios in the same VICE session, without restarting it):
       r = a.run(lvl=3, plvl=3, weapon="sword", monsters=["skeleton"], fights=20)
 
 Phase 1: hero and monsters next to each other (automatic positions), a still bot that turns and attacks (bot="stand").
+(23/11) Levels with their own code (the boss levels of chapters 1-3, level 20): the same code as the game (out/work/arena_ovl_*.prg,
+assembled with the labels of the ARENA build at OVP_AT = $F4E0) is loaded before every fight, so its state starts again each
+time as when the hero enters the level; those series are played one fight at a time with seed + k (ovl=False: without it).
 Needs the build: ./build.sh (or tools/build/asm.sh) makes out/work/arena_game.prg and out/work/arena.prg."""
 import argparse, csv, json, os, re, subprocess, sys, time
 
@@ -109,7 +112,7 @@ class Arena:
 
     def run(self, lvl=1, plvl=1, weapon="dagger", armor="", shield="", ring="", potions=None, monsters=("fallen",),
             boss=0, pos=None, ppos=(0, 0), fights=10, maxsec=120, fast=True, skills=ALLSK,
-            pot=0.0, wake=True, bot="stand", timeout=None, dur=0):
+            pot=0.0, wake=True, bot="stand", timeout=None, dur=0, seed=0x1234, ovl=True):
         assert 1 <= lvl <= MAXLEVEL and 1 <= plvl <= 20 and 1 <= len(monsters) <= 8 and 1 <= fights <= 255
         assert weapon, "the hero always has a weapon"
         eq = [item(weapon), item(armor), item(shield), item(ring)]
@@ -137,11 +140,24 @@ class Arena:
         p = ([lvl, plvl] + [e[0] for e in eq] + [e[1] for e in eq] + bt + bn + [len(mt), boss] + (mt + [0] * 8)[:8]
              + mx[:8] + my[:8] + [ppos[0], ppos[1], fights, maxf & 255, maxf >> 8, 1 if fast else 0, sk,
                                  min(255, int(pot * 256)), 1 if wake else 0, {"stand": 0, "approach": 1}[bot]])
+        p += [seed & 255, seed >> 8]
         assert len(p) == A["PAR_LEN"], len(p)
+        ov = self.overlay(lvl) if ovl else None
+        if ov and fights > 1:               # (23/11) the level code keeps its state in its own bytes: one fight at a time
+            args = dict(lvl=lvl, plvl=plvl, weapon=weapon, armor=armor, shield=shield, ring=ring, potions=potions, monsters=monsters,
+                        boss=boss, pos=pos, ppos=ppos, maxsec=maxsec, fast=fast, skills=skills, pot=pot, wake=wake, bot=bot,
+                        timeout=timeout, dur=dur, ovl=ovl)
+            rs = [self.run(fights=1, seed=(seed + 7919 * k) & 0xffff or 1, **args) for k in range(fights)]
+            return merge(rs, fights)
         if self.ran:                        # the tail of the PRG (fixed graphics, generator copied under the I/O) is
             self.v.load(os.path.join(OUT, "arena_game.prg"))      # dead data after `start`: load it again
         self.ran = True
         self.load_theme(theme(lvl))
+        if ov:                              # after the theme: the code goes where the tail of the theme was
+            self.v.cmd("bank ram")          # under the KERNAL, like the theme
+            self.v.load(ov)
+            self.v.cmd("bank cpu")
+            self.v.poke(G["ovp_ok"], 1)
         self.v.poke(PAR, *p)
         t0 = time.time()
         lim = timeout or (60 + fights * maxsec * (0.25 if fast else 1.2))
@@ -165,6 +181,30 @@ class Arena:
                              monsters=list(monsters), boss=boss, fights=fights, maxsec=maxsec, skills=list(skills), pot=pot,
                              wake=wake, bot=bot, fast=fast, dur=dur)
         return res
+
+    @staticmethod
+    def overlay(lvl):
+        """(23/11) the code of the level for the arena (theme.asm OVP_AT): boss level of chapter c = 1..3 (5c), level 20; else None"""
+        if lvl == MAXLEVEL:
+            f = "arena_ovl_final.prg"
+        elif lvl % 5 == 0:
+            f = "arena_ovl_boss%d.prg" % (lvl // 5)
+        else:
+            return None
+        f = os.path.join(OUT, f)
+        return f if os.path.exists(f) else None
+
+
+def merge(rs, fights):
+    """(23/11) results of single-fight runs -> one series (sums; hero and monster 0 from the last one)"""
+    r = dict(rs[-1])
+    for k in ("fights", "win", "lose", "timeout", "frames", "hp_end", "xp", "kills", "dealt", "taken", "healed", "potions"):
+        r[k] = sum(x[k] for x in rs)
+    r["wall_s"] = round(sum(x["wall_s"] for x in rs), 1)
+    r["log"] = [x["log"][0] for x in rs][:A["LOG_N"]]
+    r["avg_sec"] = round(r["frames"] / max(1, r["fights"]) / 50, 2)
+    r["params"] = dict(rs[0]["params"], fights=fights)
+    return r
 
 
 def summary(r):

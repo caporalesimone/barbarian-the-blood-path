@@ -100,7 +100,7 @@ flowchart TD
     TP --> GAME
     FM --> GAME
     GAME["64tass src/game.asm, due passate (21/11):<br/>GENPASS=1 -> gen_imgz.py (generatore ZX0, out/work/gen_img.zx0;<br/>segmento CORE, out/work/core.prg)<br/>GENPASS=2 -> out/work/game.prg, game.lbl, game.lst"]
-    GAME --> ARENA["build arena: ARENA=1<br/>out/work/arena_game.prg + src/test/arena.asm"]
+    GAME --> ARENA["build arena: ARENA=1<br/>out/work/arena_game.prg + src/test/arena.asm<br/>+ arena_ovl_boss1..3, arena_ovl_final (OVP_AT $F4E0)"]
     GAME -->|game.lbl| LOB["src/lobby.asm -> out/work/lobby.prg"]
     GAME -->|game.lbl| MEN["src/menu.asm -> out/work/menu.bin<br/>(immagine piatta, 3 zone)"]
     MEN --> PM["pack_menu.py: ZX0 per zona,<br/>verifica sul posto -> out/work/menu.prg"]
