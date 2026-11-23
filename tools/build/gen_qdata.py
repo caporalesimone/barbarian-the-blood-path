@@ -204,6 +204,18 @@ def main():
     L.append("QTX      = $%04x      ; testi del capitolo (file QTXc, D2)" % QTX)
     for nm, v in (("qt_ty", ty), ("qt_p1", p1), ("qt_p2", p2), ("qt_n", n), ("qt_it", it), ("qt_np", npc)):
         L.append("%-6s .byte %s" % (nm, ", ".join(str(e) for e in v)))
+    # (23/11, Q15) abilita' (ordine di sk_req, gen_db.py): il passo della catena che la sblocca; serve q_step >= passo
+    sko = ["slash", "whirlwind", "battle cry", "smash", "rage", "frenzy"]
+    skq = [0] * len(sko)
+    for x in qs[:12]:
+        s = (x.get("reward") or {}).get("skill")
+        if s:
+            if s not in sko[1:]:
+                die("%s: abilita' %s sconosciuta" % (x["id"], s))
+            skq[sko.index(s)] = int(x["id"])
+    if 0 in skq[1:]:
+        die("abilita' senza passo della catena: %s" % [sko[i] for i in range(1, len(sko)) if not skq[i]])
+    L.append("sk_qs  .byte %s     ; (Q15) passo della catena (q_step >=) per abilita': %s" % (", ".join(map(str, skq)), ", ".join(sko)))
     L.append('        .enc "screen"')
     for i, k in enumerate(items):
         L.append('qi_%d    .text "%s", 0' % (i + 1, q["quest_items"][k]))

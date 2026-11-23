@@ -699,8 +699,7 @@ _r      lda #G_RULE
         ldx #12
         jsr hb_clear            ; hb 0..5 = riga 22, 6..11 = riga 23 (una cella si' e una no)
         ldx #0
-_k      lda c_lvl               ; abilita' non ancora disponibile: niente lettera (07/11)
-        cmp sk_req,x
+_k      jsr sk_ok               ; abilita' non ancora disponibile (livello, Q15 passo della catena): niente lettera (07/11)
         bcc _kn
         lda sk_g,x
         ldy sk_pos,x

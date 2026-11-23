@@ -773,7 +773,21 @@ _rs     lda qg_rw+3
         sta q_flag
         lda #0
         sta q_cnt
-        beq _ex
+        ldx #0                  ; (23/11, committente) passo 3c consegnato, c <= QGATE_CH: capitolo c+1 sbloccato
+        lda q_step              ; (al posto della morte del boss, chap_won)
+-       inx
+        sec
+        sbc #3
+        beq +
+        bcs -
+        bcc _ex
++       cpx #QGATE*QGATE_CH+1
+        bcs _ex
+        inx
+        cpx c_unl
+        bcc _ex
+        stx c_unl
+        bcs _ex
 _sd     tya                     ; accessoria: bit id-1 in q_sdone, posto libero
         sec
         sbc #QT_CHAIN

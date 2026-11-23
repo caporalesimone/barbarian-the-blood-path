@@ -3358,10 +3358,18 @@ _cry    jsr centre_on_player
         sta fx_timer
         jmp hit_area
 
-; X = abilita' (0..3): diventa quella del Fire se il livello basta (sk_req); il nome compare per un po' nell'HUD
-sel_skill:
+; X = abilita' (0..5): C = 1 se c'e': livello (sk_req) e (23/11, Q15) passo della catena consegnato (sk_qs, qtab.inc)
+sk_ok:
         lda c_lvl
         cmp sk_req,x
+        bcc +
+        lda q_step
+        cmp sk_qs,x
++       rts
+
+; X = abilita' (0..3): diventa quella del Fire se c'e' (sk_ok); il nome compare per un po' nell'HUD
+sel_skill:
+        jsr sk_ok
         bcc _no
         stx c_skill
         stx hud_nm

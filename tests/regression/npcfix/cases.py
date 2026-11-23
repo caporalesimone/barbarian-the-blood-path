@@ -72,7 +72,7 @@ def placed(ctx):
         check(later.get(i) == (tx, ty), "fixed NPC %d moved to %s" % (i, later.get(i)))
 
 
-@test("NPCFIX-11", "next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv)")
+@test("NPCFIX-11", "next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/regression/qgiv)")
 def names(ctx):
     g, L = ctx["g"], ctx["L"]
     for k, (i, tx, ty, _) in enumerate(ctx["spec"], 1):

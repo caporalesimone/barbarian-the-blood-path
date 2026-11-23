@@ -227,9 +227,12 @@ ne ricava il colore del "!" (`npc_bmark`, bianco quando è in alto). I vaganti d
 testo dell'offerta con il contatore vero. Anche nel sotterraneo (QTX copre la coda del tema, come la scheda C; i segni si
 rifanno solo nel villaggio). Il concept del 17-18/11 (`QST0`..`QST8`, `src/qpage.asm`, `gen_quests.py`, `data/quests.yaml`,
 le quest dei vaganti) è stato tolto.
-Test: `QGIV-10`..`19`. **Da fare**: abilità dalla catena
-(Q15), cintura a 8, oggetto "qualsiasi" (passo 11), sblocco del capitolo alla consegna, cancello D4 nei capitoli 2-4
-(`QGATE_CH`), ripetibili (D18).
+(23/11) **Abilità dalla catena (Q15)**: `sk_ok` (GAME) vuole il livello (`sk_req`) e `q_step` >= il passo che dà l'abilità
+(`sk_qs`, scritta da `gen_qdata.py` dai premi `skill:` della catena: Whirlwind 2, Battle Cry 4, Rage 6, Smash 8, Frenzy 9); la
+usano `sel_skill`, `buff_act` e l'HUD. **Sblocco del capitolo alla consegna**: in `qg_give`, consegnato il passo 3c con *c* <=
+`QGATE_CH` (i capitoli con il cancello D4, che garantisce il passo preso prima del boss) → `c_unl` = *c*+1; `chap_won` non
+sblocca più quei capitoli. Test: `QGIV-10`..`19`, `QREW-10`..`12`. **Da fare**: cintura a 8, oggetto "qualsiasi" (passo 11),
+cancello D4 nei capitoli 2-4 (`QGATE_CH`: con il cancello anche lo sblocco alla consegna), ripetibili (D18).
 
 ---
 
@@ -254,7 +257,8 @@ Test: `QGIV-10`..`19`. **Da fare**: abilità dalla catena
 | 12 | **the saint's heart** | the Penitent | C: Lord of Ruin (piano 20) | borsello **1300**, gettone respec (c'è già), *aldric's heart* (unico), vittoria e Abisso |
 
 Abilità e piani (Q15): Whirlwind (livello 3) al passo 2 (piano 3), Battle Cry (6) al 4 (piani 6–7), Rage (9) al 6 (piano 10),
-Smash (12) all'8 (piani 13–14), Frenzy (15) al 9 (piano 15): da verificare col simulatore.
+Smash (12) all'8 (piani 13–14), Frenzy (15) al 9 (piano 15): da verificare col simulatore. (23/11) Nel codice: `sk_qs`, `sk_ok`
+(sezione 4.5).
 
 ---
 

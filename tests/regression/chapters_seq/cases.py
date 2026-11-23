@@ -64,11 +64,14 @@ def seq_boss_level(ctx):
     check(fin in ptrs or fin + 1 in ptrs, "boss sprite is not the final boss (%02x not in %s)" % (fin, ptrs))
 
 
-@test("CHAP-SEQ-12", "killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2)")
+@test("CHAP-SEQ-12", "killing the boss of chapter 1 does not unlock chapter 2 (23/11: step 3 handed in at QGIV does, QREW-12): c_unl stays 1; the quest goal C is reached")
 def seq_kill(ctx):
     g = ctx["g"]; L = g.L
+    g.poke(L["q_step"], 2); g.poke(L["q_flag"], 1)                  # step 3 taken (the gate D4 lets the hero in)
     g.call_keep(L["kill_monster"], regs="x=%02x" % (g.b(L["lb_boss"]) - 1))
-    check(g.b(L["c_unl"]) == 2, "c_unl %d" % g.b(L["c_unl"]))
+    check(g.b(L["c_unl"]) == 1, "c_unl %d, expected 1" % g.b(L["c_unl"]))
+    check(g.b(L["q_flag"]) & 2, "goal C of step 3 not reached (q_flag %d)" % g.b(L["q_flag"]))
+    g.poke(L["q_step"], 3); g.poke(L["q_flag"], 0); g.poke(L["c_unl"], 2)  # handed in (QGIV, QREW-12): exit open
 
 
 @test("CHAP-SEQ-13", "village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved")

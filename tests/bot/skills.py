@@ -451,6 +451,11 @@ class Town(Capability):
                     return
         bot.heal_tries = 0
         chap, unl = e.b(L["c_chap"]), e.b(L["c_unl"])
+        if unl <= chap and "q_step" in L and e.b(L["q_step"]) == 3 * chap - 1 and e.b(L["q_flag"]) & 2:
+            # (23/11) the bot does not do quests: the chapter is unlocked by handing in step 3c (QGIV), not by the boss
+            e.poke(L["q_step"], 3 * chap); e.poke(L["q_flag"], e.b(L["q_flag"]) & 0xf0); e.poke(L["c_unl"], chap + 1)
+            bot.log.event("cheat", what="hand in", q_step=3 * chap)
+            unl = chap + 1
         if unl > chap:                                     # the chapter boss is dead: the exit of the village is open
             goal = {(e.b(L["tx_exit_x"] + k), e.b(L["tx_exit_y"] + k)) for k in range(L["TX_EXIT_N"])}
             what = "exit"

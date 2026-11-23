@@ -132,6 +132,8 @@ ar_fight:
         ; PG
         lda PAR_PLVL
         sta c_lvl
+        lda #QT_CHAIN           ; (23/11, Q15) catena finita: le abilita' le decide solo il livello, come nel simulatore
+        sta q_step
         ldx #2
 -       lda PAR_SADD,x
         sta c_sadd,x
@@ -473,8 +475,7 @@ _bn     inx
 _l      lda ar_skb,x
         and PAR_SKILLS
         beq _n
-        lda c_lvl
-        cmp sk_req,x
+        jsr sk_ok
         bcc _n
         lda sk_cdl,x
         ora sk_cdh,x

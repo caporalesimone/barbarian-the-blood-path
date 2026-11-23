@@ -1293,8 +1293,7 @@ _tz     dex
 
 ; X = 4 Rage (tasto R) / 5 Frenzy (tasto F): attivazione immediata se il livello basta e la ricarica e' finita
 buff_act:
-        lda c_lvl
-        cmp sk_req,x
+        jsr sk_ok               ; livello e passo della catena (Q15)
         bcc _r
         lda sk_cdl,x
         ora sk_cdh,x

@@ -125,7 +125,7 @@ def page_none(ctx):
     check(g.b(L["cur_level"]) == 0 and g.in_game(), "not back in the village")
 
 
-@test("QUEST-12", "Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv); concept quest 1 marked taken for the list tests below")
+@test("QUEST-12", "Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/regression/qgiv); concept quest 1 marked taken for the list tests below")
 def page_quest(ctx):
     g, L = ctx["g"], ctx["L"]
     tx, ty = g.b(L["npc_tx0"]), g.b(L["npc_ty0"])

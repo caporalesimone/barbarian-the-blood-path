@@ -133,7 +133,12 @@ _fin    lda #1                  ; sala del trono: come la morte del boss finale 
         jsr resp_add
         .endrept
         jmp _home
-_boss   jsr chap_won            ; piano del boss del capitolo: come la sua morte (capitolo dopo sbloccato)
+_boss   lda cur_level
+        jsr lv_grp              ; piano del boss del capitolo: capitolo dopo sbloccato (23/11: anche nei capitoli con il
+        cmp c_unl               ; cancello delle quest, dove nel gioco lo sblocca la consegna del passo 3c)
+        bcc _home
+        adc #0                  ; (C = 1) c + 1
+        sta c_unl
 _home   lda #0                  ; al villaggio del capitolo, alla cripta (come le scale in su dal primo piano)
         tax
         jmp change_level

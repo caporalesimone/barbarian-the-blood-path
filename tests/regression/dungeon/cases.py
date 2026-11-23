@@ -283,6 +283,7 @@ def portal_stash(ctx):
 
 def skill_ready(g, x):
     g.poke(g.L["sk_cdl"] + x, 0); g.poke(g.L["sk_cdh"] + x, 0)
+    g.poke(g.L["q_step"], 12)                                   # (23/11, Q15) chain done: only the level decides
 
 
 def fire_once(g):

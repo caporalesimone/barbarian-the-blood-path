@@ -15,6 +15,7 @@ def setup(ctx):
     new_game(g)
     go_level(g, 1)
     g.poke(g.L["godmode"], 1)
+    g.poke(g.L["q_step"], 12)                                   # (23/11, Q15) chain done: only the level decides
 
 
 def teardown(ctx):

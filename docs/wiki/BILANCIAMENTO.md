@@ -473,6 +473,9 @@ la frequenza dei tesori buoni (10% dei tiri a ≥ 0,8 T), l'oro dei bauli epici 
 - Pozioni: il simulatore beve sotto il 35% della vita con la cintura di riferimento; il colore reale dipende
   dal piano (zone).
 - Frenzy: il simulatore conta il colpo in più, non la corsa.
+- (23/11) **Abilità e catena (Q15)**: nel gioco un'abilità vuole il livello e il passo della catena consegnato
+  (`sk_ok`); il simulatore guarda solo il livello, cioè assume un giocatore che consegna i passi al piano previsto
+  ([quests](quests.md) sezione 5). L'arena fa lo stesso (`q_step` = 12).
 - Usura, armi rotte (danno 0 dal 07/11, prima pugni), riparazioni: solo in `sim_durability.py`.
 - Bottino: `sim_chest.py` riproduce `gen_item` (categoria, L = round(T·u²), oggetto migliore ≤ L, magia da
   `bon_tab[L]`), ma non la sequenza esatta del generatore del gioco (i bauli del piano sono deterministici dal

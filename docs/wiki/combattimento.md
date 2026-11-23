@@ -82,7 +82,10 @@ Ogni colpo sveglia il mostro e lo rende il bersaglio della riga del bersaglio.
 
 ### Abilità (`perform_skill1`)
 
-Si scelgono con H J K L (`sel_skill`, solo se il livello basta) e si usano tenendo Fire.
+Si scelgono con H J K L (`sel_skill`) e si usano tenendo Fire. (23/11, Q15 di [quests](quests.md)) Un'abilità c'è (`sk_ok`)
+solo con il **livello** della tabella **e** il **passo della catena** che la insegna consegnato (`sk_qs` in `qtab.inc`,
+`q_step` >= passo): Whirlwind 2, Battle Cry 4, Rage 6, Smash 8, Frenzy 9; Slash sempre. Vale anche per Rage e Frenzy (`buff_act`)
+e per le lettere dell'HUD.
 
 | Abilità | Tasto | Livello | Ricarica | Area (semilarghezza × semialtezza, px) | Effetto |
 |---|---|---|---|---|---|

@@ -56,9 +56,10 @@
  every skill but slash and both powers
  need time to recharge after use.
 
- {a skill shows in the hud only when}
- {your level allows it. from level 17}
- {a roll of 19 or 20 is a critical.}
+ {a skill needs its level and the}
+ {quest that teaches it. it shows in}
+ {the hud only then. from level 17 a}
+ {roll of 19 or 20 is a critical.}
 === skill: slash (h)
  your basic attack, from level 1.
 
@@ -75,7 +76,8 @@
    hold [fire]: it strikes again as
    soon as it can.
 === skill: whirlwind (j)
- from level 3.
+ from level 3, when the quest
+ the widow's son is done.
 
  <what it does>
    you spin around: one attack roll
@@ -89,7 +91,8 @@
    use it when they surround you:
    one [fire], many blows.
 === skill: battle cry (k)
- from level 6.
+ from level 6, when the quest
+ the silent village is done.
 
  <what it does>
    a cry that reaches the monsters
@@ -105,7 +108,8 @@
    the higher your str, the harder
    the saving throw.
 === skill: smash (l)
- from level 12.
+ from level 12, when the quest
+ the oath roll is done.
 
  <what it does>
    a heavy blow around you: two attack
@@ -117,7 +121,9 @@
  <recharge>
    6 seconds.
 === power: rage (u)
- from level 9. it starts at once.
+ from level 9, when the quest
+ the silver needle is done.
+ it starts at once.
 
  <what it does>
    for 6 seconds the damage you take
@@ -130,7 +136,9 @@
    {yellow: on   white: ready}
    {cyan: recharging}
 === power: frenzy (o)
- from level 15. it starts at once.
+ from level 15, when the quest
+ the oathbreaker is done.
+ it starts at once.
 
  <what it does>
    for 5 seconds every [fire] strikes

@@ -143,7 +143,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `INN-GOLD-01` | inn: entering, the carried gold goes into the chest (in tens) |
 | `LVL-IN-01` | crypt: enter level 1 |
 | `FIGHT-01` | combat: a monster killed, experience gained |
-| `PG-LEVEL-01` | level up: experience over the threshold -> level + 1, more hp, Whirlwind selectable at level 3 |
+| `PG-LEVEL-01` | level up: experience over the threshold -> level + 1, more hp, Whirlwind selectable at level 3 (with step 2 of the chain) |
 | `MAP-02` | minimap on level 1: hero marker on the hero's position |
 | `POTION-01` | potion: key 1 drinks the first belt slot, hp grows, slot freed |
 | `DUNG-CHEST-01` | level chest: opens, gold and item taken |
@@ -159,28 +159,15 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (16)
+### sanity (3)
 
 | ID | Test |
 |---|---|
-| `QGIV-10` | father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet; (22/11) text with a blank row between lines, scroll bar on column 39 (CH_THUMB), S scrolls one line |
-| `QGIV-11` | step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, purse step (q_flag $10), the 'done' text |
-| `QGIV-12` | hilde gives step 2 (the amulet, from father osric); grom gives a1.1 (side, q_side slot 0 = id 1) after step 1 of the chapter |
-| `QGIV-13` | a1.1 reached, back to grom: a magic sword; then a1.2 (G: 300 gold) offered; Fire again: 'give 300 gold?' yes -> -300 gold, the gravedigger, q_sdone bits 0-1 |
-| `QGIV-14` | Q12: pack full, step 2 reached: father osric says 'no room' and the step stays to be taken back (q_step 1, q_flag bit 1) |
-| `QGIV-15` | D12, marks of the fixed NPCs (q_marks, npc_q): yellow '!' $87 who has a quest to give, yellow '?' $97 who takes one back (22/11, before a green '!'), 0 nobody; the sprite of the mark ('?': pointer NPC_QPTR) is yellow |
-| `QGIV-16` | page Q (key Q, module QGIV with q_k $ff): step 2 and the side a1.3 taken -> 2 rows with their titles; Fire on the first: its text and the goal; RUN/STOP back |
-| `QGIV-18` | town minimap (M): a mark over each fixed NPC with a mark (sprites 3..5 = k 1..3, mm_qmark): osric a yellow '?' (block MG_B+4, 22/11), the gravedigger a yellow '!' (block MG_B+3), grom none; double size, x = 82 + 4 col, y = 34 + 4 row |
-| `QGIV-19` | (23/11) back in the village from the QGIV module (talk, page Q): CORE read again before the game is shown (core_ok = 1 at irq_on of ui_exit), then no frame over 25000 cycles while walking |
-| `QGIV-17` | page Q in a dungeon (level 1, no MENU module): the list, RUN/STOP back in the game; the stairs down still work (theme and CORE read again) |
-| `DROP-10` | (23/11) a monster hit shows its name and life in the target row; when it dies the row is empty within 2 frames (not after BTH_FR = 50) |
-| `DROP-11` | (23/11) a chest left by a dead monster (defer_drop) appears DROP_T frames later (+-2), with another monster still in contact with the hero (combat going on) |
-| `LIST-C-10` | (23/11, prototype liste-compatte) inventory, pack with 3 items of 8: the pack entries are the 3 occupied slots (no '-' rows); equipment and belt keep every slot |
-| `LIST-C-11` | (23/11, prototype) inn: the chest with 2 items of 24 shows 2 entries, the pack only its items |
-| `LIST-C-12` | (23/11, prototype) inn: a pack item to the empty chest (1 entry), back to the pack (chest empty again): the cursor goes back to the pack list; D on the empty chest list does nothing |
-| `LIST-C-13` | (23/11, prototype) inventory: Fire on the only pack item (equip): the lists are counted again (no entries past the pack: before, slots after c_pack showed as red items, snapshot liste.6) |
+| `QREW-10` | Q15: sk_qs from quests.yaml (0, 2, 4, 8, 6, 9); level 3 with step 1 handed in: no Whirlwind; level 9 with step 5: no Rage (buff_act), with step 6 Rage starts |
+| `QREW-11` | step 2 reached, handed in to father osric (level 3): q_step 2, 'the skill whirlwind' in the reward, then J chooses Whirlwind |
+| `QREW-12` | chapter 1: the boss dying does not unlock chapter 2 (chap_won, c_unl 1); step 3 handed in to father osric: c_unl 2, purse step 1 (550) |
 
-### regression (282)
+### regression (304)
 
 | ID | Test |
 |---|---|
@@ -210,6 +197,12 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BEST-12` | the checker refuses a wrong bestiary: strong_of of another chapter, unknown tier, duplicate id |
 | `BOOT-10` | POKE 1020,1: BARBARIAN -> START from disk without the menu (Krill installed), GAME, LOBBY and hero list loaded |
 | `BOOT-11` | START from the monitor (wait screen, no bar) up to the game menu |
+| `DROP-10` | a monster hit shows its name and life in the target row; when it dies the row is empty within 2 frames (not after BTH_FR = 50) |
+| `DROP-11` | a chest left by a dead monster (defer_drop) appears DROP_T frames later (+-2), with another monster still in contact with the hero (combat going on) |
+| `LIST-C-10` | inventory, pack with 3 items of 8: the pack entries are the 3 occupied slots (no '-' rows); equipment and belt keep every slot |
+| `LIST-C-11` | inn: the chest with 2 items of 24 shows 2 entries, the pack only its items |
+| `LIST-C-12` | inn: a pack item to the empty chest (1 entry), back to the pack (chest empty again): the cursor goes back to the pack list; D on the empty chest list does nothing |
+| `LIST-C-13` | inventory: Fire on the only pack item (equip): the lists are counted again (no entries past the pack: before, slots after c_pack showed as red items, snapshot liste.6) |
 | `LORE-10` | release: BARBARIAN menu, HELP (all the pages of data/help.txt), LORE (identical LDAT), joystick fire held = double scroll speed (released: normal; held at the end: no exit), return, START |
 | `LORE-11` | LORE story stream: one blank row between the text rows of a paragraph, two between paragraphs, size limits (15/11) |
 | `HELP-10` | release: the HUD crop in the help equals the game HUD |
@@ -218,6 +211,16 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BOOT-14` | BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), keyboard and screen as at power-on (16/11) |
 | `BOOT-15` | START is silent (no SID player): the menu music stops when the game is chosen and restarts only in the lobby (16/11) |
 | `BOOT-16` | HELP and LORE exits: wait page (phrase on row 10, 'please wait' on row 13, VIC bank 0, screen on) before the reload of BARBARIAN (16/11) |
+| `QGIV-10` | father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet; (22/11) text with a blank row between lines, scroll bar on column 39 (CH_THUMB), S scrolls one line |
+| `QGIV-11` | step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, no purse step (q_flag 0: the purse of 1000 moved to step 3 on 22/11), the 'done' text |
+| `QGIV-12` | hilde gives step 2 (the amulet, from father osric); grom gives a1.1 (side, q_side slot 0 = id 1) after step 1 of the chapter |
+| `QGIV-13` | a1.1 reached, back to grom: a magic sword; then a1.2 (G: 300 gold) offered; Fire again: 'give 300 gold?' yes -> -300 gold, the gravedigger, q_sdone bits 0-1 |
+| `QGIV-14` | Q12: pack full, step 2 reached: father osric says 'no room' and the step stays to be taken back (q_step 1, q_flag bit 1) |
+| `QGIV-15` | D12, marks of the fixed NPCs (q_marks, npc_q): yellow '!' $87 who has a quest to give, yellow '?' $97 who takes one back (22/11, before a green '!'), 0 nobody; the sprite of the mark ('?': pointer NPC_QPTR) is yellow |
+| `QGIV-16` | page Q (key Q, module QGIV with q_k $ff): step 2 and the side a1.3 taken -> 2 rows with their titles; Fire on the first: its text and the goal; RUN/STOP back |
+| `QGIV-17` | page Q in a dungeon (level 1, no MENU module): the list, RUN/STOP back in the game; the stairs down still work (theme and CORE read again) |
+| `QGIV-18` | town minimap (M): a '!' over each fixed NPC with a mark (sprites 3..5 = k 1..3, mm_qmark): osric a yellow '?' (block MG_B+4, 22/11), the gravedigger a yellow '!' (block MG_B+3), grom none; double size, x = 82 + 4 col, y = 34 + 4 row |
+| `QGIV-19` | (23/11) back in the village from the QGIV module (talk to father osric, page Q): CORE read again before the game is shown (core_ok = 1 at irq_on of ui_exit), then no frame over 25000 cycles while walking |
 | `TITLEMUSIC-10` | HELP: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
 | `TITLEMUSIC-11` | BARBARIAN: Demon's Eye with its own IRQ clock (CIA1 timer A, 19656 cycles), IRQ/SID/CIA restored before the KERNAL LOAD |
 | `BOOT-17` | BARBARIAN menu: one loop per frame whatever the phase of the music IRQ (CIA1 timer locked to the frame; before 19/11 an IRQ over raster line 250 froze the menu for ever, TODO I6, LORE-10 hangs) |
@@ -239,7 +242,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-11` | tools/simulators/chapters.py: every generated level of a chapter at its global depth with the chapter's bestiary, the chapter boss |
 | `CHAP-SEQ-10` | new hero in chapter 1 (c_chap = c_unl = 1); the village exit is closed: no label, the edge stops the hero |
 | `CHAP-SEQ-11` | level 5 = boss level of chapter 1: map BOSSCH1 (stairs up, no stairs down), boss drawn as the final boss |
-| `CHAP-SEQ-12` | killing the boss of chapter 1 unlocks chapter 2 (c_unl = 2) |
+| `CHAP-SEQ-12` | killing the boss of chapter 1 does not unlock chapter 2 (23/11: step 3 handed in at QGIV does, QREW-12): c_unl stays 1; the quest goal C is reached |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
 | `CHAP-SEQ-14` | chapter 2: the crypt leads to level 6 (first of the chapter); its stairs up lead back to the village |
 | `CS-10` | no points, no token: nothing about respec on the screen, no entries, 'no points to spend.', next point at level 5 |
@@ -348,7 +351,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `MUSIC-11` | .sid files: one per song, PSID header, init + 50 frames of play write gate and frequency of the SID voices |
 | `MUS-IO-10` | village and level 2: Q page open and closed 3 times; back in the game the SID volume is full (15) and mus_mute is 0 |
 | `NPCFIX-10` | village 1: the fixed NPCs are on their tiles (header tk_fix), with their design, still, npc_q = the D12 mark (0, $85, $87); nobody else in their sectors |
-| `NPCFIX-11` | next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv) |
+| `NPCFIX-11` | next to each fixed NPC the bar shows its name (22/11: Fire opens the quest module QGIV, tests/regression/qgiv) |
 | `OPT-11` | bar_far (sabs): monster off screen at |dx| >= 176 or |dy| >= 112, both signs |
 | `OPT-12` | neg16 / sabs: -tmp0:1 and |tmp0:1| saturated at 255 |
 | `OPT-02` | gold_total: c_gold + 10 x c_sgold (24 bit) at the limits |
@@ -403,7 +406,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
 | `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
 | `QUEST-11` | Q with no quest taken: the list (22/11: module QGIV, q_k $ff) says 'talk to the villagers', RUN/STOP goes back to the game |
-| `QUEST-12` | Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/sanity/qgiv); concept quest 1 marked taken for the list tests below |
+| `QUEST-12` | Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/regression/qgiv); concept quest 1 marked taken for the list tests below |
 | `QUEST-13` | the walkers move (slowly, the hero 4 tiles away), stay inside their sector, never stand on the hero's tile; with the hero next to them they stop |
 | `QUEST-14` | the visible NPCs get the free sprites 3..7 (never the hero's, never more than 5) |
 | `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |

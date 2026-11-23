@@ -249,7 +249,7 @@ Prima versione giocabile del sistema delle quest, con testi segnaposto (17–18/
   W/S e premio. È il modulo `QGIV` (file `qstg`, `q_k` = `$ff`), con i testi del capitolo (`QTXc`). **Lobby**: "active quests:"
   = quest prese, "completed quests:" = passi della catena e accessorie consegnati.
 - **Test**: `tests/regression/quest/cases.py` (QUEST-10..14, 16: piazzamento, elenco vuoto, nome di Hilde, vaganti che si fermano,
-  sprite, cadenza dell'attacco); `tests/sanity/qgiv` (QGIV-10..19: modulo delle quest, segni, pagina Q, rientro con CORE riletto).
+  sprite, cadenza dell'attacco); `tests/regression/qgiv` (QGIV-10..19: modulo delle quest, segni, pagina Q, rientro con CORE riletto).
 
 ## Armaiolo: tolto (09/11, decisione del committente)
 

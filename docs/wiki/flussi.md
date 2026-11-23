@@ -392,7 +392,7 @@ flowchart TD
     TT -->|"porta della locanda / negozio"| VM["sezione 15"]
     TT -->|"leva (piano 20)"| LV["ui_lever"]
     SCR["pergamena (tasto 5)"] --> PT["portale sul piano: c_portal, c_retlvl"]
-    KM["kill_monster: boss del piano del boss<br/>di un capitolo (lv_cboss)"] --> CW["chap_won: c_unl = c + 1"]
+    KM["kill_monster: boss del piano del boss<br/>di un capitolo (lv_cboss)"] --> CW["chap_won: c_unl = c + 1<br/>(capitolo 1: alla consegna del passo 3, QGIV)"]
 ```
 
 ## 14. Schermate: motore dei menu

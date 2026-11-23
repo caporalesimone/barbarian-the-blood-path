@@ -461,6 +461,8 @@ game_start:
         sta c_sadd+1
         lda pl_rcon+TESTCL
         sta c_sadd+2
+        lda #QT_CHAIN           ; (23/11, Q15) il PG di riferimento ha fatto la catena: abilita' secondo il livello
+        sta q_step
 .endif
         jsr recalc_stats
         jsr hp_full
@@ -698,6 +700,8 @@ tu_nm2  .byte 7,18,5,25,32,23,15,12,6,32,32,32   ; "grey wolf"
         ror c_xp
 .endif
 .if TESTUI == 27                ; avvisi dell'HUD (screenshot del manuale): vita bassa e arma quasi rotta
+        lda #QT_CHAIN           ; (23/11, Q15) catena finita: le lettere delle abilita' come prima
+        sta q_step
         lda #6
         sta c_hp
         lda #0

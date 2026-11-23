@@ -177,7 +177,7 @@ def fight(ctx):
     check(False, "no reachable monster")
 
 
-@test("PG-LEVEL-01", "level up: experience over the threshold -> level + 1, more hp, Whirlwind selectable at level 3")
+@test("PG-LEVEL-01", "level up: experience over the threshold -> level + 1, more hp, Whirlwind selectable at level 3 (with step 2 of the chain)")
 def pg_level(ctx):
     g, L = ctx["g"], ctx["g"].L
     lv, hm = g.b(L["c_lvl"]), g.w16(L["hpmax"])
@@ -192,6 +192,7 @@ def pg_level(ctx):
     check(g.w16(L["hpmax"]) > hm, "max hp %d did not grow (was %d)" % (g.w16(L["hpmax"]), hm))
     check(g.w16(L["c_hp"]) == g.w16(L["hpmax"]), "hp not full after the level up")
     g.frames(2)
+    g.poke(L["q_step"], 2)                                         # (23/11, Q15) and step 2 of the chain handed in
     key(g, (4, 0x04), 2)                                           # J: Whirlwind (level 3)
     check(g.b(L["c_skill"]) == 1, "Whirlwind not selected at level 3 (c_skill %d)" % g.b(L["c_skill"]))
     key(g, (3, 0x20), 2)                                           # H: back to Slash

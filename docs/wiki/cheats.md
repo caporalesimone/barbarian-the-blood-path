@@ -43,7 +43,7 @@ Dettaglio di **`next level`** secondo dove si è:
 | Dove | Effetto |
 |---|---|
 | Piano normale | Il piano sotto, come le scale in giù (il piano lasciato si salva come sempre) |
-| Piano del boss di capitolo (5, 10, 15) | Come se il boss fosse morto (`chap_won`): capitolo vinto, capitolo dopo sbloccato, **ritorno al villaggio del capitolo**, alla cripta (la via in giù), con l'uscita aperta |
+| Piano del boss di capitolo (5, 10, 15) | Come se il boss fosse morto e (23/11) il passo della catena consegnato: capitolo dopo sbloccato (`c_unl`, anche nel capitolo 1 dove nel gioco lo sblocca la consegna a `QGIV`), niente quest, **ritorno al villaggio del capitolo**, alla cripta (la via in giù), con l'uscita aperta |
 | Sala del trono (piano 20) | Come il boss finale morto: `c_won` = 1, `c_unl` = 5, i gettoni respec del dono (`RESP_FINAL`), poi villaggio 4 |
 | Villaggi 1-4 | Il **primo piano del capitolo**, come la cripta |
 | Villaggio 5 | `limit reached` |

@@ -177,7 +177,7 @@ letta da `bmap_load` nel buffer di `FMAP`; i 4 byte di testa danno scale di arri
 `gen_cboss` (sotto l'I/O) prepara le due stanze logiche (arrivo, sala) e chiama `post_walls`. Niente scale in giù, nessun
 mostro normale (`spawn_monsters` esce subito), solo il boss del piano (`place_boss`, sulla casella `B`, statistiche del
 piano) disegnato con il **suo sprite** nel posto del boss finale del file (`build_sprites`). La sua morte sblocca il
-capitolo dopo (`chap_won`, [capitoli](capitoli.md)).
+capitolo dopo (`chap_won`; nel capitolo 1 dal 23/11 lo sblocca la consegna del passo 3 della catena, [capitoli](capitoli.md)).
 
 **Mappe** (19/11, richiesta del committente: ogni piano del boss ha tema e forma propri, legati al capitolo; il boss finale
 resta nella sala del trono a stella):

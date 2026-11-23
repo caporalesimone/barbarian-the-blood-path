@@ -48,10 +48,13 @@ chap_enter:
         rol lv_cboss
 _r      rts
 
-; morte del boss del capitolo (kill_monster): il capitolo dopo e' sbloccato
+; morte del boss del capitolo (kill_monster): il capitolo dopo e' sbloccato. (23/11, committente) Nei capitoli con il
+; cancello delle quest (1..QGATE_CH, qengine.asm) no: lo sblocca la consegna del passo 3c a QGIV (qg_give)
 chap_won:
         lda cur_level
         jsr lv_grp              ; A = capitolo
+        cmp #QGATE*QGATE_CH+1
+        bcc _r
         cmp c_unl
         bcc _r
         adc #0                  ; (C = 1) c + 1
