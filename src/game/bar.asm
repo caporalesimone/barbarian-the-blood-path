@@ -1,14 +1,10 @@
 ; ===================================================================
-;  bar.asm - barra vita + nome del mostro in alto (8 sprite nel bordo
-;  superiore, linee 21..41) e database dei nomi dei boss
+;  bar.asm - bersaglio (nome e vita del mostro, etichetta del luogo, messaggi delle quest: testo in nbuf e celle in cellf,
+;  scritti nella riga 19 dell'HUD da bt_row, hud.asm; fino al 23/11 in 8 sprite in alto) e database dei nomi dei boss.
+;  Gli sprite BARSPR ($8800/$B000) servono ancora al testo della minimappa (bt_step, costruzione sincrona)
 ; ===================================================================
 BARSPR     = $8800              ; 8 sprite x 64 byte, visibili al VIC (banco 2)
 BARPTR     = (BARSPR - $8000) / 64
-BAR_Y      = 55
-IRQ_BAR    = 76                 ; (17/11, era 70) cambio sprite barra -> gioco DOPO l'ultima riga degli sprite della barra
-                                ; (righe 56-76): uno sprite gia' acceso continua anche se lo si spegne, e con 70 le sue ultime
-                                ; righe si disegnavano con puntatore, colore e X di gioco (puntini sotto il nome dei negozi e sotto
-                                ; la barra della vita dei mostri, a destra: sprite 7, puntatore 0 = $8000, colore 0)
 
         .virtual $91a8
 li_t       .byte ?              ; tile sotto il giocatore (loc_id)
@@ -19,8 +15,6 @@ bar_on     .byte ?
 bar_lab    .byte ?              ; 0 = barra mostro; >0 = etichetta luogo sotto il giocatore
 bar_fr     .byte ?              ; sprite visibili: 0 = $8800, $28 = $B000 (doppio buffer)
 bt_bk      .byte ?              ; offset (pagine) del buffer in costruzione
-bar_cof    .byte ?
-bc_pb      .byte ?
 bt_ph      .byte ?              ; costruzione incrementale degli sprite: 0 = ferma, 1.. = fase
 bt_cel     .byte ?              ; 1 = a fine costruzione disegnare la barra vita
 bt_who     .byte ?              ; contenuto del testo gia' negli sprite: mostro+1 oppure $80|etichetta
@@ -41,7 +35,6 @@ gbuf       .fill 8
         .cerror gbuf+8 > $9200, "blocco barra oltre $9200"
 
 
-bar_x   .byte 88, 112, 136, 160, 184, 208, 232, 0
 mul3    .for i = 0, i < 8, i = i + 1
         .byte i*3
         .next
@@ -246,60 +239,13 @@ _cl     lda #0
         iny
         cpy #24
         bne _cl
-        lda #1
-        sta bt_cel
-        lda bar_m
+        lda bar_m               ; (23/11) la vita va nella riga del bersaglio dell'HUD (bt_row, da cellf); il nome in nbuf
         cmp bt_who
-        bne _new
-        lda bt_ph               ; stesso mostro: basta ridisegnare la barra (o lo fara' la costruzione in corso)
-        bne _r
-        lda bar_fr
-        sta bar_cof
-        jmp bar_cells
-_new    sta bt_who
+        beq _r
+        sta bt_who
         jsr bar_name
-        lda #1
-        sta bt_ph
 _r      rts
 
-; barra vita: righe sprite 11..16
-bar_cells:
-        lda #0
-        sta bc_i
-_b      ldx bc_i
-        lda bar_dl,x
-        sta ptr1
-        lda bar_dh,x
-        clc
-        adc bar_cof
-        sta ptr1+1
-        lda #$ff
-        ldy #27
-        sta (ptr1),y
-        ldy #39
-        sta (ptr1),y
-        lda cellf,x
-        bne _full
-        lda #0
-        cpx #0
-        bne _l1
-        lda #$80
-_l1     cpx #23
-        bne _fill
-        lda #$01
-        bne _fill
-_full   lda #$ff
-_fill   ldy #30
-        sta (ptr1),y
-        ldy #33
-        sta (ptr1),y
-        ldy #36
-        sta (ptr1),y
-        inc bc_i
-        lda bc_i
-        cmp #24
-        bne _b
-        rts
 
 ; un passo della costruzione degli sprite (al massimo ~2.5K cicli per frame, IRQ mai bloccato a lungo)
 ;  fase 1-2: azzera una pagina; 3-6: 6 glifi ciascuna; poi barra vita (se mostro) e fine
@@ -374,12 +320,7 @@ _gr     lda gbuf,x
         bne _g
         inc bt_ph
         rts
-_end    lda bt_cel
-        beq _done
-        lda bt_bk
-        sta bar_cof
-        jsr bar_cells
-_done   lda bt_bk               ; scambio: il buffer appena costruito diventa visibile
+_end    lda bt_bk               ; (23/11) solo il testo della minimappa: la barra di gioco non usa piu' gli sprite               ; scambio: il buffer appena costruito diventa visibile
         sta bar_fr
         lda #0
         sta bt_ph
@@ -397,10 +338,8 @@ _y      lda #1
 
 ; chiamata ogni frame dopo update_monsters
 update_bar:
-        jsr redraw_due          ; (19/11) il testo della barra si costruisce a pezzi: nei fotogrammi di ridisegno il pezzo aspetta
-        bcs +
-        jsr bt_step
-+
+        lda #0                  ; (23/11) niente sprite della barra: il testo e' gia' in nbuf (bt_row lo scrive nell'HUD);
+        sta bt_ph               ; bt_step resta per il testo della minimappa (ui.asm, costruzione sincrona negli sprite a $8800)
         lda bar_t
         bne _act
         lda lb_boss
@@ -468,41 +407,6 @@ bar_set:
         lda #0
         sta bar_lhp
 _r      rts
-
-; registri sprite della barra (chiamato da apply_frame)
-bar_regs:
-        lda #BARPTR
-        ldy bar_fr
-        beq _p0
-        lda #BARPTR+160         ; $B000
-_p0     sta bc_pb
-        ldx #7
-_l      txa
-        asl
-        tay
-        lda bar_x,x
-        sta SPR_X,y
-        lda #BAR_Y
-        sta SPR_X+1,y
-        lda #1
-        sta SPR_COL,x
-        txa
-        clc
-        adc bc_pb
-        sta SCR_A+$3f8,x
-        sta SCR_B+$3f8,x
-        sta SCR_H+$3f8,x
-        dex
-        bpl _l
-        lda #$80
-        sta SPR_MSB
-        lda #0
-        sta SPR_XEXP
-        sta SPR_YEXP
-        sta SPR_MC
-        lda #$ff
-        sta SPR_EN
-        rts
 
 ; un mostro e' stato colpito: mostra la barra
 bar_target:                     ; X = indice mostro (preservato)

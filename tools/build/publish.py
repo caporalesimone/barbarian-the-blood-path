@@ -40,7 +40,7 @@ def game_metrics():
     if os.path.isfile(p):
         lb = {m.group(1): int(m.group(2), 16) for m in (re.match(r"(\w+)\s*=\s*\$([0-9a-f]+)", x) for x in open(p)) if m}
         if all(k in lb for k in ("SCR_H", "gfx_data", "FREE_RAM_END", "code2_end")):
-            ms.append(metric("ram_free_8720", "RAM libera sotto $8720", lb["SCR_H"] + 800 - lb["gfx_data"], "B", "up",
+            ms.append(metric("ram_free_8720", "RAM libera sotto $86F8", lb["SCR_H"] + 760 - lb["gfx_data"], "B", "up",
                              "codice del gioco fino allo schermo dell'HUD"))
             ms.append(metric("ram_free_9c00", "RAM libera blocco $9C00", lb["FREE_RAM_END"] + 1 - lb["code2_end"], "B", "up"))
     q = os.path.join(OUT, "work", "game.zx0")

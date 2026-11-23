@@ -11,7 +11,7 @@
 NPC_BPTR = (NPC_BANG-$8000)/64  ; $30
 NPC_QPTR = (NPC_QMARK-$8000)/64 ; (22/11) $39: il "?" (quest da ritirare)
 NPC_BUP  = 18                   ; il "!" sta 18 righe sopra lo sprite dell'NPC (14 righe disegnate: 4 righe di stacco)
-NPC_BMIN = 80                   ; sopra questa riga c'e' la barra in alto (IRQ_BAR, bar.asm): li' il "!" non si disegna
+NPC_BMIN = 35                   ; (23/11) era 80, sotto la barra di sprite in alto (tolta): come il limite degli sprite di gioco
 
         .binary "../out/work/gfx/npc_bang.bin"  ; NPC_BANG (64 B, tools/build/npc_gfx.py BANG)
         .cerror * != NPC_JT, "zona 5: la tabella dei salti degli NPC deve seguire lo sprite del !"

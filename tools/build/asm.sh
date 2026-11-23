@@ -99,8 +99,8 @@ ls -la out/work/game.prg
 python3 - <<'PY'
 import re
 l = {m.group(1): int(m.group(2), 16) for m in (re.match(r'(\w+)\s*=\s*\$([0-9a-f]+)', x) for x in open('out/work/game.lbl')) if m}
-m1 = l['SCR_H'] + 800 - l['gfx_data']; m2 = l['FREE_RAM_END'] + 1 - l['code2_end']; m = min(m1, m2)
-print(f"margine codice: {m1} B fino a $8720 (fine ${l['gfx_data']:04x}), {m2} B nel blocco $9C00-$9FFF")
-if m1 < 1024:                          # il blocco $9C00 e' piccolo per costruzione: conta il margine sotto $8720
-    print("*** ATTENZIONE: margine sotto $8720 inferiore a 1 KB: e' ora di liberare memoria ***")
+m1 = l['SCR_H'] + 760 - l['gfx_data']; m2 = l['FREE_RAM_END'] + 1 - l['code2_end']; m = min(m1, m2)
+print(f"margine codice: {m1} B fino a $86F8 (fine ${l['gfx_data']:04x}), {m2} B nel blocco $9C00-$9FFF")
+if m1 < 1024:                          # il blocco $9C00 e' piccolo per costruzione: conta il margine sotto $86F8
+    print("*** ATTENZIONE: margine sotto $86F8 inferiore a 1 KB: e' ora di liberare memoria ***")
 PY
