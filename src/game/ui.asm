@@ -2465,8 +2465,8 @@ ui_gamemenu:
         ldx #>tt_gm
         ldy #0
         jsr ui_title
-        #at VER_X+1,19          ; (23/11, committente) seed della partita sopra la versione, centrato, staccato dalle voci
-        #msg "seed "
+        #at VER_X+1,18          ; (23/11, committente) seed della partita sopra la versione, centrato, staccato dalle voci,
+        #msg "seed "            ; una riga vuota fra seed e versione
         jsr ui_seed
         #at VER_X,20            ; centrata (09/11)
         #msg "version " .. VERSION
