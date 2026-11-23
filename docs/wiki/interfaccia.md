@@ -72,7 +72,9 @@ Tutte le schermate a tutto schermo usano lo stesso motore, `ui_nav` (`src/game/u
   posto per le azioni (`sl_sl`) resta quello vero. Restano interi l'equipaggiamento (5 posti fissi), la cintura (posti 1-4 dei
   tasti e scelta del posto della pozione) e la merce. Uno zaino vuoto non ha né voci né riga separatrice; un baule vuoto è una
   lista senza voci: A/D non ci portano il cursore (`sl_nav`) e, se si svuota con il cursore sopra, il cursore torna all'altra
-  lista (`sl_z`); la locanda apre sulla prima voce dello zaino o, se è vuoto, sull'arma (`sl_fwd`). Test `LIST-C-10..12`. Le
+  lista (`sl_z`); la locanda apre sulla prima voce dello zaino o, se è vuoto, sull'arma (`sl_fwd`). Le voci cambiano con i posti occupati,
+  quindi ogni schermata le riconta dopo ogni azione (`sl_reinit`; inventario: `iv_rc`, aggiunto dopo lo snapshot liste.6 in cui,
+  indossato l'ultimo oggetto dello zaino, la lista mostrava come zaino i posti oltre `c_pack`: oggetti "rossi"). Test `LIST-C-10..13`. Le
   schermate a due liste (negozi, locanda, baule del piano) usano `ls2_frame`, `ls2_init`, `ls2_draw` (righe 2-7 e 10-16) e
   il riquadro dell'oggetto `iv_sel` (righe 18-22: icona e nome nel titolo; la riga 3 la sceglie la schermata, `iv_l3`).
 - **Icona della categoria** (08/11 sera, `ui_cic`): in ogni lista di oggetti (pack, wares, contents, zaino e baule

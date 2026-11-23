@@ -159,7 +159,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (15)
+### sanity (16)
 
 | ID | Test |
 |---|---|
@@ -178,6 +178,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `LIST-C-10` | (23/11, prototype liste-compatte) inventory, pack with 3 items of 8: the pack entries are the 3 occupied slots (no '-' rows); equipment and belt keep every slot |
 | `LIST-C-11` | (23/11, prototype) inn: the chest with 2 items of 24 shows 2 entries, the pack only its items |
 | `LIST-C-12` | (23/11, prototype) inn: a pack item to the empty chest (1 entry), back to the pack (chest empty again): the cursor goes back to the pack list; D on the empty chest list does nothing |
+| `LIST-C-13` | (23/11, prototype) inventory: Fire on the only pack item (equip): the lists are counted again (no entries past the pack: before, slots after c_pack showed as red items, snapshot liste.6) |
 
 ### regression (282)
 

@@ -129,6 +129,12 @@ _l      inx
         txa
         ldx sv_x
         rts
+; (inv.asm, inventario) dopo ogni azione (indossa, togli, usa, elimina) le voci dello zaino si ricontano: dipendono dai
+; posti occupati. Senza, la lista restava con il conto vecchio e sl_map mostrava come zaino i posti oltre c_pack (c_eq...:
+; oggetti "rossi" che non c'erano, snapshot liste.6 del 23/11)
+iv_rc:  ldx #0
+        jsr sl_reinit
+        jmp iv_cur
 ; (sl_reinit, slist.asm) lista X rimasta senza voci (ultimo oggetto spostato) e con il cursore: il cursore passa all'altra
 ; lista, se ne ha; poi sl_fwd. Nessuna lista con il cursore resta vuota: sl_get presume che la voce esista
 sl_z:   lda sl_n,x

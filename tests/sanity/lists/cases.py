@@ -94,3 +94,26 @@ def inn_empty(ctx):
     cs, want = check_lists(g, "after chest -> pack")
     check(cs == want == [] and g.b(L["sl_l"]) == 0 and not g.in_game(),
           "chest %s, cursor list %d (expected the pack list 0)" % (cs, g.b(L["sl_l"])))
+
+
+@test("LIST-C-13", "inventory: Fire on the only pack item (equip): the lists are counted again (no entries past the pack: before, slots after c_pack showed as red items, snapshot liste.6)")
+def inv_recount(ctx):
+    from lib.play import D
+    g = ctx["g"]; L = g.L
+    for _ in range(3):
+        if g.in_game(): break
+        key(g, K_RUNSTOP, 3)
+    g.poke(L["c_eq"] + 1, 0); g.poke(L["c_eqd"] + 1, 0); g.poke(L["c_eqm"] + 1, 0)          # no armour worn
+    arm = next(i for i in range(1, 200) if g.b(L["itcat"] + i) == g.L["CAT_ARMOR"])
+    g.poke(L["c_pack"], arm, 0, 0, 0, 0, 0, 0, 0); g.poke(L["c_packd"], 20); g.poke(L["c_packm"], 20)
+    key(g, K_I, 5)
+    n0 = g.b(L["sl_n"])
+    for _ in range(20):                                   # cursor down to the pack item
+        if g.b(L["sl_sl"]) == 0 and g.b(L["ui_cur"]) == 0: break
+        g.frames(1, joy=D); g.frames(2)
+    check(g.b(L["ui_cur"]) == 0, "cursor not on the pack item (ui_cur %d)" % g.b(L["ui_cur"]))
+    g.press_fire(settle=5)
+    check(g.b(L["c_eq"] + 1) == arm, "the armour was not worn")
+    check_lists(g, "after equip")
+    check(g.b(L["sl_n"]) == n0 - 2, "entries %d -> %d (expected %d: the pack item and its separator row gone)" % (n0, g.b(L["sl_n"]), n0 - 2))
+    key(g, K_RUNSTOP, 3)

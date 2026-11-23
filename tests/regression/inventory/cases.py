@@ -44,7 +44,15 @@ def open_inv(g):
 
 
 def at(g, cur):
-    g.poke(g.L["ui_cur"], cur); g.frames(1)
+    """list cursor and ui_cur on the entry of slot cur (sl_sl). (23/11) Also the list cursor: the inventory derives ui_cur from it
+    again after every action (iv_rc), so poking ui_cur alone no longer lasts past the first action"""
+    L = g.L
+    for c in range(g.b(L["sl_n"])):
+        r = g.call_keep(L["sl_get"], regs="a=%02x,x=00" % c)
+        if not r["c"] and g.b(L["sl_sl"]) == cur:
+            g.poke(L["sl_cur"], c)
+            break
+    g.poke(L["ui_cur"], cur); g.frames(1)
 
 
 def close(g):

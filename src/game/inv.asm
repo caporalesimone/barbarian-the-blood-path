@@ -135,8 +135,9 @@ _in     jsr sl_nav
         beq _in
 _exit   jmp ui_exit
 _f      jsr inv_act
-        jmp _dyn
+        jmp _rc
 _drop   jsr inv_delete
+_rc     jsr iv_rc               ; (23/11, liste compatte) voci ricontate dopo ogni azione (ui.asm)
         jmp _dyn
 ; posto della voce del cursore -> ui_cur (la riga separatrice non e' mai sotto il cursore)
 iv_cur  jsr sl_sel
