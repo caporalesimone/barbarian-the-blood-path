@@ -120,6 +120,9 @@ becomes a test in `tests/`, it does not stay in `tools/`.
   **Owner's rule (14/11): unless requested otherwise, when I build I use `./build.sh --fast`** (disk + smoke and sanity only,
   fast build), and the auxiliary builds (atlas, maps, manual, release) only if requested or if what they describe changes.
   `./build.sh --release` (also regression, `EMU-*`, manual): **only when the owner asks for it**. Details: [docs/getting-started.md](docs/getting-started.md), [docs/wiki/build.md](docs/wiki/build.md).
+- **Disk first, tests after** (23/11, owner's rule): after every build that changes the game, **attach the `.d64` to the owner
+  (SendUserFile) before running the tests**, so he can try it without waiting for them (`./build.sh --fast --no-test`, send
+  `out/releases/latest/*.d64`, then the tests). If the tests fail: fix, rebuild, **send the new `.d64` again**, then test again.
 - **A single disk** (11/11 evening, owner's rule): `out/work/disk.d64` (working disk) -> `out/releases/vX.Y/blood_path_vX.Y_1541.d64`. For development:
   `LOAD"*",8`, `POKE 1020,1` (straight to `START`; `POKE 1021,1` = god mode), `RUN` ([docs/wiki/cheats.md](docs/wiki/cheats.md)).
 - **Version**: grows by itself (minor number in `version.yaml`) on **every build with changes** to the sources
