@@ -3,17 +3,15 @@
 carries their sprites and, in an "info" block at its end, their sprite colours and names (tools/build/gen_gfx.py);
 gfx_install copies the sprites to the sprite slots and the info block to NM_AT. The expected values come from the drawings
 (tools/build/monsters.py, tools/build/monsters_chap.py) through the same functions as the build. One VICE session (CHAIN).
-Screenshots: out/work/villages/monsters<c>.png (a monster of the chapter targeted, its name in the top bar)."""
+Screenshots: out/work/villages/monsters<c>.png (a monster of the chapter targeted, its name in the target row)."""
 import os
 from c64test import test, check
 from lib.c64 import Game, ROOT
 from lib.play import new_game, alive, mpos, floor_next, FLOOR_D
 import gen_gfx as GG, monsters as MO, monsters_chap as MC
-import vicemon
 
 CHAIN = True
 SHOTS = os.path.join(ROOT, "out", "work", "villages")
-CHARGEN = open(os.path.join(vicemon.ROMS_C64, "chargen-901225-01.bin"), "rb").read()
 
 
 def setup(ctx):
@@ -79,17 +77,26 @@ def check_set(g, c, boss):
         check(s == bytes(GG.scr_text(n)), "chapter %d type %d: name %r, expected %r" % (c, t, s, n))
 
 
+def hud_decode():
+    """glyph code -> character of the 'hud' encoding (out/work/gfx_consts.inc, .cdef lines of the build)"""
+    import re
+    from lib.c64 import OUT
+    G, dec = {}, {}
+    for line in open(os.path.join(OUT, "gfx_consts.inc")):
+        m = re.match(r"(G_\w+)\s*=\s*(\d+)", line)
+        if m: G[m.group(1)] = int(m.group(2))
+        m = re.match(r'\s*\.cdef "(.)", "(.)", (G_\w+)', line)
+        if m:
+            for k in range(ord(m.group(2)) - ord(m.group(1)) + 1):
+                dec.setdefault(G[m.group(3)] + k, chr(ord(m.group(1)) + k).lower())
+    return dec
+
+
 def drawn(g):
-    """the text drawn in the visible bar sprites, decoded with the character ROM (24 glyphs)"""
+    """(23/11) the text of the target row (row 20 of SCR_H, bt_row, columns 1..24), decoded with the 'hud' encoding"""
     L = g.L
-    base = L["BARSPR"] + 256 * g.b(L["bar_fr"])
-    spr = g.mem(base, 8 * 64)
-    out = ""
-    for i in range(24):
-        gl = bytes(spr[(i // 3) * 64 + (i % 3) + r * 3] for r in range(8))
-        code = next((k for k in range(64) if CHARGEN[k * 8:k * 8 + 8] == gl), None)
-        out += "?" if code is None else (" " if code == 32 else chr(code + 96) if 1 <= code <= 26 else chr(code))
-    return out.rstrip()
+    dec = hud_decode()
+    return "".join(dec.get(c, "?") for c in g.mem(L["SCR_H"] + 800 + 1, 24)).rstrip()
 
 
 def target(g, want):
@@ -118,7 +125,7 @@ def shot(g, i, path):
 
 def chapter_test(c):
     @test("MON-CHAP-%d" % (10 + c), "chapter %d: a dungeon level and the boss level give the sprites, colours and names of the chapter; "
-          "a monster of the chapter has its name drawn in the top bar" % c)
+          "a monster of the chapter has its name drawn in the target row" % c)
     def t(ctx):
         g = ctx["g"]; L = g.L
         lvl = 5 * (c - 1) + 2

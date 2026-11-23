@@ -103,6 +103,11 @@ ricalcolo dell'etichetta del luogo (`loc_check`), il pezzo del testo della barra
 ridisegno completo (`rd_sync`) gli NPC tengono gli sprite del fotogramma prima (`npc_draw`). Vicino ai vaganti del villaggio
 il ridisegno più questi lavori sforava il fotogramma (persi 3-4% camminando fra gli NPC, test `PERF-24`).
 
+**Limiti della camera** (`update_camera`): `camx` = px − 152 in 0..464, `camy` = py − 76 in 0..`CAMY_MAX` = 606 (23/11: era 600;
+con il campo di gioco fino alla raster 207 l'eroe nell'ultima fila calpestabile, py fino a 746, aveva lo sprite dalla riga 191 e
+`spr_pos`, che nasconde da 187, lo faceva sparire in fondo al dungeon. Con 606 sta a 185; le righe di testo lette restano quelle
+di 600, cambia solo lo scroll fine). Verificato in VICE: eroe sulla fila più bassa del piano 2, py 746, camy 606, sprite a 185.
+
 Le schermate (inventario, mappa, menu, negozi...) si aprono **dentro** uno di questi passi (`handle_keys`, `act_tick`)
 e girano il loro ciclo finché non si chiudono ([14](#14-schermate-motore-dei-menu)); poi il ciclo principale riprende.
 
@@ -114,19 +119,19 @@ Sorgente: `src/game/hud.asm` (`irq_h`), `src/game/bar.asm`. Un solo IRQ raster c
 ```mermaid
 stateDiagram-v2
     direction LR
-    [*] --> P0: irq_on (riga IRQ_L1 = 199)
-    P0: fase 0, riga 199 (198 con hy = 7: fase 3)<br/>ECM + scroll 7 a inizio 200:<br/>campo di gioco nero 200-206
-    P1: fase 1, riga 205<br/>scroll 7, schermo HUD $8400, sfondo nero;<br/>alla 207 via l'ECM, multicolor, 38 colonne
+    [*] --> P0: irq_on (riga IRQ_L1 = 207)
+    P0: fase 0, riga 207 (206 con hy = 7: fase 3)<br/>ECM + scroll 7 a inizio 208:<br/>campo di gioco nero 208-214
+    P1: fase 1, riga 213<br/>scroll 7, schermo HUD $8400, sfondo nero;<br/>alla 215 via l'ECM, multicolor, 38 colonne
     P2: fase 2, riga 250 (fine HUD)<br/>registri del campo di gioco<br/>dall'ultimo apply_frame
     P0 --> P1
     P1 --> P2
     P2 --> P0: spr_copy + sfx_update
 ```
 
-(23/11) L'HUD comincia alla riga raster 207 con la riga 19 di `SCR_H` (riga del bersaglio, VC 760: la riga 19 del campo di gioco
-puo' partire ma non arriva mai a RC 7). Il campo di gioco finisce alla 199 per ogni hy: dalla 200 alla 206 ECM + MCM (modo
-illegale, nero), perche' la riga 19 della memoria colore e' quella della riga del bersaglio. Lo scroll 7 si scrive all'inizio
-della 200 (con hy = 0 nella 205/206: in vc64web cambiarlo sulla riga cattiva del campo spostava l'HUD di una riga, provato);
+(23/11, HUD compatto) L'HUD comincia alla riga raster 215 con la riga 20 di `SCR_H` (riga del bersaglio, VC 800: la riga 20 del
+campo di gioco puo' partire ma non arriva mai a RC 7). Il campo di gioco finisce alla 207 per ogni hy: dalla 208 alla 214 ECM + MCM
+(modo illegale, nero), perche' la riga 20 della memoria colore e' quella della riga del bersaglio. Lo scroll 7 si scrive all'inizio
+della 208 (con hy = 0 nella 213/214: in vc64web cambiarlo sulla riga cattiva del campo spostava l'HUD di una riga, provato);
 nessuna scrittura deve cadere entro pochi cicli da un limite (provato in VICE e vc64web per gli 8 valori di hy).
 Niente piu' fase della barra di sprite in alto (`IRQ_BAR`, tolta il 23/11).
 

@@ -38,7 +38,7 @@ def set_level(g, lvl, sadd=(0, 0, 0)):
 
 def hud_icon(g):
     L = g.L
-    return g.mem(L["SCR_H"] + 800 + 120 + 6, 1)
+    return g.mem(L["SCR_H"] + 800 + 120 + 20, 1)        # (23/11) level-up arrow: row 23, column 20
 
 
 @test("STAT-10", "level up: the stats stay the base ones, the points grow by pl_pts (1 per level, 2..20)")
@@ -56,13 +56,13 @@ def stat_levelup(ctx):
     check(avail(g) == 1, "points to spend %d (expected 1)" % avail(g))
 
 
-@test("STAT-11", "HUD: glyph next to the level number (row 23, col 6) while there are points to spend, blank without")
+@test("STAT-11", "HUD: glyph next to the XP bar (row 23, col 20; 23/11) while there are points to spend, blank without")
 def stat_hud(ctx):
     g = ctx["g"]; L = g.L
     g.frames(20)
     h = hud_icon(g)
     check(h == [L["G_LVUP"]], "HUD %s (expected the level-up glyph)" % h)
-    check(g.b(0xd800 + 23 * 40 + 6) & 15 == 5, "glyph colour %d (expected green)" % (g.b(0xd800 + 23 * 40 + 6) & 15))
+    check(g.b(0xd800 + 23 * 40 + 20) & 15 == 5, "glyph colour %d (expected green)" % (g.b(0xd800 + 23 * 40 + 20) & 15))
     g.poke(L["c_sadd"], 1); g.poke(L["hud_dirty"], 1); g.frames(20)
     h = hud_icon(g)
     check(h == [L["G_BLANK"]], "HUD %s with no points (expected blank)" % h)

@@ -8,7 +8,7 @@ Mappe dettagliate e sempre aggiornate (rigenerate a ogni build, Lab64): [indice]
 | Area | Contenuto |
 |---|---|
 | `$0002`–`$0040` | pagina zero del gioco (temporanei, puntatori, `rnd`, posizione del PG, camera; dall'11/11 anche `ui_cur`, `ui_n`, `ui_col`, `ui_ib`, `ui_sel`, `ui_lc`); `$41`–`$4F` libera; `$50`–`$5B` ZX0, `$5C`–`$64` caricamento del MENU (`ml_*`), `$65`–`$8C` variabili del modulo MENU (locanda e negozi); `$8D`–`$8F` libera |
-| `$0400`–`$86F8` | codice e dati del gioco (`GAME_ENTRY` $0400: lo schermo del BASIC è libero perché il VIC usa il banco 2 e il BASIC non gira; il loader salta a $0400, nessuno stub BASIC) (`main`, `db`, `dungeon`, `data`, `game`, `combat`, `levels`, `ui`, `hud`, `bar`, `music`, `prefetch`, `rel`) + grafica fissa copiata una volta all'avvio |
+| `$0400`–`$8720` | codice e dati del gioco (`GAME_ENTRY` $0400: lo schermo del BASIC è libero perché il VIC usa il banco 2 e il BASIC non gira; il loader salta a $0400, nessuno stub BASIC) (`main`, `db`, `dungeon`, `data`, `game`, `combat`, `levels`, `ui`, `hud`, `bar`, `music`, `prefetch`, `rel`) + grafica fissa copiata una volta all'avvio |
 | `$8400` | schermo fisso della fascia HUD (VIC banco 2) |
 | `$8A40`– | brano del luogo (`SND_LBUF`, grande quanto il brano più lungo, [Musica](musica.md)) |
 | `$8C00` | sprite delle varianti forti e del boss finale |
@@ -22,7 +22,7 @@ Mappe dettagliate e sempre aggiornate (rigenerate a ogni build, Lab64): [indice]
 | `$D000`–`$DFFF` | sotto l'I/O: STASH del piano lasciato (portale/morte: boss, 5 mostri, 10 bauli) `$D000`–`$D07F`; **generatore dei piani** `$D080`–`$DD04` (`src/game/gen_io.asm`, ~3,2 KB, nel PRG compresso ZX0 a 2,2 KB e decompresso all'avvio da `copy_gfx` (21/11), eseguito con `$01=$34` da `gen_call`: [Dungeon](dungeon.md)); il resto libero |
 | `$E000`–`$FFFF` | sotto il KERNAL: (21/11) **segmento CORE** `$E000`–`core_end` (liste, inventario, descrizione degli oggetti, file `core`), cache della grafica (villaggio `$EC00`, tema da `GFX_DUN_AT` = `$EC6D` a `$F4DF`: 15/11, comincia nella coda del villaggio), **modulo MENU, zona 2** `$F4E0`–`$FCFF`, mappa della sala del trono `FMAP` in fondo (`$FD00`, dal 10/11) |
 
-Margine del codice: controllato a ogni build (`.cerror`, avviso sotto 1 KB sotto `$86F8`; fino al 23/11 `$8720`: la riga 19 di `SCR_H` e' diventata la riga del bersaglio). Al 07/11: **~1,9 KB** sotto
+Margine del codice: controllato a ogni build (`.cerror`, avviso sotto 1 KB sotto `$8720`; il 23/11 per qualche ora `$86F8`, con la riga del bersaglio nella riga 19 di `SCR_H`: con l'HUD compatto sta nella riga 20). Al 07/11: **~1,9 KB** sotto
 `$8720` (da 509 B: sala del trono pregenerata su file +300 B, generatore sotto l'I/O +1,1 KB, codice di debug tolto,
 conferma dell'eliminazione −70 B) + ~450 B in `CODE2`. Altre idee in `TODO.md` (negozi in overlay). Lo zaino a 8 posti
 (07/11 sera) non ha liberato codice: toglie 32 B dal blocco dell'eroe, non dal margine.

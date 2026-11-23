@@ -47,7 +47,7 @@ LOBBY_AT    = $c000          ; modulo LOBBY (file, menu iniziale): usa la RAM de
 ; ---- (15/11, TODO T1) annotazioni della mappa automatica della memoria (lab64 map, docs/wiki/build.md sezione 4a; sintassi in
 ; docs/memory-maps.md di Lab64): "@map" = zone che il gioco scrive solo con puntatori o copie (invisibili all'analisi statica: contano come
 ; usate); "@free" = memoria libera e cosa ci puo' stare; "@scenario" = cosa e' in memoria insieme (moduli e file del disco).
-;@map $86f8..$87e8 "Schermo HUD: righe 19-24 di SCR_H (il VIC mostra solo queste, split raster; 19 = riga del bersaglio, 23/11)"
+;@map $8720..$87e8 "Schermo HUD: righe 20-24 di SCR_H (il VIC mostra 20-23, split raster; 20 = riga del bersaglio, 23/11)"
 ;@map $87e8..$87f8 "Fra schermo HUD e puntatori sprite: all'avvio grafica fissa del PRG" free-after=start
 ;@map $87f8..$8800 "Puntatori sprite della fascia HUD"
 ;@map $8800..$8a40 "Sprite della barra, set A (doppio buffer con $B000) e segnaposto della minimappa"
@@ -1312,6 +1312,7 @@ _idle   lda #0
         rts
 
 ; ------------------------------------------------------------------ camera
+CAMY_MAX = 606                  ; (23/11) camy massima: vedi _cx
 update_camera:
         ; camx = px - 152, limitato a 0..464
         lda px
@@ -1338,7 +1339,9 @@ _maxx   lda #$d0
         sta camx
         lda #1
         sta camx+1
-_cx     ; camy = py - 96, limitato a 0..576
+_cx     ; camy = py - 76, limitato a 0..606 (23/11: era 600; con il campo di gioco fino alla riga 207 l'eroe nell'ultima
+        ; fila calpestabile (py fino a 746) aveva lo sprite dalla riga 191 e spr_pos lo nascondeva (da 187): con 606 sta a
+        ; 185. Le righe di testo lette sono le stesse di 600 (606/8 = 75), cambia solo lo scroll fine: la riga 47 entra in parte)
         lda py
         sec
         sbc #76
@@ -1357,9 +1360,9 @@ _cx     ; camy = py - 96, limitato a 0..576
         cmp #2
         bne _cy
         lda camy
-        cmp #$59
+        cmp #<CAMY_MAX+1
         bcc _cy
-_maxy   lda #$58
+_maxy   lda #<CAMY_MAX
         sta camy
         lda #2
         sta camy+1
@@ -1853,7 +1856,7 @@ _xok    lda ent_y
         lda tmp2
         cmp #35
         bcc _hide
-        cmp #179                ; (23/11) era 192: il campo di gioco finisce alla riga 199 (sprite fino alla 199: niente furti
+        cmp #187                ; (23/11) era 192: il campo di gioco finisce alla riga 207 (sprite fino alla 207: niente furti
                                 ; di cicli che spostino le scritture dell'IRQ della 199)
         bcs _hide
         sta sh_y,x
@@ -2021,8 +2024,8 @@ cheat_menu:
 ;   - se la grafica cresce, FREE_RAM_START si sposta in avanti (guardia .cerror sotto).
 ;  Mappa: out/work/memory-map/program-game.html (lab64 map; annotazioni @map / @free nei sorgenti).
 ; ===================================================================
-;@map gfx_data..$86f8 "All'avvio grafica fissa del PRG, dato morto dopo copy_gfx" free-after=start
-;@free gfx_data..$86f8 "Margine del programma principale: codice e dati di main.asm (guardia .cerror a $86F8, righe HUD)" use=code
+;@map gfx_data..$8720 "All'avvio grafica fissa del PRG, dato morto dopo copy_gfx" free-after=start
+;@free gfx_data..$8720 "Margine del programma principale: codice e dati di main.asm (guardia .cerror a $8720, righe HUD)" use=code
 gfx_data:                       ; solo la grafica fissa: tile del villaggio e dei dungeon e mostri sono su file (gfxN)
 gd_fchr .binary "../out/work/gfx/fixed_chr.bin"  ; caratteri fissi (glifi HUD, minimappa): 4 strisce da GFX_FSTRIP byte
 gd_core .binary "../out/work/gfx/spr_core.bin"   ; sprite 0..11 (eroe, fendenti) + 24..26
@@ -2073,7 +2076,7 @@ core_end:
 FREE_RAM_END   = $9fff              ; il PRG puo' arrivare fino a $9FFF: la coda di gfx_data e' dato morto dopo
                                     ; copy_gfx (prima istruzione utile di `start`) e copre $8000-$9FFF (schermo HUD,
                                     ; sprite barra, sprites2, variabili $9000: tutti scritti DOPO la copia)
-        .cerror gfx_data > SCR_H + 760, "codice oltre $86F8: le righe HUD (SCR_H+760, dalla riga 19) lo sovrascriverebbero"
+        .cerror gfx_data > SCR_H + 800, "codice oltre $8720: le righe HUD (SCR_H+800, dalla riga 20) lo sovrascriverebbero"
         .cerror GENPASS == 2 && gen_img_end > CODE2, "grafica fissa + generatore (compresso) oltre $9C00 (secondo blocco di codice)"
 
 ; ------------------------------------------------------------------ secondo blocco di codice: $9C00-$9FFF

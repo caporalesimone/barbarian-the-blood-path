@@ -213,7 +213,7 @@
    [run/stop] or [c]	back
 
  {nothing is spent until you confirm.}
- {yellow arrow in the hud: points to}
+ {green arrow in the hud: points to}
  {spend.}
 === respec
  a respec token gives back all the
@@ -307,22 +307,22 @@
    up to 10000¤: keep the rest in
    your inn chest.
 === the hud
-[1]              [2]             [3]
+[1]                 [2]   [3]         [4]
 @hud
-[4]        [5]       [6]   [7]          [8]
+[5]                  [6]          [7]
 
-[1] hp, xp: life and experience, now
-    and max (10000+ shows as 10k)
-[2] red bar: life   yellow bar: level
-[3] gear wearing out: flashes, red =
-    broken. c3 l4: chapter 3, level 4
-[4] lv: your level. yellow arrow: stat
-    points to spend, press [c]
-[5] h j k l: skills, yellow = on fire
-[6] u o: rage, frenzy. yellow: on,
+[1] red bar: life. it flashes when
+    your life is low
+[2] gear wearing out: flashes, red =
+    broken
+[3] belt: potions [1]-[4] (blue while
+    they recharge)
+[4] h j k l: skills, yellow = on fire
+    u o: rage, frenzy. yellow: on,
     white: ready, cyan: recharging
-[7] keys for the key chests
-[8] belt: potions [1]-[4] (blue while
-    they recharge), portal scroll [5]
+[5] yellow bar: experience
+[6] green arrow: stat points to spend,
+    press [c]
+[7] portal scroll [5]
 {top line: the place where you stand,}
-{or the monster you fight and its life}
+{the monster you fight, or your skill}

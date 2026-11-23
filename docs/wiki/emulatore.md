@@ -58,7 +58,7 @@ tasti dice `KEY AND JOYSTICK TEST`; i titoli citati qui (es. «Limits found») s
 | **Bot in pagina** (decide ogni 2 fotogrammi leggendo la RAM) | `runLoop 'CODICE' {frames,every}` | cli §14 | `EMU-13..15` |
 | Esito ripetibile: stesso stato + stesso bot = stesso hash | `stateHash`, `retriesTotal`, `_forceRetry` | cli §14, getting-started §7 | [vedi trappole] |
 | Etichette del gioco | `loadLabels @@out/work/game.lbl`, poi `peek cur_level`, `runUntil {pc:"main_loop"}` | cli §8 | sì |
-| **Testo del gioco a schermo** (anche con codifica propria) | `loadEncoding hud @@out/work/gfx_consts.inc`, `findText 'XP' '{"enc":"hud","addr":"$8400"}'`, `wait text`/`assert text` negli script | cli §9, `scripting.md` §3 | `EMU-12` |
+| **Testo del gioco a schermo** (anche con codifica propria) | `loadEncoding hud @@out/work/gfx_consts.inc`, `findText 'XP' '{"enc":"hud","addr":"$8400"}'`, `wait text`/`assert text` negli script | cli §9, `scripting.md` §3 | `EMU-12` (solo `loadEncoding` dal 23/11: l'HUD non ha più testo) |
 | Cicli esatti tra due indirizzi (min/max/media) | `measure DA A '{"n":20}'` | cli §11 | no (non sono misure del gioco) |
 | Stati salvati, esportati su file, confronto | `saveState`, `loadState @file`, `regress save/check`, `ramSnap`/`ramDiff` | cli §12 | no |
 | Screenshot, video muto deterministico | `screenshot`, `video file.js` | cli §9, §13 | screenshot nei test |
@@ -133,7 +133,7 @@ etichette di `out/work/game.lbl` e si muovono **solo con il joystick della porta
 ```mermaid
 flowchart LR
     A["EMU-10<br/>boot dal disco<br/>LOAD, POKE 1020,1, RUN"] --> B["EMU-11<br/>nuovo eroe 'black thorne'<br/>seed terrar, salvataggio Krill"]
-    B --> C["EMU-12<br/>HUD: HP XP LV 25/25<br/>codifica 'hud'"]
+    B --> C["EMU-12<br/>HUD: barre HP e XP<br/>codifica 'hud'"]
     C --> D["EMU-13<br/>alchimista:<br/>oro -60, zaino"]
     D --> E["EMU-14<br/>scale della cripta:<br/>livello 1, mostri"]
     E --> F["EMU-15<br/>mostro ucciso,<br/>pergamena, portale"]
@@ -144,7 +144,7 @@ flowchart LR
 |---|---|---|
 | `EMU-10` | START (con Krill), GAME e LOBBY in RAM uguali ai PRG di `out/`, bordo non rosso | ~23 s di orologio (warp per i caricamenti) |
 | `EMU-11` | creazione dal menu con joystick e tastiera, salvataggio sul 1541-II emulato, villaggio: livello 0, PV > 0, oro 100, nome in RAM = «black thorne» | ~28 s |
-| `EMU-12` | `findText` con la codifica `hud` letta da `out/work/gfx_consts.inc` (64 caratteri): HP, XP, LV e «25/25» nella matrice `$8400` | < 1 s |
+| `EMU-12` | codifica `hud` letta da `out/work/gfx_consts.inc` (`loadEncoding`); dal 23/11 l'HUD non ha più testo: le righe 22 e 23 (colonne 1-18) della matrice `$8400` sono glifi delle barre (`G_BAR0`..`G_BAR8`) e la barra HP non è vuota | < 1 s |
 | `EMU-13` | cammina alla porta dell'alchimista (tile `DALCH`, trovata nella mappa), compra la pergamena (qualunque sia l'ordine della scorta): oro −60, pergamena nello zaino | ~12 s |
 | `EMU-14` | cammina alle scale (`TSTAIRS`) ed entra: `cur_level` = 1, mostri presenti | ~25 s |
 | `EMU-15` | caccia un mostro, lo uccide, legge la pergamena (tasto 5), entra nel portale: villaggio, PV > 0 | ~18 s |

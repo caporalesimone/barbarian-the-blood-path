@@ -112,7 +112,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 - `SFX_LOWHP` provvisorio da riascoltare nel JUKEBOX; tile del trono dietro il boss.
 
 ### E5 (ex 2.6) HUD: esperienza a 24 bit (per l'Abisso) — S
-- Oltre 65535 xp: 3 cifre + K, barra a 24 bit (~100–130 B). Dipende dalle soglie oltre il 20 (H3).
+- Oltre 65535 xp: barra a 24 bit (dal 23/11 l'HUD non mostra più i numeri degli XP; ~60-80 B, stima). Dipende dalle soglie oltre il 20 (H3).
 
 ### C1 (ex 1.2) Grafica della cintura nell'HUD: ampolle colorate — S-M
 - Ampolle nei colori della pozione (rossa 2, gialla 7, viola 4) al posto dell'icona generica; in ricarica blu (già fatto).
@@ -180,7 +180,7 @@ Le voci che cambiano il blocco eroe (C5, F1–F3, G4) vanno fatte insieme per ca
 ### F1 (ex 3.1) Cintura a 8 posti sbloccata da una quest (dopo B2) — L
 - `c_beltt` 8 byte, 4 slot da 2 pozioni, tasti 1–4; flag nell'eroe. Regole decise l'08/11 (prima fila, la seconda sale,
   allineamento all'uscita dei menu; pozioni dal baule del dungeon come dall'alchimista). Quest scelta col simulatore.
-  **Serve**: formato, HUD (due file da 4), purse, alchimista, baule, `give_item`, simulatore, eroe di prova con 8 pozioni,
+  **Serve**: formato, HUD (le due file da 4 ci sono dal 23/11: la seconda mostra 4 trattini), purse, alchimista, baule, `give_item`, simulatore, eroe di prova con 8 pozioni,
   test `BELT-20..` (`BELT_SLOTS`, `BELT_KEYS` in `tests/lib/play.py`). Dettagli: storico in git (voce 3.1).
 
 ---

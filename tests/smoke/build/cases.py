@@ -5,10 +5,10 @@ from lib.c64 import ROOT, labels
 from c64test import test, check
 
 
-@test("BUILD-01", "memory margin positive (code below $86F8, HUD row 19, >= 128 B, total >= 256 B)")
+@test("BUILD-01", "memory margin positive (code below $8720, HUD row 20, >= 128 B, total >= 256 B)")
 def margin(ctx):
     L = labels("game")
-    m1 = L["SCR_H"] + 760 - L["gfx_data"]; m2 = L["FREE_RAM_END"] + 1 - L["code2_end"]
+    m1 = L["SCR_H"] + 800 - L["gfx_data"]; m2 = L["FREE_RAM_END"] + 1 - L["code2_end"]
     check(m1 >= 128 and m2 >= 0 and m1 + m2 >= 256, "margin %d B + %d B" % (m1, m2))
 
 

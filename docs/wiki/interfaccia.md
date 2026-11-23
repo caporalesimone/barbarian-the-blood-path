@@ -1,7 +1,7 @@
 # Interfaccia
 
 Sorgenti: `src/game.asm` (`read_input`), `src/game/game.asm` (`handle_keys`, `act_tick`), `src/game/hud.asm` (HUD),
-`src/game/bar.asm` (bersaglio: riga 19 dell'HUD), `src/game/ui.asm` (schermate a tutto schermo), `src/lobby.asm` (menu iniziale).
+`src/game/bar.asm` (bersaglio: riga 20 dell'HUD), `src/game/ui.asm` (schermate a tutto schermo), `src/lobby.asm` (menu iniziale).
 Tutti i testi del gioco sono in inglese; i nomi di oggetti, mostri e abilità non si traducono.
 
 ## Comandi
@@ -93,15 +93,15 @@ la legenda. Non sta nel gioco (nessun byte di RAM né tempo di CPU di `GAME`). P
 
 ```mermaid
 flowchart TB
-    PLAY["campo di gioco: fino alla riga raster 199, scorrimento fine,<br/>doppio buffer (schermi $B400 / $BC00)"]
-    BAND["fascia nera: righe raster 200-206 (ECM + MCM)"]
-    BAR["riga del bersaglio (riga 19 di $8400, raster 207): nome del luogo,<br/>oppure nome e vita del mostro bersaglio / boss"]
-    HUD["HUD: righe 20..23 su uno schermo fisso ($8400),<br/>riga 20 vuota con il regolo, poi HP, XP, LV"]
+    PLAY["campo di gioco: fino alla riga raster 207, scorrimento fine,<br/>doppio buffer (schermi $B400 / $BC00)"]
+    BAND["fascia nera: righe raster 208-214 (ECM + MCM)"]
+    BAR["riga del bersaglio (riga 20 di $8400, raster 215): nome del luogo,<br/>nome e vita del mostro bersaglio / boss, nome dell'abilità scelta"]
+    HUD["HUD: righe 21..23 dello schermo fisso ($8400):<br/>riga 21 vuota con il regolo, poi barre HP e XP, cintura, abilità"]
     PLAY --> BAND --> BAR --> HUD
 ```
 
 **Riga del bersaglio** (23/11, decisione del committente; prima una barra di 8 sprite in cima allo schermo, che copriva il PG
-in cima alla mappa e su cui passavano gli sprite): riga 19 dello schermo HUD (`bt_row`, `src/game/hud.asm`), nome del mostro
+in cima alla mappa e su cui passavano gli sprite): riga 20 dello schermo HUD (riga 19 fino al 23/11, HUD compatto) (`bt_row`, `src/game/hud.asm`), nome del mostro
 alle colonne 1-24 nei glifi dell'HUD (lettere, cifre, "/", "."; il resto spazio: tradotto da `nbuf`, codici schermo) e la sua
 vita in 12 caratteri `G_BAR` viola alle colonne 26-37 (da `cellf`); oppure l'etichetta del luogo o il messaggio delle quest.
 Ogni 4 fotogrammi, ogni cella scritta una volta (niente riga cancellata e riscritta: niente lampeggi); spegnendosi, il testo
@@ -119,30 +119,35 @@ negozio o della locanda: `pl_tile`).
 
 | Riga | Contenuto |
 |---|---|
-| bersaglio (19) | (23/11) nome e vita del mostro bersaglio (viola), o etichetta del luogo / messaggio delle quest: sopra |
-| regolo (20) | vuota (spazio nero) con il regolo nell'ultima linea di pixel |
-| HP | vita attuale / massima (16 bit) e barra rossa (24 caratteri, `scale`) |
-| XP | esperienza / soglia del livello successivo e barra gialla della frazione (16 bit bassi). Da 10000 in su ogni numero (ciascuno per conto suo: `9999/27K`) è in **migliaia senza decimali** (`10K`, `11K` … `65K`, `hput_k`; 07/11 sera): `65K/30K` sta sempre negli 11 caratteri fra la colonna 4 e la barra. Al livello massimo: `MAX`. Test: `tests/regression/hud/test_hudxp.py` |
-| LV | livello; H J K L alle colonne 9, 11, 13, 15 (12/11: due colonne più a destra, richiesta del committente; il nome dell'abilità scelta dalla colonna 8) (giallo la scelta, bianco le altre); U e O (giallo attiva, bianco pronta, ciano in ricarica). Una lettera compare **solo se l'abilità è disponibile** (livello raggiunto; 07/11: prima grigio 11, che è un colore ≥ 8 e rendeva il carattere multicolore e illeggibile); chiavi; cintura (4 pozioni, **blu durante la ricarica delle pozioni**) |
+| bersaglio (20) | (23/11) nome e vita del mostro bersaglio (viola), etichetta del luogo / messaggio delle quest, o per qualche istante il nome dell'abilità appena scelta (giallo, `sk_t`): sopra |
+| regolo (21) | vuota (spazio nero) con il regolo nell'ultima linea di pixel |
+| 22 | colonne 1–18: **barra rossa della vita** (solo barra, niente numeri: 23/11, richiesta del committente; 144 passi, `HB_BARW`); 19–21: icone d'usura; 23, 25, 27, 29: **pozioni 1–4**; 31: **pergamena**; 33, 35, 37: abilità **H J K** |
+| 23 | colonne 1–18: **barra gialla dell'esperienza** (frazione del livello, 16 bit bassi; piena al livello massimo); 20: freccia verde del livello (punti da spendere); 23–29: pozioni 5–8 (trattini: la cintura ne ha 4); 33, 35, 37: abilità **L U O** |
+
+HUD compatto (23/11, decisione del committente): via la riga "LV" (livello, chiavi, capitolo/piano) e i numeri di HP e XP; il campo
+di gioco guadagna una riga (fino alla raster 207). Il livello è nella scheda del personaggio, le chiavi nell'inventario ("key n/10"),
+capitolo e piano nella minimappa e nel menu di RUN/STOP. Abilità: giallo la scelta (H J K L), bianco le altre; U e O giallo attiva,
+bianco pronta, ciano in ricarica; una lettera compare **solo se l'abilità è disponibile**. Pozioni blu durante la ricarica, un
+punto blu per una tasca vuota.
 
 **Avvisi** (`hud_warn`, chiamata da `bs_body` una volta ogni 16 fotogrammi, 06/11 pomeriggio):
-- **vita bassa** (`c_hp` ≤ `hpmax` / 4): le celle "HP nnn/nnn" della riga 21 (colonne 1–11, color RAM `$DB49`…)
+- **vita bassa** (`c_hp` ≤ `hpmax` / 4): le celle piene della barra HP (riga 22, colonne 1–18, color RAM `$DB71`…; 23/11)
   alternano rosso (2) e giallo (7) a ogni chiamata (bit 4 di `frame`); al passaggio sotto la soglia un suono
   (`SFX_LOWHP`), una volta (`hw_low`). Quando la vita risale la riga HP si ridisegna (`hud_pend` bit 0);
 - **oggetto che si sta per rompere** (`hw_icons`): per arma, armatura e scudo indossati che si usurano, se la
   durabilità è ≤ `WARN_PC` = 20% del massimo (`rules.yaml durability.warn_percent`; nel codice durabilità ×
   `WARN_MUL` (5) ≤ massimo, a 8 bit con riporto: un pugnale nuovo 15/15 non si accende, 3/15 sì), la sua icona (`G_WSWORD`,
   `G_WARMOR`, `G_WSHIELD`: 3 glifi nei codici liberi del charset, `HUD_WARN` in `tools/build/gen_gfx.py`) lampeggia
-  rossa/gialla in riga 21, colonne 29–31 (sopra la cintura); a durabilità 0 (arma rotta, 07/11) resta **fissa** in rosso. Restano accese anche nel villaggio. `hud_p3` le
+  rossa/gialla in riga 22, colonne 19–21 (dopo la barra HP, 23/11); a durabilità 0 (arma rotta, 07/11) resta **fissa** in rosso. Restano accese anche nel villaggio. `hud_p3` le
   ridisegna subito dopo aver pulito la riga, così non sfarfallano.
 Costo: ~160 B di codice, 1 byte di RAM, 24 B di glifi. Test: `tests/regression/items/test_items.py`; screenshot `TESTUI=27`.
-- **punti statistica** (11/11, branch `feature/stat-points`): se `pts_avail` > 0, in riga 23 **accanto al numero del
-  livello** (colonna 6) una **freccia verde in su** (colore 5, `G_LVUP`, quarto glifo di `HUD_WARN`; scelta del committente l'11/11, **glifo ancora da confermare**:
+- **punti statistica** (11/11, branch `feature/stat-points`): se `pts_avail` > 0, in riga 23 **accanto alla barra XP**
+  (colonna 20, 23/11) una **freccia verde in su** (colore 5, `G_LVUP`, quarto glifo di `HUD_WARN`; scelta del committente l'11/11, **glifo ancora da confermare**:
   proposte in `lab/concept/hud_glyphs/`): c'è un punto da spendere, il tasto C apre la schermata del personaggio.
-  Disegnato da `hud_p2` (riga del livello). Test `STAT-11`.
+  Disegnato da `hud_p1` (riga XP). Test `STAT-11`.
 
-Scegliendo un'abilità il suo nome compare per qualche istante al posto di "H J K L" (`SK_SHOW`, `hud_nm`);
-lo stesso posto mostra "broken" quando un oggetto indossato si rompe (07/11: resta indossato, senza effetto). L'HUD si
+Scegliendo un'abilità il suo nome compare per qualche istante nella riga del bersaglio (23/11; prima al posto di "H J K L").
+L'HUD si
 ridisegna solo quando serve (`hud_dirty`). I caratteri hires nell'HUD multicolor accettano solo i colori 0–7
 (per questo le pozioni in ricarica sono blu e non grigie).
 
@@ -234,7 +239,7 @@ il **piano del capitolo** (1–5):
 
 | Dove | Testo | Codice |
 |---|---|---|
-| HUD, riga 21 a destra (colonne 34–38) | `C3 L4` (nel villaggio solo `C3`) | `hud_cl` (`hud.asm`) |
+| Menu di RUN/STOP, riga 6 (23/11, HUD compatto: prima nell'HUD, `hud_cl`) | "chapter 3 level 4"; nel villaggio il suo nome | `gm_place` (`ui.asm`) |
 | Etichette di scale, cripta, portale | "stairs down to level 4" | `loc_cl` (`bar.asm`) |
 | Schermata di caricamento | "loading level 4" | `io_screen` (`ui.asm`) |
 | Minimappa del villaggio (22/11, committente) | un **"!" giallo** (quest da dare) o un **"?" giallo** (da ritirare, dal 22/11: prima "!" verde) sopra la casella di ogni NPC fisso (il segno D12 di `npc_q`; "?" nel blocco `MG_B+4`, glifo `mq_gq`): glifo largo 2 pixel `mq_gl` nel blocco `MG_B+3` ($B0C0), sprite 3..5 (NPC fisso k = 1..3) a doppia grandezza come le icone dei negozi, x = 82 + 4 colonna, y = 34 + 4 riga (sopra la casella); niente segni finché gli NPC non sono piazzati (`npc_pend`). Il "!" del font della UI era largo 1 pixel e non si vedeva. (22/11) `mm_qmark` sta nel modulo MENU (zona 1, `src/menu/npc_fix.asm`, `MENU_QMMK`): `mm_icons` la chiama solo con il modulo in memoria (`ovl_cur`) | `mm_qmark` |

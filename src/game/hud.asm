@@ -1,21 +1,20 @@
-; ===================================================================
+;===================================================================
 ;  hud.asm - fascia HUD fissa in basso (testo) + IRQ raster di split
 ;
-;  Schermo: righe 0..18 = campo di gioco (scroll fine)
-;           riga 19     = (23/11, branch proto-barra-sotto) riga del bersaglio: nome del mostro e sua vita, o l'etichetta
-;                         del luogo / il messaggio delle quest (bt_row; prima: 8 sprite in alto, nascondevano il PG)
-;           riga 20     = riga "regolo" (vuota: lo spazio nero, poi il regolo nell'ultima linea di pixel)
-;           righe 21..23 = HUD (3 righe di testo, posizione fissa)
-;  IRQ1 (linea 201): D011 -> yscroll 7 (la riga 19 viene ripresa a linea 207,
-;                    cosi' le righe 20..23 cadono sempre a 215/223/231/239)
-;  IRQ2 (linea 205): scroll 7 + ECM, schermo HUD, D021 nero; alla 207 via l ECM, D016 -> MCM, xscroll 0
+;  Schermo: campo di gioco fino alla riga raster 207 (scroll fine), 208-214 nere
+;           riga 20     = (23/11) riga del bersaglio: nome e vita del mostro, o etichetta del luogo / messaggio delle quest,
+;                         o il nome dell'abilita' appena scelta (bt_row; prima: 8 sprite in alto, nascondevano il PG)
+;           riga 21     = vuota (spazio nero), regolo nell'ultima linea di pixel
+;           righe 22-23 = barre della vita e dell'esperienza, cintura (2 file da 4 + pergamena), abilita' (2 file da 3)
+;  IRQ1 (linea 207, 206 con hy = 7): ECM (+ scroll 7) -> nero dalla 208
+;  IRQ2 (linea 213): scroll 7 + ECM, schermo HUD, D021 nero; alla 215 via l'ECM, D016 -> MCM, xscroll 0
 ;  apply_frame (linea $fc) ripristina i registri dello scroll per il frame dopo.
 ; ===================================================================
 HUD_ROW0   = SCR_H + 800        ; riga 20 nello schermo HUD
-BTR_SCR     = SCR_H + 760        ; (23/11) riga 19: riga del bersaglio (bt_row)
-BT_COLR    = COLRAM + 760
-IRQ_L1     = 199                ; (23/11) era 209 (secondo hy): fine del campo di gioco fissa alla 199, HUD dalla 207 (riga 19)
-IRQ_L2     = 205                ; era 217 (2 righe prima della 207: margine anche con un IRQ in ritardo, vc64web)
+BTR_SCR     = SCR_H + 800        ; (23/11) riga 20: riga del bersaglio (bt_row)
+BT_COLR    = COLRAM + 800
+IRQ_L1     = 207                ; (23/11) era 209 (secondo hy): fine del campo di gioco fissa alla 207, HUD dalla 215 (riga 20)
+IRQ_L2     = 213                ; era 217 (2 righe prima della 215: margine anche con un IRQ in ritardo, vc64web)
 
         .virtual $9780
 hud_pend   .byte ?
@@ -37,9 +36,9 @@ ap_bg      .byte ?              ; l'IRQ di fine HUD li ripristina, cosi' un fram
 ap_d016    .byte ?              ; ciclo principale non lascia lo schermo HUD su tutto il campo
 ap_d011    .byte ?
 ap_l1      .byte ?
-ap_ph      .byte ?
-ap_p0      .byte ?              ; (23/11) valore di $D011 della fase 0 ($57, o scroll hy + ECM con hy = 0)              ; (23/11) fase dell'IRQ di inizio HUD: 0, o 3 con hy = 7 (IRQ nella 198)
-hw_low     .byte ?              ; 1 = vita bassa (avviso attivo: "HP nnn/nnn" lampeggia)
+ap_ph      .byte ?              ; (23/11) fase dell'IRQ di inizio HUD: 0, o 3 con hy = 7 (IRQ nella 206)
+ap_p0      .byte ?              ; (23/11) valore di $D011 della fase 0 ($57, o scroll hy + ECM con hy = 0)
+hw_low     .byte ?              ; 1 = vita bassa (avviso attivo: le celle piene della barra HP lampeggiano)
 bt_hold    .byte ?              ; (23/11) fotogrammi di testo tenuto dopo lo spegnimento della barra (bt_row)
         .endv
 
@@ -127,18 +126,20 @@ irq_h:
         cmp #3
         beq _ph3
         bne _p1
-; (23/11) fine del campo di gioco alla riga 199 per ogni hy, senza scritture a tempo critiche:
-; fase 0 (IRQ nella 199): solo ECM in piu' allo scroll del campo (con l'MCM = modo illegale, pixel neri) all'inizio della 200.
-;   Lo scroll non cambia: nessuna riga cattiva tolta o aggiunta. Se la scrittura arriva qualche ciclo prima o dopo, solo la
-;   parte di una riga (199 o 200) cambia colore. La riga 19 del campo (riga cattiva a 200 + hy) parte, ma nera: la sua
-;   memoria colore (riga 19) e' quella della riga del bersaglio e non si vede. Con hy = 7 la 199 e' una riga cattiva del campo
-;   (l'IRQ arriverebbe a meta' della 200): IRQ nella 198 (fase 3), attesa della 199 e del fermo della CPU.
-; fase 1 (IRQ nella 205): scroll 7 + ECM (la 205 e la 206 non sono mai righe "7": nessuna riga cattiva nuova), schermo
-;   dell'HUD e sfondo nero; poi alla 207 (riga cattiva dell'HUD: VC 760, la riga 19 del campo non e' arrivata a RC 7) via
-;   l'ECM e MCM dell'HUD: la 207 e' la riga vuota in cima ai glifi, va bene in qualunque ciclo.
+; (23/11) fine del campo di gioco alla riga 207 per ogni hy, senza scritture a tempo critiche:
+; fase 0 (IRQ nella 207): ECM (con l'MCM del campo = modo illegale, pixel neri) e scroll 7 all'inizio della 208; dalla 208
+;   alla 214 nessuna riga e' "7": nessuna riga cattiva nuova fino all'HUD. Se la scrittura arriva qualche ciclo prima o dopo,
+;   solo la parte di una riga (207 o 208) cambia colore. La riga 20 del campo (riga cattiva a 208 + hy) puo' partire, ma nera:
+;   la sua memoria colore (riga 20) e' quella della riga del bersaglio. Con hy = 0 la 208 e' quella riga cattiva: in vc64web
+;   cambiare lo scroll li' (anche prima del ciclo 12) spostava l'HUD di una riga (provato): con hy = 0 solo l'ECM qui, lo
+;   scroll 7 nella fase 1. Con hy = 7 la 207 e' una riga cattiva del campo (l'IRQ arriverebbe a meta' della 208): IRQ nella
+;   206 (fase 3), attesa della 207 e del fermo della CPU.
+; fase 1 (IRQ nella 213): scroll 7 + ECM (la 213 e la 214 non sono mai righe "7"), schermo dell'HUD e sfondo nero; poi alla
+;   215 (riga cattiva dell'HUD: VC 800, la riga 20 del campo non arriva a RC 7) via l'ECM e MCM dell'HUD: la 215 e' la riga
+;   vuota in cima ai glifi, va bene in qualunque ciclo.
 _ph3
--       lda $d012               ; aspetta la 199 (o oltre: mai un fotogramma intero); poi una lettura nei cicli 12-54 della 199
-        cmp #199                ; (riga cattiva) ferma la CPU fino al 55
+-       lda $d012               ; aspetta la 207 (o oltre: mai un fotogramma intero); poi una lettura nei cicli 12-54 della 207
+        cmp #IRQ_L1             ; (riga cattiva) ferma la CPU fino al 55
         bcc -
         nop
         nop
@@ -146,10 +147,8 @@ _ph3
         nop
         nop
         nop
-_ph0    lda ap_p0               ; all'inizio della 200: ECM (nero dalla 200 alla 206) e scroll 7 (dalla 200 alla 206 nessuna riga
-        sta $d011               ; e' "7": nessuna riga cattiva nuova fino all'HUD). Con hy = 0 la 200 e' la riga cattiva della riga
-                                ; 19 del campo: in vc64web cambiare lo scroll li' (anche prima del ciclo 12) spostava l'HUD di una
-                                ; riga (provato): con hy = 0 qui solo l'ECM, lo scroll 7 nella fase 1 (206)
+_ph0    lda ap_p0               ; all'inizio della 208: ECM (nero dalla 208 alla 214) e scroll 7 (con hy = 0 solo ECM)
+        sta $d011
 .if TESTFZ
         inc $03f8               ; test: fotogrammi video (16 bit) contro giri del ciclo ($03fa)
         bne +
@@ -168,9 +167,9 @@ _p1     lda #$57                ; scroll 7 + ECM (gia' scritti nella fase 0 se h
         lda #0
         sta $d021
 -       lda $d012
-        cmp #207
+        cmp #IRQ_L2+2
         bcc -
-        lda #$17                ; 207: via l'ECM
+        lda #$17                ; 215: via l'ECM
         sta $d011
         lda #$10                ; MCM, 38 col, xscroll 0
         sta $d016
@@ -202,47 +201,6 @@ _ps     jsr spr_copy
 ; ------------------------------------------------------------------ primitive
 p10l    .byte <10000, <1000, <100, <10, <1
 p10h    .byte >10000, >1000, >100, >10, >1
-
-; hv -> dbuf[0..4] (glifi, zeri iniziali = vuoto)
-dec5:
-        ldx #0
-_dl     ldy #0
-_ds     lda hv
-        sec
-        sbc p10l,x
-        sta tmp0
-        lda hv+1
-        sbc p10h,x
-        bcc _dd
-        sta hv+1
-        lda tmp0
-        sta hv
-        iny
-        bne _ds
-_dd     tya
-        clc
-        adc #G_0
-        sta dbuf,x
-        inx
-        cpx #5
-        bne _dl
-        ldx #0
-_z      lda dbuf,x
-        cmp #G_0
-        bne _zd
-        lda #G_BLANK
-        sta dbuf,x
-        inx
-        cpx #4
-        bne _z
-_zd     rts
-
-; A = valore a 8 bit -> dbuf
-dec5b:
-        sta hv
-        lda #0
-        sta hv+1
-        jmp dec5
 
 ; sc_n * sc_k / sc_d -> A (0..sc_k)
 scale:
@@ -333,7 +291,7 @@ _cc     sta hc,x
         bne _b
         rts
 
-; (23/11, branch proto-barra-sotto) riga del bersaglio, riga 19 dello schermo HUD (BTR_SCR): nome del mostro bersaglio
+; (23/11) riga del bersaglio, riga 20 dello schermo HUD (BTR_SCR): nome del mostro bersaglio
 ; (colonne 1-24) e sua vita (12 caratteri G_BAR, colonne 26-37, viola), oppure l'etichetta del luogo o il messaggio delle quest
 ; (nbuf, bar.asm: codici schermo della ROM tradotti nei glifi dell'HUD; lettere, cifre, "/" e "." - il resto spazio). Prima
 ; stavano in 8 sprite in cima allo schermo, che coprivano il PG in cima alla mappa. Ogni 4 fotogrammi; quando la barra si
@@ -346,7 +304,29 @@ bt_row:
         lda BTR_SCR             ; colonna 0 sempre vuota quando la riga e' scritta da qui: se no (avvio: c'e' la grafica copiata
         cmp #G_BLANK            ; da copy_gfx) la riga si svuota subito
         bne _bk
-        lda bar_on
+        lda sk_t                ; (23/11) abilita' appena scelta (o oggetto rotto): il suo nome per SK_SHOW fotogrammi, in giallo
+        beq +
+        lda frame
+        and #3
+        bne _x
+        ldx #40
+        jsr hb_clear
+        ldx hud_nm
+        lda sk_off,x
+        tax
+        ldy #0
+-       lda sk_nm,x
+        sta hb+BT_NC,y
+        lda #7
+        sta hc+BT_NC,y
+        inx
+        iny
+        cpy #10
+        bne -
+        lda #2                  ; finito il nome: la riga si ridisegna (o si svuota) subito
+        sta bt_hold
+        jmp _fl
++       lda bar_on
         bne _on
         lda bt_hold             ; barra spenta: il testo resta BTH_FR fotogrammi, poi la riga si svuota
         beq +
@@ -464,41 +444,6 @@ _l      lda hb,y
         bne _l
         rts
 
-; copia le cifre di dbuf in hb da X saltando gli spazi iniziali; X = colonna successiva
-hput:
-        ldy #0
-_s      lda dbuf,y
-        cmp #G_BLANK
-        bne _c
-        iny
-        cpy #4
-        bne _s
-_c      lda dbuf,y
-        sta hb,x
-        inx
-        iny
-        cpy #5
-        bne _c
-        rts
-
-; come hput, ma da 10000 in su in migliaia senza decimali ("10K", "65K": 16 bit, 07/11 sera): dbuf = cifre di dec5,
-; la prima e' la decina di migliaia (G_BLANK se 0); solo la riga XP la usa
-hput_k:
-        lda dbuf
-        cmp #G_0 + 1
-        bcc hput
-        cmp #G_BLANK
-        beq hput
-        sta hb,x
-        lda dbuf+1
-        sta hb+1,x
-        lda #G_K
-        sta hb+2,x
-        inx
-        inx
-        inx
-        rts
-
 ; ------------------------------------------------------------------ pannelli
 ; sincrono: ridisegna tutta la fascia (dopo UI / cambio livello)
 hud_full:
@@ -557,35 +502,23 @@ _n3     lda hud_pend
         jmp hud_p3
 _x      rts
 
-; ---- riga 21: HP  nnn/nnn + barra rossa (8 celle)
+; (23/11, committente) HUD compatto, righe 20-23 dello schermo HUD:
+;   20 riga del bersaglio (bt_row) · 21 vuota con il regolo · 22 vita · 23 esperienza
+;   riga 22: barra rossa della vita (colonne 1-18, 144 pixel) · avvisi degli oggetti (19-21) · pozioni 1-4 (23, 25, 27, 29) · pergamena (31) · H J K (33, 35, 37)
+;   riga 23: barra gialla dell'esperienza (1-18) · freccia verde del level up (20) · posti 5-8 (23-29, cintura da 8) · L U O
+; Niente numeri, niente "LV", niente chiavi (nell'inventario) ne' capitolo e piano (minimappa e menu di gioco).
+HB_BARW  = 18                   ; celle delle barre
+HB_HP    = 80                   ; offset da HUD_ROW0: riga 22
+HB_XP    = 120                  ; riga 23
+HB_POT   = 23                   ; colonna del primo posto della cintura
+HB_SK    = 33                   ; colonna della prima abilita'
+HP_ROWC  = COLRAM + 880         ; color RAM della riga 22
+HP_ROWS  = SCR_H + 880          ; schermo HUD, riga 22
+
+; ---- riga 22: barra della vita
 hud_p0:
-        ldx #26
+        ldx #HB_BARW+1
         jsr hb_clear
-        lda #G_H
-        sta hb+1
-        lda #G_P
-        sta hb+2
-        lda #2
-        sta hc+1
-        sta hc+2
-        lda c_hp
-        sta hv
-        lda c_hp+1
-        sta hv+1
-        jsr dec5
-        ldx #4
-        jsr hput
-        lda #G_SLASH
-        sta hb,x
-        inx
-        stx tmp4
-        lda hpmax
-        sta hv
-        lda hpmax+1
-        sta hv+1
-        jsr dec5
-        ldx tmp4
-        jsr hput
         lda c_hp
         sta sc_n
         lda c_hp+1
@@ -594,7 +527,7 @@ hud_p0:
         sta sc_d
         lda hpmax+1
         sta sc_d+1
-        lda #80
+        lda #HB_BARW*8
         sta sc_k
         jsr scale
         cmp #0
@@ -602,22 +535,21 @@ hud_p0:
         lda c_hp
         ora c_hp+1
         beq _px
-        lda #1
-_px     ldx #10
+        lda #1                  ; vivo: almeno un pixel
+_px     ldx #HB_BARW
         stx bar_n
         ldx #2
         stx bar_c
-        ldx #16
+        ldx #1
         jsr bar
-        lda #40
-        ldx #26
+        lda #HB_HP
+        ldx #HB_BARW+1
         jmp hflush
 
 ; ------------------------------------------------------------------ avvisi (chiamato ogni 16 fotogrammi)
-; Vita bassa (c_hp <= hpmax / 4): le celle "HP nnn/nnn" (riga 21, colonne 1..11) alternano rosso e giallo;
-; al passaggio sotto la soglia un suono (SFX_LOWHP), una volta. Oggetto indossato che si sta per rompere
-; (durabilita' <= WARN_PC % del massimo): icona rossa/gialla lampeggiante in riga 21, colonne 29..31.
-HW_COL   = COLRAM + 840             ; color RAM della riga 21
+; Vita bassa (c_hp <= hpmax / 4): le celle piene della barra della vita (riga 22) alternano rosso e giallo; al passaggio
+; sotto la soglia un suono (SFX_LOWHP), una volta. Oggetto indossato che si sta per rompere (durabilita' <= WARN_PC % del
+; massimo): icona rossa/gialla lampeggiante in riga 22, colonne 19..21.
 hud_warn:
         lda hpmax+1             ; tmp0/tmp1 = hpmax / 4
         lsr
@@ -643,19 +575,22 @@ _bl     lda frame               ; lampeggio: bit 4 di frame (la routine gira ogn
         lda #7
         .byte $2c               ; (bit abs: salta lda #2)
 +       lda #2
-        ldx #10
-_c      sta HW_COL+1,x
-        dex
-        bpl _c
+        ldx #HB_BARW
+_c      ldy HP_ROWS,x           ; solo le celle piene (il binario vuoto resta blu)
+        cpy #G_BAR0
+        beq +
+        sta HP_ROWC,x
++       dex
+        bne _c
         jmp hw_icons
 _ok     lda hw_low
         beq hw_icons
-        lda #0                  ; fine della vita bassa: si ridisegna la riga HP (colori normali)
+        lda #0                  ; fine della vita bassa: si ridisegna la barra (colori normali)
         sta hw_low
         lda hud_pend
         ora #1
         sta hud_pend
-; icone degli oggetti che si stanno per rompere -> riga 21, colonne 29..31 (schermo HUD e color RAM)
+; icone degli oggetti che si stanno per rompere -> riga 22, colonne 19..21 (schermo HUD e color RAM)
 hw_icons:
         ldx #2
 _i      lda #G_BLANK
@@ -687,90 +622,26 @@ _n      lda frame
 _sc     sta hc,x
         dex
         bpl _i
-        lda #69
+        lda #HB_HP+HB_BARW+1
         ldx #3
         jmp hflush
 hw_gl   .byte G_WSWORD, G_WARMOR, G_WSHIELD
 
-; (12/11, committente) riga 21, colonne 34..38 (hb+6..+10 del riquadro da 28): "C3 L4" = capitolo e piano del
-; capitolo (nel villaggio solo "C3"). Internamente i piani restano 1..MAXLEVEL (lv_grp).
-hud_cl:
-        lda cur_level
-        bne _d
-        lda c_chap
-        ldx #0
-        beq _w
-_d      jsr lv_grp              ; A = capitolo, X = indice
-        inx
-_w      stx tmp3
-        clc
-        adc #G_0
-        sta hb+7
-        lda HG_C
-        sta hb+6
-        ldx tmp3
-        beq _r
-        lda HG_L
-        sta hb+9
-        txa
-        clc
-        adc #G_0
-        sta hb+10
-_r      rts
-        .enc "hud"
-HG_C    .byte "c"               ; glifi HUD di "c" e "l" (letti come costanti sotto)
-HG_L    .byte "l"
-        .enc "none"
-
-; ---- riga 22: XP cur/need + barra gialla (11 celle)
+; ---- riga 23: barra dell'esperienza (frazione del livello) e freccia verde del level up
 hud_p1:
-        ldx #26
+        ldx #HB_BARW+3
         jsr hb_clear
-        lda #G_X
-        sta hb+1
-        lda #G_P
-        sta hb+2
-        lda #7
-        sta hc+1
-        sta hc+2
         lda c_lvl
         cmp #PL_MAXLVL
         bcc _lv
-        lda #G_M
-        sta hb+4
-        lda #G_A
-        sta hb+5
-        lda #G_X
-        sta hb+6
-        lda #80
+        lda #HB_BARW*8          ; livello massimo: barra piena
         jmp _bar
-_lv     tax                     ; xp_n*[livello - 1]: esperienza per il livello successivo (24 bit)
+_lv     tax                     ; (xp - soglia precedente) / (soglia - precedente), differenze a 16 bit
         dex
-        stx tmp7
-        lda c_xp                ; mostrati i 16 bit bassi (nel dungeon l'esperienza sta sotto 65536)
-        sta hv
-        lda c_xp+1
-        sta hv+1
-        jsr dec5
-        ldx #4
-        jsr hput_k
-        lda #G_SLASH
-        sta hb,x
-        inx
-        stx tmp4
-        ldx tmp7
-        lda xp_n0,x
-        sta hv
-        lda xp_n1,x
-        sta hv+1
-        jsr dec5
-        ldx tmp4
-        jsr hput_k
-        ; barra: (xp - soglia precedente) / (soglia - precedente), differenze a 16 bit
         lda #0
         sta tmp5
         sta tmp6
-        ldx tmp7
+        cpx #0
         beq _np
         lda xp_n0-1,x
         sta tmp5
@@ -790,24 +661,30 @@ _np     lda c_xp
         lda xp_n1,x
         sbc tmp6
         sta sc_d+1
-        lda #80
+        lda #HB_BARW*8
         sta sc_k
         jsr scale
-_bar    ldx #10
+_bar    ldx #HB_BARW
         stx bar_n
         ldx #7
         stx bar_c
-        ldx #16
+        ldx #1
         jsr bar
-        lda #80
-        ldx #26
+        jsr pts_avail           ; (11/11) punti statistica da spendere: freccia verde in su (G_LVUP)
+        beq +
+        lda #G_LVUP
+        sta hb+HB_BARW+2
+        lda #5                  ; verde (colore < 8: carattere hires)
+        sta hc+HB_BARW+2
++       lda #HB_XP
+        ldx #HB_BARW+3
         jmp hflush
 
-; ---- riga regolo + riga 23: LV nn  H J K L  U O  chiave nn
+; ---- riga 21 (regolo) e abilita' H J K / L U O (righe 22-23, colonne 33, 35, 37)
 hud_p2:
         ldx #40
         jsr hb_clear
-        lda COLRAM+720          ; colore della mappa ((23/11) dalla riga 18: la 19 e' la riga del bersaglio)
+        lda COLRAM+760          ; colore della mappa (riga 19 della memoria colore, del campo di gioco)
         sta tmp4
         ldx #39
 _r      lda #G_RULE
@@ -816,109 +693,64 @@ _r      lda #G_RULE
         sta hc,x
         dex
         bpl _r
-        lda #0
+        lda #40
         ldx #40
         jsr hflush
-        ldx #26
-        jsr hb_clear
-        lda #G_L
-        sta hb+1
-        lda #G_V
-        sta hb+2
-        lda c_lvl
-        jsr dec5b
-        lda dbuf+3
-        sta hb+4
-        lda dbuf+4
-        sta hb+5
-        jsr pts_avail           ; (11/11) punti statistica da spendere: freccia verde in su (G_LVUP) accanto al livello; glifo da confermare, TODO A1
-        beq +
-        lda #G_LVUP
-        sta hb+6
-        lda #5                  ; verde (colore < 8: carattere hires)
-        sta hc+6
-+       lda #G_KEY              ; chiavi: icona + numero (0..10)
-        sta hb+22
+        ldx #12
+        jsr hb_clear            ; hb 0..5 = riga 22, 6..11 = riga 23 (una cella si' e una no)
+        ldx #0
+_k      lda c_lvl               ; abilita' non ancora disponibile: niente lettera (07/11)
+        cmp sk_req,x
+        bcc _kn
+        lda sk_g,x
+        ldy sk_pos,x
+        sta hb,y
+        cpx #4
+        bcs _bf
+        lda #1                  ; H J K L: bianco, giallo quella scelta
+        cpx c_skill
+        bne _kc
         lda #7
-        sta hc+22
-        lda c_keys
-        jsr dec5b
-        ldx #23
-        jsr hput
-        ldx #4                  ; U (Rage) e O (Frenzy): attiva = giallo, pronta = bianco, ricarica = ciano;
-_bf     lda c_lvl               ; abilita' non ancora disponibile: niente lettera (07/11). Solo colori < 8: con un
-        cmp sk_req,x            ; colore >= 8 il carattere diventa multicolore e la lettera non si legge
-        bcc _bn
-        lda bf_g-4,x
-        sta hb+14,x
-        lda bf_t-4,x
+        bne _kc
+_bf     lda bf_t-4,x            ; U (Rage) e O (Frenzy): attiva = giallo, pronta = bianco, ricarica = ciano
         tay
         lda tmr,y
         ora tmr+1,y
         beq +
         lda #7
-        bne _bc
+        bne _kc
 +       lda sk_cdl,x
         ora sk_cdh,x
         beq +
         lda #3
-        bne _bc
+        bne _kc
 +       lda #1
-_bc     sta hc+14,x
-_bn     inx
+_kc     ldy sk_pos,x
+        sta hc,y
+_kn     inx
         cpx #6
-        bne _bf
-        lda sk_t                ; nome dell'abilita' al posto di H J K L (SK_SHOW frame)
-        beq _fk
-        ldx hud_nm
-        lda sk_off,x
-        tax
-        ldy #0
-_nm     lda sk_nm,x
-        sta hb+8,y              ; (12/11) nome dalla colonna 8 (le lettere sono a 9-15)
-        lda #7
-        sta hc+8,y
-        inx
-        iny
-        cpy #10
-        bne _nm
-        lda #120
-        ldx #26
-        jmp hflush
-_fk     ldy #0
-_s      sty tmp3
-        tya
-        asl
-        clc
-        adc #7
-        adc #2              ; (12/11, committente: lettere un po' piu' a destra) colonna 9, 11, 13, 15
-        tax
-        lda c_lvl               ; abilita' non ancora disponibile: niente lettera
-        cmp sk_req,y
-        bcc _nx
-        lda sk_g,y
+        bne _k
+        lda #HB_HP+HB_SK
+        ldx #5
+        jsr hflush
+        ldx #5                  ; riga 23: hb+6..11 -> hb+0..5
+-       lda hb+6,x
         sta hb,x
-        cpy c_skill
-        bne _w
-        lda #7
-        bne _c
-_w      lda #1
-_c      sta hc,x
-_nx     ldy tmp3
-        iny
-        cpy #4
-        bne _s
-        lda #120
-        ldx #26
+        lda hc+6,x
+        sta hc,x
+        dex
+        bpl -
+        lda #HB_XP+HB_SK
+        ldx #5
         jmp hflush
 
 SK_SHOW = 100                   ; 2 secondi
 sk_off  .byte 0, 10, 20, 30, 40
-bf_g    .byte G_U, G_O
-sk_g    .byte G_H, G_J, G_K, G_L
+sk_g    .byte G_H, G_J, G_K, G_L, G_U, G_O
+sk_pos  .byte 0, 2, 4, 6, 8, 10 ; H J K in riga 22, L U O in riga 23 (in hb: 6..11 = riga 23)
 bf_t    .byte T_RAGE, T_FZ
 sk_nm
-        .enc "hud"              ; testo normale: ogni lettera diventa il suo glifo HUD
+        .enc "hud"              ; testo normale: ogni lettera diventa il suo glifo HUD (mostrato nella riga del bersaglio)
         .text "slash     "
         .text "whirlwind "
         .text "battle cry"
@@ -926,23 +758,19 @@ sk_nm
         .text "broken    "
         .enc "none"
 
-; ---- cintura: 5 posti (4 pozioni, una per posto, + pergamena), riquadro in basso a destra
-; righe 21..23, colonne 28..38 ; posto j in colonna 29+2j. Riga 22: icone; riga 23: un trattino
-; sotto ogni posto (la posizione, al posto dei numeri dei tasti 1..5)
+; ---- cintura (23/11, committente): due file da 4 pozioni, riga 22 posti 1-4 e riga 23 posti 5-8 (oggi vuoti: la cintura
+; da 8 arrivera'), colonne 23..29; la pergamena nella prima fila, a destra delle pozioni (colonna 31). Posto vuoto: trattino blu
 hud_p3:
-        ldx #11                 ; riga 21: vuota, poi a destra capitolo e piano del capitolo
-        jsr hb_clear
-        jsr hud_cl
-        lda #68
-        ldx #11
-        jsr hflush
-        jsr hw_icons            ; avvisi degli oggetti (colonne 29..31) subito, senza aspettare hud_warn
-        ldx #11                 ; riga 22: icone
+        ldx #9
         jsr hb_clear
         ldy #0
 _i      tya
         asl
         tax
+        lda #G_DOT              ; vuoto: trattino
+        sta hb,x
+        lda #6
+        sta hc,x
         lda c_beltt,y
         beq _n
         sty tmp3
@@ -954,32 +782,31 @@ _i      tya
         beq _pc
 _pb     lda #6
 _pc     ldy tmp3
-        sta hc+1,x
+        sta hc,x
         lda #G_POT
-        sta hb+1,x
+        sta hb,x
 _n      iny
         cpy #4
         bne _i
         jsr scr_find            ; pergamene: icona se ce n'e' almeno una (quantita' nell'inventario)
         bcs _ns
         lda #1
-        sta hc+9
+        sta hc+8
         lda #G_SCR
-        sta hb+9
-_ns     lda #108
-        ldx #11
+        sta hb+8
+_ns     lda #HB_HP+HB_POT
+        ldx #9
         jsr hflush
-        ldx #11                 ; riga 23: trattini
+        ldx #7                  ; riga 23: posti 5-8, vuoti (trattini)
         jsr hb_clear
-        ldx #0
-_d      lda #G_DOT
-        sta hb+1,x
-        lda #6                  ; blu (carattere hires)
-        sta hc+1,x
-        inx
-        inx
-        cpx #10
-        bne _d
-        lda #148
-        ldx #11
+        ldx #6
+-       lda #G_DOT
+        sta hb,x
+        lda #6
+        sta hc,x
+        dex
+        dex
+        bpl -
+        lda #HB_XP+HB_POT
+        ldx #7
         jmp hflush

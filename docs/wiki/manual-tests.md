@@ -6,7 +6,7 @@ Solo i test che **non si possono automatizzare**: aspetto, suono, sensazione dei
 Sono già coperti da `tests/run_tests.sh` e quindi **non sono qui**: bilanciamento e regole d20 (simulatore, arena),
 avvio e caricamento dei file (`test_start`, `test_lore`), salvataggi e cancellazione del barbaro (`test_saves`,
 `test_rel`), generazione dei piani (`test_gen`), oggetti, cintura, pergamene (`test_items`, `test_belt`), mostri
-(`test_ai`), riga XP dell'HUD (`test_hudxp`), ritaglio dell'HUD nell'help (`gen_help.py --check`).
+(`test_ai`), barre dell'HUD (`EMU-12`), ritaglio dell'HUD nell'help (`gen_help.py --check`).
 Un'informazione non verificata al 100% è marcata **(da verificare)**.
 
 ## Come si usa

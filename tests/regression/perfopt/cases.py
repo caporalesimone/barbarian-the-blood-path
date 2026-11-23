@@ -61,6 +61,6 @@ def hud_panels(ctx):
     check(g.b(L["hud_dirty"]) == 0 and g.b(L["hud_pend"]) == 2, "xp: hud_dirty %d hud_pend %d (expected 0, 2)" % (g.b(L["hud_dirty"]), g.b(L["hud_pend"])))
     g.frames(4)
     hp = g.w16(L["c_hp"])
-    txt = g.mem(L["SCR_H"] + 800 + 40 + 4, 3)
+    txt = g.mem(L["SCR_H"] + 880 + 1, 3)                 # (23/11) HP bar: row 22, columns 1-3
     check(g.b(L["hud_pend"]) == 0, "panels still pending after 4 frames: %02x" % g.b(L["hud_pend"]))
     check(txt[0] != L["G_BLANK"], "HP row not drawn")

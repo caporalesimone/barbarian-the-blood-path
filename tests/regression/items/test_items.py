@@ -68,24 +68,25 @@ with AR.Arena() as a:
     wr("hpmax", 100, 0); wr("c_hp", 10, 0); wr("hw_low", 0)
     wr("c_eq", SW); wr("c_eqd", 5, 0, 0); wr("c_eqm", 100, 0, 0)
     wr("frame", 0)
+    call(jsr("hud_p0"))                               # (23/11) the HP bar (row 22): the low-HP blink colours its full cells
     call(jsr("hud_warn"))
-    c0, low = a.mem(0xdb49, 1)[0] & 15, rd("hw_low")[0]
-    ico = a.mem(G["SCR_H"] + 869, 3)
+    c0, low = a.mem(0xdb71, 1)[0] & 15, rd("hw_low")[0]
+    ico = a.mem(G["SCR_H"] + 899, 3)
     wr("frame", 16)
     call(jsr("hud_warn"))
-    c1 = a.mem(0xdb49, 1)[0] & 15
+    c1 = a.mem(0xdb71, 1)[0] & 15
     if (c0, c1, low) != (2, 7, 1) or ico != [G["G_WSWORD"], G["G_BLANK"], G["G_BLANK"]]:
-        err.append("HUD warnings: HP colours %d/%d (expected 2/7), hw_low %d, icons %s" % (c0, c1, low, ico))
+        err.append("HUD warnings: HP bar colours %d/%d (expected 2/7), hw_low %d, icons %s" % (c0, c1, low, ico))
     wr("c_hp", 90, 0); wr("c_eqd", 60)
     call(jsr("hud_warn"))
-    if rd("hw_low")[0] != 0 or a.mem(G["SCR_H"] + 869, 1)[0] != G["G_BLANK"]:
+    if rd("hw_low")[0] != 0 or a.mem(G["SCR_H"] + 899, 1)[0] != G["G_BLANK"]:
         err.append("HUD warnings: they do not switch off (hw_low %d)" % rd("hw_low")[0])
     # threshold in percent (rules.yaml durability.warn_percent): new dagger 15/15 no icon, 3/15 (20%) icon,
     # 4/15 no; 60/255 (x5 above 255) no
     for d, m, want in ((15, 15, 0), (3, 15, 1), (4, 15, 0), (60, 255, 0), (51, 255, 1)):
         wr("c_eqd", d); wr("c_eqm", m)
         call(jsr("hud_warn"))
-        on = a.mem(G["SCR_H"] + 869, 1)[0] == G["G_WSWORD"]
+        on = a.mem(G["SCR_H"] + 899, 1)[0] == G["G_WSWORD"]
         if on != bool(want):
             err.append("durability warning %d/%d: icon %s (expected %s)" % (d, m, on, bool(want)))
     # ---- TOD clock
