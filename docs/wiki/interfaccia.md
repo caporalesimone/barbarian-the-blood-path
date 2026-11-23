@@ -107,7 +107,8 @@ vita in 12 caratteri `G_BAR` viola alle colonne 26-37 (da `cellf`); oppure l'eti
 Ogni 4 fotogrammi, ogni cella scritta una volta (niente riga cancellata e riscritta: niente lampeggi); spegnendosi, il testo
 resta 1 s (`BTH_FR`), tranne alla morte del bersaglio: la riga si svuota subito (`kill_monster`: `bt_hold` = 1, 23/11,
 test `DROP-10`); a barra spenta la riga si riscrive vuota ogni 16 fotogrammi (altre schermate usano `SCR_H`). Gli
-sprite `BARSPR` ($8800/$B000) e `bt_step` restano solo per il testo della minimappa.
+(23/11, committente) della vecchia barra in sprite (doppio buffer $8800/$B000, costruzione a fasi `bt_step`) resta solo
+`mm_glyphs`: il testo della minimappa negli sprite `BARSPR` a $8800, scritto in una volta all'apertura.
 
 **Bersaglio: quale mostro** (`src/game/bar.asm`, `bar_target` / `update_bar`, 06/11 sera): ogni colpo a segno del
 PG la sposta sul mostro colpito (`hit_one`); se non c'è un bersaglio (`bar_t` = 0) la prende il mostro che attacca
@@ -240,9 +241,8 @@ il **piano del capitolo** (1–5):
 
 | Dove | Testo | Codice |
 |---|---|---|
-| Menu di RUN/STOP, riga 6 (23/11, HUD compatto: prima nell'HUD, `hud_cl`) | "chapter 3 level 4"; nel villaggio il suo nome | `gm_place` (`ui.asm`) |
 | Etichette di scale, cripta, portale | "stairs down to level 4" | `loc_cl` (`bar.asm`) |
 | Schermata di caricamento | "loading level 4" | `io_screen` (`ui.asm`) |
 | Minimappa del villaggio (22/11, committente) | un **"!" giallo** (quest da dare) o un **"?" giallo** (da ritirare, dal 22/11: prima "!" verde) sopra la casella di ogni NPC fisso (il segno D12 di `npc_q`; "?" nel blocco `MG_B+4`, glifo `mq_gq`): glifo largo 2 pixel `mq_gl` nel blocco `MG_B+3` ($B0C0), sprite 3..5 (NPC fisso k = 1..3) a doppia grandezza come le icone dei negozi, x = 82 + 4 colonna, y = 34 + 4 riga (sopra la casella); niente segni finché gli NPC non sono piazzati (`npc_pend`). Il "!" del font della UI era largo 1 pixel e non si vedeva. (22/11) `mm_qmark` sta nel modulo MENU (zona 1, `src/menu/npc_fix.asm`, `MENU_QMMK`): `mm_icons` la chiama solo con il modulo in memoria (`ovl_cur`) | `mm_qmark` |
-| Minimappa | "chapter 3 level 4" per intero (17 caratteri); nel villaggio il nome del villaggio (23/11, `vil_nm`); dal 23/11 niente seed e coordinate del PG | `mm_sprites` |
+| Minimappa | "chapter 3 level 4" per intero (17 caratteri); nel villaggio il nome del villaggio (23/11, `vil_nm`); dal 23/11 niente seed e coordinate del PG. È l'unico posto con capitolo e piano (23/11, committente: tolti dall'HUD e poi anche dal menu di RUN/STOP, per non duplicarli) | `mm_sprites` |
 | Dettagli del barbaro (menu iniziale) | "abyss depth": profondità raggiunta nell'Abisso (capitolo 5, piani oltre il 20); "-" finché non ci si entra | `lobby.asm` |

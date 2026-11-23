@@ -165,7 +165,6 @@ load_location:
         jsr enter_gfx
         lda #0
         sta bar_lab
-        sta bt_ph
         sta bt_who
         lda #$ff
         sta lc_x                ; forza il ricalcolo dell'etichetta

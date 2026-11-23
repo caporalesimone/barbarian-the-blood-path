@@ -2103,17 +2103,8 @@ _fl     lda #<mm_chap               ; (12/11, committente) "chapter 3 level 4" p
         jsr loc_num
         ; (23/11, committente) niente seed e coordinate del PG nella minimappa: le coordinate sono nel menu dei trucchi,
         ; il seed nel menu di gioco (RUN/STOP)
-_bld    ; costruzione sincrona negli sprite della barra (poi la barra di gioco va ricostruita)
-        lda #0
-        sta bt_cel
-        lda #$28                ; cosi' si costruisce nel set $8800 (puntatori BARPTR della tabella mg_p)
-        sta bar_fr
-        lda #1
-        sta bt_ph
-_bs     jsr bt_step
-        lda bt_ph
-        bne _bs
-        sei
+_bld    jsr mm_glyphs           ; testo negli sprite a $8800 (puntatori BARPTR della tabella mg_p); nbuf e' sporco: la riga
+        sei                     ; del bersaglio va ricalcolata al rientro
         lda #0
         sta bt_who
         sta bar_lab
@@ -2458,48 +2449,6 @@ _l      stx tmp3
         rts
 
 tt_gm   #t5 "game menu"
-; (23/11, committente) riga 6 del menu di gioco: nel villaggio il suo nome (vil_nm), nel sotterraneo "chapter 3 level 4"
-; (centrati): capitolo e piano non sono piu' nell'HUD
-gm_place:
-        lda cur_level
-        bne _d
-        ldx c_chap
-        dex
-        lda vil_lo,x
-        sta ptr0
-        lda vil_hi,x
-        sta ptr0+1
-        ldy #0                  ; lunghezza -> colonna (40 - n) / 2
--       lda (ptr0),y
-        beq +
-        iny
-        bne -
-+       sty tmp3
-        lda #40
-        sec
-        sbc tmp3
-        lsr
-        tax
-        ldy #6
-        jsr ui_at
-        lda ptr0
-        ldx ptr0+1
-        jmp ui_puts
-_d      jsr lv_grp              ; A = capitolo, X = indice del piano nel capitolo
-        inx
-        stx tmp4
-        pha
-        #at 11,6                ; "chapter N level M" = 17 caratteri
-        #msg "chapter "
-        pla
-        clc
-        adc #$30
-        jsr ui_putc
-        #msg " level "
-        lda tmp4
-        clc
-        adc #$30
-        jmp ui_putc
 ; menu di gioco (RUN/STOP): resume, save game, quit game (e cheats con CHEATS = 1)
 ui_gamemenu:
 .if CHEATS
@@ -2516,7 +2465,6 @@ ui_gamemenu:
         ldx #>tt_gm
         ldy #0
         jsr ui_title
-        jsr gm_place            ; (23/11) dove si e': riga 6 (il capitolo e il piano non sono piu' nell'HUD)
         #at VER_X+1,18          ; (23/11, committente) seed della partita sopra la versione, centrato, staccato dalle voci,
         #msg "seed "            ; una riga vuota fra seed e versione
         jsr ui_seed

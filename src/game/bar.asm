@@ -1,9 +1,10 @@
 ; ===================================================================
 ;  bar.asm - bersaglio (nome e vita del mostro, etichetta del luogo, messaggi delle quest: testo in nbuf e celle in cellf,
 ;  scritti nella riga 19 dell'HUD da bt_row, hud.asm; fino al 23/11 in 8 sprite in alto) e database dei nomi dei boss.
-;  Gli sprite BARSPR ($8800/$B000) servono ancora al testo della minimappa (bt_step, costruzione sincrona)
+;  (23/11, committente) della vecchia barra in sprite (doppio buffer $8800/$B000, costruzione a fasi) resta solo mm_glyphs:
+;  il testo della minimappa (nbuf) negli sprite BARSPR a $8800
 ; ===================================================================
-BARSPR     = $8800              ; 8 sprite x 64 byte, visibili al VIC (banco 2)
+BARSPR     = $8800              ; testo della minimappa: 8 sprite x 64 byte, visibili al VIC (banco 2)
 BARPTR     = (BARSPR - $8000) / 64
 
         .virtual $91a8
@@ -13,11 +14,7 @@ bar_t      .byte ?              ; frame residui di visualizzazione
 bar_lhp    .byte ?
 bar_on     .byte ?
 bar_lab    .byte ?              ; 0 = barra mostro; >0 = etichetta luogo sotto il giocatore
-bar_fr     .byte ?              ; sprite visibili: 0 = $8800, $28 = $B000 (doppio buffer)
-bt_bk      .byte ?              ; offset (pagine) del buffer in costruzione
-bt_ph      .byte ?              ; costruzione incrementale degli sprite: 0 = ferma, 1.. = fase
-bt_cel     .byte ?              ; 1 = a fine costruzione disegnare la barra vita
-bt_who     .byte ?              ; contenuto del testo gia' negli sprite: mostro+1 oppure $80|etichetta
+bt_who     .byte ?              ; contenuto del testo gia' in nbuf: mostro+1 oppure $80|etichetta
 lc_x       .byte ?              ; ultima casella/chiavi esaminate da loc_check
 lc_y       .byte ?
 lc_k       .byte ?
@@ -208,7 +205,7 @@ _type   tax                     ; (15/11) A = tipo 1..9: nome del set del capito
         ldx #>NM_AT
         jmp bn_put
 
-; ricostruisce i dati sprite per il bersaglio corrente
+; vita del bersaglio in cellf (celle piene) e, se il bersaglio e' cambiato, il suo nome in nbuf
 bar_build:
         lda #0
         sta bar_lab
@@ -247,44 +244,16 @@ _cl     lda #0
 _r      rts
 
 
-; un passo della costruzione degli sprite (al massimo ~2.5K cicli per frame, IRQ mai bloccato a lungo)
-;  fase 1-2: azzera una pagina; 3-6: 6 glifi ciascuna; poi barra vita (se mostro) e fine
-bt_step:
-        lda bt_ph
-        bne _go
-        rts
-_go     cmp #3
-        bcs _gl
-        cmp #1
-        bne _z0
-        lda bar_fr              ; si costruisce sempre nel buffer non visibile
-        eor #$28
-        sta bt_bk
-        lda #1
-_z0     clc
-        adc #>BARSPR-1
-        clc
-        adc bt_bk
-        sta ptr1+1
-        lda #<BARSPR
-        sta ptr1
+; (23/11) testo della minimappa: nbuf (24 codici schermo) negli sprite BARSPR a $8800, 3 caratteri per sprite, dalla
+; char ROM. Sincrona (la minimappa la chiama una volta, all'apertura)
+mm_glyphs:
         ldy #0
         tya
-_z      sta (ptr1),y
+-       sta BARSPR,y
+        sta BARSPR+$100,y
         iny
-        bne _z
-        inc bt_ph
-        rts
-_gl     cmp #7
-        bcs _end
-        sec
-        sbc #3
-        tax
-        lda mul6,x
-        sta bc_i
-        clc
-        adc #6
-        sta bn_i                ; fine (esclusa) di questo gruppo di glifi
+        bne -
+        sty bc_i
 _g      ldx bc_i
         lda nbuf,x
         ldy #$d0                ; ptr0 = $D000 (char ROM) + codice x 8
@@ -304,8 +273,6 @@ _gy     lda (ptr0),y
         lda bar_dl,x
         sta ptr1
         lda bar_dh,x
-        clc
-        adc bt_bk
         sta ptr1+1
         ldx #0
 _gr     lda gbuf,x
@@ -316,30 +283,12 @@ _gr     lda gbuf,x
         bne _gr
         inc bc_i
         lda bc_i
-        cmp bn_i
+        cmp #24
         bne _g
-        inc bt_ph
-        rts
-_end    lda bt_bk               ; (23/11) solo il testo della minimappa: la barra di gioco non usa piu' gli sprite               ; scambio: il buffer appena costruito diventa visibile
-        sta bar_fr
-        lda #0
-        sta bt_ph
-        rts
-mul6    .byte 0, 6, 12, 18
-
-; bar_on = 1 a costruzione finita (doppio buffer: niente sparizioni durante la costruzione)
-bar_show:
-        lda bt_ph
-        beq _y
-        rts                     ; in costruzione: resta visibile il contenuto precedente (o niente)
-_y      lda #1
-        sta bar_on
         rts
 
 ; chiamata ogni frame dopo update_monsters
-update_bar:
-        lda #0                  ; (23/11) niente sprite della barra: il testo e' gia' in nbuf (bt_row lo scrive nell'HUD);
-        sta bt_ph               ; bt_step resta per il testo della minimappa (ui.asm, costruzione sincrona negli sprite a $8800)
+update_bar:                     ; (23/11) testo in nbuf e vita in cellf: bt_row (hud.asm) li scrive nell'HUD
         lda bar_t
         bne _act
         lda lb_boss
@@ -370,7 +319,9 @@ _act    dec bar_t
         cmp bar_lhp
         beq _on
         jsr bar_build
-_on     jmp bar_show
+_on     lda #1
+        sta bar_on
+        rts
 _off    lda #0
         sta bar_t
         jmp loc_check
@@ -685,11 +636,10 @@ _have   cmp #0
         lda #0
         sta bar_m
         sta bar_lhp
-        sta bt_cel
         jsr bar_name
-        lda #1
-        sta bt_ph
-_on     jmp bar_show
+_on     lda #1
+        sta bar_on
+        rts
 _none   lda #0
         sta bar_lab
         sta bar_on

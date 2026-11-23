@@ -99,7 +99,7 @@ flowchart TD
 
 (19/11) `update_bar` e `npc_tick` vengono **dopo** `update_camera`: con `redraw_due` (C=1 se in questo fotogramma
 `maybe_redraw` cambia cella o ridisegna tutto) il lavoro che può aspettare un fotogramma salta: il passo degli NPC, il
-ricalcolo dell'etichetta del luogo (`loc_check`), il pezzo del testo della barra (`bt_step`); e nel fotogramma di un
+ricalcolo dell'etichetta del luogo (`loc_check`); e nel fotogramma di un
 ridisegno completo (`rd_sync`) gli NPC tengono gli sprite del fotogramma prima (`npc_draw`). Vicino ai vaganti del villaggio
 il ridisegno più questi lavori sforava il fotogramma (persi 3-4% camminando fra gli NPC, test `PERF-24`).
 
