@@ -164,10 +164,11 @@ in gioco e da tarare**):
 | Boss | Come è fatta | Scelte mie (19/11) |
 |---|---|---|
 | The Hollow Abbot | sotto **2/3** e **1/3** della vita: fermo 50 fotogrammi (1 s), lampeggia verde, bordo verde, suono del portale; poi 2 **Skeleton** (tipo 2) sulle caselle di pavimento accanto, svegli. Finché uno è vivo: +1 vita ogni **25** fotogrammi (verde a tratti), mai oltre il massimo. Al rientro le soglie già superate non si ripetono | nessun limite al numero di rigenerazioni; gli scheletri sono mostri normali del piano 5 |
-| **Mother Stitch** (19/11, al posto del mugnaio) | tre **riti**: appena sveglia, sotto **2/3** e sotto **1/3** della vita; ognuno: ferma **50** fotogrammi, lampeggia bianco, bordo bianco, suono del portale, poi **2 feticci** (tipo 8 del file `GFX4`: nome "fetish", arancio) sulle caselle di pavimento accanto. I feticci sono **fermi** e non attaccano (stordimento rinnovato a ogni fotogramma, riconosciuti dal **tipo**: anche quelli rimessi dalla STASH dopo il portale), vita = vita massima del boss / **16**. **Protetta** finché un feticcio è in piedi: colpi del PG **dimezzati** (almeno 1), +1 vita ogni **25** fotogrammi, colore **giallo**. Caduto l'ultimo feticcio: **scoperta 100** fotogrammi (ferma, lampeggia azzurro, lampo del bordo, colpi ×2). I feticci danno **esperienza ma niente bottino** (committente, 19/11: `ovp_kill`). Al rientro i riti già fatti non si ripetono | colori senza verde (committente: si confonde con la palude); se attorno non c'è pavimento libero il rito non pianta niente e non c'è fase "scoperta" |
+| **Mother Stitch** (19/11, al posto del mugnaio) | tre **riti**: appena sveglia, sotto **2/3** e sotto **1/3** della vita; ognuno: ferma **50** fotogrammi, lampeggia bianco, bordo bianco, suono del portale, poi **2 feticci** (tipo 8 del file `GFX4`: nome "fetish", arancio) sulle caselle di pavimento accanto. I feticci sono **fermi** e non attaccano (stordimento rinnovato a ogni fotogramma, riconosciuti dal **tipo**: anche quelli rimessi dalla STASH dopo il portale), vita = vita massima del boss / **8** (24/11; / 16 fino al 23/11). **Protetta** finché un feticcio è in piedi: colpi del PG **dimezzati** (almeno 1), +1 vita ogni **25** fotogrammi, colore **giallo**. Caduto l'ultimo feticcio: **scoperta 75** fotogrammi (24/11; 100 fino al 23/11: ferma, lampeggia azzurro, lampo del bordo, colpi ×2). (24/11) **Tipo e vita fissi**: tipo del Lich (`CB2_TYPE`: nel capitolo 2 le statistiche di Hag of the Mere), **300** punti vita (`CB2_HP`). **Maledizione**: sveglia, fuori da riti e scoperta, ogni **400** fotogrammi lampeggia di rosso chiaro **40** fotogrammi (avviso, lampo del bordo), poi se il PG è entro **40** pixel su entrambi gli assi la cadenza dello Slash si allunga di 5/8 (×1,625) per **150** fotogrammi (`ovp_rate`, suono del colpo subito). **Feticci marci**: quelli ancora in piedi **500** fotogrammi dopo il rito diventano **annegati** (tipo 1, svegli, vita del tipo al piano): la protezione finisce senza scoperta. I feticci danno **esperienza ma niente bottino** (committente, 19/11: `ovp_kill`). Al rientro i riti già fatti non si ripetono | colori senza verde (committente: si confonde con la palude); se attorno non c'è pavimento libero il rito non pianta niente e non c'è fase "scoperta" |
 | Varok the Oathbreaker | sveglio, libero: allineato con il PG (scarto < 8 px su un asse) a **32–143 px**: avviso **25** fotogrammi (fermo, lampeggia giallo), poi carica a **4 px** per fotogramma nella direzione del PG (massimo 60 fotogrammi): contro un muro **stordito 100** fotogrammi (grigio, lampo del bordo), se raggiunge il PG **due attacchi** e si ferma; dopo ogni carica **75** fotogrammi di pausa. Lo scudo dimezza i colpi del PG (almeno 1), non da stordito | la carica non passa sugli spigoli (nessuno scivolamento); gli altri mostri non la fermano |
 
-Test: `OVP-11`, `OVP-12`, `OVP-13` (regression). **Non provato a mano in gioco** (19/11): leggibilità degli avvisi, difficoltà.
+Test: `OVP-11`, `OVP-12`, `OVP-13` (regression), `STITCH-10..11` (sanity: tipo e vita fissi, feticci marci, maledizione),
+`ARENA-12`. **Non provato a mano in gioco** (19/11): leggibilità degli avvisi, difficoltà.
 
 **(21/11, committente) Rabbia dell'abate** (`src/game/ovl_boss1.asm`, `ab_tick2`): sotto il **30%** della vita (1/4 + 1/32 +
 1/64 = 29,7%) entra in rabbia (bordo rosso e suono, una volta): **attacca più spesso** (ricarica dell'attacco al massimo 28
@@ -198,6 +199,18 @@ colpisce **lui**, non prima gli scheletri (`Abbot.adds_first = False`): gli sche
 lui. Con queste il simulatore coincide con l'arena (100 punti vita: durata 473 contro 472 fotogrammi, 8,5 contro 8,4 attacchi
 del boss, 60 contro 58 punti vita persi). Ritaratura `--fit-chapter`: **123 punti vita** → simulatore **59/74/81%**, arena
 **68/81/84%** (150 combattimenti per livello, ±4 punti).
+
+**(24/11) Mother Stitch: meccaniche nuove, taratura e arena.** Il committente ha chiesto il capitolo 2 completo senza altre
+decisioni: la proposta del 20/11 è nel codice (feticci / 8, scoperta 1,5 s, maledizione, feticci marci; tabella sopra). Taratura
+(`sim_builds.py --fit-chapter stitch`): **431** punti vita per il 60% al livello 10 (69/75/99% ai livelli 10/11/12). In arena il PG
+di riferimento al livello 10 vinceva lo **0%** con 431 punti vita, con ogni bot: fermo (colpisce sempre lei, protetta: colpi
+dimezzati e rigenerazione), che si avvicina (il più vicino è lei), e il bot nuovo `adds` (BOT 2: prima gli altri mostri, poi il
+boss; aggira gli ostacoli). Differenze misurate con `adds`: stessa quota di colpi su di lei protetta (45% contro 40%), ma il
+PG in arena fa il 45% di danno in meno al fotogramma (cammina fra feticci e boss, non schiva mai la maledizione, Slash prende quasi
+sempre un solo mostro: `slash_area` di Mother Stitch 0,2 invece di 0,7, stima). Il salto al livello 12 (85–100% in arena) è
+Smash, che prende boss e feticci insieme. **Scelta**: **300** punti vita, fra i due: simulatore **94/99/100%**, arena (bot
+`adds`) **35/48/100%** ai livelli 10/11/12 (40 combattimenti per livello). Un giocatore vero sta in mezzo (si muove meglio del bot,
+schiva la maledizione): **non verificato**, da provare a mano.
 
 ### Proposta del 20/11: più meccaniche e taratura con il simulatore (design, non nel codice)
 

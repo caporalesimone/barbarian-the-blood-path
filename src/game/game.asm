@@ -3296,6 +3296,10 @@ perform_skill1:
         lda sk_cd_hi,x
         bne _cd
         lda s_rate
+        clc                     ; (24/11) + ovp_rate (maledizione di Mother Stitch: codice del piano)
+        adc ovp_rate
+        bcc _cd
+        lda #255
 _cd     sta sk_cdl,x
         lda sk_cd_hi,x
         sta sk_cdh,x

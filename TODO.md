@@ -358,7 +358,7 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   a 1,4 s e `town_in`/`in1` a 5,2 s finché, riordinati i file delle quest (D2), non si rimisura; il disco si ottimizza prima della 2.0.
   (24/11) **`PERF-DISK-23` fallisce già al commit 2431d8b** (twn3, file del villaggio 3 da solo: 2,22 s sul limite 2,1 s nella
   suite `PERF-DISK` completa; 0,96 s lanciato da solo): non dipende dalle statistiche del capitolo 2 (i file sul disco hanno gli stessi blocchi).
-  Il file `GFX4` (piano del boss del capitolo 2) ha 3 B di margine sui suoi 15 blocchi: le meccaniche nuove di Mother Stitch lo allungheranno.
+  (24/11) Con le meccaniche nuove di Mother Stitch `GFX4` passa da 15 a 17 blocchi; i limiti di `PERF-DISK` del capitolo 2 restano rispettati.
 - (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
   disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
   misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da
@@ -642,8 +642,9 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   (`arena_ovl_*`, `ARENA-11`). **Abate in arena (23/11)**: con 68 punti vita
   98/96/96% ai livelli 5/6/7 contro 60/77/85% del simulatore. Deciso (23/11, committente): correggere il simulatore e cercare la
   causa. Fatto: arrivo degli evocati, pausa come stordimento, area di Slash, bersaglio del PG ([bestiario](docs/wiki/bestiario.md));
-  Abate a **123** punti vita (simulatore 59/74/81%, arena 68/81/84%). Prossimo: Mother Stitch, tarata con il simulatore e
-  verificata in arena (i suoi feticci: da controllare se il PG li colpisce prima, come oggi nel simulatore). (22/11, D11) **Generatore dei mostri**: con una quest di caccia
+  Abate a **123** punti vita (simulatore 59/74/81%, arena 68/81/84%). **Mother Stitch fatta il 24/11** (proposta nel codice,
+  tipo del Lich, 300 punti vita scelti fra simulatore 94% e arena 35% al livello 10: [bestiario](docs/wiki/bestiario.md); da
+  provare a mano). Prossimo: Varok, poi Lord of Ruin. (22/11, D11) **Generatore dei mostri**: con una quest di caccia
   attiva il mostro richiesto nasce sempre nel piano.
 - **Versione 2.0** quando è pronto, mai prima (regola del 09/11).
 

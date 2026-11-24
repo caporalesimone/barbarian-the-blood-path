@@ -59,7 +59,10 @@ Regole d'uso:
   numeri. Attenzione: l'arena azzera il seme a ogni serie (`seed`, di solito `$1234`); per statistiche indipendenti
   variare il seme fra le serie (vedi `tests/regression/items/test_items.py`). (23/11) Nei piani dei boss (5, 10, 15, 20)
   l'arena carica il codice del piano (meccaniche dei boss, evocazioni del piano 20) e gioca un combattimento alla volta con
-  seme + 7919·k; `ovl=False` per lo scontro senza meccaniche ([dungeon](dungeon.md)).
+  seme + 7919·k; `ovl=False` per lo scontro senza meccaniche ([dungeon](dungeon.md)). (24/11) Il bot fermo (`--bot stand`) colpisce il mostro più
+  vicino: con evocati o feticci lontani dal PG serve `--bot adds` (prima gli altri mostri, poi il boss, aggirando gli ostacoli).
+  Nemmeno lui gioca come un giocatore (cammina male, non schiva): con Mother Stitch simulatore e arena restano lontani
+  ([bestiario](bestiario.md)).
 
 ## 2. Che cosa governa che cosa (mappa dei parametri)
 

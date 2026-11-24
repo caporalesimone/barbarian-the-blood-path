@@ -112,6 +112,7 @@ xp_needed: auto
 boss: {hp_mult: 2.5, ac_add: 2, att_add: 2}   # boss con nome dei piani 1..floors-1 (variante forte)
 chapter_bosses:               # (22/11, D8/D16) boss dei capitoli: tipo (statistiche del tipo al piano, + boss) e vita FISSI
   abbot: {floor: 5, type: skeleton_king, hp: 123}      # sim_builds.py --fit-chapter abbot (obiettivo bosses.target): 68 il 22/11, 123 il 23/11 (simulatore corretto con l'arena: 68% in arena al livello 5)
+  stitch: {floor: 10, type: lich, hp: 300}      # (24/11) Mother Stitch: tipo del Lich (nel capitolo 2 le statistiche di Hag of the Mere, mon_stats.py). Vita scelta fra simulatore e arena: --fit-chapter stitch da 431 (liv. 10: sim 69%, arena 0%); a 300 sim 94/99/100%, arena (bot "adds", non schiva) 35/48/100%
 final_boss_hp_mult: 1         # moltiplicatore della vita del boss finale (la scheda e' gia' tarata)
 final_summons: {waves: 3, per_wave: 2, max_alive: 2, delay: 0, floor: 20, types: [fallen, skeleton, zombie, demon]}   # ondata (2 mostri, subito) al 75/50/25% della vita se i vivi (boss compreso) sono <= max_alive; statistiche del piano 20 (06/11)
 

@@ -101,7 +101,7 @@ def ovp_abbot(ctx):
     g.poke(L["godmode"], 0)
 
 
-@test("OVP-12", "level 10, Mother Stitch (GFX4): awake, a rite (1 s still) plants 2 fetishes (type 8, still, life = her max / 16); "
+@test("OVP-12", "level 10, Mother Stitch (GFX4): awake, a rite (1 s still) plants 2 fetishes (type 8, still, life = her max / 8 since 24/11); "
       "while one stands the hero's hits are halved and she regenerates; the last one down leaves her open (hits x2); "
       "under 2/3 a second rite; a fetish killed gives no loot")
 def ovp_stitch(ctx):
@@ -119,7 +119,7 @@ def ovp_stitch(ctx):
     fets = list(range(n0, n1))
     check(len(fets) == 2 and all(g.b(L["mtype"] + i) == O["DM_TYPE"] for i in fets), "fetishes planted: %d" % len(fets))
     _, mx = hp(g, b)
-    check(all(hp(g, i) == (max(1, mx // 16),) * 2 for i in fets), "fetish life %s, expected %d" % ([hp(g, i) for i in fets], mx // 16))
+    check(all(hp(g, i) == (max(1, mx // 8),) * 2 for i in fets), "fetish life %s, expected %d" % ([hp(g, i) for i in fets], mx // 8))
     pos = [(g.b(L["mxl"] + i), g.b(L["myl"] + i)) for i in fets]
     os.makedirs(os.path.join(ROOT, "out", "work", "ovp"), exist_ok=True)
     g.screenshot(os.path.join(ROOT, "out", "work", "ovp", "stitch_fetishes.png"))   # to look at, not compared
@@ -146,7 +146,7 @@ def ovp_stitch(ctx):
     g.call_keep(L["ovp_dmg"], regs="x=%02x" % b)
     check((g.b(L["cb_dl"]), g.b(L["cb_dh"])) == (14, 0), "open: damage 7 -> %d (expected 14)" % g.b(L["cb_dl"]))
     g.frames(110)
-    check(g.b(O["dm_open"]) == 0, "still open after 2 s")
+    check(g.b(O["dm_open"]) == 0, "still open after 1.5 s")
     set_hp(g, b, mx * 2 // 3 - 1)
     g.frames(3)
     check(g.b(O["dm_wave"]) == 2 and g.b(O["dm_t"]) > 0, "no second rite under 2/3 (ms_wave %d)" % g.b(O["dm_wave"]))

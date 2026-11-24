@@ -64,6 +64,7 @@ OVJ_GEN  = 18                   ; (19/11) fine della generazione sotto l'I/O (ci
 OVJ_N    = 21                   ; lunghezza della tabella dei salti
 ovp_ok  .byte 0
 ovp_tint .byte 0                ; (19/11) colore del boss del capitolo deciso dal codice del piano (0 = il suo), build_sprites
+ovp_rate .byte 0                ; (24/11) fotogrammi in piu' sulla cadenza dello Slash (maledizione di Mother Stitch), perform_skill1
 .if OVP_RES
 ovp_init = final_init
 ovp_tick = final_tick

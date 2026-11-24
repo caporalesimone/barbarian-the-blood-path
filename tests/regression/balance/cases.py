@@ -7,3 +7,4 @@ PY = sys.executable
 script("BAL-10", "d20 rules in the simulator: reference hero, weak hero, curves", [PY, os.path.join(H, "test_balance.py")])
 script("ARENA-10", "arena: short repeatable series, sensible results", [PY, os.path.join(H, "test_arena.py")])
 script("ARENA-11", "(23/11) arena with the code of the level: the Abbot (level 5) has his fixed life, summons, rages; repeatable", [PY, os.path.join(H, "test_arena_boss.py")])
+script("ARENA-12", "(24/11) arena with the code of level 10: Mother Stitch has her fixed type and life, holds a rite, the bot 'adds' kills fetishes; repeatable", [PY, os.path.join(H, "test_arena_stitch.py")])

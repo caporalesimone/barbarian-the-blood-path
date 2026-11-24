@@ -97,7 +97,8 @@ class Base:
     def slash_area(self, alive, tgt):
         """(23/11) Slash hits every monster in its area (hit_area): with summons next to the boss, each other monster is also hit
         with probability AREA (fitted on the arena, 23/11: fight length, boss swings and damage to the summons match)"""
-        return [m for m in alive if m is not tgt and (m is self.b or getattr(m, "add", False)) and self.rng.random() < AREA]
+        a = self.c.get("slash_area", AREA)          # (24/11) per boss: Mother Stitch's fetishes stand still (rules_next.yaml)
+        return [m for m in alive if m is not tgt and (m is self.b or getattr(m, "add", False)) and self.rng.random() < a]
 
     def pg_rate(self, t):
         return 1.0
@@ -169,16 +170,19 @@ class Abbot(Base):
 
 
 class Stitch(Base):
-    """Mother Stitch (chapter 2): game = rites at waking, 2/3, 1/3: 2 still fetishes (life = boss max / 16); while one stands
-    the hero's hits are halved and she regenerates; the last one down leaves her exposed 2 s (still, hits x2). New: a hex every
-    8 s (attack cadence x1.6 for 3 s, unless dodged); a fetish left standing 10 s rots into a Drowned"""
+    """Mother Stitch (chapter 2): rites at waking, 2/3, 1/3: 2 still fetishes (life = boss max / fetish_hp_div); while one
+    stands the hero's hits are halved and she regenerates; the last one down leaves her exposed (still, hits x2).
+    (24/11, in the game: ovl_boss2.asm) a hex every 8 s (Slash cadence x1.625 for 3 s, unless dodged: the hero out of reach
+    at the end of the warning); fetishes left standing 10 s rot into Drowned (type 1), no exposure"""
     def start(self, ms):
         self.th = list(self.g["rites_at"])
         self.fet = []
         self.exposed = 0
         self.slow = 0
-        if self.new:
-            self.timers["hex"] = self.c["new"]["hex"]["every"]
+        self.hx = self.g.get("hex") or (self.c["new"].get("hex") if self.new else None)
+        self.rot = self.g.get("fetish_rot") or (self.c["new"].get("fetish_rot") if self.new else None)
+        if self.hx:
+            self.timers["hex"] = self.hx["every"]
 
     def step(self, t, ms, pend):
         g = self.g
@@ -200,19 +204,19 @@ class Stitch(Base):
             self.exposed = 0
         self.timers["_exp"] = self.exposed or FAR
         self.regen(t, bool(standing), g["regen_every"])
-        if not self.new or not self.b.alive:
+        if not self.b.alive:
             return
-        n = self.c["new"]
-        if t >= self.timers["hex"]:
-            h = n["hex"]
+        if self.hx and t >= self.timers["hex"]:
+            h = self.hx
             self.timers["hex"] = t + h["every"]
             if not self.dodge():
                 self.slow = t + h["warn"] + h["duration"]
-        for f in list(self.fet):
-            if f.alive and t >= f.born + n["fetish_rot"]["after"]:
+        if self.rot:
+            rotten = [f for f in self.fet if f.alive and t >= f.born + self.rot["after"]]
+            for f in rotten:
                 f.alive = False
                 self.fet.remove(f)
-                self.spawn(pend, t, n["fetish_rot"]["type"])
+                self.spawn(pend, t, self.rot["type"], arrive=True)   # out of self.fet: no exposure (dm_rot: dm_sh = 0)
 
     def protected(self):
         return any(f.alive for f in self.fet)
@@ -225,7 +229,7 @@ class Stitch(Base):
         return max(1, d // self.g["protect_div"]) if self.protected() else d
 
     def pg_rate(self, t):
-        return self.c["new"]["hex"]["slow"] if self.new and t < self.slow else 1.0
+        return self.hx["slow"] if self.hx and t < self.slow else 1.0
 
 
 class Varok(Base):

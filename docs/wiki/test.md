@@ -163,10 +163,10 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 | ID | Test |
 |---|---|
-| `ORDER-10` | inventory: equipment, then pack, then belt (the belt potions are the last entries) |
-| `ORDER-11` | alchemist, list 'yours': rings worn, pack, belt (4 slots, last; the '>' on a belt slot when buying a potion: SHOP-BELT-10) |
+| `STITCH-10` | level 10: Mother Stitch has the fixed type and life (CB2_TYPE, CB2_HP); awake, the first rite plants 2 fetishes; DM_ROT x 4 frames later they are Drowned (type 1, awake, life of type 1 on the level) and she is not open |
+| `STITCH-11` | the hex: warning (DM_HW frames), the hero next to her: ovp_rate = 5/8 of s_rate for DM_HT frames, then 0; the hero far away (> DM_HR pixels): no hex |
 
-### regression (313)
+### regression (316)
 
 | ID | Test |
 |---|---|
@@ -190,6 +190,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BAL-10` | d20 rules in the simulator: reference hero, weak hero, curves |
 | `ARENA-10` | arena: short repeatable series, sensible results |
 | `ARENA-11` | (23/11) arena with the code of the level: the Abbot (level 5) has his fixed life, summons, rages; repeatable |
+| `ARENA-12` | (24/11) arena with the code of level 10: Mother Stitch has her fixed type and life, holds a rite, the bot 'adds' kills fetishes; repeatable |
 | `BASES-10` | item tables: 11 armors with CA 1..10, 4 shields with CA 1..4 |
 | `BASES-11` | inventory: the studded armor (DEX 14) stays in the pack with s_dex 13 ('dex 14' in its box); with DEX 14 it is equipped |
 | `BEST-10` | every chapter of chapters.yaml (but the Abyss) has base monsters, their strong variants and one boss = its final map boss |
@@ -366,7 +367,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `OPT-12B` | put_hero: the hero on tile (A, X) -> px/py = tile x 16 + 8 (centre) |
 | `OVP-10` | level 20: the code of the throne room is copied from the tail of GFX8 to $C900 (ovp_ok = 1); the boss below 3/4 of its life calls a wave of SUM_WAVE monsters; level 19: the decor code of chapter 4 (with the citadel); village: the MENU module is read again at $C900 |
 | `OVP-11` | level 5, The Hollow Abbot (code in the tail of GFX2): under 2/3 of its life it stops 1 s (green) and raises a Skeleton next to itself (2 until 22/11); while it lives it regenerates (1 hp every 50 frames since 22/11) |
-| `OVP-12` | level 10, Mother Stitch (GFX4): awake, a rite (1 s still) plants 2 fetishes (type 8, still, life = her max / 16); while one stands the hero's hits are halved and she regenerates; the last one down leaves her open (hits x2); under 2/3 a second rite; a fetish killed gives no loot |
+| `OVP-12` | level 10, Mother Stitch (GFX4): awake, a rite (1 s still) plants 2 fetishes (type 8, still, life = her max / 8 since 24/11); while one stands the hero's hits are halved and she regenerates; the last one down leaves her open (hits x2); under 2/3 a second rite; a fetish killed gives no loot |
 | `OVP-13` | level 15, Varok the Oathbreaker (GFX6): aligned with the hero he stops (warning) and charges along the row; his shield halves the hero's hits, not when stunned |
 | `PERF-10` | village: walking in 8 directions, lost frames <= 2%, worst frame <= 2 |
 | `PERF-11` | inventory open within 0.3 s, minimap within 0.5 s; back in the game within 0.3 s |
@@ -408,6 +409,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QENG-10` | K (chain step 1, 8 fallen): only a fallen of chapter 1 counts; the 8th marks the step reached (q_flag bit 1) with 'quest complete' |
 | `QENG-11` | P and B (side a1.4: 10 kills on level 4; a1.3: a named boss of levels 1-4) in q_side slots 2 and 3: counted only on their level, bit 7 when reached |
 | `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
+| `ORDER-10` | inventory: equipment, then pack, then belt (the belt potions are the last entries) |
+| `ORDER-11` | alchemist, list 'yours': rings worn, pack, belt (4 slots, last; the '>' on a belt slot when buying a potion: SHOP-BELT-10) |
 | `QCH2-10` | village 2: mama sabine gives step 4 ('the silent village', slay the drowned: 0/12); in level 7 the quest monster type is the drowned (its name in the theme), a drowned killed counts, a bog crawler does not |
 | `QCH2-11` | step 6 (the silver needle) handed in to mama sabine: q_step 6, chapter 3 unlocked (c_unl 3), purse step 2; the boss of chapter 2 dying does not unlock chapter 3 |
 | `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open; chapter 2 (24/11): level 10 sealed until step 6 is taken; chapter 3 open |

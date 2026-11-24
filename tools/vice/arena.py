@@ -14,6 +14,8 @@ From Python (several scenarios in the same VICE session, without restarting it):
       r = a.run(lvl=3, plvl=3, weapon="sword", monsters=["skeleton"], fights=20)
 
 Phase 1: hero and monsters next to each other (automatic positions), a still bot that turns and attacks (bot="stand").
+bot="approach": walks to the nearest monster; bot="adds" (24/11): walks to the other monsters first and to the boss last
+(summons, Mother Stitch's fetishes), going around what blocks it (src/test/arena.asm BOT 2).
 (23/11) Levels with their own code (the boss levels of chapters 1-3, level 20): the same code as the game (out/work/arena_ovl_*.prg,
 assembled with the labels of the ARENA build at OVP_AT = $F4E0) is loaded before every fight, so its state starts again each
 time as when the hero enters the level; those series are played one fight at a time with seed + k (ovl=False: without it).
@@ -139,7 +141,7 @@ class Arena:
         bn = [dur] + sadd(plvl)             # PAR+14 = PAR_DUR (weapon durability), PAR+15..17 = PAR_SADD (stat points)
         p = ([lvl, plvl] + [e[0] for e in eq] + [e[1] for e in eq] + bt + bn + [len(mt), boss] + (mt + [0] * 8)[:8]
              + mx[:8] + my[:8] + [ppos[0], ppos[1], fights, maxf & 255, maxf >> 8, 1 if fast else 0, sk,
-                                 min(255, int(pot * 256)), 1 if wake else 0, {"stand": 0, "approach": 1}[bot]])
+                                 min(255, int(pot * 256)), 1 if wake else 0, {"stand": 0, "approach": 1, "adds": 2}[bot]])
         p += [seed & 255, seed >> 8]
         assert len(p) == A["PAR_LEN"], len(p)
         ov = self.overlay(lvl) if ovl else None
@@ -242,7 +244,7 @@ def main():
     ap.add_argument("--maxsec", type=float, default=120, help="game time limit per fight (seconds)")
     ap.add_argument("--skills", default=",".join(ALLSK))
     ap.add_argument("--sleep", action="store_true", help="monsters asleep at the start")
-    ap.add_argument("--bot", default="stand", choices=["stand", "approach"])
+    ap.add_argument("--bot", default="stand", choices=["stand", "approach", "adds"])
     ap.add_argument("--slow", action="store_true", help="waits for the raster (real game speed)")
     ap.add_argument("--show", action="store_true", help="visible VICE window (with --slow and without warp: --nowarp)")
     ap.add_argument("--nowarp", action="store_true")

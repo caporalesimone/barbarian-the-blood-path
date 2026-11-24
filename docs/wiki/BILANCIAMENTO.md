@@ -479,6 +479,10 @@ la frequenza dei tesori buoni (10% dei tiri a ≥ 0,8 T), l'oro dei bauli epici 
   colpisce il boss e non prima gli scheletri (`adds_first`). Dopo: Abate a 123 punti vita, simulatore 59% e arena 68% al
   livello 5 (74/81 e 81/84 ai livelli 6/7); [bestiario](bestiario.md). L'arena azzera il contatore dei fotogrammi a ogni
   combattimento (il codice del piano ne usa i bit): le serie si ripetono uguali.
+- (24/11) **Mother Stitch, simulatore e arena non coincidono**: con la vita tarata dal simulatore (431, 60% al livello 10) il
+  bot dell'arena perde sempre. Il simulatore non fa camminare il PG fra feticci e boss e gli fa schivare metà delle maledizioni;
+  il bot dell'arena (`adds`) cammina male e non schiva mai. Vita scelta fra i due: 300 (simulatore 94%, arena 35% al livello
+  10); `slash_area` per boss (`bosses.stitch.slash_area` 0,2). Da provare a mano ([bestiario](bestiario.md)).
 - (23/11) **Abilità e catena (Q15)**: nel gioco un'abilità vuole il livello e il passo della catena consegnato
   (`sk_ok`); il simulatore guarda solo il livello, cioè assume un giocatore che consegna i passi al piano previsto
   ([quests](quests.md) sezione 5). L'arena fa lo stesso (`q_step` = 12).

@@ -111,13 +111,16 @@ bosses:
                               # ogni 6 s (1 s di avviso, il primo dopo 2 s): 1/8 della vita massima del PG se non schiva
     new: {}                   # (22/11) tutto nel gioco
   stitch:                     # capitolo 2, palude (piano 10)
+    slash_area: 0.2           # (24/11) i feticci stanno fermi accanto a lei: lo Slash li prende di rado (arena, bot "adds": ~0 colpi
+                              # in piu' per Slash; un giocatore che si mette bene ne prende di piu'): stima, da provare a mano
     hp_mult: 1.43
     dmg_mult: 1.0
-    game: {rites_at: [1.0, 0.667, 0.333], fetish_n: 2, fetish_hp_div: 16, protect_div: 2, regen_every: 25, exposed: 100, exposed_mult: 2}
-    new:
-      changes: {fetish_hp_div: 8, exposed: 75}                                  # proposta: feticci piu' robusti, scoperta piu' breve
-      hex: {every: 400, warn: 40, slow: 1.6, duration: 150}                     # maledizione: cadenza del PG x1,6 per 3 s
-      fetish_rot: {after: 500, type: zombie}                                    # feticcio non abbattuto in 10 s -> un annegato
+    game: {rites_at: [1.0, 0.667, 0.333], fetish_n: 2, fetish_hp_div: 8, protect_div: 2, regen_every: 25, exposed: 75, exposed_mult: 2,
+           hex: {every: 400, warn: 40, slow: 1.625, duration: 150},             # maledizione: cadenza dello Slash x1,625 per 3 s
+           fetish_rot: {after: 500, type: fallen}}                              # feticcio non abbattuto in 10 s -> un annegato (tipo 1)
+                              # (24/11) la proposta del 20/11 e' nel codice (ovl_boss2.asm): feticci / 8, scoperta 1,5 s,
+                              # maledizione, feticci marci; tipo e vita fissi in rules.yaml chapter_bosses
+    new: {}                   # (24/11) tutto nel gioco
   varok:                      # capitolo 3, grotta (piano 15)
     hp_mult: 0.7
     dmg_mult: 0.65

@@ -38,7 +38,7 @@ PAR_FAST   = PAR+49             ; 1 = senza attesa del raster (piu' veloce, stes
 PAR_SKILLS = PAR+50             ; abilita' permesse: bit 0 slash, 1 whirlwind, 2 battle cry, 3 smash, 4 rage, 5 frenzy
 PAR_POT    = PAR+51             ; beve sotto vita * PAR_POT / 256 (0 = mai)
 PAR_WAKE   = PAR+52             ; 1 = mostri gia' svegli
-PAR_BOT    = PAR+53             ; 0 = fermo, si gira e attacca; 1 = si avvicina
+PAR_BOT    = PAR+53             ; 0 = fermo, si gira e attacca; 1 = si avvicina; 2 = si avvicina, prima gli altri mostri poi il boss
 PAR_SEED   = PAR+54             ; (23/11) seme del generatore casuale (16 bit; arena.py: $1234 di solito, un altro a ogni
                                 ; combattimento dei piani con il codice del piano, che si rilegge a ogni combattimento)
 PAR_LEN    = 56
@@ -94,12 +94,12 @@ _z      sta RES,x
         lda PAR_LVL
         sta cur_level
         sta c_loc
-        jsr floor_types         ; statistiche dei mostri del piano
         jsr irq_off
         lda cur_level           ; tema gia' a GFX_DUN_AT (caricato da tools/vice/arena.py)
         jsr lvl_theme
         lda #1
         jsr gfx_install
+        jsr floor_types         ; statistiche dei mostri del piano (24/11: dopo gfx_install, che porta quelle del capitolo)
         jsr clear_map           ; stanza 44x44: muri attorno, pavimento dentro
         ldx #2
 _ry     lda maprow_lo,x
@@ -367,11 +367,54 @@ _dir    sta ar_j
         ora #$10
         sta joy
         rts
-_far    lda PAR_BOT             ; lontano: fermo (BOT 0) o si avvicina (BOT 1)
+_far    lda PAR_BOT             ; lontano: fermo (BOT 0) o si avvicina (BOT 1, 2)
         beq _x
-        lda ar_j
+        cmp #2
+        bcc _go
+        lda ar_alt              ; (24/11) BOT 2: bloccato (8 fotogrammi fermo) -> 24 fotogrammi sull'altro asse, verso alterno
+        beq _ck
+        dec ar_alt
+        lda ar_jm
+        sta joy
+        rts
+_ck     lda px
+        cmp ar_lx
+        bne _mv
+        lda py
+        cmp ar_ly
+        bne _mv
+        inc ar_stk
+        lda ar_stk
+        cmp #8
+        bcc _go
+        lda #0
+        sta ar_stk
+        lda #24
+        sta ar_alt
+        lda ar_flip
+        eor #1
+        sta ar_flip
+        tay
+        lda ar_ady
+        cmp ar_adx
+        bcs _mh
+        lda ar_jv,y             ; asse maggiore orizzontale: su o giu'
+        bne _sm
+_mh     lda ar_jh,y             ; asse maggiore verticale: sinistra o destra
+_sm     sta ar_jm
+        sta joy
+        rts
+_mv     lda #0
+        sta ar_stk
+        lda px
+        sta ar_lx
+        lda py
+        sta ar_ly
+_go     lda ar_j
         sta joy
 _x      rts
+ar_jv   .byte $01, $02
+ar_jh   .byte $04, $08
 
 ; mostro vivo piu' vicino -> ar_t, distanze ar_adx/ar_ady (0..255, saturate), segni ar_dxs/ar_dys.
 ; Conta anche i mostri entro 40 px (ar_near). C=1 se nessuno e' vivo.
@@ -383,10 +426,12 @@ ar_target:
         sta ar_near
         ldx #0
 _l      cpx lb_cnt
-        bcs _e
-        lda malive,x
-        beq _n
-        lda mxl,x
+        bcc +
+        jmp _e
++       lda malive,x
+        bne +
+        jmp _n
++       lda mxl,x
         sec
         sbc px
         sta tmp0
@@ -419,7 +464,16 @@ _l      cpx lb_cnt
         lsr
         clc
         adc tmp6
-        cmp ar_best
+        ldy PAR_BOT             ; (24/11) BOT 2: si avvicina e colpisce prima gli altri mostri (evocati, feticci), il boss per
+        cpy #2                  ; ultimo (come un giocatore: il simulatore, boss_scripts.Base.adds_first)
+        bcc _nb
+        ldy lb_boss
+        dey
+        sty tmp7
+        cpx tmp7
+        bne _nb
+        ora #$80                ; il boss: distanza + 128 (dopo ogni altro mostro vicino)
+_nb     cmp ar_best
         bcs _n
         sta ar_best
         stx ar_t
@@ -432,7 +486,8 @@ _l      cpx lb_cnt
         lda tmp2
         sta ar_dys
 _n      inx
-        bne _l
+        beq _e
+        jmp _l
 _e      lda ar_t
         cmp #$ff
         beq _none
@@ -649,5 +704,11 @@ ar_ady   .byte 0
 ar_dxs   .byte 0
 ar_dys   .byte 0
 ar_j     .byte 0
+ar_lx    .byte 0                ; (24/11) BOT 2: ultima posizione, fotogrammi fermo, fotogrammi sull'altro asse, direzione, verso
+ar_ly    .byte 0
+ar_stk   .byte 0
+ar_alt   .byte 0
+ar_jm    .byte 0
+ar_flip  .byte 0
 ar_end_  = *
         .cerror ar_end_ > PAR, "modulo arena oltre $CEFF (blocco parametri)"
