@@ -427,8 +427,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QUEST-16` | attack cadence (s_rate): weapon + max(0, slow - per_dex x mod DEX): new hero (dagger, DEX 13) slower, DEX 18 = the weapon's |
 | `QUESTDB-NEXT-10` | quest database (data/quests/next): 12 chain steps, 15 side quests, 6 repeatable models; limits, 5-bit characters, references |
 | `QUESTDB-NEXT-11` | quest texts at 5 bits (ex H7, done on 22/11 in gen_qdata.py): bytes and disk blocks of every quest file (title, goal, text, done), with and without ZX0; every file <= 1000 B |
-| `QSAVE-10` | layout: 32 B of quest state contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
-| `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 32 B of quest state; new_character empties both |
+| `QSAVE-10` | layout: 29 B of quest state (32 until 24/11: 3 free bytes went to the belt of 8) contiguous in CHRBLK, inn chest at INN_AT (120 B under the KERNAL), file = CHRBLK + chest + 5 floors (4 blocks) |
+| `QSAVE-11` | save_char then load_char gives back the whole inn chest (120 B) and the 29 B of quest state; new_character empties both |
 | `RING-10` | inventory: with one ring on, a second ring goes to the free ring slot; both rings add their stat (recalc_stats) |
 | `RING-11` | inventory: with both rings on, a new ring replaces the one of lower value (it goes to the pack, message 'replaced') |
 | `RING-12` | alchemist: a ring among the wares has affixes (af_gen) and the bought ring keeps its suffix |
