@@ -268,8 +268,8 @@ Dal 21/11 (branch `liste-menu`, prototipi approvati dal committente) due **liste
 segmento CORE) e il riquadro dell'oggetto, come nell'inventario; le due liste si percorrono come una sola, A/D saltano alla prima voce dell'altra (22/11, [interfaccia](interfaccia.md)):
 - **wares** (righe 2-7): la merce, una voce per riga, prezzo pieno a destra;
 - **gear** (fabbro) o **yours** (alchimista) (righe 10-16): il fabbro mostra arma, armatura e scudo indossati (spunta), poi
-  armi, armature e scudi dello zaino e i posti liberi `-`; l'alchimista l'anello indossato, la cintura (una pozione per posto),
-  anelli e pergamene dello zaino (la pila: "3 portal scroll") e i posti liberi. A destra il prezzo di vendita. Nel titolo
+  armi, armature e scudi dello zaino e i posti liberi `-`; l'alchimista i due anelli indossati, anelli e pergamene dello
+  zaino (la pila: "3 portal scroll") e, in fondo, la cintura (una pozione per posto; 24/11, committente: equip, zaino, cintura). A destra il prezzo di vendita. Nel titolo
   l'**oro totale** (addosso + baule della locanda, da 100 000 in migliaia con `k`; si paga prima con l'oro addosso e il resto
   dal baule, vedi [Oggetti](oggetti.md#prezzi));
 - **riquadro dell'oggetto** (righe 18-22): icona e nome nel titolo, caratteristiche, durabilità, poi a destra `buy N`,
@@ -305,6 +305,7 @@ flowchart LR
   merce le ha estratte due volte; tornando nel negozio l'assortimento si estrae di nuovo (come prima).
 - (22/11, correzione su segnalazione del committente) Acquisto di una pozione: il `>` della scelta del posto della cintura stava
   una voce sopra il posto scelto (`sh_draw` contava un anello solo prima della cintura; dal 21/11 sono due: `SH_BELT0` = 3).
+  (24/11) Con la cintura in fondo alla lista il primo posto della cintura e' la voce `sl_n` − 4 (`SH_BELT0` tolto).
   Fire metteva la pozione nel posto giusto, ma il cursore sullo schermo indicava quello sopra. Test `SHOP-BELT-10`.
 - (22/11, correzione) Fino al 22/11 la merce non era da 3 a 8 oggetti: in `shop_roll` lo `stx shp_cnt` non tocca i flag e il
   `bne` dopo vedeva lo Z del `dec`, sempre 1, quindi `shp_k` diventava la dimensione del pool filtrato (8 voci piene e, con un

@@ -163,10 +163,10 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 | ID | Test |
 |---|---|
-| `QCH2-10` | village 2: mama sabine gives step 4 ('the silent village', slay the drowned: 0/12); in level 7 the quest monster type is the drowned (its name in the theme), a drowned killed counts, a bog crawler does not |
-| `QCH2-11` | step 6 (the silver needle) handed in to mama sabine: q_step 6, chapter 3 unlocked (c_unl 3), purse step 2; the boss of chapter 2 dying does not unlock chapter 3 |
+| `ORDER-10` | inventory: equipment, then pack, then belt (the belt potions are the last entries) |
+| `ORDER-11` | alchemist, list 'yours': rings worn, pack, belt (4 slots, last; the '>' on a belt slot when buying a potion: SHOP-BELT-10) |
 
-### regression (311)
+### regression (313)
 
 | ID | Test |
 |---|---|
@@ -408,6 +408,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QENG-10` | K (chain step 1, 8 fallen): only a fallen of chapter 1 counts; the 8th marks the step reached (q_flag bit 1) with 'quest complete' |
 | `QENG-11` | P and B (side a1.4: 10 kills on level 4; a1.3: a named boss of levels 1-4) in q_side slots 2 and 3: counted only on their level, bit 7 when reached |
 | `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
+| `QCH2-10` | village 2: mama sabine gives step 4 ('the silent village', slay the drowned: 0/12); in level 7 the quest monster type is the drowned (its name in the theme), a drowned killed counts, a bog crawler does not |
+| `QCH2-11` | step 6 (the silver needle) handed in to mama sabine: q_step 6, chapter 3 unlocked (c_unl 3), purse step 2; the boss of chapter 2 dying does not unlock chapter 3 |
 | `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open; chapter 2 (24/11): level 10 sealed until step 6 is taken; chapter 3 open |
 | `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
 | `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |

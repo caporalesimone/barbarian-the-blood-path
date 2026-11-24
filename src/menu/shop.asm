@@ -172,16 +172,7 @@ sh_segs:
         lda sh_eqn,x
         sta sg_c,y
         iny
-        txa
-        beq +
-        lda #SK_BELT|SK_SEP     ; alchimista: la cintura
-        sta sg_k,y
-        lda #0
-        sta sg_a,y
-        lda #4
-        sta sg_c,y
-        iny
-+       ldx #0                  ; zaino: tmp6 = primo della categoria, tmp7 = quanti, tmp4 = posti usati
+        ldx #0                  ; zaino: tmp6 = primo della categoria, tmp7 = quanti, tmp4 = posti usati
         stx tmp7
 _l      lda c_pack,x
         beq _e
@@ -220,13 +211,19 @@ _e      stx tmp4
         sec
         sbc tmp4
         sta sg_c,y
-        dey                     ; segmenti della lista 1 = Y (l'ultimo) - 1 + 1
-        sty sl_sn+1
+        ldx shop_id             ; (24/11, committente: equip, zaino, cintura) alchimista: la cintura in fondo
+        beq +
+        iny
+        lda #SK_BELT|SK_SEP
+        sta sg_k,y
+        lda #0
+        sta sg_a,y
+        lda #4
+        sta sg_c,y
++       sty sl_sn+1             ; segmenti della lista 1 = Y (l'ultimo) - 1 + 1
         rts
 sh_eq0  .byte 0, 3
 sh_eqn  .byte 3, 2              ; (21/11) alchimista: i due anelli
-SH_BELT0 = 2 + 1                ; (22/11) voce della lista 1 del primo posto della cintura (alchimista): 2 anelli + riga
-                                ; separatrice (era 2: con i due anelli del 21/11 il '>' stava una voce sopra il posto scelto)
 
 ; voce del cursore -> ui_lc (codici di prima: 0..7 zaino, 8..12 equipaggiamento, LC_W.. merce, LC_B.. cintura (21/11 sera: prima merce 12 = secondo anello))
 sh_cur: jsr sl_sel
@@ -244,12 +241,14 @@ _s      sta ui_lc
         rts
 
 ; tutta la schermata variabile: oro nel titolo della lista 1, liste, oggetto, tasti. Nella scelta del posto della pozione
-; (sh_slot) il cursore sta sul posto della cintura (lista 1: i due anelli, riga separatrice, poi la cintura: SH_BELT0)
+; (sh_slot) il cursore sta sul posto della cintura (24/11: le ultime 4 voci della lista 1, dopo anelli e zaino)
 sh_draw:
         lda sh_slot
         bmi +
         clc
-        adc #SH_BELT0
+        adc sl_n+1
+        sec
+        sbc #4
         sta sl_cur+1
         lda #1
         sta sl_l
