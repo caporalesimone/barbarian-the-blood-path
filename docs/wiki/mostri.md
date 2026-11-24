@@ -54,14 +54,14 @@ flowchart TD
     E --> F{"rnd < strong_tab[piano]?"}
     F -->|sì| G["il primo mostro della stanza<br/>è la variante forte"]
     F -->|no| H
-    G --> H["place_monster × n: tipo base 1..maxtype_tab[piano],<br/>casella libera dentro la stanza (12 tentativi);<br/>dal 19/11 solo sul pavimento (floor_ok)"]
+    G --> H["place_monster × n: tipo base 1..base_n(piano),<br/>casella libera dentro la stanza (12 tentativi);<br/>dal 19/11 solo sul pavimento (floor_ok)"]
     H --> I{"altre stanze?"}
     I -->|sì| D
     I -->|no| J["finché meno di mon_min (64 tentativi):<br/>un mostro base in una stanza a caso"]
     J --> K["piano 20: solo il Lord of Ruin al centro della stanza finale"]
 ```
 
-- `maxtype_tab`: tipi base disponibili (piano ≥ piano minimo): 2 ai piani 1–3, 3 ai piani 4–7, 4 dal piano 8.
+- `base_n` (24/11, prima `maxtype_tab`): tipi base disponibili = l'ultimo con primo piano (`mt_fmin`, dal file del tema) ≤ piano. Capitolo 1 (e 3–4): 2 ai piani 1–3, 3 ai piani 4–7, 4 dal piano 8; capitolo 2: 4 dal piano 6.
 - `strong_tab`: probabilità di una stanza "forte": 0 ai piani 1–2 (`strong_min_floor` 3), poi da 12% a 66%
   (piano 20) a gradini. Inizio graduale (06/11): la variante forte di una famiglia esce solo se il suo piano
   minimo è ≤ piano + 1 (`STRONG_EARLY`): skeleton king dal piano 1 (ma le stanze forti partono dal 3), lich dal 4,

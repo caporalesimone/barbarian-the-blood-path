@@ -104,8 +104,8 @@ place_boss:
 _new    ldy lb_cnt
         cpy #31
         bcs _r
-        ldx cur_level
-        lda maxtype_tab,x
+        lda cur_level
+        jsr base_n
         jsr rndrange
         tax
         lda mt_fmin+N_BASE+1,x  ; versione forte di una famiglia del piano, se il suo piano minimo lo permette

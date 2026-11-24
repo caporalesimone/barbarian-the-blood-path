@@ -598,9 +598,8 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   **Fatto (24/11)**: statistiche proprie del **capitolo 2** (`own_stats` in `data/chapters.yaml`); poi (24/11 sera, committente)
   il bestiario è il **database dei mostri con formule** (`A + B*P` per statistica, calcolo sul C64 "modalità A",
   `tools/build/mon_stats.py`, 160 B in coda al file del tema, [bestiario](docs/wiki/bestiario.md#statistiche-formule-del-bestiario-2411-toolsbuildmon_statspy)),
-  migrato senza ritarare. **Prossimi passi decisi (24/11)**: (1) Will-o'-Wisp e Corpse Light con primo piano e crescita propri
-  (oggi copiano Demon e Balrog: dal piano 8 e 9, Corpse Light quasi senza crescita), commit a parte con simulatore e arena;
-  (2) boss di capitolo con **statistiche proprie** (riga del bestiario nel posto 9 del file del piano del boss, non più cloni di
+  migrato senza ritarare. Fatto anche (24/11): Will-o'-Wisp e Corpse Light dal piano 6 con crescita propria (`base_n`).
+  **Prossimi passi decisi (24/11)**: (2) boss di capitolo con **statistiche proprie** (riga del bestiario nel posto 9 del file del piano del boss, non più cloni di
   `chapter_bosses`) e meccaniche in `data/monsters/bosses.yaml` (costanti dei `ovl_boss*.asm` generate, simulatore sullo stesso
   file); da verificare quanti punti del codice trattano il tipo 9 come boss finale; (3) tabella dei mostri della wiki generata dal
   file. Capitoli 3–4: restano concept (committente, 24/11), righe `implemented = yes` e `own_stats: true` quando si fanno. **Da fare nel codice**: **IA nuove** (distanza per Bone

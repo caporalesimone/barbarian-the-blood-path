@@ -289,7 +289,10 @@ def void_curve():
 
 
 def floor_types(floor, strong=False):
-    return [k for k, v in R["monsters"].items() if v["floor"] <= floor and bool(v.get("strong")) == strong and not v.get("final")]
+    """tipi (id del capitolo 1) presenti al piano: primo piano del tipo nel capitolo del piano <= piano (base_n, mt_fmin)"""
+    types = mstats()[2][1]
+    return [k for k in types if not R["monsters"][k].get("final") and bool(R["monsters"][k].get("strong")) == strong
+            and coef_of(k, floor)["fmin"] <= floor]
 
 
 def hit_chance(att, ac):

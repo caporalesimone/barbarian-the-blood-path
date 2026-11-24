@@ -499,9 +499,12 @@ def main():
     o(f"SUM_WAVE    = {byte(fs['per_wave'], 'per_wave')}")
     o(f"SUM_MAXALIVE = {byte(fs['max_alive'], 'max_alive')}")
     o(f"SUM_FLOOR   = {byte(fs['floor'], 'final_summons.floor')}")
-    mt = [0] + [sum(1 for k, _ in base if MR[k]["floor"] <= L) for L in range(1, maxl + 1)]
-    chk(all(v >= 1 for v in mt[1:]), "al piano 1 serve almeno un mostro base")
-    o.bytes("maxtype_tab", mt)
+    # (24/11) i tipi base presenti a un piano li conta base_n (combat.asm) da mt_fmin: in ordine di primo piano, il primo
+    # presente dal primo piano del capitolo
+    for c in range(1, maxl // MS.CPF + 1):
+        fm = [r["floor"] for r in MS.type_rows(c)[:nb]]
+        chk(fm == sorted(fm), "capitolo %d: tipi base non in ordine di primo piano %s (base_n)" % (c, fm))
+        chk(fm[0] <= MS.CPF * c - 4, "capitolo %d: nessun tipo base al primo piano del capitolo (%s)" % (c, fm))
     sr = sp["strong_room_chance"]
     smf = byte(sp.get("strong_min_floor", 1), "strong_min_floor")
     o.bytes("strong_tab", [0] + [0 if L < smf else pct256(min(100, sr["percent"] + sr["per_dungeon_level"] * (step(L) - 1)), "strong")

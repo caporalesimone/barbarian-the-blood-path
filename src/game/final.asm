@@ -42,8 +42,8 @@ _cd     cpy #SUM_MAXALIVE+1     ; (boss compreso)
 _s      ldy lb_cnt
         cpy #32
         bcs _r
-        ldx #SUM_FLOOR          ; tipi comuni del piano SUM_FLOOR (statistiche del piano del boss)
-        lda maxtype_tab,x
+        lda #SUM_FLOOR          ; tipi comuni del piano SUM_FLOOR (statistiche del piano del boss)
+        jsr base_n
         jsr rndrange
         clc
         adc #1

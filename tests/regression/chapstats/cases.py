@@ -81,3 +81,16 @@ def formulas(ctx):
     for c, lvl in ((1, 1), (1, 4), (2, 7), (2, 9), (3, 12), (4, 17)):
         enter(g, c, lvl)
         ft_is(ctx, c, lvl)
+
+
+@test("CHST-13", "base_n (which base types spawn, from mt_fmin of the theme file): chapter 1 levels 1-5, chapter 2 levels 6-10 "
+      "(Will-o'-Wisp from level 6), chapter 3 levels 11-15 (types of chapter 1)")
+def base_types(ctx):
+    g = ctx["g"]; L = g.L
+    for c, lvl in ((1, 2), (2, 7), (3, 12)):
+        enter(g, c, lvl)
+        rows = MS.type_rows(c if c in MS.own_chapters() else 1)[:4]
+        for f in range(5 * c - 4, 5 * c + 1):
+            exp = max(1, max([i + 1 for i, r in enumerate(rows) if r["floor"] <= f], default=1))
+            r = g.call_keep(L["base_n"], regs="a=%02x" % f)
+            check(r["a"] == exp, "chapter %d level %d: base_n %d, expected %d" % (c, f, r["a"], exp))

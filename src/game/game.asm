@@ -1806,15 +1806,15 @@ clear_lvlblk:
         jmp fill_pages
         .cerror LVLEND > LVLBLK + $300, "clear_lvlblk: LVLBLK oltre 3 pagine"
 
-; un mostro nuovo nella stanza scelta da spawn_monsters (tipo a caso fino a maxtype_tab del piano; una variante
+; un mostro nuovo nella stanza scelta da spawn_monsters (tipo a caso fino a base_n del piano; una variante
 ; forte per stanza se il piano lo permette); niente se il piano ha gia' mon_cap mostri
 place_monster:
         lda lb_cnt
         cmp mon_cap
         bcc +
         rts
-+       ldx cur_level
-        lda maxtype_tab,x
++       lda cur_level
+        jsr base_n              ; (24/11) tipi base del capitolo gia' comparsi (mt_fmin del file del tema)
         jsr rndrange
         clc
         adc #1

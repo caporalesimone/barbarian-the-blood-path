@@ -29,8 +29,7 @@ Richiesta del committente (15/11): "disegna i mostri per capitolo oltre che i bo
 
 Fra parentesi il colore C64 dello sprite. Il tipo decide IA ed evocazioni del boss finale (tipi base del piano 20: nel
 capitolo 4 Imp, Blood Knight, Gargoyle, Cultist). Statistiche, primo piano, velocità e bottino vengono dalla riga del tipo: nel
-capitolo 2 le sue righe (24/11, sezione sotto: Will-o'-Wisp dal piano 8, Corpse Light dal 9, come prima), nei capitoli 3–4 quelle
-del capitolo 1 (il tipo 3 è lento come lo zombie: Hellhound, Gargoyle). Il boss con nome dei piani normali resta
+capitolo 2 le sue righe (24/11, sezione sotto: tutti dal piano 6), nei capitoli 3–4 quelle del capitolo 1 (il tipo 3 è lento come lo zombie: Hellhound, Gargoyle). Il boss con nome dei piani normali resta
 "nome + epiteto" (`first_names`/`epithets` di `balance.yaml`, uguale in ogni capitolo); **il boss di capitolo** (piani 5, 10, 15)
 nella barra mostra il **suo nome** (prima: un nome + epiteto a caso), il boss finale "lord of ruin".
 
@@ -90,7 +89,7 @@ passate dal segmento CORE a GAME (`ui.asm`). Costi misurati: GAME +41 B (margine
 (stessa aritmetica intera) scegliendo `A` e `B` con l'errore massimo più basso: scarto **≤ 3 punti vita**, **≤ 1** su ATT,
 salvezza ed esperienza, **0** su CA e danno, a ogni piano. Le righe del capitolo 2 portano i numeri che il gioco usava (prima
 venivano dal tipo del capitolo 1 nello stesso posto, con fattori): primo piano 6 (Will-o'-Wisp 8, Corpse Light 9, come prima),
-dadi del danno del tipo del capitolo 1, velocità effettive. Le righe concept (capitoli 3–4, boss di capitolo) sono state
+dadi del danno del tipo del capitolo 1, velocità effettive. Will-o'-Wisp e Corpse Light ritoccati subito dopo (sotto). Le righe concept (capitoli 3–4, boss di capitolo) sono state
 convertite con la crescita comune di prima, così `tools/simulators/chapters.py` dà gli stessi risultati.
 
 Cose scoperte nella migrazione:
@@ -105,13 +104,23 @@ Cose scoperte nella migrazione:
 | Drowned | 6 | `24 + 2.5*P` | `16 + P` | `5 + 0.7*P` | `1d4 + 6 + P` | `1 + 0.4*P` | `24 + 3.06*P` | 4 |
 | Bog Crawler | 6 | `27 + 3.5*P` | `18 + P` | `7 + 0.7*P` | `1d6 + 7 + P` | `2 + 0.4*P` | `38 + 4.2*P` | 9 |
 | Mire Witchling | 6 | `47 + 3.4*P` | `13 + P` | `6 + 0.7*P` | `1d8 + 6 + P` | `2 + 0.4*P` | `85 + 14.3*P` | 7 |
-| Will-o'-Wisp | 8 | `53 + 3.25*P` | `16 + P` | `7 + 0.44*P` | `2d6 + 2 + P` | `4` | `104 + 26*P` | 9 |
+| Will-o'-Wisp | 6 | `46 + 3.4*P` | `14 + P` | `5 + 0.7*P` | `2d6 + P` | `3 + 0.25*P` | `70 + 21.5*P` | 9 |
 | Drowned Hulk | 6 | `45 + 2.5*P` | `18 + P` | `7 + 0.7*P` | `1d8 + 7 + P` | `3 + 0.4*P` | `101 + 11.2*P` | 5 |
 | Crawler Queen | 6 | `51 + 3.1*P` | `19 + P` | `8 + 0.75*P` | `1d10 + 6 + P` | `4 + 0.3*P` | `124 + 15.44*P` | 10 |
 | Hag of the Mere | 6 | `74 + 3.5*P` | `16 + P` | `8 + 0.75*P` | `2d6 + 7 + P` | `5 + 0.3*P` | `211 + 42.2*P` | 8 |
-| Corpse Light | 9 | `93` | `18 + P` | `9` | `2d8 + 4 + P` | `6` | `352 + 88*P` | 10 |
+| Corpse Light | 6 | `79 + 3.5*P` | `15 + P` | `6 + 0.75*P` | `2d8 + 1 + P` | `5 + 0.25*P` | `260 + 45*P` | 10 |
 
-Velocità prima di `monster_speed_percent` (80%). Il **boss del capitolo 2** (tipo fisso, `chapter_bosses`) prende le statistiche
+Velocità prima di `monster_speed_percent` (80%).
+
+**Will-o'-Wisp e Corpse Light (24/11, scelta del committente: "prima identico, poi ritocco").** Nella migrazione copiavano Demon
+e Balrog: Wisp solo dal piano 8, Corpse Light dal 9 e quasi senza crescita (vita 93 fissa). Ora tutti e due **dal piano 6**, con
+crescita come i fratelli e gli **stessi valori di prima al piano 10** (Wisp: anche ai piani 8–9). I tipi base presenti a un piano
+li conta `base_n` (`combat.asm`) da `mt_fmin` del file del tema, al posto di `maxtype_tab` (dal capitolo 1: il tipo 4 sempre dal
+piano 8); `gen_db.py` controlla che i tipi base di ogni capitolo siano in ordine di primo piano. Effetto misurato (simulatore,
+PG di riferimento, 400 combattimenti, boss del piano = media delle famiglie presenti come in `place_boss`): boss del piano
+78 → 83% al piano 6, 91 → 93% al 7, invariato all'8–9; mostri base invariati (vita finale 90–96%). Arena al piano 6 (PG di
+riferimento senza pozioni, 40 combattimenti): 3 Will-o'-Wisp vinti 100% (simulatore 100%), Corpse Light come boss **65%**
+(simulatore 62%). Test `CHST-13`. Il **boss del capitolo 2** (tipo fisso, `chapter_bosses`) prende le statistiche
 del suo tipo nel capitolo 2. **Simulatori**: `tools/simulators/rules.py` (`monster`, `coef_of`) usa gli stessi coefficienti e
 gli stessi tipi per capitolo. `tools/simulators/fit_rules.py` tara solo la tabella dell'Abisso: le formule si scelgono a mano.
 Test: `CHST-10..12` (regression, `tests/regression/chapstats`: tabelle dopo il cambio di capitolo e valori di `floor_types` =

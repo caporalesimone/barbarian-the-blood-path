@@ -971,6 +971,18 @@ ft_dh   .byte ft_hph-ft_hpl, $ff, $ff, $ff, $ff, ft_xph-ft_hpl
 FT_N    = 6
         .cerror MT_CH_LEN > 256, "mt_ch oltre 256 B (floor_types indicizza con X)"
 
+; (24/11) A = piano -> A = quanti tipi base (1..N_BASE) ci sono gia' a quel piano: l'ultimo tipo con primo piano
+; (mt_fmin) <= piano, almeno 1. Prima la tabella maxtype_tab (dal capitolo 1): ora vale il bestiario del capitolo (gen_db.py
+; controlla che i tipi base siano in ordine di primo piano). X distrutto.
+base_n: ldx #N_BASE
+-       cmp mt_fmin,x
+        bcs +
+        dex
+        bne -
+        inx
++       txa
+        rts
+
 ; vita del mostro rt_i alla nascita: media del tipo x (96..160)/128 (+-25%); boss con nome x BOSS_HPH/2
 mon_hp_init:
         ldx rt_i

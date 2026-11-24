@@ -249,6 +249,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHST-10` | chapter 2 level 7: mt_ch = the stats of chapter 2 (mon_stats.py), different from chapter 1; the level has its monsters |
 | `CHST-11` | back to chapter 1 (level 2): mt_ch = chapter 1; chapter 3 (no own_stats): chapter 1 too; chapter 2 boss level (10): chapter 2 |
 | `CHST-12` | floor_types (C64) = the bestiary formulas (mon_stats.values) for types 1..9 on levels 1, 4, 7, 9, 12, 17 |
+| `CHST-13` | base_n (which base types spawn, from mt_fmin of the theme file): chapter 1 levels 1-5, chapter 2 levels 6-10 (Will-o'-Wisp from level 6), chapter 3 levels 11-15 (types of chapter 1) |
 | `CHAP-SEQ-12` | killing the boss of chapter 1 does not unlock chapter 2 (23/11: step 3 handed in at QGIV does, QREW-12): c_unl stays 1; the quest goal C is reached |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
 | `CHAP-SEQ-14` | chapter 2: the crypt leads to level 6 (first of the chapter); its stairs up lead back to the village |
