@@ -598,8 +598,8 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   **Fatto (24/11)**: statistiche proprie del **capitolo 2** (`own_stats` in `data/chapters.yaml`, `tools/build/mon_stats.py`: identità dal
   bestiario, difficoltà media del capitolo 1; 64 B in coda al file del tema, [bestiario](docs/wiki/bestiario.md)); per i capitoli 3–4 basta
   `own_stats: true` (da provare col simulatore). **Da fare nel codice**: **IA nuove** (distanza per Bone
-  Archer e Cultist (21/11: progetto delle frecce in [bestiario](docs/wiki/bestiario.md#arcieri-e-frecce-2111-progetto-non-nel-codice): al massimo 2 in volo, sprite 2 + uno slot dei mostri), carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per Drowned e
-  Frost Wight: da scegliere); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97% (19/11: oggi Mother Stitch, stesse statistiche, meccanica nuova),
+  Archer e Cultist (21/11: progetto delle frecce in [bestiario](docs/wiki/bestiario.md#arcieri-e-frecce-2111-progetto-non-nel-codice): al massimo 2 in volo, sprite 2 + uno slot dei mostri), carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per
+  Frost Wight: da scegliere; 24/11 fatto il fango dei Drowned, [bestiario](docs/wiki/bestiario.md)); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97% (19/11: oggi Mother Stitch, stesse statistiche, meccanica nuova),
   Varok 100%: da rifare con `fit_rules.py` e `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).
 - **Da decidere con il committente** (15/11): i colori dei disegni (Hellhound e Blood Knight sono rossi, 2, come il Lord of Ruin:
   nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema

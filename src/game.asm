@@ -1276,7 +1276,15 @@ _dx2    sta pdx
 _dy1    lda #$ff
 _dy2    sta pdy
 _dn     jsr fz_move             ; Frenzy: corsa piu' veloce (combat.asm)
-        jsr ent_pl
+        lda ovp_slow            ; (24/11) codice del piano: PG rallentato (fango attorno agli annegati del capitolo 2,
+        beq +                   ; ovl_decor.asm): fermo un fotogramma su due
+        lda frame
+        and #1
+        beq +
+        lda #0
+        sta pdx
+        sta pdy
++       jsr ent_pl
         jsr ent_tile            ; casella attuale: il PG non entra nella casella di un mostro
         lda nt_x
         sta ot_x

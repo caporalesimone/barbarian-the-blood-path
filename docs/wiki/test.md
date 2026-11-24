@@ -159,15 +159,13 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (3)
+### sanity (1)
 
 | ID | Test |
 |---|---|
-| `BELT-20` | before step 6 (q_step 5): 4 slots, a fifth potion is refused and row 23 has dark grey dashes; step 6 handed in (q_step 6): the fifth potion goes to slot 5 (behind slot 1), its colour in row 23 |
-| `BELT-21` | key 1 with slot 1 and slot 5 full: the potion of slot 1 is drunk, the one of slot 5 moves up to slot 1 |
-| `BELT-22` | a front slot emptied elsewhere (shop, inventory): the next HUD drawing moves the potion behind it up |
+| `MUD-10` | chapter 2: a Drowned awake next to the hero -> ovp_slow, the hero covers about half the distance; the Drowned dead (or asleep) -> normal speed |
 
-### regression (318)
+### regression (321)
 
 | ID | Test |
 |---|---|
@@ -325,6 +323,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `REQ-10` | inventory: a weapon whose STR requirement is above s_str stays in the pack ('str N' in its box); with enough STR it is equipped |
 | `ITEM-10` | 255 generated items, broken weapon, HUD warnings, TOD clock (repair: SHOP-FIX-10) |
 | `BELT-10` | belt (4 potions, the fifth refused; 24/11: 8 after chain step 6, the ninth refused), scroll stack, portal |
+| `BELT-20` | before step 6 (q_step 5): 4 slots, a fifth potion is refused and row 23 has dark grey dashes; step 6 handed in (q_step 6): the fifth potion goes to slot 5 (behind slot 1), its colour in row 23 |
+| `BELT-21` | key 1 with slot 1 and slot 5 full: the potion of slot 1 is drunk, the one of slot 5 moves up to slot 1 |
+| `BELT-22` | a front slot emptied elsewhere (shop, inventory): the next HUD drawing moves the potion behind it up |
 | `KRILL-10` | START installs Krill: resident code at $0200 as out/work/krill/loader.prg (but its variables), LDFLAGS used |
 | `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (4 blocks since 22/11), barbarian first |
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |

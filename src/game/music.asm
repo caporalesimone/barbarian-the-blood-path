@@ -379,6 +379,7 @@ gfx_tail:
         sta ovp_ok
         sta ovp_tint
         sta ovp_rate
+        sta ovp_slow
         lda #<GFX_DUN_END
         sta bm_at
         lda #>GFX_DUN_END

@@ -253,7 +253,8 @@ fuori dalla palude, `PATH`). I piani del boss e la sala del trono no: le loro ma
 | 4 cittadella | stendardo del Lord of Ruin, rastrelliera | armatura vuota | sigillo nel pavimento, scudo spezzato |
 
 - **Dove**: codice del piano dei file `GFX1`, `GFX3`, `GFX5`, `GFX7` (`src/game/ovl_decor.asm`, assemblato una volta per capitolo
-  con `-D DK_CHAP`; 247 B, nel capitolo 4 524 B con la cittadella). Costo per GAME: lo stub `ovp_decor` e la chiamata.
+  con `-D DK_CHAP`; 247 B, nel capitolo 4 524 B con la cittadella). Costo per GAME: lo stub `ovp_decor` e la chiamata. (24/11)
+  Nel capitolo 2 anche `OVJ_TICK`: il fango attorno ai Drowned (`dw_tick`, `ovp_slow`; [bestiario](bestiario.md)).
 - **Quando**: `load_location`, **subito dopo `gen_dungeon`** (`ovp_decor`, voce `OVJ_DECOR`), prima di `spawn_monsters`,
   `place_chests` e degli altri piazzamenti: usano `floor_ok` (`FLOOR..FLOORC`), quindi mostri, bauli ed evocazioni non
   nascono mai su un arredo.

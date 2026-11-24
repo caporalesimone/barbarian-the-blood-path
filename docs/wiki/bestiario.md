@@ -82,8 +82,18 @@ capitolo 1 le rimette. Il **simulatore** usa le stesse tabelle (`tools/simulator
 Il **boss del capitolo 2** (tipo fisso, `chapter_bosses`) prende le statistiche del suo tipo nel capitolo 2.
 Test `CHST-10..11` (regression, `tests/regression/chapstats`).
 
+### IA del capitolo 2 (24/11)
+
+**Fango degli annegati** (scelta mia, come le statistiche: il committente ha chiesto il capitolo 2 completo senza altre
+decisioni; il bestiario diceva "lascia una pozza che rallenta"): con un **Drowned** (tipo 1) vivo e sveglio a meno di **24** pixel
+su entrambi gli assi il PG si muove a **metà velocità** (fermo un fotogramma su due). Codice nel codice del piano degli arredi
+del capitolo 2 (`ovl_decor.asm` con `DK_CHAP` 2, `OVJ_TICK`, coda di `GFX3`), in GAME solo la variabile `ovp_slow` e 12 B in
+`update_player`; vale nei piani 6–9 (non nel piano del boss). Il simulatore non lo modella (non fa muovere il PG). Test `MUD-10`.
+**Non fatto**: il volo dei Will-o'-Wisp sull'acqua (cambia le collisioni dei mostri in GAME: memoria e rischio), lo sputo della
+Mire Witchling (attacco a distanza: progetto delle frecce non ancora nel codice).
+
 **Resta** (TODO M9): statistiche proprie dei capitoli 3–4 (basta `own_stats: true`, poi bilanciamento), IA nuove (distanza,
-carica, teletrasporto, evocazione), bilanciamento con i simulatori.
+carica, teletrasporto, evocazione; nel capitolo 2 il volo dei Will-o'-Wisp), bilanciamento con i simulatori.
 
 ## Come fa Diablo (DevilutionX, `assets/txtdata/monsters/`)
 

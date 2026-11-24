@@ -17,9 +17,13 @@
         clc                     ; OVJ_INIT
         rts
         nop
+.if DK_CHAP == 2
+        jmp dw_tick             ; OVJ_TICK: (24/11) fango attorno agli annegati
+.else
         clc                     ; OVJ_TICK
         rts
         nop
+.endif
         clc                     ; OVJ_FIRE
         rts
         nop
@@ -40,6 +44,62 @@
         .cerror * - OVP_AT != OVJ_N, "ovl_decor: tabella dei salti"
         .cerror T_FLOORC - T_FLOOR != 2, "ovl_decor: pavimenti FLOOR..FLOORC non contigui"
         .include "../out/work/decor.inc"
+
+.if DK_CHAP == 2
+; (24/11, IA del capitolo 2: scelta mia, il committente ha chiesto il capitolo 2 completo senza altre decisioni) FANGO: con un
+; annegato (tipo DW_TYPE) vivo e sveglio a meno di DW_R pixel su entrambi gli assi il PG si muove a meta' velocita' (ovp_slow,
+; update_player: fermo un fotogramma su due). Controllo ogni 4 fotogrammi.
+DW_TYPE = 1
+DW_R    = 24
+dw_tick:
+        lda frame
+        and #3
+        bne _r
+        ldy #0
+        ldx lb_cnt
+_l      dex
+        bmi _e
+        lda mtype,x
+        cmp #DW_TYPE
+        bne _l
+        lda malive,x
+        beq _l
+        lda mwake,x
+        beq _l
+        lda px
+        sec
+        sbc mxl,x
+        sta tmp0
+        lda px+1
+        sbc mxh,x
+        jsr _near
+        bcc _l
+        lda py
+        sec
+        sbc myl,x
+        sta tmp0
+        lda py+1
+        sbc myh,x
+        jsr _near
+        bcc _l
+        iny
+_e      sty ovp_slow
+_r      rts
+; A = byte alto, tmp0 = basso di una differenza -> C=1 se |differenza| < DW_R
+_near   beq _p
+        cmp #$ff
+        bne _no
+        lda tmp0
+        cmp #256-DW_R+1
+        rts
+_p      lda tmp0
+        cmp #DW_R
+        bcc _y
+_no     clc
+        rts
+_y      sec
+        rts
+.endif
 
 dk_x    .byte 0
 dk_y    .byte 0
