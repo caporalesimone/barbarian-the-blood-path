@@ -18,10 +18,10 @@ Stato di riferimento (15/11, v1.256 su `main`): `SAVE_VER $C7`; smoke + sanity 3
 | # | Categoria | Voci (in ordine di taglia) |
 |---|---|---|
 | 1 | [Priorità massima](#1--priorità-massima) | A1 |
-| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B2, B3, B6, B8–B18 (XS ciascuna) |
+| 2 | [Decisioni del committente](#2--decisioni-del-committente) | B3, B6, B8–B18 (XS ciascuna) |
 | 3 | [Verifiche e misure](#3--verifiche-e-misure) | I2, I3, I4, I5, I6, I8, I7, I11, I1 |
 | 4 | [Interfaccia, grafica, audio, testi, manuale](#4--interfaccia-grafica-audio-testi-manuale) | C3, E5, C1, M2, E6, E7, E8, E9, E10 |
-| 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5, F1 |
+| 5 | [Salvataggi](#5--salvataggi-un-solo-save_ver-dove-possibile) | C4, F2, F3, C5 |
 | 6 | [Prestazioni e memoria](#6--prestazioni-e-memoria) | D12, D14, D1, D5, D7, D10, D11, D3 |
 | 7 | [Loader e disco](#7--loader-e-disco) | M8, M10, M3, M4, M5 |
 | 8 | [Frenzy: prove in gioco](#8--frenzy-prove-in-gioco-del-committente) | K1, K2, K3, K6, K5, K4 |
@@ -66,7 +66,6 @@ non si possono chiudere.
 
 | ID | Decisione | Blocca |
 |---|---|---|
-| B2 (ex D4) | **Cintura a 8 posti** (20/11, committente): premio importante a fine capitolo 2 o inizio capitolo 3; quest e momento decisi col simulatore ([quests](docs/wiki/quests.md) sez. 7). | F1 |
 | B3 (ex D5) | **Pergamene fuori dallo zaino**: contatore 0..10 addosso (tasto 5), pile da 10 nel baule della locanda, opzione "riga dell'oro nella locanda con `s N`". Cooldown della pergamena ≥ 5 s (08/11). | F2 |
 | B6 (ex D9) | **Una pergamena garantita per piano?** | G1 |
 | B8 (ex D11) | **Quest system**: decisioni prese il 20/11 ([quests](docs/wiki/quests.md)); restano i chiarimenti C3–C7 della pagina (sez. 8). | H1 |
@@ -116,7 +115,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 
 ### C1 (ex 1.2) Grafica della cintura nell'HUD: ampolle colorate — S-M
 - Ampolle nei colori della pozione (rossa 2, gialla 7, viola 4) al posto dell'icona generica; in ricarica blu (già fatto).
-  **Cavilli**: caratteri hires, colori < 8; i codici liberi dell'HUD sono finiti (`HUD_FREE`); da ripensare con la cintura a 8 (F1).
+  **Cavilli**: caratteri hires, colori < 8; i codici liberi dell'HUD sono finiti (`HUD_FREE`); (24/11: la cintura a 8 usa la riga 23 con lo stesso glifo).
 
 ### M2 Temi audio veri dei villaggi — S-M
 - Brano per capitolo fatto il 12/11 ([musica](docs/wiki/musica.md)). **Resta**: scegliere i temi dei villaggi 2–4 (oggi tutti Tavern
@@ -157,7 +156,7 @@ Nessun codice nuovo (salvo una correzione se la verifica trova un errore).
 
 ## 5 — Salvataggi (un solo `SAVE_VER` dove possibile)
 
-Le voci che cambiano il blocco eroe (C5, F1–F3, G4) vanno fatte insieme per cambiare `SAVE_VER` una volta sola.
+Le voci che cambiano il blocco eroe (C5, F2–F3, G4) vanno fatte insieme per cambiare `SAVE_VER` una volta sola.
 
 ### C4 (ex 1.6) Salvataggio senza controllo degli errori di disco — S-M
 - `gm_save` (`sv_all`), `chap_save`, `save_char` non controllano `KREADST` né il canale errori della 1541 (lettura del codice, **non
@@ -176,12 +175,6 @@ Le voci che cambiano il blocco eroe (C5, F1–F3, G4) vanno fatte insieme per ca
 - Controllo di integrità (CRC-8/16 o somma) per eroe, piani, baule, verificato al caricamento; un record corrotto si
   riconosce. Cambia il formato (**`SAVE_VER`**): ~30–60 B di codice, tempo da misurare sul salvataggio. Test con file corrotto
   (`test_rel.py`, `test_saves.py`).
-
-### F1 (ex 3.1) Cintura a 8 posti sbloccata da una quest (dopo B2) — L
-- `c_beltt` 8 byte, 4 slot da 2 pozioni, tasti 1–4; flag nell'eroe. Regole decise l'08/11 (prima fila, la seconda sale,
-  allineamento all'uscita dei menu; pozioni dal baule del dungeon come dall'alchimista). Quest scelta col simulatore.
-  **Serve**: formato, HUD (le due file da 4 ci sono dal 23/11: la seconda mostra 4 trattini), purse, alchimista, baule, `give_item`, simulatore, eroe di prova con 8 pozioni,
-  test `BELT-20..` (`BELT_SLOTS`, `BELT_KEYS` in `tests/lib/play.py`). Dettagli: storico in git (voce 3.1).
 
 ---
 
@@ -504,7 +497,7 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
 
 ### G1 (ex 4.1) Obiettivi e curva (iterazione successiva del simulatore) — M
 - Gruppo base, boss del piano ~75%, boss finale 60–70%; curva del PG più regolare; stordimento; Battle Cry 1 contro 1;
-  set delle armi. `tools/simulators/fit_rules.py`, `cmp_rules.py`, `chapters.py`, arena. Rifare dopo F1 e A1.
+  set delle armi. `tools/simulators/fit_rules.py`, `cmp_rules.py`, `chapters.py`, arena. Rifare dopo A1 (F1 fatto il 24/11: cintura a 8).
 
 ### G3 (ex 4.3) Probabilità di uscita per ogni oggetto (stile Diablo) — M
 - `w = R × g(livello area − livello oggetto)`; colonna `dropRate` in `data/items/items.tsv` come in DevilutionX

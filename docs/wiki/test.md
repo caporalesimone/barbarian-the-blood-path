@@ -159,14 +159,15 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (2)
+### sanity (3)
 
 | ID | Test |
 |---|---|
-| `STITCH-10` | level 10: Mother Stitch has the fixed type and life (CB2_TYPE, CB2_HP); awake, the first rite plants 2 fetishes; DM_ROT x 4 frames later they are Drowned (type 1, awake, life of type 1 on the level) and she is not open |
-| `STITCH-11` | the hex: warning (DM_HW frames), the hero next to her: ovp_rate = 5/8 of s_rate for DM_HT frames, then 0; the hero far away (> DM_HR pixels): no hex |
+| `BELT-20` | before step 6 (q_step 5): 4 slots, a fifth potion is refused and row 23 has dark grey dashes; step 6 handed in (q_step 6): the fifth potion goes to slot 5 (behind slot 1), its colour in row 23 |
+| `BELT-21` | key 1 with slot 1 and slot 5 full: the potion of slot 1 is drunk, the one of slot 5 moves up to slot 1 |
+| `BELT-22` | a front slot emptied elsewhere (shop, inventory): the next HUD drawing moves the potion behind it up |
 
-### regression (316)
+### regression (318)
 
 | ID | Test |
 |---|---|
@@ -323,7 +324,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `ITEMDB-NEXT-10` | next item database (data/items/next, proposal of 20/11): full names <= 37, unique names <= 16, affix values fit a byte, ids fit the record |
 | `REQ-10` | inventory: a weapon whose STR requirement is above s_str stays in the pack ('str N' in its box); with enough STR it is equipped |
 | `ITEM-10` | 255 generated items, broken weapon, HUD warnings, TOD clock (repair: SHOP-FIX-10) |
-| `BELT-10` | belt (4 potions, the fifth refused), scroll stack, portal |
+| `BELT-10` | belt (4 potions, the fifth refused; 24/11: 8 after chain step 6, the ninth refused), scroll stack, portal |
 | `KRILL-10` | START installs Krill: resident code at $0200 as out/work/krill/loader.prg (but its variables), LDFLAGS used |
 | `KRILL-11` | disk: hl (1 block), ksave, save-01..05 with SV_LEN + 2 bytes (4 blocks since 22/11), barbarian first |
 | `KRILL-12` | new hero: hl rewritten by the plugin (version, present, name); hero file: save_char then load_char gives the same hero |
@@ -411,6 +412,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
 | `ORDER-10` | inventory: equipment, then pack, then belt (the belt potions are the last entries) |
 | `ORDER-11` | alchemist, list 'yours': rings worn, pack, belt (4 slots, last; the '>' on a belt slot when buying a potion: SHOP-BELT-10) |
+| `STITCH-10` | level 10: Mother Stitch has the fixed type and life (CB2_TYPE, CB2_HP); awake, the first rite plants 2 fetishes; DM_ROT x 4 frames later they are Drowned (type 1, awake, life of type 1 on the level) and she is not open |
+| `STITCH-11` | the hex: warning (DM_HW frames), the hero next to her: ovp_rate = 5/8 of s_rate for DM_HT frames, then 0; the hero far away (> DM_HR pixels): no hex |
 | `QCH2-10` | village 2: mama sabine gives step 4 ('the silent village', slay the drowned: 0/12); in level 7 the quest monster type is the drowned (its name in the theme), a drowned killed counts, a bog crawler does not |
 | `QCH2-11` | step 6 (the silver needle) handed in to mama sabine: q_step 6, chapter 3 unlocked (c_unl 3), purse step 2; the boss of chapter 2 dying does not unlock chapter 3 |
 | `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open; chapter 2 (24/11): level 10 sealed until step 6 is taken; chapter 3 open |

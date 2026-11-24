@@ -154,6 +154,8 @@ _e      lda PAR_EQ,x
 +       sta c_eqb,x
         lda PAR_BELTT,x
         sta c_beltt,x
+        lda #0                  ; (24/11, F1) seconda fila della cintura: vuota
+        sta c_beltt+4,x
         dex
         bpl _e
         ldx #SK_N-1             ; (arma rotta in un combattimento precedente: c_eqd resta 0, danno 0; 07/11)             ; ricariche, Rage, Frenzy, pozioni

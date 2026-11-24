@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Belt and scrolls on the real code (arena build, after a fight): 4 potions at most (the fifth refused, reason 1),
+"""Belt and scrolls on the real code (arena build, after a fight): 4 potions at most before chain step 6 (the fifth refused,
+reason 1), 8 after it (24/11, F1: the ninth refused),
 a stack of scrolls up to 10 (08/11; reason 2 beyond), drinking frees the slot and blocks every potion for the
 cooldown, the scroll opens the portal and uses the stack (the last one frees the pack slot)."""
 import os, sys, time
@@ -29,13 +30,19 @@ with AR.Arena() as a:
     def rd(lbl, n):
         return a.mem(G[lbl], n)
 
-    for lbl, n in (("c_beltt", 4), ("c_pack", 8), ("c_packb", 8)):     # pack: PACK_N = 8 (07/11)
+    for lbl, n in (("c_beltt", 8), ("c_pack", 8), ("c_packb", 8)):     # pack: PACK_N = 8 (07/11); belt BELT_N = 8 (24/11)
         a.cmd("f %04x %04x 00" % (G[lbl], G[lbl] + n - 1), 0.2)
     a.cmd("> %04x 00" % G["c_portal"], 0.2)
     P1, P2, S = G["I_POTR"], G["I_POTY"], G["I_SCROLL"]
+    a.cmd("> %04x %02x" % (G["q_step"], G["QB_BELT"] - 1), 0.2)     # (24/11) belt of 4: step 6 not handed in
     r = [give(P1), give(P2), give(P1), give(P1), give(P2)]
-    if [x[0] for x in r] != [0, 0, 0, 0, 1] or r[4][1] != 1 or rd("c_beltt", 4) != [P1, P2, P1, P1]:
-        err.append("potions: %s %s" % (r, rd("c_beltt", 4)))
+    if [x[0] for x in r] != [0, 0, 0, 0, 1] or r[4][1] != 1 or rd("c_beltt", 8) != [P1, P2, P1, P1, 0, 0, 0, 0]:
+        err.append("potions: %s %s" % (r, rd("c_beltt", 8)))
+    a.cmd("> %04x %02x" % (G["q_step"], G["QB_BELT"]), 0.2)         # belt of 8: 4 more behind, the ninth refused
+    r = [give(P2), give(P2), give(P1), give(P2), give(P1)]
+    if [x[0] for x in r] != [0, 0, 0, 0, 1] or r[4][1] != 1 or rd("c_beltt", 8) != [P1, P2, P1, P1, P2, P2, P1, P2]:
+        err.append("potions (belt of 8): %s %s" % (r, rd("c_beltt", 8)))
+    a.cmd("f %04x %04x 00" % (G["c_beltt"] + 4, G["c_beltt"] + 7), 0.2)
     r = [give(S, 4), give(S, 4), give(S, 2), give(S)]  # 4, 8, +2 = 10, the eleventh refused
     pk, pb = rd("c_pack", 1), rd("c_packb", 1)
     if [x[0] for x in r] != [0, 0, 0, 1] or r[3][1] != 2 or pk != [S] or pb != [10]:

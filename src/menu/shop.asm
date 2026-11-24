@@ -218,7 +218,7 @@ _e      stx tmp4
         sta sg_k,y
         lda #0
         sta sg_a,y
-        lda #4
+        lda #BELT_N             ; (24/11, F1) sl_vis ne mostra belt_cap
         sta sg_c,y
 +       sty sl_sn+1             ; segmenti della lista 1 = Y (l'ultimo) - 1 + 1
         rts
@@ -241,14 +241,17 @@ _s      sta ui_lc
         rts
 
 ; tutta la schermata variabile: oro nel titolo della lista 1, liste, oggetto, tasti. Nella scelta del posto della pozione
-; (sh_slot) il cursore sta sul posto della cintura (24/11: le ultime 4 voci della lista 1, dopo anelli e zaino)
+; (sh_slot) il cursore sta sul posto della cintura (24/11: le ultime belt_cap voci della lista 1, dopo anelli e zaino)
 sh_draw:
         lda sh_slot
         bmi +
+        jsr belt_cap
+        sta tmp0
+        lda sh_slot
         clc
         adc sl_n+1
         sec
-        sbc #4
+        sbc tmp0
         sta sl_cur+1
         lda #1
         sta sl_l

@@ -191,7 +191,7 @@ durabilità di un altro.
 ```mermaid
 flowchart LR
     B["bottino / negozio"] --> GI{"give_item"}
-    GI -->|pozione| BE["cintura c_beltt: 4 posti,<br/>una pozione per posto"]
+    GI -->|pozione| BE["cintura c_beltt: 4 posti (8 con la cintura a 8),<br/>una pozione per posto"]
     GI -->|pergamena| SC["pila nello zaino (max 10)"]
     GI -->|altro| PK["zaino c_pack: 8 posti"]
     PK <-->|Fire nell'inventario| EQ["equipaggiamento c_eq:<br/>arma, armatura, scudo, due anelli"]
@@ -225,7 +225,11 @@ flowchart LR
   aprono il portale) e una pila nel baule della locanda (fino a 10): spostandole si accumulano sulla pila che c'è già
   (`st_move`, modulo MENU), quello che non ci sta resta dov'era; con la pila piena: "max 10 scrolls." / "the chest is
   full". Mostrate come `3 portal scroll` / `10 portal scroll`.
-- **Cintura**: 4 pozioni (tasti 1–4); se è piena la pozione resta nel baule.
+- **Cintura**: 4 pozioni (tasti 1–4); se è piena la pozione resta nel baule. (24/11, TODO F1) **Cintura a 8**: premio del
+  passo 6 della catena (Mother Stitch, `QB_BELT` da `quests.yaml`, nessun flag: `belt_cap` guarda `q_step`). `c_beltt` ha 8
+  posti: 0–3 la prima fila (tasti 1–4), 4–7 la seconda, dietro al posto −4. Le pozioni nuove (bauli, alchimista, premi) vanno nel
+  primo posto libero, prima fila poi seconda; bevuta una pozione la seconda fila sale (`belt_up`), e così all'uscita dei menu
+  (lo chiama il disegno della cintura nell'HUD). Nell'HUD la seconda fila è la riga 23 (trattini grigio scuro finché non c'è).
 - **Pergamena di portale** (tasto 5): apre un portale accanto al PG verso il villaggio (`c_portal`,
   `c_retlvl` = piano, `c_retx`/`c_rety` = posizione); il portale precedente sparisce. Nel villaggio il portale
   riporta al piano e alla posizione salvati.

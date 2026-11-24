@@ -216,6 +216,10 @@ def main():
     if 0 in skq[1:]:
         die("abilita' senza passo della catena: %s" % [sko[i] for i in range(1, len(sko)) if not skq[i]])
     L.append("sk_qs  .byte %s     ; (Q15) passo della catena (q_step >=) per abilita': %s" % (", ".join(map(str, skq)), ", ".join(sko)))
+    bl = [int(x["id"]) for x in qs[:12] if (x.get("reward") or {}).get("belt")]      # (24/11, F1) cintura a 8 posti
+    if len(bl) != 1 or (qs[bl[0] - 1]["reward"]["belt"] != 8):
+        die("serve un passo della catena (uno solo) con il premio belt: 8")
+    L.append("QB_BELT = %d               ; (24/11, F1) q_step >= QB_BELT: cintura a 8 posti (premio del passo)" % bl[0])
     L.append('        .enc "screen"')
     for i, k in enumerate(items):
         L.append('qi_%d    .text "%s", 0' % (i + 1, q["quest_items"][k]))

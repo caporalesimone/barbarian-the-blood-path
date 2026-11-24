@@ -132,6 +132,10 @@ Dal formato **$CE** (22/11, decisione D1 del committente, [quests.md](quests.md)
   `q_side` (4 accessorie attive × id e contatore), `q_rep` (2 ripetibili × 5 B), `q_item` (oggetto premio delle 2 ripetibili),
   3 liberi. Le ripetibili (16 B) si possono togliere dal salvataggio se servisse spazio (D1);
 - blocco da 254 a **166** byte, piani dall'offset 286, file da 739 a **771** byte: da 3 a **4 blocchi**.
+Dal formato **$CF** (24/11, TODO F1, cintura a 8): `c_beltt` passa da 4 a **8** byte (posti 0–3 la prima fila, 4–7 la seconda,
+[oggetti](oggetti.md)); per farle posto si tolgono `c_qst` (non usato dal 22/11) e i 3 byte liberi in fondo allo stato delle quest
+(`q_free`). Il blocco resta di **166** byte e il file di 4 blocchi, ma i campi fra `c_beltt` e `c_qst` scalano di 4: un
+salvataggio $CE non si legge (schermata dei salvataggi di un'altra versione).
 **Unici** (22/11, fase 6, sempre formato $CD: estensione compatibile, i valori di prima restano validi): quinto byte = **$80 + numero
 dell'unico** (riga di `data/items/next/uniques.tsv`, da 0), prefisso 0, id = la base dell'unico. Le righe nuove di `uniques.tsv`
 vanno **in fondo**: riordinarle o toglierle cambia il significato degli oggetti salvati e richiede un `SAVE_VER` nuovo.

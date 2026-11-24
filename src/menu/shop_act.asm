@@ -39,11 +39,13 @@ _pay    jsr gold_pay
         jmp sfx_play
 _ng     jmp no_gold
 _r      rts
-_pot    ldx #0                  ; primo posto libero della cintura
+_pot    jsr belt_cap            ; primo posto libero della cintura (24/11, F1: 4 o 8 posti)
+        sta tmp0
+        ldx #0
 _f      lda c_beltt,x
         beq _sel
         inx
-        cpx #4
+        cpx tmp0
         bne _f
         lda #1
         sta gv_why
@@ -66,10 +68,14 @@ _l      jsr ui_input
         bcs +
         lda #1
 +       sta sh_dir
-_nx     lda sh_slot
+_nx     jsr belt_cap            ; (24/11, F1) giro sui posti che ci sono (4 o 8: maschera posti - 1)
+        sec
+        sbc #1
+        sta tmp0
+        lda sh_slot
         clc
         adc sh_dir
-        and #3
+        and tmp0
         sta sh_slot
         tax
         lda c_beltt,x

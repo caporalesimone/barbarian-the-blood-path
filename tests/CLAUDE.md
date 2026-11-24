@@ -47,7 +47,8 @@ dettagli di suite e runner: `docs/wiki/test.md`.
 - **Baule della locanda pieno al limite** (08/11): oro `c_sgold` = 65535 decine = 655350 monete (`TU_SGOLD`; nelle varianti della
   locanda, TESTUI 21/29, anche i 24 posti pieni) e **oro nello zaino** (2350): il totale (657700) usa tutte le 6 cifre.
 - **Pozioni** (08/11): sempre **8 pozioni** (cintura a 8 posti, 4 slot da 2, `docs/wiki/quests.md`, premi). Il riquadro purse ha sempre il
-  posto per 8 (2 file da 4). Oggi la cintura del codice ha 4 posti: finché la cintura a 8 non c'è, l'eroe di prova ne ha 4 (TODO).
+  posto per 8 (2 file da 4). (24/11) La cintura a 8 c'è (premio del passo 6): l'eroe di prova
+  ha 8 pozioni (`tu_belt`) e `q_step` almeno `QB_BELT`.
 
 ## Emulatore secondario (vc64web, 13/11)
 - **VICE resta l'unico riferimento autorevole**: i numeri misurati su vc64web non sono misure del gioco, si confermano in VICE.

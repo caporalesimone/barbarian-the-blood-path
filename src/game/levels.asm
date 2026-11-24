@@ -892,13 +892,17 @@ _du     lda c_pack,x
         dex
         bpl _du
         jsr ap_clr
-        lda #I_POTR
-        sta c_beltt
-        sta c_beltt+1
-        lda #I_POTY
-        sta c_beltt+3
-        lda #I_POTV             ; cintura piena (08/11, CLAUDE.md: l'eroe di prova ha sempre il massimo di pozioni)
-        sta c_beltt+2
+        ldx #BELT_N-1           ; cintura piena (08/11, CLAUDE.md: l'eroe di prova ha sempre il massimo di pozioni; 24/11, F1: 8,
+-       lda tu_belt,x           ; con la cintura a 8: q_step almeno QB_BELT)
+        sta c_beltt,x
+        dex
+        bpl -
+        lda q_step
+        cmp #QB_BELT
+        bcs +
+        lda #QB_BELT
+        sta q_step
++
         lda #<340
         sta c_xp
         lda #>340
@@ -925,6 +929,7 @@ _n      lda tu_name,x
         jmp recalc_stats
 TU_SGOLD = 65535                ; baule di casa pieno al limite (65535 decine = 655350 monete, 10/11) + 2350 addosso = 657700:
                                 ; la scheda passa per il totale a 6 cifre (regola del committente, 08/11: si prova sempre questo caso)
+tu_belt .byte I_POTR, I_POTR, I_POTV, I_POTY, I_POTR, I_POTY, I_POTY, I_POTV   ; (24/11, F1) cintura a 8 piena
 tu_eq   .byte I_SWORD, I_PLATE_MAIL, I_MEDIUM_SHIELD, I_SILVER, I_GOLD     ; (21/11) due anelli
 tu_eqb  .byte MAG_W1, MAG_A3, MAG_A2, 0, 0      ; (21/11 sera) prefissi (prima la magia +1, +3, +2)
         .cerror * - tu_eqb != EQ_N, "tu_eqb: un byte per posto indossato"

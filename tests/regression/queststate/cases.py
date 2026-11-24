@@ -1,6 +1,6 @@
 """Quest state in the save (22/11, save format $CE, owner's decision D1): the inn chest leaves the hero block (it lives at
 INN_AT, in the RAM under the KERNAL, and follows CHRBLK in the file save-0N); the hero block gets the 32 bytes of the quest
-state (q_step .. q_free). One VICE session, the village."""
+state (q_step .. q_item; q_free removed on 24/11 for the 8-slot belt). One VICE session, the village."""
 import os
 from lib.c64 import Game
 from c64test import test, check
@@ -8,7 +8,7 @@ from lib.play import new_game
 
 CHAIN = True
 OUT = os.path.join(os.path.dirname(__file__), "..", "..", "..", "out", "work")
-QF = ("q_step", 1), ("q_flag", 1), ("q_cnt", 1), ("q_sdone", 2), ("q_side", 8), ("q_rep", 10), ("q_item", 6), ("q_free", 3)
+QF = ("q_step", 1), ("q_flag", 1), ("q_cnt", 1), ("q_sdone", 2), ("q_side", 8), ("q_rep", 10), ("q_item", 6)
 
 
 def poke_n(g, a, v):

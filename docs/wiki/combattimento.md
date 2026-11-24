@@ -148,7 +148,9 @@ Riparazione dal fabbro: [Villaggio](villaggio.md#negozi). Simulazione: `tools/si
 | yellow (healing potion) | 50 (Abisso 75) | 350 fot. (7 s) | piani 5–17 |
 | violet (greater healing) | 40 + 4 × livello (Abisso 28 + 5 × livello) | 500 fot. (10 s) | dal piano 12 |
 
-- Tasti 1–4 = i 4 posti della cintura; dall'inventario con Fire.
+- Tasti 1–4 = i 4 posti della cintura; dall'inventario con Fire. (24/11, F1) Con la **cintura a 8** (premio del passo 6 della
+  catena, `QB_BELT`) dietro ogni posto ce n'è un secondo (posti 5–8): il tasto beve la pozione davanti e quella dietro sale
+  (`belt_up`).
 - Non si beve a vita piena né durante la ricarica (il posto resta pieno). La ricarica blocca **tutte** le
   pozioni; nell'HUD le icone diventano blu finché dura.
 - Cura = `itval` + `itdn` × livello, fino alla vita massima; oltre il livello 20 (Abisso) `pab_val` + `pab_dn` × livello

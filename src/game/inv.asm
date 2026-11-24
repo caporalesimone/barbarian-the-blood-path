@@ -145,7 +145,7 @@ iv_cur  jsr sl_sel
         sta ui_cur
         rts
 ; segmenti: indossati (EQ_N), cintura (4), zaino (8)
-iv_sg   .byte 3, SK_EQ,0,EQ_N, SK_PACK|SK_SEP,0,PACK_N, SK_BELT|SK_SEP,0,4   ; (24/11, committente) equip, zaino, cintura
+iv_sg   .byte 3, SK_EQ,0,EQ_N, SK_PACK|SK_SEP,0,PACK_N, SK_BELT|SK_SEP,0,BELT_N   ; (24/11, committente) equip, zaino, cintura (sl_vis: belt_cap posti)
 iv_box  .byte 0,1,40,5, 0,6,40,12, 0,IV_SY,40,5
 tt_bp   #t5 "backpack"
 

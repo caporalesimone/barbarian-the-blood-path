@@ -64,6 +64,7 @@ LVLEND
 
 ; ---- personaggio (salvato su disco)
 NAME_LEN = 12                   ; caratteri del nome dell'eroe
+BELT_N   = 8                    ; (24/11, F1) posti della cintura (4 + 4 con la cintura a 8)
 STASH_N  = 24                   ; oggetti nel baule di casa (07/11 sera: da 48 a 24); (22/11) a INN_AT, fuori dal blocco dell'eroe
 PACK_N   = 8                    ; posti dello zaino (07/11 sera: da 16 a 8); l'equipaggiamento segue: indici PACK_N..PACK_N+EQ_N-1
 EQ_N     = 5                    ; (21/11, SAVE_VER $CA) posti indossati: arma, armatura, scudo, due anelli (EQ_RING, EQ_RING+1)
@@ -83,7 +84,9 @@ c_retlvl .byte ?         ; piano a cui riporta il portale
 c_retx  .word ?          ; X di ritorno del portale (pixel)
 c_rety  .word ?          ; Y di ritorno del portale (pixel)
 c_portal .byte ?         ; 1 = portale aperto nel villaggio
-c_beltt .fill 4          ; cintura: 4 posti, una pozione ciascuno (id, 0 = vuoto). Pergamene: pila nello zaino
+c_beltt .fill BELT_N     ; cintura: (24/11, SAVE_VER $CF) 8 posti, una pozione ciascuno (id, 0 = vuoto): 0-3 prima fila (tasti
+                         ; 1-4), 4-7 seconda (dietro al posto -4, sale quando il davanti si vuota); 4-7 solo con la cintura a 8
+                         ; (q_step >= QB_BELT, belt_cap). Pergamene: pila nello zaino
 c_skill .byte ?          ; abilita' selezionata
 c_kills .word ?          ; mostri uccisi (16 bit)
 c_won   .byte ?          ; 1 = boss finale sconfitto
@@ -112,7 +115,6 @@ c_chap  .byte ?          ; (12/11, SAVE_VER $C7, TODO M1) capitolo in cui si gio
 c_unl   .byte ?          ; capitolo piu' alto sbloccato (uccidere il boss del capitolo c sblocca c+1)
 c_packs .fill PACK_N     ; (21/11 sera, SAVE_VER $CC) suffisso degli oggetti nello zaino (0 = nessuno)
 c_eqs   .fill EQ_N       ; ... e dell'equipaggiamento (segue lo zaino come c_packb / c_eqb)
-c_qst   .byte ?          ; (17/11, SAVE_VER $C8) concept delle quest; (22/11) non piu' usato (stato in q_step..)
 ; (22/11, SAVE_VER $CE, decisione D1 del committente) stato delle quest, 32 B (docs/wiki/quests.md sezione 0, QUEST-IMPLEMENTAZIONE 2.3)
 q_step  .byte ?          ; passi della catena consegnati (0..12)
 q_flag  .byte ?          ; bit 0 passo corrente preso, bit 1 obiettivo raggiunto (da riscuotere), bit 4-7 gradino borsello / cintura
@@ -121,7 +123,6 @@ q_sdone .word ?          ; accessorie consegnate: bit n-1 = accessoria n (15 bit
 q_side  .fill 4*2        ; 4 accessorie attive: id (bit 7 = da riscuotere), contatore
 q_rep   .fill 2*5        ; 2 ripetibili: modello e capitolo, parametro, quantita', contatore, premio (sacrificabili se serve spazio: D1)
 q_item  .fill 2*3        ; oggetto premio delle 2 ripetibili (id, prefisso, suffisso), generato alla consegna (D10)
-q_free  .fill 3          ; liberi
 CHREND
         .endv
         .cerror CHREND > $9600, "blocco personaggio sovrapposto alle tabelle dei mostri ($9600, MRT)"
@@ -456,11 +457,13 @@ give_item:
         jmp add_to_pack
 _pot    lda #1
         sta gv_why
+        jsr belt_cap            ; (24/11, F1) 4 o 8 posti
+        sta tmp7
         ldy #0
 _pf     lda c_beltt,y
         beq _pp
         iny
-        cpy #4
+        cpy tmp7
         bne _pf
         sec
         rts

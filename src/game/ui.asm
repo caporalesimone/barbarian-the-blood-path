@@ -78,7 +78,7 @@ ue_x    .byte 1,1,1,1, 20,20,20,20
 
 ; (23/11, committente: prototipo "liste compatte") nello zaino e nel baule della locanda i posti vuoti non sono voci. Gli
 ; altri segmenti restano interi: equipaggiamento (5 posti fissi), cintura (posti 1-4 dei tasti e scelta del posto della
-; pozione nei negozi), merce.
+; pozione nei negozi; 24/11: 4 o 8 posti, belt_cap), merce.
 ; Y = segmento -> A = voci visibili, flag Z di A. X e Y conservati
 sl_vis: lda sg_k,y
         and #$7f
@@ -86,7 +86,10 @@ sl_vis: lda sg_k,y
         beq _f
         cmp #SK_CHEST
         beq _f
-        lda sg_c,y
+        cmp #SK_BELT            ; (24/11, F1) cintura: i posti che ci sono (4, 8 con la cintura a 8)
+        bne +
+        jmp belt_cap
++       lda sg_c,y
         rts
 _f      sta sv_k
         stx sv_x

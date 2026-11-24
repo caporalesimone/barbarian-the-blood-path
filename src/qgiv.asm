@@ -9,7 +9,7 @@
 ;  Testi: file QTXc del capitolo (tools/build/gen_qdata.py, a 5 bit) letto a QTX ($EC00, come CSHEET: cs_ok si azzera).
 ;  Premi: qg_rw (out/work/qgiv_rw.inc), 4 byte per quest.
 ;  (23/11) Fatti: abilita' dalla catena (Q15, sk_ok in GAME), sblocco del capitolo alla consegna del passo 3c (capitoli con
-;  il cancello, QGATE_CH), oggetto magico "qualsiasi" ($ff, passo 11). Da fare: cintura a 8 (TODO F1).
+;  il cancello, QGATE_CH), oggetto magico "qualsiasi" ($ff, passo 11), cintura a 8 (24/11: q_step >= QB_BELT, belt_cap in GAME).
 ; ===================================================================
         .include "../out/work/game.lbl"
         .include "macros.inc"
@@ -679,7 +679,9 @@ _sp     lda #0                  ; posto: zaino per unico e oggetto, cintura per 
         lsr
         and #7
         sta qg_n
-        ldx #3
+        jsr belt_cap            ; (24/11, F1) posti della cintura: 4 o 8
+        tax
+        dex
 -       lda c_beltt,x
         bne +
         dec qg_n

@@ -1384,6 +1384,7 @@ _m      sta mw_l
 +       rts
 
 ; X = posto della cintura: beve la pozione (drink: niente se in ricarica o con la vita piena), poi il posto e' vuoto
+; (24/11, F1) e la pozione dietro (posto X+4) sale al suo posto (belt_up)
 use_potion:
         ldy c_beltt,x
         beq _no
@@ -1391,7 +1392,35 @@ use_potion:
         bcs _no
         lda #0
         sta c_beltt,x
+        jmp belt_up
 _no     rts
+
+; (24/11, F1) A = posti utilizzabili della cintura: 4, 8 con il premio del passo QB_BELT consegnato. X, Y conservati
+belt_cap:
+        lda q_step
+        cmp #QB_BELT
+        lda #4
+        bcc +
+        asl
++       rts
+
+; (24/11, F1) allineamento della cintura: un posto davanti vuoto (0-3) prende la pozione dietro (4-7). Dopo una bevuta e
+; all'uscita di menu e moduli che tolgono pozioni (negozio, inventario, baule del piano: hud_p3 lo chiama ogni volta). X, Y conservati
+belt_up:
+        txa
+        pha
+        ldx #3
+-       lda c_beltt,x
+        bne +
+        lda c_beltt+4,x
+        sta c_beltt,x
+        lda #0
+        sta c_beltt+4,x
++       dex
+        bpl -
+        pla
+        tax
+        rts
 
 ; Y = pozione: cura itval + itdn x livello (16 bit, fino alla vita massima), poi blocco di tutte le pozioni
 ; per itrate x 2 fotogrammi. C=1 (niente fatto) se in ricarica o con la vita piena. Preserva X, Y.

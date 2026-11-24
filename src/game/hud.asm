@@ -757,19 +757,43 @@ sk_nm
         .text "broken    "
         .enc "none"
 
-; ---- cintura (23/11, committente): due file da 4 pozioni, riga 22 posti 1-4 e riga 23 posti 5-8 (oggi vuoti: la cintura
-; da 8 arrivera'), colonne 23..29; la pergamena nella prima fila, a destra delle pozioni (colonna 31). Posto vuoto: trattino blu
+; ---- cintura (23/11, committente): due file da 4 pozioni, riga 22 posti 1-4 e riga 23 posti 5-8, colonne 23..29; la
+; pergamena nella prima fila, a destra delle pozioni (colonna 31). Posto vuoto: trattino blu; (24/11, F1) posti 5-8 senza la
+; cintura a 8 (belt_cap): trattino grigio scuro. Prima di disegnare allinea la cintura (belt_up: la seconda fila sale)
 hud_p3:
+        jsr belt_up
         ldx #9
         jsr hb_clear
         ldy #0
-_i      tya
-        asl
-        tax
-        lda #G_DOT              ; vuoto: trattino
+        jsr _row
+        jsr scr_find            ; pergamene: icona se ce n'e' almeno una (quantita' nell'inventario)
+        bcs _ns
+        lda #1
+        sta hc+8
+        lda #G_SCR
+        sta hb+8
+_ns     lda #HB_HP+HB_POT
+        ldx #9
+        jsr hflush
+        ldx #7                  ; riga 23: posti 5-8
+        jsr hb_clear
+        ldy #4
+        jsr _row
+        lda #HB_XP+HB_POT
+        ldx #7
+        jmp hflush
+
+; 4 posti della cintura da Y (0 o 4) -> hb 0, 2, 4, 6 (glifo e colore)
+_row    jsr belt_cap
+        sta tmp4
+        ldx #0
+_i      lda #G_DOT              ; vuoto: trattino blu (grigio scuro se il posto non c'e')
         sta hb,x
         lda #6
-        sta hc,x
+        cpy tmp4
+        bcc +
+        lda #11
++       sta hc,x
         lda c_beltt,y
         beq _n
         sty tmp3
@@ -785,27 +809,8 @@ _pc     ldy tmp3
         lda #G_POT
         sta hb,x
 _n      iny
-        cpy #4
+        inx
+        inx
+        cpx #8
         bne _i
-        jsr scr_find            ; pergamene: icona se ce n'e' almeno una (quantita' nell'inventario)
-        bcs _ns
-        lda #1
-        sta hc+8
-        lda #G_SCR
-        sta hb+8
-_ns     lda #HB_HP+HB_POT
-        ldx #9
-        jsr hflush
-        ldx #7                  ; riga 23: posti 5-8, vuoti (trattini)
-        jsr hb_clear
-        ldx #6
--       lda #G_DOT
-        sta hb,x
-        lda #6
-        sta hc,x
-        dex
-        dex
-        bpl -
-        lda #HB_XP+HB_POT
-        ldx #7
-        jmp hflush
+        rts

@@ -17,7 +17,7 @@ SMITH_DOOR = (39, 12)                                       # below the smith's 
 K_RUNSTOP, K_1, K_2, K_3, K_4, K_5 = (7, 0x80), (7, 0x01), (7, 0x08), (1, 0x01), (1, 0x08), (2, 0x01)
 K_I, K_M, K_Y, K_N, K_RETURN, K_DEL = (4, 0x02), (4, 0x10), (3, 0x02), (4, 0x80), (0, 0x02), (0, 0x01)
 K_F1, K_F3, K_F5, K_F7 = (0, 0x10), (0, 0x20), (0, 0x40), (0, 0x08)
-BELT_KEYS = (K_1, K_2, K_3, K_4)                            # belt slots 1..4 (BELT_SLOTS = 4 until TODO 3.1)
+BELT_KEYS = (K_1, K_2, K_3, K_4)                            # belt slots 1..4 (front row; 24/11: slots 5..8 behind them, no keys)
 
 
 def new_game(g, slot=0):
