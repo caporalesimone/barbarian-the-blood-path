@@ -155,7 +155,7 @@ class Hero:
 # ------------------------------------------------------------------ mostri
 def monster(name, floor, boss=False, scale=None):
     """statistiche di un mostro del tipo `name` al piano `floor` (vita come dadi da tirare)"""
-    t = R["monsters"][name]
+    t = chapter_entry(name, floor)
     g = R["growth"]
     sc = scale or R["monster_scale"]
     V = max(0, floor - NF) if not t.get("final") else 0     # piani dell'Abisso oltre il dungeon
@@ -185,6 +185,42 @@ def monster(name, floor, boss=False, scale=None):
         m["boss"] = True            # immune al blocco da colpo (decisione 4b, src/game/combat.asm hit_one)
         m["level"] += 1             # livello del mostro = piano (+2 forte) +1 boss (kill_monster)
     return m
+
+
+_CH = {}
+
+
+def chapter_entry(name, floor):
+    """(24/11, M9) scheda del tipo `name` nei piani di un capitolo con own_stats (tools/build/mon_stats.py, come gfx_install):
+    stessi dadi della vita e del danno del capitolo 1, bonus fissi, CA, ATT, salvezza ed esperienza del capitolo"""
+    t = R["monsters"][name]
+    c = (floor - 1) // 5 + 1 if 1 <= floor <= NF else 0
+    if t.get("final") or not c:
+        return t
+    if c not in _CH:
+        import mon_stats as MS, bestiary as BE
+        own = MS.own_chapters()
+        _CH[c] = None
+        if c in own:
+            B = BE.load_balance(ROOT)
+            R1 = dict(R, monsters={r["id"]: BE.rules_entry(r) for r in BE.game_rows()})
+            _CH[c] = ([r["id"] for r in BE.game_rows()], MS.chapter_tables(R1, B, c))
+    if _CH[c] is None or name not in _CH[c][0]:
+        return t
+    ids, tb = _CH[c]
+    x = ids.index(name) + 1
+    hn, hs, hk = MS_dice(t["hp"])
+    h = tb["hp_lo"][x] + 256 * tb["hp_hi"][x]
+    dn, ds, _ = MS_dice(t["dmg"])
+    e = dict(t, ac=tb["ac"][x], att=tb["att"][x], save=tb["sv"][x], xp=tb["xp_lo"][x] + 256 * tb["xp_hi"][x],
+             hp="%dd%d%+d" % (hn, hs, round(h - hn * (hs + 1) / 2)) if hn else str(h),
+             dmg="%dd%d%+d" % (dn, ds, tb["dk"][x]) if dn else str(tb["dk"][x]))
+    return e
+
+
+def MS_dice(s):
+    import mon_stats as MS
+    return MS.dice(s)
 
 
 def curve(floor, what, t=None):

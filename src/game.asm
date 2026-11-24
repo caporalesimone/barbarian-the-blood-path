@@ -503,9 +503,29 @@ _dn     lda #<SPR_DATA+12*64    ; ptr0 prosegue: mostri base -> slot 12..19
         lda #0
         sta tmp7
         jsr cp_n
+        ldy #0                  ; (24/11, M9) statistiche dei tipi 1..8 del capitolo (tools/build/mon_stats.py): ptr0 = blocco
+        ldx #0                  ; in coda al file, 8 byte per tabella (GFX_STATF) -> posti 1..8 di quella tabella di mt_ch
+_st     lda gi_stf,x
+        sta tmp7
+        lda #8
+        sta tmp6
+-       lda (ptr0),y
+        sty tmp5
+        ldy tmp7
+        sta mt_ch+1,y
+        inc tmp7
+        ldy tmp5
+        iny
+        dec tmp6
+        bne -
+        inx
+        cpy #GFX_STATS
+        bcc _st
+        .cerror GFX_STATS != 8 * len(gi_stf) || MT_CH_LEN > 256, "blocco delle statistiche del tema e mt_ch"
 _x      cli
         rts
 TK_AT = GFX_TOWN_AT+4*GFX_TSTRIP         ; intestazione del villaggio (TK_LEN + TK_SOLID byte), poi la mappa RLE
+gi_stf     .byte GFX_STATF                     ; (24/11) scarto in mt_ch delle tabelle del file del tema
 gi_pal     .byte 0, pal_c1-pal_bg, pal_c2-pal_bg, pal_ram-pal_bg
 gi_src_lo  .byte <(GFX_TOWN_AT+range(4)*GFX_TSTRIP)
 gi_src_hi  .byte >(GFX_TOWN_AT+range(4)*GFX_TSTRIP)

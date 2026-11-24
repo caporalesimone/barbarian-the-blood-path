@@ -1343,6 +1343,8 @@ def main():
                 bt[o:o + 8] = bytes(ch)
         return bytes(bt)
     decor_gfx.write_inc(os.path.join(ROOT, "out", "work", "decor.inc"), TID)
+    import mon_stats as MS                                  # (24/11, M9) statistiche dei tipi del capitolo: in coda al file
+    MS_R, MS_B = MS.load()
     for (n, c, boss, m), r in zip(sets, raws):
         if boss and c < CHAPTERS:
             tl = cboss_tiles(c)
@@ -1350,7 +1352,7 @@ def main():
             tl = boss_t if boss else cave_t if c in caves else swamp_t if c in swamps else dun_t
         if not boss and c in decor_gfx.CHAPTERS:
             tl = decor_tiles(c, tl)
-        files.append(tl + b"".join(mon_bytes(m)) + info_bytes(r, INFO))
+        files.append(tl + b"".join(mon_bytes(m)) + info_bytes(r, INFO) + MS.file_block(MS_R, MS_B, c))
     global GFX_DUN_AT
     GFX_DUN_AT = GFX_DUN_END - len(files[0])
     assert all(len(f) == len(files[0]) for f in files)
@@ -1387,6 +1389,8 @@ def main():
         f.write(f"GFX_NT = {NT}\nGFX_TSTRIP = {NT * 8}\nGFX_FSTRIP = {(64 - NT) * 8}\nGFX_DSTRIP = {DUN_NT * 8}\n")
         f.write(f"GFX_TOWN_AT = ${GFX_TOWN_AT:04x}\nGFX_DUN_AT = ${GFX_DUN_AT:04x}\n")
         f.write(f"GFX_MONS = {len(mons)}\nGFX_STRONG = {len(strong)}\nGFX_INFO = {INFO}\nGFX_DUN_END = ${GFX_DUN_END:04x}\n")
+        f.write(f"GFX_STATS = {len(MS.FILE_FIELDS) * 8}            ; (24/11) statistiche dei tipi 1..8 del capitolo (mon_stats.py) -> mt_ch\n")
+        f.write("GFX_STATF = " + ", ".join(str(10 * MS.CH_FIELDS.index(x)) for x in MS.FILE_FIELDS) + "      ; scarti in mt_ch delle tabelle nel file, in ordine\n")
         f.write(f"NM_AT = ${NM_TOP - INFO:04x}            ; colori (9), indirizzi dei nomi (9), nomi dei mostri del set (blocco info)\n")
         f.write("solid_dun\n")
         row = [1 if n in SOLID else 0 for n in TILES] + [0] * (NTILE_MAX - len(TILES))

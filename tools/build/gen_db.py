@@ -467,10 +467,19 @@ def main():
         t["col"].append(byte(b["color"], k))
         t["llb"].append(byte(b.get("loot_level_bonus", 0), k))
         t["ptr"].append(PTR_BASE + 2 * i if i < nb else PTR_STRONG + 2 * (i - nb))
+    import mon_stats as MS      # (24/11, M9) tabelle che cambiano per capitolo: contigue a mt_ch, copiate dal file del tema
+    t1 = MS.ch1_tables(R, B)
+    chk(all(t1[f] == t[f] for f in MS.CH_FIELDS), "mon_stats.ch1_tables diverso da gen_db (stesse formule)")
+    pre = lambda f: ("mon_" if f in ("spd", "col", "llb", "ptr") else "mt_") + f
     for f, v in t.items():
-        if f == "col":          # (15/11) colori e nomi dei tipi: dal file del tema del capitolo (gen_gfx.py, blocco info a NM_AT)
+        if f == "col" or f in MS.CH_FIELDS:   # (15/11) colori e nomi dei tipi: dal file del tema (gen_gfx.py, blocco info a NM_AT)
             continue
-        o.bytes(("mon_" if f in ("spd", "col", "llb", "ptr") else "mt_") + f, v)
+        o.bytes(pre(f), v)
+    o("; (24/11) tabelle per capitolo (tools/build/mon_stats.py): il file del tema le porta in coda, gfx_install le copia qui")
+    o("mt_ch")
+    for f in MS.CH_FIELDS:
+        o.bytes(pre(f), t[f])
+    o(f"MT_CH_LEN   = {len(MS.CH_FIELDS) * len(t['hp_lo'])}")
     o.bytes("gr_ac", [int(p * G["ac_per_floor"]) for p in range(maxl)])
     o.bytes("gr_att", [int(p * G["att_per_floor"]) for p in range(maxl)])
     o.bytes("gr_dmg", [int(p * G["dmg_per_floor"]) for p in range(maxl)])

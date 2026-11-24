@@ -26,14 +26,22 @@ r = S.series(h, [m, m], 10, n=150)
 print(f"level 10: level-1 hero against 2 x {m}: won {r['winp']:.0f}%")
 if r["winp"] > 30:
     bad.append(f"level-1 hero on level 10 wins {r['winp']:.0f}% > 30%")
-# the average hp of the monsters grows with the level
+# the average hp of the monsters grows with the level: (24/11) every type inside a chapter (a chapter with own_stats,
+# tools/build/mon_stats.py, gives its types other stats); the mean of the 4 base types over the whole dungeon (5% tolerance:
+# the chapter stats keep the mean difficulty, not every type)
 for name in ("skeleton", "demon"):
     def avg(fl):
         m = RU.monster(name, fl)
         return m["hp"].avg * m["hp_mult"]
-    hp = [avg(fl) for fl in range(1, RU.NF)]
-    if any(b < a for a, b in zip(hp, hp[1:])):
-        bad.append(f"average hp of {name} per level not growing: {[round(x) for x in hp]}")
+    for c in range(4):
+        hp = [avg(fl) for fl in range(5 * c + 1, min(5 * c + 6, RU.NF))]
+        if any(b < a for a, b in zip(hp, hp[1:])):
+            bad.append(f"average hp of {name} in chapter {c + 1} not growing: {[round(x) for x in hp]}")
+BASE = ("fallen", "skeleton", "zombie", "demon")
+mean = [sum(RU.monster(n, fl)["hp"].avg * RU.monster(n, fl)["hp_mult"] for n in BASE) / 4 for fl in range(1, RU.NF)]
+print("mean hp of the base types per level:", [round(x) for x in mean])
+if any(b < a * 0.95 for a, b in zip(mean, mean[1:])):
+    bad.append(f"mean hp of the base types per level not growing: {[round(x) for x in mean]}")
 for b in bad:
     print("FAIL", b)
 sys.exit(1 if bad else 0)

@@ -356,6 +356,9 @@ misura prima e dopo con `lab64 test regression -k PERF`. D1–D5 sono le osserva
   90% di 1,1 s). Strade: (a) rifare la disposizione con le soluzioni sopra; (b) non salvare le ripetibili (16 B, consentito da D1:
   file di nuovo da 3 blocchi, 755 B su 760); (c) limite diverso. **Deciso (22/11, D14-D15 di quests.md)**: (c), limiti dei temi
   a 1,4 s e `town_in`/`in1` a 5,2 s finché, riordinati i file delle quest (D2), non si rimisura; il disco si ottimizza prima della 2.0.
+  (24/11) **`PERF-DISK-23` fallisce già al commit 2431d8b** (twn3, file del villaggio 3 da solo: 2,22 s sul limite 2,1 s nella
+  suite `PERF-DISK` completa; 0,96 s lanciato da solo): non dipende dalle statistiche del capitolo 2 (i file sul disco hanno gli stessi blocchi).
+  Il file `GFX4` (piano del boss del capitolo 2) ha 3 B di margine sui suoi 15 blocchi: le meccaniche nuove di Mother Stitch lo allungheranno.
 - (18/11) **PERF-DISK deterministici**: ogni misura parte da uno snapshot di VICE (macchina e drive) e si ripete in 6 fasi del
   disco (un giro diviso in 6, attesa nel buffer della cassetta): conta la piu' lenta (la fase sposta al massimo ~0,2 s). E una
   misura fuori limite non interrompe piu' la sequenza: prima saltava il resto del capitolo e il capitolo dopo partiva da
@@ -599,8 +602,9 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   capitolo nel piano del boss): sprite, colori e nomi nei file del tema del capitolo, nomi e colori copiati a `NM_AT`
   ([bestiario](docs/wiki/bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)). **Statistiche e IA non sono cambiate**: il tipo *t* di
   ogni capitolo ha quelle del tipo *t* del capitolo 1 (per profondità).
-  **Da fare nel codice**: **statistiche proprie** per capitolo (le tabelle `mt_*`/`mon_spd`/`mon_llb` da caricare col tema,
-  come i nomi: ~120 B per file; oggi le righe dei capitoli 2–4 nel bestiario sono concept); **IA nuove** (distanza per Bone
+  **Fatto (24/11)**: statistiche proprie del **capitolo 2** (`own_stats` in `data/chapters.yaml`, `tools/build/mon_stats.py`: identità dal
+  bestiario, difficoltà media del capitolo 1; 64 B in coda al file del tema, [bestiario](docs/wiki/bestiario.md)); per i capitoli 3–4 basta
+  `own_stats: true` (da provare col simulatore). **Da fare nel codice**: **IA nuove** (distanza per Bone
   Archer e Cultist (21/11: progetto delle frecce in [bestiario](docs/wiki/bestiario.md#arcieri-e-frecce-2111-progetto-non-nel-codice): al massimo 2 in volo, sprite 2 + uno slot dei mostri), carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per Drowned e
   Frost Wight: da scegliere); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97% (19/11: oggi Mother Stitch, stesse statistiche, meccanica nuova),
   Varok 100%: da rifare con `fit_rules.py` e `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).

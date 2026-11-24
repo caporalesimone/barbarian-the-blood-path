@@ -32,6 +32,7 @@ chapters:
     name: "Bad Water"
     implemented: false
     village: {name: "Bad Water", gfx: TWN2, map: data/town_map2.txt, pf_n: null, atlas_set: VILL2}
+    own_stats: true    # (24/11, M9) monster types 1..8 with own stats from the bestiary, same mean difficulty (tools/build/mon_stats.py)
     levels: 5
     themes: [3, 4]
     map: {style: swamp, palettes: [12, 12, 12, 12]}     # (18/11, owner) one swamp: levels 6-9 side by side, gates on the borders

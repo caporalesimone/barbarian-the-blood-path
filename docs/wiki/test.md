@@ -159,16 +159,14 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `KRILL-01` | load_gfx 1 (Krill, LOAD_TO): the theme at GFX_DUN_AT (under the KERNAL, $EC6D since 15/11) equals out/work/gfx/gfx1.prg |
 | `KRILL-02` | snd_get (Krill): the song in its buffer equals out/work/snd/snd0.prg |
 
-### sanity (4)
+### sanity (2)
 
 | ID | Test |
 |---|---|
-| `QREW-10` | Q15: sk_qs from quests.yaml (0, 2, 4, 8, 6, 9); level 3 with step 1 handed in: no Whirlwind; level 9 with step 5: no Rage (buff_act), with step 6 Rage starts |
-| `QREW-11` | step 2 reached, handed in to father osric (level 3): q_step 2, 'the skill whirlwind' in the reward, then J chooses Whirlwind |
-| `QREW-12` | chapter 1: the boss dying does not unlock chapter 2 (chap_won, c_unl 1); step 3 handed in to father osric: c_unl 2, purse step 1 (550) |
-| `QREW-13` | step 11 (the last cart, 'a magic item'): village 4, handed in to the penitent: q_step 11, +1000 gold (purse permitting), a new weapon, armor, shield or ring in the pack with a prefix or a suffix |
+| `CHST-10` | chapter 2 level 7: mt_ch = the stats of chapter 2 (mon_stats.py), different from chapter 1; the level has its monsters |
+| `CHST-11` | back to chapter 1 (level 2): mt_ch = chapter 1; chapter 3 (no own_stats): chapter 1 too; chapter 2 boss level (10): chapter 2 |
 
-### regression (305)
+### regression (309)
 
 | ID | Test |
 |---|---|
@@ -213,6 +211,10 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `BOOT-14` | BARBARIAN menu: item 4 'exit game' -> BASIC (READY.), keyboard and screen as at power-on (16/11) |
 | `BOOT-15` | START is silent (no SID player): the menu music stops when the game is chosen and restarts only in the lobby (16/11) |
 | `BOOT-16` | HELP and LORE exits: wait page (phrase on row 10, 'please wait' on row 13, VIC bank 0, screen on) before the reload of BARBARIAN (16/11) |
+| `QREW-10` | Q15: sk_qs from quests.yaml (0, 2, 4, 8, 6, 9); level 3 with step 1 handed in: no Whirlwind; level 9 with step 5: no Rage (buff_act), with step 6 Rage starts |
+| `QREW-11` | step 2 reached, handed in to father osric (level 3): q_step 2, 'the skill whirlwind' in the reward, then J chooses Whirlwind |
+| `QREW-12` | chapter 1: the boss dying does not unlock chapter 2 (chap_won, c_unl 1); step 3 handed in to father osric: c_unl 2, purse step 1 (550) |
+| `QREW-13` | step 11 (the last cart, 'a magic item'): village 4, handed in to the penitent: q_step 11, +1000 gold (purse permitting), a new weapon, armor, shield or ring in the pack with a prefix or a suffix |
 | `QGIV-10` | father osric (k 1): step 1 taken at once (q_flag 1), its title, the yellow goal 'slay the fallen: 0/8', the text and the reward on screen; hilde (k 0): nothing yet; (22/11) text with a blank row between lines, scroll bar on column 39 (CH_THUMB), S scrolls one line |
 | `QGIV-11` | step 1 reached (8 fallen): father osric takes it back: +120 gold, osric's cudgel in the pack, q_step 1, no purse step (q_flag 0: the purse of 1000 moved to step 3 on 22/11), the 'done' text |
 | `QGIV-12` | hilde gives step 2 (the amulet, from father osric); grom gives a1.1 (side, q_side slot 0 = id 1) after step 1 of the chapter |

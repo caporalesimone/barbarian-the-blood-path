@@ -205,7 +205,9 @@ Il file **finisce sempre a `$F4E0`** (`GFX_DUN_END`, inizio della zona 2 del MEN
 | 2025 | 9 | byte basso dell'indirizzo del nome dei tipi 1…9 (blocco tutto in una pagina: byte alto = `>NM_AT`) | `NM_AT+9` … (`bar_name`, `src/game/bar.asm`) |
 | 2034 | fino a `GFX_INFO` − 18 | nomi dei tipi 1…9, codici schermo (lettere 1–26, spazio, `'`, `-`), 0 finale, al massimo 24 caratteri (larghezza della barra); poi zeri fino a `GFX_INFO` (147 B: il blocco più lungo, quello di `GFX4`) | `NM_AT` = `$9000` − `GFX_INFO` (`$8F6D`, fine degli slot sprite 58–63, dopo il motivetto `SND_FBUF`) |
 
-`gfx_install` copia tile e sprite e poi il blocco info intero a `NM_AT`: il buffer del tema sotto il KERNAL non serve più dopo
+| 2016 + `GFX_INFO` | 64 | (24/11) **statistiche dei tipi 1…8 del capitolo** (`tools/build/mon_stats.py` `file_block`): 8 byte per tabella, nell'ordine `hp_lo`, `ac`, `att`, `dk`, `sv`, `xp_lo`, `mon_spd`, `mon_llb` (`GFX_STATF`) | posti 1…8 delle tabelle a `mt_ch` (GAME) |
+
+Il file comincia quindi `GFX_INFO` + 64 byte prima di `$ED00`. `gfx_install` copia tile e sprite, il blocco info intero a `NM_AT` e le statistiche nelle tabelle di `mt_ch`: il buffer del tema sotto il KERNAL non serve più dopo
 l'installazione (un salvataggio lo sovrascrive: buffer del plugin `SV_SCR`).
 
 File del piano: `GFX(2c−1)` per i piani 1–4 del capitolo *c*, `GFX(2c)` per il suo piano del boss (5, 10, 15, 20) (`lvl_theme`,
