@@ -96,24 +96,20 @@ magic_max: 3               # +N massimo su arma, armatura e scudo nei piani 1-20
 
 
 # ---------------------------------------------------------------- mostri
-# Scheda base al piano minimo del tipo. P = piano - piano minimo: vita +hp_dice_per_floor dadi, CA +ac_per_floor,
-# ATT +att_per_floor, danno +dmg_per_floor (per piano, parte decimale troncata); salvezza + ATT/2.
-# curve_hp / curve_dmg (indice = piano, 0..floors): moltiplicatori cercati da tools/simulators/fit_rules.py sul PG di riferimento.
-monster_scale: {hp: 1.0, damage: 1.0}       # moltiplicatori globali (taratura veloce)
-growth: {hp_dice_per_floor: 0.5, ac_per_floor: 1, att_per_floor: 0.7, dmg_per_floor: 1.0,
-         curve_hp:  [1, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5],
-         curve_dmg: [1, 0.5, 0.5, 0.5, 0.5, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 1, 1, 1, 1, 1, 1]}
-# xp: esperienza al piano minimo del tipo; per ogni piano in piu' x (1 + xp_per_floor * P) (provvisorio: Fable).
-xp_per_floor: 0.25
+# (24/11) Vita, CA, ATT, danno, salvezza ed esperienza di ogni mostro a ogni piano: formule del bestiario
+# data/monsters/bestiary.tsv (tools/build/mon_stats.py, docs/wiki/bestiario.md). Prima del 24/11 qui c'erano la crescita
+# comune per piano (growth: dadi di vita, CA, ATT, danno, curve_hp) e xp_per_floor: migrati nelle formule senza ritarare.
+# curve_dmg (indice = piano, 0..floors): moltiplicatore del tiro di danno dei mostri (dadi + bonus) per piano.
+monster_scale: {damage: 1.0}       # moltiplicatore globale del danno dei mostri (taratura veloce)
+growth: {curve_dmg: [1, 0.5, 0.5, 0.5, 0.5, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 0.75, 1, 1, 1, 1, 1, 1]}
 # esperienza per passare al livello 2..20 (24 bit): ~1,3 livelli esplorando tutto un piano (provvisoria: Fable)
 xp_needed: auto
-# (11/11) i mostri (schede: floor, level, hp, ac, att, dmg, save, xp, strong/final/stun_immune) stanno nel bestiario
-# data/monsters/bestiary.tsv (tools/build/bestiary.py li rimette qui per gen_db e tools/simulators/: righe implemented = yes).
+# (11/11) i mostri (schede: floor, level, formule di hp, ac, att, dmg, save, xp, strong/final/stun_immune) stanno nel bestiario
+# data/monsters/bestiary.tsv (tools/build/bestiary.py li rimette qui per gen_db e tools/simulators/: i tipi del gioco).
 boss: {hp_mult: 2.5, ac_add: 2, att_add: 2}   # boss con nome dei piani 1..floors-1 (variante forte)
 chapter_bosses:               # (22/11, D8/D16) boss dei capitoli: tipo (statistiche del tipo al piano, + boss) e vita FISSI
   abbot: {floor: 5, type: skeleton_king, hp: 123}      # sim_builds.py --fit-chapter abbot (obiettivo bosses.target): 68 il 22/11, 123 il 23/11 (simulatore corretto con l'arena: 68% in arena al livello 5)
   stitch: {floor: 10, type: lich, hp: 300}      # (24/11) Mother Stitch: tipo del Lich (nel capitolo 2 le statistiche di Hag of the Mere, mon_stats.py). Vita scelta fra simulatore e arena: --fit-chapter stitch da 431 (liv. 10: sim 69%, arena 0%); a 300 sim 94/99/100%, arena (bot "adds", non schiva) 35/48/100%
-final_boss_hp_mult: 1         # moltiplicatore della vita del boss finale (la scheda e' gia' tarata)
 final_summons: {waves: 3, per_wave: 2, max_alive: 2, delay: 0, floor: 20, types: [fallen, skeleton, zombie, demon]}   # ondata (2 mostri, subito) al 75/50/25% della vita se i vivi (boss compreso) sono <= max_alive; statistiche del piano 20 (06/11)
 
 # ---------------------------------------------------------------- Abisso (piani floors+1 .. 255, livello = piano)

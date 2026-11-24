@@ -2886,4 +2886,41 @@ _p      #msg "pack is full."
 
 
 
+; (24/11) da inv.asm (segmento CORE): CORE finisce sotto la cache del tema (GFX_DUN_AT), che dal 24/11 porta
+; 160 B di statistiche dei mostri
+; anello: " str" / " dex" / " con" secondo ui_ib (1..3)
+ring_stat:
+        lda ui_ib
+        beq _r
+        cmp #4
+        bcs _r
+        sec
+        sbc #1
+        sta tmp7
+        asl
+        adc tmp7                ; x 3
+        tax
+        adc #3
+        sta tmp7                ; fine (ui_putc usa Y: il contatore e' X)
+        lda #$20
+        jsr ui_putc
+_c      lda rs_txt,x
+        jsr ui_putc
+        inx
+        cpx tmp7
+        bne _c
+_r      rts
+rs_txt  .text "strdexcon"
+
+
+; icona: A = codice, X = colore (ui_col preservato)
+ui_icon:
+        ldy ui_col
+        sty tmp6
+        stx ui_col
+        jsr ui_putc
+        lda tmp6
+        sta ui_col
+        rts
+
         .enc "none"

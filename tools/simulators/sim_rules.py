@@ -22,6 +22,12 @@ T = R["timing"]
 SK = R["skills"]
 
 
+def hp_range(m):
+    """vita alla nascita, come mon_hp_init: media x 96..160 / 128"""
+    h = int(m["hp"].avg * m["hp_mult"])
+    return h * 96 // 128, h * 160 // 128
+
+
 class Mon:
     def __init__(self, st, rng):
         self.st = st
@@ -374,11 +380,11 @@ img{max-width:100%;background:#fff;border-radius:6px}</style></head><body><main>
         for k in RU.floor_types(f) + RU.floor_types(f, True):
             m = monster(k, f)
             h = ref_hero(f)
-            rows.append([f, k, "%d-%d" % (m["hp"].min, m["hp"].max), m["ac"], "+%d" % m["att"], "%d-%d" % (m["dmg"].min, m["dmg"].max),
+            rows.append([f, k, "%d-%d" % hp_range(m), m["ac"], "+%d" % m["att"], "%d-%d" % (m["dmg"].min, m["dmg"].max),
                          "%.0f%%" % (100 * hit_chance(h.att, m["ac"] - h.pen)), "%.0f%%" % (100 * hit_chance(m["att"], h.ac))])
     m = monster("lord_of_ruin", NF)
     h = ref_hero(NF)
-    rows.append([NF, "lord_of_ruin", "%d-%d" % (m["hp"].min, m["hp"].max), m["ac"], "+%d" % m["att"], "%d-%d" % (m["dmg"].min, m["dmg"].max),
+    rows.append([NF, "lord_of_ruin", "%d-%d" % hp_range(m), m["ac"], "+%d" % m["att"], "%d-%d" % (m["dmg"].min, m["dmg"].max),
                  "%.0f%%" % (100 * hit_chance(h.att, m["ac"] - h.pen)), "%.0f%%" % (100 * hit_chance(m["att"], h.ac))])
     H.append("<h2>2. Mostri per piano</h2><p>Colpisce: probabilita' del PG di riferimento di colpire il mostro, e del mostro di colpire il PG.</p>"
              + table(["piano", "mostro", "vita", "CA", "ATT", "danno", "PG colpisce", "mostro colpisce"], rows))
@@ -416,10 +422,10 @@ img{max-width:100%;background:#fff;border-radius:6px}</style></head><body><main>
                          "%.1f" % r["pots"], "%.0f%%" % r["pg_hitp"], "%.0f%%" % r["m_hitp"]])
     H.append("<h2>4. Al livello di riferimento</h2>" + table(["piano", "gruppo", "mostri", "vinti", "durata s", "vita finale", "pozioni", "PG colpisce", "mostri colpiscono"], rows))
     # 5. boss finale
-    H.append("<h2>5. Boss finale (piano %d) al livello %d</h2><p>Riferimento dell'ultimo piano." % (NF, NF) + "<p> Vita del boss = scheda x final_boss_hp_mult "
-             "(data/rules.yaml, tarato da tools/simulators/fit_rules.py per ~65%% di vittorie con 4 pozioni; oggi x%g). Le evocazioni arrivano al 75/50/25%% della vita.</p>" % R["final_boss_hp_mult"])
+    H.append("<h2>5. Boss finale (piano %d) al livello %d</h2><p>Riferimento dell'ultimo piano." % (NF, NF) + "<p> Vita del boss = formula del bestiario (data/monsters/bestiary.tsv, oggi %d) x il moltiplicatore della riga. "
+             "Le evocazioni arrivano al 75/50/25%% della vita.</p>" % monster("lord_of_ruin", NF)["hp"].avg)
     rows = []
-    base_mult = R["final_boss_hp_mult"]
+    base_mult = 1
     for mult in (0.5, 0.75, 1, 1.25, 1.5, 2):
         row = ["x%g" % (base_mult * mult)]
         for pots in ([], ["red", "red", "yellow", "violet"]):

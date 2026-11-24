@@ -595,12 +595,18 @@ riquadro dell'oggetto compaiono solo le sigle `lch` e `thn`. Dinamica proposta (
   capitolo nel piano del boss): sprite, colori e nomi nei file del tema del capitolo, nomi e colori copiati a `NM_AT`
   ([bestiario](docs/wiki/bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)). **Statistiche e IA non sono cambiate**: il tipo *t* di
   ogni capitolo ha quelle del tipo *t* del capitolo 1 (per profondità).
-  **Fatto (24/11)**: statistiche proprie del **capitolo 2** (`own_stats` in `data/chapters.yaml`, `tools/build/mon_stats.py`: identità dal
-  bestiario, difficoltà media del capitolo 1; 64 B in coda al file del tema, [bestiario](docs/wiki/bestiario.md)); per i capitoli 3–4 basta
-  `own_stats: true` (da provare col simulatore). **Da fare nel codice**: **IA nuove** (distanza per Bone
+  **Fatto (24/11)**: statistiche proprie del **capitolo 2** (`own_stats` in `data/chapters.yaml`); poi (24/11 sera, committente)
+  il bestiario è il **database dei mostri con formule** (`A + B*P` per statistica, calcolo sul C64 "modalità A",
+  `tools/build/mon_stats.py`, 160 B in coda al file del tema, [bestiario](docs/wiki/bestiario.md#statistiche-formule-del-bestiario-2411-toolsbuildmon_statspy)),
+  migrato senza ritarare. **Prossimi passi decisi (24/11)**: (1) Will-o'-Wisp e Corpse Light con primo piano e crescita propri
+  (oggi copiano Demon e Balrog: dal piano 8 e 9, Corpse Light quasi senza crescita), commit a parte con simulatore e arena;
+  (2) boss di capitolo con **statistiche proprie** (riga del bestiario nel posto 9 del file del piano del boss, non più cloni di
+  `chapter_bosses`) e meccaniche in `data/monsters/bosses.yaml` (costanti dei `ovl_boss*.asm` generate, simulatore sullo stesso
+  file); da verificare quanti punti del codice trattano il tipo 9 come boss finale; (3) tabella dei mostri della wiki generata dal
+  file. Capitoli 3–4: restano concept (committente, 24/11), righe `implemented = yes` e `own_stats: true` quando si fanno. **Da fare nel codice**: **IA nuove** (distanza per Bone
   Archer e Cultist (21/11: progetto delle frecce in [bestiario](docs/wiki/bestiario.md#arcieri-e-frecce-2111-progetto-non-nel-codice): al massimo 2 in volo, sprite 2 + uno slot dei mostri), carica, teletrasporto per l'Imp, volo sull'acqua per Will-o'-Wisp e Gargoyle, rallentamento per
   Frost Wight: da scegliere; 24/11 fatto il fango dei Drowned, [bestiario](docs/wiki/bestiario.md)); meccaniche dei boss di capitolo; **bilanciamento** (prima simulazione: Abbot 13%, Miller 97% (19/11: oggi Mother Stitch, stesse statistiche, meccanica nuova),
-  Varok 100%: da rifare con `fit_rules.py` e `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).
+  Varok 100%: da rifare con `tools/simulators/chapters.py`, ora con 4 famiglie per capitolo).
 - **Da decidere con il committente** (15/11): i colori dei disegni (Hellhound e Blood Knight sono rossi, 2, come il Lord of Ruin:
   nel capitolo 4 il Blood Knight è fra le evocazioni del boss finale e si confonde con lui; l'Ash Ghoul, grigio 12, nel tema
   grigio del capitolo 3 si legge poco sui muri chiari: screenshot `out/work/villages/monsters3.png` dei test `MON-CHAP-*`); se i boss con nome dei piani normali devono avere nomi per capitolo (oggi `first_names`/`epithets` comuni).

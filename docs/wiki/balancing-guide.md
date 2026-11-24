@@ -31,7 +31,7 @@ progetto che valgono sempre sono in `CLAUDE.md`; i numeri correnti e le decision
 | `tools/simulators/rules.py` | modello condiviso: legge gli yaml, calcola statistiche di PG e mostri per piano (`floor_types`, `monster`, `Hero`, `ref_hero`), probabilità di colpire (`hit_chance`) | — | importato dagli altri |
 | `tools/simulators/sim_rules.py` | Monte Carlo dei combattimenti (d20, abilità, pozioni, stordimenti, boss, evocazioni) e **report HTML** `out/work/simulators/simulazione_regole.html` | ~2 min per il report | ogni volta che cambiano PG, mostri, abilità, pozioni, crescita |
 | `tools/simulators/sim_rules.py --fight PIANO LIVELLO MOSTRO [MOSTRO…]` | una serie singola, stampa vittorie, durata, vita finale, colpi | secondi | per rispondere a una domanda precisa |
-| `tools/simulators/fit_rules.py` | **taratura automatica** delle curve dei mostri (`growth.*`, `final_boss_hp_mult`, tabella dell'Abisso) sugli obiettivi del § 3 | 10–25 min | dopo un cambio che sposta la forza del PG (nuova arma, abilità, pozioni) |
+| `tools/simulators/fit_rules.py` | **taratura automatica** della tabella dell'Abisso (`void.table`) sugli obiettivi del § 3 (dal 24/11 solo quella: i mostri dei piani 1–20 sono formule del bestiario) | 10–25 min | dopo un cambio che sposta la forza del PG nell'Abisso |
 | `tools/simulators/cmp_rules.py` | confronto A/B di due set di regole sugli stessi combattimenti | minuti | per decidere fra due varianti |
 | `tools/simulators/sim_chest.py` | chestLevel e probabilità di ogni oggetto per piano (riproduce `gen_item`) | secondi | bottino, livelli oggetto, magia |
 | `tools/simulators/sim_gold.py` | oro trovato e vendita per piano (Monte Carlo sul censimento dei piani veri, 20/11), bauli epici, borsello | secondi | prezzi, oro iniziale, premi |
@@ -69,15 +69,15 @@ Regole d'uso:
 | Elemento | Parametri | File | Simulatore |
 |---|---|---|---|
 | PG: caratteristiche, vita, competenza per livello | `player.scores`, `increases`, `hp_*`, `proficiency` | rules.yaml | sim_rules |
-| Esperienza e livelli | `xp_needed` (auto = ~1,3 livelli per piano esplorato), `xp_per_floor`, xp dei mostri, calo per differenza di livello | rules.yaml | sim_rules (`progression`) |
+| Esperienza e livelli | `xp_needed` (auto = ~1,3 livelli per piano esplorato), formula `xp` dei mostri (bestiario), calo per differenza di livello | rules.yaml, bestiary.tsv | sim_rules (`progression`) |
 | Abilità: livello, ricarica, area, effetto | `skills.*` | rules.yaml | sim_rules |
 | Rage / Frenzy | `skills.rage`, `skills.frenzy` (durata, ricarica, corsa) | rules.yaml | sim_rules (corsa esclusa) |
 | Pozioni: cura, ricarica, zone per piano | `potions.*` | rules.yaml | sim_rules (beve sotto il 35%) |
 | Oggetti: dadi, CA, livello oggetto, prezzo, due mani/penetrazione | `weapons`, `armors`, `shields`, `rings` | rules.yaml | rules, sim_chest, sim_gold |
 | Equipaggiamento atteso per piano | `reference[piano]` | rules.yaml | tutto: è "il PG di riferimento" |
-| Mostri: scheda base, piano minimo, livello, xp | `monsters.*` | rules.yaml | sim_rules, sim_gold |
-| Crescita per piano: CA, ATT, danno, dadi di vita, moltiplicatori | `growth.*` (`curve_hp`, `curve_dmg` per piano) | rules.yaml | **tarati da fit_rules** |
-| Boss con nome e boss finale | `boss.*` (vita ×, CA +, ATT +, xp ×), `lord_of_ruin`, `final_boss_hp_mult`, `final_summons` | rules + balance | sim_rules, fit_rules |
+| Mostri: primo piano, livello, **formule** di vita, CA, ATT, danno, salvezza, xp (24/11) | `data/monsters/bestiary.tsv` (+ `constants.yaml`), `tools/build/mon_stats.py` | bestiary.tsv | sim_rules, sim_gold, arena; a mano |
+| Moltiplicatore del danno dei mostri per piano | `growth.curve_dmg`, `monster_scale.damage` | rules.yaml | sim_rules |
+| Boss con nome e boss finale | `boss.*` (vita ×, CA +, ATT +, xp ×), riga `lord_of_ruin` del bestiario, `final_summons` | rules + balance + bestiary | sim_rules |
 | Quanti mostri per piano, varianti forti | `spawn.*` (tabelle per gradino, `strong_*`) | balance.yaml | sim_gold (quantità), sim_durability |
 | Bottino: cosa lasciano i mostri, bauli del piano | `drops`, `chests` | balance.yaml | sim_gold, sim_chest |
 | chestLevel e generazione degli oggetti | `chest_level`, `loot` (pesi, `bonus`), `boss.loot_*` | balance.yaml | sim_chest |
@@ -135,23 +135,25 @@ parametri, poi arena/test per confermare che codice e simulatore coincidono.
 ## 5. Procedure per elemento
 
 ### 5.1 Mostri e crescita per piano (il cuore)
-- Non tarare a mano `growth.*`: lanciare `python3 tools/simulators/fit_rules.py` (`--fights 60 --check 400`, ~20 min;
-  `--dry` per vedere senza scrivere; `--final` per ritarare anche il boss finale). Fa tre cose in ordine:
-  (1) `ac_per_floor`/`att_per_floor` per probabilità di colpire stabili (solo conti), (2) `curve_hp` e
-  `curve_dmg` piano per piano, monotone, sugli obiettivi boss ~70% / gruppo ≥ 95% / durata 4–8 s, (3) il
-  boss finale. Scrive `rules.yaml` e un commento con la data.
+- (24/11) Ogni mostro ha le sue **formule** nel bestiario (`data/monsters/bestiary.tsv`, [bestiario](bestiario.md#statistiche-formule-del-bestiario-2411-toolsbuildmon_statspy)):
+  `A + B*P` per vita, CA, ATT, danno, salvezza ed esperienza, P = piani dopo il primo. Si ritoccano **a mano**: prima la
+  crescita (`B`) se il mostro diventa troppo facile o troppo duro col passare dei piani, poi il valore iniziale (`A`).
+  `python3 tools/build/mon_stats.py` stampa vita/CA/ATT/danno di ogni tipo a ogni piano (valori del C64).
+- Fino al 23/11 c'erano una crescita comune (`growth.ac_per_floor`, `att_per_floor`, `hp_dice_per_floor`, `curve_hp`,
+  `xp_per_floor`) e `final_boss_hp_mult`, tarati da `fit_rules.py`: migrati nelle formule senza cambiare il gioco (scarti ≤ 3
+  punti vita).
 - Poi **leggere il report** (`out/work/simulators/simulazione_regole.html`): la riga dei boss per piano non deve avere buchi
   (piani al 40% o al 100%); se ce ne sono, è di solito l'equipaggiamento di riferimento (`reference`) sbagliato
-  per quel piano, non la curva.
-- Scheda base di un mostro nuovo: scegliere vita, CA, ATT, danno, salvezza in linea con i vicini di piano minimo
-  (tabella in `docs/wiki/mostri.md`), poi `fit_rules` ritara le curve attorno.
-- Esperienza: `xp` della scheda × crescita; se la progressione (report § 3) esce dall'obiettivo, si corregge
-  `xp_needed` (lasciarlo `auto` a meno di motivi) o gli `xp` delle schede, non le curve.
+  per quel piano, non la formula.
+- Mostro nuovo: formule in linea con i vicini dello stesso primo piano (tabella in `docs/wiki/mostri.md`), oppure una formula
+  con nome in `data/monsters/constants.yaml` (ruolo) più un ritocco; poi simulatore e arena.
+- Esperienza: formula `xp` del mostro; se la progressione (report § 3) esce dall'obiettivo, si corregge `xp_needed` (lasciarlo
+  `auto` a meno di motivi) o le formule `xp`.
 - Verifica in arena di un piano: `tools/vice/arena.py --lvl N --plvl N … --monster <base più forte> ×3 --fights 40`
   e `--boss 1`.
 
 ### 5.2 PG, abilità, Rage/Frenzy
-- Caratteristiche e vita: `player.*`; ogni cambio sposta **tutto**: dopo, rilanciare `fit_rules`.
+- Caratteristiche e vita: `player.*`; ogni cambio sposta **tutto**: dopo, rileggere il report e ritoccare le formule dei mostri.
 - Abilità: ricarica e area sono in fotogrammi/pixel nel codice e in secondi nel simulatore: tenerli uguali
   (tabella in `docs/wiki/combattimento.md`). Il simulatore non conta la corsa della Frenzy né lo spostamento: le
   abilità "di posizione" (Whirlwind sui gruppi) sono sottostimate; giudicarle anche giocando.

@@ -1,7 +1,7 @@
-"""Monster stats of the chapters (24/11, TODO M9, docs/wiki/bestiario.md): a chapter with own_stats (data/chapters.yaml,
-today chapter 2) gives its monster types 1..8 their own life, AC, attack, damage bonus, save, speed, xp and loot level bonus
-(tools/build/mon_stats.py: the bestiary of the chapter around the mean of chapter 1, same mean difficulty). The theme file
-carries the block at its end, gfx_install copies it to mt_ch. Expected values from the same function as the build.
+"""Monster stats of the chapters (24/11, TODO M9, docs/wiki/bestiario.md): the bestiary formulas (data/monsters/bestiary.tsv,
+tools/build/mon_stats.py) become per type A and B coefficients (value = A + ((B x P + 8) >> 4)); a chapter with own_stats
+(data/chapters.yaml, today chapter 2) has its own rows as types 1..8. The theme file carries the block at its end, gfx_install
+copies it to mt_ch, floor_types computes the values. Expected values from the same functions as the build.
 One VICE session (CHAIN)."""
 from c64test import test, check
 from lib.c64 import Game
@@ -58,3 +58,26 @@ def back(ctx):
     block_is(ctx, 3, 1)
     enter(g, 2, 10)
     block_is(ctx, 2, 2)
+
+
+def ft_is(ctx, c, lvl):
+    """(24/11) floor_types del C64 = mon_stats.values (formule del bestiario) per i tipi 1..9 al piano lvl"""
+    g = ctx["g"]; L = g.L
+    R, B = ctx["R"], ctx["B"]
+    rows = MS.type_rows(c if c in MS.own_chapters() else 1)
+    nf = R["dungeon"]["floors"]
+    rd = lambda name: g.mem(L[name], 10)
+    hl, hh, ac, att, dk, sv, xl, xh = (rd(n) for n in ("ft_hpl", "ft_hph", "ft_ac", "ft_att", "ft_dk", "ft_sv", "ft_xpl", "ft_xph"))
+    for x, r in enumerate(rows, 1):
+        v = MS.values(MS.coef(r, nf, B.get("monster_speed_percent", 100)), lvl, nf)
+        got = dict(hp=hl[x] + 256 * hh[x], ac=ac[x], att=att[x], dk=dk[x], sv=sv[x], xp=xl[x] + 256 * xh[x])
+        exp = {k: v[k] for k in got}
+        check(got == exp, "chapter %d level %d type %d %s: C64 %s, formulas %s" % (c, lvl, x, r["id"], got, exp))
+
+
+@test("CHST-12", "floor_types (C64) = the bestiary formulas (mon_stats.values) for types 1..9 on levels 1, 4, 7, 9, 12, 17")
+def formulas(ctx):
+    g = ctx["g"]
+    for c, lvl in ((1, 1), (1, 4), (2, 7), (2, 9), (3, 12), (4, 17)):
+        enter(g, c, lvl)
+        ft_is(ctx, c, lvl)

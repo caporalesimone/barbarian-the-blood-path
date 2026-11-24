@@ -63,7 +63,7 @@ flowchart TD
         CH["chapters.yaml<br/>(solo atlante e simulatori)"]
     end
     subgraph GEN["generatori (tools/)"]
-        GDB["gen_db.py<br/>(items_db.py, bestiary.py)"]
+        GDB["gen_db.py<br/>(items_db.py, bestiary.py, mon_stats.py)"]
         GGF["gen_gfx.py"]
         GFO["gen_font.py"]
         GMU["gen_music.py<br/>(songs.py)"]

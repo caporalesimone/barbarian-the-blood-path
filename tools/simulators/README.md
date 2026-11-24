@@ -8,7 +8,7 @@ e `data/chapters.yaml` (capitoli).
 |---|---|
 | `rules.py` | modello condiviso: PG, oggetti, mostri per piano, Abisso |
 | `sim_rules.py` | combattimenti Monte Carlo e progressione; report `out/work/simulators/simulazione_regole.html` |
-| `fit_rules.py` | taratura automatica di `growth`, `final_boss_hp_mult`, `void.table` (scrive `rules.yaml`) |
+| `fit_rules.py` | taratura automatica di `void.table` (Abisso, scrive `rules.yaml`); dal 24/11 i mostri dei piani 1–20 sono formule del bestiario (`tools/build/mon_stats.py`) |
 | `cmp_rules.py` | confronti fra configurazioni |
 | `sim_durability.py` | durabilità generata e vita utile degli oggetti |
 | `sim_chest.py` | chestLevel e probabilità di ogni oggetto per piano |

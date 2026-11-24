@@ -40,9 +40,9 @@ assert LANG in ("it", "en"), "--lang it|en"
 SRC, OUT, PDF = SOURCES[LANG]
 if not os.path.exists(os.path.join(M, SRC)):
     sys.exit("manual source manual/%s missing (the English manual is a TODO)" % SRC)
-W = {"it": {"base": "base", "strong": "forte", "final": "boss finale", "dpf": "dadi/piano", 5: "lenta", 7: "media",
+W = {"it": {"base": "base", "strong": "forte", "final": "boss finale", "dpf": "per piano", 5: "lenta", 7: "media",
             8: "normale", 9: "veloce"},
-     "en": {"base": "base", "strong": "strong", "final": "final boss", "dpf": "dice/level", 5: "slow", 7: "medium",
+     "en": {"base": "base", "strong": "strong", "final": "final boss", "dpf": "per level", 5: "slow", 7: "medium",
             8: "normal", 9: "fast"}}[LANG]
 
 # ------------------------------------------------------------------ 1. ritaglio screenshot
@@ -76,18 +76,21 @@ pngs = {"fallen": "fallen", "skeleton": "skeleton", "zombie": "zombie", "demon":
         "balrog": "balrog", "lord_of_ruin": "lord_of_ruin"}
 spd = {k: W[k] for k in (5, 7, 8, 9)}
 mons = Y["monsters"]
-g = RL["growth"]
-gv = "%g" % g["hp_dice_per_floor"]
-grow = (f' <small>(+{gv.replace(".", ",") if LANG == "it" else gv} {W["dpf"]})</small>')
+import mon_stats as MS        # noqa: E402  (24/11) valori dalle formule del bestiario, come il C64
+MCF = MS.coefs_by_id(RL, Y)
+fmt = lambda v: ("%g" % v).replace(".", ",") if LANG == "it" else "%g" % v
 
 rows = ""
 for key, m in mons.items():
     r = RL["monsters"][key]
+    cf = MCF[key]
+    v = MS.values(cf, r["floor"])
     kind = W[m["tier"]]
-    gr = "" if m["tier"] == "final" else grow
+    gr = "" if m["tier"] == "final" or not cf["hp"][1] else f' <small>(+{fmt(cf["hp"][1] / 16)} {W["dpf"]})</small>'
+    dmg = ("%dd%d+%d" % (v["dn"], v["ds"], v["dk"])) if v["dn"] else str(v["dk"])
     rows += (f'<tr><td class="spr"><img src="mon/{pngs[key]}.png"></td>'
-             f'<td><b>{names[key]}</b><br><small>{kind}</small></td><td>{r["floor"]}</td><td>{r["hp"]}{gr}</td>'
-             f'<td>{r["dmg"]}</td><td>{r["ac"]}</td><td>{r["xp"]}</td><td>{spd.get(m["speed"], m["speed"])}</td></tr>')
+             f'<td><b>{names[key]}</b><br><small>{kind}</small></td><td>{r["floor"]}</td><td>{v["hp"]}{gr}</td>'
+             f'<td>{dmg}</td><td>{v["ac"]}</td><td>{v["xp"]}</td><td>{spd.get(m["speed"], m["speed"])}</td></tr>')
 mx = Y["spawn"]["max_monsters_per_level"]
 mn = Y["spawn"]["min_monsters_per_level"]
 cells = lambda a: "".join(f"<td>{v if v else '—'}</td>" for v in a)

@@ -3,48 +3,41 @@
 Sorgenti: `src/game/game.asm` (`spawn_monsters`, `place_monster`, `init_monsters_rt`, `update_monsters`,
 `kill_monster`, `final_tick`), `src/game/bar.asm` (`place_boss`, nomi), `src/game/combat.asm` (`floor_types`,
 `mon_hp_init`, `mon_attack`). Dati: il **bestiario** `data/monsters/bestiary.tsv`
-(11/11: schede, tier, colore, velocità, bonus del bottino; [bestiario](bestiario.md), righe `implemented = yes`),
-`data/rules.yaml` (`growth`, `boss`, `final_summons`) e `data/balance.yaml` (`spawn`, `boss`) → `out/work/db.asm`.
+(11/11: tier, colore, velocità, bonus del bottino; dal 24/11 le statistiche sono **formule** per piano,
+[bestiario](bestiario.md#statistiche-formule-del-bestiario-2411-toolsbuildmon_statspy), righe `implemented = yes`),
+`data/rules.yaml` (`growth.curve_dmg`, `boss`, `final_summons`) e `data/balance.yaml` (`spawn`, `boss`) → `out/work/db.asm`.
 
 ## Tipi
 
 Quattro famiglie (base → variante forte, stessa grafica con un'aggiunta e altro colore) più il boss finale. **Dal 15/11 ogni
 capitolo ha le sue famiglie** (grafica, colore e nome dal file del tema del capitolo, [bestiario](bestiario.md#nel-gioco-i-mostri-dei-capitoli-1511)):
-la tabella sotto vale per il **tipo**, in ogni capitolo (statistiche uguali). Numero del tipo
+la tabella sotto è quella del **capitolo 1** (anche nei capitoli 3–4); il capitolo 2 ha le sue righe (dal 24/11,
+[bestiario](bestiario.md#statistiche-formule-del-bestiario-2411-toolsbuildmon_statspy)). Numero del tipo
 (`mtype`): 1–4 base, 5–8 forti (`base + N_BASE`), 9 = `T_FINAL`.
 
-| # | Tipo | Famiglia | Piano min. | Vita (scheda) | CA | ATT | Danno | Salv. | XP | Velocità (px/fot.) | +liv. bottino |
+| # | Tipo | Famiglia | Primo piano | Vita | CA | ATT | Danno | Salv. | XP | Velocità (px/fot.) | +liv. bottino |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | fallen | fallen | 1 | 2d6 | 12 | +3 | 1d4+1 | 0 | 10 | 0,75 | 0 |
-| 2 | skeleton | skeleton | 1 | 2d8+2 | 13 | +4 | 1d6+2 | 1 | 20 | 0,75 | 0 |
-| 3 | zombie | zombie | 4 | 4d8+8 | 11 | +4 | 1d8+2 | 2 | 50 | 0,5 | 0 |
-| 4 | demon | demon | 8 | 6d10+12 | 15 | +7 | 2d6+3 | 4 | 120 | 0,75 | 1 |
-| 5 | fallen warchief | fallen | 1 | 4d6+4 | 14 | +5 | 1d8+2 | 2 | 40 | 0,875 | 1 |
-| 6 | skeleton king | skeleton | 2 | 5d8+10 | 15 | +6 | 1d10+3 | 3 | 70 | 0,75 | 1 |
-| 7 | lich | zombie | 5 | 7d8+14 | 15 | +7 | 2d6+4 | 5 | 150 | 0,75 | 1 |
-| 8 | balrog | demon | 9 | 9d10+27 | 17 | +9 | 2d8+5 | 6 | 400 | 0,875 | 2 |
-| 9 | Lord of Ruin | — | 20 | 45d10+90 | 22 | +13 | 4d8+32 | 10 | 3000 | 0,75 | 3 |
+| 1 | fallen | fallen | 1 | `9 + 2.56*P` | `12 + P` | `2 + 0.75*P` | `1d4 + 1 + P` | `0.3*P` | `9 + 2.56*P` | 0,75 | 0 |
+| 2 | skeleton | skeleton | 1 | `14 + 3.4*P` | `13 + P` | `3 + 0.75*P` | `1d6 + 2 + P` | `1 + 0.3*P` | `20 + 5*P` | 0,75 | 0 |
+| 3 | zombie | zombie | 4 | `38 + 3.25*P` | `11 + P` | `3 + 0.75*P` | `1d8 + 2 + P` | `2 + 0.3*P` | `50 + 12.44*P` | 0,5 | 0 |
+| 4 | demon | demon | 8 | `66 + 4.06*P` | `15 + P` | `6 + 0.75*P` | `2d6 + 3 + P` | `4 + 0.3*P` | `120 + 30*P` | 0,75 | 1 |
+| 5 | fallen warchief | fallen | 1 | `25 + 2.6*P` | `14 + P` | `4 + 0.75*P` | `1d8 + 2 + P` | `2 + 0.3*P` | `40 + 10*P` | 0,875 | 1 |
+| 6 | skeleton king | skeleton | 2 | `47 + 3.25*P` | `15 + P` | `5 + 0.75*P` | `1d10 + 3 + P` | `3 + 0.3*P` | `69 + 17.56*P` | 0,75 | 1 |
+| 7 | lich | zombie | 5 | `67 + 3.3*P` | `15 + P` | `6 + 0.75*P` | `2d6 + 4 + P` | `5 + 0.3*P` | `150 + 37.44*P` | 0,75 | 1 |
+| 8 | balrog | demon | 9 | `113 + 3.8*P` | `17 + P` | `8 + 0.75*P` | `2d8 + 5 + P` | `6 + 0.25*P` | `400 + 100*P` | 0,875 | 2 |
+| 9 | Lord of Ruin | — | 20 | `507` | 22 | +13 | `4d8 + 32` | 10 | 3000 | 0,75 | 3 |
 
-Velocità = `mon_spd` / 8 (da `balance.yaml speed` × `monster_speed_percent` 80%). Il PG si muove a passi più
-rapidi. Valori al 06/11, provvisori (ritaratura di Fable).
+P = piano − primo piano (mai sotto 0; per il boss finale sempre 0). Vita = vita **media** del tipo al piano. Velocità =
+`mon_spd` / 8 (da `speed` del bestiario × `monster_speed_percent` 80%). Il PG si muove a passi più rapidi. Formule del 24/11
+ricavate dal gioco di prima senza ritarare (scarti ≤ 3 punti vita, ≤ 1 su ATT, salvezza, esperienza).
 
 ## Statistiche al piano (`floor_types`)
 
-Entrando in un piano si calcolano una volta le statistiche di ogni tipo (`ft_*`, 10 voci). Con
-P = piano − piano minimo del tipo (0 se negativo; 0 per il boss finale):
-
-| Statistica | Formula |
-|---|---|
-| CA | `mt_ac` + `gr_ac[P]` (+1 per piano) |
-| ATT | `mt_att` + `gr_att[P]` (+0,6 per piano, troncato) |
-| danno fisso K | `mt_dk` + `gr_dmg[P]` (+1 per piano) |
-| salvezza | `mt_sv` + `gr_att[P]` / 2 |
-| vita media | (media dei dadi + `gr_hpd[P]` dadi in più × media del dado) × `cv_hp[piano]` / 32 |
-| moltiplicatore del danno | `cv_dmg[piano]` / 32 (uguale per tutti i tipi) |
-| esperienza | xp base × (4 + P) / 4 |
-
-`gr_hpd` = +0,5 dadi per piano; `cv_hp` = ×1,5 da piano 1 in poi; `cv_dmg` = ×0,5 al piano 1, ×0,75 piani 2–7,
-×1 piano 8, ×1,25 piani 9–14, ×1,75 piani 15–20 (curve di `rules.yaml growth`).
+Entrando in un piano si calcolano una volta le statistiche di ogni tipo (`ft_*`, 10 voci): per vita, CA, ATT, danno fisso K,
+salvezza ed esperienza `valore = A + ((B × P + 8) >> 4)`, con `A` (valore al primo piano) e `B` (crescita per piano × 16) dalle
+tabelle di `mt_ch` (dal 24/11; prima: scheda + crescita comune `gr_*` e curva `cv_hp`). Il moltiplicatore del danno
+`cv_dmg[piano]` / 32 resta uguale per tutti i tipi: ×0,5 piani 1–4, ×0,75 piani 5–14, ×1 piani 15–20 (`rules.yaml
+growth.curve_dmg`). Il colpo del mostro: dadi (`mt_dn`, `mt_ds`) + K, × `cv_dmg`.
 
 ### Vita del singolo mostro (`mon_hp_init`)
 Alla nascita: vita media del tipo × (96 + rnd 0..64) / 128, cioè **±25%**; il boss con nome × 2,5

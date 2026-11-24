@@ -1,0 +1,6 @@
+# Costanti con nome per le formule del bestiario (24/11, data/monsters/bestiary.tsv, tools/build/mon_stats.py).
+# Un nome vale un numero oppure una formula (con le stesse variabili L, P, FIRST, C, F e le altre costanti), e si usa nelle
+# celle del bestiario: `hp: tank_hp * 1.2`. Servono per i capitoli nuovi (prima i ruoli, poi i ritocchi mostro per mostro).
+# Esempio:   tank_hp: "28 + 3.4*P"
+# Oggi nessuna: i mostri dei capitoli 1 e 2 hanno formule proprie (migrate senza ritarare dal gioco del 24/11).
+constants: {}

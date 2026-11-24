@@ -7,13 +7,14 @@ bestiario di un capitolo sostituisce quello del capitolo precedente); il **boss 
 dell'**ultimo capitolo**; il **capitolo 1 ha un boss nuovo**; concept per altri 3 capitoli (un boss, mostri comuni e
 varianti potenziate come oggi). Modello: il database dei mostri di Diablo (DevilutionX).
 
-**Stato**: la tabella `data/monsters/bestiary.tsv` è la **sorgente dei mostri** dall'11/11 (`tools/build/bestiary.py`: le
-**statistiche** del gioco vengono dalle righe `implemented = yes`, i 9 tipi di sempre). **Dal 15/11 ogni capitolo ha nel gioco
-i suoi mostri**: sprite, colore e nome delle 4 famiglie e delle 4 varianti forti del capitolo, e il boss del capitolo nel suo
-piano del boss (sezione sotto). **L'IA non cambia** (il tipo *t* si muove come il tipo *t* del capitolo 1). **Statistiche**: dal
-24/11 i capitoli con `own_stats: true` in `data/chapters.yaml` (oggi il **capitolo 2**) hanno statistiche proprie, ricavate dal
-loro bestiario a parità di difficoltà media (sezione "Statistiche per capitolo" sotto); gli altri hanno quelle del tipo *t* del
-capitolo 1 (crescita per profondità). Le statistiche delle righe concept sono il punto di partenza, non i numeri del gioco.
+**Stato**: la tabella `data/monsters/bestiary.tsv` è il **database dei mostri** (`tools/build/bestiary.py`). **Dal 24/11 le
+statistiche sono formule** (sezione "Statistiche: formule del bestiario" sotto): vita, CA, ATT, danno, salvezza ed esperienza
+di ogni mostro a ogni piano escono dalla sua riga, e gioco, simulatori, manuale e test le leggono dallo stesso modulo
+(`tools/build/mon_stats.py`). Le righe `implemented = yes` sono nel gioco: i 9 tipi del capitolo 1 (con il boss finale) e i
+tipi 1–8 del **capitolo 2** (`own_stats: true` in `data/chapters.yaml`). **Dal 15/11 ogni capitolo ha nel gioco i suoi
+mostri**: sprite, colore e nome delle 4 famiglie e delle 4 varianti forti del capitolo, e il boss del capitolo nel suo piano
+del boss (sezione sotto). **L'IA non cambia** (il tipo *t* si muove come il tipo *t* del capitolo 1). I capitoli 3–4 usano le
+statistiche del capitolo 1; le loro righe (e quelle dei boss di capitolo) sono concept.
 
 ## Nel gioco: i mostri dei capitoli (15/11)
 
@@ -26,10 +27,10 @@ Richiesta del committente (15/11): "disegna i mostri per capitolo oltre che i bo
 | 3 | Ash Ghoul (12) | Bone Archer (1) | Hellhound (2) | Frost Wight (14) | Pyre Ghoul (8) | Bone Marksman (7) | Hellhound Alpha (10) | Wight Lord (3) | dungeon: Lord of Ruin; piano 15: Varok the Oathbreaker (7) |
 | 4 | Imp (10) | Blood Knight (2) | Gargoyle (12) | Cultist (4) | Imp Overseer (8) | Blood Champion (4) | Stone Gargoyle (15) | High Cultist (7) | Lord of Ruin (2) (piano 20, sala del trono) |
 
-Fra parentesi il colore C64 dello sprite. Il tipo decide **tutto il resto** come prima: statistiche, profondità minima
-(`maxtype_tab`: il tipo 4 compare dalla profondità 8, quindi nel capitolo 2 Will-o'-Wisp e Corpse Light solo dal piano 3 del
-capitolo), velocità (il tipo 3 è lento come lo zombie: Mire Witchling, Hellhound, Gargoyle), bottino, evocazioni del boss finale
-(tipi base del piano 20: nel capitolo 4 Imp, Blood Knight, Gargoyle, Cultist). Il boss con nome dei piani normali resta
+Fra parentesi il colore C64 dello sprite. Il tipo decide IA ed evocazioni del boss finale (tipi base del piano 20: nel
+capitolo 4 Imp, Blood Knight, Gargoyle, Cultist). Statistiche, primo piano, velocità e bottino vengono dalla riga del tipo: nel
+capitolo 2 le sue righe (24/11, sezione sotto: Will-o'-Wisp dal piano 8, Corpse Light dal 9, come prima), nei capitoli 3–4 quelle
+del capitolo 1 (il tipo 3 è lento come lo zombie: Hellhound, Gargoyle). Il boss con nome dei piani normali resta
 "nome + epiteto" (`first_names`/`epithets` di `balance.yaml`, uguale in ogni capitolo); **il boss di capitolo** (piani 5, 10, 15)
 nella barra mostra il **suo nome** (prima: un nome + epiteto a caso), il boss finale "lord of ruin".
 
@@ -51,36 +52,70 @@ nella barra mostra il **suo nome** (prima: un nome + epiteto a caso), il boss fi
   ROM dei caratteri) per un mostro e per il boss di ogni capitolo, ritorno al capitolo 1; atlante grafico, sezione Sprite.
 - Ritocco ai disegni (15/11): Stone Gargoyle, le crepe da `g` a `b` (erano grigio chiaro 15 come il corpo: sparivano).
 
-### Statistiche per capitolo (24/11, `tools/build/mon_stats.py`)
+### Statistiche: formule del bestiario (24/11, `tools/build/mon_stats.py`)
 
-Decisione mia (il committente ha chiesto il capitolo 2 completo senza altre decisioni): il bestiario del capitolo dà
-**l'identità** dei mostri, il capitolo 1 dà **la difficoltà** del piano. Per ogni gruppo (4 base, 4 forti) le righe del capitolo
-si confrontano con la loro media: vita e danno medi danno un fattore *k* (media 1), CA, ATT, salvezza e velocità uno scarto *d*
-(media 0). Il tipo *t* del capitolo = il tipo *t* del capitolo 1 (stessa profondità minima, stessa crescita, stessi dadi) con
-vita × *k*, bonus del danno tale che il danno medio sia × *k*, CA/ATT/salvezza + *d*, velocità = media del gruppo del capitolo 1
-+ *d* (× `monster_speed_percent`), esperienza × (*k*vita + *k*danno)/2, bonus del livello del bottino del bestiario.
-Il tipo 0 e il tipo 9 (boss finale) restano quelli del capitolo 1.
+Richiesta del committente (24/11): il bestiario come **database ufficiale** dei mostri, con **formule semplici** al posto dei
+valori a un piano più una crescita comune nascosta nel codice. Proposta discussa il 24/11 (scelte del committente: calcolo sul
+C64 con coefficienti, "modalità A"; capitoli 3–4 concept; Will-o'-Wisp e Corpse Light prima identici a prima, poi ritocco a parte).
 
-Capitolo 2 (vita media al piano minimo, `python3 tools/build/mon_stats.py`):
+**Il formato.** Nelle colonne `hp`, `ac`, `att`, `save`, `xp` una formula; in `dmg` i dadi più una formula (`1d4 + 1 + P`).
+`floor` è il **primo piano** in cui il mostro compare (spawn) e da cui cresce. Variabili: `L` piano (profondità globale),
+`P` = `L − FIRST` (piani dopo il primo, mai sotto 0), `FIRST` (la colonna `floor`), `C` capitolo del piano, `F` piano nel
+capitolo (1–5). Operazioni `+ − * /`, parentesi, `min`, `max`, `round`; costanti con nome (anche formule) in
+`data/monsters/constants.yaml` (oggi nessuna). Esempio: Skeleton `hp = 14 + 3.4*P`, `ac = 13 + P`, `dmg = 1d6 + 2 + P`.
 
-| Tipo | Mostro | Vita | CA | ATT | Danno | Salv. | Vel. | XP | Capitolo 1 (stesso tipo) |
-|---|---|---|---|---|---|---|---|---|---|
-| 1 | Drowned | 9 | 11 | 2 | 1d4+1 | 0 | 3 | 11 | Fallen 7, CA 12, vel. 6 |
-| 2 | Bog Crawler | 9 | 13 | 4 | 1d6+2 | 1 | 7 | 17 | Skeleton 11, vel. 6 |
-| 3 | Mire Witchling | 28 | 11 | 5 | 1d8+4 | 2 | 6 | 57 | Zombie 26, 1d8+2, vel. 4 |
-| 4 | Will-o'-Wisp | 36 | 16 | 7 | 2d6+2 | 4 | 7 | 104 | Demon 45, CA 15, 2d6+3 |
-| 5 | Drowned Hulk | 23 | 13 | 4 | 1d8+2 | 2 | 4 | 45 | Fallen Warchief 18, vel. 7 |
-| 6 | Crawler Queen | 26 | 15 | 6 | 1d10+2 | 3 | 8 | 62 | Skeleton King 32, 1d10+3 |
-| 7 | Hag of the Mere | 49 | 15 | 8 | 2d6+6 | 5 | 6 | 169 | Lich 46, 2d6+4 |
-| 8 | Corpse Light | 62 | 18 | 9 | 2d8+4 | 6 | 8 | 352 | Balrog 76, 2d8+5 |
+**Vincolo**: nei piani in cui la riga si usa (capitolo 1: piani 1–20, perché i capitoli 3–4 usano i suoi tipi; gli altri: il
+loro capitolo; il boss finale: il suo piano) la formula deve essere **lineare** in `L`. La build lo controlla e si ferma con
+mostro, colonna e piano; si ferma anche per crescita negativa e valori fuori dai limiti (CA, ATT, danno, salvezza 0–255; vita
+ed esperienza 0–65535).
 
-**Nel gioco**: le tabelle che cambiano (`hp_lo/hi`, `ac`, `att`, `dk`, `sv`, `xp_lo/hi`, `mon_spd`, `mon_llb`: 10 × 10 B) stanno
-contigue in GAME a `mt_ch` (`gen_db.py`); ogni file del tema porta in coda i tipi 1–8 di 8 di queste (64 B, `GFX_STATS`: i
-byte alti di vita ed esperienza devono restare quelli del capitolo 1, la build lo controlla) e `gfx_install` li copia nei loro
-posti (~35 B di codice). I file dei capitoli senza `own_stats` portano le statistiche del capitolo 1, quindi tornare al
-capitolo 1 le rimette. Il **simulatore** usa le stesse tabelle (`tools/simulators/rules.py` `chapter_entry`: piani 6–10).
-Il **boss del capitolo 2** (tipo fisso, `chapter_bosses`) prende le statistiche del suo tipo nel capitolo 2.
-Test `CHST-10..11` (regression, `tests/regression/chapstats`).
+**Sul C64** (`floor_types`, `src/game/combat.asm`): niente formule. La build fa di ogni formula due numeri, `A` = valore al
+piano `FIRST` (arrotondato) e `B` = crescita per piano × 16, e il C64 entrando in un piano calcola per ogni tipo e statistica
+
+    valore = A + ((B × P + 8) >> 4)          P = piano − FIRST (0 sotto il primo piano e per il boss finale)
+
+con `mul16x8` (6 statistiche × 9 tipi: ~15.000 cicli stimati, una volta per piano; il caricamento dal disco dura secondi).
+La pendenza ha la precisione di 1/16 per piano: `2.6` diventa 42/16 = 2,625 (il rapporto di `python3 tools/build/mon_stats.py`
+stampa i valori veri per piano). Il danno del mostro resta: dadi + bonus, × `curve_dmg` del piano (`rules.yaml growth`).
+
+**Tabelle** (`gen_db.py`): 20 campi per tipo (`fmin`, vita `hp_lo/hi/b`, `ac/ac_b`, `att/att_b`, dadi `dn/ds`, `dk/dk_b`,
+`sv/sv_b`, esperienza `xp_lo/hi/bl/bh`, `mon_spd`, `mon_llb`) × 10 tipi, contigue in GAME a `mt_ch`, più `mt_z` (10 zeri:
+parte alta delle statistiche a 8 bit). Ogni file del tema porta in coda i tipi 1–8 del suo capitolo (**160 B**, `GFX_STATS`;
+prima 64 B), `gfx_install` li copia nei loro posti: le righe del capitolo 2 nel capitolo 2, quelle del capitolo 1 negli altri.
+Per farci stare la coda (la cache del tema finisce sempre a `$F4E0` e ora comincia a `$EBD8`) `ring_stat` e `ui_icon` sono
+passate dal segmento CORE a GAME (`ui.asm`). Costi misurati: GAME +41 B (margine del codice 1045 → 1004 B: sotto l'avviso di
+1 KB), via le tabelle di crescita (`gr_*`, `cv_hp`, `mt_hpd2`, 111 B).
+
+**Migrazione (24/11) senza ritarare.** Le formule dei capitoli 1–2 sono state ricavate dai valori che il gioco calcolava prima
+(stessa aritmetica intera) scegliendo `A` e `B` con l'errore massimo più basso: scarto **≤ 3 punti vita**, **≤ 1** su ATT,
+salvezza ed esperienza, **0** su CA e danno, a ogni piano. Le righe del capitolo 2 portano i numeri che il gioco usava (prima
+venivano dal tipo del capitolo 1 nello stesso posto, con fattori): primo piano 6 (Will-o'-Wisp 8, Corpse Light 9, come prima),
+dadi del danno del tipo del capitolo 1, velocità effettive. Le righe concept (capitoli 3–4, boss di capitolo) sono state
+convertite con la crescita comune di prima, così `tools/simulators/chapters.py` dà gli stessi risultati.
+
+Cose scoperte nella migrazione:
+- **Piano 1**: la proposta del 24/11 diceva che al piano 1 la vita era × 1 invece di × 1,5. **Era sbagliato**: `cv_hp` era
+  indicizzata con il piano e il suo × 1 era il piano 0 (villaggio). Nessun salto da allineare.
+- **Lord of Ruin**: nel gioco ha vita media **507** (la scheda 45d10+90 = 338 × la curva del piano 20, 1,5), il simulatore lo
+  escludeva dalla curva e usava 338. Ora la formula dice 507 e il simulatore la usa: i numeri del simulatore sul boss finale
+  cambiano, il gioco no.
+
+| Capitolo 2 | Primo piano | Vita | CA | ATT | Danno | Salv. | XP | Vel. |
+|---|---|---|---|---|---|---|---|---|
+| Drowned | 6 | `24 + 2.5*P` | `16 + P` | `5 + 0.7*P` | `1d4 + 6 + P` | `1 + 0.4*P` | `24 + 3.06*P` | 4 |
+| Bog Crawler | 6 | `27 + 3.5*P` | `18 + P` | `7 + 0.7*P` | `1d6 + 7 + P` | `2 + 0.4*P` | `38 + 4.2*P` | 9 |
+| Mire Witchling | 6 | `47 + 3.4*P` | `13 + P` | `6 + 0.7*P` | `1d8 + 6 + P` | `2 + 0.4*P` | `85 + 14.3*P` | 7 |
+| Will-o'-Wisp | 8 | `53 + 3.25*P` | `16 + P` | `7 + 0.44*P` | `2d6 + 2 + P` | `4` | `104 + 26*P` | 9 |
+| Drowned Hulk | 6 | `45 + 2.5*P` | `18 + P` | `7 + 0.7*P` | `1d8 + 7 + P` | `3 + 0.4*P` | `101 + 11.2*P` | 5 |
+| Crawler Queen | 6 | `51 + 3.1*P` | `19 + P` | `8 + 0.75*P` | `1d10 + 6 + P` | `4 + 0.3*P` | `124 + 15.44*P` | 10 |
+| Hag of the Mere | 6 | `74 + 3.5*P` | `16 + P` | `8 + 0.75*P` | `2d6 + 7 + P` | `5 + 0.3*P` | `211 + 42.2*P` | 8 |
+| Corpse Light | 9 | `93` | `18 + P` | `9` | `2d8 + 4 + P` | `6` | `352 + 88*P` | 10 |
+
+Velocità prima di `monster_speed_percent` (80%). Il **boss del capitolo 2** (tipo fisso, `chapter_bosses`) prende le statistiche
+del suo tipo nel capitolo 2. **Simulatori**: `tools/simulators/rules.py` (`monster`, `coef_of`) usa gli stessi coefficienti e
+gli stessi tipi per capitolo. `tools/simulators/fit_rules.py` tara solo la tabella dell'Abisso: le formule si scelgono a mano.
+Test: `CHST-10..12` (regression, `tests/regression/chapstats`: tabelle dopo il cambio di capitolo e valori di `floor_types` =
+formule per i tipi 1–9 a sei piani), `BEST-10..12`, `BAL-10`.
 
 ### IA del capitolo 2 (24/11)
 
@@ -92,7 +127,7 @@ del capitolo 2 (`ovl_decor.asm` con `DK_CHAP` 2, `OVJ_TICK`, coda di `GFX3`), in
 **Non fatto**: il volo dei Will-o'-Wisp sull'acqua (cambia le collisioni dei mostri in GAME: memoria e rischio), lo sputo della
 Mire Witchling (attacco a distanza: progetto delle frecce non ancora nel codice).
 
-**Resta** (TODO M9): statistiche proprie dei capitoli 3–4 (basta `own_stats: true`, poi bilanciamento), IA nuove (distanza,
+**Resta** (TODO M9): statistiche proprie dei capitoli 3–4 (righe `implemented = yes` e `own_stats: true`, poi bilanciamento), IA nuove (distanza,
 carica, teletrasporto, evocazione; nel capitolo 2 il volo dei Will-o'-Wisp), bilanciamento con i simulatori.
 
 ## Come fa Diablo (DevilutionX, `assets/txtdata/monsters/`)
@@ -115,12 +150,12 @@ Cosa si impara:
 ## La tabella `data/monsters/bestiary.tsv`
 
 Colonne (README in `data/monsters/README.md`): `id`, `chapter`, `tier` (`base`, `strong`, `boss` = boss di capitolo,
-`final` = boss finale), `strong_of`, `name`, `floor` (**profondità globale** minima, 1..255), `level`, `hp` (dadi), `ac`,
-`att`, `dmg`, `save`, `xp`, `speed`, `color` (C64), `loot_level_bonus`, `flags` (`strong`, `final`, `stun_immune`,
-`chapter_boss`), `ai`, `sprite`, `implemented`, `notes`. Le statistiche dei concept sono quelle di un mostro di oggi
-**cresciuto** alla stessa profondità (demone + crescita per piano di `rules.yaml`), poi ritoccate per ruolo: resistente
-(più vita, più lento), veloce (meno vita, velocità 10), picchiatore (più danno, meno CA). Da tarare col simulatore
-(`tools/simulators/chapters.py`) quando i capitoli saranno nel codice.
+`final` = boss finale), `strong_of`, `name`, `floor` (**primo piano**, profondità globale 1..255), `level`, `hp`, `ac`,
+`att`, `dmg` (dadi + formula), `save`, `xp` (formule dal 24/11), `speed`, `color` (C64), `loot_level_bonus`, `flags`
+(`strong`, `final`, `stun_immune`, `chapter_boss`), `ai`, `sprite`, `implemented`, `notes`. Le statistiche dei concept sono
+quelle di un mostro di oggi **cresciuto** alla stessa profondità, poi ritoccate per ruolo: resistente (più vita, più lento),
+veloce (meno vita, velocità 10), picchiatore (più danno, meno CA); dal 24/11 scritte come formule con la crescita comune di
+prima. Da tarare col simulatore (`tools/simulators/chapters.py`) quando i capitoli saranno nel codice.
 
 ## Bestiari (proposta, capitoli di [Capitoli](capitoli.md))
 
@@ -280,16 +315,15 @@ quanti arcieri per capitolo, danno della freccia, se la freccia si schiva muoven
 Ogni capitolo coi suoi mostri alla sua profondità globale (PG di riferimento, numeri provvisori dei concept): i comuni
 si vincono sempre; i boss di capitolo con 4 pozioni della zona sono **sbilanciati**: The Hollow Abbot (profondità 6)
 **13%** (troppo forte), The Miller of Bad Water (11, oggi Mother Stitch con le stesse statistiche) **97%**, Varok the Oathbreaker (16) **100%** (troppo deboli), Lord of
-Ruin (20) 93%. Da tarare con `tools/simulators/fit_rules.py` (obiettivo dei boss: ~65–75%, `docs/wiki/balancing-guide.md`) prima di
-disegnarli.
+Ruin (20) 93%. Da tarare (obiettivo dei boss: ~65–75%, `docs/wiki/balancing-guide.md`) prima di disegnarli.
 
 ## Cosa serve per metterli nel gioco (stime, da verificare)
 
 | Lavoro | Note |
 |---|---|
 | Sprite | **fatto il 15/11** (sezione "Nel gioco"): 4 famiglie + 4 forti + boss per capitolo, nei file dei temi del capitolo, con colori e nomi |
-| Tipi di mostro nel codice | `N_MTYPES` = 9 e le tabelle sono per tipo: oggi i capitoli cambiano solo grafica, colore e nome (stesse statistiche); statistiche per capitolo = tabelle `mt_*` per capitolo (da caricare col tema, come i nomi) |
+| Tipi di mostro nel codice | `N_MTYPES` = 9, tabelle per tipo; **fatto il 24/11** per il capitolo 2: le statistiche arrivano col file del tema (formule del bestiario) |
 | IA nuove | veloce (c'è: `speed`), distanza (arcieri), evocazione (c'è per il boss finale), carica, teletrasporto: ognuna 50–200 B, da decidere quali |
 | Boss di capitolo | mappa finale per capitolo (`FMAPn`), boss con nome fisso e regole proprie |
-| Bilanciamento | `tools/simulators/chapters.py` per capitolo, `fit_rules.py` sulle nuove schede |
+| Bilanciamento | `tools/simulators/chapters.py` per capitolo, `sim_rules.py`, `sim_builds.py`, arena; le formule si ritoccano a mano |
 | Test | il controllo della tabella (`BEST-*`), il gioco = tabella per il capitolo attuale |

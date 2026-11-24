@@ -187,11 +187,11 @@ Il PG "normale" che arriva al piano (livello = piano); su questo sono tarati i m
 
 ## 6. Mostri (piani 1–20)
 
-Scheda base al piano minimo del tipo (fallen 1, skeleton 1, zombie 4, demon 8; forti: warchief 1, king 2, lich 5,
-balrog 9); per ogni piano in più: +0,5 dadi di vita, CA +1, ATT +0,6, danno +1 (parte decimale troncata); poi vita
-× `curve_hp[piano]` e danno × `curve_dmg[piano]`. Le due curve sono cercate da `tools/simulators/fit_rules.py` (programmazione
-dinamica, curve monotone) sugli obiettivi della sezione 1: vita ×1,5 su tutti i piani; danno ×0,5 (piano 1), ×0,75
-(2–7), ×1 (8), ×1,25 (9–14), ×1,75 (15–20).
+(24/11) Ogni mostro ha le sue formule nel bestiario (`data/monsters/bestiary.tsv`, [bestiario](bestiario.md#statistiche-formule-del-bestiario-2411-toolsbuildmon_statspy)):
+vita, CA, ATT, danno fisso, salvezza ed esperienza = `A + B × P` (P = piano − primo piano del mostro); il danno resta × `curve_dmg[piano]`
+(×0,5 piani 1–4, ×0,75 piani 5–14, ×1 dal 15). Fino al 23/11: scheda al piano minimo + crescita comune (+0,5 dadi di vita,
+CA +1, ATT +0,7, danno +1 per piano, vita × `curve_hp` = ×1,5), cercata da `tools/simulators/fit_rules.py`; migrata nelle formule
+senza ritarare (scarti ≤ 3 punti vita).
 
 Boss con nome (piani 1–19): variante forte con vita ×2,5, CA +2, ATT +2. Boss finale (`lord_of_ruin`): 60d10+120 di
 vita, CA 22, ATT +13, danno 4d8+32, **immune al blocco da colpo** (altrimenti da solo non attacca mai), evoca al
@@ -315,8 +315,8 @@ Cosa è cambiato rispetto al progetto e come il simulatore lo segue (`tools/simu
 - **Varianti forti** solo dal piano 3 e solo se il loro piano minimo è ≤ piano + 1; boss del piano con la
   stessa regola (altrimenti fallen warchief).
 
-Risultato di `tools/simulators/fit_rules.py --final` (60 combattimenti per punto, 400 di verifica; i numeri esatti sono
-in `data/rules.yaml growth` e `final_boss_hp_mult`, il report in `out/work/simulators/simulazione_regole.html`):
+Risultato di `tools/simulators/fit_rules.py --final` (fino al 23/11; 60 combattimenti per punto, 400 di verifica; dal 24/11 quei
+numeri sono nelle formule del bestiario, il report in `out/work/simulators/simulazione_regole.html`):
 `ac_per_floor` 1,0, `att_per_floor` 0,7; `curve_hp` ×1,5 dal piano 1; `curve_dmg` ×0,5 ai piani 1–4, ×0,75
 ai piani 5–14, ×1 dal 15 (più bassa di prima: il PG di riferimento ha meno magia). **Boss finale**: con le
 evocazioni immediate e di piano 20 la vecchia scheda era imbattibile (0–25%); ora vita 45d10+90 (×0,75) e
@@ -483,6 +483,9 @@ la frequenza dei tesori buoni (10% dei tiri a ≥ 0,8 T), l'oro dei bauli epici 
   bot dell'arena perde sempre. Il simulatore non fa camminare il PG fra feticci e boss e gli fa schivare metà delle maledizioni;
   il bot dell'arena (`adds`) cammina male e non schiva mai. Vita scelta fra i due: 300 (simulatore 94%, arena 35% al livello
   10); `slash_area` per boss (`bosses.stitch.slash_area` 0,2). Da provare a mano ([bestiario](bestiario.md)).
+- (24/11) **Statistiche dei mostri**: simulatore e gioco usano gli stessi coefficienti (`tools/build/mon_stats.py`, stessa
+  aritmetica intera di `floor_types`; test `CHST-12`). Fino al 23/11 il simulatore escludeva il boss finale dalla curva della
+  vita (338 punti vita medi invece dei 507 del gioco): corretto, ora i numeri del simulatore sul boss finale sono quelli del gioco.
 - (23/11) **Abilità e catena (Q15)**: nel gioco un'abilità vuole il livello e il passo della catena consegnato
   (`sk_ok`); il simulatore guarda solo il livello, cioè assume un giocatore che consegna i passi al piano previsto
   ([quests](quests.md) sezione 5). L'arena fa lo stesso (`q_step` = 12).

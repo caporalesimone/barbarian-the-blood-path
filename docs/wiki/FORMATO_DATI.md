@@ -194,7 +194,7 @@ KERNAL** e da lì copiati dove il VIC li vede (`gfx_install`).
 Scritto da `tools/build/gen_gfx.py` (tile), `tools/build/gen_maps.py` (intestazione e mappa, con i controlli) e
 `tools/build/asm.sh` (li unisce in `out/work/twnN.prg`). Sorgenti: `tools/build/vilN_*.py`, `data/town_mapN.txt`.
 
-### `GFX1` … `GFXn` — temi di dungeon (2016 + `GFX_INFO` byte = 2163 byte, 9 blocchi; caricati a `GFX_DUN_AT` = `$EC6D`)
+### `GFX1` … `GFXn` — temi di dungeon (2016 + `GFX_INFO` + `GFX_STATS` byte = 2323 byte; caricati a `GFX_DUN_AT` = `$EBD8`)
 
 Il file del piano (12/11: due per capitolo, `GFX(2c−1)` dungeon e `GFX(2c)` boss; capitolo da `lv_grp`) lo sceglie `lvl_theme` (`src/game/theme.asm`; `tools/build/gen_gfx.py`, `chapter_sets`); i file non si deduplicano (dall'11/11, ramo `fast-loader`, la grafica si rilegge a ogni ingresso: niente cache).
 **Dal 15/11** ogni file porta i **mostri del suo capitolo** (`tools/build/monsters.py` `chapter_set`: capitolo 1 i mostri di sempre, capitoli 2–4 `tools/build/monsters_chap.py`): sprite, colori e nomi dei tipi 1…8 e del posto del boss (tipo 9: Lord of Ruin nei file del dungeon e in `GFX8`, il boss del capitolo in `GFX2`, `GFX4`, `GFX6`).
@@ -209,9 +209,9 @@ Il file **finisce sempre a `$F4E0`** (`GFX_DUN_END`, inizio della zona 2 del MEN
 | 2025 | 9 | byte basso dell'indirizzo del nome dei tipi 1…9 (blocco tutto in una pagina: byte alto = `>NM_AT`) | `NM_AT+9` … (`bar_name`, `src/game/bar.asm`) |
 | 2034 | fino a `GFX_INFO` − 18 | nomi dei tipi 1…9, codici schermo (lettere 1–26, spazio, `'`, `-`), 0 finale, al massimo 24 caratteri (larghezza della barra); poi zeri fino a `GFX_INFO` (147 B: il blocco più lungo, quello di `GFX4`) | `NM_AT` = `$9000` − `GFX_INFO` (`$8F6D`, fine degli slot sprite 58–63, dopo il motivetto `SND_FBUF`) |
 
-| 2016 + `GFX_INFO` | 64 | (24/11) **statistiche dei tipi 1…8 del capitolo** (`tools/build/mon_stats.py` `file_block`): 8 byte per tabella, nell'ordine `hp_lo`, `ac`, `att`, `dk`, `sv`, `xp_lo`, `mon_spd`, `mon_llb` (`GFX_STATF`) | posti 1…8 delle tabelle a `mt_ch` (GAME) |
+| 2016 + `GFX_INFO` | 160 | (24/11) **statistiche dei tipi 1…8 del capitolo** (`tools/build/mon_stats.py` `file_block`, formule del bestiario): 8 byte per tabella, 20 tabelle nell'ordine `fmin`, `hp_lo`, `hp_hi`, `hp_b`, `ac`, `ac_b`, `att`, `att_b`, `dn`, `ds`, `dk`, `dk_b`, `sv`, `sv_b`, `xp_lo`, `xp_hi`, `xp_bl`, `xp_bh`, `mon_spd`, `mon_llb` (`GFX_STATF`; `A` = valore al primo piano, `B` = crescita per piano × 16: [bestiario](bestiario.md)) | posti 1…8 delle tabelle a `mt_ch` (GAME) |
 
-Il file comincia quindi `GFX_INFO` + 64 byte prima di `$ED00`. `gfx_install` copia tile e sprite, il blocco info intero a `NM_AT` e le statistiche nelle tabelle di `mt_ch`: il buffer del tema sotto il KERNAL non serve più dopo
+Il file finisce sempre a `$F4E0` (`GFX_DUN_END`) e comincia a `GFX_DUN_AT` (`$EBD8` dal 24/11, sotto `GFX_TOWN_AT`: il segmento CORE finisce prima, la build lo controlla). `gfx_install` copia tile e sprite, il blocco info intero a `NM_AT` e le statistiche nelle tabelle di `mt_ch`: il buffer del tema sotto il KERNAL non serve più dopo
 l'installazione (un salvataggio lo sovrascrive: buffer del plugin `SV_SCR`).
 
 File del piano: `GFX(2c−1)` per i piani 1–4 del capitolo *c*, `GFX(2c)` per il suo piano del boss (5, 10, 15, 20) (`lvl_theme`,

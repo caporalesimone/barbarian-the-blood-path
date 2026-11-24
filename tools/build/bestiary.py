@@ -16,7 +16,8 @@ TSV = os.path.join(ROOT, "data", "monsters", "bestiary.tsv")
 COLUMNS = ["id", "chapter", "tier", "strong_of", "name", "floor", "level", "hp", "ac", "att", "dmg", "save", "xp", "speed",
            "color", "loot_level_bonus", "flags", "ai", "sprite", "implemented", "notes"]
 TIERS = ("base", "strong", "boss", "final")
-INTS = ("chapter", "floor", "level", "ac", "att", "save", "xp", "speed", "color", "loot_level_bonus")
+INTS = ("chapter", "floor", "level", "speed", "color", "loot_level_bonus")
+FORMULAS = ("hp", "ac", "att", "dmg", "save", "xp")     # (24/11) formule (tools/build/mon_stats.py), dmg = dadi + formula
 FLAGS = ("strong", "final", "stun_immune", "chapter_boss")
 
 
@@ -58,12 +59,14 @@ def load(path=TSV):
 
 
 def game_rows(rows=None):
-    """le righe che il gioco di oggi usa (implemented = yes), nell'ordine del file"""
-    return [r for r in (rows or load()) if r["implemented"] == "yes"]
+    """i tipi del gioco nel capitolo 1 (righe implemented = yes del capitolo 1 e il boss finale), nell'ordine del file:
+    tipo 1..9. (24/11) Le righe implemented = yes di un capitolo con own_stats (data/chapters.yaml) sono i suoi tipi 1..8
+    (tools/build/mon_stats.py type_rows)"""
+    return [r for r in (rows or load()) if r["implemented"] == "yes" and (r["chapter"] == 1 or r["tier"] == "final")]
 
 
 def rules_entry(r):
-    e = {k: r[k] for k in ("floor", "level", "hp", "ac", "att", "dmg", "save", "xp")}
+    e = {k: r[k] for k in ("id", "chapter", "floor", "level", "hp", "ac", "att", "dmg", "save", "xp")}
     for fl in ("strong", "final", "stun_immune"):
         if fl in r["flags"]:
             e[fl] = True
@@ -108,6 +111,6 @@ if __name__ == "__main__":
     for ch, rs in sorted(by_chapter(rows).items()):
         print("== chapter %d" % ch)
         for r in rs:
-            print("  %-22s %-6s %-26s depth %3d  hp %-9s ac %2d att +%-2d dmg %-7s xp %5d %s" % (
+            print("  %-22s %-6s %-26s depth %3d  hp %-12s ac %-7s att %-11s dmg %-14s xp %-13s %s" % (
                 r["id"], r["tier"], r["name"], r["floor"], r["hp"], r["ac"], r["att"], r["dmg"], r["xp"],
                 "" if r["implemented"] == "yes" else "(concept)"))

@@ -153,21 +153,47 @@ class Hero:
 
 
 # ------------------------------------------------------------------ mostri
+_MS = None
+
+
+def mstats():
+    """(24/11) statistiche dei mostri dalle formule del bestiario (tools/build/mon_stats.py, come il C64):
+    (modulo, coefficienti per id, id dei tipi 1..9 per capitolo)"""
+    global _MS
+    if _MS is None:
+        import mon_stats as MS, bestiary as BE
+        rows = BE.load()
+        B = BE.load_balance(ROOT)
+        _MS = (MS, MS.coefs_by_id(R, B, rows), {c: [r["id"] for r in MS.type_rows(c, rows)] for c in range(1, NF // MS.CPF + 1)})
+    return _MS
+
+
+def coef_of(name, floor):
+    """coefficienti del tipo `name` (id di un tipo del gioco del capitolo 1) al piano: nei piani di un capitolo con
+    own_stats il tipo nello stesso posto del capitolo (come gfx_install); gli altri nomi (concept): la loro riga"""
+    MS, cf, types = mstats()
+    c = (min(max(floor, 1), NF) - 1) // MS.CPF + 1
+    if name in types[1]:
+        return cf[types[c][types[1].index(name)]]
+    return cf[name]
+
+
 def monster(name, floor, boss=False, scale=None):
-    """statistiche di un mostro del tipo `name` al piano `floor` (vita come dadi da tirare)"""
-    t = chapter_entry(name, floor)
-    g = R["growth"]
+    """statistiche di un mostro del tipo `name` al piano `floor` (vita: Dice costante = la media del tipo, come ft_hpl;
+    il gioco la tira x 96..160/128 alla nascita, sim_rules.Mon)"""
+    MS = mstats()[0]
+    t = R["monsters"][name]
+    cf = coef_of(name, floor)
     sc = scale or R["monster_scale"]
-    V = max(0, floor - NF) if not t.get("final") else 0     # piani dell'Abisso oltre il dungeon
-    floor = min(floor, NF) if not t.get("final") else floor
-    P = 0 if t.get("final") else max(0, floor - t["floor"])
-    hp = Dice(t["hp"]).plus(n_dice=int(P * g["hp_dice_per_floor"]))
-    m = dict(name=name, hp=hp, ac=t["ac"] + int(P * g["ac_per_floor"]), att=t["att"] + int(P * g["att_per_floor"]),
-             dmg=Dice(t["dmg"]).plus(k=int(P * g["dmg_per_floor"])), save=t["save"] + int(P * g["att_per_floor"]) // 2,
-             xp=t["xp"], level=floor + (2 if t.get("strong") else 0),      # come kill_monster: piano (+2 forte, +1 boss)
-             hp_mult=sc["hp"] * curve(floor, "hp", t) * (R.get("final_boss_hp_mult", 1) if t.get("final") else 1),
-             dmg_mult=sc["damage"] * curve(floor, "dmg", t),
-             final=bool(t.get("final")), strong=bool(t.get("strong")), stun_immune=bool(t.get("stun_immune")))
+    final = cf["final"]
+    V = max(0, floor - NF) if not final else 0     # piani dell'Abisso oltre il dungeon
+    floor = min(floor, NF) if not final else floor
+    v = MS.values(cf, floor, NF)
+    m = dict(name=name, hp=Dice(str(max(1, v["hp"]))), ac=v["ac"], att=v["att"],
+             dmg=Dice("%dd%d+%d" % (v["dn"], v["ds"], v["dk"]) if v["dn"] else str(v["dk"])), save=v["sv"],
+             xp=v["xp"], level=floor + (2 if t.get("strong") else 0),      # come kill_monster: piano (+2 forte, +1 boss)
+             hp_mult=sc.get("hp", 1), dmg_mult=sc["damage"] * curve(floor, "dmg"),
+             final=bool(final), strong=bool(t.get("strong")), stun_immune=bool(t.get("stun_immune")))
     if V:                                                    # Abisso: segue il PG di riferimento (fit_void)
         vc = void_curve()
         v = min(V, len(vc["ac"]) - 1)
@@ -187,46 +213,8 @@ def monster(name, floor, boss=False, scale=None):
     return m
 
 
-_CH = {}
-
-
-def chapter_entry(name, floor):
-    """(24/11, M9) scheda del tipo `name` nei piani di un capitolo con own_stats (tools/build/mon_stats.py, come gfx_install):
-    stessi dadi della vita e del danno del capitolo 1, bonus fissi, CA, ATT, salvezza ed esperienza del capitolo"""
-    t = R["monsters"][name]
-    c = (floor - 1) // 5 + 1 if 1 <= floor <= NF else 0
-    if t.get("final") or not c:
-        return t
-    if c not in _CH:
-        import mon_stats as MS, bestiary as BE
-        own = MS.own_chapters()
-        _CH[c] = None
-        if c in own:
-            B = BE.load_balance(ROOT)
-            R1 = dict(R, monsters={r["id"]: BE.rules_entry(r) for r in BE.game_rows()})
-            _CH[c] = ([r["id"] for r in BE.game_rows()], MS.chapter_tables(R1, B, c))
-    if _CH[c] is None or name not in _CH[c][0]:
-        return t
-    ids, tb = _CH[c]
-    x = ids.index(name) + 1
-    hn, hs, hk = MS_dice(t["hp"])
-    h = tb["hp_lo"][x] + 256 * tb["hp_hi"][x]
-    dn, ds, _ = MS_dice(t["dmg"])
-    e = dict(t, ac=tb["ac"][x], att=tb["att"][x], save=tb["sv"][x], xp=tb["xp_lo"][x] + 256 * tb["xp_hi"][x],
-             hp="%dd%d%+d" % (hn, hs, round(h - hn * (hs + 1) / 2)) if hn else str(h),
-             dmg="%dd%d%+d" % (dn, ds, tb["dk"][x]) if dn else str(tb["dk"][x]))
-    return e
-
-
-def MS_dice(s):
-    import mon_stats as MS
-    return MS.dice(s)
-
-
-def curve(floor, what, t=None):
-    """moltiplicatore per piano (growth.curve_hp / curve_dmg, indice = piano); il boss finale ne e' escluso"""
-    if t is not None and t.get("final"):
-        return 1.0
+def curve(floor, what="dmg", t=None):
+    """moltiplicatore del danno dei mostri per piano (growth.curve_dmg, indice = piano: ft_dmul, anche per il boss finale)"""
     c = R["growth"].get("curve_" + what)
     return c[min(floor, len(c) - 1)] if c else 1.0
 

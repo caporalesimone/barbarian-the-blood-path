@@ -257,11 +257,11 @@ def main():
     chk([m["strong_of"] for _, m in strong] == [k for k, _ in base], "varianti forti nell'ordine dei base")
     nb = len(base)
     MR = R["monsters"]
-    xpq = R["xp_per_floor"]
+    import mon_stats as MS      # (24/11, M9) statistiche dei mostri: formule del bestiario -> coefficienti del C64
+    MCF = MS.coefs_by_id(R, B)
 
     def mxp(k, L):
-        Pf = 0 if MR[k].get("final") else max(0, L - MR[k]["floor"])
-        return MR[k]["xp"] * (1 + xpq * Pf)
+        return MS.values(MCF[k], L, maxl)["xp"]
 
     sp = B["spawn"]
 
@@ -293,7 +293,6 @@ def main():
     o.bytes("xp_n0", [v & 255 for v in need])
     o.bytes("xp_n1", [(v >> 8) & 255 for v in need])
     o.bytes("xp_n2", [v >> 16 for v in need])
-    o(f"XP_PFQ      = {byte(round(xpq * 4), 'xp_per_floor')}            ; xp = base x (4 + P x XP_PFQ) / 4")
     o()
 
     # ------------------------------------------------------------ oggetti
@@ -439,54 +438,33 @@ def main():
 
     # ------------------------------------------------------------ mostri
     G = R["growth"]
-    o("; ---- mostri: scheda (rules.yaml), crescita per piano P = piano - piano minimo, curve per piano (x/32)")
+    o("; ---- mostri (24/11): bestiario con formule (tools/build/mon_stats.py), valore = A + ((B x P + 8) >> 4), P = piano - fmin")
     o(f"N_BASE      = {nb}")
     o(";      tipo: " + ", ".join("%d %s" % (i + 1, k) for i, (k, _) in enumerate(mons_r)) + " (0 = nessuno; tabelle mon_* da 0)")
     o(f"N_MTYPES    = {len(mons_r)}")
     o(f"T_FINAL     = {len(mons_r)}")
     for i, (k, _) in enumerate(mons_r):
         o(f"M_{k.upper():<16} = {i + 1}")
-    t = {f: [0] for f in ("fmin", "hp_lo", "hp_hi", "hpd2", "ac", "att", "dn", "ds", "dk", "sv", "xp_lo", "xp_hi",
-                          "imm", "spd", "col", "llb", "ptr")}
+    t = {f: [0] for f in ("imm", "col", "ptr")}
     for i, ((k, m), (_, b)) in enumerate(zip(mons_r, mons_b)):
-        hn, hs, hk = dice(m["hp"])
-        havg = hn * (hs + 1) / 2 + hk
-        if m.get("final"):
-            havg *= R.get("final_boss_hp_mult", 1)
-        dn_, ds_, dk_ = dice(m["dmg"])
-        t["fmin"].append(byte(m["floor"], k))
-        t["hp_lo"].append(int(round(havg)) & 255)
-        t["hp_hi"].append(word(int(round(havg)), k) >> 8)
-        t["hpd2"].append(byte(hs + 1, k))
-        for f, v in (("ac", m["ac"]), ("att", m["att"]), ("dn", dn_), ("ds", ds_), ("dk", dk_), ("sv", m["save"])):
-            t[f].append(byte(v, f"{k}.{f}"))
-        t["xp_lo"].append(word(m["xp"], k) & 255)
-        t["xp_hi"].append(m["xp"] >> 8)
         t["imm"].append(1 if m.get("stun_immune") else 0)
-        t["spd"].append(byte(max(1, round(b["speed"] * B.get("monster_speed_percent", 100) / 100)), k))
         t["col"].append(byte(b["color"], k))
-        t["llb"].append(byte(b.get("loot_level_bonus", 0), k))
         t["ptr"].append(PTR_BASE + 2 * i if i < nb else PTR_STRONG + 2 * (i - nb))
-    import mon_stats as MS      # (24/11, M9) tabelle che cambiano per capitolo: contigue a mt_ch, copiate dal file del tema
-    t1 = MS.ch1_tables(R, B)
-    chk(all(t1[f] == t[f] for f in MS.CH_FIELDS), "mon_stats.ch1_tables diverso da gen_db (stesse formule)")
+    tc = MS.ch1_tables(R, B)
+    chk([r["id"] for r in MS.type_rows(1)] == [k for k, _ in mons_r], "mon_stats.type_rows(1) diverso dai tipi del gioco")
     pre = lambda f: ("mon_" if f in ("spd", "col", "llb", "ptr") else "mt_") + f
     for f, v in t.items():
-        if f == "col" or f in MS.CH_FIELDS:   # (15/11) colori e nomi dei tipi: dal file del tema (gen_gfx.py, blocco info a NM_AT)
+        if f == "col":            # (15/11) colori e nomi dei tipi: dal file del tema (gen_gfx.py, blocco info a NM_AT)
             continue
         o.bytes(pre(f), v)
-    o("; (24/11) tabelle per capitolo (tools/build/mon_stats.py): il file del tema le porta in coda, gfx_install le copia qui")
+    o("; (24/11) tabelle dei tipi (tools/build/mon_stats.py): il file del tema porta i tipi 1..8 del suo capitolo, gfx_install le copia qui")
     o("mt_ch")
     for f in MS.CH_FIELDS:
-        o.bytes(pre(f), t[f])
-    o(f"MT_CH_LEN   = {len(MS.CH_FIELDS) * len(t['hp_lo'])}")
-    o.bytes("gr_ac", [int(p * G["ac_per_floor"]) for p in range(maxl)])
-    o.bytes("gr_att", [int(p * G["att_per_floor"]) for p in range(maxl)])
-    o.bytes("gr_dmg", [int(p * G["dmg_per_floor"]) for p in range(maxl)])
-    o.bytes("gr_hpd", [int(p * G["hp_dice_per_floor"]) for p in range(maxl)])
-    sc = R.get("monster_scale", {"hp": 1, "damage": 1})
-    chk(len(G["curve_hp"]) == maxl + 1 and len(G["curve_dmg"]) == maxl + 1, "growth.curve_*: servono floors+1 valori")
-    o.bytes("cv_hp", [byte(round(v * sc["hp"] * 32), "curve_hp") for v in G["curve_hp"]])
+        o.bytes(pre(f), tc[f])
+    o(f"MT_CH_LEN   = {len(MS.CH_FIELDS) * len(tc['hp_lo'])}")
+    sc = R.get("monster_scale", {"damage": 1})
+    chk(set(sc) == {"damage"}, "monster_scale: solo damage (24/11: la vita e' nelle formule del bestiario)")
+    chk(len(G["curve_dmg"]) == maxl + 1, "growth.curve_dmg: servono floors+1 valori")
     o.bytes("cv_dmg", [byte(round(v * sc["damage"] * 32), "curve_dmg") for v in G["curve_dmg"]])
     bo = R["boss"]
     chk(round(bo["hp_mult"] * 2) == bo["hp_mult"] * 2, "boss.hp_mult: multiplo di 0,5")

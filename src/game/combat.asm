@@ -881,8 +881,10 @@ _up     inc c_lvl
 _done   rts
 
 ; ------------------------------------------------------------------ mostri del piano
-; statistiche per tipo al piano attuale (P = piano - piano minimo del tipo): vita media (x curva), CA, ATT,
-; danno fisso, salvezza, esperienza. Da chiamare entrando in un piano (prima di init_monsters_rt).
+; (24/11) statistiche per tipo al piano attuale dalle formule del bestiario (tools/build/mon_stats.py): per ogni tipo e
+; statistica valore = A + ((B x P + 8) >> 4), P = piano - piano minimo del tipo (0 per il boss finale e sotto il piano
+; minimo); A e B nelle tabelle di mt_ch (tipi 1..8: dal file del tema del capitolo). Vita, CA, ATT, danno fisso,
+; salvezza, esperienza. Da chiamare entrando in un piano (prima di init_monsters_rt). ~15.000 cicli (stima).
 floor_types:
         ldy cur_level
         cpy #MAXLEVEL+1
@@ -899,85 +901,75 @@ _t      stx cb_t
         lda tmp4
         sec
         sbc mt_fmin,x
-        bcs +
+        bcs _p
         lda #0
-+       cmp #MAXLEVEL
-        bcc _p
-        lda #MAXLEVEL-1
-_p      tay
-        sty tmp5
-        lda mt_ac,x
-        clc
-        adc gr_ac,y
-        sta ft_ac,x
-        lda mt_att,x
-        clc
-        adc gr_att,y
-        sta ft_att,x
-        lda mt_dk,x
-        clc
-        adc gr_dmg,y
-        sta ft_dk,x
-        lda gr_att,y
-        lsr
-        clc
-        adc mt_sv,x
-        sta ft_sv,x
-        ; esperienza = base x (4 + P x XP_PFQ) / 4
-        tya
-        .rept XP_PFQ-1
-        clc
-        adc tmp5
-        .endrept
-        clc
-        adc #4
-        sta mw_k
-        lda mt_xp_lo,x
+_p      sta tmp5                ; P
+        ldy #FT_N-1             ; statistica (Y resta: mul16x8 e mu_shr usano A e X)
+_s      lda ft_ob,y             ; B (16 bit) x P
+        jsr _ld
         sta mw_l
-        lda mt_xp_hi,x
+        lda ft_obh,y
+        jsr _ld
         sta mw_h
-        jsr mul16x8
-        ldx #2
-        jsr mu_shr
-        ldx cb_t
-        lda mu0
-        sta ft_xpl,x
-        lda mu1
-        sta ft_xph,x
-        ; vita = (media + dadi in piu' x media del dado) x curva del piano / 32
-        ldy tmp5
-        lda gr_hpd,y
-        sta mw_k
-        lda mt_hpd2,x
-        sta mw_l
-        lda #0
-        sta mw_h
-        jsr mul16x8             ; dadi x (facce + 1) = 2 x media
-        ldx cb_t
-        lda mu0
-        lsr
-        clc
-        adc mt_hp_lo,x
-        sta mw_l
-        lda mt_hp_hi,x
-        adc #0
-        sta mw_h
-        ldy tmp4
-        lda cv_hp,y
+        lda tmp5
         sta mw_k
         jsr mul16x8
-        ldx #5
+        lda mu0                 ; + 8 (arrotondamento), >> 4
+        clc
+        adc #8
+        sta mu0
+        bcc +
+        inc mu1
+        bne +
+        inc mu2
++       ldx #4
         jsr mu_shr
-        ldx cb_t
+        lda ft_oah,y            ; + A (16 bit)
+        jsr _ld
+        sta mw_h
+        lda ft_oa,y
+        jsr _ld
+        clc
+        adc mu0
+        sta mu0
+        lda mw_h
+        adc mu1
+        sta mu1
+        lda ft_dl,y             ; -> ft_* del tipo
+        clc
+        adc cb_t
+        tax
         lda mu0
         sta ft_hpl,x
+        lda ft_dh,y
+        bmi +
+        clc
+        adc cb_t
+        tax
         lda mu1
-        sta ft_hph,x
+        sta ft_hpl,x
++       dey
+        bpl _s
+        ldx cb_t
         dex
         beq +
         jmp _t
 +       rts
-        .cerror XP_PFQ < 1, "xp_per_floor: almeno 0,25"
+_ld     clc                     ; A = scarto di una tabella di mt_ch -> A = il suo valore per il tipo cb_t
+        adc cb_t
+        tax
+        lda mt_ch,x
+        rts
+; per statistica (vita, CA, ATT, danno fisso, salvezza, esperienza): scarti in mt_ch di A (basso, alto) e B (basso, alto;
+; mt_z = zeri per le statistiche a 8 bit), scarti da ft_hpl delle destinazioni (alta: $ff = nessuna)
+ft_oa   .byte mt_hp_lo-mt_ch, mt_ac-mt_ch, mt_att-mt_ch, mt_dk-mt_ch, mt_sv-mt_ch, mt_xp_lo-mt_ch
+ft_oah  .byte mt_hp_hi-mt_ch, mt_z-mt_ch, mt_z-mt_ch, mt_z-mt_ch, mt_z-mt_ch, mt_xp_hi-mt_ch
+ft_ob   .byte mt_hp_b-mt_ch, mt_ac_b-mt_ch, mt_att_b-mt_ch, mt_dk_b-mt_ch, mt_sv_b-mt_ch, mt_xp_bl-mt_ch
+ft_obh  .byte mt_z-mt_ch, mt_z-mt_ch, mt_z-mt_ch, mt_z-mt_ch, mt_z-mt_ch, mt_xp_bh-mt_ch
+ft_dl   .byte ft_hpl-ft_hpl, ft_ac-ft_hpl, ft_att-ft_hpl, ft_dk-ft_hpl, ft_sv-ft_hpl, ft_xpl-ft_hpl
+ft_dh   .byte ft_hph-ft_hpl, $ff, $ff, $ff, $ff, ft_xph-ft_hpl
+FT_N    = 6
+        .cerror MT_CH_LEN > 256, "mt_ch oltre 256 B (floor_types indicizza con X)"
 
 ; vita del mostro rt_i alla nascita: media del tipo x (96..160)/128 (+-25%); boss con nome x BOSS_HPH/2
 mon_hp_init:

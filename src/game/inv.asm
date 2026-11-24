@@ -297,40 +297,7 @@ it_af:  jsr af_clr
         ldy ui_sx
         jmp af_pair
 
-; anello: " str" / " dex" / " con" secondo ui_ib (1..3)
-ring_stat:
-        lda ui_ib
-        beq _r
-        cmp #4
-        bcs _r
-        sec
-        sbc #1
-        sta tmp7
-        asl
-        adc tmp7                ; x 3
-        tax
-        adc #3
-        sta tmp7                ; fine (ui_putc usa Y: il contatore e' X)
-        lda #$20
-        jsr ui_putc
-_c      lda rs_txt,x
-        jsr ui_putc
-        inx
-        cpx tmp7
-        bne _c
-_r      rts
-rs_txt  .text "strdexcon"
-
-
-; icona: A = codice, X = colore (ui_col preservato)
-ui_icon:
-        ldy ui_col
-        sty tmp6
-        stx ui_col
-        jsr ui_putc
-        lda tmp6
-        sta ui_col
-        rts
+; (24/11) ring_stat e ui_icon stanno in ui.asm (GAME): spazio in CORE per il blocco delle statistiche del tema
 
 ; A = id oggetto -> icona della categoria (08/11, TODO 1.3) nel suo colore; spazio se 0 o $FF (oro del baule).
 ; Pozioni nel loro colore (itfl). X conservato.
