@@ -80,7 +80,7 @@ byte alti di vita ed esperienza devono restare quelli del capitolo 1, la build l
 posti (~35 B di codice). I file dei capitoli senza `own_stats` portano le statistiche del capitolo 1, quindi tornare al
 capitolo 1 le rimette. Il **simulatore** usa le stesse tabelle (`tools/simulators/rules.py` `chapter_entry`: piani 6–10).
 Il **boss del capitolo 2** (tipo fisso, `chapter_bosses`) prende le statistiche del suo tipo nel capitolo 2.
-Test `CHST-10..11` (sanity, `tests/sanity/chapstats`).
+Test `CHST-10..11` (regression, `tests/regression/chapstats`).
 
 **Resta** (TODO M9): statistiche proprie dei capitoli 3–4 (basta `own_stats: true`, poi bilanciamento), IA nuove (distanza,
 carica, teletrasporto, evocazione), bilanciamento con i simulatori.

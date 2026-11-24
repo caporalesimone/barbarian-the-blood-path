@@ -193,8 +193,9 @@ Raggiunta la quantità: catena `q_flag` bit 1, accessoria bit 7 dell'id; nella b
 per ~3 s (`q_msg`, `loc_check`), lampo e suono. **D11** (`q_spawn`, `load_location` dopo `place_boss`): con una quest K o
 "oggetto da mostro" presa e non raggiunta, se nel piano (del capitolo della quest, non il piano del boss del capitolo) non c'è
 un mostro del tipo, il primo mostro che non è il boss lo diventa. **D4** (`q_gate`): la scala verso il piano del boss del
-capitolo è chiusa ("the way is sealed") finché il passo 3c non è preso o consegnato; acceso (`QGATE` = 1) **solo nel capitolo 1**
-(`QGATE_CH`): `QGIV` dà le quest di tutti i capitoli, ma i tipi di mostro dei capitoli 2-4 sono da verificare (D13). Costo: ~870 B di GAME (codice ~470, tabelle e nomi ~270, barra).
+capitolo è chiusa ("the way is sealed") finché il passo 3c non è preso o consegnato; acceso (`QGATE` = 1) **nei capitoli 1 e 2**
+(`QGATE_CH` = 2 dal 24/11): `QGIV` dà le quest di tutti i capitoli; i tipi di mostro del capitolo 2 sono verificati (D13: il tipo è
+il posto nel bestiario del capitolo, lo stesso ordine del file del tema; test `QCH2-10`), quelli dei capitoli 3-4 no. Costo: ~870 B di GAME (codice ~470, tabelle e nomi ~270, barra).
 Test: `QENG-10`..`14`.
 
 ### 4.5 Modulo del villaggio `QGIV` (22/11, `src/qgiv.asm`)
@@ -231,10 +232,10 @@ le quest dei vaganti) è stato tolto.
 (`sk_qs`, scritta da `gen_qdata.py` dai premi `skill:` della catena: Whirlwind 2, Battle Cry 4, Rage 6, Smash 8, Frenzy 9); la
 usano `sel_skill`, `buff_act` e l'HUD. **Sblocco del capitolo alla consegna**: in `qg_give`, consegnato il passo 3c con *c* <=
 `QGATE_CH` (i capitoli con il cancello D4, che garantisce il passo preso prima del boss) → `c_unl` = *c*+1; `chap_won` non
-sblocca più quei capitoli. Test: `QGIV-10`..`19`, `QREW-10`..`12`. (23/11) **Oggetto "qualsiasi"** (`$ff`, passo 11): categoria a caso fra arma,
+sblocca più quei capitoli. Test: `QGIV-10`..`19`, `QREW-10`..`12`, `QCH2-10`..`11` (capitolo 2: passo 6 a Mama Sabine → `c_unl` 3). (23/11) **Oggetto "qualsiasi"** (`$ff`, passo 11): categoria a caso fra arma,
 armatura, scudo e anello, la base migliore fino al livello oggetto 5 × capitolo (`lt_scan`, come i bauli), poi magico come
 l'oggetto di una base (`af_gen`, `af_m` = 1); test `QREW-13`. **Da fare**: cintura a 8,
-cancello D4 nei capitoli 2-4 (`QGATE_CH`: con il cancello anche lo sblocco alla consegna), ripetibili (D18).
+cancello D4 nei capitoli 3-4 (`QGATE_CH`: con il cancello anche lo sblocco alla consegna), ripetibili (D18).
 
 ---
 

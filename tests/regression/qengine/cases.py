@@ -78,7 +78,8 @@ def qe_chest(ctx):
     check(g.b(L["q_ml"]) == L["QL_FOUND"] and g.b(L["q_mi"]) == 1, "message %d item %d (expected found, 1)" % (g.b(L["q_ml"]), g.b(L["q_mi"])))
 
 
-@test("QENG-13", "C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open")
+@test("QENG-13", "C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open; "
+      "chapter 2 (24/11): level 10 sealed until step 6 is taken; chapter 3 open")
 def qe_gate(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["c_chap"], 1)
@@ -87,8 +88,10 @@ def qe_gate(ctx):
         state(g, step, flag)
         return bool(g.call_keep(L["q_gate"], regs="a=%02x" % lvl)["c"])
     res = [sealed(0, 0), sealed(2, 0), sealed(2, 1), sealed(3, 0), sealed(0, 0, 3)]
-    g.poke(L["c_chap"], 2); ch2 = sealed(3, 0, 10); g.poke(L["c_chap"], 1)
-    check(not ch2, "chapter 2 sealed (QGATE_CH = 1: only chapter 1 for now)")
+    g.poke(L["c_chap"], 2); ch2 = [sealed(3, 0, 10), sealed(5, 0, 10), sealed(5, 1, 10)]
+    g.poke(L["c_chap"], 3); ch3 = sealed(6, 0, 15); g.poke(L["c_chap"], 1)
+    check(ch2 == [True, True, False], "chapter 2 (24/11, QGATE_CH = 2): sealed with step 4 delivered, step 6 offered, taken: %s" % ch2)
+    check(not ch3, "chapter 3 sealed (QGATE_CH = 2: chapters 1-2 for now)")
     check(res == [True, True, False, False, False], "sealed (step 0, step 3 offered, taken, delivered, level 3): %s" % res)
     state(g, 2, 1)
     g.call_keep(L["q_cboss"])

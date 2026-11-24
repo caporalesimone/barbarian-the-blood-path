@@ -163,10 +163,10 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 
 | ID | Test |
 |---|---|
-| `CHST-10` | chapter 2 level 7: mt_ch = the stats of chapter 2 (mon_stats.py), different from chapter 1; the level has its monsters |
-| `CHST-11` | back to chapter 1 (level 2): mt_ch = chapter 1; chapter 3 (no own_stats): chapter 1 too; chapter 2 boss level (10): chapter 2 |
+| `QCH2-10` | village 2: mama sabine gives step 4 ('the silent village', slay the drowned: 0/12); in level 7 the quest monster type is the drowned (its name in the theme), a drowned killed counts, a bog crawler does not |
+| `QCH2-11` | step 6 (the silver needle) handed in to mama sabine: q_step 6, chapter 3 unlocked (c_unl 3), purse step 2; the boss of chapter 2 dying does not unlock chapter 3 |
 
-### regression (309)
+### regression (311)
 
 | ID | Test |
 |---|---|
@@ -246,6 +246,8 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `CHAP-11` | tools/simulators/chapters.py: every generated level of a chapter at its global depth with the chapter's bestiary, the chapter boss |
 | `CHAP-SEQ-10` | new hero in chapter 1 (c_chap = c_unl = 1); the village exit is closed: no label, the edge stops the hero |
 | `CHAP-SEQ-11` | level 5 = boss level of chapter 1: map BOSSCH1 (stairs up, no stairs down), boss drawn as the final boss |
+| `CHST-10` | chapter 2 level 7: mt_ch = the stats of chapter 2 (mon_stats.py), different from chapter 1; the level has its monsters |
+| `CHST-11` | back to chapter 1 (level 2): mt_ch = chapter 1; chapter 3 (no own_stats): chapter 1 too; chapter 2 boss level (10): chapter 2 |
 | `CHAP-SEQ-12` | killing the boss of chapter 1 does not unlock chapter 2 (23/11: step 3 handed in at QGIV does, QREW-12): c_unl stays 1; the quest goal C is reached |
 | `CHAP-SEQ-13` | village exit open: label 'travel to next chapter'; fire: chapter 2, village TWN2 at the south entry, hero saved |
 | `CHAP-SEQ-14` | chapter 2: the crypt leads to level 6 (first of the chapter); its stairs up lead back to the village |
@@ -406,7 +408,7 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QENG-10` | K (chain step 1, 8 fallen): only a fallen of chapter 1 counts; the 8th marks the step reached (q_flag bit 1) with 'quest complete' |
 | `QENG-11` | P and B (side a1.4: 10 kills on level 4; a1.3: a named boss of levels 1-4) in q_side slots 2 and 3: counted only on their level, bit 7 when reached |
 | `QENG-12` | IC (chain step 2, Tam's amulet in the named boss chest of level 3, D19): q_chest on level 2 nothing, on level 3 'found: tam's amulet' and the step reached |
-| `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open |
+| `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open; chapter 2 (24/11): level 10 sealed until step 6 is taken; chapter 3 open |
 | `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
 | `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
 | `QUEST-11` | Q with no quest taken: the list (22/11: module QGIV, q_k $ff) says 'talk to the villagers', RUN/STOP goes back to the game |

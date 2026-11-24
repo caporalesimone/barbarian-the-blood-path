@@ -11,8 +11,8 @@
 ;  tocca nulla (Q10).
 ; ===================================================================
 QGATE    = 1                           ; (22/11) 1 = cancello D4 attivo sulle scale (act_tick)
-QGATE_CH = 1                           ; (22/11, D13) solo nei capitoli 1..QGATE_CH: QGIV da' le quest del capitolo 1; gli altri
-                                        ; capitoli restano aperti finche' non si estende (tipi di mostro da verificare)
+QGATE_CH = 2                           ; (22/11, D13) cancello solo nei capitoli 1..QGATE_CH (24/11: anche il capitolo 2, tipi di
+                                        ; mostro verificati, QREW-14); gli altri capitoli restano aperti finche' non si estende
 QE_KILL  = 1
 QE_CHEST = 2
 QE_CBOSS = 3
