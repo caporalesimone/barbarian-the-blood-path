@@ -200,8 +200,9 @@ flowchart TD
     DG --> CE["chap_ensure: se il capitolo cambia,<br/>slot del capitolo letti dal file dell'eroe"]
     CE --> CLR["clear_lvlblk, spawn_monsters,<br/>place_chests / fin_chests, place_boss"]
     CLR --> VB{"piano visitato<br/>(c_vis)?"}
-    VB -->|si'| LDL["load_level: differenze dallo slot in RAM"] --> IR
-    VB -->|no| IR["init_monsters_rt"]
+    VB -->|si'| LDL["load_level: differenze dallo slot in RAM"] --> QS
+    VB -->|no| QS["q_spawn (25/11): quest prese, ripopolamento mirato<br/>e mostro richiesto (D11)"]
+    QS --> IR["init_monsters_rt"]
     IR --> PE{"pend_lvl = piano?<br/>(portale o morte)"}
     PE -->|"si'"| MEM["st_in (GEN_STIN): boss, mostri caldi<br/>e bauli lasciati dalla STASH"] --> FI
     PE -->|no| FI["final_init, apply_chests, place_portal_tile"]

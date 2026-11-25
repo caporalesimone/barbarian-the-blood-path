@@ -249,51 +249,121 @@ _sl     lda #QL_SEAL
 _op     clc
 _r      rts
 
-; ---- (D11) dopo la generazione dei mostri del piano (load_location, dopo place_boss): per ogni quest presa che chiede un tipo
-; di mostro del capitolo (K, IM) e non ancora raggiunta, se nel piano non ce n'e' nessuno, il primo mostro che non e' il boss
-; diventa di quel tipo. Niente nei piani del boss del capitolo (solo il boss) e nel villaggio.
+; ---- (25/11, committente: "una quest si deve sempre poter concludere") entrando in un piano, DOPO lo stato salvato
+; (load_level: mostri morti tolti), per ogni quest presa e non ancora raggiunta che conta in questo piano:
+;  1. ripopolamento mirato: se il piano non le offre piu' niente - K, IM (tipo del capitolo), P (piano nel suo intervallo):
+;     nessun mostro vivo; B (boss con nome nei piani p1..p2): boss morto; IC (baule del boss nei piani p1..p2): boss morto e
+;     il suo baule gia' aperto - tutti i mostri rigenerati del piano tornano vivi (come in una partita nuova; i bauli no);
+;  2. (D11, 22/11) K e IM: se nel piano non c'e' un mostro VIVO del tipo, il primo mostro vivo che non e' il boss lo diventa.
+; Niente nei piani del boss del capitolo (solo il boss) e nel villaggio. Prima del 25/11 q_spawn girava prima di load_level
+; (contava e convertiva anche mostri poi tolti perche' morti) e non c'era il ripopolamento: un piano ripulito prima di prendere
+; la quest la bloccava (boss con nome gia' ucciso, piano vuoto).
 q_spawn:
         lda lv_cboss
-        bne _r
+        bne _r0
         lda cur_level
-        beq _r
-        ldx #4
+        bne +
+_r0     rts
++
+        ldx #4                  ; 1. ripopolamento
 _s      stx q_sl
         jsr q_slot
         bcs _n
+        jsr q_need
+        bcc _n
+        ldx lb_cnt              ; tutti vivi
+        lda #1
+-       dex
+        bmi _n
+        sta malive,x
+        bpl -
+_n      ldx q_sl
+        dex
+        bpl _s
+        ldx #4                  ; 2. D11
+_c      stx q_sl
+        jsr q_slot
+        bcs _m
         lda qt_ty,y
         and #$0f
         cmp #QG_K
         beq +
         cmp #QG_IM
-        bne _n
+        bne _m
 +       jsr q_chap
-        bcc _n
+        bcc _m
         lda qt_p1,y
         sta q_tp
-        ldx lb_cnt              ; ce n'e' gia' uno?
-        beq _n
+        ldx lb_cnt              ; ce n'e' gia' uno vivo?
 -       dex
+        bmi _cv
+        lda malive,x
+        beq -
         lda mtype,x
         cmp q_tp
-        beq _n
-        txa
         bne -
--       txa                     ; X = 0: il primo che non e' il boss
+        beq _m
+_cv     ldx #0                  ; il primo vivo che non e' il boss
+-       cpx lb_cnt
+        bcs _m
+        lda malive,x
+        beq +
+        txa
         clc
         adc #1
         cmp lb_boss
-        bne +
-        inx
-        cpx lb_cnt
-        bcc -
-        bcs _n
-+       lda q_tp
+        beq +
+        lda q_tp
         sta mtype,x
-_n      ldx q_sl
+        bne _m
++       inx
+        bne -
+_m      ldx q_sl
         dex
-        bpl _s
+        bpl _c
 _r      rts
+
+; ---- C = 1 se la quest Y conta in questo piano e il piano non le offre piu' niente (q_spawn, punto 1)
+q_need:
+        lda qt_ty,y
+        and #$0f
+        cmp #QG_K
+        beq _k
+        cmp #QG_IM
+        beq _k
+        cmp #QG_P
+        beq _p
+        cmp #QG_IC
+        beq _ic
+        cmp #QG_B
+        bne _no
+        jsr q_inlv              ; B: boss del piano morto
+        bcc _no
+        bcs _bd
+_ic     jsr q_inlv              ; IC: boss morto e il suo baule non c'e' piu' (aperto)
+        bcc _no
+        lda lb_bch
+        bne _no
+_bd     ldx lb_boss
+        beq _no                 ; piano senza boss: il ripopolamento non aiuta
+        lda malive-1,x
+        bne _no
+        sec
+        rts
+_k      jsr q_chap
+        bcc _no
+        bcs _any
+_p      jsr q_inlv
+        bcc _no
+_any    ldx lb_cnt              ; K, IM, P: nessun mostro vivo
+-       dex
+        bmi _y
+        lda malive,x
+        beq -
+_no     clc
+        rts
+_y      sec
+        rts
 
 ; ===================================================================
 ;  (22/11) NPC del villaggio: chi da' e chi ritira. Usati dal modulo QGIV (src/qgiv.asm) e dai segni (D12). La quest Y

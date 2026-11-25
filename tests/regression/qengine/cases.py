@@ -103,7 +103,7 @@ def qe_spawn(ctx):
     g = ctx["g"]; L = g.L
     g.poke(L["c_chap"], 1); g.poke(L["cur_level"], 2); g.poke(L["lv_cboss"], 0)
     state(g, 0, 1)
-    g.poke(L["lb_cnt"], 4); g.poke(L["lb_boss"], 1)
+    g.poke(L["lb_cnt"], 4); g.poke(L["lb_boss"], 1); g.poke(L["malive"], 1, 1, 1, 1)
     g.poke(L["mtype"], L["M_SKELETON"], L["M_SKELETON"], L["M_ZOMBIE"], L["M_SKELETON"])
     g.call_keep(L["q_spawn"])
     m = g.mem(L["mtype"], 4)
@@ -115,3 +115,76 @@ def qe_spawn(ctx):
     g.call_keep(L["q_spawn"])
     check(g.b(L["mtype"]) == L["M_SKELETON"], "chapter boss level changed")
     g.poke(L["lv_cboss"], 0); g.poke(L["lb_cnt"], 0); g.poke(L["cur_level"], 0); state(g)
+
+
+def lvl(g, cnt, alive, boss=1, bch=0, level=2):
+    """a generated level poked: cnt monsters (skeletons), alive flags, boss index + 1, boss chest place + 1"""
+    L = g.L
+    g.poke(L["c_chap"], 1); g.poke(L["cur_level"], level); g.poke(L["lv_cboss"], 0)
+    g.poke(L["lb_cnt"], cnt); g.poke(L["lb_boss"], boss); g.poke(L["lb_bch"], bch)
+    g.poke(L["mtype"], *([L["M_SKELETON"]] * cnt)); g.poke(L["malive"], *alive)
+
+
+@test("QENG-15", "(25/11, 'a quest must always be completable') targeted repopulation: a cleared level comes back alive for K (chapter), "
+      "P (level in range), B (named boss dead), IC (boss dead and its chest opened); not without a quest, not for a reached one, "
+      "not when the level still offers something (a monster alive, the boss alive, the boss chest unopened)")
+def qe_repop(ctx):
+    g = ctx["g"]; L = g.L
+    alive = lambda: g.mem(L["malive"], 4)
+    lvl(g, 4, (0, 0, 0, 0)); state(g)
+    g.call_keep(L["q_spawn"])
+    check(alive() == [0, 0, 0, 0], "no quest taken: repopulated %s" % alive())
+    state(g, 0, 1); g.call_keep(L["q_spawn"])                  # K: chain step 1 (fallen), level empty
+    check(alive() == [1, 1, 1, 1], "K, empty level: %s" % alive())
+    lvl(g, 4, (0, 0, 1, 0)); state(g, 0, 1); g.call_keep(L["q_spawn"])
+    check(alive() == [0, 0, 1, 0], "K, one monster alive: repopulated anyway %s" % alive())
+    lvl(g, 4, (0, 0, 0, 0)); state(g, 0, 3); g.call_keep(L["q_spawn"])
+    check(alive() == [0, 0, 0, 0], "K reached: repopulated %s" % alive())
+    lvl(g, 4, (0, 0, 0, 0), level=4); state(g, side=(16 - 12, 0, 0, 0, 0, 0, 0, 0)); g.call_keep(L["q_spawn"])   # P a1.4: level 4
+    check(alive() == [1, 1, 1, 1], "P on level 4: %s" % alive())
+    lvl(g, 4, (0, 0, 0, 0), level=3); state(g, side=(16 - 12, 0, 0, 0, 0, 0, 0, 0)); g.call_keep(L["q_spawn"])
+    check(alive() == [0, 0, 0, 0], "P out of its level (3): repopulated %s" % alive())
+    lvl(g, 4, (0, 1, 1, 1), boss=1); state(g, side=(15 - 12, 0, 0, 0, 0, 0, 0, 0)); g.call_keep(L["q_spawn"])  # B a1.3
+    check(alive() == [1, 1, 1, 1], "B, named boss dead: %s" % alive())
+    lvl(g, 4, (1, 0, 0, 0), boss=1); state(g, side=(15 - 12, 0, 0, 0, 0, 0, 0, 0)); g.call_keep(L["q_spawn"])
+    check(alive() == [1, 0, 0, 0], "B, named boss alive: repopulated %s" % alive())
+    lvl(g, 4, (0, 0, 0, 0), boss=1, bch=1, level=3); state(g, 1, 1); g.call_keep(L["q_spawn"])               # IC: step 2, level 3
+    check(alive() == [0, 0, 0, 0], "IC, boss chest unopened: repopulated %s" % alive())
+    lvl(g, 4, (0, 0, 0, 0), boss=1, bch=0, level=3); state(g, 1, 1); g.call_keep(L["q_spawn"])
+    check(alive() == [1, 1, 1, 1], "IC, boss dead and chest opened: %s" % alive())
+    g.poke(L["lb_cnt"], 0); g.poke(L["cur_level"], 0); state(g)
+
+
+@test("QENG-16", "D11 after the saved state (25/11): a dead fallen does not count, the converted monster is a living one (not the boss)")
+def qe_spawn_alive(ctx):
+    g = ctx["g"]; L = g.L
+    lvl(g, 4, (1, 0, 1, 1), boss=1)
+    g.poke(L["mtype"] + 1, L["M_FALLEN"])                     # the only fallen is dead
+    state(g, 0, 1); g.call_keep(L["q_spawn"])
+    m = g.mem(L["mtype"], 4)
+    check(m == [L["M_SKELETON"], L["M_FALLEN"], L["M_FALLEN"], L["M_SKELETON"]], "types %s (expected the living monster 2 converted)" % m)
+    g.poke(L["lb_cnt"], 0); g.poke(L["cur_level"], 0); state(g)
+
+
+@test("QENG-17", "real game: level 2 cleared, then chain step 1 taken: back on level 2 the monsters are alive again; without the quest it stays cleared")
+def qe_repop_real(ctx):
+    g = ctx["g"]; L = g.L
+
+    def go(lv):
+        g.poke(L["c_chap"], 1); g.poke(L["c_unl"], 1)
+        g.call_keep(L["change_level"], regs="a=%02x,x=00" % lv, tmax=150); g.frames(3)
+        check(g.b(L["cur_level"]) == lv, "level %d, expected %d" % (g.b(L["cur_level"]), lv))
+
+    def alive():
+        n = g.b(L["lb_cnt"])
+        return sum(1 for v in g.mem(L["malive"], n) if v)
+    state(g)
+    go(2)
+    n = g.b(L["lb_cnt"])
+    check(n > 0, "level 2 without monsters")
+    g.poke(L["malive"], *([0] * n))                           # all killed
+    go(3); go(2)
+    check(alive() == 0, "no quest: level 2 repopulated (%d alive)" % alive())
+    go(3); state(g, 0, 1); go(2)
+    check(alive() == n, "chain step 1 taken: %d of %d alive" % (alive(), n))
+    state(g)

@@ -190,9 +190,17 @@ Posti delle quest **prese**: la catena (passo `q_step` + 1 se `q_flag` bit 0 e n
 | boss del capitolo (`q_cboss`) | `chap_won` e boss finale | C |
 
 Raggiunta la quantità: catena `q_flag` bit 1, accessoria bit 7 dell'id; nella barra "quest complete" (o "found: <oggetto>")
-per ~3 s (`q_msg`, `loc_check`), lampo e suono. **D11** (`q_spawn`, `load_location` dopo `place_boss`): con una quest K o
-"oggetto da mostro" presa e non raggiunta, se nel piano (del capitolo della quest, non il piano del boss del capitolo) non c'è
-un mostro del tipo, il primo mostro che non è il boss lo diventa. **D4** (`q_gate`): la scala verso il piano del boss del
+per ~3 s (`q_msg`, `loc_check`), lampo e suono. **Una quest si deve sempre poter concludere** (25/11, regola del committente):
+entrando in un piano (`q_spawn`, `load_location` **dopo** lo stato salvato del piano, cioè sui mostri rimasti vivi; non nel
+piano del boss del capitolo né nel villaggio), per ogni quest presa e non ancora raggiunta che conta lì:
+1. **ripopolamento mirato** (`q_need`): se il piano non le offre più niente, tutti i mostri rigenerati del piano tornano vivi
+   (come in una partita nuova; i bauli no). "Niente" = K e "oggetto da mostro" (capitolo della quest), P (piano nel suo
+   intervallo): nessun mostro vivo; B (piano nell'intervallo): boss con nome morto; IC: boss morto e il suo baule già aperto.
+   Caso tipico: piani 1–4 ripuliti e poi presa *a name on the stone* o *candles for the saint*. Niente farming: senza una
+   quest presa e non raggiunta i piani ripuliti restano puliti come prima;
+2. **D11** (22/11): con una quest K o "oggetto da mostro", se nel piano non c'è un mostro **vivo** del tipo, il primo mostro
+   vivo che non è il boss lo diventa (prima del 25/11 `q_spawn` girava prima dello stato salvato e contava anche i morti).
+Costo: GAME +129 B (margine del codice 1012 → 883 B). Test `QENG-14..17`. **D4** (`q_gate`): la scala verso il piano del boss del
 capitolo è chiusa ("the way is sealed") finché il passo 3c non è preso o consegnato; acceso (`QGATE` = 1) **nei capitoli 1 e 2**
 (`QGATE_CH` = 2 dal 24/11): `QGIV` dà le quest di tutti i capitoli; i tipi di mostro del capitolo 2 sono verificati (D13: il tipo è
 il posto nel bestiario del capitolo, lo stesso ordine del file del tema; test `QCH2-10`), quelli dei capitoli 3-4 no. Costo: ~870 B di GAME (codice ~470, tabelle e nomi ~270, barra).

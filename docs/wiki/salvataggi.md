@@ -86,6 +86,8 @@ scarta il baule del boss non aperto; la nebbia resta. Nella stessa partita i pia
 (portale compreso). Nessun accesso al disco in più: il numero viaggia nei record già scritti; se si spegne senza
 salvare, l'eroe riparte con il numero vecchio e i piani salvati nel frattempo risultano "di un'altra partita"
 (ripopolati), coerentemente con l'eroe ripristinato. Per l'Abisso la regola è da decidere (`TODO.md`).
+(25/11) **Eccezione per le quest**: nella stessa partita un piano ripulito torna popolato se una quest presa e non ancora
+raggiunta ne ha bisogno ([quests](quests.md), sezione 4.4, ripopolamento mirato: solo i mostri, i bauli no).
 `c_game` porta anche i **minuti giocati** (bit 9..23, fino a 32767) e `c_deaths` le morti.
 
 ### Tempo giocato: orologio TOD del CIA2

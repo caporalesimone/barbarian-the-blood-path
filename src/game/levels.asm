@@ -205,13 +205,13 @@ _dun    ldx #63                 ; mostri: nessun percorso in corso (mslide, mslc
         jmp _pb
 _pc     jsr place_chests
 _pb     jsr place_boss
-        jsr q_spawn             ; (22/11, D11) quest di caccia: il mostro richiesto c'e' sempre
         lda cur_level           ; ...e se visitato, le differenze salvate sopra
         jsr vis_bit
         and c_vis,x
         beq _ok
         jsr load_level
-_ok     jsr init_monsters_rt        ; scale: mostri rimasti ricalcolati (vita piena)
+_ok     jsr q_spawn             ; (25/11) quest prese: ripopolamento mirato e mostro richiesto (D11), sui mostri rimasti vivi
+        jsr init_monsters_rt        ; scale: mostri rimasti ricalcolati (vita piena)
         lda pend_lvl            ; (19/11) piano lasciato per portale o morte: se e' questo, boss, mostri caldi e bauli
         beq _mem                ; lasciati come erano (STASH); se e' un altro, quella STASH non serve piu'
         cmp cur_level

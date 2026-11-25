@@ -421,6 +421,9 @@ Generato con `lab64 test all --md` (rifarlo quando si aggiunge un test).
 | `QCH2-11` | step 6 (the silver needle) handed in to mama sabine: q_step 6, chapter 3 unlocked (c_unl 3), purse step 2; the boss of chapter 2 dying does not unlock chapter 3 |
 | `QENG-13` | C and the gate (D4): the stairs to level 5 are sealed until step 3 is taken; q_cboss reaches step 3; other levels always open; chapter 2 (24/11): level 10 sealed until step 6 is taken; chapter 3 open |
 | `QENG-14` | D11: with step 1 taken (fallen), a level of chapter 1 without fallen gets one (the first monster that is not the boss); none on a chapter boss level |
+| `QENG-15` | (25/11, 'a quest must always be completable') targeted repopulation: a cleared level comes back alive for K (chapter), P (level in range), B (named boss dead), IC (boss dead and its chest opened); not without a quest, not for a reached one, not when the level still offers something |
+| `QENG-16` | D11 after the saved state (25/11): a dead fallen does not count, the converted monster is a living one (not the boss) |
+| `QENG-17` | real game: level 2 cleared, then chain step 1 taken: back on level 2 the monsters are alive again; without the quest it stays cleared |
 | `QUEST-10` | village: the NPCs are placed (quest giver + at most one walker per sector, each inside its sector, on free tiles) |
 | `QUEST-11` | Q with no quest taken: the list (22/11: module QGIV, q_k $ff) says 'talk to the villagers', RUN/STOP goes back to the game |
 | `QUEST-12` | Hilde: name in the bar next to her (22/11: Fire opens the quest module QGIV, tests/regression/qgiv); concept quest 1 marked taken for the list tests below |
