@@ -111,6 +111,10 @@ becomes a test in `tests/`, it does not stay in `tools/`.
   `lab64 images` stops if they are missing (names and SHA-256 in Lab64's `roms/roms.md`).
 - (17/11, owner's rule) **Export**: when the owner asks for an export, fetch `origin` of **both** repositories (game and Lab64), compare it
   with the local commits and produce **two patch files**, one per repository (only commits not yet on `origin`), delivered as files.
+  (25/11, owner's rule) Together with the patches, **two git bundles** (`git bundle create <repo>_origin-<base>..<head>.bundle
+  origin/main..main`): the bundle keeps the commits identical (hash, author and commit dates, merges), the patches do not (only
+  the author date, no merges). Verify both on a clean copy of `origin/main` (`git am` / `git pull --ff-only <bundle> main`)
+  before delivering; the owner applies the bundle with `git pull --ff-only <bundle> main`, then pushes.
 - Before delivering, `git status` clean; history is not rewritten unless the owner asks.
 - **MP3 outside the repository** (11/11, owner's rule): `lab/music/` (~13 MB) **is not in git and never was**.
   **When the owner asks to download the repository, also include `lab/music/`** (separate zip or together with the git bundle).
